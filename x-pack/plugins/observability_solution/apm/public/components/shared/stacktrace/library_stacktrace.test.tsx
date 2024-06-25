@@ -14,13 +14,9 @@ describe('LibraryStacktrace', () => {
     describe('with no stack frames', () => {
       it('renders null', () => {
         const props = { id: 'testId', stackframes: [] };
-        const { queryByTestId } = renderWithTheme(
-          <LibraryStacktrace {...props} />
-        );
+        const { queryByTestId } = renderWithTheme(<LibraryStacktrace {...props} />);
 
-        expect(
-          queryByTestId('LibraryStacktraceAccordion')
-        ).not.toBeInTheDocument();
+        expect(queryByTestId('LibraryStacktraceAccordion')).not.toBeInTheDocument();
       });
     });
 
@@ -30,9 +26,7 @@ describe('LibraryStacktrace', () => {
           id: 'testId',
           stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
-        const { queryByTestId } = renderWithTheme(
-          <LibraryStacktrace {...props} />
-        );
+        const { queryByTestId } = renderWithTheme(<LibraryStacktrace {...props} />);
 
         expect(queryByTestId('LibraryStacktraceAccordion')).toBeInTheDocument();
       });

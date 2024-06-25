@@ -7,11 +7,7 @@
 import { getDurationRt } from '../../../../../common/agent_configuration/runtime_types/duration_rt';
 import { getIntegerRt } from '../../../../../common/agent_configuration/runtime_types/integer_rt';
 import { PackagePolicyVars, SettingsRow } from '../typings';
-import {
-  mergeNewVars,
-  isSettingsFormValid,
-  validateSettingValue,
-} from './utils';
+import { mergeNewVars, isSettingsFormValid, validateSettingValue } from './utils';
 
 describe('settings utils', () => {
   describe('validateSettingValue', () => {

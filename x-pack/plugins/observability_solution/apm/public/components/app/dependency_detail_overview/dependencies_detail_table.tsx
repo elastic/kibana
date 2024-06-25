@@ -49,10 +49,7 @@ export function DependenciesDetailTable() {
             end,
             environment,
             numBuckets: 20,
-            offset:
-              comparisonEnabled && isTimeComparison(offset)
-                ? offset
-                : undefined,
+            offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
             kuery,
           },
         },
@@ -97,14 +94,12 @@ export function DependenciesDetailTable() {
   return (
     <DependenciesTable
       dependencies={dependencies}
-      title={i18n.translate(
-        'xpack.apm.dependencyDetail.dependenciesTableTitle',
-        { defaultMessage: 'Upstream services' }
-      )}
-      nameColumnTitle={i18n.translate(
-        'xpack.apm.dependencyDetail.dependenciesTableColumn',
-        { defaultMessage: 'Service' }
-      )}
+      title={i18n.translate('xpack.apm.dependencyDetail.dependenciesTableTitle', {
+        defaultMessage: 'Upstream services',
+      })}
+      nameColumnTitle={i18n.translate('xpack.apm.dependencyDetail.dependenciesTableColumn', {
+        defaultMessage: 'Service',
+      })}
       status={status}
       compact={false}
       initialPageSize={25}

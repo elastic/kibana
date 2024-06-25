@@ -35,6 +35,7 @@ export const bulkActionsReducer = (
     nextState.isAllSelected = false;
   } else if (action === BulkActionsVerbs.rowCountUpdate && rowCount !== undefined) {
     nextState.rowCount = rowCount;
+    nextState.updatedAt = Date.now();
   } else if (action === BulkActionsVerbs.updateAllLoadingState) {
     const nextRowSelection = new Map(
       Array.from(rowSelection.keys()).map((idx: number) => [idx, { isLoading }])

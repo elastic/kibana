@@ -9,7 +9,7 @@ import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { mount, shallow } from 'enzyme';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -61,7 +61,7 @@ describe('SearchApplicationsList', () => {
     setMockValues(DEFAULT_VALUES);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<SearchApplicationsList />);
+    const wrapper = shallowWithIntl(<SearchApplicationsList />);
     const pageTemplate = wrapper.find(EnterpriseSearchApplicationsPageTemplate);
 
     expect(pageTemplate.prop('isLoading')).toEqual(true);
@@ -69,7 +69,7 @@ describe('SearchApplicationsList', () => {
   it('renders empty prompt when no data is available', () => {
     setMockValues({ ...DEFAULT_VALUES, hasNoSearchApplications: true, isFirstRequest: false });
     setMockActions(mockActions);
-    const wrapper = shallow(<SearchApplicationsList />);
+    const wrapper = shallowWithIntl(<SearchApplicationsList />);
 
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
     expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(0);
@@ -81,7 +81,7 @@ describe('SearchApplicationsList', () => {
     setMockValues(mockValues);
     setMockActions(mockActions);
 
-    const wrapper = shallow(<SearchApplicationsList />);
+    const wrapper = shallowWithIntl(<SearchApplicationsList />);
 
     expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(1);
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(0);
@@ -95,7 +95,7 @@ describe('SearchApplicationsList', () => {
       isCloud: false,
     });
     setMockActions(mockActions);
-    const wrapper = shallow(<SearchApplicationsList />);
+    const wrapper = shallowWithIntl(<SearchApplicationsList />);
 
     expect(wrapper.find(SearchApplicationsListTable)).toHaveLength(0);
     expect(wrapper.find(EmptySearchApplicationsPrompt)).toHaveLength(1);
@@ -111,7 +111,7 @@ describe('SearchApplicationsList', () => {
       isCloud: true,
     });
     setMockActions(mockActions);
-    const wrapper = shallow(<SearchApplicationsList />);
+    const wrapper = shallowWithIntl(<SearchApplicationsList />);
 
     expect(wrapper.find(LicensingCallout)).toHaveLength(0);
   });
@@ -120,7 +120,7 @@ describe('SearchApplicationsList', () => {
 describe('CreateSearchApplicationButton', () => {
   describe('disabled={true}', () => {
     it('renders a disabled button that shows a popover when hovered', () => {
-      const wrapper = mount(<CreateSearchApplicationButton disabled />);
+      const wrapper = mountWithIntl(<CreateSearchApplicationButton disabled />);
 
       const button = wrapper.find(
         'button[data-test-subj="enterprise-search-search-applications-creation-button"]'
@@ -157,7 +157,7 @@ describe('CreateSearchApplicationButton', () => {
   });
   describe('disabled={false}', () => {
     it('renders a button and shows a popover when hovered', () => {
-      const wrapper = mount(<CreateSearchApplicationButton disabled={false} />);
+      const wrapper = mountWithIntl(<CreateSearchApplicationButton disabled={false} />);
 
       const button = wrapper.find(
         'button[data-test-subj="enterprise-search-search-applications-creation-button"]'

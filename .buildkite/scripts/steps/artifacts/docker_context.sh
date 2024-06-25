@@ -20,6 +20,9 @@ case $KIBANA_DOCKER_CONTEXT in
   default)
     DOCKER_CONTEXT_FILE="kibana-$FULL_VERSION-docker-build-context.tar.gz"
   ;;
+  chainguard)
+    DOCKER_CONTEXT_FILE="kibana-chainguard-$FULL_VERSION-docker-build-context.tar.gz"
+  ;;
   cloud)
     DOCKER_CONTEXT_FILE="kibana-cloud-$FULL_VERSION-docker-build-context.tar.gz"
   ;;

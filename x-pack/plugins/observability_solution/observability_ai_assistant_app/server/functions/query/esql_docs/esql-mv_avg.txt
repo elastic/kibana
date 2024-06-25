@@ -1,10 +1,29 @@
-MV_AVG
+## MV_AVG
 
-Converts a multivalued field into a single valued field containing the average
-of all of the values. For example:
+The `MV_AVG` function in ES|QL converts a multivalued field into a single valued field containing the average of all of the values.
+
+### Syntax
+
+`MV_AVG(number)`
+
+#### Parameters
+
+`number`: Multivalue expression.
+
+### Examples
+
+Here are a couple of examples of how you can use the `MV_AVG` function in your ES|QL queries:
+
 ```esql
 ROW a=[3, 5, 1, 6]
 | EVAL avg_a = MV_AVG(a)
 ```
 
-The output type is always a double and the input type can be any number.
+In this example, the `MV_AVG` function is used to calculate the average of the values in the multivalued field `a`.
+
+```esql
+ROW b=[10, 20, 30, 40]
+| EVAL avg_b = MV_AVG(b)
+```
+
+In this second example, the `MV_AVG` function is used to calculate the average of the values in the multivalued field `b`.

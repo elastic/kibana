@@ -79,6 +79,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     bounds: PropTypes.object.isRequired,
     chartWidth: PropTypes.number.isRequired,
     lastRefresh: PropTypes.number.isRequired,
+    onRenderComplete: PropTypes.func,
     previousRefresh: PropTypes.number.isRequired,
     selectedJobId: PropTypes.string.isRequired,
     selectedDetectorIndex: PropTypes.number,
@@ -434,6 +435,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             }
 
             this.setState(stateUpdate);
+            if (this.props.onRenderComplete !== undefined) {
+              this.props.onRenderComplete();
+            }
           }
         };
 
@@ -717,6 +721,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       !isEqual(previousProps.selectedDetectorIndex, this.props.selectedDetectorIndex) ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       previousProps.selectedForecastId !== this.props.selectedForecastId ||
+      previousProps.selectedJob?.job_id !== this.props.selectedJob?.job_id ||
       previousProps.selectedJobId !== this.props.selectedJobId ||
       previousProps.functionDescription !== this.props.functionDescription
     ) {
@@ -727,6 +732,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
         previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId ||
+        previousProps.selectedJob?.job_id !== this.props.selectedJob?.job_id ||
         previousProps.functionDescription !== this.props.functionDescription;
       this.loadSingleMetricData(fullRefresh);
     }

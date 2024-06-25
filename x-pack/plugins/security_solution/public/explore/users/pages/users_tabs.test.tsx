@@ -9,15 +9,14 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 
-import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 import { Users } from './users';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
 jest.mock('../../../common/components/empty_prompt');
-jest.mock('../../../common/containers/sourcerer');
+jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/components/search_bar', () => ({
   SiemSearchBar: () => null,
 }));

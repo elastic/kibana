@@ -18,14 +18,10 @@ import {
   MobileCrashesGroupPeriodsResponse,
   getMobileCrashesGroupPeriods,
 } from './get_mobile_crash_group_detailed_statistics';
-import {
-  CrashDistributionResponse,
-  getCrashDistribution,
-} from './distribution/get_distribution';
+import { CrashDistributionResponse, getCrashDistribution } from './distribution/get_distribution';
 
 const mobileCrashDistributionRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -60,8 +56,7 @@ const mobileCrashDistributionRoute = createApmServerRoute({
 });
 
 const mobileCrashMainStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics',
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -77,14 +72,11 @@ const mobileCrashMainStatisticsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ errorGroups: MobileCrashGroupMainStatisticsResponse }> => {
+  handler: async (resources): Promise<{ errorGroups: MobileCrashGroupMainStatisticsResponse }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const { serviceName } = params.path;
-    const { environment, kuery, sortField, sortDirection, start, end } =
-      params.query;
+    const { environment, kuery, sortField, sortDirection, start, end } = params.query;
 
     const errorGroups = await getMobileCrashGroupMainStatistics({
       environment,
@@ -102,8 +94,7 @@ const mobileCrashMainStatisticsRoute = createApmServerRoute({
 });
 
 const mobileCrashDetailedStatisticsRoute = createApmServerRoute({
-  endpoint:
-    'POST /internal/apm/mobile-services/{serviceName}/crashes/groups/detailed_statistics',
+  endpoint: 'POST /internal/apm/mobile-services/{serviceName}/crashes/groups/detailed_statistics',
   params: t.type({
     path: t.type({
       serviceName: t.string,

@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useMemo } from 'react';
 import { find, isEmpty, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
 import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
+import { RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD } from '../../../../common/endpoint/service/response_actions/constants';
+import { isResponseActionsAlertAgentIdField } from '../../lib/endpoint';
+import { useAlertResponseActionsSupport } from '../../hooks/endpoint/use_alert_response_actions_support';
 import * as i18n from './translations';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
@@ -33,12 +36,6 @@ import { getEnrichedFieldInfo } from './helpers';
 import type { EventSummaryField, EnrichedFieldInfo } from './types';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
-import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
-import {
-  SENTINEL_ONE_AGENT_ID_FIELD,
-  isAlertFromSentinelOneEvent,
-} from '../../utils/sentinelone_alert_check';
-
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
 const THRESHOLD_CARDINALITY_FIELD = `${ALERT_THRESHOLD_RESULT}.cardinality.field`;
@@ -51,7 +48,12 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   // ENDPOINT-related field //
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   {
-    id: SENTINEL_ONE_AGENT_ID_FIELD,
+    id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
+    overrideField: AGENT_STATUS_FIELD_NAME,
+    label: i18n.AGENT_STATUS,
+  },
+  {
+    id: RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.crowdstrike,
     overrideField: AGENT_STATUS_FIELD_NAME,
     label: i18n.AGENT_STATUS,
   },
@@ -297,16 +299,7 @@ export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): E
   return { primaryEventCategory, allEventCategories };
 }
 
-export const getSummaryRows = ({
-  data,
-  browserFields,
-  scopeId,
-  eventId,
-  isDraggable = false,
-  isReadOnly = false,
-  investigationFields,
-  sentinelOneManualHostActionsEnabled,
-}: {
+export interface UseSummaryRowsProps {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   scopeId: string;
@@ -314,97 +307,120 @@ export const getSummaryRows = ({
   investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
-  sentinelOneManualHostActionsEnabled?: boolean;
-}) => {
-  const eventCategories = getEventCategoriesFromData(data);
+}
 
-  const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
+export const useSummaryRows = ({
+  data,
+  browserFields,
+  scopeId,
+  eventId,
+  isDraggable = false,
+  isReadOnly = false,
+  investigationFields,
+}: UseSummaryRowsProps): AlertSummaryRow[] => {
+  const responseActionsSupport = useAlertResponseActionsSupport(data);
 
-  const eventCode = Array.isArray(eventCodeField?.originalValue)
-    ? eventCodeField?.originalValue?.[0]
-    : eventCodeField?.originalValue;
+  return useMemo(() => {
+    const eventCategories = getEventCategoriesFromData(data);
 
-  const eventRuleTypeField = find({ category: 'kibana', field: ALERT_RULE_TYPE }, data);
-  const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
-    ? eventRuleTypeField?.originalValue?.[0]
-    : eventRuleTypeField?.originalValue;
+    const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
 
-  const tableFields = getEventFieldsToDisplay({
-    eventCategories,
-    eventCode,
-    eventRuleType,
-    highlightedFieldsOverride: investigationFields ?? [],
-  });
+    const eventCode = Array.isArray(eventCodeField?.originalValue)
+      ? eventCodeField?.originalValue?.[0]
+      : eventCodeField?.originalValue;
 
-  return data != null
-    ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
-        const item = data.find(
-          (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
-        );
-        if (!item || isEmpty(item.values)) {
-          return acc;
-        }
+    const eventRuleTypeField = find({ category: 'kibana', field: ALERT_RULE_TYPE }, data);
+    const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
+      ? eventRuleTypeField?.originalValue?.[0]
+      : eventRuleTypeField?.originalValue;
 
-        // If we found the data by its legacy id we swap the ids to display the correct one
-        if (item.field === field.legacyId) {
-          field.id = field.legacyId;
-        }
+    const tableFields = getEventFieldsToDisplay({
+      eventCategories,
+      eventCode,
+      eventRuleType,
+      highlightedFieldsOverride: investigationFields ?? [],
+    });
 
-        const linkValueField =
-          field.linkField != null && data.find((d) => d.field === field.linkField);
-        const description = {
-          ...getEnrichedFieldInfo({
-            item,
-            linkValueField: linkValueField || undefined,
-            contextId: scopeId,
-            scopeId,
-            browserFields,
-            eventId,
-            field,
-          }),
-          isDraggable,
-          isReadOnly,
-        };
-
-        if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
-          return acc;
-        }
-
-        if (
-          field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
-          sentinelOneManualHostActionsEnabled &&
-          !isAlertFromSentinelOneEvent({ data })
-        ) {
-          return acc;
-        }
-
-        if (field.id === THRESHOLD_TERMS_FIELD) {
-          const enrichedInfo = enrichThresholdTerms(item, data, description);
-          if (enrichedInfo) {
-            return [...acc, ...enrichedInfo];
-          } else {
+    return data != null
+      ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
+          const item = data.find(
+            (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
+          );
+          if (!item || isEmpty(item.values)) {
             return acc;
           }
-        }
 
-        if (field.id === THRESHOLD_CARDINALITY_FIELD) {
-          const enrichedInfo = enrichThresholdCardinality(item, data, description);
-          if (enrichedInfo) {
-            return [...acc, enrichedInfo];
-          } else {
+          // If we found the data by its legacy id we swap the ids to display the correct one
+          if (item.field === field.legacyId) {
+            field.id = field.legacyId;
+          }
+
+          const linkValueField =
+            field.linkField != null && data.find((d) => d.field === field.linkField);
+          const description = {
+            ...getEnrichedFieldInfo({
+              item,
+              linkValueField: linkValueField || undefined,
+              contextId: scopeId,
+              scopeId,
+              browserFields,
+              eventId,
+              field,
+            }),
+            isDraggable,
+            isReadOnly,
+          };
+
+          // If the field is one used by a supported Response Actions agentType,
+          // and the alert's host supports response actions
+          // but the alert field is not the one that the agentType on the alert host uses,
+          // then exit and return accumulator
+          if (
+            isResponseActionsAlertAgentIdField(field.id) &&
+            responseActionsSupport.isSupported &&
+            responseActionsSupport.details.agentIdField !== field.id
+          ) {
             return acc;
           }
-        }
 
-        return [
-          ...acc,
-          {
-            title: field.label ?? field.id,
-            description,
-          },
-        ];
-      }, [])
-    : [];
+          if (field.id === THRESHOLD_TERMS_FIELD) {
+            const enrichedInfo = enrichThresholdTerms(item, data, description);
+            if (enrichedInfo) {
+              return [...acc, ...enrichedInfo];
+            } else {
+              return acc;
+            }
+          }
+
+          if (field.id === THRESHOLD_CARDINALITY_FIELD) {
+            const enrichedInfo = enrichThresholdCardinality(item, data, description);
+            if (enrichedInfo) {
+              return [...acc, enrichedInfo];
+            } else {
+              return acc;
+            }
+          }
+
+          return [
+            ...acc,
+            {
+              title: field.label ?? field.id,
+              description,
+            },
+          ];
+        }, [])
+      : [];
+  }, [
+    data,
+    investigationFields,
+    scopeId,
+    browserFields,
+    eventId,
+    isDraggable,
+    isReadOnly,
+    responseActionsSupport.details.agentIdField,
+    responseActionsSupport.isSupported,
+  ]);
 };
 
 /**

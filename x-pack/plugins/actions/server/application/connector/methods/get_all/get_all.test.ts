@@ -557,6 +557,60 @@ describe('getAll()', () => {
         'Error validating connector: 1, Error: [actionTypeId]: expected value of type [string] but got [undefined]'
       );
     });
+
+    test('removes secrets before validation', async () => {
+      const expectedResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: '1',
+            type: 'type',
+            attributes: {
+              name: 'test',
+              actionTypeId: 'test',
+              isMissingSecrets: false,
+              config: {
+                foo: 'bar',
+              },
+              secrets: { foo: 'bar' },
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(expectedResult);
+      scopedClusterClient.asInternalUser.search.mockResponse(
+        // @ts-expect-error not full search response
+        {
+          aggregations: {
+            '1': { doc_count: 6 },
+          },
+        }
+      );
+
+      actionsClient = new ActionsClient({
+        logger,
+        actionTypeRegistry,
+        unsecuredSavedObjectsClient,
+        scopedClusterClient,
+        kibanaIndices,
+        actionExecutor,
+        ephemeralExecutionEnqueuer,
+        bulkExecutionEnqueuer,
+        request,
+        authorization: authorization as unknown as ActionsAuthorization,
+        inMemoryConnectors: [],
+        connectorTokenClient: connectorTokenClientMock.create(),
+        getEventLogClient,
+      });
+
+      await actionsClient.getAll();
+
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe('getAllSystemConnectors()', () => {

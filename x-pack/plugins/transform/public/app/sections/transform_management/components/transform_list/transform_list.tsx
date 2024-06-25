@@ -76,13 +76,7 @@ function getItemIdToExpandedRowMap(
   return itemIds.reduce((m: ItemIdToExpandedRowMap, transformId: TransformId) => {
     const item = transforms.find((transform) => transform.config.id === transformId);
     if (item !== undefined) {
-      m[transformId] = (
-        <ExpandedRow
-          item={item}
-          onAlertEdit={onAlertEdit}
-          transformsStatsLoading={transformsStatsLoading}
-        />
-      );
+      m[transformId] = <ExpandedRow item={item} onAlertEdit={onAlertEdit} />;
     }
     return m;
   }, {} as ItemIdToExpandedRowMap);
@@ -356,9 +350,6 @@ export const TransformList: FC<TransformListProps> = ({
         className="transform__TransformTable"
         columns={columns}
         error={searchError}
-        hasActions={false}
-        isExpandable={true}
-        isSelectable={false}
         items={filteredTransforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}

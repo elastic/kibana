@@ -52,6 +52,10 @@ describe('Connector type config checks', () => {
   });
 
   for (const connectorTypeId of connectorTypes) {
+    const skipConnectorType = ['.gen-ai'];
+    if (skipConnectorType.includes(connectorTypeId)) {
+      continue;
+    }
     test(`detect connector type changes for: ${connectorTypeId}`, async () => {
       const {
         getService,

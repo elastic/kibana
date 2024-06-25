@@ -32,37 +32,22 @@ export function useCrashGroupDistributionFetcher({
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/mobile-services/{serviceName}/crashes/distribution',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-                groupId,
-              },
+        return callApmApi('GET /internal/apm/mobile-services/{serviceName}/crashes/distribution', {
+          params: {
+            path: { serviceName },
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
+              groupId,
             },
-          }
-        );
+          },
+        });
       }
     },
-    [
-      environment,
-      kuery,
-      serviceName,
-      start,
-      end,
-      offset,
-      groupId,
-      comparisonEnabled,
-    ]
+    [environment, kuery, serviceName, start, end, offset, groupId, comparisonEnabled]
   );
 
   return { crashDistributionData: data, status };

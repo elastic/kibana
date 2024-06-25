@@ -27,11 +27,9 @@ export async function getCustomDashboards({
     sortOrder: 'desc',
   });
 
-  return result.saved_objects.map(
-    ({ id, attributes, updated_at: upatedAt }) => ({
-      id,
-      updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
-      ...attributes,
-    })
-  );
+  return result.saved_objects.map(({ id, attributes, updated_at: upatedAt }) => ({
+    id,
+    updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
+    ...attributes,
+  }));
 }

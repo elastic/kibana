@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
-import { Duration, SLO, toDurationUnit } from '../../../../domain/models';
+import { Duration, SLODefinition, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../../common/constants';
 import {
@@ -64,7 +64,7 @@ export interface EvalutionAggResults {
 
 async function queryAllResults(
   esClient: ElasticsearchClient,
-  slo: SLO,
+  slo: SLODefinition,
   params: BurnRateRuleParams,
   startedAt: Date,
   buckets: EvaluationBucket[] = [],
@@ -93,7 +93,7 @@ async function queryAllResults(
 
 export async function evaluate(
   esClient: ElasticsearchClient,
-  slo: SLO,
+  slo: SLODefinition,
   params: BurnRateRuleParams,
   startedAt: Date
 ) {

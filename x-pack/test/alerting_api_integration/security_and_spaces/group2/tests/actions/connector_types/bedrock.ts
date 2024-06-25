@@ -31,7 +31,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  defaultModel: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -443,6 +443,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
                 .on('error', reject)
                 .send({
+                  actionTypeId: '.bedrock',
                   subAction: 'invokeStream',
                   message: 'Hello world',
                   isEnabledKnowledgeBase: false,

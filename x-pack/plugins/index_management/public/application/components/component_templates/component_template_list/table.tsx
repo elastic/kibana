@@ -131,7 +131,6 @@ export const ComponentTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
     tableLayout: 'auto',
     itemId: 'name',
-    isSelectable: true,
     'data-test-subj': 'componentTemplatesTable',
     sorting: { sort: { field: 'name', direction: 'asc' } },
     selection: {

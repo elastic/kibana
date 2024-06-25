@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useEffect, useState } from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import {
-  PAGE_SIZE,
-  SortDirection,
-} from '../service_overview_instances_chart_and_table';
+import { PAGE_SIZE, SortDirection } from '../service_overview_instances_chart_and_table';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
@@ -29,8 +21,7 @@ import { InstancesSortField } from '../../../../../common/instances';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem =
-  ServiceInstanceMainStatistics['currentPeriod'][0];
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 type ServiceInstanceDetailedStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/detailed_statistics'>;
 
@@ -73,12 +64,13 @@ export function ServiceOverviewInstancesTable({
     query: { kuery, latencyAggregationType, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
-  const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] =
-    useState<Record<string, boolean>>({});
-
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
-    Record<string, ReactNode>
+  const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] = useState<
+    Record<string, boolean>
   >({});
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
+    {}
+  );
 
   useEffect(() => {
     // Closes any open rows when fetching new items
@@ -141,17 +133,12 @@ export function ServiceOverviewInstancesTable({
   };
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="s"
-      data-test-subj="serviceOverviewInstancesTable"
-    >
+    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="serviceOverviewInstancesTable">
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h2>
             {i18n.translate('xpack.apm.serviceOverview.instancesTableTitle', {
-              defaultMessage:
-                'Top {count} {count, plural, one {instance} other {instances}}',
+              defaultMessage: 'Top {count} {count, plural, one {instance} other {instances}}',
               values: { count: mainStatsItemCount },
             })}
           </h2>
@@ -183,10 +170,9 @@ export function ServiceOverviewInstancesTable({
             itemIdToExpandedRowMap={itemIdToExpandedRowMap}
             error={
               status === FETCH_STATUS.FAILURE
-                ? i18n.translate(
-                    'xpack.apm.serviceOverview.instancesTable.errorMessage',
-                    { defaultMessage: 'Failed to fetch' }
-                  )
+                ? i18n.translate('xpack.apm.serviceOverview.instancesTable.errorMessage', {
+                    defaultMessage: 'Failed to fetch',
+                  })
                 : ''
             }
           />

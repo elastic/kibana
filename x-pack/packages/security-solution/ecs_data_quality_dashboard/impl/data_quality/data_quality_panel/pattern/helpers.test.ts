@@ -441,7 +441,7 @@ describe('helpers', () => {
           indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
-          sizeInBytes: 0,
+          sizeInBytes: undefined,
           checkedAt: undefined,
         },
         {
@@ -451,7 +451,7 @@ describe('helpers', () => {
           indexName: '.ds-packetbeat-8.5.3-2023.02.04-000001',
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
-          sizeInBytes: 0,
+          sizeInBytes: undefined,
           checkedAt: undefined,
         },
         {
@@ -461,7 +461,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           pattern: 'auditbeat-*',
           patternDocsCount: 4,
-          sizeInBytes: 0,
+          sizeInBytes: undefined,
           checkedAt: undefined,
         },
       ]);

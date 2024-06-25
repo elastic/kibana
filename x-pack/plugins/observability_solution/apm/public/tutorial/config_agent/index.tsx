@@ -72,13 +72,7 @@ function getFleetLink({
       };
 }
 
-function TutorialConfigAgent({
-  variantId,
-  http,
-  basePath,
-  isCloudEnabled,
-  kibanaVersion,
-}: Props) {
+function TutorialConfigAgent({ variantId, http, basePath, isCloudEnabled, kibanaVersion }: Props) {
   const [data, setData] = useState<APIResponseType>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<PolicyOption>();
@@ -105,9 +99,7 @@ function TutorialConfigAgent({
       isCloudEnabled,
       data,
     });
-    const defaultSelectedOption = availableOptions.find(
-      ({ isSelected }) => isSelected
-    );
+    const defaultSelectedOption = availableOptions.find(({ isSelected }) => isSelected);
     setSelectedOption(defaultSelectedOption);
     setIsLoading(false);
     return availableOptions;

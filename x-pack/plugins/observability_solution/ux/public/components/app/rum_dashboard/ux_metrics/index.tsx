@@ -74,11 +74,7 @@ export function UXMetrics() {
       <EuiHorizontalRule margin="xs" />
 
       <EuiFlexGroup justifyContent="spaceBetween" wrap>
-        <EuiFlexItem
-          grow={1}
-          data-cy={`client-metrics`}
-          style={{ minHeight: 150 }}
-        >
+        <EuiFlexItem grow={1} data-cy={`client-metrics`} style={{ minHeight: 150 }}>
           <EuiSpacer size="s" />
           {CoreVitals}
         </EuiFlexItem>

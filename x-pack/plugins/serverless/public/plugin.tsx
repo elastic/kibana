@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { EuiButton } from '@elastic/eui';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ProjectSwitcher, ProjectSwitcherKibanaProvider } from '@kbn/serverless-project-switcher';
 import { ProjectType } from '@kbn/serverless-types';
 import React from 'react';
@@ -78,6 +80,27 @@ export class ServerlessPlugin
     const activeNavigationNodes$ = project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
+    core.chrome.navControls.registerRight({
+      order: 1,
+      mount: toMountPoint(
+        <KibanaRenderContextProvider i18n={core.i18n} theme={core.theme}>
+          <EuiButton
+            href="https://ela.st/serverless-feedback"
+            size={'s'}
+            color={'warning'}
+            iconType={'popout'}
+            iconSide={'right'}
+            target={'_blank'}
+          >
+            {i18n.translate('xpack.serverless.header.giveFeedbackBtn.label', {
+              defaultMessage: 'Give feedback',
+            })}
+          </EuiButton>
+        </KibanaRenderContextProvider>,
+        { ...core }
+      ),
+    });
+
     return {
       setSideNavComponentDeprecated: (sideNavigationComponent) =>
         project.setSideNavComponent(sideNavigationComponent),
@@ -120,13 +143,11 @@ export class ServerlessPlugin
     currentProjectType: ProjectType
   ) {
     ReactDOM.render(
-      <I18nProvider>
-        <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
-            <ProjectSwitcher {...{ currentProjectType }} />
-          </ProjectSwitcherKibanaProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>,
+      <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+        <ProjectSwitcherKibanaProvider {...{ coreStart, projectChangeAPIUrl }}>
+          <ProjectSwitcher {...{ currentProjectType }} />
+        </ProjectSwitcherKibanaProvider>
+      </KibanaRenderContextProvider>,
       targetDomElement
     );
 

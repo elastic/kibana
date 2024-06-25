@@ -22,19 +22,14 @@ export function useProfilingIntegrationSetting() {
     apmEnableProfilingIntegration
   );
 
-  return (
-    isProfilingIntegrationFeatureFlagEnabled &&
-    isProfilingIntegrationUiSettingEnabled
-  );
+  return isProfilingIntegrationFeatureFlagEnabled && isProfilingIntegrationUiSettingEnabled;
 }
 
 export function useTransactionProfilingSetting() {
   const { core } = useApmPluginContext();
   const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
 
-  const isTransactionProfilingEnabled = core.uiSettings.get<boolean>(
-    apmEnableTransactionProfiling
-  );
+  const isTransactionProfilingEnabled = core.uiSettings.get<boolean>(apmEnableTransactionProfiling);
 
   return isProfilingIntegrationEnabled && isTransactionProfilingEnabled;
 }

@@ -48,11 +48,5 @@ export function TransactionOverviewLink({
     latencyAggregationType,
     transactionType,
   });
-  return (
-    <EuiLink
-      data-test-subj="apmTransactionOverviewLinkLink"
-      href={href}
-      {...rest}
-    />
-  );
+  return <EuiLink data-test-subj="apmTransactionOverviewLinkLink" href={href} {...rest} />;
 }

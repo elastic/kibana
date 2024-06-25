@@ -124,7 +124,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data.search.sessions.maxUpdateRetries (number)',
         'data.search.sessions.notTouchedTimeout (duration)',
         'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
+        'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string)',
+        'discover.experimental.enabledProfiles (array)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'enterpriseSearch.ui.enabled (boolean)',
@@ -160,10 +162,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean)',
         'monitoring.ui.min_interval_seconds (number)',
         'monitoring.ui.show_license_expiration (boolean)',
-        'navigation.solutionNavigation.featureOn (boolean)',
-        'navigation.solutionNavigation.enabled (boolean)',
-        'navigation.solutionNavigation.optInStatus (alternatives)',
-        'navigation.solutionNavigation.defaultSolution (alternatives)',
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
@@ -259,9 +257,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.serverless.project_id (string)',
         'xpack.cloud.serverless.project_name (string)',
         'xpack.cloud.serverless.project_type (string)',
+        'xpack.cloud.onboarding.default_solution (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
+        'xpack.fleet.agentless.api.url (string)',
         'xpack.fleet.enableExperimental (array)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',
@@ -272,19 +272,15 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.graph.savePolicy (alternatives)',
         'xpack.ilm.ui.enabled (boolean)',
         'xpack.index_management.ui.enabled (boolean)',
-        'xpack.index_management.enableIndexActions (any)',
-        'xpack.index_management.enableLegacyTemplates (any)',
-        'xpack.index_management.enableIndexStats (any)',
-        'xpack.index_management.editableIndexSettings (any)',
-        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.infra.sources.default.fields.message (array)',
+        'xpack.index_management.enableTogglingDataRetention (any)', // It's a boolean (any because schema.conditional)
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          * and will all resolve to xpack.infra.featureFlags.* (boolean)
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
         'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
-        'xpack.infra.featureFlags.osqueryEnabled (any)',
+        'xpack.infra.featureFlags.osqueryEnabled (boolean)',
         'xpack.infra.featureFlags.inventoryThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
@@ -292,6 +288,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
         'xpack.infra.featureFlags.profilingEnabled (boolean)',
 
+        'xpack.index_management.enableIndexActions (any)',
+        'xpack.index_management.enableLegacyTemplates (any)',
+        'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.enableDataStreamStats (any)',
+        'xpack.index_management.editableIndexSettings (any)',
+        'xpack.index_management.enableMappingsSourceFieldSection (any)',
+        'xpack.index_management.dev.enableSemanticText (boolean)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -312,6 +315,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // 'xpack.reporting.poll.jobsRefresh.intervalErrorMultiplier (number)',
         'xpack.rollup.ui.enabled (boolean)',
         'xpack.saved_object_tagging.cache_refresh_interval (duration)',
+        'xpack.search.homepage.ui.enabled (boolean)',
+        'xpack.searchInferenceEndpoints.ui.enabled (boolean)',
+        'xpack.searchPlayground.ui.enabled (boolean)',
         'xpack.security.loginAssistanceMessage (string)',
         'xpack.security.sameSiteCookies (alternatives)',
         'xpack.security.showInsecureClusterWarning (boolean)',
@@ -328,6 +334,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.stack_connectors.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableExperimental (array)',
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
+        'xpack.alerting.rules.run.alerts.max (number)',
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean)',
@@ -340,6 +347,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability_onboarding.ui.enabled (boolean)',
         'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
         'share.new_version.enabled (boolean)',
+        'aiAssistantManagementSelection.preferredAIAssistantType (alternatives)',
         /**
          * Rule form V2 feature flags
          */

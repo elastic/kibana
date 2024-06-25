@@ -172,7 +172,6 @@ export const FillSetting = ({
           defaultMessage: 'Fill',
         })}
         data-test-subj="lnsXY_fill"
-        name="fill"
         buttonSize="compressed"
         options={getFillPositionOptions({ isHorizontal, axisMode: currentConfig?.axisMode })}
         idSelected={`${idPrefix}${currentConfig?.fill || 'none'}`}

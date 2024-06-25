@@ -76,7 +76,21 @@ export interface InternalSavedObjectsServiceSetup extends SavedObjectsServiceSet
   getTypeRegistry: () => ISavedObjectTypeRegistry;
 }
 
-export type InternalSavedObjectsServiceStart = SavedObjectsServiceStart;
+/**
+ * @internal
+ */
+export interface InternalSavedObjectsServiceStart extends SavedObjectsServiceStart {
+  metrics: {
+    /**
+     * The number of milliseconds it took to run the SO migrator.
+     *
+     * Note: it's the time spent in the `migrator.runMigrations` call.
+     * The value will be recorded even if a migration wasn't strictly performed,
+     * and in that case it will just be the time spent checking if a migration was required.
+     */
+    migrationDuration: number;
+  };
+}
 
 /** @internal */
 export interface SavedObjectsSetupDeps {
@@ -148,6 +162,7 @@ export class SavedObjectsService
       migratorPromise: firstValueFrom(this.migrator$),
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
+      isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
     });
 
     registerCoreObjectTypes(this.typeRegistry);
@@ -256,10 +271,13 @@ export class SavedObjectsService
      */
     migrator.prepareMigrations();
 
+    let migrationDuration: number;
+
     if (skipMigrations) {
       this.logger.warn(
         'Skipping Saved Object migrations on startup. Note: Individual documents will still be migrated when read or written.'
       );
+      migrationDuration = 0;
     } else {
       this.logger.info(
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
@@ -283,7 +301,9 @@ export class SavedObjectsService
       }
 
       this.logger.info('Starting saved objects migrations');
+      const migrationStartTime = performance.now();
       await migrator.runMigrations();
+      migrationDuration = Math.round(performance.now() - migrationStartTime);
     }
 
     const createRepository = (
@@ -372,6 +392,9 @@ export class SavedObjectsService
         return [...indices];
       },
       getAllIndices: () => [...allIndices],
+      metrics: {
+        migrationDuration,
+      },
     };
   }
 

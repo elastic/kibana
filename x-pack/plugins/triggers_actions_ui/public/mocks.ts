@@ -6,6 +6,8 @@
  */
 
 import { RuleAction } from '@kbn/alerting-plugin/common';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
@@ -13,7 +15,6 @@ import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
 import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
-import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
   RuleTypeModel,
@@ -50,6 +51,7 @@ import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 import { AlertActionsProps } from './types';
+import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -142,7 +144,10 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       });
     },
     getAlertSummaryWidget: (props) => {
-      return getAlertSummaryWidgetLazy(props);
+      const dependencies: AlertSummaryWidgetDependencies['dependencies'] = {
+        charts: chartPluginMock.createStartContract(),
+      };
+      return getAlertSummaryWidgetLazy({ ...props, dependencies });
     },
     getRuleDefinition: (props) => {
       return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });

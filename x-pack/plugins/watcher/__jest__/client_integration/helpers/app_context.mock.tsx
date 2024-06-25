@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 import { LocationDescriptorObject } from 'history';
 
 import {
+  coreMock,
   uiSettingsServiceMock,
   notificationServiceMock,
   httpServiceMock,
@@ -31,6 +32,7 @@ class MockTimeBuckets {
   }
 }
 
+const coreStart = coreMock.createStart();
 const history = scopedHistoryMock.create();
 history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}${location.search ? '?' + location.search : ''}`;
@@ -44,7 +46,9 @@ export const mockContextValue: AppDeps = {
   uiSettings: uiSettingsServiceMock.createSetupContract(),
   settings: settingsServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
-  theme: {
+  i18n: coreStart.i18n,
+  theme: coreStart.theme,
+  chartsTheme: {
     useChartsBaseTheme: jest.fn(),
   } as any,
   // For our test harness, we don't use this mocked out http service

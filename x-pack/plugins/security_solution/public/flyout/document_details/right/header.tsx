@@ -7,15 +7,21 @@
 
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
-import { useRightPanelContext } from './context';
+import { useDocumentDetailsContext } from '../shared/context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
+import {
+  AlertsCasesTourSteps,
+  getTourAnchor,
+  SecurityStepId,
+} from '../../../common/components/guided_onboarding_tour/tour_config';
+import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 
 export interface PanelHeaderProps {
   /**
@@ -35,19 +41,51 @@ export interface PanelHeaderProps {
 
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
-    const { dataFormattedForFieldBrowser } = useRightPanelContext();
+    const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
     const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
-    const renderTabs = tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        key={index}
-        data-test-subj={tab['data-test-subj']}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
+
+    const tourAnchor = useMemo(
+      () =>
+        isAlert
+          ? {
+              'tour-step': getTourAnchor(
+                AlertsCasesTourSteps.reviewAlertDetailsFlyout,
+                SecurityStepId.alertsCases
+              ),
+            }
+          : {},
+      [isAlert]
+    );
+
+    const renderTabs = tabs.map((tab, index) =>
+      isAlert && tab.id === 'overview' ? (
+        <GuidedOnboardingTourStep
+          isTourAnchor={isAlert}
+          step={AlertsCasesTourSteps.reviewAlertDetailsFlyout}
+          tourId={SecurityStepId.alertsCases}
+        >
+          <EuiTab
+            onClick={() => onSelectedTabChanged(tab.id)}
+            isSelected={tab.id === selectedTabId}
+            key={index}
+            data-test-subj={tab['data-test-subj']}
+            {...tourAnchor}
+          >
+            {tab.name}
+          </EuiTab>
+        </GuidedOnboardingTourStep>
+      ) : (
+        <EuiTab
+          onClick={() => onSelectedTabChanged(tab.id)}
+          isSelected={tab.id === selectedTabId}
+          key={index}
+          data-test-subj={tab['data-test-subj']}
+        >
+          {tab.name}
+        </EuiTab>
+      )
+    );
 
     return (
       <FlyoutHeader>

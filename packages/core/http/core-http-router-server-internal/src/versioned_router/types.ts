@@ -17,13 +17,9 @@ export type Method = Exclude<RouteMethod, 'options'>;
 
 /** @internal */
 export interface VersionedRouterRoute {
-  /** @internal */
   method: string;
-  /** @internal */
   path: string;
-  /** @internal */
   options: Omit<VersionedRouteConfig<RouteMethod>, 'path'>;
-  /** @internal */
   handlers: Array<{
     fn: RequestHandler;
     options: AddVersionOpts<unknown, unknown, unknown>;

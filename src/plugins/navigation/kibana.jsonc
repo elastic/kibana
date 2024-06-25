@@ -6,8 +6,8 @@
     "id": "navigation",
     "server": true,
     "browser": true,
-    "optionalPlugins": ["cloud","security"],
+    "optionalPlugins": ["cloud", "cloudExperiments", "spaces"],
     "requiredPlugins": ["unifiedSearch"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": []
   }
 }

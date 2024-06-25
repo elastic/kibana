@@ -14,7 +14,7 @@ import { getEndpointManagementPageList } from '../../../screens';
 describe(
   'App Features for Security Essential PLI',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
@@ -55,9 +55,10 @@ describe(
       }
 
       // No access to response actions (except `unisolate`)
+      // TODO: update tests when `scan` is included in PLIs
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
-      )) {
+        (apiName) => apiName !== 'scan'
+      ).filter((apiName) => apiName !== 'unisolate')) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });
@@ -80,9 +81,10 @@ describe(
       });
 
       // No access to response actions (except `unisolate`)
+      // TODO: update tests when `scan` is included in PLIs
       for (const actionName of RESPONSE_ACTION_API_COMMANDS_NAMES.filter(
-        (apiName) => apiName !== 'unisolate'
-      )) {
+        (apiName) => apiName !== 'scan'
+      ).filter((apiName) => apiName !== 'unisolate')) {
         it(`should not allow access to Response Action: ${actionName}`, () => {
           ensureResponseActionAuthzAccess('none', actionName, username, password);
         });

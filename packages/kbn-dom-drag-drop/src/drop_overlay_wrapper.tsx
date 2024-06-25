@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import classnames from 'classnames';
 
 /**
@@ -27,7 +27,7 @@ export interface DropOverlayWrapperProps {
  * @param otherProps
  * @constructor
  */
-export const DropOverlayWrapper: React.FC<DropOverlayWrapperProps> = ({
+export const DropOverlayWrapper: React.FC<PropsWithChildren<DropOverlayWrapperProps>> = ({
   isVisible,
   children,
   overlayProps,

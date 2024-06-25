@@ -8,13 +8,7 @@
 import React, { useState } from 'react';
 import { EuiExpression, EuiPopover } from '@elastic/eui';
 
-type ExpressionColor =
-  | 'subdued'
-  | 'primary'
-  | 'success'
-  | 'accent'
-  | 'warning'
-  | 'danger';
+type ExpressionColor = 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
 interface Props {
   title: React.ReactNode;
   value: React.ReactNode;

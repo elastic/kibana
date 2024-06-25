@@ -8,6 +8,50 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
+export const supportedFieldTypes = [
+  'number',
+  'date',
+  'string',
+  'boolean',
+  'ip',
+  'cartesian_point',
+  'cartesian_shape',
+  'geo_point',
+  'geo_shape',
+  'version',
+] as const;
+
+export const isSupportedFieldType = (type: string): type is SupportedFieldType =>
+  supportedFieldTypes.includes(type as SupportedFieldType);
+
+export type SupportedFieldType = typeof supportedFieldTypes[number];
+
+export type FunctionParameterType =
+  | SupportedFieldType
+  | 'null'
+  | 'any'
+  | 'chrono_literal'
+  | 'time_literal'
+  | 'number[]'
+  | 'string[]'
+  | 'boolean[]'
+  | 'any[]'
+  | 'date[]';
+
+export type FunctionReturnType =
+  | 'number'
+  | 'date'
+  | 'any'
+  | 'boolean'
+  | 'string'
+  | 'cartesian_point'
+  | 'cartesian_shape'
+  | 'geo_point'
+  | 'geo_shape'
+  | 'ip'
+  | 'version'
+  | 'void';
+
 export interface FunctionDefinition {
   type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
@@ -19,16 +63,42 @@ export interface FunctionDefinition {
   signatures: Array<{
     params: Array<{
       name: string;
-      type: string;
+      type: FunctionParameterType;
       optional?: boolean;
       noNestingFunctions?: boolean;
       supportsWildcard?: boolean;
-      literalOnly?: boolean;
+      /**
+       * If set, this parameter does not accept a field. It only accepts a constant,
+       * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
+       */
+      constantOnly?: boolean;
+      /**
+       * if provided this means that the value must be one
+       * of the options in the array iff the value is a literal.
+       *
+       * String values are case insensitive.
+       *
+       * If the value is not a literal, this field is ignored because
+       * we can't check the return value of a function to see if it
+       * matches one of the options prior to runtime.
+       */
+      literalOptions?: string[];
+      /**
+       * Must only be included _in addition to_ literalOptions.
+       *
+       * If provided this is the list of suggested values that
+       * will show up in the autocomplete. If omitted, the literalOptions
+       * will be used as suggestions.
+       *
+       * This is useful for functions that accept
+       * values that we don't want to show as suggestions.
+       */
+      literalSuggestions?: string[];
     }>;
     minParams?: number;
-    returnType: string;
-    examples?: string[];
+    returnType: FunctionReturnType;
   }>;
+  examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
@@ -47,7 +117,7 @@ export interface CommandBaseDefinition {
       innerType?: string;
       values?: string[];
       valueDescriptions?: string[];
-      literalOnly?: boolean;
+      constantOnly?: boolean;
       wildcards?: boolean;
     }>;
   };
@@ -87,3 +157,5 @@ export type SignatureType =
   | FunctionDefinition['signatures'][number]
   | CommandOptionsDefinition['signature'];
 export type SignatureArgType = SignatureType['params'][number];
+
+export type FunctionParameter = FunctionDefinition['signatures'][number]['params'][number];

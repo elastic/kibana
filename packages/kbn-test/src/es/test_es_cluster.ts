@@ -225,22 +225,21 @@ export function createTestEsCluster<
 
     async start() {
       let installPath: string;
+      let disableEsTmpDir: boolean;
 
       // We only install once using the first node. If the cluster has
       // multiple nodes, they'll all share the same ESinstallation.
       const firstNode = this.nodes[0];
       if (esFrom === 'source') {
-        installPath = (
-          await firstNode.installSource({
-            sourcePath: config.sourcePath,
-            license: config.license,
-            password: config.password,
-            basePath: config.basePath,
-            esArgs: config.esArgs,
-          })
-        ).installPath;
+        ({ installPath, disableEsTmpDir } = await firstNode.installSource({
+          sourcePath: config.sourcePath,
+          license: config.license,
+          password: config.password,
+          basePath: config.basePath,
+          esArgs: config.esArgs,
+        }));
       } else if (esFrom === 'snapshot') {
-        installPath = (await firstNode.installSnapshot(config)).installPath;
+        ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
       } else if (esFrom === 'serverless') {
         if (!esServerlessOptions) {
           throw new Error(
@@ -302,6 +301,7 @@ export function createTestEsCluster<
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
             onEarlyExit,
             writeLogsToPath,
+            disableEsTmpDir,
           });
         });
       }

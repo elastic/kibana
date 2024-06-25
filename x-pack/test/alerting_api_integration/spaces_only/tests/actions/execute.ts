@@ -342,7 +342,7 @@ export default function ({ getService }: FtrProviderContext) {
      */
     it('should execute system actions correctly', async () => {
       const connectorId = 'system-connector-test.system-action';
-      const name = 'System action: test.system-action';
+      const name = 'Test system action';
 
       const response = await supertest
         .post(
@@ -375,7 +375,7 @@ export default function ({ getService }: FtrProviderContext) {
      */
     it('should execute system actions with kibana privileges correctly', async () => {
       const connectorId = 'system-connector-test.system-action-kibana-privileges';
-      const name = 'System action: test.system-action-kibana-privileges';
+      const name = 'Test system action with kibana privileges';
 
       const response = await supertest
         .post(

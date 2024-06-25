@@ -22,3 +22,7 @@ export interface ConnectorsAPISyncJobResponse {
 export interface ConnectorSecretCreateResponse {
   id: string;
 }
+
+export interface ConnectorAPICancelSyncResponse {
+  success: boolean;
+}

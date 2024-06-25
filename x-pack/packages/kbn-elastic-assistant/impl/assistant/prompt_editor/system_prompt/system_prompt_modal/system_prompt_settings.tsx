@@ -144,6 +144,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                       apiConfig: {
                         defaultSystemPromptId: getDefaultSystemPromptId(convo),
                         connectorId: defaultConnector?.id ?? '',
+                        actionTypeId: defaultConnector?.actionTypeId ?? '',
                       },
                     }),
               }))
@@ -210,6 +211,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
       [
         conversationSettings,
         conversationsSettingsBulkActions,
+        defaultConnector?.actionTypeId,
         defaultConnector?.id,
         selectedSystemPrompt,
         setConversationSettings,
@@ -338,7 +340,6 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
             }
             checked={isNewConversationDefault}
             onChange={handleNewConversationDefaultChange}
-            compressed
           />
         </EuiFormRow>
       </>

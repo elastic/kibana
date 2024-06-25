@@ -5,62 +5,47 @@
  * 2.0.
  */
 
+import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import type { Environment } from '../../../../../common/environment_rt';
 import {
   PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
-import { string } from '../../../../../common/utils/esql';
-import { getEsqlDateRangeFilter } from '../../../../../common/utils/esql/get_esql_date_range_filter';
-import { getEsqlEnvironmentFilter } from '../../../../../common/utils/esql/get_esql_environment_filter';
 
 export function getLatencyChartScreenContext({
   serviceName,
   transactionName,
   transactionType,
   environment,
-  start,
-  end,
   bucketSizeInSeconds,
 }: {
   serviceName?: string;
   transactionName?: string;
   transactionType?: string;
   environment?: Environment;
-  start: string;
-  end: string;
   bucketSizeInSeconds?: number;
 }) {
-  const clauses = [
-    `${PROCESSOR_EVENT} == "transaction"`,
-    getEsqlDateRangeFilter(start, end),
-    serviceName ? `${SERVICE_NAME} == ${string`${serviceName}`}` : '',
-    transactionName
-      ? `${TRANSACTION_NAME} == ${string`${transactionName}`}`
-      : '',
-    transactionType
-      ? `${TRANSACTION_TYPE} == ${string`${transactionType}`}`
-      : '',
-    environment ? getEsqlEnvironmentFilter(environment) : '',
-  ].filter(Boolean);
+  const fieldValues = {
+    [PROCESSOR_EVENT]: 'transaction',
+    ...(serviceName ? { [SERVICE_NAME]: serviceName } : {}),
+    ...(transactionName ? { [TRANSACTION_NAME]: transactionName } : {}),
+    ...(transactionType ? { [TRANSACTION_TYPE]: transactionType } : {}),
+    ...(environment && environment !== ENVIRONMENT_ALL.value
+      ? { [SERVICE_ENVIRONMENT]: environment }
+      : {}),
+  };
 
   return {
-    screenDescription: `There is a latency chart displayed. The ES|QL equivalent for this is:
-  
-    \`\`\`esql
-    FROM traces-apm*
-      | WHERE ${clauses.join(' AND ')}
-      ${
-        bucketSizeInSeconds !== undefined
-          ? `| EVAL date_bucket = DATE_TRUNC(${bucketSizeInSeconds} seconds, @timestamp)`
-          : ''
-      }
-      | STATS avg_duration = AVG(transaction.duration.us)${
-        bucketSizeInSeconds !== undefined ? ` BY date_bucket` : ''
-      }
-    \`\`\`
+    screenDescription: `There is a latency chart displayed. The field values are: ${JSON.stringify(
+      fieldValues
+    )}. ${
+      bucketSizeInSeconds !== undefined
+        ? `The bucket size in seconds is ${bucketSizeInSeconds}s`
+        : ''
+    }
   `,
   };
 }

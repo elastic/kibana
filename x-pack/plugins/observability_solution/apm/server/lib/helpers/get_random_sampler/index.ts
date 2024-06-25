@@ -9,6 +9,8 @@ import { KibanaRequest } from '@kbn/core/server';
 import seedrandom from 'seedrandom';
 import { APMRouteHandlerResources } from '../../../routes/apm_routes/register_apm_server_routes';
 
+export type RandomSampler = Awaited<ReturnType<typeof getRandomSampler>>;
+
 export async function getRandomSampler({
   security,
   request,
@@ -22,8 +24,7 @@ export async function getRandomSampler({
 
   if (security) {
     const securityPluginStart = await security.start();
-    const username =
-      securityPluginStart.authc.getCurrentUser(request)?.username;
+    const username = securityPluginStart.authc.getCurrentUser(request)?.username;
 
     if (username) {
       seed = Math.abs(seedrandom(username).int32());
@@ -35,5 +36,3 @@ export async function getRandomSampler({
     seed,
   };
 }
-
-export type RandomSampler = Awaited<ReturnType<typeof getRandomSampler>>;

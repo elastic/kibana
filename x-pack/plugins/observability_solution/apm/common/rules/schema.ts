@@ -13,10 +13,7 @@ import { AggregationType } from './apm_rule_types';
 
 export const searchConfigurationSchema = schema.object({
   query: schema.object({
-    query: schema.oneOf([
-      schema.string(),
-      schema.recordOf(schema.string(), schema.any()),
-    ]),
+    query: schema.oneOf([schema.string(), schema.recordOf(schema.string(), schema.any())]),
     language: schema.string(),
   }),
 });
@@ -69,7 +66,7 @@ export const anomalyParamsSchema = schema.object({
     schema.literal(ML_ANOMALY_SEVERITY.MINOR),
     schema.literal(ML_ANOMALY_SEVERITY.WARNING),
   ]),
-  anomalyDetectorTypes: schema.arrayOf(detectorsSchema, { minSize: 1 }),
+  anomalyDetectorTypes: schema.maybe(schema.arrayOf(detectorsSchema, { minSize: 1 })),
 });
 
 export const transactionErrorRateParamsSchema = schema.object({
@@ -86,13 +83,9 @@ export const transactionErrorRateParamsSchema = schema.object({
 });
 
 type ErrorCountParamsType = TypeOf<typeof errorCountParamsSchema>;
-type TransactionDurationParamsType = TypeOf<
-  typeof transactionDurationParamsSchema
->;
+type TransactionDurationParamsType = TypeOf<typeof transactionDurationParamsSchema>;
 type AnomalyParamsType = TypeOf<typeof anomalyParamsSchema>;
-type TransactionErrorRateParamsType = TypeOf<
-  typeof transactionErrorRateParamsSchema
->;
+type TransactionErrorRateParamsType = TypeOf<typeof transactionErrorRateParamsSchema>;
 
 export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
 

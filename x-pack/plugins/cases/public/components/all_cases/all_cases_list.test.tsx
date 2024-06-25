@@ -12,7 +12,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
-import '../../common/mock/match_media';
 import type { AppMockRenderer } from '../../common/mock';
 import {
   createAppMockRenderer,
@@ -365,13 +364,6 @@ describe('AllCasesListGeneric', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('case-table-selected-case-count')).not.toBeInTheDocument();
       expect(screen.queryByTestId('cases-metrics-stats')).not.toBeInTheDocument();
-    });
-  });
-
-  it('case table should not be selectable when isSelectorView=true', async () => {
-    appMockRenderer.render(<AllCasesList isSelectorView={true} />);
-    await waitFor(() => {
-      expect(screen.queryByTestId('cases-table')).not.toHaveAttribute('isSelectable');
     });
   });
 

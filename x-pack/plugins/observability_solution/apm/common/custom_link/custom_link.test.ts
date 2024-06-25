@@ -28,8 +28,7 @@ describe('Custom link', () => {
     });
 
     it('handles complex template with multiple variables', () => {
-      const url =
-        'https://example.com/{{name}}/details/{{age}}?param={{gender}}';
+      const url = 'https://example.com/{{name}}/details/{{age}}?param={{gender}}';
       const result = extractTemplateVariableNames(url);
       expect(result).toEqual(['name', 'age', 'gender']);
     });
@@ -99,9 +98,7 @@ describe('Custom link', () => {
         service: { name: 'foo & bar' },
       } as Transaction;
       const result = getEncodedCustomLinkUrl(url, transaction);
-      expect(result).toBe(
-        'https://kibana.com/app/apm/foo%20%26%20bar/overview'
-      );
+      expect(result).toBe('https://kibana.com/app/apm/foo%20%26%20bar/overview');
     });
   });
 });

@@ -19,7 +19,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
 
       // Logs Data logic
       const MESSAGE_LOG_LEVELS = [
-        { message: 'A simple log', level: 'info' },
+        { message: 'A simple log with something random <random> in the middle', level: 'info' },
         { message: 'Yet another debug log', level: 'debug' },
         { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
       ];
@@ -44,11 +44,14 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             .fill(0)
             .map(() => {
               const index = Math.floor(Math.random() * 3);
+              const { message, level } = MESSAGE_LOG_LEVELS[index];
+              const serviceName = SERVICE_NAMES[index];
+
               return log
                 .create()
-                .message(MESSAGE_LOG_LEVELS[index].message)
-                .logLevel(MESSAGE_LOG_LEVELS[index].level)
-                .service(SERVICE_NAMES[index])
+                .message(message.replace('<random>', generateShortId()))
+                .logLevel(level)
+                .service(serviceName)
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',

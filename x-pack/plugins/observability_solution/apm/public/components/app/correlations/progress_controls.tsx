@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -43,10 +37,9 @@ export function CorrelationsProgressControls({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiProgress
-              aria-label={i18n.translate(
-                'xpack.apm.correlations.progressAriaLabel',
-                { defaultMessage: 'Progress' }
-              )}
+              aria-label={i18n.translate('xpack.apm.correlations.progressAriaLabel', {
+                defaultMessage: 'Progress',
+              })}
               value={Math.round(progress * 100)}
               max={100}
               size="m"

@@ -30,11 +30,7 @@ export function InspectorHeaderLink() {
   }
 
   return (
-    <EuiHeaderLink
-      color="primary"
-      onClick={inspect}
-      data-test-subj="apmInspectHeaderLink"
-    >
+    <EuiHeaderLink color="primary" onClick={inspect} data-test-subj="apmInspectHeaderLink">
       {i18n.translate('xpack.apm.inspectButtonText', {
         defaultMessage: 'Inspect',
       })}

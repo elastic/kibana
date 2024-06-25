@@ -19,17 +19,13 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../links/url_helpers';
-import {
-  getComparisonOptions,
-  TimeRangeComparisonEnum,
-} from './get_comparison_options';
+import { getComparisonOptions, TimeRangeComparisonEnum } from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: ${({ theme }) =>
-    theme.eui.euiFormInputGroupLabelBackground};
+  background-color: ${({ theme }) => theme.eui.euiFormInputGroupLabelBackground};
   padding: 0 ${({ theme }) => theme.eui.euiSizeM};
 `;
 
@@ -39,17 +35,12 @@ export function TimeComparison() {
   const { isSmall, isMedium } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useAnyOfApmParams(
-    '/services',
-    '/dependencies/*',
-    '/services/{serviceName}'
-  );
+  } = useAnyOfApmParams('/services', '/dependencies/*', '/services/{serviceName}');
 
   const location = useLocation();
   const apmRouter = useApmRouter();
 
-  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =
-    useAnomalyDetectionJobsContext();
+  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } = useAnomalyDetectionJobsContext();
   const { core } = useApmPluginContext();
   const { preferredEnvironment } = useEnvironmentsContext();
 
@@ -61,9 +52,7 @@ export function TimeComparison() {
     const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
     // Only show the "Expected bounds" option in Overview and Transactions tabs
     const showExpectedBoundsForThisTab =
-      !matchingRoutes.some(
-        (d) => d.path === '/services/{serviceName}/transactions/view'
-      ) &&
+      !matchingRoutes.some((d) => d.path === '/services/{serviceName}/transactions/view') &&
       matchingRoutes.some(
         (d) =>
           d.path === '/services/{serviceName}/overview' ||
@@ -91,9 +80,7 @@ export function TimeComparison() {
     location.pathname,
   ]);
 
-  const isSelectedComparisonTypeAvailable = comparisonOptions.some(
-    ({ value }) => value === offset
-  );
+  const isSelectedComparisonTypeAvailable = comparisonOptions.some(({ value }) => value === offset);
 
   // Replaces type when current one is no longer available in the select options
   if (
@@ -101,9 +88,8 @@ export function TimeComparison() {
     // If user changes environment and there's no ML jobs that match the new environment
     // then also default to first comparison option as well
     (offset === TimeRangeComparisonEnum.ExpectedBounds &&
-      comparisonOptions.find(
-        (d) => d.value === TimeRangeComparisonEnum.ExpectedBounds
-      )?.disabled === true)
+      comparisonOptions.find((d) => d.value === TimeRangeComparisonEnum.ExpectedBounds)
+        ?.disabled === true)
   ) {
     urlHelpers.replace(history, {
       query: { offset: comparisonOptions[0].value },
@@ -135,9 +121,7 @@ export function TimeComparison() {
               }
               urlHelpers.push(history, {
                 query: {
-                  comparisonEnabled: Boolean(
-                    nextComparisonEnabledValue
-                  ).toString(),
+                  comparisonEnabled: Boolean(nextComparisonEnabledValue).toString(),
                 },
               });
             }}

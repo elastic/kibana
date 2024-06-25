@@ -8,10 +8,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { SuggestionRawDefinition } from './types';
+import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
   CommandDefinition,
@@ -22,7 +23,9 @@ import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 
-const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
+const allFunctions = statsAggregationFunctionDefinitions
+  .concat(evalFunctionDefinitions)
+  .concat(groupingFunctionDefinitions);
 
 export const TRIGGER_SUGGESTION_COMMAND = {
   title: 'Trigger Suggestion Dialog',
@@ -44,7 +47,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
     kind: 'Function',
     detail: fn.description,
     documentation: {
-      value: buildFunctionDocumentation(fullSignatures),
+      value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
     // agg functgions have priority over everything else
     sortText: fn.type === 'agg' ? '1A' : 'C',
@@ -58,7 +61,7 @@ export function getSuggestionBuiltinDefinition(fn: FunctionDefinition): Suggesti
   return {
     label: fn.name,
     text: hasArgs ? `${fn.name} $0` : fn.name,
-    ...(hasArgs ? { insertTextRules: 4 } : {}), // kbn-esql-validation-autocomplete.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    asSnippet: hasArgs,
     kind: 'Operator',
     detail: fn.description,
     documentation: {
@@ -75,11 +78,13 @@ export const getCompatibleFunctionDefinition = (
   returnTypes?: string[],
   ignored: string[] = []
 ): SuggestionRawDefinition[] => {
-  const fnSupportedByCommand = allFunctions.filter(
-    ({ name, supportedCommands, supportedOptions }) =>
-      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-      !ignored.includes(name)
-  );
+  const fnSupportedByCommand = allFunctions
+    .filter(
+      ({ name, supportedCommands, supportedOptions }) =>
+        (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
+        !ignored.includes(name)
+    )
+    .sort((a, b) => a.name.localeCompare(b.name));
   if (!returnTypes) {
     return fnSupportedByCommand.map(getSuggestionFunctionDefinition);
   }
@@ -138,14 +143,22 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
     sortText: 'D',
   }));
 
-export const buildSourcesDefinitions = (sources: string[]): SuggestionRawDefinition[] =>
-  sources.map((label) => ({
-    label,
-    text: getSafeInsertText(label, { dashSupported: true }),
-    kind: 'Reference',
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
-      defaultMessage: `Index`,
-    }),
+export const buildSourcesDefinitions = (
+  sources: Array<{ name: string; isIntegration: boolean; title?: string }>
+): SuggestionRawDefinition[] =>
+  sources.map(({ name, isIntegration, title }) => ({
+    label: title ?? name,
+    text: name,
+    isSnippet: isIntegration,
+    ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
+    kind: isIntegration ? 'Class' : 'Issue',
+    detail: isIntegration
+      ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
+          defaultMessage: `Integration`,
+        })
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
+          defaultMessage: `Index`,
+        }),
     sortText: 'A',
   }));
 
@@ -163,6 +176,21 @@ export const buildConstantsDefinitions = (
         defaultMessage: `Constant`,
       }),
     sortText: 'A',
+  }));
+
+export const buildValueDefinitions = (
+  values: string[],
+  detail?: string
+): SuggestionRawDefinition[] =>
+  values.map((value) => ({
+    label: `"${value}"`,
+    text: `"${value}"`,
+    detail:
+      detail ??
+      i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.valueDefinition', {
+        defaultMessage: 'Literal value',
+      }),
+    kind: 'Value',
   }));
 
 export const buildNewVarDefinition = (label: string): SuggestionRawDefinition => {
@@ -269,19 +297,34 @@ export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition =>
   },
 });
 
-function getUnitDuration(unit: number = 1) {
-  const filteredTimeLiteral = timeLiterals.filter(({ name }) => {
+export function getUnitDuration(unit: number = 1) {
+  const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
     const result = /s$/.test(name);
     return unit > 1 ? result : !result;
   });
   return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
 }
 
+/**
+ * Given information about the current command and the parameter type, suggest
+ * some literals that may make sense.
+ *
+ * TODO — this currently tries to cover both command-specific suggestions and type
+ * suggestions. We could consider separating the two... or just using parameter types
+ * and forgetting about command-specific suggestions altogether.
+ *
+ * Another thought... should literal suggestions be defined in the definitions file?
+ * That approach might allow for greater specificity in the suggestions and remove some
+ * "magical" logic. Maybe this is really the same thing as the literalOptions parameter
+ * definition property...
+ */
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.includes('number') && commandName === 'limit') {
-    // suggest 10/50/100
-    suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+  if (types.includes('number')) {
+    if (commandName === 'limit') {
+      // suggest 10/100/1000 for limit
+      suggestions.push(...buildConstantsDefinitions(['10', '100', '1000'], ''));
+    }
   }
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular
@@ -289,7 +332,7 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   }
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {
-    suggestions.push(...buildConstantsDefinitions(timeLiterals.map(({ name }) => name))); // i.e. year, month, ...
+    suggestions.push(...buildConstantsDefinitions(timeUnitsToSuggest.map(({ name }) => name))); // i.e. year, month, ...
   }
   if (types.includes('chrono_literal')) {
     suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY, ...

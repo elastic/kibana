@@ -25,7 +25,12 @@ import {
   AwsCredentialTypeSelector,
 } from './aws_credentials_form';
 
-export const AwsCredentialsFormAgentless = ({ input, newPolicy, updatePolicy }: AwsFormProps) => {
+export const AwsCredentialsFormAgentless = ({
+  input,
+  newPolicy,
+  packageInfo,
+  updatePolicy,
+}: AwsFormProps) => {
   const awsCredentialsType = getAwsCredentialsType(input) || DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   const options = getAwsCredentialsFormOptions();
   const group = options[awsCredentialsType];
@@ -74,6 +79,7 @@ export const AwsCredentialsFormAgentless = ({ input, newPolicy, updatePolicy }: 
       <EuiSpacer size="l" />
       <AwsInputVarFields
         fields={fields}
+        packageInfo={packageInfo}
         onChange={(key, value) => {
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}

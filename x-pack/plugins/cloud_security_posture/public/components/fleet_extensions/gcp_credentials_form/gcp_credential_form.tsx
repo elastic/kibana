@@ -46,15 +46,16 @@ import {
 export const GCP_SETUP_ACCESS = {
   CLOUD_SHELL: 'google_cloud_shell',
   MANUAL: 'manual',
-};
+} as const;
 
 export const GCP_CREDENTIALS_TYPE = {
   CREDENTIALS_FILE: 'credentials-file',
   CREDENTIALS_JSON: 'credentials-json',
   CREDENTIALS_NONE: 'credentials-none',
-};
+} as const;
 
 type SetupFormatGCP = typeof GCP_SETUP_ACCESS.CLOUD_SHELL | typeof GCP_SETUP_ACCESS.MANUAL;
+
 export const GCPSetupInfoContent = () => (
   <>
     <EuiHorizontalRule margin="xl" />

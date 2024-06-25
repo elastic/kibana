@@ -49,10 +49,7 @@ export function APMRuleGroupBy({
       }));
   };
 
-  const selectedOptions = [
-    ...getPreSelectedOptions(),
-    ...getUserSelectedOptions(options.groupBy),
-  ];
+  const selectedOptions = [...getPreSelectedOptions(), ...getUserSelectedOptions(options.groupBy)];
 
   return (
     <EuiComboBox

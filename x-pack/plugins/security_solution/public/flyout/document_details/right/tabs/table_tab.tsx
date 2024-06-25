@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { get } from 'lodash';
@@ -16,7 +15,7 @@ import type { BrowserField, BrowserFields } from '../../../../../common/search_s
 import { FieldNameCell } from '../../../../common/components/event_details/table/field_name_cell';
 import { CellActions } from '../components/cell_actions';
 import * as i18n from '../../../../common/components/event_details/translations';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
 import { EventFieldsBrowser } from '../../../../common/components/event_details/event_fields_browser';
 import { TimelineTabs } from '../../../../../common/types';
@@ -82,8 +81,9 @@ export const getColumns: ColumnsProvider = ({
 /**
  * Table view displayed in the document details expandable flyout right section
  */
-export const TableTab: FC = memo(() => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useRightPanelContext();
+export const TableTab = memo(() => {
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
+    useDocumentDetailsContext();
 
   return (
     <EventFieldsBrowser

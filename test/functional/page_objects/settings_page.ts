@@ -131,7 +131,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async toggleAdvancedSettingCheckbox(propertyName: string, value?: boolean) {
-    let curValue: string | undefined;
+    let curValue: string | null;
     if (value !== undefined) {
       curValue = await this.getAdvancedSettingAriaCheckbox(propertyName);
 
@@ -621,18 +621,7 @@ export class SettingsPageObject extends FtrService {
 
   async clickAddNewIndexPatternButton() {
     await this.common.scrollKibanaBodyTop();
-
-    // if showing no data view prompt
-    const noDataView = await this.testSubjects.exists('createDataViewButton');
-    if (noDataView) {
-      await this.testSubjects.click('createDataViewButton');
-      return;
-    }
-
-    const tableView = await this.testSubjects.exists('createIndexPatternButton');
-    if (tableView) {
-      await this.testSubjects.click('createIndexPatternButton');
-    }
+    await this.testSubjects.click('createDataViewButton');
   }
 
   async selectRollupIndexPatternType() {
@@ -669,7 +658,7 @@ export class SettingsPageObject extends FtrService {
       // case where we don't want the * appended so we'll remove it if it was added
       await field.type(indexPatternName, { charByChar: true });
       const tempName = await field.getAttribute('value');
-      if (tempName.length > indexPatternName.length) {
+      if (tempName?.length ?? 0 > indexPatternName.length) {
         await field.type(this.browser.keys.DELETE, { charByChar: true });
       }
     }
@@ -787,7 +776,7 @@ export class SettingsPageObject extends FtrService {
   ) {
     await this.clickAddField();
     await this.setFieldName(name);
-    await this.setFieldTypeComposite();
+    await this.setFieldType('Composite');
     await this.setCompositeScript(script);
     if (subfieldCount > 0) {
       await this.testSubjects.find(`typeField_${subfieldCount - 1}`);
@@ -874,14 +863,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async setFieldType(type: string) {
+    const typeFieldDataTestSubj = 'typeField';
     this.log.debug('set type = ' + type);
-    await this.comboBox.set('typeField', type);
-  }
-
-  async setFieldTypeComposite() {
-    this.log.debug('set type = Composite');
-    await this.testSubjects.setValue('typeField', 'Composite');
-    await this.browser.pressKeys(this.browser.keys.RETURN);
+    await this.retry.try(async () => {
+      await this.comboBox.set(typeFieldDataTestSubj, type);
+      const comboBox = await this.testSubjects.find(typeFieldDataTestSubj);
+      expect(await this.comboBox.isOptionSelected(comboBox, type)).to.be(true);
+    });
   }
 
   async setFieldScript(script: string) {

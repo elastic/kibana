@@ -11,11 +11,14 @@ import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import userEvent from '@testing-library/user-event';
-import { useBatchedPublishingSubjects } from './publishing_batcher';
+import {
+  useBatchedPublishingSubjects,
+  useBatchedOptionalPublishingSubjects,
+} from './publishing_batcher';
 import { useStateFromPublishingSubject } from './publishing_subject';
 import { PublishingSubject } from './types';
 
-describe('useBatchedPublishingSubjects', () => {
+describe('publishing subject', () => {
   describe('render', () => {
     let subject1: BehaviorSubject<number>;
     let subject2: BehaviorSubject<number>;
@@ -56,7 +59,6 @@ describe('useBatchedPublishingSubjects', () => {
           <>
             <button onClick={incrementAll} />
             <span>{`value1: ${value1}, value2: ${value2}, value3: ${value3}, value4: ${value4}, value5: ${value5}, value6: ${value6}`}</span>
-            <div data-test-subj="renderCount">{renderCount}</div>
           </>
         );
       }
@@ -72,7 +74,7 @@ describe('useBatchedPublishingSubjects', () => {
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
         ).toBeInTheDocument();
       });
-      expect(screen.getByTestId('renderCount')).toHaveTextContent('2');
+      expect(renderCount).toBe(2);
     });
 
     test('should batch state updates when using useBatchedPublishingSubjects', async () => {
@@ -97,7 +99,6 @@ describe('useBatchedPublishingSubjects', () => {
               }}
             />
             <span>{`value1: ${value1}, value2: ${value2}, value3: ${value3}, value4: ${value4}, value5: ${value5}, value6: ${value6}`}</span>
-            <div data-test-subj="renderCount">{renderCount}</div>
           </>
         );
       }
@@ -113,7 +114,48 @@ describe('useBatchedPublishingSubjects', () => {
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
         ).toBeInTheDocument();
       });
-      expect(screen.getByTestId('renderCount')).toHaveTextContent('2');
+      expect(renderCount).toBe(2);
+    });
+
+    test('should batch state updates when using useBatchedOptionalPublishingSubjects', async () => {
+      let renderCount = 0;
+      function Component() {
+        const [value1, value2, value3, value4, value5, value6] =
+          useBatchedOptionalPublishingSubjects(
+            subject1,
+            subject2,
+            subject3,
+            subject4,
+            subject5,
+            subject6
+          );
+
+        renderCount++;
+        return (
+          <>
+            <button
+              onClick={() => {
+                // using setTimeout to move next calls outside of callstack from onClick
+                setTimeout(incrementAll, 0);
+              }}
+            />
+            <span>{`value1: ${value1}, value2: ${value2}, value3: ${value3}, value4: ${value4}, value5: ${value5}, value6: ${value6}`}</span>
+          </>
+        );
+      }
+      render(<Component />);
+      await waitFor(() => {
+        expect(
+          screen.getByText('value1: 0, value2: 0, value3: 0, value4: 0, value5: 0, value6: 0')
+        ).toBeInTheDocument();
+      });
+      userEvent.click(screen.getByRole('button'));
+      await waitFor(() => {
+        expect(
+          screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
+        ).toBeInTheDocument();
+      });
+      expect(renderCount).toBe(2);
     });
 
     test('should render for each state update outside of click handler', async () => {
@@ -136,7 +178,6 @@ describe('useBatchedPublishingSubjects', () => {
               }}
             />
             <span>{`value1: ${value1}, value2: ${value2}, value3: ${value3}, value4: ${value4}, value5: ${value5}, value6: ${value6}`}</span>
-            <div data-test-subj="renderCount">{renderCount}</div>
           </>
         );
       }
@@ -152,33 +193,33 @@ describe('useBatchedPublishingSubjects', () => {
           screen.getByText('value1: 1, value2: 1, value3: 1, value4: 1, value5: 1, value6: 1')
         ).toBeInTheDocument();
       });
-      expect(screen.getByTestId('renderCount')).toHaveTextContent('7');
+      expect(renderCount).toBe(7);
     });
   });
 
   describe('Publishing subject is undefined on first render', () => {
-    test('useBatchedPublishingSubjects state should update when publishing subject is provided', async () => {
+    test('useBatchedOptionalPublishingSubjects should update state when publishing subject is provided', async () => {
       let renderCount = 0;
       function Component() {
         // When subjects is expected to change, subjects must be part of react state.
-        const [subjectFoo, setSubjectFoo] = useState<PublishingSubject<string> | undefined>(
+        const [subjectFoo, setSubjectFoo] = useState<BehaviorSubject<string> | undefined>(
           undefined
         );
-        const [valueFoo] = useBatchedPublishingSubjects(subjectFoo);
+        const [valueFoo] = useBatchedOptionalPublishingSubjects(subjectFoo);
 
         renderCount++;
         return (
           <>
             <button
               onClick={() => {
-                // using setTimeout to move next calls outside of callstack from onClick
-                setTimeout(() => {
-                  setSubjectFoo(new BehaviorSubject<string>('foo'));
-                }, 0);
+                if (!subjectFoo) {
+                  setSubjectFoo(new BehaviorSubject<string>('foo1'));
+                } else {
+                  subjectFoo.next('foo2');
+                }
               }}
             />
             <span>{`valueFoo: ${valueFoo}`}</span>
-            <div data-test-subj="renderCount">{renderCount}</div>
           </>
         );
       }
@@ -187,13 +228,14 @@ describe('useBatchedPublishingSubjects', () => {
         expect(screen.getByText('valueFoo: undefined')).toBeInTheDocument();
       });
       userEvent.click(screen.getByRole('button'));
+      userEvent.click(screen.getByRole('button'));
       await waitFor(() => {
-        expect(screen.getByText('valueFoo: foo')).toBeInTheDocument();
+        expect(screen.getByText('valueFoo: foo2')).toBeInTheDocument();
       });
-      expect(screen.getByTestId('renderCount')).toHaveTextContent('3');
+      expect(renderCount).toBe(4);
     });
 
-    test('useStateFromPublishingSubject state should update when publishing subject is provided', async () => {
+    test('useStateFromPublishingSubject should update state when publishing subject is provided', async () => {
       let renderCount = 0;
       function Component() {
         // When subject is expected to change, subject must be part of react state.
@@ -207,14 +249,10 @@ describe('useBatchedPublishingSubjects', () => {
           <>
             <button
               onClick={() => {
-                // using setTimeout to move next calls outside of callstack from onClick
-                setTimeout(() => {
-                  setSubjectFoo(new BehaviorSubject<string>('foo'));
-                }, 0);
+                setSubjectFoo(new BehaviorSubject<string>('foo'));
               }}
             />
             <span>{`valueFoo: ${valueFoo}`}</span>
-            <div data-test-subj="renderCount">{renderCount}</div>
           </>
         );
       }
@@ -226,7 +264,7 @@ describe('useBatchedPublishingSubjects', () => {
       await waitFor(() => {
         expect(screen.getByText('valueFoo: foo')).toBeInTheDocument();
       });
-      expect(screen.getByTestId('renderCount')).toHaveTextContent('3');
+      expect(renderCount).toBe(3);
     });
   });
 });

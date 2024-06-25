@@ -7,11 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ConfigSchema } from '../../..';
-import {
-  INSTRUCTION_VARIANT,
-  AgentInstructions,
-  AgentApiKey,
-} from './instruction_variants';
+import { INSTRUCTION_VARIANT, AgentInstructions, AgentApiKey } from './instruction_variants';
 import {
   createJavaAgentInstructions,
   createNodeAgentInstructions,

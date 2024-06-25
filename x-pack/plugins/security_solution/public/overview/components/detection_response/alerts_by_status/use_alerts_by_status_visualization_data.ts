@@ -13,24 +13,24 @@ export const acknowledgedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY
 export const closedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`;
 
 export const useAlertsByStatusVisualizationData = () => {
-  const { responses: openAlertsResponse } = useVisualizationResponse({
+  const { responses: openAlertsResponses } = useVisualizationResponse({
     visualizationId: openAlertsVisualizationId,
   });
 
-  const { responses: acknowledgedAlertsResponse } = useVisualizationResponse({
+  const { responses: acknowledgedAlertsResponses } = useVisualizationResponse({
     visualizationId: acknowledgedAlertsVisualizationId,
   });
 
-  const { responses: closedAlertsResponse } = useVisualizationResponse({
+  const { responses: closedAlertsResponses } = useVisualizationResponse({
     visualizationId: closedAlertsVisualizationId,
   });
 
   const visualizationOpenAlertsData =
-    openAlertsResponse != null ? openAlertsResponse[0].hits.total : 0;
+    openAlertsResponses != null ? openAlertsResponses[0].hits.total : 0;
   const visualizationAcknowledgedAlertsData =
-    acknowledgedAlertsResponse != null ? acknowledgedAlertsResponse[0].hits.total : 0;
+    acknowledgedAlertsResponses != null ? acknowledgedAlertsResponses[0].hits.total : 0;
   const visualizationClosedAlertsData =
-    closedAlertsResponse != null ? closedAlertsResponse[0].hits.total : 0;
+    closedAlertsResponses != null ? closedAlertsResponses[0].hits.total : 0;
 
   const visualizationTotalAlertsData =
     visualizationOpenAlertsData +

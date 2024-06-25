@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  wildcardQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../../common/es_fields/apm';
+import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
@@ -59,8 +51,7 @@ export async function getServicesWithoutTransactions({
   rollupInterval: RollupInterval;
   searchQuery: string | undefined;
 }): Promise<ServicesWithoutTransactionsResponse> {
-  const isServiceTransactionMetric =
-    documentType === ApmDocumentType.ServiceTransactionMetric;
+  const isServiceTransactionMetric = documentType === ApmDocumentType.ServiceTransactionMetric;
 
   const response = await apmEventClient.search(
     isServiceTransactionMetric
@@ -123,17 +114,14 @@ export async function getServicesWithoutTransactions({
     }
   );
 
-  const maxCountExceeded =
-    (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0;
+  const maxCountExceeded = (response.aggregations?.sample.services.sum_other_doc_count ?? 0) > 0;
 
   return {
     services:
       response.aggregations?.sample.services.buckets.map((bucket) => {
         return {
           serviceName: bucket.key as string,
-          environments: bucket.environments.buckets.map(
-            (envBucket) => envBucket.key as string
-          ),
+          environments: bucket.environments.buckets.map((envBucket) => envBucket.key as string),
           agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
         };
       }) ?? [],

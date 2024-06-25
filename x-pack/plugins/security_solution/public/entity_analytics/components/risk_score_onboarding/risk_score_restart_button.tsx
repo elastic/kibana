@@ -31,18 +31,18 @@ const RiskScoreRestartButtonComponent = ({
   const spaceId = useSpaceId();
 
   const { renderDocLink } = useRiskScoreToastContent(riskScoreEntity);
-  const { http, notifications } = useKibana().services;
+  const { http, ...startServices } = useKibana().services;
 
   const onClick = useCallback(async () => {
     fetch({
       http,
-      notifications,
       refetch,
       renderDocLink,
       riskScoreEntity,
       spaceId,
+      startServices,
     });
-  }, [fetch, http, notifications, refetch, renderDocLink, riskScoreEntity, spaceId]);
+  }, [fetch, http, refetch, renderDocLink, riskScoreEntity, spaceId, startServices]);
 
   return (
     <EuiButton

@@ -59,6 +59,7 @@ describe('TextBasedLanguagesEditor', () => {
     );
   }
   let props: TextBasedLanguagesEditorProps;
+
   beforeEach(() => {
     props = {
       query: { esql: 'from test' },

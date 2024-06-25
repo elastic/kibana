@@ -8,87 +8,34 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { alertDataMock } from '../mocks';
+import { alertInputDataMock } from '../mocks';
 import { RiskInputsUtilityBar } from './utility_bar';
 
 describe('RiskInputsUtilityBar', () => {
-  it('renders', () => {
+  it('renders when at least one item is selected', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 0,
-          }}
-        />
+        <RiskInputsUtilityBar riskInputs={[alertInputDataMock]} />
       </TestProviders>
     );
-
     expect(getByTestId('risk-input-utility-bar')).toBeInTheDocument();
   });
 
-  it('renders current page message when totalItemCount is 1', () => {
-    const { getByTestId } = render(
+  it('is hidden by default', () => {
+    const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 1,
-          }}
-        />
+        <RiskInputsUtilityBar riskInputs={[]} />
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent('Showing 1 Risk contribution');
-  });
-
-  it('renders current page message when totalItemCount is 20', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 20,
-          }}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent(
-      'Showing 1-10 of 20 Risk contribution'
-    );
-  });
-
-  it('renders current page message when totalItemCount is 20 and on the second page', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <RiskInputsUtilityBar
-          selectedAlerts={[]}
-          pagination={{
-            pageIndex: 1,
-            totalItemCount: 20,
-          }}
-        />
-      </TestProviders>
-    );
-
-    expect(getByTestId('risk-input-utility-bar')).toHaveTextContent(
-      'Showing 11-20 of 20 Risk contribution'
-    );
+    expect(queryByTestId('risk-input-utility-bar')).toBeNull();
   });
 
   it('renders selected risk input message', () => {
     const { getByTestId } = render(
       <TestProviders>
         <RiskInputsUtilityBar
-          selectedAlerts={[alertDataMock, alertDataMock, alertDataMock]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 0,
-          }}
+          riskInputs={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
         />
       </TestProviders>
     );
@@ -100,11 +47,7 @@ describe('RiskInputsUtilityBar', () => {
     const { getByRole } = render(
       <TestProviders>
         <RiskInputsUtilityBar
-          selectedAlerts={[alertDataMock, alertDataMock, alertDataMock]}
-          pagination={{
-            pageIndex: 0,
-            totalItemCount: 0,
-          }}
+          riskInputs={[alertInputDataMock, alertInputDataMock, alertInputDataMock]}
         />
       </TestProviders>
     );

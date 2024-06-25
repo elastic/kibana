@@ -46,7 +46,10 @@ describe('registerFieldsRoute', () => {
 
     expect(
       await handler(
-        { ...context, core: { elasticsearch: { client: { asInternalUser: {} } } } },
+        {
+          ...context,
+          core: { elasticsearch: { client: { asInternalUser: {} } }, uiSettings: { client: {} } },
+        },
         req,
         res
       )

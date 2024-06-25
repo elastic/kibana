@@ -43,7 +43,18 @@ describe('<PipelinesList />', () => {
     const pipeline3 = {
       name: 'test_pipeline3',
       description: 'test_pipeline3 description',
-      processors: [],
+      processors: [
+        {
+          script: {
+            lang: 'painless',
+            source: `String[] envSplit = ctx['env'].splitOnToken(params['delimiter']);\nArrayList tags = new ArrayList();\ntags.add(envSplit[params['position']].trim());\nctx['tags'] = tags;`,
+            params: {
+              delimiter: '-',
+              position: 1,
+            },
+          },
+        },
+      ],
       deprecated: true,
     };
 
@@ -60,7 +71,7 @@ describe('<PipelinesList />', () => {
 
       // Verify documentation link
       expect(exists('documentationLink')).toBe(true);
-      expect(find('documentationLink').text()).toBe('Ingest Pipelines docs');
+      expect(find('documentationLink').text()).toBe('Documentation');
 
       // Verify create dropdown exists
       expect(exists('createPipelineDropdown')).toBe(true);
@@ -70,7 +81,14 @@ describe('<PipelinesList />', () => {
       tableCellsValues.forEach((row, i) => {
         const pipeline = pipelines[i];
 
-        expect(row).toEqual(['', pipeline.name, 'EditDelete']);
+        expect(row).toEqual([
+          '',
+          pipeline.name,
+          '',
+          `test_pipeline${i + 1} description`,
+          '0',
+          'EditDelete',
+        ]);
       });
     });
 
@@ -85,7 +103,7 @@ describe('<PipelinesList />', () => {
       expect(tableCellsValues.length).toEqual(pipelinesWithoutDeprecated.length);
 
       // Enable filtering by deprecated pipelines
-      const searchInput = component.find('.euiFieldSearch').first();
+      const searchInput = component.find('input.euiFieldSearch').first();
       (searchInput.instance() as unknown as HTMLInputElement).value = 'is:deprecated';
       searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
       component.update();
@@ -114,6 +132,14 @@ describe('<PipelinesList />', () => {
       expect(exists('pipelinesTable')).toBe(true);
       expect(exists('pipelineDetails')).toBe(true);
       expect(find('pipelineDetails.title').text()).toBe(pipeline1.name);
+    });
+
+    test('Replaces newline characters for spaces in flyout for json blocks', async () => {
+      const { find, actions } = testBed;
+
+      await actions.clickPipelineAt(1);
+
+      expect(find('jsonCodeBlock').text()).not.toContain(`\n`);
     });
 
     test('should delete a pipeline', async () => {
@@ -162,7 +188,7 @@ describe('<PipelinesList />', () => {
 
       expect(exists('sectionLoading')).toBe(false);
       expect(exists('emptyList')).toBe(true);
-      expect(find('emptyList.title').text()).toEqual('Start by creating a pipeline');
+      expect(find('emptyList.title').text()).toEqual('Create your first pipeline');
     });
   });
 

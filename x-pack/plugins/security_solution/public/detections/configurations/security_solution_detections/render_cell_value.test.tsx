@@ -8,18 +8,28 @@
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
-
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
+import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-
-import { RenderCellValue } from '.';
+import { getRenderCellValueHook } from './render_cell_value';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../sourcerer/containers', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({
+    browserFields: {},
+    defaultIndex: 'defaultIndex',
+    loading: false,
+    indicesExist: true,
+  }),
+}));
+jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -49,10 +59,20 @@ describe('RenderCellValue', () => {
       colIndex: 0,
       setCellProps: jest.fn(),
       scopeId,
+      rowRenderers: defaultRowRenderers,
+      asPlainText: false,
+      ecsData: undefined,
+      truncate: undefined,
+      context: undefined,
+      browserFields: {},
     };
   });
 
   test('it forwards the `CellValueElementProps` to the `DefaultCellRenderer`', () => {
+    const RenderCellValue = getRenderCellValueHook({
+      scopeId: SourcererScopeName.default,
+      tableId: TableId.test,
+    });
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
@@ -61,6 +81,23 @@ describe('RenderCellValue', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(DefaultCellRenderer).first().props()).toEqual(props);
+    expect(wrapper.find(DefaultCellRenderer).props()).toEqual(props);
+  });
+
+  test('it renders a GuidedOnboardingTourStep', () => {
+    const RenderCellValue = getRenderCellValueHook({
+      scopeId: SourcererScopeName.default,
+      tableId: TableId.test,
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <RenderCellValue {...props} />
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="GuidedOnboardingTourStep"]').exists()).toEqual(true);
   });
 });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import { ML_ENTITY_FIELD_OPERATIONS } from '@kbn/ml-anomaly-utils';
@@ -17,12 +16,12 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import type { ExplorerAppState } from '../../common/types/locator';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
-import type { MlEmbeddableBaseApi } from '../embeddables';
+import type { AnomalyChartsApi, AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
-import type { AnomalyChartsEmbeddableApi } from '../embeddables/anomaly_charts/types';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
-import type { MlCoreSetup } from '../plugin';
 import { isSwimLaneEmbeddableContext } from '../embeddables/anomaly_swimlane/types';
+import type { MlCoreSetup } from '../plugin';
+import { getEmbeddableTimeRange } from './get_embeddable_time_range';
 
 export interface OpenInAnomalyExplorerSwimLaneActionContext extends EmbeddableApiContext {
   embeddable: AnomalySwimLaneEmbeddableApi;
@@ -42,18 +41,14 @@ export interface OpenInAnomalyExplorerAnomalyChartsActionContext extends Embedda
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
-export function isAnomalyChartsEmbeddableContext(
-  arg: unknown
-): arg is OpenInAnomalyExplorerAnomalyChartsActionContext {
+export function isAnomalyChartsEmbeddableContext(arg: unknown): arg is {
+  embeddable: AnomalyChartsApi;
+} {
   return (
     isPopulatedObject(arg, ['embeddable']) &&
     apiIsOfType(arg.embeddable, ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE)
   );
 }
-
-const getTimeRange = (embeddable: MlEmbeddableBaseApi): TimeRange | undefined => {
-  return embeddable.timeRange$?.getValue() ?? embeddable.parentApi?.timeRange$?.getValue();
-};
 
 export function createOpenInExplorerAction(
   getStartServices: MlCoreSetup['getStartServices']
@@ -85,7 +80,7 @@ export function createOpenInExplorerAction(
           page: 'explorer',
           pageState: {
             jobIds: jobIds.getValue(),
-            timeRange: getTimeRange(embeddable),
+            timeRange: getEmbeddableTimeRange(embeddable),
             mlExplorerSwimlane: {
               viewByFromPage: fromPage.getValue(),
               viewByPerPage: perPage.getValue(),
@@ -102,10 +97,12 @@ export function createOpenInExplorerAction(
         });
       } else if (isAnomalyChartsEmbeddableContext(context)) {
         const { embeddable } = context;
-        const { jobIds, entityFields } = embeddable;
+        const { jobIds$, selectedEntities$ } = embeddable;
 
+        const jobIds = jobIds$?.getValue() ?? [];
         let mlExplorerFilter: ExplorerAppState['mlExplorerFilter'] | undefined;
-        const entityFieldsValue = entityFields.getValue();
+        const entityFieldsValue = selectedEntities$?.getValue();
+
         if (
           Array.isArray(entityFieldsValue) &&
           entityFieldsValue.length === 1 &&
@@ -137,8 +134,8 @@ export function createOpenInExplorerAction(
         return locator.getUrl({
           page: 'explorer',
           pageState: {
-            jobIds: jobIds.getValue(),
-            timeRange: getTimeRange(embeddable),
+            jobIds,
+            timeRange: getEmbeddableTimeRange(embeddable),
             // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
             ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
             query: {},

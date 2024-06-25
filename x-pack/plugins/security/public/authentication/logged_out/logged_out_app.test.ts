@@ -53,8 +53,8 @@ describe('loggedOutApp', () => {
     const mockRenderApp = jest.requireMock('./logged_out_page').renderLoggedOutPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
-      coreStartMock.i18n,
-      { element: appMountParams.element, theme$: appMountParams.theme$ },
+      coreStartMock,
+      { element: appMountParams.element },
       { basePath: coreStartMock.http.basePath, customBranding: coreStartMock.customBranding }
     );
   });

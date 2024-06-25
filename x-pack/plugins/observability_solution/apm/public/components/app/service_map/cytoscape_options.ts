@@ -9,10 +9,7 @@ import cytoscape from 'cytoscape';
 import { CSSProperties } from 'react';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
-import {
-  SERVICE_NAME,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-} from '../../../../common/es_fields/apm';
+import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
   getServiceHealthStatusColor,
   ServiceHealthStatus,
@@ -23,9 +20,7 @@ import { iconForNode } from './icons';
 export const popoverWidth = 350;
 
 function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
-  const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
-    'serviceAnomalyStats'
-  );
+  const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data('serviceAnomalyStats');
 
   return serviceAnomalyStats;
 }
@@ -84,9 +79,7 @@ function getBorderWidth(el: cytoscape.NodeSingular) {
 // @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-export const getAnimationOptions = (
-  theme: EuiTheme
-): cytoscape.AnimationOptions => ({
+export const getAnimationOptions = (theme: EuiTheme): cytoscape.AnimationOptions => ({
   duration: parseInt(theme.eui.euiAnimSpeedNormal, 10),
   // @ts-expect-error The cubic-bezier options here are not recognized by the cytoscape types
   easing: theme.eui.euiAnimSlightBounce,
@@ -97,17 +90,13 @@ const zIndexEdge = 100;
 const zIndexEdgeHighlight = 110;
 const zIndexEdgeHover = 120;
 
-export const getNodeHeight = (theme: EuiTheme): number =>
-  parseInt(theme.eui.euiSizeXXL, 10);
+export const getNodeHeight = (theme: EuiTheme): number => parseInt(theme.eui.euiSizeXXL, 10);
 
 function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (
-  theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
-): cytoscape.Stylesheet[] => {
+const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
@@ -122,10 +111,8 @@ const getStyle = (
         // The DefinitelyTyped definitions don't specify that a function can be
         // used here.
         'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
-        'background-height': (el: cytoscape.NodeSingular) =>
-          isService(el) ? '60%' : '40%',
-        'background-width': (el: cytoscape.NodeSingular) =>
-          isService(el) ? '60%' : '40%',
+        'background-height': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
+        'background-width': (el: cytoscape.NodeSingular) => (isService(el) ? '60%' : '40%'),
         'border-color': getBorderColorFn(theme),
         'border-style': getBorderStyle,
         'border-width': getBorderWidth,
@@ -188,12 +175,8 @@ const getStyle = (
         'source-arrow-color': lineColor,
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
         // @ts-expect-error
-        'source-distance-from-node': isIE11
-          ? undefined
-          : parseInt(theme.eui.euiSizeXS, 10),
-        'target-distance-from-node': isIE11
-          ? undefined
-          : parseInt(theme.eui.euiSizeXS, 10),
+        'source-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.euiSizeXS, 10),
+        'target-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.euiSizeXS, 10),
       },
     },
     {
@@ -247,10 +230,7 @@ const getStyle = (
 
 // The CSS styles for the div containing the cytoscape element. Makes a
 // background grid of dots.
-export const getCytoscapeDivStyle = (
-  theme: EuiTheme,
-  status: FETCH_STATUS
-): CSSProperties => ({
+export const getCytoscapeDivStyle = (theme: EuiTheme, status: FETCH_STATUS): CSSProperties => ({
   background: `linear-gradient(
   90deg,
   ${theme.eui.euiPageBackgroundColor}

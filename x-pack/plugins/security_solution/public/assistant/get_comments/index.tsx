@@ -6,18 +6,28 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import type { Conversation, Message } from '@kbn/elastic-assistant';
+import type { Conversation, ClientMessage } from '@kbn/elastic-assistant';
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import styled from '@emotion/styled';
+import type { UserAvatar } from '@kbn/elastic-assistant/impl/assistant_context';
 import { StreamComment } from './stream';
 import { CommentActions } from '../comment_actions';
 import * as i18n from './translations';
 
-export interface ContentMessage extends Message {
+// Matches EuiAvatar L
+const SpinnerWrapper = styled.div`
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+`;
+
+export interface ContentMessage extends ClientMessage {
   content: string;
 }
 const transformMessageWithReplacements = ({
@@ -26,7 +36,7 @@ const transformMessageWithReplacements = ({
   showAnonymizedValues,
   replacements,
 }: {
-  message: Message;
+  message: ClientMessage;
   content: string;
   showAnonymizedValues: boolean;
   replacements: Replacements;
@@ -43,35 +53,55 @@ const transformMessageWithReplacements = ({
 };
 
 export const getComments = ({
+  abortStream,
   currentConversation,
+  isEnabledLangChain,
   isFetchingResponse,
   refetchCurrentConversation,
   regenerateMessage,
   showAnonymizedValues,
+  isFlyoutMode,
+  currentUserAvatar,
+  setIsStreaming,
 }: {
-  currentConversation: Conversation;
+  abortStream: () => void;
+  currentConversation?: Conversation;
+  isEnabledLangChain: boolean;
   isFetchingResponse: boolean;
   refetchCurrentConversation: () => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
+  isFlyoutMode: boolean;
+  currentUserAvatar?: UserAvatar;
+  setIsStreaming: (isStreaming: boolean) => void;
 }): EuiCommentProps[] => {
+  if (!currentConversation) return [];
+
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
   };
-  const connectorId = currentConversation.apiConfig?.connectorId ?? '';
+  // should only happen when no apiConfig is present
+  const actionTypeId = currentConversation.apiConfig?.actionTypeId ?? '';
 
   const extraLoadingComment = isFetchingResponse
     ? [
         {
           username: i18n.ASSISTANT,
-          timelineAvatar: <EuiLoadingSpinner size="xl" />,
+          timelineAvatar: (
+            <SpinnerWrapper>
+              <EuiLoadingSpinner size="xl" />
+            </SpinnerWrapper>
+          ),
           timestamp: '...',
           children: (
             <StreamComment
-              connectorId={connectorId}
+              abortStream={abortStream}
+              actionTypeId={actionTypeId}
               content=""
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
+              isEnabledLangChain={isEnabledLangChain}
+              setIsStreaming={setIsStreaming}
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
               // we never need to append to a code block in the loading comment, which is what this index is used for
@@ -82,6 +112,23 @@ export const getComments = ({
       ]
     : [];
 
+  const UserAvatar = () => {
+    if (currentUserAvatar) {
+      return (
+        <EuiAvatar
+          name="user"
+          size="l"
+          color={currentUserAvatar?.color ?? 'subdued'}
+          {...(currentUserAvatar?.imageUrl
+            ? { imageUrl: currentUserAvatar.imageUrl as string }
+            : { initials: currentUserAvatar?.initials })}
+        />
+      );
+    }
+
+    return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
+  };
+
   return [
     ...currentConversation.messages.map((message, index) => {
       const isLastComment = index === currentConversation.messages.length - 1;
@@ -90,7 +137,7 @@ export const getComments = ({
 
       const messageProps = {
         timelineAvatar: isUser ? (
-          <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />
+          <UserAvatar />
         ) : (
           <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
         ),
@@ -119,13 +166,16 @@ export const getComments = ({
           ...messageProps,
           children: (
             <StreamComment
-              connectorId={connectorId}
+              abortStream={abortStream}
+              actionTypeId={actionTypeId}
               index={index}
               isControlsEnabled={isControlsEnabled}
+              isEnabledLangChain={isEnabledLangChain}
               isError={message.isError}
               reader={message.reader}
               refetchCurrentConversation={refetchCurrentConversation}
               regenerateMessage={regenerateMessageOfConversation}
+              setIsStreaming={setIsStreaming}
               transformMessage={transformMessage}
             />
           ),
@@ -137,16 +187,20 @@ export const getComments = ({
 
       return {
         ...messageProps,
-        actions: <CommentActions message={transformedMessage} />,
+        actions: <CommentActions message={transformedMessage} isFlyoutMode={isFlyoutMode} />,
         children: (
           <StreamComment
-            connectorId={connectorId}
+            actionTypeId={actionTypeId}
+            abortStream={abortStream}
             content={transformedMessage.content}
             index={index}
             isControlsEnabled={isControlsEnabled}
+            isEnabledLangChain={isEnabledLangChain}
+            // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}
             regenerateMessage={regenerateMessageOfConversation}
             refetchCurrentConversation={refetchCurrentConversation}
+            setIsStreaming={setIsStreaming}
             transformMessage={transformMessage}
           />
         ),

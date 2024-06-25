@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -19,6 +19,7 @@ import {
   ProjectMonitor,
   ScheduleUnit,
   SourceType,
+  MonitorFields,
 } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { DEFAULT_COMMON_FIELDS } from '../../../../common/constants/monitor_defaults';
@@ -60,20 +61,23 @@ export const getNormalizeCommonFields = ({
       errors.push(getInvalidNamespaceError(monitor, namespaceError));
     }
   }
+
+  const monLocations = getMonitorLocations({
+    monitorLocations: {
+      locations: monitor.locations,
+      privateLocations: monitor.privateLocations,
+    },
+    allPrivateLocations: privateLocations,
+    allPublicLocations: locations,
+  });
+
   const normalizedFields = {
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
-    [ConfigKey.SCHEDULE]: {
-      number: `${monitor.schedule}`,
-      unit: ScheduleUnit.MINUTES,
-    },
+    [ConfigKey.SCHEDULE]: getMonitorSchedule(monitor.schedule, defaultFields[ConfigKey.SCHEDULE]),
     [ConfigKey.PROJECT_ID]: projectId,
-    [ConfigKey.LOCATIONS]: getMonitorLocations({
-      monitor,
-      privateLocations,
-      publicLocations: locations,
-    }),
+    [ConfigKey.LOCATIONS]: monLocations,
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
     [ConfigKey.NAMESPACE]:
       monitor.namespace || formatKibanaNamespace(namespace) || defaultFields[ConfigKey.NAMESPACE],
@@ -84,7 +88,7 @@ export const getNormalizeCommonFields = ({
       ? getValueInSeconds(monitor.timeout)
       : defaultFields[ConfigKey.TIMEOUT],
     [ConfigKey.CONFIG_HASH]: monitor.hash || defaultFields[ConfigKey.CONFIG_HASH],
-    [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(monitor),
+    [ConfigKey.MAX_ATTEMPTS]: getMaxAttempts(monitor.retestOnFailure),
     [ConfigKey.PARAMS]: Object.keys(monitor.params || {}).length
       ? JSON.stringify(monitor.params)
       : defaultFields[ConfigKey.PARAMS],
@@ -120,12 +124,11 @@ const getAlertConfig = (monitor: ProjectMonitor) => {
 
 const ONLY_ONE_ATTEMPT = 1;
 
-const getMaxAttempts = (monitor: ProjectMonitor) => {
+export const getMaxAttempts = (retestOnFailure?: boolean) => {
   const defaultFields = DEFAULT_COMMON_FIELDS;
-  const retestOnFailure = monitor.retestOnFailure;
   if (retestOnFailure) {
     return defaultFields[ConfigKey.MAX_ATTEMPTS];
-  } else if (monitor.retestOnFailure === false) {
+  } else if (retestOnFailure === false) {
     return ONLY_ONE_ATTEMPT;
   }
   return defaultFields[ConfigKey.MAX_ATTEMPTS];
@@ -139,32 +142,113 @@ export const getCustomHeartbeatId = (
   return `${monitor.id}-${projectId}-${namespace}`;
 };
 
+export const getMonitorSchedule = (
+  schedule: number | string | MonitorFields['schedule'],
+  defaultValue?: MonitorFields['schedule']
+) => {
+  if (!schedule && defaultValue) {
+    return defaultValue;
+  }
+  if (typeof schedule === 'number' || typeof schedule === 'string') {
+    if (typeof schedule === 'number') {
+      return {
+        number: `${schedule}`,
+        unit: ScheduleUnit.MINUTES,
+      };
+    }
+    if (schedule.includes('s')) {
+      return {
+        number: schedule.replace('s', ''),
+        unit: ScheduleUnit.SECONDS,
+      };
+    }
+
+    return {
+      number: `${schedule}`,
+      unit: ScheduleUnit.MINUTES,
+    };
+  }
+  return schedule;
+};
+
+export const LocationsMap: Record<string, string> = {
+  japan: 'asia-northeast1-a',
+  india: 'asia-south1-a',
+  singapore: 'asia-southeast1-a',
+  australia_east: 'australia-southeast1-a',
+  united_kingdom: 'europe-west2-a',
+  germany: 'europe-west3-a',
+  canada_east: 'northamerica-northeast1-a',
+  brazil: 'southamerica-east1-a',
+  us_east: 'us-east4-a',
+  us_west: 'us-west1-a',
+};
+
 export const getMonitorLocations = ({
-  privateLocations,
-  publicLocations,
-  monitor,
+  allPrivateLocations,
+  allPublicLocations,
+  monitorLocations,
 }: {
-  monitor: ProjectMonitor;
-  privateLocations: PrivateLocationAttributes[];
-  publicLocations: Locations;
+  monitorLocations: {
+    locations?: string[];
+    privateLocations?: string[];
+  };
+  allPrivateLocations: PrivateLocationAttributes[];
+  allPublicLocations: Locations;
 }) => {
+  const invalidPublicLocations: string[] = [];
+  const invalidPrivateLocations: string[] = [];
   const publicLocs =
-    monitor.locations?.map((id) => {
-      return publicLocations.find((location) => location.id === id);
+    monitorLocations.locations?.map((locationId) => {
+      const locationFound = allPublicLocations.find(
+        (location) =>
+          location.id === (LocationsMap[locationId] || locationId) || location.id === locationId
+      );
+      if (locationFound) {
+        return locationFound;
+      } else {
+        invalidPublicLocations.push(locationId);
+      }
     }) || [];
   const privateLocs =
-    monitor.privateLocations?.map((locationName) => {
-      return privateLocations.find(
+    monitorLocations.privateLocations?.map((locationName) => {
+      const locationFound = allPrivateLocations.find(
         (location) =>
           location.label.toLowerCase() === locationName.toLowerCase() ||
           location.id.toLowerCase() === locationName.toLowerCase()
       );
+      if (locationFound) {
+        return locationFound;
+      } else {
+        invalidPrivateLocations.push(locationName);
+      }
     }) || [];
 
-  return [...publicLocs, ...privateLocs]
+  if (invalidPublicLocations.length || invalidPrivateLocations.length) {
+    throw new InvalidLocationError(
+      getInvalidLocationError(
+        invalidPublicLocations,
+        invalidPrivateLocations,
+        allPublicLocations,
+        allPrivateLocations
+      )
+    );
+  }
+
+  const allLocations = [...publicLocs, ...privateLocs]
     .filter((location) => location !== undefined)
     .map((loc) => formatLocation(loc!)) as BrowserFields[ConfigKey.LOCATIONS];
+
+  // return only unique locations
+  return uniqBy(allLocations, 'id');
 };
+
+export class InvalidLocationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidLocationError';
+  }
+}
 
 const UNSUPPORTED_OPTION_TITLE = i18n.translate(
   'xpack.synthetics.projectMonitorApi.validation.unsupportedOption.title',
@@ -221,6 +305,38 @@ export const getInvalidUrlsOrHostsError = (
     }
   ),
 });
+
+const getInvalidLocationError = (
+  invalidPublic: string[],
+  invalidPrivate: string[],
+  allPublicLocations: Locations,
+  allPrivateLocations: PrivateLocationAttributes[]
+) => {
+  const availablePublicMsg =
+    allPublicLocations.length === 0
+      ? 'No Elastic managed location available to use.'
+      : `Available locations are '${allPublicLocations.map((l) => l.id).join('|')}'`;
+  const availablePrivateMsg =
+    allPrivateLocations.length === 0
+      ? 'No private location available to use.'
+      : `Available private locations are '${allPrivateLocations.map((l) => l.label).join('|')}'`;
+
+  return i18n.translate('xpack.synthetics.projectMonitorApi.validation.invalidLocations', {
+    defaultMessage: 'Invalid locations specified.{invalidPublicLocation}{invalidPrivateLocation}',
+    values: {
+      invalidPublicLocation:
+        invalidPublic.length > 0
+          ? ` Elastic managed Location(s) '${invalidPublic.join(
+              '|'
+            )}' not found. ${availablePublicMsg}`
+          : '',
+      invalidPrivateLocation:
+        invalidPrivate.length > 0
+          ? ` Private Location(s) '${invalidPrivate.join('|')}' not found. ${availablePrivateMsg}`
+          : '',
+    },
+  });
+};
 
 export const getInvalidNamespaceError = (monitor: ProjectMonitor, error: string) => ({
   id: monitor.id,

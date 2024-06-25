@@ -8,11 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { termQuery } from '@kbn/observability-plugin/server';
-import {
-  FAAS_COLDSTART_DURATION,
-  FAAS_ID,
-  METRICSET_NAME,
-} from '../../../../common/es_fields/apm';
+import { FAAS_COLDSTART_DURATION, FAAS_ID, METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 import { ChartBase } from '../types';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
@@ -28,20 +24,16 @@ const chartBase: ChartBase = {
   yUnit: 'time',
   series: {
     coldStart: {
-      title: i18n.translate(
-        'xpack.apm.agentMetrics.serverless.coldStartDuration',
-        { defaultMessage: 'Cold start duration' }
-      ),
+      title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStartDuration', {
+        defaultMessage: 'Cold start duration',
+      }),
       color: theme.euiColorVis5,
     },
   },
-  description: i18n.translate(
-    'xpack.apm.agentMetrics.serverless.coldStartDuration.description',
-    {
-      defaultMessage:
-        'Cold start duration shows the execution duration of the serverless runtime for requests that experience cold starts.',
-    }
-  ),
+  description: i18n.translate('xpack.apm.agentMetrics.serverless.coldStartDuration.description', {
+    defaultMessage:
+      'Cold start duration shows the execution duration of the serverless runtime for requests that experience cold starts.',
+  }),
 };
 
 export async function getColdStartDurationChart({

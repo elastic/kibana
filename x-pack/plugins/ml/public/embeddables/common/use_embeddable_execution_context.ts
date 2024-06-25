@@ -47,3 +47,25 @@ export function useEmbeddableExecutionContext<T extends EmbeddableInput>(
 
   useExecutionContext(executionContext, embeddableExecutionContext);
 }
+
+export const useReactEmbeddableExecutionContext = (
+  executionContextStart: ExecutionContextStart,
+  parentExecutionContext: KibanaExecutionContext,
+  embeddableType: string,
+  id: string
+) => {
+  const embeddableExecutionContext = useMemo(() => {
+    const child: KibanaExecutionContext = {
+      type: 'visualization',
+      name: embeddableType,
+      id,
+    };
+
+    return {
+      ...parentExecutionContext,
+      child,
+    };
+  }, [embeddableType, id, parentExecutionContext]);
+
+  useExecutionContext(executionContextStart, embeddableExecutionContext);
+};

@@ -7,16 +7,19 @@
  */
 
 import React from 'react';
-import { OverlayStart } from '@kbn/core/public';
+import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
 
 export function confirmModalPromise(
   message = '',
   title = '',
   confirmBtnText = '',
-  overlays: OverlayStart
+  overlays: OverlayStart,
+  startServices: StartServices
 ): Promise<true> {
   return new Promise((resolve, reject) => {
     const cancelButtonText = i18n.translate('savedObjects.confirmModal.cancelButtonLabel', {
@@ -39,7 +42,8 @@ export function confirmModalPromise(
           title={title}
         >
           {message}
-        </EuiConfirmModal>
+        </EuiConfirmModal>,
+        startServices
       )
     );
   });

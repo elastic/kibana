@@ -44,62 +44,41 @@ export function useErrorGroupListData({
   const [searchQuery, setDebouncedSearchQuery] = useStateDebounced('');
 
   const {
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      offset,
-      comparisonEnabled,
-    },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/overview',
-    '/services/{serviceName}/errors'
-  );
+    query: { environment, kuery, rangeFrom, rangeTo, offset, comparisonEnabled },
+  } = useAnyOfApmParams('/services/{serviceName}/overview', '/services/{serviceName}/errors');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const {
-    data: mainStatistics = INITIAL_MAIN_STATISTICS,
-    status: mainStatisticsStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                sortField: sorting.field,
-                sortDirection: sorting.direction,
-                searchQuery,
+  const { data: mainStatistics = INITIAL_MAIN_STATISTICS, status: mainStatisticsStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (start && end) {
+          return callApmApi(
+            'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
+            {
+              params: {
+                path: { serviceName },
+                query: {
+                  environment,
+                  kuery,
+                  start,
+                  end,
+                  sortField: sorting.field,
+                  sortDirection: sorting.direction,
+                  searchQuery,
+                },
               },
-            },
-          }
-        ).then((response) => {
-          return {
-            ...response,
-            requestId: uuidv4(),
-          };
-        });
-      }
-    },
-    [
-      sorting.direction,
-      sorting.field,
-      start,
-      end,
-      serviceName,
-      environment,
-      kuery,
-      searchQuery,
-    ]
-  );
+            }
+          ).then((response) => {
+            return {
+              ...response,
+              requestId: uuidv4(),
+            };
+          });
+        }
+      },
+      [sorting.direction, sorting.field, start, end, serviceName, environment, kuery, searchQuery]
+    );
 
   const {
     data: detailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
@@ -118,15 +97,10 @@ export function useErrorGroupListData({
                 start,
                 end,
                 numBuckets: 20,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
+                offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
               },
               body: {
-                groupIds: JSON.stringify(
-                  renderedItems.map(({ groupId }) => groupId).sort()
-                ),
+                groupIds: JSON.stringify(renderedItems.map(({ groupId }) => groupId).sort()),
               },
             },
           }

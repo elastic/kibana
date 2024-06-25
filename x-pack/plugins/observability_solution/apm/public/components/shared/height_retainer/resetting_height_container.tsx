@@ -8,10 +8,9 @@
 import React, { useRef } from 'react';
 
 export function ResettingHeightRetainer(
-  props: React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLDivElement>,
-    HTMLDivElement
-  > & { reset?: boolean }
+  props: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
+    reset?: boolean;
+  }
 ) {
   const { reset, ...containerProps } = props;
   const resetRef = useRef(reset);
@@ -25,11 +24,5 @@ export function ResettingHeightRetainer(
     resetRef.current = reset;
   }
 
-  return (
-    <div
-      {...containerProps}
-      ref={containerRef}
-      style={{ minHeight: minHeightRef.current }}
-    />
-  );
+  return <div {...containerProps} ref={containerRef} style={{ minHeight: minHeightRef.current }} />;
 }

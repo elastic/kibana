@@ -91,7 +91,7 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
             title={i18n.translate(
               'xpack.idxMgmt.templateList.legacyTable.ilmPolicyColumnDescription',
               {
-                defaultMessage: "'{policyName}' index lifecycle policy",
+                defaultMessage: "''{policyName}'' index lifecycle policy",
                 values: {
                   policyName: ilmPolicy.name,
                 },
@@ -281,7 +281,6 @@ export const LegacyTemplateTable: React.FunctionComponent<Props> = ({
         columns={columns}
         search={searchConfig}
         sorting={sorting}
-        isSelectable={true}
         selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({

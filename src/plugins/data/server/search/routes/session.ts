@@ -53,7 +53,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
         },
         response: {
           200: {
-            body: schema.maybe(searchSessionSchema),
+            body: () => schema.maybe(searchSessionSchema()),
           },
         },
       },

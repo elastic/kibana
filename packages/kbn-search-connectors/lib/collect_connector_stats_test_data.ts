@@ -183,6 +183,7 @@ export const spoIncrementalSyncJob: ConnectorSyncJob = {
   job_type: SyncJobType.INCREMENTAL,
   status: SyncStatus.ERROR,
   trigger_method: TriggerMethod.ON_DEMAND,
+  error: 'spo_incremental_error',
   connector: {
     id: spoConnector.id,
     configuration: {
@@ -248,6 +249,7 @@ export const orphanedSyncJob: ConnectorSyncJob = {
   trigger_method: TriggerMethod.ON_DEMAND,
   connector: {
     id: '3',
+    service_type: 'github',
     configuration: {
       use_text_extraction_service: {
         value: false,
@@ -315,6 +317,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 220,
+          topErrors: ['spo_incremental_error'],
         },
         accessControl: {
           total: 1,
@@ -327,6 +330,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 20,
+          topErrors: [],
         },
         full: {
           total: 1,
@@ -339,6 +343,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 100,
+          topErrors: [],
         },
         incremental: {
           total: 1,
@@ -351,6 +356,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 100,
+          topErrors: ['spo_incremental_error'],
         },
       },
       last7Days: {
@@ -365,6 +371,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 120,
+          topErrors: ['spo_incremental_error'],
         },
         accessControl: {
           total: 1,
@@ -377,6 +384,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 20,
+          topErrors: [],
         },
         incremental: {
           total: 1,
@@ -389,6 +397,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 100,
+          topErrors: ['spo_incremental_error'],
         },
       },
     },
@@ -406,6 +415,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 220,
+          topErrors: ['spo_incremental_error'],
         },
         accessControl: {
           total: 1,
@@ -418,6 +428,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 20,
+          topErrors: [],
         },
         full: {
           total: 1,
@@ -430,6 +441,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 100,
+          topErrors: [],
         },
         incremental: {
           total: 1,
@@ -442,6 +454,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 100,
+          topErrors: ['spo_incremental_error'],
         },
       },
       last7Days: {
@@ -456,6 +469,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 120,
+          topErrors: ['spo_incremental_error'],
         },
         accessControl: {
           total: 1,
@@ -468,6 +482,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 20,
+          topErrors: [],
         },
         incremental: {
           total: 1,
@@ -480,6 +495,7 @@ export const expectedSpoConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 100,
+          topErrors: ['spo_incremental_error'],
         },
       },
     },
@@ -543,6 +559,7 @@ export const expectedMysqlConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 200,
+          topErrors: [],
         },
         full: {
           total: 1,
@@ -555,6 +572,7 @@ export const expectedMysqlConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 200,
+          topErrors: [],
         },
       },
     },
@@ -564,6 +582,7 @@ export const expectedMysqlConnectorStats: ConnectorStats = {
 export const expectedDeletedConnectorStats: ConnectorStats = {
   id: orphanedSyncJob.connector.id,
   isDeleted: true,
+  serviceType: 'github',
   syncJobs: {
     overall: {
       total: 1,
@@ -579,6 +598,7 @@ export const expectedDeletedConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 200,
+          topErrors: [],
         },
         full: {
           total: 1,
@@ -591,6 +611,7 @@ export const expectedDeletedConnectorStats: ConnectorStats = {
           idle: 0,
           running: 0,
           totalDurationSeconds: 200,
+          topErrors: [],
         },
       },
     },

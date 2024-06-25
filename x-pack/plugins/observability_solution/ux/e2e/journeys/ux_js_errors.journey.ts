@@ -52,9 +52,7 @@ journey('UX JsErrors', async ({ page, params }) => {
     await page.waitForLoadState('networkidle');
     await page.waitForSelector(`text=${jsErrorCount}`);
 
-    const jsErrors = await (
-      await page.waitForSelector(byTestId('uxJsErrorsTotal'))
-    ).innerText();
+    const jsErrors = await (await page.waitForSelector(byTestId('uxJsErrorsTotal'))).innerText();
 
     expect(jsErrors).toBe(jsErrorLabel);
   });

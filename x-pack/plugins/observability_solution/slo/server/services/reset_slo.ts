@@ -65,7 +65,7 @@ export class ResetSLO {
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${slo.id}`,
-            document: createTempSummaryDocument(slo, this.spaceId),
+            document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
             refresh: true,
           }),
         { logger: this.logger }

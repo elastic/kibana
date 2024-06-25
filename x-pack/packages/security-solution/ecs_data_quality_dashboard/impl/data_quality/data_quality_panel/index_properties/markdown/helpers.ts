@@ -25,6 +25,8 @@ import { HOT, WARM, COLD, FROZEN, UNMANAGED } from '../../../ilm_phases_empty_pr
 import * as i18n from '../translations';
 import type {
   AllowedValue,
+  CustomFieldMetadata,
+  EcsBasedFieldMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
   IlmExplainPhaseCounts,
@@ -85,23 +87,21 @@ export const getIndexInvalidValues = (indexInvalidValues: UnallowedValueCount[])
         .map(({ fieldName, count }) => `${getCodeFormattedValue(escape(fieldName))} (${count})`)
         .join(', '); // newlines are instead joined with spaces
 
-export const getCustomMarkdownTableRows = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): string =>
-  enrichedFieldMetadata
+export const getCustomMarkdownTableRows = (customFieldMetadata: CustomFieldMetadata[]): string =>
+  customFieldMetadata
     .map(
       (x) =>
         `| ${escape(x.indexFieldName)} | ${getCodeFormattedValue(
           x.indexFieldType
-        )} | ${getAllowedValues(x.allowed_values)} |`
+        )} | ${getAllowedValues(undefined)} |`
     )
     .join('\n');
 
-export const getSameFamilyBadge = (enrichedFieldMetadata: EnrichedFieldMetadata): string =>
-  enrichedFieldMetadata.isInSameFamily ? getCodeFormattedValue(SAME_FAMILY) : '';
+export const getSameFamilyBadge = (ecsBasedFieldMetadata: EcsBasedFieldMetadata): string =>
+  ecsBasedFieldMetadata.isInSameFamily ? getCodeFormattedValue(SAME_FAMILY) : '';
 
 export const getIncompatibleMappingsMarkdownTableRows = (
-  incompatibleMappings: EnrichedFieldMetadata[]
+  incompatibleMappings: EcsBasedFieldMetadata[]
 ): string =>
   incompatibleMappings
     .map(
@@ -113,7 +113,7 @@ export const getIncompatibleMappingsMarkdownTableRows = (
     .join('\n');
 
 export const getIncompatibleValuesMarkdownTableRows = (
-  incompatibleValues: EnrichedFieldMetadata[]
+  incompatibleValues: EcsBasedFieldMetadata[]
 ): string =>
   incompatibleValues
     .map(
@@ -173,14 +173,14 @@ ${getMarkdownTableRows(errorSummary)}
 `
     : '';
 
-export const getMarkdownTable = ({
+export const getMarkdownTable = <T extends EnrichedFieldMetadata[]>({
   enrichedFieldMetadata,
   getMarkdownTableRows,
   headerNames,
   title,
 }: {
-  enrichedFieldMetadata: EnrichedFieldMetadata[];
-  getMarkdownTableRows: (enrichedFieldMetadata: EnrichedFieldMetadata[]) => string;
+  enrichedFieldMetadata: T;
+  getMarkdownTableRows: (enrichedFieldMetadata: T) => string;
   headerNames: string[];
   title: string;
 }): string =>
@@ -218,18 +218,18 @@ export const getResultEmoji = (incompatible: number | undefined): string => {
   }
 };
 
-export const getSummaryTableMarkdownHeader = (isILMAvailable: boolean): string =>
-  isILMAvailable
+export const getSummaryTableMarkdownHeader = (includeDocSize: boolean): string =>
+  includeDocSize
     ? `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${ILM_PHASE} | ${SIZE} |
 |${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
         DOCS
       )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
         ILM_PHASE
       )}|${getHeaderSeparator(SIZE)}|`
-    : `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} | ${SIZE} |
+    : `| ${RESULT} | ${INDEX} | ${DOCS} | ${INCOMPATIBLE_FIELDS} |
 |${getHeaderSeparator(RESULT)}|${getHeaderSeparator(INDEX)}|${getHeaderSeparator(
         DOCS
-      )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(SIZE)}|`;
+      )}|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|`;
 
 export const getSummaryTableMarkdownRow = ({
   docsCount,
@@ -252,7 +252,7 @@ export const getSummaryTableMarkdownRow = ({
   patternDocsCount: number;
   sizeInBytes: number | undefined;
 }): string =>
-  isILMAvailable
+  isILMAvailable && Number.isInteger(sizeInBytes)
     ? `| ${getResultEmoji(incompatible)} | ${escape(indexName)} | ${formatNumber(
         docsCount
       )} (${getDocsCountPercent({
@@ -267,7 +267,7 @@ export const getSummaryTableMarkdownRow = ({
       )} (${getDocsCountPercent({
         docsCount,
         patternDocsCount,
-      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} | ${formatBytes(sizeInBytes)} |
+      })}) | ${incompatible ?? EMPTY_PLACEHOLDER} |
 `;
 
 export const getSummaryTableMarkdownComment = ({
@@ -322,13 +322,22 @@ export const getStatsRollupMarkdownComment = ({
   indicesChecked: number | undefined;
   sizeInBytes: number | undefined;
 }): string =>
-  `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${SIZE} | ${DOCS} |
+  Number.isInteger(sizeInBytes)
+    ? `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${SIZE} | ${DOCS} |
 |${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
-    INDICES_CHECKED
-  )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(SIZE)}|${getHeaderSeparator(DOCS)}|
+        INDICES_CHECKED
+      )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(SIZE)}|${getHeaderSeparator(DOCS)}|
 | ${incompatible ?? EMPTY_STAT} | ${indicesChecked ?? EMPTY_STAT} | ${
-    indices ?? EMPTY_STAT
-  } | ${formatBytes(sizeInBytes)} | ${formatNumber(docsCount)} |
+        indices ?? EMPTY_STAT
+      } | ${formatBytes(sizeInBytes)} | ${formatNumber(docsCount)} |
+`
+    : `| ${INCOMPATIBLE_FIELDS} | ${INDICES_CHECKED} | ${INDICES} | ${DOCS} |
+|${getHeaderSeparator(INCOMPATIBLE_FIELDS)}|${getHeaderSeparator(
+        INDICES_CHECKED
+      )}|${getHeaderSeparator(INDICES)}|${getHeaderSeparator(DOCS)}|
+| ${incompatible ?? EMPTY_STAT} | ${indicesChecked ?? EMPTY_STAT} | ${
+        indices ?? EMPTY_STAT
+      } | ${formatNumber(docsCount)} |
 `;
 
 export const getDataQualitySummaryMarkdownComment = ({

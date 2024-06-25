@@ -11,15 +11,18 @@
       "slo"
     ],
     "requiredPlugins": [
+      "aiops",
       "alerting",
       "cases",
       "charts",
       "contentManagement",
       "controls",
+      "dashboard",
       "data",
       "dataViews",
       "lens",
       "dataViewEditor",
+      "dataViewFieldEditor",
       "fieldFormats",
       "observability",
       "observabilityShared",

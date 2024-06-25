@@ -10,16 +10,17 @@ import { i18n } from '@kbn/i18n';
 import { OverlayStart } from '@kbn/core/public';
 import { SAVE_DUPLICATE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
-import { SavedObject } from '../../types';
+import { SavedObject, StartServices } from '../../types';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<SavedObject, 'title' | 'getDisplayName'>,
-  overlays: OverlayStart
+  overlays: OverlayStart,
+  startServices: StartServices
 ): Promise<true> {
   const confirmMessage = i18n.translate(
     'savedObjects.confirmModal.saveDuplicateConfirmationMessage',
     {
-      defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
+      defaultMessage: `A {name} with the title ''{title}'' already exists. Would you like to save anyway?`,
       values: { title: savedObject.title, name: savedObject.getDisplayName() },
     }
   );
@@ -29,7 +30,7 @@ export function displayDuplicateTitleConfirmModal(
     values: { name: savedObject.getDisplayName() },
   });
   try {
-    return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays);
+    return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays, startServices);
   } catch (_) {
     return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
   }

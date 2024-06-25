@@ -69,9 +69,7 @@ describe('createStaticDataView', () => {
 
   it(`should not create data view if no APM data is found`, async () => {
     // does not have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(false);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(false);
 
     const dataViewService = getMockedDataViewService('apm-*');
 
@@ -89,9 +87,7 @@ describe('createStaticDataView', () => {
 
   it(`should create data view`, async () => {
     // does have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(true);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService('apm-*');
 
@@ -111,13 +107,10 @@ describe('createStaticDataView', () => {
 
   it(`should overwrite the data view if the new data view title does not match the old data view title`, async () => {
     // does have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(true);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService('apm-*');
-    const expectedDataViewTitle =
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
+    const expectedDataViewTitle = 'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*';
 
     await createOrUpdateStaticDataView({
       apmEventClient: apmEventClientMock,
@@ -133,18 +126,14 @@ describe('createStaticDataView', () => {
     expect(dataViewService.get).toHaveBeenCalled();
     expect(dataViewService.createAndSave).toHaveBeenCalled();
     // @ts-ignore
-    expect(dataViewService.createAndSave.mock.calls[0][0].title).toBe(
-      expectedDataViewTitle
-    );
+    expect(dataViewService.createAndSave.mock.calls[0][0].title).toBe(expectedDataViewTitle);
     // @ts-ignore
     expect(dataViewService.createAndSave.mock.calls[0][1]).toBe(true);
   });
 
   it(`should not overwrite an data view if the new data view title matches the old data view title`, async () => {
     // does have APM data
-    jest
-      .spyOn(HistoricalAgentData, 'hasHistoricalAgentData')
-      .mockResolvedValue(true);
+    jest.spyOn(HistoricalAgentData, 'hasHistoricalAgentData').mockResolvedValue(true);
 
     const dataViewService = getMockedDataViewService(
       'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'

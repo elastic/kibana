@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  IEsSearchRequest,
-  IKibanaSearchResponse,
-  isRunningResponse,
-} from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../../common/constants';

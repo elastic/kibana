@@ -20,12 +20,9 @@ export function ServiceDependencies() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate(
-                'xpack.apm.serviceDependencies.breakdownChartTitle',
-                {
-                  defaultMessage: 'Time spent by dependency',
-                }
-              )}
+              {i18n.translate('xpack.apm.serviceDependencies.breakdownChartTitle', {
+                defaultMessage: 'Time spent by dependency',
+              })}
             </h2>
           </EuiTitle>
           <ServiceDependenciesBreakdownChart height={200} />

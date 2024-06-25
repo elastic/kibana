@@ -38,7 +38,6 @@ export const useCheckStepCompleted = ({
     http: kibanaServicesHttp,
     notifications: { toasts },
   } = useKibana().services;
-  const abortSignal = useRef(new AbortController());
   const addError = useRef(toasts.addError.bind(toasts)).current;
 
   useEffect(() => {
@@ -46,6 +45,7 @@ export const useCheckStepCompleted = ({
       return;
     }
 
+    const abortSignal = new AbortController();
     const autoCheckStepCompleted = async () => {
       const isDone = await autoCheckIfStepCompleted({
         indicesExist,
@@ -56,12 +56,19 @@ export const useCheckStepCompleted = ({
         },
       });
 
-      toggleTaskCompleteStatus({ stepId, cardId, sectionId, undo: !isDone });
+      if (!abortSignal.signal.aborted) {
+        toggleTaskCompleteStatus({
+          stepId,
+          cardId,
+          sectionId,
+          undo: !isDone,
+          trigger: 'auto_check',
+        });
+      }
     };
     autoCheckStepCompleted();
-    const currentAbortController = abortSignal.current;
     return () => {
-      currentAbortController.abort();
+      abortSignal.abort();
     };
   }, [
     autoCheckIfStepCompleted,

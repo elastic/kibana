@@ -16,7 +16,9 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
-    "@kbn/shared-ux-markdown",
+    "@kbn/kibana-react-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*",

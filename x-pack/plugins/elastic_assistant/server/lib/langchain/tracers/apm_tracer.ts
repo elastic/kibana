@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { BaseCallbackHandlerInput, BaseTracer, Run } from 'langchain/callbacks';
+import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
+import type { Run } from 'langsmith/schemas';
+import { BaseTracer } from '@langchain/core/tracers/base';
 import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 
@@ -36,7 +38,7 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
 
     this.projectName = projectName ?? 'default';
     this.exampleId = exampleId;
-    this.logger = logger;
+    this.logger = logger.get('apmTracer');
   }
 
   protected async persistRun(_run: Run): Promise<void> {}

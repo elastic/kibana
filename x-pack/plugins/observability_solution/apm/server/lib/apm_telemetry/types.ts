@@ -126,10 +126,7 @@ export interface APMUsage {
       };
     };
   };
-  retainment: Record<
-    'span' | 'transaction' | 'error' | 'metric' | 'onboarding',
-    { ms: number }
-  >;
+  retainment: Record<'span' | 'transaction' | 'error' | 'metric' | 'onboarding', { ms: number }>;
   integrations: {
     ml: {
       all_jobs_count: number;

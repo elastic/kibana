@@ -1,0 +1,473 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useComparisonCss should render with basic diff mode and diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "1qc86qa",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+      .unifiedDataTable__comparisonMatchCell {
+        .unifiedDataTable__cellValue {
+          &,
+          & * {
+            color: #007871 !important;
+          }
+        }
+      }
+
+      .unifiedDataTable__comparisonDiffCell {
+        .unifiedDataTable__cellValue {
+          &,
+          & * {
+            color: #bd271e !important;
+          }
+        }
+      }
+    ;
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+
+    
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with basic diff mode and no diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "1qc86qa",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+      .unifiedDataTable__comparisonMatchCell {
+        .unifiedDataTable__cellValue {
+          &,
+          & * {
+            color: #007871 !important;
+          }
+        }
+      }
+
+      .unifiedDataTable__comparisonDiffCell {
+        .unifiedDataTable__cellValue {
+          &,
+          & * {
+            color: #bd271e !important;
+          }
+        }
+      }
+    ;
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+
+    
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with chars diff mode and diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "vd39me",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+      .unifiedDataTable__comparisonAddedSegment {
+        text-decoration: underline;
+      }
+
+      .unifiedDataTable__comparisonRemovedSegment {
+        text-decoration: line-through;
+      }
+    ;
+
+    
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with chars diff mode and no diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "1ylxgdl",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+
+    
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with lines diff mode and diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "nlhk3s",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+
+    
+      .unifiedDataTable__comparisonSegment {
+        padding-left: calc(4px / 2);
+      }
+
+      
+        .unifiedDataTable__comparisonAddedSegment:before {
+          content: '+';
+          
+    position: absolute;
+    width: 8px;
+    height: 100%;
+    margin-left: calc(-8px - calc(4px / 2));
+    text-align: center;
+    line-height: 1;
+    font-weight: 500;
+  ;
+          background-color: #00BFB3;
+          color: #F1F4FA;
+        }
+
+        .unifiedDataTable__comparisonRemovedSegment:before {
+          content: '-';
+          
+    position: absolute;
+    width: 8px;
+    height: 100%;
+    margin-left: calc(-8px - calc(4px / 2));
+    text-align: center;
+    line-height: 1;
+    font-weight: 500;
+  ;
+          background-color: #ce5d56;
+          color: #F1F4FA;
+        }
+      ;
+    ;
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with lines diff mode and no diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "1mthx0u",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+
+    
+      .unifiedDataTable__comparisonSegment {
+        padding-left: calc(4px / 2);
+      }
+
+      
+    ;
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with no diff mode and no diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "1ylxgdl",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+
+    
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with words diff mode and diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "vd39me",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+      .unifiedDataTable__comparisonAddedSegment {
+        text-decoration: underline;
+      }
+
+      .unifiedDataTable__comparisonRemovedSegment {
+        text-decoration: line-through;
+      }
+    ;
+
+    
+  ",
+  "toString": [Function],
+}
+`;
+
+exports[`useComparisonCss should render with words diff mode and no diff decorations 1`] = `
+Object {
+  "map": undefined,
+  "name": "1ylxgdl",
+  "next": undefined,
+  "styles": "
+    .unifiedDataTable__cellValue {
+      white-space: pre-wrap;
+    }
+
+    .unifiedDataTable__comparisonFieldName {
+      font-weight: 600;
+    }
+
+    .unifiedDataTable__comparisonBaseDocCell {
+      background-color: rgba(211,218,230,0.2);
+    }
+
+    
+
+    .unifiedDataTable__comparisonSegment {
+      position: relative;
+    }
+
+    .unifiedDataTable__comparisonAddedSegment {
+      background-color: #e6f9f7;
+      color: #007871;
+    }
+
+    .unifiedDataTable__comparisonRemovedSegment {
+      background-color: #f8e9e9;
+      color: #bd271e;
+    }
+
+    
+
+    
+  ",
+  "toString": [Function],
+}
+`;

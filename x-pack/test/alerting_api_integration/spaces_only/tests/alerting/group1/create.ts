@@ -559,7 +559,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   ...systemAction,
                   params: {},
                   id: 'system-connector-test.system-action-connector-adapter',
-                  actionTypeId: 'test.test.system-action-connector-adapter',
                 },
               ],
             })

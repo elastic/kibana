@@ -180,6 +180,14 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             );
           }
 
+          const basePrivilege =
+            privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
+            CUSTOM_PRIVILEGE_VALUE;
+
+          const privilege = privilegeCalculator.isWildcardBasePrivilege(record.privilegeIndex)
+            ? '*'
+            : basePrivilege;
+
           let icon = <EuiIcon type="empty" size="s" />;
           if (privilegeCalculator.hasSupersededInheritedPrivileges(record.privilegeIndex)) {
             icon = (
@@ -202,13 +210,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
               <EuiFlexItem>
-                <PrivilegeDisplay
-                  privilege={
-                    privilegeCalculator.getBasePrivilege(record.privilegeIndex)?.id ??
-                    CUSTOM_PRIVILEGE_VALUE
-                  }
-                  data-test-subj={`privilegeColumn`}
-                />
+                <PrivilegeDisplay privilege={privilege} data-test-subj={`privilegeColumn`} />
               </EuiFlexItem>
             </EuiFlexGroup>
           );
@@ -234,6 +236,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'primary'}
                   iconType={'pencil'}
                   onClick={() => this.props.onEdit(record.privilegeIndex)}
+                  data-test-subj={`privilegeEditAction-${record.privilegeIndex}`}
                 />
               );
             },
@@ -252,6 +255,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
                   color={'danger'}
                   iconType={'trash'}
                   onClick={() => this.onDeleteSpacePrivilege(record)}
+                  data-test-subj={`privilegeDeleteAction-${record.privilegeIndex}`}
                 />
               );
             },
@@ -264,7 +268,6 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
       <EuiInMemoryTable
         columns={columns}
         items={rows}
-        hasActions
         rowProps={(item: TableRow) => {
           return {
             className: isGlobalPrivilegeDefinition(item.privileges)

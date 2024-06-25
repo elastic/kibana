@@ -7,7 +7,6 @@
 
 import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { EcsFlat } from '@elastic/ecs';
 import { omit } from 'lodash/fp';
 
 import {
@@ -33,11 +32,11 @@ import {
   getTotalPatternIndicesChecked,
   getTotalPatternSameFamily,
   getTotalSizeInBytes,
-  hasValidTimestampMapping,
   isMappingCompatible,
   postStorageResult,
   getStorageResults,
   StorageResult,
+  formatStorageResult,
 } from './helpers';
 import {
   hostNameWithTextMapping,
@@ -62,19 +61,17 @@ import {
   auditbeatWithAllResults,
 } from './mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { mockStats } from './mock/stats/mock_stats';
-import { mockStatsGreenIndex } from './mock/stats/mock_stats_green_index';
-import { mockStatsYellowIndex } from './mock/stats/mock_stats_yellow_index';
+import { mockStatsAuditbeatIndex } from './mock/stats/mock_stats_packetbeat_index';
+import { mockStatsPacketbeatIndex } from './mock/stats/mock_stats_auditbeat_index';
 import {
   COLD_DESCRIPTION,
   FROZEN_DESCRIPTION,
   HOT_DESCRIPTION,
-  TIMESTAMP_DESCRIPTION,
   UNMANAGED_DESCRIPTION,
   WARM_DESCRIPTION,
 } from './translations';
 import {
   DataQualityCheckResult,
-  EcsMetadata,
   EnrichedFieldMetadata,
   PartitionedFieldMetadata,
   PatternRollup,
@@ -82,8 +79,8 @@ import {
 } from './types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-
-const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
+import { EcsFlatTyped } from './constants';
+import { mockPartitionedFieldMetadataWithSameFamily } from './mock/partitioned_field_metadata/mock_partitioned_field_metadata_with_same_family';
 
 describe('helpers', () => {
   describe('getTotalPatternSameFamily', () => {
@@ -485,7 +482,7 @@ describe('helpers', () => {
     test('it returns the happy path result when the index has no mapping conflicts, and no unallowed values', () => {
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues: noUnallowedValues, // no unallowed values for `event.category` in this index
         })
@@ -501,7 +498,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues: noEntryForEventCategory, // a lookup in this map for the `event.category` field will return undefined
         })
@@ -511,7 +508,7 @@ describe('helpers', () => {
     test('it returns a result with the expected `indexInvalidValues` and `isEcsCompliant` when the index has no mapping conflict, but it has unallowed values', () => {
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: fieldMetadataCorrectMappingType, // no mapping conflicts for `event.category` in this index
           unallowedValues, // this index has unallowed values for the event.category field
         })
@@ -537,7 +534,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field: 'event.category', // `event.category` is a `keyword`, per the ECS spec
             type: indexFieldType, // this index has a mapping of `text` instead
@@ -558,7 +555,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field: 'event.category', // `event.category` is a `keyword` per the ECS spec
             type: indexFieldType, // this index has a mapping of `wildcard` instead
@@ -579,7 +576,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field: 'event.category', // `event.category` is a `keyword` per the ECS spec
             type: indexFieldType, // this index has a mapping of `text` instead
@@ -611,7 +608,7 @@ describe('helpers', () => {
 
       expect(
         getEnrichedFieldMetadata({
-          ecsMetadata,
+          ecsMetadata: EcsFlatTyped,
           fieldMetadata: {
             field,
             type: indexFieldType, // no mapping conflict, because ECS doesn't define this field
@@ -632,14 +629,13 @@ describe('helpers', () => {
   describe('getMissingTimestampFieldMetadata', () => {
     test('it returns the expected `EnrichedFieldMetadata`', () => {
       expect(getMissingTimestampFieldMetadata()).toEqual({
-        description: TIMESTAMP_DESCRIPTION,
+        ...EcsFlatTyped['@timestamp'],
         hasEcsMetadata: true,
         indexFieldName: '@timestamp',
         indexFieldType: '-', // the index did NOT define a mapping for @timestamp
         indexInvalidValues: [],
         isEcsCompliant: false, // an index must define the @timestamp mapping
         isInSameFamily: false, // `date` is not a member of any families
-        type: 'date',
       });
     });
   });
@@ -717,46 +713,15 @@ describe('helpers', () => {
     });
   });
 
-  describe('hasValidTimestampMapping', () => {
-    test('it returns true when the `enrichedFieldMetadata` has a valid @timestamp', () => {
-      const enrichedFieldMetadata: EnrichedFieldMetadata[] = [timestamp, sourcePort];
-
-      expect(hasValidTimestampMapping(enrichedFieldMetadata)).toBe(true);
-    });
-
-    test('it returns false when the `enrichedFieldMetadata` collection does NOT include a valid @timestamp', () => {
-      const enrichedFieldMetadata: EnrichedFieldMetadata[] = [sourcePort];
-
-      expect(hasValidTimestampMapping(enrichedFieldMetadata)).toBe(false);
-    });
-
-    test('it returns false when the `enrichedFieldMetadata` has an @timestamp with an invalid mapping', () => {
-      const timestampWithInvalidMapping: EnrichedFieldMetadata = {
-        ...timestamp,
-        indexFieldType: 'text', // invalid mapping, should be "date"
-      };
-      const enrichedFieldMetadata: EnrichedFieldMetadata[] = [
-        timestampWithInvalidMapping,
-        sourcePort,
-      ];
-
-      expect(hasValidTimestampMapping(enrichedFieldMetadata)).toBe(false);
-    });
-
-    test('it returns false when `enrichedFieldMetadata` is empty', () => {
-      expect(hasValidTimestampMapping([])).toBe(false);
-    });
-  });
-
   describe('getDocsCount', () => {
     test('it returns the expected docs count when `stats` contains the `indexName`', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.docs?.count;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].num_docs;
 
       expect(
         getDocsCount({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -767,7 +732,7 @@ describe('helpers', () => {
       expect(
         getDocsCount({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(0);
     });
@@ -789,37 +754,37 @@ describe('helpers', () => {
       expect(
         getDocsCount({
           indexName,
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
         })
-      ).toEqual(mockStatsGreenIndex[indexName].primaries?.docs?.count);
+      ).toEqual(mockStatsAuditbeatIndex[indexName].num_docs);
     });
   });
 
   describe('getSizeInBytes', () => {
     test('it returns the expected size when `stats` contains the `indexName`', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.store?.size_in_bytes;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].size_in_bytes;
 
       expect(
         getSizeInBytes({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
 
-    test('it returns zero when `stats` does NOT contain the `indexName`', () => {
+    test('it returns undefined when `stats` does NOT contain the `indexName`', () => {
       const indexName = 'not-gonna-find-it';
 
       expect(
         getSizeInBytes({
           indexName,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
-      ).toEqual(0);
+      ).toBeUndefined();
     });
 
-    test('it returns zero when `stats` is null', () => {
+    test('it returns undefined when `stats` is null', () => {
       const indexName = '.ds-packetbeat-8.6.1-2023.02.04-000001';
 
       expect(
@@ -827,7 +792,7 @@ describe('helpers', () => {
           indexName,
           stats: null,
         })
-      ).toEqual(0);
+      ).toBeUndefined();
     });
 
     test('it returns the expected size for a green index, where `primaries.store.size_in_bytes` and `total.store.size_in_bytes` have different values', () => {
@@ -836,21 +801,21 @@ describe('helpers', () => {
       expect(
         getSizeInBytes({
           indexName,
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
         })
-      ).toEqual(mockStatsGreenIndex[indexName].primaries?.store?.size_in_bytes);
+      ).toEqual(mockStatsAuditbeatIndex[indexName].size_in_bytes);
     });
   });
 
   describe('getTotalDocsCount', () => {
     test('it returns the expected total given a subset of index names in the stats', () => {
       const indexName = '.ds-packetbeat-8.5.3-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.docs?.count;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].num_docs;
 
       expect(
         getTotalDocsCount({
           indexNames: [indexName],
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -864,7 +829,7 @@ describe('helpers', () => {
       expect(
         getTotalDocsCount({
           indexNames: allIndexNamesInStats,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(3258632);
     });
@@ -873,19 +838,19 @@ describe('helpers', () => {
       expect(
         getTotalDocsCount({
           indexNames: [], // <-- empty
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(0);
     });
 
     test('it returns the expected total for a green index', () => {
       const indexName = 'auditbeat-custom-index-1';
-      const expectedCount = mockStatsGreenIndex[indexName].primaries?.docs?.count;
+      const expectedCount = mockStatsAuditbeatIndex[indexName].num_docs;
 
       expect(
         getTotalDocsCount({
           indexNames: [indexName],
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -894,12 +859,12 @@ describe('helpers', () => {
   describe('getTotalSizeInBytes', () => {
     test('it returns the expected total given a subset of index names in the stats', () => {
       const indexName = '.ds-packetbeat-8.5.3-2023.02.04-000001';
-      const expectedCount = mockStatsYellowIndex[indexName].primaries?.store?.size_in_bytes;
+      const expectedCount = mockStatsPacketbeatIndex[indexName].size_in_bytes;
 
       expect(
         getTotalSizeInBytes({
           indexNames: [indexName],
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -913,28 +878,58 @@ describe('helpers', () => {
       expect(
         getTotalSizeInBytes({
           indexNames: allIndexNamesInStats,
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(1464758182);
     });
 
-    test('it returns zero given an empty collection of index names', () => {
+    test('it returns undefined given an empty collection of index names', () => {
       expect(
         getTotalSizeInBytes({
           indexNames: [], // <-- empty
-          stats: mockStatsYellowIndex,
+          stats: mockStatsPacketbeatIndex,
         })
-      ).toEqual(0);
+      ).toBeUndefined();
     });
 
-    test('it returns the expected total for a green index', () => {
+    test('it returns undefined if sizeInByte in not an integer', () => {
       const indexName = 'auditbeat-custom-index-1';
-      const expectedCount = mockStatsGreenIndex[indexName].primaries?.store?.size_in_bytes;
 
       expect(
         getTotalSizeInBytes({
           indexNames: [indexName],
-          stats: mockStatsGreenIndex,
+          stats: { [indexName]: { ...mockStatsAuditbeatIndex[indexName], size_in_bytes: null } },
+        })
+      ).toBeUndefined();
+    });
+
+    test('it returns the expected total for an index', () => {
+      const indexName = 'auditbeat-custom-index-1';
+      const expectedCount = mockStatsAuditbeatIndex[indexName].size_in_bytes;
+
+      expect(
+        getTotalSizeInBytes({
+          indexNames: [indexName],
+          stats: mockStatsAuditbeatIndex,
+        })
+      ).toEqual(expectedCount);
+    });
+
+    test('it returns the expected total for indices', () => {
+      const expectedCount = Object.values(mockStatsPacketbeatIndex).reduce(
+        (acc, { size_in_bytes: sizeInBytes }) => {
+          return acc + (sizeInBytes ?? 0);
+        },
+        0
+      );
+
+      expect(
+        getTotalSizeInBytes({
+          indexNames: [
+            '.ds-packetbeat-8.6.1-2023.02.04-000001',
+            '.ds-packetbeat-8.5.3-2023.02.04-000001',
+          ],
+          stats: mockStatsPacketbeatIndex,
         })
       ).toEqual(expectedCount);
     });
@@ -1399,6 +1394,120 @@ describe('helpers', () => {
     });
   });
 
+  describe('formatStorageResult', () => {
+    it('should correctly format the input data into a StorageResult object', () => {
+      const inputData: Parameters<typeof formatStorageResult>[number] = {
+        result: {
+          indexName: 'testIndex',
+          pattern: 'testPattern',
+          checkedAt: 1627545600000,
+          docsCount: 100,
+          incompatible: 3,
+          sameFamily: 1,
+          ilmPhase: 'hot',
+          markdownComments: ['test comments'],
+          error: null,
+        },
+        report: {
+          batchId: 'testBatch',
+          isCheckAll: true,
+          sameFamilyFields: ['agent.type'],
+          unallowedMappingFields: ['event.category', 'host.name', 'source.ip'],
+          unallowedValueFields: ['event.category'],
+          sizeInBytes: 5000,
+          ecsVersion: '1.0.0',
+          indexName: 'testIndex',
+          indexId: 'testIndexId',
+        },
+        partitionedFieldMetadata: mockPartitionedFieldMetadataWithSameFamily,
+      };
+
+      const expectedResult: StorageResult = {
+        batchId: 'testBatch',
+        indexName: 'testIndex',
+        indexPattern: 'testPattern',
+        isCheckAll: true,
+        checkedAt: 1627545600000,
+        docsCount: 100,
+        totalFieldCount: 10,
+        ecsFieldCount: 2,
+        customFieldCount: 4,
+        incompatibleFieldCount: 3,
+        incompatibleFieldMappingItems: [
+          {
+            fieldName: 'event.category',
+            expectedValue: 'keyword',
+            actualValue: 'constant_keyword',
+            description:
+              'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n`event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.\nThis field is an array. This will allow proper categorization of some events that fall in multiple categories.',
+          },
+          {
+            fieldName: 'host.name',
+            expectedValue: 'keyword',
+            actualValue: 'text',
+            description:
+              'Name of the host.\nIt can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
+          },
+          {
+            fieldName: 'source.ip',
+            expectedValue: 'ip',
+            actualValue: 'text',
+            description: 'IP address of the source (IPv4 or IPv6).',
+          },
+        ],
+        incompatibleFieldValueItems: [
+          {
+            fieldName: 'event.category',
+            expectedValues: [
+              'authentication',
+              'configuration',
+              'database',
+              'driver',
+              'email',
+              'file',
+              'host',
+              'iam',
+              'intrusion_detection',
+              'malware',
+              'network',
+              'package',
+              'process',
+              'registry',
+              'session',
+              'threat',
+              'vulnerability',
+              'web',
+            ],
+            actualValues: [{ name: 'an_invalid_category', count: 2 }],
+            description:
+              'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy.\n`event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory.\nThis field is an array. This will allow proper categorization of some events that fall in multiple categories.',
+          },
+        ],
+        sameFamilyFieldCount: 1,
+        sameFamilyFields: ['agent.type'],
+        sameFamilyFieldItems: [
+          {
+            fieldName: 'agent.type',
+            expectedValue: 'keyword',
+            actualValue: 'constant_keyword',
+            description:
+              'Type of the agent.\nThe agent type always stays the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.',
+          },
+        ],
+        unallowedMappingFields: ['event.category', 'host.name', 'source.ip'],
+        unallowedValueFields: ['event.category'],
+        sizeInBytes: 5000,
+        ilmPhase: 'hot',
+        markdownComments: ['test comments'],
+        ecsVersion: '1.0.0',
+        indexId: 'testIndexId',
+        error: null,
+      };
+
+      expect(formatStorageResult(inputData)).toEqual(expectedResult);
+    });
+  });
+
   describe('postStorageResult', () => {
     const { fetch } = httpServiceMock.createStartContract();
     const { toasts } = notificationServiceMock.createStartContract();
@@ -1453,10 +1562,9 @@ describe('helpers', () => {
       });
 
       expect(fetch).toHaveBeenCalledWith(
-        '/internal/ecs_data_quality_dashboard/results',
+        '/internal/ecs_data_quality_dashboard/results_latest/auditbeat-*',
         expect.objectContaining({
           method: 'GET',
-          query: { pattern: 'auditbeat-*' },
         })
       );
     });

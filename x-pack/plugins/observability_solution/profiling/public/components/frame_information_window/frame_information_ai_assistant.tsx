@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
+import { EuiFlexItem } from '@elastic/eui';
 import { Frame } from '.';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
@@ -78,12 +79,14 @@ export function FrameInformationAIAssistant({ frame }: Props) {
   return (
     <>
       {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && promptMessages ? (
-        <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
-          messages={promptMessages}
-          title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
-            defaultMessage: 'Optimize function',
-          })}
-        />
+        <EuiFlexItem>
+          <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
+            messages={promptMessages}
+            title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
+              defaultMessage: 'Optimize function',
+            })}
+          />
+        </EuiFlexItem>
       ) : null}
     </>
   );

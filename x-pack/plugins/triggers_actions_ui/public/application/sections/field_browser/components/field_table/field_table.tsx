@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { getFieldColumns, getFieldItemsData, isActionsColumn } from '../field_items';
+import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
 import type { FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
@@ -128,7 +128,6 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
       }),
     [getFieldTableColumns, searchInput, onHide, onToggleColumn]
   );
-  const hasActions = useMemo(() => columns.some((column) => isActionsColumn(column)), [columns]);
 
   return (
     <>
@@ -147,7 +146,6 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
           columns={columns}
           pagination={pagination}
           sorting={sorting}
-          hasActions={hasActions}
           onChange={onTableChange}
           compressed
         />

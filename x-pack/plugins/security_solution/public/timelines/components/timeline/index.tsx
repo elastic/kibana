@@ -18,7 +18,7 @@ import { timelineActions, timelineSelectors } from '../../store';
 import { timelineDefaults } from '../../store/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import type { CellValueElementProps } from './cell_rendering';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { TimelineModalHeader } from '../modal/header';
 import type { TimelineId, RowRenderer, TimelineTabs } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
@@ -26,7 +26,7 @@ import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/h
 import type { State } from '../../../common/store';
 import { EVENTS_COUNT_BUTTON_CLASS_NAME, onTimelineTabKeyPressed } from './helpers';
 import * as i18n from './translations';
-import { TabsContent } from './tabs_content';
+import { TabsContent } from './tabs';
 import { HideShowContainer, TimelineContainer } from './styles';
 import { useTimelineFullScreen } from '../../../common/containers/use_full_screen';
 import { EXIT_FULL_SCREEN_CLASS_NAME } from '../../../common/components/exit_full_screen';

@@ -116,7 +116,7 @@ describe('clean draft timelines', () => {
 
     expect(mockPersistTimeline).not.toHaveBeenCalled();
     expect(mockResetTimeline).toHaveBeenCalled();
-    expect(mockResetTimeline.mock.calls[0][1]).toEqual([mockGetDraftTimelineValue.savedObjectId]);
+    expect(mockResetTimeline.mock.calls[0][1]).toEqual(mockGetDraftTimelineValue.savedObjectId);
     expect(mockResetTimeline.mock.calls[0][2]).toEqual(req.body.timelineType);
 
     expect(mockGetTimeline).toHaveBeenCalled();

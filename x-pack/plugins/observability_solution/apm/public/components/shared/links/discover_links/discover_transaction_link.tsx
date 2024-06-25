@@ -6,11 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import {
-  PROCESSOR_EVENT,
-  TRACE_ID,
-  TRANSACTION_ID,
-} from '../../../../../common/es_fields/apm';
+import { PROCESSOR_EVENT, TRACE_ID, TRANSACTION_ID } from '../../../../../common/es_fields/apm';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverLink } from './discover_link';
 
@@ -40,7 +36,5 @@ export function DiscoverTransactionLink({
   readonly transaction: Transaction;
   children?: ReactNode;
 }) {
-  return (
-    <DiscoverLink query={getDiscoverQuery(transaction)} children={children} />
-  );
+  return <DiscoverLink query={getDiscoverQuery(transaction)} children={children} />;
 }

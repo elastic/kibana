@@ -16,12 +16,7 @@ import {
   Settings,
   Tooltip,
 } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLoadingChart,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart } from '@elastic/eui';
 import React from 'react';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -30,9 +25,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 
-function hasValidTimeseries(
-  series?: Coordinate[] | null
-): series is Coordinate[] {
+function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[] {
   return !!series?.some((point) => point.y !== null);
 }
 
@@ -83,7 +76,7 @@ export function SparkPlot({
   );
 }
 
-function SparkPlotItem({
+export function SparkPlotItem({
   type,
   color,
   isLoading,

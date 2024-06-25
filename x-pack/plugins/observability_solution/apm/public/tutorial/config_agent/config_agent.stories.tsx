@@ -55,9 +55,7 @@ function Wrapper({
     get: () => ({
       fleetAgents: [
         ...(hasFleetPoliciesWithApmIntegration ? fleetAgents : []),
-        ...(hasCloudPolicyWithApmIntegration
-          ? [policyElasticAgentOnCloudAgent]
-          : []),
+        ...(hasCloudPolicyWithApmIntegration ? [policyElasticAgentOnCloudAgent] : []),
       ],
       isFleetEnabled,
       cloudStandaloneSetup: {

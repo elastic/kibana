@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { documentationService } from '../../../../services';
 import { UIM_APP_NAME } from '../../../../../../common/constants/ui_metric';
 import { httpService } from '../../../../services/http';
 import { notificationService } from '../../../../services/notification';
@@ -28,6 +29,7 @@ export const IndexMappingWithContext: React.FC<IndexMappingWithContextProps> = (
     httpService.setup(core.http);
     notificationService.setup(core.notifications);
   }
+  documentationService.setup(core.docLinks);
 
   const newDependencies: AppDependencies = {
     ...dependencies,

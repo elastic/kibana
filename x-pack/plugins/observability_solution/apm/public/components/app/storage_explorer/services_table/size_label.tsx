@@ -12,23 +12,15 @@ import { EuiToolTip, EuiIcon } from '@elastic/eui';
 export function SizeLabel() {
   return (
     <EuiToolTip
-      content={i18n.translate(
-        'xpack.apm.storageExplorer.sizeLabel.description',
-        {
-          defaultMessage: `The estimated storage size per service. This estimate includes primary and replica shards and is calculated by prorating the total size of your indices by the service's document count divided by the total number of documents.`,
-        }
-      )}
+      content={i18n.translate('xpack.apm.storageExplorer.sizeLabel.description', {
+        defaultMessage: `The estimated storage size per service. This estimate includes primary and replica shards and is calculated by prorating the total size of your indices by the service's document count divided by the total number of documents.`,
+      })}
     >
       <>
         {i18n.translate('xpack.apm.storageExplorer.sizeLabel.title', {
           defaultMessage: 'Size',
         })}{' '}
-        <EuiIcon
-          size="s"
-          color="subdued"
-          type="questionInCircle"
-          className="eui-alignTop"
-        />
+        <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
       </>
     </EuiToolTip>
   );

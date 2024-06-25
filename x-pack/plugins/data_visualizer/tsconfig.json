@@ -27,7 +27,6 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
-    "@kbn/discover-plugin",
     "@kbn/ebt-tools",
     "@kbn/embeddable-plugin",
     "@kbn/embeddable-plugin",
@@ -77,7 +76,13 @@
     "@kbn/utility-types",
     "@kbn/visualization-utils",
     "@kbn/ml-time-buckets",
-    "@kbn/aiops-log-rate-analysis"
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/presentation-publishing",
+    "@kbn/shared-ux-utility",
+    "@kbn/search-types",
+    "@kbn/unified-field-list"
   ],
   "exclude": [
     "target/**/*",

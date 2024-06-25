@@ -46,18 +46,14 @@ export function toJson(wrapper: ReactWrapper) {
 
 export function mockMoment() {
   // avoid timezone issues
-  jest
-    .spyOn(moment.prototype, 'format')
-    .mockImplementation(function (this: Moment) {
-      return `1st of January (mocking ${this.unix()})`;
-    });
+  jest.spyOn(moment.prototype, 'format').mockImplementation(function (this: Moment) {
+    return `1st of January (mocking ${this.unix()})`;
+  });
 
   // convert relative time to absolute time to avoid timing issues
-  jest
-    .spyOn(moment.prototype, 'fromNow')
-    .mockImplementation(function (this: Moment) {
-      return `1337 minutes ago (mocking ${this.unix()})`;
-    });
+  jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function (this: Moment) {
+    return `1337 minutes ago (mocking ${this.unix()})`;
+  });
 }
 
 // Useful for getting the rendered href from any kind of link component
@@ -121,20 +117,12 @@ export function renderWithTheme(
   params?: any,
   { darkMode = false } = {}
 ) {
-  return render(
-    <EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>,
-    params
-  );
+  return render(<EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>, params);
 }
 
-export function mountWithTheme(
-  tree: React.ReactElement<any>,
-  { darkMode = false } = {}
-) {
+export function mountWithTheme(tree: React.ReactElement<any>, { darkMode = false } = {}) {
   function WrappingThemeProvider(props: any) {
-    return (
-      <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>
-    );
+    return <EuiThemeProvider darkMode={darkMode}>{props.children}</EuiThemeProvider>;
   }
 
   return mount(tree, {

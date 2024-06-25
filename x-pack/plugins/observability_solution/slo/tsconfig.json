@@ -29,7 +29,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/slo-schema",
     "@kbn/alerting-plugin",
-    "@kbn/observability-alert-details",
     "@kbn/rison",
     "@kbn/embeddable-plugin",
     "@kbn/lens-plugin",
@@ -43,7 +42,6 @@
     "@kbn/charts-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/serverless",
-    "@kbn/dashboard-plugin",
     "@kbn/data-views-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/licensing-plugin",
@@ -85,6 +83,19 @@
     "@kbn/discover-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/core-http-server",
-    "@kbn/presentation-publishing"
+    "@kbn/aiops-plugin",
+    "@kbn/presentation-publishing",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/data-view-field-editor-plugin",
+    "@kbn/securitysolution-io-ts-utils",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/datemath",
+    "@kbn/presentation-containers",
+    "@kbn/dashboard-plugin",
+    "@kbn/monaco",
+    "@kbn/code-editor",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-application-browser",
+    "@kbn/core-theme-browser"
   ]
 }

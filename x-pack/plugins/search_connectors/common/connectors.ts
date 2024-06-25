@@ -221,6 +221,24 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     serviceType: 'google_drive',
   },
   {
+    categories: ['enterprise_search', 'elastic_stack', 'custom', 'connector', 'connector_client'],
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.graphQL.description',
+      {
+        defaultMessage: 'Search over your content with GraphQL.',
+      }
+    ),
+    iconPath: 'graphql.svg',
+    isBeta: false,
+    isNative: false,
+    keywords: ['graphql', 'connector'],
+    name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.graphQL.name', {
+      defaultMessage: 'GraphQL',
+    }),
+    serviceType: 'graphql',
+    isTechPreview: true,
+  },
+  {
     categories: [
       'enterprise_search',
       'datastore',
@@ -317,7 +335,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     ),
     iconPath: 'notion.svg',
     isBeta: true,
-    isNative: false,
+    isNative: true,
     keywords: ['notion', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.notion.name', {
       defaultMessage: 'Notion',
@@ -452,13 +470,34 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       }
     ),
     iconPath: 'gmail.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['gmail', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.gmail.name', {
       defaultMessage: 'Gmail',
     }),
     serviceType: 'gmail',
+  },
+  {
+    categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
+    description: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.openTextDocumentum.description',
+      {
+        defaultMessage: 'Search over your content on OpenText Documentum.',
+      }
+    ),
+    iconPath: 'connector.svg',
+    isBeta: false,
+    isNative: false,
+    isTechPreview: true,
+    keywords: ['opentext', 'documentum', 'connector'],
+    name: i18n.translate(
+      'searchConnectorsPlugin.content.nativeConnectors.openTextDocumentum.name',
+      {
+        defaultMessage: 'OpenText Documentum',
+      }
+    ),
+    serviceType: 'opentext_documentum',
   },
   {
     categories: [
@@ -476,7 +515,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       }
     ),
     iconPath: 'oracle.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['oracle', 'sql', 'database', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.oracle.name', {
@@ -538,7 +577,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     categories: ['enterprise_search', 'elastic_stack', 'connector', 'connector_client'],
     iconPath: 'slack.svg',
     isBeta: false,
-    isNative: false,
+    isNative: true,
     isTechPreview: true,
     keywords: ['slack', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.slack.name', {
@@ -578,7 +617,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     }),
     iconPath: 'box.svg',
     isBeta: false,
-    isNative: false,
+    isNative: true,
     isTechPreview: true,
     keywords: ['cloud', 'box'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.box.name', {
@@ -602,7 +641,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       'outlook',
     ],
     iconPath: 'outlook.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: true,
     keywords: ['outlook', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.outlook.name', {
@@ -627,13 +666,13 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     ),
     iconPath: 'teams.svg',
     isBeta: false,
-    isNative: false,
+    isNative: true,
     isTechPreview: true,
     keywords: ['teams', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.teams.name', {
       defaultMessage: 'Teams',
     }),
-    serviceType: 'teams',
+    serviceType: 'microsoft_teams',
   },
   {
     categories: [
@@ -652,7 +691,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
     ),
     iconPath: 'zoom.svg',
     isBeta: false,
-    isNative: false,
+    isNative: true,
     isTechPreview: true,
     keywords: ['zoom', 'connector'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.zoom.name', {
@@ -669,7 +708,7 @@ export const CONNECTOR_DEFINITIONS: ConnectorServerSideDefinition[] = [
       }
     ),
     iconPath: 'custom.svg',
-    isBeta: true,
+    isBeta: false,
     isNative: false,
     keywords: ['custom', 'connector', 'code'],
     name: i18n.translate('searchConnectorsPlugin.content.nativeConnectors.customConnector.name', {

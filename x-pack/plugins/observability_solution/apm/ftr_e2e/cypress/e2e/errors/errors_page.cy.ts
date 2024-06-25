@@ -83,19 +83,13 @@ describe('Errors page', () => {
 
       it('clicking on type adds a filter in the searchbar', () => {
         cy.visitKibana(javaServiceErrorsPageHref);
-        cy.getByTestSubj('apmUnifiedSearchBar')
-          .invoke('val')
-          .should('be.empty');
+        cy.getByTestSubj('apmUnifiedSearchBar').invoke('val').should('be.empty');
         // `force: true` because Cypress says the element is 0x0
         cy.contains('exception 0').click({
           force: true,
         });
-        cy.getByTestSubj('apmUnifiedSearchBar')
-          .its('length')
-          .should('be.gt', 0);
-        cy.get('table')
-          .find('td:contains("exception 0")')
-          .should('have.length', 1);
+        cy.getByTestSubj('apmUnifiedSearchBar').its('length').should('be.gt', 0);
+        cy.get('table').find('td:contains("exception 0")').should('have.length', 1);
       });
 
       it('sorts by ocurrences', () => {
@@ -133,10 +127,9 @@ describe('Check detailed statistics API with multiple errors', () => {
   });
 
   it('calls detailed API with visible items only', () => {
-    cy.intercept(
-      'GET',
-      '/internal/apm/services/opbeans-java/errors/groups/main_statistics?*'
-    ).as('errorsMainStatistics');
+    cy.intercept('GET', '/internal/apm/services/opbeans-java/errors/groups/main_statistics?*').as(
+      'errorsMainStatistics'
+    );
     cy.intercept(
       'POST',
       '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*'

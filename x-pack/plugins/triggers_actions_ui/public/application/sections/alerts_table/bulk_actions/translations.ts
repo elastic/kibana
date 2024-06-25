@@ -34,3 +34,9 @@ export const COLUMN_HEADER_ARIA_LABEL = i18n.translate(
     defaultMessage: 'Select all rows',
   }
 );
+
+export const SELECT_ROW_ARIA_LABEL = (displayedRowIndex: number) =>
+  i18n.translate('xpack.triggersActionsUI.bulkActions.selectRowCheckbox.AriaLabel', {
+    values: { displayedRowIndex },
+    defaultMessage: 'Select row {displayedRowIndex}',
+  });

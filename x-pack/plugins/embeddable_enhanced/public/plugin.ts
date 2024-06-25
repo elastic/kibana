@@ -18,7 +18,11 @@ import {
   IEmbeddable,
   PANEL_NOTIFICATION_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-import { apiHasUniqueId, StateComparators } from '@kbn/presentation-publishing';
+import {
+  apiHasUniqueId,
+  EmbeddableApiContext,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import type { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
 import {
   AdvancedUiActionsSetup,
@@ -35,6 +39,7 @@ import {
 } from './embeddables/dynamic_action_storage';
 import { HasDynamicActions } from './embeddables/interfaces/has_dynamic_actions';
 import { EnhancedEmbeddable } from './types';
+import { getDynamicActionsState } from './get_dynamic_actions_state';
 
 export interface SetupDependencies {
   embeddable: EmbeddableSetup;
@@ -49,16 +54,19 @@ export interface StartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
+export interface ReactEmbeddableDynamicActionsApi {
+  dynamicActionsApi: HasDynamicActions;
+  dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
+  serializeDynamicActions: () => DynamicActionsSerializedState;
+  startDynamicActions: () => { stopDynamicActions: () => void };
+}
+
 export interface StartContract {
   initializeReactEmbeddableDynamicActions: (
     uuid: string,
     getTitle: () => string | undefined,
     state: DynamicActionsSerializedState
-  ) => {
-    dynamicActionsApi: HasDynamicActions;
-    dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
-    serializeDynamicActions: () => DynamicActionsSerializedState;
-  };
+  ) => ReactEmbeddableDynamicActionsApi;
 }
 
 export interface DynamicActionsSerializedState {
@@ -138,23 +146,26 @@ export class EmbeddableEnhancedPlugin
     dynamicActionsApi: HasDynamicActions;
     dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
     serializeDynamicActions: () => DynamicActionsSerializedState;
+    startDynamicActions: () => { stopDynamicActions: () => void };
   } {
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
-      { dynamicActions: { events: [] }, ...(state.enhancements ?? {}) }
+      getDynamicActionsState(state.enhancements)
     );
     const api: DynamicActionStorageApi = {
       dynamicActionsState$,
-      setDynamicActions: (newState) => dynamicActionsState$.next(newState),
+      setDynamicActions: (newState) => {
+        dynamicActionsState$.next(newState);
+      },
     };
     const storage = new DynamicActionStorage(uuid, getTitle, api);
     const dynamicActions = new DynamicActionManager({
-      isCompatible: async (context: unknown) => {
-        return apiHasUniqueId(context) && context.uuid === uuid;
+      isCompatible: async (context: EmbeddableApiContext) => {
+        const { embeddable } = context;
+        return apiHasUniqueId(embeddable) && embeddable.uuid === uuid;
       },
       storage,
       uiActions: this.uiActions!,
     });
-    this.startDynamicActions(dynamicActions);
 
     return {
       dynamicActionsApi: { ...api, enhancements: { dynamicActions } },
@@ -163,12 +174,16 @@ export class EmbeddableEnhancedPlugin
           dynamicActionsState$,
           api.setDynamicActions,
           (a, b) => {
-            return deepEqual(a, b);
+            return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
           },
         ],
       },
       serializeDynamicActions: () => {
         return { enhancements: dynamicActionsState$.getValue() };
+      },
+      startDynamicActions: () => {
+        const stop = this.startDynamicActions(dynamicActions);
+        return { stopDynamicActions: stop };
       },
     };
   }

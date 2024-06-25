@@ -51,6 +51,7 @@ export enum OperatingSystem {
 
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
+export type EventFiltersTypes = EntryTypes | 'exists' | 'nested';
 
 export const validatePotentialWildcardInput = ({
   field = '',
@@ -100,18 +101,26 @@ export const validateFilePathInput = ({
   }
 };
 
-export const validateWildcardInput = (value?: string): string | undefined => {
-  if (/[*?]/.test(value ?? '')) {
-    return WILDCARD_WARNING;
+export const validateWildcardInput = (value: string | string[]): string | undefined => {
+  const wildcardRegex = /[*?]/;
+  if (Array.isArray(value)) {
+    const doesAnyValueContainWildcardInput = value.some((v) => wildcardRegex.test(v));
+    if (doesAnyValueContainWildcardInput) {
+      return WILDCARD_WARNING;
+    }
+  } else {
+    if (wildcardRegex.test(value)) {
+      return WILDCARD_WARNING;
+    }
   }
 };
 
-export const hasWildcardAndInvalidOperator = ({
+export const validateHasWildcardWithWrongOperator = ({
   operator,
   value,
 }: {
-  operator: EntryTypes | TrustedAppEntryTypes;
-  value: string;
+  operator: TrustedAppEntryTypes | EventFiltersTypes;
+  value: string | string[];
 }): boolean => {
   if (operator !== 'wildcard' && validateWildcardInput(value)) {
     return true;

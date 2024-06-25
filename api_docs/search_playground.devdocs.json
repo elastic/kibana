@@ -40,7 +40,9 @@
           "label": "PlaygroundProvider",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+            "React.FunctionComponent<",
+            "PlaygroundProviderProps",
+            " & { children?: React.ReactNode; }>"
           ],
           "path": "x-pack/plugins/search_playground/public/types.ts",
           "deprecated": false,
@@ -154,6 +156,51 @@
             {
               "parentPluginId": "searchPlayground",
               "id": "def-public.SearchPlaygroundPluginStart.Playground.$2",
+              "type": "Any",
+              "tags": [],
+              "label": "context",
+              "description": [],
+              "signature": [
+                "any"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "searchPlayground",
+          "id": "def-public.SearchPlaygroundPluginStart.PlaygroundHeaderDocs",
+          "type": "Function",
+          "tags": [],
+          "label": "PlaygroundHeaderDocs",
+          "description": [],
+          "signature": [
+            "React.FunctionComponent<{ children?: React.ReactNode; }>"
+          ],
+          "path": "x-pack/plugins/search_playground/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "searchPlayground",
+              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundHeaderDocs.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "P & { children?: React.ReactNode; }"
+              ],
+              "path": "node_modules/@types/react/index.d.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            },
+            {
+              "parentPluginId": "searchPlayground",
+              "id": "def-public.SearchPlaygroundPluginStart.PlaygroundHeaderDocs.$2",
               "type": "Any",
               "tags": [],
               "label": "context",

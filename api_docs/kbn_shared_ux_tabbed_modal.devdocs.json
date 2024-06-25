@@ -1,0 +1,174 @@
+{
+  "id": "@kbn/shared-ux-tabbed-modal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+        "id": "def-common.TabbedModal",
+        "type": "Function",
+        "tags": [],
+        "label": "TabbedModal",
+        "description": [],
+        "signature": [
+          "({\n  tabs,\n  defaultSelectedTabId,\n  ...rest\n}: Omit<",
+          "IModalContextProviderProps",
+          "<T>, \"children\"> & ",
+          "ITabbedModalInner",
+          ") => JSX.Element"
+        ],
+        "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+            "id": "def-common.TabbedModal.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  tabs,\n  defaultSelectedTabId,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "IModalContextProviderProps",
+              "<T>, \"children\"> & ",
+              "ITabbedModalInner"
+            ],
+            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+        "id": "def-common.IModalTabDeclaration",
+        "type": "Interface",
+        "tags": [],
+        "label": "IModalTabDeclaration",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-tabbed-modal",
+            "scope": "common",
+            "docId": "kibKbnSharedUxTabbedModalPluginApi",
+            "section": "def-common.IModalTabDeclaration",
+            "text": "IModalTabDeclaration"
+          },
+          "<S> extends ",
+          "EuiTabProps",
+          ",",
+          "ITabDeclaration",
+          "<S>"
+        ],
+        "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+            "id": "def-common.IModalTabDeclaration.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+            "id": "def-common.IModalTabDeclaration.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+            "id": "def-common.IModalTabDeclaration.content",
+            "type": "Function",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "signature": [
+              "(props: { state: S; dispatch: ",
+              "IDispatchFunction",
+              "; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+            ],
+            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+                "id": "def-common.IModalTabDeclaration.content.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "{ state: S; dispatch: ",
+                  "IDispatchFunction",
+                  "; }"
+                ],
+                "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-tabbed-modal",
+            "id": "def-common.IModalTabDeclaration.modalActionBtn",
+            "type": "Object",
+            "tags": [],
+            "label": "modalActionBtn",
+            "description": [],
+            "signature": [
+              "IModalTabActionBtn<S> | undefined"
+            ],
+            "path": "packages/shared-ux/modal/tabbed/src/tabbed_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

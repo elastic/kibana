@@ -7,10 +7,9 @@
  */
 
 /* eslint-disable max-classes-per-file */
-import { PodAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
-import { container } from './container';
+import { k8sContainer } from './k8s_container';
 
 interface PodDocument extends Fields {
   'kubernetes.pod.uid': string;
@@ -26,17 +25,8 @@ export class Pod extends Entity<PodDocument> {
     });
   }
 
-  asset() {
-    return new PodAsset({
-      'asset.kind': 'pod',
-      'asset.id': this.fields['kubernetes.pod.uid'],
-      'asset.name': this.fields['kubernetes.pod.uid'],
-      'asset.ean': `pod:${this.fields['kubernetes.pod.uid']}`,
-    });
-  }
-
   container(id: string) {
-    return container(id, this.fields['kubernetes.pod.uid'], this.fields['kubernetes.node.name']);
+    return k8sContainer(id, this.fields['kubernetes.pod.uid'], this.fields['kubernetes.node.name']);
   }
 }
 

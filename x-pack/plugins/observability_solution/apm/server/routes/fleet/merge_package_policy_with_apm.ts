@@ -37,11 +37,10 @@ export async function decoratePackagePolicyWithAgentConfigAndSourceMap({
     artifacts,
   });
 
-  const policyWithAgentConfigAndSourceMaps =
-    getPackagePolicyWithAgentConfigurations(
-      policyWithSourceMaps,
-      agentConfigurations
-    );
+  const policyWithAgentConfigAndSourceMaps = getPackagePolicyWithAgentConfigurations(
+    policyWithSourceMaps,
+    agentConfigurations
+  );
 
   return policyWithAgentConfigAndSourceMaps;
 }

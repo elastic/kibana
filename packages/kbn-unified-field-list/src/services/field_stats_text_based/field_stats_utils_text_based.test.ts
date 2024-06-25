@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { buildSearchFilter, fetchAndCalculateFieldStats } from './field_stats_utils_text_based';
 
@@ -74,11 +73,10 @@ describe('fieldStatsUtilsTextBased', function () {
           "totalDocuments": 4,
         }
       `);
-
       expect(searchHandler).toHaveBeenCalledWith(
         expect.objectContaining({
           query:
-            'from logs* | limit 1000| WHERE `message` IS NOT NULL\n    | STATS `message_terms` = count(`message`) BY `message`\n    | SORT `message_terms` DESC\n    | LIMIT 10',
+            'from logs* | limit 1000\n| WHERE `message` IS NOT NULL\n    | STATS `message_terms` = count(`message`) BY `message`\n    | SORT `message_terms` DESC\n    | LIMIT 10',
         })
       );
     });
@@ -121,7 +119,7 @@ describe('fieldStatsUtilsTextBased', function () {
       expect(searchHandler).toHaveBeenCalledWith(
         expect.objectContaining({
           query:
-            'from logs* | limit 1000| WHERE `message` IS NOT NULL\n    | KEEP `message`\n    | LIMIT 100',
+            'from logs* | limit 1000\n| WHERE `message` IS NOT NULL\n    | KEEP `message`\n    | LIMIT 100',
         })
       );
     });

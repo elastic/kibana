@@ -20,7 +20,6 @@ export async function getSearchStatus(
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
   try {
-    // @ts-expect-error start_time_in_millis: EpochMillis is string | number
     const apiResponse: TransportResult<AsyncSearchStatusResponse> =
       await internalClient.asyncSearch.status(
         {
@@ -29,7 +28,7 @@ export async function getSearchStatus(
         { meta: true }
       );
     const response = apiResponse.body;
-    if (response.completion_status >= 400) {
+    if (response.completion_status! >= 400) {
       return {
         status: SearchStatus.ERROR,
         error: i18n.translate('data.search.statusError', {

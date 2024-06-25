@@ -70,7 +70,11 @@ describe('Policy Linux Event Collection Card', () => {
             'Events' +
             'File' +
             'Network' +
-            'Process'
+            'Process' +
+            'Session data' +
+            'Collect session data' +
+            'Capture terminal output' +
+            'Info'
         )
       );
     });
@@ -92,6 +96,7 @@ describe('Policy Linux Event Collection Card', () => {
             'Linux ' +
             '2 / 3 event collections enabled' +
             'Events' +
+            'File' +
             'Network' +
             'Process' +
             'Session data' +

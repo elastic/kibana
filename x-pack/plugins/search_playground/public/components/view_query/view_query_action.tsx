@@ -20,10 +20,14 @@ export const ViewQueryAction: React.FC = () => {
   return (
     <>
       {showFlyout && <ViewQueryFlyout onClose={() => setShowFlyout(false)} />}
-      <EuiButtonEmpty onClick={() => setShowFlyout(true)} disabled={selectedIndices?.length === 0}>
+      <EuiButtonEmpty
+        onClick={() => setShowFlyout(true)}
+        disabled={selectedIndices?.length === 0}
+        data-test-subj="viewQueryActionButton"
+      >
         <FormattedMessage
           id="xpack.searchPlayground.viewQuery.actionButtonLabel"
-          defaultMessage="View Query"
+          defaultMessage="View query"
         />
       </EuiButtonEmpty>
     </>

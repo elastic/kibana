@@ -63,6 +63,7 @@ export const getConversationSearchEsMock = () => {
 export const getCreateConversationSchemaMock = (): ConversationCreateProps => ({
   title: 'Welcome',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
     defaultSystemPromptId: 'Default',
     model: 'model',
@@ -88,6 +89,7 @@ export const getUpdateConversationSchemaMock = (
 ): ConversationUpdateProps => ({
   title: 'Welcome 2',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '2',
     defaultSystemPromptId: 'Default',
     model: 'model',
@@ -127,6 +129,7 @@ export const getConversationMock = (
 ): ConversationResponse => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   apiConfig: {
+    actionTypeId: '.gen-ai',
     connectorId: '1',
     defaultSystemPromptId: 'Default',
   },
@@ -150,6 +153,7 @@ export const getQueryConversationParams = (
     ? {
         title: 'Welcome 2',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: '2',
           defaultSystemPromptId: 'Default',
           model: 'model',
@@ -173,6 +177,7 @@ export const getQueryConversationParams = (
         title: 'Welcome',
         category: 'assistant',
         apiConfig: {
+          actionTypeId: '.gen-ai',
           connectorId: '1',
           defaultSystemPromptId: 'Default',
           model: 'model',

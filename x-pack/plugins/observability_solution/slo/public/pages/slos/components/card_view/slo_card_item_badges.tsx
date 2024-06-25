@@ -14,6 +14,7 @@ import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badg
 import { BurnRateRuleParams } from '../../../../typings';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { LoadingBadges } from '../badges/slo_badges';
+import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
 import { SloTagsList } from '../common/slo_tags_list';
@@ -43,6 +44,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
     },
     [onStateChange]
   );
+
   return (
     <Container
       onClick={(evt) => {
@@ -56,8 +58,9 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
           <>
             <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
             <SLOCardItemInstanceBadge slo={slo} />
-            <SloRulesBadge rules={rules} onClick={handleCreateRule} />
+            <SloRulesBadge rules={rules} onClick={handleCreateRule} isRemote={!!slo.remote} />
             <SloTimeWindowBadge slo={slo} color="default" />
+            <SloRemoteBadge slo={slo} />
             <SloTagsList
               tags={slo.tags}
               numberOfTagsToDisplay={1}

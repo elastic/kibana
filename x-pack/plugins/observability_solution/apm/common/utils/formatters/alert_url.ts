@@ -7,20 +7,11 @@
 import { stringify } from 'querystring';
 import { ENVIRONMENT_ALL } from '../../environment_filter_values';
 
-const format = ({
-  pathname,
-  query,
-}: {
-  pathname: string;
-  query: Record<string, any>;
-}): string => {
+const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
   return `${pathname}?${stringify(query)}`;
 };
 
-export const getAlertUrlErrorCount = (
-  serviceName: string,
-  serviceEnv: string | undefined
-) =>
+export const getAlertUrlErrorCount = (serviceName: string, serviceEnv: string | undefined) =>
   format({
     pathname: `/app/apm/services/${serviceName}/errors`,
     query: {

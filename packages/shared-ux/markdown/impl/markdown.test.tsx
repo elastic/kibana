@@ -33,4 +33,16 @@ describe('shared ux markdown component', () => {
     render(<Markdown markdownContent={exampleMarkdownContent} />);
     expect(screen.getByTestId('euiMarkdownEditorToolbar')).toBeInTheDocument();
   });
+
+  it('renders EuiMarkdownEditor without style passed', () => {
+    render(<Markdown style={{ color: 'red' }} data-test-subj="editor" />);
+    expect(screen.getByTestId('editor')).not.toHaveStyle({ color: 'red' });
+  });
+
+  it('renders EuiMarkdownFormat with style passed', () => {
+    render(
+      <Markdown style={{ color: 'red' }} data-test-subj="format" markdownContent="test" readOnly />
+    );
+    expect(screen.getByTestId('format')).toHaveStyle({ color: 'red' });
+  });
 });

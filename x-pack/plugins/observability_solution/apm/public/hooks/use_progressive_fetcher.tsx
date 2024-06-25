@@ -5,11 +5,7 @@
  * 2.0.
  */
 import type { OmitByValue, Assign } from 'utility-types';
-import type {
-  ClientRequestParamsOf,
-  EndpointOf,
-  ReturnOf,
-} from '@kbn/server-route-repository';
+import type { ClientRequestParamsOf, EndpointOf, ReturnOf } from '@kbn/server-route-repository';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   apmProgressiveLoading,
@@ -18,10 +14,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import type { APMServerRouteRepository } from '../../server';
 
-import type {
-  APMClient,
-  APMClientOptions,
-} from '../services/rest/create_call_apm_api';
+import type { APMClient, APMClientOptions } from '../services/rest/create_call_apm_api';
 import { FetcherResult, FETCH_STATUS, useFetcher } from './use_fetcher';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
@@ -55,27 +48,16 @@ type APMProgressiveAPIClient = <
   endpoint: TEndpoint,
   options: Omit<APMClientOptions, 'signal'> &
     WithoutProbabilityParameter<
-      ClientRequestParamsOf<
-        APMProgressivelyLoadingServerRouteRepository,
-        TEndpoint
-      >
+      ClientRequestParamsOf<APMProgressivelyLoadingServerRouteRepository, TEndpoint>
     >
 ) => Promise<ReturnOf<APMProgressivelyLoadingServerRouteRepository, TEndpoint>>;
 
-function clientWithProbability(
-  regularCallApmApi: APMClient,
-  probability: number
-) {
-  return <
-    TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>
-  >(
+function clientWithProbability(regularCallApmApi: APMClient, probability: number) {
+  return <TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>>(
     endpoint: TEndpoint,
     options: Omit<APMClientOptions, 'signal'> &
       WithoutProbabilityParameter<
-        ClientRequestParamsOf<
-          APMProgressivelyLoadingServerRouteRepository,
-          TEndpoint
-        >
+        ClientRequestParamsOf<APMProgressivelyLoadingServerRouteRepository, TEndpoint>
       >
   ) => {
     return regularCallApmApi(endpoint, {
@@ -92,9 +74,7 @@ function clientWithProbability(
 }
 
 export function useProgressiveFetcher<TReturn>(
-  callback: (
-    callApmApi: APMProgressiveAPIClient
-  ) => Promise<TReturn> | undefined,
+  callback: (callApmApi: APMProgressiveAPIClient) => Promise<TReturn> | undefined,
   dependencies: any[],
   options?: Parameters<typeof useFetcher>[2]
 ): FetcherResult<TReturn> {
@@ -106,18 +86,14 @@ export function useProgressiveFetcher<TReturn>(
     uiSettings?.get<ProgressiveLoadingQuality>(apmProgressiveLoading) ??
     ProgressiveLoadingQuality.off;
 
-  const sampledProbability = getProbabilityFromProgressiveLoadingQuality(
-    progressiveLoadingQuality
-  );
+  const sampledProbability = getProbabilityFromProgressiveLoadingQuality(progressiveLoadingQuality);
 
   const sampledFetch = useFetcher(
     (regularCallApmApi) => {
       if (progressiveLoadingQuality === ProgressiveLoadingQuality.off) {
         return;
       }
-      return callback(
-        clientWithProbability(regularCallApmApi, sampledProbability)
-      );
+      return callback(clientWithProbability(regularCallApmApi, sampledProbability));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies,
@@ -137,13 +113,10 @@ export function useProgressiveFetcher<TReturn>(
   const isError = unsampledFetch.status === FETCH_STATUS.FAILURE;
 
   const usedFetch =
-    (!isError &&
-      fetches.find((fetch) => fetch.status === FETCH_STATUS.SUCCESS)) ||
-    unsampledFetch;
+    (!isError && fetches.find((fetch) => fetch.status === FETCH_STATUS.SUCCESS)) || unsampledFetch;
 
   const status =
-    unsampledFetch.status === FETCH_STATUS.LOADING &&
-    usedFetch.status === FETCH_STATUS.SUCCESS
+    unsampledFetch.status === FETCH_STATUS.LOADING && usedFetch.status === FETCH_STATUS.SUCCESS
       ? FETCH_STATUS.LOADING
       : usedFetch.status;
 

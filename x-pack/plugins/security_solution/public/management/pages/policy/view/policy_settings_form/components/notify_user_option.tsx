@@ -167,18 +167,14 @@ export const NotifyUserOption = React.memo(
 
         <EuiSpacer size="s" />
 
-        {isEditMode ? (
-          <EuiCheckbox
-            data-test-subj={getTestId('checkbox')}
-            id={`${protection}UserNotificationCheckbox}`}
-            onChange={handleUserNotificationCheckbox}
-            checked={userNotificationSelected}
-            disabled={!isEditMode || selected === ProtectionModes.off}
-            label={NOTIFY_USER_CHECKBOX_LABEL}
-          />
-        ) : (
-          <>{NOTIFY_USER_CHECKBOX_LABEL}</>
-        )}
+        <EuiCheckbox
+          data-test-subj={getTestId('checkbox')}
+          id={`${protection}UserNotificationCheckbox}`}
+          onChange={handleUserNotificationCheckbox}
+          checked={userNotificationSelected}
+          disabled={!isEditMode || selected === ProtectionModes.off}
+          label={NOTIFY_USER_CHECKBOX_LABEL}
+        />
 
         {userNotificationSelected &&
           (isEditMode ? (

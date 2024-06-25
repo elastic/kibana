@@ -35,12 +35,8 @@ export function TransactionOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const {
-    transactionType,
-    fallbackToTransactions,
-    serverlessType,
-    serviceName,
-  } = useApmServiceContext();
+  const { transactionType, fallbackToTransactions, serverlessType, serviceName } =
+    useApmServiceContext();
 
   const history = useHistory();
 
@@ -56,8 +52,7 @@ export function TransactionOverview() {
     false
   );
 
-  const setScreenContext =
-    useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
+  const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
   useEffect(() => {
     return setScreenContext?.({

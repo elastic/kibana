@@ -19,11 +19,7 @@ import {
 } from '../../../../../common/elasticsearch_fieldnames';
 import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
-const getWildcardFilter = (
-  field: string,
-  value: string,
-  spaceId: string
-): Filter => {
+const getWildcardFilter = (field: string, value: string, spaceId: string): Filter => {
   return {
     meta: {
       index: getStaticDataViewId(spaceId),
@@ -38,11 +34,7 @@ const getWildcardFilter = (
   };
 };
 
-const getMatchFilter = (
-  field: string,
-  value: string,
-  spaceId: string
-): Filter => {
+const getMatchFilter = (field: string, value: string, spaceId: string): Filter => {
   return {
     meta: {
       index: getStaticDataViewId(spaceId),
@@ -136,49 +128,27 @@ export const useMapFilters = (): Filter[] => {
       filters.push(getMultiMatchFilter(USER_AGENT_OS, os, spaceId));
     }
     if (location) {
-      filters.push(
-        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, location, spaceId)
-      );
+      filters.push(getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, location, spaceId));
     }
     if (transactionUrl) {
-      filters.push(
-        getMultiMatchFilter(TRANSACTION_URL, transactionUrl, spaceId)
-      );
+      filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrl, spaceId));
     }
     if (browserExcluded) {
-      filters.push(
-        getMultiMatchFilter(USER_AGENT_NAME, browserExcluded, spaceId, true)
-      );
+      filters.push(getMultiMatchFilter(USER_AGENT_NAME, browserExcluded, spaceId, true));
     }
     if (deviceExcluded) {
-      filters.push(
-        getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, spaceId, true)
-      );
+      filters.push(getMultiMatchFilter(USER_AGENT_DEVICE, deviceExcluded, spaceId, true));
     }
     if (osExcluded) {
-      filters.push(
-        getMultiMatchFilter(USER_AGENT_OS, osExcluded, spaceId, true)
-      );
+      filters.push(getMultiMatchFilter(USER_AGENT_OS, osExcluded, spaceId, true));
     }
     if (locationExcluded) {
       filters.push(
-        getMultiMatchFilter(
-          CLIENT_GEO_COUNTRY_ISO_CODE,
-          locationExcluded,
-          spaceId,
-          true
-        )
+        getMultiMatchFilter(CLIENT_GEO_COUNTRY_ISO_CODE, locationExcluded, spaceId, true)
       );
     }
     if (transactionUrlExcluded) {
-      filters.push(
-        getMultiMatchFilter(
-          TRANSACTION_URL,
-          transactionUrlExcluded,
-          spaceId,
-          true
-        )
-      );
+      filters.push(getMultiMatchFilter(TRANSACTION_URL, transactionUrlExcluded, spaceId, true));
     }
     if (searchTerm) {
       filters.push(getWildcardFilter(TRANSACTION_URL, searchTerm, spaceId));

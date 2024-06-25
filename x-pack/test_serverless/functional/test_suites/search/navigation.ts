@@ -15,6 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const header = getPageObject('header');
 
   describe('navigation', function () {
     before(async () => {
@@ -36,7 +37,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // check side nav links
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
-      await svlCommonNavigation.sidenav.expectSectionOpen('search_project_nav');
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'serverlessElasticsearch',
       });
@@ -70,18 +70,22 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await expectNoPageReload();
     });
 
+    it('navigate to playground from side nav', async () => {
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'searchPlayground' });
+      await header.waitUntilLoadingHasFinished();
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Build', 'Playground']);
+
+      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'searchPlayground' });
+      expect(await browser.getCurrentUrl()).contain('/app/search_playground/chat');
+    });
+
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:triggersActions' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
-
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Index Management', 'Indices']);
-
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:ingest_pipelines' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Ingest Pipelines']);
-
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:api_keys' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['API keys']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Content',
+        'Index Management',
+        'Indices',
+      ]);
     });
 
     it('navigate management', async () => {

@@ -7,7 +7,7 @@
  */
 
 import supertest from 'supertest';
-import { createCoreContext, createHttpServer } from '@kbn/core-http-server-mocks';
+import { createCoreContext, createHttpService } from '@kbn/core-http-server-mocks';
 import type { HttpService, InternalHttpServicePreboot } from '@kbn/core-http-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 
@@ -22,7 +22,7 @@ describe('GET /api/status', () => {
   const setupServer = async () => {
     const coreContext = createCoreContext({ coreId });
 
-    server = createHttpServer(coreContext);
+    server = createHttpService(coreContext);
     httpPreboot = await server.preboot({
       context: contextServiceMock.createPrebootContract(),
     });

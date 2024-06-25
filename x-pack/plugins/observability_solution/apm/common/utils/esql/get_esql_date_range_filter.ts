@@ -8,11 +8,8 @@
 import moment from 'moment';
 import { string } from '.';
 
-export function getEsqlDateRangeFilter(
-  from: number | string,
-  to: number | string
-) {
-  return `@timestamp >= ${string`${moment(
-    from
-  ).toISOString()}`} AND @timestamp < ${string`${moment(to).toISOString()}`}`;
+export function getEsqlDateRangeFilter(from: number | string, to: number | string) {
+  return `@timestamp >= ${string`${moment(from).toISOString()}`} AND @timestamp < ${string`${moment(
+    to
+  ).toISOString()}`}`;
 }

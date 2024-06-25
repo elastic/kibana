@@ -15,7 +15,7 @@ import { Services } from '../services';
 
 export interface ProfilingEmbeddablesDependencies {
   coreStart: CoreStart;
-  coreSetup: CoreSetup;
+  coreSetup: CoreSetup<ProfilingPluginPublicStartDeps>;
   pluginsStart: ProfilingPluginPublicStartDeps;
   pluginsSetup: ProfilingPluginPublicSetupDeps;
   profilingFetchServices: Services;

@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +22,21 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerBulkCreateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/_bulk_create',
+      options: {
+        access,
+        description: `Create saved objects`,
+      },
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),
@@ -58,30 +64,30 @@ export const registerBulkCreateRoute = (
         ),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/_bulk_create',
-        req,
+        request,
         logger,
       });
-      const { overwrite } = req.query;
+      const { overwrite } = request.query;
+      const types = [...new Set(request.body.map(({ type }) => type))];
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsBulkCreate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsBulkCreate({ request, types }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
-      const typesToCheck = [...new Set(req.body.map(({ type }) => type))];
       if (!allowHttpApiAccess) {
-        throwIfAnyTypeNotVisibleByAPI(typesToCheck, savedObjects.typeRegistry);
+        throwIfAnyTypeNotVisibleByAPI(types, savedObjects.typeRegistry);
       }
 
-      const result = await savedObjects.client.bulkCreate(req.body, {
+      const result = await savedObjects.client.bulkCreate(request.body, {
         overwrite,
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

@@ -18,10 +18,7 @@ import {
 } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
 import { ChartBase } from './types';
-import {
-  environmentQuery,
-  serviceNodeNameQuery,
-} from '../../../common/utils/environment_query';
+import { environmentQuery, serviceNodeNameQuery } from '../../../common/utils/environment_query';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { ChartType, Coordinate, YUnit } from '../../../typings/timeseries';
 import { APMConfig } from '../..';
@@ -123,10 +120,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
     },
   };
 
-  const { hits, aggregations } = await apmEventClient.search(
-    operationName,
-    params
-  );
+  const { hits, aggregations } = await apmEventClient.search(operationName, params);
   const timeseriesData = aggregations?.timeseriesData;
 
   return {
@@ -145,9 +139,7 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
               title: chartBase.series[seriesKey].title,
               key: seriesKey,
               type: chartBase.type,
-              color:
-                chartBase.series[seriesKey].color ||
-                getVizColorForIndex(i, theme),
+              color: chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
               overallValue,
               data:
                 timeseriesData?.buckets.map((bucket) => {

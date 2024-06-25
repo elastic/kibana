@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { estypes } from '@elastic/elasticsearch';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
@@ -19,9 +15,7 @@ import {
 } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 
-function getSearchRequest(
-  filters: estypes.QueryDslQueryContainer[]
-): APMEventESSearchRequest {
+function getSearchRequest(filters: estypes.QueryDslQueryContainer[]): APMEventESSearchRequest {
   return {
     apm: {
       events: [ProcessorEvent.metric, ProcessorEvent.transaction],
@@ -66,10 +60,7 @@ export async function getServicesWithDashboards({
 
   if (allSearches.length > 0) {
     const allResponses = (
-      await apmEventClient.msearch(
-        'get_services_with_dashboards',
-        ...allSearches
-      )
+      await apmEventClient.msearch('get_services_with_dashboards', ...allSearches)
     ).responses;
 
     for (let index = 0; index < allLinkedCustomDashboards.length; index++) {

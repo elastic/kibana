@@ -26,14 +26,9 @@ import {
   UnsupportedApmServerSchema,
 } from './get_unsupported_apm_server_schema';
 import { isSuperuser } from './is_superuser';
-import {
-  runMigrationCheck,
-  RunMigrationCheckResponse,
-} from './run_migration_check';
+import { runMigrationCheck, RunMigrationCheckResponse } from './run_migration_check';
 
-function throwNotFoundIfFleetMigrationNotAvailable(
-  featureFlags: ApmFeatureFlags
-): void {
+function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags): void {
   if (!featureFlags.migrationToFleetAvailable) {
     throw Boom.notFound();
   }
@@ -94,9 +89,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
 const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
   options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
+  handler: async (resources): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { context } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
@@ -148,23 +141,16 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
 
-    const [
-      savedObjectsClient,
-      coreStart,
-      fleetPluginStart,
-      securityPluginStart,
-      apmIndices,
-    ] = await Promise.all([
-      (await context.core).savedObjects.client,
-      resources.core.start(),
-      plugins.fleet.start(),
-      plugins.security.start(),
-      resources.getApmIndices(),
-    ]);
+    const [savedObjectsClient, coreStart, fleetPluginStart, securityPluginStart, apmIndices] =
+      await Promise.all([
+        (await context.core).savedObjects.client,
+        resources.core.start(),
+        plugins.fleet.start(),
+        plugins.security.start(),
+        resources.getApmIndices(),
+      ]);
 
-    const esClient = coreStart.elasticsearch.client.asScoped(
-      resources.request
-    ).asCurrentUser;
+    const esClient = coreStart.elasticsearch.client.asScoped(resources.request).asCurrentUser;
     const cloudPluginSetup = plugins.cloud?.setup;
 
     const hasRequiredRole = isSuperuser({ securityPluginStart, request });
@@ -172,9 +158,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient = await createInternalESClientWithResources(resources);
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({
       cloudPluginSetup,
       fleetPluginStart,
@@ -219,7 +203,6 @@ const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
 const CLOUD_SUPERUSER_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.cloud_apm_package_policy.requiredRoleOnCloud',
   {
-    defaultMessage:
-      'Operation only permitted by Elastic Cloud users with the superuser role.',
+    defaultMessage: 'Operation only permitted by Elastic Cloud users with the superuser role.',
   }
 );

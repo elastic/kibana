@@ -12,7 +12,7 @@ import React from 'react';
 
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const SAMPLE_PANEL_ACTION = 'samplePanelAction';
 
@@ -29,7 +29,9 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
       if (!embeddable) {
         return;
       }
-      const openFlyout = (await getStartServices())[0].overlays.openFlyout;
+      const coreStart = (await getStartServices())[0];
+      const { overlays, ...startServices } = coreStart;
+      const openFlyout = overlays.openFlyout;
       openFlyout(
         toMountPoint(
           <React.Fragment>
@@ -41,7 +43,8 @@ export function createSamplePanelAction(getStartServices: CoreSetup['getStartSer
             <EuiFlyoutBody>
               <h3 data-test-subj="samplePanelActionBody">This is a sample action</h3>
             </EuiFlyoutBody>
-          </React.Fragment>
+          </React.Fragment>,
+          startServices
         ),
         {
           'data-test-subj': 'samplePanelActionFlyout',

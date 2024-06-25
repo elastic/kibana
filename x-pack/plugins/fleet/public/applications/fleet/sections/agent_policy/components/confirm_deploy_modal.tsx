@@ -16,8 +16,17 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   onConfirm: () => void;
   onCancel: () => void;
   agentCount: number;
-  agentPolicy: AgentPolicy;
-}> = ({ onConfirm, onCancel, agentCount, agentPolicy }) => {
+  agentPolicies: AgentPolicy[];
+  agentPoliciesToAdd?: string[];
+  agentPoliciesToRemove?: string[];
+}> = ({
+  onConfirm,
+  onCancel,
+  agentCount,
+  agentPolicies,
+  agentPoliciesToAdd = [],
+  agentPoliciesToRemove = [],
+}) => {
   return (
     <EuiConfirmModal
       title={
@@ -42,28 +51,68 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
       }
       buttonColor="primary"
     >
-      <EuiCallOut
-        iconType="iInCircle"
-        title={i18n.translate('xpack.fleet.agentPolicy.confirmModalCalloutTitle', {
-          defaultMessage:
-            'This action will update {agentCount, plural, one {# agent} other {# agents}}',
-          values: {
-            agentCount,
-          },
-        })}
-      >
-        <div className="eui-textBreakWord">
-          <FormattedMessage
-            id="xpack.fleet.agentPolicy.confirmModalCalloutDescription"
-            defaultMessage="Fleet has detected that the selected agent policy, {policyName}, is already in use by
+      {agentCount > 0 ? (
+        <EuiCallOut
+          iconType="iInCircle"
+          title={i18n.translate('xpack.fleet.agentPolicy.confirmModalCalloutTitle', {
+            defaultMessage:
+              'This action will update {agentCount, plural, one {# agent} other {# agents}}',
+            values: {
+              agentCount,
+            },
+          })}
+        >
+          <div className="eui-textBreakWord">
+            <FormattedMessage
+              id="xpack.fleet.agentPolicy.confirmModalCalloutDescription"
+              defaultMessage="Fleet has detected that the selected agent policies, {policyNames}, are already in use by
             some of your agents. As a result of this action, Fleet will deploy updates to all agents
-            that use this policy."
-            values={{
-              policyName: <b>{agentPolicy.name}</b>,
-            }}
-          />
-        </div>
-      </EuiCallOut>
+            that use these policies."
+              values={{
+                policyNames: <b>{agentPolicies.map((policy) => policy.name).join(', ')}</b>,
+              }}
+            />
+          </div>
+        </EuiCallOut>
+      ) : (
+        <EuiCallOut
+          data-test-subj="confirmAddRemovePoliciesCallout"
+          iconType="iInCircle"
+          title={i18n.translate('xpack.fleet.agentPolicy.confirmModalPoliciesCalloutTitle', {
+            defaultMessage: 'This action will update the selected agent policies',
+            values: {
+              agentCount,
+            },
+          })}
+        >
+          {agentPoliciesToAdd.length > 0 && (
+            <div className="eui-textBreakWord">
+              <FormattedMessage
+                id="xpack.fleet.agentPolicy.confirmModalPoliciesAddCalloutDescription"
+                defaultMessage="Agent policies that will be updated to use this integration policy:"
+              />
+              <ul>
+                {agentPoliciesToAdd.map((policy) => (
+                  <li key={policy}>{policy}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {agentPoliciesToRemove.length > 0 && (
+            <div className="eui-textBreakWord">
+              <FormattedMessage
+                id="xpack.fleet.agentPolicy.confirmModalPoliciesRemoveCalloutDescription"
+                defaultMessage="Agent policies that will be updated to remove this integration policy:"
+              />
+              <ul>
+                {agentPoliciesToRemove.map((policy) => (
+                  <li key={policy}>{policy}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </EuiCallOut>
+      )}
       <EuiSpacer size="l" />
       <FormattedMessage
         id="xpack.fleet.agentPolicy.confirmModalDescription"

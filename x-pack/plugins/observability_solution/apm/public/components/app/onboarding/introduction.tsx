@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBetaBadge,
-  EuiImage,
-  EuiMarkdownFormat,
-  EuiPageHeader,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiImage, EuiMarkdownFormat, EuiPageHeader } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
@@ -36,29 +31,23 @@ export function Introduction({ isBeta, guideLink }: IntroductionProps) {
       size="l"
       allowFullScreen
       fullScreenIconColor="dark"
-      alt={i18n.translate(
-        'xpack.apm.onboarding.introduction.imageAltDescription',
-        {
-          defaultMessage: 'screenshot of primary dashboard.',
-        }
-      )}
+      alt={i18n.translate('xpack.apm.onboarding.introduction.imageAltDescription', {
+        defaultMessage: 'screenshot of primary dashboard.',
+      })}
       url={previewImage}
     />,
   ];
 
-  const description = i18n.translate(
-    'xpack.apm.onboarding.specProvider.longDescription',
-    {
-      defaultMessage:
-        'Application Performance Monitoring (APM) collects in-depth \
+  const description = i18n.translate('xpack.apm.onboarding.specProvider.longDescription', {
+    defaultMessage:
+      'Application Performance Monitoring (APM) collects in-depth \
 performance metrics and errors from inside your application. \
 It allows you to monitor the performance of thousands of applications in real time. \
 [Learn more]({learnMoreLink}).',
-      values: {
-        learnMoreLink: guideLink,
-      },
-    }
-  );
+    values: {
+      learnMoreLink: guideLink,
+    },
+  });
 
   return (
     <>

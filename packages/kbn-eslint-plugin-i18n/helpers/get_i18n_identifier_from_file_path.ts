@@ -12,6 +12,7 @@ import { findKey } from 'lodash';
 
 export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
+
   const relativePathToFile = dir.replace(cwd, '');
 
   // We need to match the path of the file that is being worked in with the path
@@ -26,7 +27,7 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
     (el) => el === 'public' || el === 'server' || el === 'common'
   );
 
-  const path = relativePathArray.slice(0, pluginNameIndex).join('/');
+  const path = relativePathArray.slice(0, pluginNameIndex).join('/').replace('x-pack/', '');
 
   const xpackRC = resolve(join(__dirname, '../../../'), 'x-pack/.i18nrc.json');
   const rootRC = resolve(join(__dirname, '../../../'), '.i18nrc.json');

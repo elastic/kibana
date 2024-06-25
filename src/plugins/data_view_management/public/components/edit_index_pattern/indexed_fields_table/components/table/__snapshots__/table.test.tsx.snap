@@ -4,17 +4,16 @@ exports[`Table render conflict summary modal  1`] = `
 <React.Fragment>
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="This field has a type conflict"
         id="indexPatternManagement.editIndexPattern.fields.conflictModal.title"
-        values={Object {}}
       />
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
     <EuiText>
       <p>
-        <FormattedMessage
+        <Memo(MemoizedFormattedMessage)
           defaultMessage="The type of the {fieldName} field changes across indices and might not be available for search, visualizations, and other analysis."
           id="indexPatternManagement.editIndexPattern.fields.conflictModal.description"
           values={
@@ -57,7 +56,6 @@ exports[`Table render conflict summary modal  1`] = `
             token="euiBasicTable.noItemsMessage"
           />
         }
-        responsive={true}
         rowHeader="firstName"
         tableCaption="Demo of EuiBasicTable"
         tableLayout="auto"
@@ -69,10 +67,9 @@ exports[`Table render conflict summary modal  1`] = `
       fill={true}
       onClick={[Function]}
     >
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Close"
         id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
-        values={Object {}}
       />
     </EuiButton>
   </EuiModalFooter>
@@ -304,7 +301,6 @@ exports[`Table should render normally 1`] = `
       ],
     }
   }
-  responsive={true}
   searchFormat="eql"
   sorting={
     Object {

@@ -350,7 +350,7 @@
         "label": "DimensionTrigger",
         "description": [],
         "signature": [
-          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+          "({ id, label, color, dataTestSubj, }: { label: React.ReactNode; id?: string | undefined; color?: \"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
           "Property",
           ".Color | undefined; dataTestSubj?: string | undefined; }) => JSX.Element"
         ],
@@ -405,7 +405,7 @@
                 "label": "color",
                 "description": [],
                 "signature": [
-                  "\"warning\" | \"success\" | \"default\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
+                  "\"default\" | \"warning\" | \"success\" | \"subdued\" | \"accent\" | \"danger\" | \"ghost\" | ",
                   "Property",
                   ".Color | undefined"
                 ],
@@ -948,15 +948,13 @@
                 "label": "dataView",
                 "description": [],
                 "signature": [
-                  "{ fields: ",
                   {
                     "pluginId": "@kbn/es-query",
                     "scope": "common",
                     "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.DataViewFieldBase",
-                    "text": "DataViewFieldBase"
-                  },
-                  "[]; id?: string | undefined; title: string; }"
+                    "section": "def-common.DataViewBase",
+                    "text": "DataViewBase"
+                  }
                 ],
                 "path": "packages/kbn-visualization-ui-components/components/query_input/filter_query_input.tsx",
                 "deprecated": false,

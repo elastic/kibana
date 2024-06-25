@@ -192,6 +192,22 @@
           },
           {
             "parentPluginId": "savedObjects",
+            "id": "def-public.SavedObjectSaveModal.componentDidMount",
+            "type": "Function",
+            "tags": [],
+            "label": "componentDidMount",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "savedObjects",
             "id": "def-public.SavedObjectSaveModal.render",
             "type": "Function",
             "tags": [],
@@ -239,7 +255,9 @@
           },
           ">, \"id\" | \"title\" | \"getDisplayName\" | \"lastSavedTitle\" | \"copyOnSave\" | \"getEsType\">, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: (() => void) | undefined, services: Pick<",
           "SavedObjectKibanaServices",
-          ", \"overlays\" | \"savedObjectsClient\">) => Promise<true>"
+          ", \"overlays\" | \"savedObjectsClient\">, startServices: ",
+          "StartServices",
+          ") => Promise<true>"
         ],
         "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
         "deprecated": false,
@@ -317,6 +335,21 @@
               "Pick<",
               "SavedObjectKibanaServices",
               ", \"overlays\" | \"savedObjectsClient\">"
+            ],
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.checkForDuplicateTitle.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "startServices",
+            "description": [],
+            "signature": [
+              "StartServices"
             ],
             "path": "src/plugins/saved_objects/public/saved_object/helpers/check_for_duplicate_title.ts",
             "deprecated": false,
@@ -462,7 +495,9 @@
             "section": "def-common.OverlayStart",
             "text": "OverlayStart"
           },
-          "; }) => Promise<",
+          "; }, startServices: ",
+          "StartServices",
+          ") => Promise<",
           {
             "pluginId": "@kbn/core-saved-objects-api-browser",
             "scope": "common",
@@ -633,6 +668,21 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "savedObjects",
+            "id": "def-public.saveWithConfirmation.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "startServices",
+            "description": [],
+            "signature": [
+              "StartServices"
+            ],
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/save_with_confirmation.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [
@@ -648,7 +698,7 @@
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{}> | undefined) => void"
+          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, Wrapper: React.FC<{ children?: React.ReactNode; }> | undefined) => void"
         ],
         "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
@@ -677,7 +727,7 @@
             "label": "Wrapper",
             "description": [],
             "signature": [
-              "React.FC<{}> | undefined"
+              "React.FC<{ children?: React.ReactNode; }> | undefined"
             ],
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,

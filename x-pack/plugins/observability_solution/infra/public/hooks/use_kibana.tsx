@@ -6,7 +6,14 @@
  */
 
 import type { PropsOf } from '@elastic/eui';
-import React, { useMemo, createElement, createContext, useContext } from 'react';
+import React, {
+  useMemo,
+  createElement,
+  createContext,
+  useContext,
+  FC,
+  PropsWithChildren,
+} from 'react';
 import { CoreStart } from '@kbn/core/public';
 import {
   createKibanaReactContext,
@@ -61,7 +68,10 @@ export const useKibanaEnvironmentContextProvider = (kibanaEnvironment?: KibanaEn
     [kibanaEnvironment]
   );
 
-  const Provider: React.FC<{ kibanaEnv?: KibanaEnvContext }> = ({ kibanaEnv = {}, children }) => {
+  const Provider: FC<PropsWithChildren<{ kibanaEnv?: KibanaEnvContext }>> = ({
+    kibanaEnv = {},
+    children,
+  }) => {
     const newProvider = createElement(KibanaEnvironmentContext.Provider, {
       value: { ...kibanaEnv, ...value },
       children,

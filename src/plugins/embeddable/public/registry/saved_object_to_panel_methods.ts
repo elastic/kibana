@@ -15,6 +15,10 @@ type SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueInput> = (
 
 export const savedObjectToPanel: Record<string, SavedObjectToPanelMethod<any, any>> = {};
 
+/**
+ * @deprecated
+ * React embeddables should register their saved object types with the registerReactEmbeddableSavedObject registry.
+ */
 export const registerSavedObjectToPanelMethod = <TSavedObjectAttributes, TByValueAttributes>(
   savedObjectType: string,
   method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>

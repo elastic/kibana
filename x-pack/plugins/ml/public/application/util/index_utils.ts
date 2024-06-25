@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
-import { getToastNotifications } from './dependency_cache';
 
 export interface DataViewAndSavedSearch {
   savedSearch: SavedSearch | null;
@@ -46,31 +44,6 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearch) {
     query: savedSearch.searchSource.getField('query')! as Query,
     filter: savedSearch.searchSource.getField('filter') as Filter[],
   };
-}
-
-/**
- * Returns true if the index passed in is time based
- * an optional flag will trigger the display a notification at the top of the page
- * warning that the index is not time based
- */
-export function timeBasedIndexCheck(dataView: DataView, showNotification = false) {
-  if (!dataView.isTimeBased()) {
-    if (showNotification) {
-      const toastNotifications = getToastNotifications();
-      toastNotifications.addWarning({
-        title: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationTitle', {
-          defaultMessage: 'The data view {dataViewIndexPattern} is not based on a time series',
-          values: { dataViewIndexPattern: dataView.getIndexPattern() },
-        }),
-        text: i18n.translate('xpack.ml.dataViewNotBasedOnTimeSeriesNotificationDescription', {
-          defaultMessage: 'Anomaly detection only runs over time-based indices',
-        }),
-      });
-    }
-    return false;
-  } else {
-    return true;
-  }
 }
 
 /**

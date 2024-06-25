@@ -17,6 +17,7 @@ import {
 import lodash from 'lodash';
 import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { RowHeightMode } from './row_height_settings';
 
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
 
@@ -26,9 +27,9 @@ const renderDisplaySettings = (
   return render(
     <UnifiedDataTableAdditionalDisplaySettings
       sampleSize={10}
-      rowHeight="custom"
+      rowHeight={RowHeightMode.custom}
       rowHeightLines={10}
-      headerRowHeight="custom"
+      headerRowHeight={RowHeightMode.custom}
       headerRowHeightLines={5}
       {...props}
     />
@@ -44,9 +45,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         <UnifiedDataTableAdditionalDisplaySettings
           sampleSize={10}
           onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight="custom"
+          rowHeight={RowHeightMode.custom}
           rowHeightLines={10}
-          headerRowHeight="custom"
+          headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
         />
       );
@@ -80,9 +81,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
           maxAllowedSampleSize={500}
           sampleSize={50}
           onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight="custom"
+          rowHeight={RowHeightMode.custom}
           rowHeightLines={10}
-          headerRowHeight="custom"
+          headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
         />
       );
@@ -114,9 +115,9 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
         <UnifiedDataTableAdditionalDisplaySettings
           sampleSize={200}
           onChangeSampleSize={onChangeSampleSizeMock}
-          rowHeight="custom"
+          rowHeight={RowHeightMode.custom}
           rowHeightLines={10}
-          headerRowHeight="custom"
+          headerRowHeight={RowHeightMode.custom}
           headerRowHeightLines={5}
         />
       );
@@ -139,6 +140,42 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
 
       expect(onChangeSampleSizeMock).not.toHaveBeenCalled();
     });
+
+    it('should only render integers when a decimal value is provided', async () => {
+      const invalidDecimalValue = 6.11;
+      const validIntegerValue = 6;
+
+      const onChangeSampleSizeMock = jest.fn();
+
+      const component = mountWithIntl(
+        <UnifiedDataTableAdditionalDisplaySettings
+          maxAllowedSampleSize={500}
+          sampleSize={50}
+          onChangeSampleSize={onChangeSampleSizeMock}
+          rowHeight={RowHeightMode.custom}
+          rowHeightLines={10}
+          headerRowHeight={RowHeightMode.custom}
+          headerRowHeightLines={5}
+        />
+      );
+      const input = findTestSubject(component, 'unifiedDataTableSampleSizeInput').last();
+      expect(input.prop('value')).toBe(50);
+
+      await act(async () => {
+        input.simulate('change', {
+          target: {
+            value: invalidDecimalValue,
+          },
+        });
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      component.update();
+
+      expect(
+        findTestSubject(component, 'unifiedDataTableSampleSizeInput').last().prop('value')
+      ).toBe(validIntegerValue);
+    });
   });
 
   describe('rowHeight', () => {
@@ -159,7 +196,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       const onChangeRowHeight = jest.fn();
       const onChangeRowHeightLines = jest.fn();
       renderDisplaySettings({
-        rowHeight: 'custom',
+        rowHeight: RowHeightMode.custom,
         onChangeRowHeight,
         onChangeRowHeightLines,
       });
@@ -188,7 +225,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', function () {
       const onChangeHeaderRowHeight = jest.fn();
       const onChangeHeaderRowHeightLines = jest.fn();
       renderDisplaySettings({
-        headerRowHeight: 'custom',
+        headerRowHeight: RowHeightMode.custom,
         onChangeHeaderRowHeight,
         onChangeHeaderRowHeightLines,
       });

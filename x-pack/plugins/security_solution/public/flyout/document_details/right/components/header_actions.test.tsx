@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { SHARE_BUTTON_TEST_ID, CHAT_BUTTON_TEST_ID } from './test_ids';
 import { HeaderActions } from './header_actions';
 import { useAssistant } from '../hooks/use_assistant';
@@ -31,18 +31,26 @@ const alertUrl = 'https://example.com/alert';
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderHeaderActions = (contextValue: RightPanelContext) =>
+const renderHeaderActions = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProvidersComponent>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <HeaderActions />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProvidersComponent>
   );
 
 describe('<HeaderAction />', () => {
+  beforeAll(() => {
+    Object.defineProperty(window, 'location', {
+      value: {
+        search: '?',
+      },
+    });
+  });
+
   beforeEach(() => {
     window.location.search = '?';
     jest.mocked(useGetAlertDetailsFlyoutLink).mockReturnValue(alertUrl);

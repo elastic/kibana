@@ -10,16 +10,11 @@ import { EuiCodeBlock, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 import { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import React from 'react';
 import { AgentConfigInstructions } from '../agent_config_instructions';
-import {
-  INSTRUCTION_VARIANT,
-  AgentInstructions,
-} from '../instruction_variants';
+import { INSTRUCTION_VARIANT, AgentInstructions } from '../instruction_variants';
 import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
-export const createFlaskAgentInstructions = (
-  commonOptions: AgentInstructions
-): EuiStepProps[] => {
+export const createFlaskAgentInstructions = (commonOptions: AgentInstructions): EuiStepProps[] => {
   const {
     baseUrl,
     apmServerUrl,
@@ -37,8 +32,7 @@ export const createFlaskAgentInstructions = (
         <>
           <EuiMarkdownFormat>
             {i18n.translate('xpack.apm.onboarding.flask.install.textPre', {
-              defaultMessage:
-                'Install the APM agent for Python as a dependency.',
+              defaultMessage: 'Install the APM agent for Python as a dependency.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
@@ -84,8 +78,7 @@ APM services are created programmatically based on the `SERVICE_NAME`.',
           <EuiSpacer />
           <EuiMarkdownFormat>
             {i18n.translate('xpack.apm.onboarding.flask.configure.textPost', {
-              defaultMessage:
-                'See the [documentation]({documentationLink}) for advanced usage.',
+              defaultMessage: 'See the [documentation]({documentationLink}) for advanced usage.',
               values: {
                 documentationLink: `${baseUrl}guide/en/apm/agent/python/current/flask-support.html`,
               },

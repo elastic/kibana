@@ -10,9 +10,10 @@ import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import { OptionsListEmbeddableFactory } from '../..';
 import {
   OptionsListEmbeddableInput,
@@ -39,6 +40,25 @@ describe('Data control editor', () => {
     componentOptions?: Partial<EditControlProps>;
     explicitInput?: Partial<ControlGroupInput>;
   }
+
+  const stubDataView = createStubDataView({
+    spec: {
+      id: 'logstash-*',
+      fields: {
+        ...stubFieldSpecMap,
+        'machine.os.raw': {
+          name: 'machine.os.raw',
+          customLabel: 'OS',
+          type: 'string',
+          esTypes: ['keyword'],
+          aggregatable: true,
+          searchable: true,
+        },
+      },
+      title: 'logstash-*',
+      timeFieldName: '@timestamp',
+    },
+  });
 
   pluginServices.getServices().dataViews.get = jest.fn().mockResolvedValue(stubDataView);
   pluginServices.getServices().dataViews.getIdsWithTitle = jest

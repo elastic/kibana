@@ -37,7 +37,6 @@ export type {
   AlertsTableFlyoutBaseProps,
   RuleEventLogListProps,
   AlertTableFlyoutComponent,
-  GetRenderCellValue,
   FieldBrowserOptions,
   FieldBrowserProps,
   RuleDefinitionProps,
@@ -103,7 +102,7 @@ export function plugin(context: PluginInitializerContext) {
 }
 
 export { useKibana } from './common';
-export type { AggregationType, Comparator, ValidNormalizedTypes } from './common';
+export type { AggregationType, ValidNormalizedTypes } from './common';
 
 export {
   WhenExpression,
@@ -120,7 +119,6 @@ export {
   getTimeFieldOptions,
   getTimeOptions,
   GroupByExpression,
-  COMPARATORS,
   connectorDeprecatedMessage,
   deprecatedMessage,
 } from './common';
@@ -143,7 +141,7 @@ export { suspendedComponentWithProps } from './application/lib/suspended_compone
 export { loadActionTypes } from './application/lib/action_connector_api/connector_types';
 export { TIME_UNITS } from './application/constants';
 export { getTimeUnitLabel } from './common/lib/get_time_unit_label';
-export type { TriggersAndActionsUiServices } from './application/app';
+export type { TriggersAndActionsUiServices } from './application/rules_app';
 export type { BulkOperationAttributes, BulkOperationResponse } from './types';
 
 export const getNotifyWhenOptions = async () => {

@@ -29,6 +29,18 @@ export class SpaceSelectorPageObject extends FtrService {
     });
   }
 
+  async getSpaceCardAnchor(spaceId: string) {
+    return await this.retry.try(async () => {
+      this.log.info(`SpaceSelectorPage:getSpaceCardAnchor(${spaceId})`);
+      const testSubjId = `space-card-${spaceId}`;
+      const anchorElement = await this.find.byCssSelector(
+        `[data-test-subj="${testSubjId}"] .euiCard__titleAnchor`
+      );
+
+      return anchorElement;
+    });
+  }
+
   async expectHomePage(spaceId: string) {
     return await this.expectRoute(spaceId, `/app/home#/`);
   }
@@ -106,6 +118,22 @@ export class SpaceSelectorPageObject extends FtrService {
 
   async setColorinPicker(hexValue: string) {
     await this.testSubjects.setValue('euiColorPickerAnchor', hexValue);
+  }
+
+  async openSolutionViewSelect() {
+    const solutionViewSelect = await this.testSubjects.find('solutionViewSelect');
+    const classes = await solutionViewSelect.getAttribute('class');
+
+    const isOpen = classes?.includes('isOpen') ?? false;
+    if (!isOpen) {
+      await solutionViewSelect.click();
+    }
+  }
+
+  async changeSolutionView(solution: 'es' | 'oblt' | 'security' | 'classic') {
+    await this.openSolutionViewSelect();
+    const serialized = solution.charAt(0).toUpperCase() + solution.slice(1);
+    await this.testSubjects.click(`solutionView${serialized}Option`);
   }
 
   async clickShowFeatures() {
@@ -193,6 +221,11 @@ export class SpaceSelectorPageObject extends FtrService {
   }
 
   async confirmDeletingSpace() {
+    await this.testSubjects.click('confirmModalConfirmButton');
+  }
+
+  // Generic for any confirm modal
+  async confirmModal() {
     await this.testSubjects.click('confirmModalConfirmButton');
   }
 

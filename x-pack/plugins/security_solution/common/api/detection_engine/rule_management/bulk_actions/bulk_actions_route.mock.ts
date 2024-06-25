@@ -8,7 +8,7 @@
 import type { PerformBulkActionRequestBody } from './bulk_actions_route.gen';
 import { BulkActionEditTypeEnum, BulkActionTypeEnum } from './bulk_actions_route.gen';
 
-export const getPerformBulkActionSchemaMock = (): PerformBulkActionRequestBody => ({
+export const getBulkDisableRuleActionSchemaMock = (): PerformBulkActionRequestBody => ({
   query: '',
   ids: undefined,
   action: BulkActionTypeEnum.disable,

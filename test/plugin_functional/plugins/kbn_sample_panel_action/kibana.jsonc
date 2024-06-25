@@ -13,8 +13,6 @@
       "uiActions",
       "embeddable"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

@@ -16,7 +16,7 @@ function generator(options: TemplateContext) {
   const dir = options.ironbank ? 'ironbank' : 'base';
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
   return Mustache.render(template.toString(), {
-    packageManager: options.baseImage === 'ubi' ? 'microdnf' : 'apt-get',
+    chainguard: options.baseImage === 'chainguard',
     ubi: options.baseImage === 'ubi',
     ubuntu: options.baseImage === 'ubuntu',
     opensslLegacyProvider: !(options.cloud || options.serverless || options.fips),

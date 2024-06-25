@@ -24,11 +24,15 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
   testLeadingControlColumn,
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { CELL_CLASS } from '../utils/get_render_cell_value';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -80,14 +84,14 @@ function getProps(): UnifiedDataTableProps {
   };
 }
 
-async function getComponent(props: UnifiedDataTableProps = getProps()) {
-  const Proxy = (innerProps: UnifiedDataTableProps) => (
-    <KibanaContextProvider services={servicesMock}>
-      <UnifiedDataTable {...innerProps} />
-    </KibanaContextProvider>
-  );
+const DataTable = (props: Partial<UnifiedDataTableProps>) => (
+  <KibanaContextProvider services={servicesMock}>
+    <UnifiedDataTable {...getProps()} {...props} />
+  </KibanaContextProvider>
+);
 
-  const component = mountWithIntl(<Proxy {...props} />);
+async function getComponent(props: UnifiedDataTableProps = getProps()) {
+  const component = mountWithIntl(<DataTable {...props} />);
   await act(async () => {
     // needed by cell actions to complete async loading
     component.update();
@@ -96,7 +100,7 @@ async function getComponent(props: UnifiedDataTableProps = getProps()) {
 }
 
 function getSelectedDocNr(component: ReactWrapper<UnifiedDataTableProps>) {
-  const gridSelectionBtn = findTestSubject(component, 'dscGridSelectionBtn');
+  const gridSelectionBtn = findTestSubject(component, 'unifiedDataTableSelectionBtn');
   if (!gridSelectionBtn.length) {
     return 0;
   }
@@ -153,7 +157,7 @@ describe('UnifiedDataTable', () => {
       await toggleDocSelection(component, esHitsMock[0]);
       await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridClearSelectedDocuments').simulate('click');
       expect(getSelectedDocNr(component)).toBe(0);
     });
@@ -162,10 +166,10 @@ describe('UnifiedDataTable', () => {
       await toggleDocSelection(component, esHitsMock[0]);
       await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       component.update();
       findTestSubject(component, 'dscGridShowAllDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(5);
@@ -175,7 +179,7 @@ describe('UnifiedDataTable', () => {
       await toggleDocSelection(component, esHitsMock[0]);
       await toggleDocSelection(component, esHitsMock[1]);
       expect(getSelectedDocNr(component)).toBe(2);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(2);
       component.setProps({
@@ -199,7 +203,7 @@ describe('UnifiedDataTable', () => {
 
     test('showing only selected documents and remove filter deselecting each doc manually', async () => {
       await toggleDocSelection(component, esHitsMock[0]);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       findTestSubject(component, 'dscGridShowSelectedDocuments').simulate('click');
       expect(getDisplayedDocNr(component)).toBe(1);
       await toggleDocSelection(component, esHitsMock[0]);
@@ -210,7 +214,7 @@ describe('UnifiedDataTable', () => {
 
     test('copying selected documents to clipboard', async () => {
       await toggleDocSelection(component, esHitsMock[0]);
-      findTestSubject(component, 'dscGridSelectionBtn').simulate('click');
+      findTestSubject(component, 'unifiedDataTableSelectionBtn').simulate('click');
       expect(component.find(EuiCopy).prop('textToCopy')).toMatchInlineSnapshot(
         `"[{\\"_index\\":\\"i\\",\\"_id\\":\\"1\\",\\"_score\\":1,\\"_type\\":\\"_doc\\",\\"_source\\":{\\"date\\":\\"2020-20-01T12:12:12.123\\",\\"message\\":\\"test1\\",\\"bytes\\":20}}]"`
       );
@@ -729,6 +733,7 @@ describe('UnifiedDataTable', () => {
       expect(grid.hasClass('euiDataGrid--bordersNone')).toBeTruthy();
     });
   });
+
   describe('rowLineHeightOverride', () => {
     it('should render the grid with the default row line height if no rowLineHeightOverride is provided', async () => {
       const component = await getComponent({
@@ -750,6 +755,95 @@ describe('UnifiedDataTable', () => {
       expect(gridRowCell.prop('style')).toMatchObject({
         lineHeight: '24px',
       });
+    });
+  });
+
+  describe('document comparison', () => {
+    const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
+      render(
+        <IntlProvider locale="en">
+          <DataTable {...props} />
+        </IntlProvider>
+      );
+    };
+
+    const getSelectedDocumentsButton = () => screen.queryByRole('button', { name: /Selected/ });
+
+    const selectDocument = (document: EsHitRecord) =>
+      userEvent.click(screen.getByTestId(`dscGridSelectDoc-${getDocId(document)}`));
+
+    const getCompareDocumentsButton = () => screen.queryByRole('button', { name: /Compare/ });
+
+    const goToComparisonMode = async () => {
+      selectDocument(esHitsMock[0]);
+      selectDocument(esHitsMock[1]);
+      userEvent.click(getCompareDocumentsButton()!);
+      await screen.findByText('Comparing 2 documents');
+    };
+
+    const getFullScreenButton = () => screen.queryByTestId('dataGridFullScreenButton');
+
+    const getFieldColumns = () =>
+      screen
+        .queryAllByTestId('unifiedDataTableComparisonFieldName')
+        .map(({ textContent }) => textContent);
+
+    const getColumnHeaders = () =>
+      screen
+        .getAllByRole('columnheader')
+        .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
+
+    const getCellValues = () =>
+      Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);
+
+    it('should not allow comparison if less than 2 documents are selected', () => {
+      renderDataTable({ enableComparisonMode: true });
+      expect(getSelectedDocumentsButton()).not.toBeInTheDocument();
+      selectDocument(esHitsMock[0]);
+      expect(getSelectedDocumentsButton()).toBeInTheDocument();
+      expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+      selectDocument(esHitsMock[1]);
+      expect(getSelectedDocumentsButton()).toBeInTheDocument();
+      expect(getCompareDocumentsButton()).toBeInTheDocument();
+    });
+
+    it('should not allow comparison if comparison mode is disabled', () => {
+      renderDataTable({ enableComparisonMode: false });
+      selectDocument(esHitsMock[0]);
+      selectDocument(esHitsMock[1]);
+      expect(getCompareDocumentsButton()).not.toBeInTheDocument();
+    });
+
+    it('should allow comparison if 2 or more documents are selected and comparison mode is enabled', async () => {
+      renderDataTable({ enableComparisonMode: true });
+      await goToComparisonMode();
+      expect(getColumnHeaders()).toEqual(['Field', '1', '2']);
+      expect(getCellValues()).toEqual(['', '', 'i', 'i', '20', '', '', 'jpg', 'test1', '']);
+    });
+
+    it('should show full screen button if showFullScreenButton is true', async () => {
+      renderDataTable({ enableComparisonMode: true, showFullScreenButton: true });
+      await goToComparisonMode();
+      expect(getFullScreenButton()).toBeInTheDocument();
+    });
+
+    it('should hide full screen button if showFullScreenButton is false', async () => {
+      renderDataTable({ enableComparisonMode: true, showFullScreenButton: false });
+      await goToComparisonMode();
+      expect(getFullScreenButton()).not.toBeInTheDocument();
+    });
+
+    it('should render selected fields', async () => {
+      const columns = ['bytes', 'message'];
+      renderDataTable({ enableComparisonMode: true, columns });
+      await goToComparisonMode();
+      expect(getFieldColumns()).toEqual(['@timestamp', ...columns]);
+    });
+
+    it('should render all available fields if no fields are selected', async () => {
+      renderDataTable({ enableComparisonMode: true });
+      await goToComparisonMode();
+      expect(getFieldColumns()).toEqual(['@timestamp', '_index', 'bytes', 'extension', 'message']);
     });
   });
 });

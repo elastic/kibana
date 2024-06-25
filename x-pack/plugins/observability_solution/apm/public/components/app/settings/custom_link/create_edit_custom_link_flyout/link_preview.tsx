@@ -32,13 +32,10 @@ export interface LinkPreviewProps {
 
 const fetchTransaction = debounce(
   async (filters: Filter[], callback: (transaction: Transaction) => void) => {
-    const transaction = await callApmApi(
-      'GET /internal/apm/settings/custom_links/transaction',
-      {
-        signal: null,
-        params: { query: convertFiltersToQuery(filters) },
-      }
-    );
+    const transaction = await callApmApi('GET /internal/apm/settings/custom_links/transaction', {
+      signal: null,
+      params: { query: convertFiltersToQuery(filters) },
+    });
     callback(transaction);
   },
   1000
@@ -99,11 +96,7 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
           data-test-subj="preview-url"
         >
           {url ? (
-            <EuiLink
-              href={formattedUrl}
-              target="_blank"
-              data-test-subj="preview-link"
-            >
+            <EuiLink href={formattedUrl} target="_blank" data-test-subj="preview-link">
               {formattedUrl}
             </EuiLink>
           ) : (
@@ -116,24 +109,17 @@ export function LinkPreview({ label, url, filters }: LinkPreviewProps) {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.apm.settings.customLink.linkPreview.descrition',
-                {
-                  defaultMessage:
-                    'Test your link with values from an example transaction document based on the filters above.',
-                }
-              )}
+              {i18n.translate('xpack.apm.settings.customLink.linkPreview.descrition', {
+                defaultMessage:
+                  'Test your link with values from an example transaction document based on the filters above.',
+              })}
             </EuiText>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             {error && (
               <EuiToolTip position="top" content={error}>
-                <EuiIcon
-                  type="warning"
-                  color="warning"
-                  data-test-subj="preview-warning"
-                />
+                <EuiIcon type="warning" color="warning" data-test-subj="preview-warning" />
               </EuiToolTip>
             )}
           </EuiFlexItem>

@@ -34,6 +34,18 @@ export enum TELEMETRY_EVENT {
   // Landing page - dashboard
   DASHBOARD = 'navigate_to_dashboard',
   CREATE_DASHBOARD = 'create_dashboard',
+
+  // value list
+  OPEN_VALUE_LIST_MODAL = 'open_value_list_modal',
+  CREATE_VALUE_LIST_ITEM = 'create_value_list_item',
+  DELETE_VALUE_LIST_ITEM = 'delete_value_list_item',
+  EDIT_VALUE_LIST_ITEM = 'edit_value_list_item',
+  ADDITIONAL_UPLOAD_VALUE_LIST_ITEM = 'additinonal_upload_value_list_item',
+
+  // Bulk custom highlighted fields action
+  ADD_INVESTIGATION_FIELDS = 'add_investigation_fields',
+  SET_INVESTIGATION_FIELDS = 'set_investigation_fields',
+  DELETE_INVESTIGATION_FIELDS = 'delete_investigation_fields',
 }
 
 export enum TelemetryEventTypes {
@@ -45,6 +57,10 @@ export enum TelemetryEventTypes {
   AssistantMessageSent = 'Assistant Message Sent',
   AssistantQuickPrompt = 'Assistant Quick Prompt',
   AssistantSettingToggled = 'Assistant Setting Toggled',
+  AssetCriticalityCsvPreviewGenerated = 'Asset Criticality Csv Preview Generated',
+  AssetCriticalityFileSelected = 'Asset Criticality File Selected',
+  AssetCriticalityCsvImported = 'Asset Criticality CSV Imported',
+  AttackDiscoveriesGenerated = 'Attack Discoveries Generated',
   EntityDetailsClicked = 'Entity Details Clicked',
   EntityAlertsClicked = 'Entity Alerts Clicked',
   EntityRiskFiltered = 'Entity Risk Filtered',
@@ -58,6 +74,9 @@ export enum TelemetryEventTypes {
   DataQualityCheckAllCompleted = 'Data Quality Check All Completed',
   DetailsFlyoutOpened = 'Details Flyout Opened',
   DetailsFlyoutTabClicked = 'Details Flyout Tabs Clicked',
+  OnboardingHubStepOpen = 'Onboarding Hub Step Open',
+  OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
+  OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
 }
 
 export enum ML_JOB_TELEMETRY_STATUS {

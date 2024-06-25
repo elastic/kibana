@@ -7,7 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { TestProvidersComponent } from '../mocks/test_providers';
+import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
 import { SecuritySolutionPluginContext } from '../types';
 import { SecuritySolutionContext } from './security_solution_context';
 import { EnterpriseGuard } from './enterprise_guard';
@@ -32,6 +32,8 @@ describe('<EnterpriseGuard />', () => {
       );
 
       expect(screen.queryByText('enterprise only content')).toBeInTheDocument();
+      expect(screen.queryByTestId('tiPaywall')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).not.toBeInTheDocument();
     });
   });
 
@@ -55,6 +57,7 @@ describe('<EnterpriseGuard />', () => {
 
       expect(screen.queryByText('enterprise only content')).not.toBeInTheDocument();
       expect(screen.queryByTestId('tiPaywall')).toBeInTheDocument();
+      expect(screen.queryByTestId(EMPTY_PAGE_SECURITY_TEMPLATE)).toBeInTheDocument();
     });
   });
 });

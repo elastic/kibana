@@ -12,39 +12,51 @@ import {
   stubDataViewWithoutTimeField,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 
-describe('docTable', function () {
+describe('getSort and getSortArray', function () {
   describe('getSort function', function () {
     test('should be a function', function () {
       expect(typeof getSort === 'function').toBeTruthy();
     });
 
     test('should return an array of objects', function () {
-      expect(getSort([['bytes', 'desc']], stubDataView)).toEqual([{ bytes: 'desc' }]);
-      expect(getSort([['bytes', 'desc']], stubDataViewWithoutTimeField)).toEqual([
+      expect(getSort([['bytes', 'desc']], stubDataView, false)).toEqual([{ bytes: 'desc' }]);
+      expect(getSort([['bytes', 'desc']], stubDataView, true)).toEqual([{ bytes: 'desc' }]);
+      expect(getSort([['bytes', 'desc']], stubDataViewWithoutTimeField, false)).toEqual([
+        { bytes: 'desc' },
+      ]);
+      expect(getSort([['bytes', 'desc']], stubDataViewWithoutTimeField, true)).toEqual([
         { bytes: 'desc' },
       ]);
     });
 
     test('should passthrough arrays of objects', () => {
-      expect(getSort([{ bytes: 'desc' }], stubDataView)).toEqual([{ bytes: 'desc' }]);
+      expect(getSort([{ bytes: 'desc' }], stubDataView, false)).toEqual([{ bytes: 'desc' }]);
+      expect(getSort([{ bytes: 'desc' }], stubDataView, true)).toEqual([{ bytes: 'desc' }]);
     });
 
     test('should return an empty array when passed an unsortable field', function () {
-      expect(getSort([['non-sortable', 'asc']], stubDataView)).toEqual([]);
-      expect(getSort([['lol_nope', 'asc']], stubDataView)).toEqual([]);
+      expect(getSort([['non-sortable', 'asc']], stubDataView, false)).toEqual([]);
+      expect(getSort([['non-sortable', 'asc']], stubDataView, true)).toEqual([
+        {
+          'non-sortable': 'asc',
+        },
+      ]);
+      expect(getSort([['lol_nope', 'asc']], stubDataView, false)).toEqual([]);
 
-      expect(getSort([['non-sortable', 'asc']], stubDataViewWithoutTimeField)).toEqual([]);
+      expect(getSort([['non-sortable', 'asc']], stubDataViewWithoutTimeField, false)).toEqual([]);
     });
 
     test('should return an empty array ', function () {
-      expect(getSort([], stubDataView)).toEqual([]);
-      expect(getSort([['foo', 'bar']], stubDataView)).toEqual([]);
-      expect(getSort([{ foo: 'bar' }], stubDataView)).toEqual([]);
+      expect(getSort([], stubDataView, false)).toEqual([]);
+      expect(getSort([['foo', 'bar']], stubDataView, false)).toEqual([]);
+      expect(getSort([{ foo: 'bar' }], stubDataView, false)).toEqual([]);
+      expect(getSort([['foo', 'bar']], stubDataView, true)).toEqual([{ foo: 'bar' }]);
+      expect(getSort([{ foo: 'bar' }], stubDataView, true)).toEqual([{ foo: 'bar' }]);
     });
 
     test('should convert a legacy sort to an array of objects', function () {
-      expect(getSort(['foo', 'desc'], stubDataView)).toEqual([{ foo: 'desc' }]);
-      expect(getSort(['foo', 'asc'], stubDataView)).toEqual([{ foo: 'asc' }]);
+      expect(getSort(['foo', 'desc'], stubDataView, false)).toEqual([{ foo: 'desc' }]);
+      expect(getSort(['foo', 'asc'], stubDataView, false)).toEqual([{ foo: 'asc' }]);
     });
   });
   describe('getSortArray function', function () {
@@ -53,22 +65,28 @@ describe('docTable', function () {
     });
 
     test('should return an array of arrays for sortable fields', function () {
-      expect(getSortArray([['bytes', 'desc']], stubDataView)).toEqual([['bytes', 'desc']]);
+      expect(getSortArray([['bytes', 'desc']], stubDataView, false)).toEqual([['bytes', 'desc']]);
     });
 
     test('should return an array of arrays from an array of elasticsearch sort objects', function () {
-      expect(getSortArray([{ bytes: 'desc' }], stubDataView)).toEqual([['bytes', 'desc']]);
+      expect(getSortArray([{ bytes: 'desc' }], stubDataView, false)).toEqual([['bytes', 'desc']]);
     });
 
     test('should sort by an empty array when an unsortable field is given', function () {
-      expect(getSortArray([{ 'non-sortable': 'asc' }], stubDataView)).toEqual([]);
-      expect(getSortArray([{ lol_nope: 'asc' }], stubDataView)).toEqual([]);
-      expect(getSortArray([{ 'non-sortable': 'asc' }], stubDataViewWithoutTimeField)).toEqual([]);
+      expect(getSortArray([{ 'non-sortable': 'asc' }], stubDataView, false)).toEqual([]);
+      expect(getSortArray([{ 'non-sortable': 'asc' }], stubDataView, true)).toEqual([
+        ['non-sortable', 'asc'],
+      ]);
+      expect(getSortArray([{ lol_nope: 'asc' }], stubDataView, false)).toEqual([]);
+      expect(
+        getSortArray([{ 'non-sortable': 'asc' }], stubDataViewWithoutTimeField, false)
+      ).toEqual([]);
     });
 
     test('should return an empty array when passed an empty sort array', () => {
-      expect(getSortArray([], stubDataView)).toEqual([]);
-      expect(getSortArray([], stubDataViewWithoutTimeField)).toEqual([]);
+      expect(getSortArray([], stubDataView, false)).toEqual([]);
+      expect(getSortArray([], stubDataViewWithoutTimeField, false)).toEqual([]);
+      expect(getSortArray([], stubDataViewWithoutTimeField, true)).toEqual([]);
     });
   });
 });

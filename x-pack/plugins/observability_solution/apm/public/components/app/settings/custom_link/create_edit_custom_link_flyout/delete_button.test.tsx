@@ -28,10 +28,9 @@ describe('DeleteButton', () => {
 
   it('deletes a custom link', async () => {
     const onDeleteMock = jest.fn();
-    const { getByText } = render(
-      <DeleteButton onDelete={onDeleteMock} customLinkId="1" />,
-      { wrapper: Wrapper }
-    );
+    const { getByText } = render(<DeleteButton onDelete={onDeleteMock} customLinkId="1" />, {
+      wrapper: Wrapper,
+    });
 
     await act(async () => {
       fireEvent.click(getByText('Delete'));

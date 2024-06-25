@@ -21,7 +21,7 @@ import type {
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
-import type { RunTimeMappings } from '../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';
@@ -365,11 +365,28 @@ export const useTimelineEventsHandler = ({
         ? activePage
         : 0;
 
+      /*
+       * optimization to avoid unnecessary network request when a field
+       * has already been fetched
+       *
+       */
+
+      let finalFieldRequest = fields;
+
+      const newFieldsRequested = fields.filter(
+        (field) => !prevRequest?.fieldRequested?.includes(field)
+      );
+      if (newFieldsRequested.length > 0) {
+        finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
+      } else {
+        finalFieldRequest = prevRequest?.fieldRequested ?? [];
+      }
+
       const currentRequest = {
         defaultIndex: indexNames,
         factoryQueryType: TimelineEventsQueries.all,
-        fieldRequested: fields,
-        fields,
+        fieldRequested: finalFieldRequest,
+        fields: finalFieldRequest,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,

@@ -38,7 +38,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
   inline = false,
   forceModal = false,
 }) => {
-  const { overlays, theme, i18n: i18nStart } = useAppDependencies();
+  const { overlays, ...startServices } = useAppDependencies();
 
   if (!forceModal && typeof text === 'string' && text.length <= MAX_SIMPLE_MESSAGE_LENGTH) {
     return text;
@@ -87,7 +87,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
             </EuiButtonEmpty>
           </EuiModalFooter>
         </EuiModal>,
-        { theme, i18n: i18nStart }
+        startServices
       )
     );
   };

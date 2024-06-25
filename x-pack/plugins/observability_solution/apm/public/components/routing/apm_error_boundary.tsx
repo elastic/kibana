@@ -27,10 +27,7 @@ class ErrorBoundary extends React.Component<
   };
 
   componentDidUpdate(prevProps: { pathname: string }) {
-    if (
-      this.props.pathname !== prevProps.pathname &&
-      this.state.error !== undefined
-    ) {
+    if (this.props.pathname !== prevProps.pathname && this.state.error !== undefined) {
       this.setState({ error: undefined });
     }
   }

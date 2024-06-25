@@ -9,10 +9,7 @@ import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { HOST_NAME, CONTAINER_ID } from '../../../common/es_fields/apm';
 import { NOT_AVAILABLE_LABEL } from '../../../common/i18n';
 import { SERVICE_NAME, SERVICE_NODE_NAME } from '../../../common/es_fields/apm';
-import {
-  environmentQuery,
-  serviceNodeNameQuery,
-} from '../../../common/utils/environment_query';
+import { environmentQuery, serviceNodeNameQuery } from '../../../common/utils/environment_query';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
@@ -88,14 +85,10 @@ export async function getServiceNodeMetadata({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(
-    'get_service_node_metadata',
-    params
-  );
+  const { aggregations } = await apmEventClient.search('get_service_node_metadata', params);
 
   return {
     host: aggregations?.host.buckets[0]?.key || NOT_AVAILABLE_LABEL,
-    containerId:
-      aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
+    containerId: aggregations?.containerId.buckets[0]?.key || NOT_AVAILABLE_LABEL,
   };
 }

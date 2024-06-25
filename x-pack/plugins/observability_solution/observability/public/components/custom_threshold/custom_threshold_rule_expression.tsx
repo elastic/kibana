@@ -15,13 +15,12 @@ import {
   EuiFormErrorText,
   EuiFormRow,
   EuiHorizontalRule,
-  EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -36,13 +35,15 @@ import {
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { useKibana } from '../../utils/kibana_react';
-import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
-import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
+import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
+import { getSearchConfiguration } from './helpers/get_search_configuration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -52,7 +53,7 @@ type Props = Omit<
 >;
 
 export const defaultExpression: MetricExpression = {
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   metrics: [
     {
       name: 'A',
@@ -83,6 +84,7 @@ export default function Expressions(props: Props) {
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
+  const [paramsWarning, setParamsWarning] = useState<string>();
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -112,7 +114,10 @@ export default function Expressions(props: Props) {
             newSearchSource.setField('index', defaultDataView);
             setDataView(defaultDataView);
           }
-          initialSearchConfiguration = newSearchSource.getSerializedFields();
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
         }
       }
 
@@ -120,12 +125,18 @@ export default function Expressions(props: Props) {
         const createdSearchSource = await data.search.searchSource.create(
           initialSearchConfiguration
         );
-        setRuleParams('searchConfiguration', {
-          ...initialSearchConfiguration,
-          ...(ruleParams.searchConfiguration?.query && {
-            query: ruleParams.searchConfiguration.query,
-          }),
-        });
+        setRuleParams(
+          'searchConfiguration',
+          getSearchConfiguration(
+            {
+              ...initialSearchConfiguration,
+              ...(ruleParams.searchConfiguration?.query && {
+                query: ruleParams.searchConfiguration.query,
+              }),
+            },
+            setParamsWarning
+          )
+        );
         setSearchSource(createdSearchSource);
         setDataView(createdSearchSource.getField('index'));
 
@@ -188,7 +199,10 @@ export default function Expressions(props: Props) {
       );
       setRuleParams('criteria', ruleCriteria);
       searchSource?.setParent(undefined).setField('index', newDataView);
-      setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+      setRuleParams(
+        'searchConfiguration',
+        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
+      );
       setDataView(newDataView);
     },
     [ruleParams.criteria, searchSource, setRuleParams]
@@ -223,7 +237,11 @@ export default function Expressions(props: Props) {
 
   const onFilterChange = useCallback(
     ({ query }: { query?: Query }) => {
-      setRuleParams('searchConfiguration', { ...ruleParams.searchConfiguration, query });
+      setParamsWarning(undefined);
+      setRuleParams(
+        'searchConfiguration',
+        getSearchConfiguration({ ...ruleParams.searchConfiguration, query }, setParamsWarning)
+      );
     },
     [setRuleParams, ruleParams.searchConfiguration]
   );
@@ -365,6 +383,24 @@ export default function Expressions(props: Props) {
   );
   return (
     <>
+      {!!paramsWarning && (
+        <>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
+              {
+                defaultMessage: 'Warning',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+            data-test-subj="thresholdRuleExpressionWarning"
+          >
+            {paramsWarning}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -412,16 +448,19 @@ export default function Expressions(props: Props) {
         onQueryChange={debouncedOnFilterChange}
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
-        query={ruleParams.searchConfiguration?.query as Query}
+        query={ruleParams.searchConfiguration?.query}
         filters={ruleParams.searchConfiguration?.filter}
         onFiltersUpdated={(filter) => {
-          // Since rule params will be sent to the API as is, and we only need meta and query parameters to be
-          // saved in the rule's saved object, we filter extra fields here (such as $state).
-          const filters = filter.map(({ meta, query }) => ({ meta, query }));
-          setRuleParams('searchConfiguration', {
-            ...ruleParams.searchConfiguration,
-            filter: filters,
-          });
+          setRuleParams(
+            'searchConfiguration',
+            getSearchConfiguration(
+              {
+                ...ruleParams.searchConfiguration,
+                filter,
+              },
+              setParamsWarning
+            )
+          );
         }}
       />
       {errors.filterQuery && (
@@ -563,7 +602,9 @@ export default function Expressions(props: Props) {
                 defaultMessage: 'Alert me if a group stops reporting data',
               }
             )}{' '}
-            <EuiToolTip
+            <EuiIconTip
+              type="questionInCircle"
+              color="subdued"
               content={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.groupDisappearHelpText',
                 {
@@ -571,9 +612,7 @@ export default function Expressions(props: Props) {
                     'Enable this to trigger the action if a previously detected group begins to report no results. This is not recommended for dynamically scaling infrastructures that may rapidly start and stop nodes automatically.',
                 }
               )}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
+            />
           </>
         }
         disabled={!hasGroupBy}

@@ -42,22 +42,17 @@ export const INPUT_VAR_NAME_TO_SCHEMA_PATH: Record<string, string> = {
   anonymous_enabled: 'apm-server.auth.anonymous.enabled',
   anonymous_allow_agent: 'apm-server.auth.anonymous.allow_agent',
   anonymous_allow_service: 'apm-server.auth.anonymous.allow_service',
-  anonymous_rate_limit_ip_limit:
-    'apm-server.auth.anonymous.rate_limit.ip_limit',
-  anonymous_rate_limit_event_limit:
-    'apm-server.auth.anonymous.rate_limit.event_limit',
+  anonymous_rate_limit_ip_limit: 'apm-server.auth.anonymous.rate_limit.ip_limit',
+  anonymous_rate_limit_event_limit: 'apm-server.auth.anonymous.rate_limit.event_limit',
   tail_sampling_enabled: 'apm-server.sampling.tail.enabled',
   tail_sampling_interval: 'apm-server.sampling.tail.interval',
   tail_sampling_policies: 'apm-server.sampling.tail.policies',
 };
 
 export const LEGACY_TO_CURRENT_SCHEMA_PATHS: Record<string, string> = {
-  'apm-server.rum.event_rate.limit':
-    'apm-server.auth.anonymous.rate_limit.event_limit',
-  'apm-server.rum.event_rate.lru_size':
-    'apm-server.auth.anonymous.rate_limit.ip_limit',
-  'apm-server.rum.allow_service_names':
-    'apm-server.auth.anonymous.allow_service',
+  'apm-server.rum.event_rate.limit': 'apm-server.auth.anonymous.rate_limit.event_limit',
+  'apm-server.rum.event_rate.lru_size': 'apm-server.auth.anonymous.rate_limit.ip_limit',
+  'apm-server.rum.allow_service_names': 'apm-server.auth.anonymous.allow_service',
   'apm-server.secret_token': 'apm-server.auth.secret_token',
   'apm-server.api_key.enabled': 'apm-server.auth.api_key.enabled',
 };

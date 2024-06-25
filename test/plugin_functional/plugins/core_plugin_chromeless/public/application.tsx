@@ -9,6 +9,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route } from '@kbn/shared-ux-router';
 import {
   EuiPage,
@@ -19,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="chromelessAppHome">
@@ -49,8 +50,13 @@ const ChromelessApp = ({ basename }: { basename: string }) => (
   </Router>
 );
 
-export const renderApp = ({ appBasePath, element }: AppMountParameters) => {
-  render(<ChromelessApp basename={appBasePath} />, element);
+export const renderApp = async ({ appBasePath, element }: AppMountParameters, core: CoreStart) => {
+  render(
+    <KibanaRenderContextProvider {...core}>
+      <ChromelessApp basename={appBasePath} />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => unmountComponentAtNode(element);
 };

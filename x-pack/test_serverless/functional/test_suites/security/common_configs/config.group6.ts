@@ -19,6 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       // https://github.com/elastic/kibana/issues/172365
       // require.resolve('../../common/discover_ml_uptime/discover'),
       require.resolve('../../common/context'),
+      require.resolve('../../common/discover/esql'),
     ],
     junit: {
       reportName: 'Serverless Security Functional Tests - Common Group 6',

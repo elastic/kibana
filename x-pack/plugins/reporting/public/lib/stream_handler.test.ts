@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { NotificationsStart } from '@kbn/core/public';
-import { coreMock, docLinksServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
 
 import { JobSummary, JobSummarySet } from '../types';
@@ -43,19 +42,10 @@ jobQueueClientMock.getError = () => Promise.resolve('this is the failed report e
 jobQueueClientMock.getManagementLink = () => '/#management';
 jobQueueClientMock.getReportURL = () => '/reporting/download/job-123';
 
-const mockShowDanger = jest.fn();
-const mockShowSuccess = jest.fn();
-const mockShowWarning = jest.fn();
-const notificationsMock = {
-  toasts: {
-    addDanger: mockShowDanger,
-    addSuccess: mockShowSuccess,
-    addWarning: mockShowWarning,
-  },
-} as unknown as NotificationsStart;
-
-const theme = themeServiceMock.createStartContract();
-const docLink = docLinksServiceMock.createStartContract();
+const core = coreMock.createStart();
+const mockShowDanger = jest.spyOn(core.notifications.toasts, 'addDanger');
+const mockShowSuccess = jest.spyOn(core.notifications.toasts, 'addSuccess');
+const mockShowWarning = jest.spyOn(core.notifications.toasts, 'addWarning');
 
 describe('stream handler', () => {
   afterEach(() => {
@@ -63,23 +53,13 @@ describe('stream handler', () => {
   });
 
   it('constructs', () => {
-    const sh = new TestReportingNotifierStreamHandler(
-      notificationsMock,
-      jobQueueClientMock,
-      theme,
-      docLink
-    );
+    const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
     expect(sh).not.toBe(null);
   });
 
   describe('findChangedStatusJobs', () => {
     it('finds no changed status jobs from empty', (done) => {
-      const sh = new TestReportingNotifierStreamHandler(
-        notificationsMock,
-        jobQueueClientMock,
-        theme,
-        docLink
-      );
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       const findJobs = sh.testFindChangedStatusJobs([]);
       findJobs.subscribe((data) => {
         expect(data).toEqual({ completed: [], failed: [] });
@@ -88,12 +68,7 @@ describe('stream handler', () => {
     });
 
     it('finds changed status jobs', (done) => {
-      const sh = new TestReportingNotifierStreamHandler(
-        notificationsMock,
-        jobQueueClientMock,
-        theme,
-        docLink
-      );
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       const findJobs = sh.testFindChangedStatusJobs([
         'job-source-mock1',
         'job-source-mock2',
@@ -110,12 +85,7 @@ describe('stream handler', () => {
 
   describe('showNotifications', () => {
     it('show success', (done) => {
-      const sh = new TestReportingNotifierStreamHandler(
-        notificationsMock,
-        jobQueueClientMock,
-        theme,
-        docLink
-      );
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       sh.testShowNotifications({
         completed: [
           {
@@ -136,12 +106,7 @@ describe('stream handler', () => {
     });
 
     it('show max length warning', (done) => {
-      const sh = new TestReportingNotifierStreamHandler(
-        notificationsMock,
-        jobQueueClientMock,
-        theme,
-        docLink
-      );
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       sh.testShowNotifications({
         completed: [
           {
@@ -163,12 +128,7 @@ describe('stream handler', () => {
     });
 
     it('show csv formulas warning', (done) => {
-      const sh = new TestReportingNotifierStreamHandler(
-        notificationsMock,
-        jobQueueClientMock,
-        theme,
-        docLink
-      );
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       sh.testShowNotifications({
         completed: [
           {
@@ -190,12 +150,7 @@ describe('stream handler', () => {
     });
 
     it('show failed job toast', (done) => {
-      const sh = new TestReportingNotifierStreamHandler(
-        notificationsMock,
-        jobQueueClientMock,
-        theme,
-        docLink
-      );
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       sh.testShowNotifications({
         completed: [],
         failed: [
@@ -216,12 +171,7 @@ describe('stream handler', () => {
     });
 
     it('show multiple toast', (done) => {
-      const sh = new TestReportingNotifierStreamHandler(
-        notificationsMock,
-        jobQueueClientMock,
-        theme,
-        docLink
-      );
+      const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
       sh.testShowNotifications({
         completed: [
           {

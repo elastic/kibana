@@ -46,10 +46,17 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
       euiThemeVars.euiTextColor
     ),
 
+    // source commands
+    ...buildRuleGroup(
+      ['from', 'row', 'show', 'meta'],
+      euiThemeVars.euiColorPrimaryText,
+      true // isBold
+    ),
+
     // commands
     ...buildRuleGroup(
       [
-        'from',
+        'metrics',
         'metadata',
         'mv_expand',
         'stats',
@@ -70,9 +77,6 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'in',
         'as',
         'expr_ws',
-        'row',
-        'show',
-        'meta',
         'limit',
         'nulls_ordering_direction',
         'nulls_ordering',
@@ -80,8 +84,11 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'enrich',
         'on',
         'with',
+        'asc',
+        'desc',
       ],
-      euiThemeVars.euiColorPrimaryText
+      euiThemeVars.euiColorAccentText,
+      true // isBold
     ),
 
     // functions
@@ -89,8 +96,25 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
 
     // operators
     ...buildRuleGroup(
-      ['or', 'and', 'rp', 'lp', 'plus', 'minus', 'asterisk', 'slash'],
-      euiThemeVars.euiTextSubduedColor
+      [
+        'or',
+        'and',
+        'rp', // ')'
+        'lp', // '('
+        'eq', // '=='
+        'cieq', // '=~'
+        'neq', // '!='
+        'lt', //  '<'
+        'lte', // '<='
+        'gt', //  '>'
+        'gte', // '>='
+        'plus', // '+'
+        'minus', // '-'
+        'asterisk', // '*'
+        'slash', // '/'
+        'percent', // '%'
+      ],
+      euiThemeVars.euiColorPrimaryText
     ),
 
     // comments
@@ -103,8 +127,28 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'src_line_comment',
         'src_multiline_comment',
       ],
-      euiThemeVars.euiColorMediumShade
+      euiThemeVars.euiColorDisabledText
+    ),
+
+    // values
+    ...buildRuleGroup(
+      ['quoted_string', 'integer_literal', 'decimal_literal'],
+      euiThemeVars.euiColorSuccessText
     ),
   ],
-  colors: {},
+  colors: {
+    'editor.foreground': euiThemeVars.euiTextColor,
+    'editor.background': euiThemeVars.euiColorEmptyShade,
+    'editor.lineHighlightBackground': euiThemeVars.euiColorLightestShade,
+    'editor.lineHighlightBorder': euiThemeVars.euiColorLightestShade,
+    'editor.selectionHighlightBackground': euiThemeVars.euiColorLightestShade,
+    'editor.selectionHighlightBorder': euiThemeVars.euiColorLightShade,
+    'editorSuggestWidget.background': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.border': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.focusHighlightForeground': euiThemeVars.euiColorEmptyShade,
+    'editorSuggestWidget.foreground': euiThemeVars.euiTextColor,
+    'editorSuggestWidget.highlightForeground': euiThemeVars.euiColorPrimary,
+    'editorSuggestWidget.selectedBackground': euiThemeVars.euiColorPrimary,
+    'editorSuggestWidget.selectedForeground': euiThemeVars.euiColorEmptyShade,
+  },
 });

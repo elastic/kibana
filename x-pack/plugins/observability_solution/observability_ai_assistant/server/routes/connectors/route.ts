@@ -20,9 +20,24 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
       await plugins.actions.start()
     ).getActionsClientWithRequest(request);
 
-    const connectors = await actionsClient.getAll();
+    const [availableTypes, connectors] = await Promise.all([
+      actionsClient
+        .listTypes({
+          includeSystemActionTypes: false,
+        })
+        .then((types) =>
+          types
+            .filter((type) => type.enabled && type.enabledInLicense && type.enabledInConfig)
+            .map((type) => type.id)
+        ),
+      actionsClient.getAll(),
+    ]);
 
-    return connectors.filter((connector) => isSupportedConnectorType(connector.actionTypeId));
+    return connectors.filter(
+      (connector) =>
+        availableTypes.includes(connector.actionTypeId) &&
+        isSupportedConnectorType(connector.actionTypeId)
+    );
   },
 });
 

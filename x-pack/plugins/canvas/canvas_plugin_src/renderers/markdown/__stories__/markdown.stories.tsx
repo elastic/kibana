@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getMarkdownRenderer } from '..';
 import { Render } from '../../__stories__/render';
 
-const markdown = getMarkdownRenderer();
+const markdown = getMarkdownRenderer(coreMock.createStart());
 storiesOf('renderers/markdown', module)
   .add('default', () => {
     const config = {

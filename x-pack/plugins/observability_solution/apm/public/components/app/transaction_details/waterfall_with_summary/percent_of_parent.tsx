@@ -16,20 +16,14 @@ interface PercentOfParentProps {
   parentType: 'trace' | 'transaction';
 }
 
-export function PercentOfParent({
-  duration,
-  totalDuration,
-  parentType,
-}: PercentOfParentProps) {
+export function PercentOfParent({ duration, totalDuration, parentType }: PercentOfParentProps) {
   totalDuration = totalDuration || duration;
   const isOver100 = duration > totalDuration;
-  const percentOfParent = isOver100
-    ? '>100%'
-    : asPercent(duration, totalDuration, '');
+  const percentOfParent = isOver100 ? '>100%' : asPercent(duration, totalDuration, '');
 
   const percentOfParentText = i18n.translate('xpack.apm.percentOfParent', {
     defaultMessage:
-      '({value} of {parentType, select, transaction { transaction } trace {trace} })',
+      '({value} of {parentType, select, transaction { transaction } trace {trace} other {unknown parentType} })',
     values: { value: percentOfParent, parentType },
   });
 
@@ -39,17 +33,14 @@ export function PercentOfParent({
     <>
       {isOver100 ? (
         <EuiToolTip
-          content={i18n.translate(
-            'xpack.apm.transactionDetails.percentOfTraceLabelExplanation',
-            {
-              defaultMessage:
-                'The % of {parentType, select, transaction {transaction} trace {trace} } exceeds 100% because this {childType, select, span {span} transaction {transaction} } takes longer than the root transaction.',
-              values: {
-                parentType,
-                childType,
-              },
-            }
-          )}
+          content={i18n.translate('xpack.apm.transactionDetails.percentOfTraceLabelExplanation', {
+            defaultMessage:
+              'The % of {parentType, select, transaction {transaction} trace {trace} other {unknown parentType} } exceeds 100% because this {childType, select, span {span} transaction {transaction} other {unknown childType} } takes longer than the root transaction.',
+            values: {
+              parentType,
+              childType,
+            },
+          })}
         >
           <>{percentOfParentText}</>
         </EuiToolTip>

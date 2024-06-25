@@ -17,6 +17,7 @@ import {
   EsQueryRuleParamsExtractedParams,
   EsQueryRuleParamsSchema,
   EsQueryRuleState,
+  validateServerless,
 } from './rule_type_params';
 import { ExecutorOptions } from './types';
 import { ActionGroupId } from './constants';
@@ -25,7 +26,8 @@ import { isSearchSourceRule } from './util';
 import { StackAlertType } from '../types';
 
 export function getRuleType(
-  core: CoreSetup
+  core: CoreSetup,
+  isServerless: boolean
 ): RuleType<
   EsQueryRuleParams,
   EsQueryRuleParamsExtractedParams,
@@ -152,7 +154,15 @@ export function getRuleType(
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     validate: {
-      params: EsQueryRuleParamsSchema,
+      params: {
+        validate: (object: unknown) => {
+          const validated = EsQueryRuleParamsSchema.validate(object);
+          if (isServerless) {
+            validateServerless(validated);
+          }
+          return validated;
+        },
+      },
     },
     schemas: {
       params: {

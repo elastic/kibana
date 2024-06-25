@@ -10,9 +10,7 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 export function getIndexManagementHref(core: CoreStart, dataStream?: string) {
   const indexManagementPath = '/data/index_management/data_streams';
   return core.application.getUrlForApp('management', {
-    path: dataStream
-      ? `${indexManagementPath}/${dataStream}?isDeepLink=true`
-      : indexManagementPath,
+    path: dataStream ? `${indexManagementPath}/${dataStream}?isDeepLink=true` : indexManagementPath,
   });
 }
 

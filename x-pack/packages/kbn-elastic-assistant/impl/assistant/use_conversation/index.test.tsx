@@ -9,7 +9,7 @@ import { useConversation } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import React from 'react';
-import { ConversationRole } from '../../assistant_context/types';
+import { MessageRole } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { WELCOME_CONVERSATION } from './sample_conversations';
 import {
@@ -21,12 +21,12 @@ import {
 jest.mock('../api/conversations');
 const message = {
   content: 'You are a robot',
-  role: 'user' as ConversationRole,
+  role: 'user' as MessageRole,
   timestamp: '10/04/2023, 1:00:36 PM',
 };
 const anotherMessage = {
   content: 'I am a robot',
-  role: 'assistant' as ConversationRole,
+  role: 'assistant' as MessageRole,
   timestamp: '10/04/2023, 1:00:46 PM',
 };
 
@@ -36,6 +36,7 @@ const mockConvo = {
   messages: [message, anotherMessage],
   apiConfig: {
     connectorId: '123',
+    actionTypeId: '.gen-ai',
     defaultSystemPromptId: 'default-system-prompt',
   },
 };
@@ -63,13 +64,8 @@ describe('useConversation', () => {
       createConversation.mockResolvedValue(mockConvo);
 
       const createResult = await result.current.createConversation({
-        id: mockConvo.id,
-        messages: mockConvo.messages,
+        ...mockConvo,
         replacements: {},
-        apiConfig: {
-          connectorId: '123',
-          defaultSystemPromptId: 'default-system-prompt',
-        },
         title: mockConvo.title,
         category: 'assistant',
       });

@@ -9,7 +9,7 @@ import type { ErrorToastOptions } from '@kbn/core/public';
 import { EuiButtonEmpty, EuiText, logicalCSS, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
 import { AttachmentType } from '../../common/types/domain';
@@ -106,7 +106,8 @@ const getErrorMessage = (error: Error | ServerError): string => {
 
 export const useCasesToast = () => {
   const { appId } = useApplication();
-  const { getUrlForApp, navigateToUrl } = useKibana().services.application;
+  const { application, i18n, theme } = useKibana().services;
+  const { getUrlForApp, navigateToUrl } = application;
 
   const toasts = useToasts();
 
@@ -147,12 +148,13 @@ export const useCasesToast = () => {
         return toasts.addSuccess({
           color: 'success',
           iconType: 'check',
-          title: toMountPoint(<TruncatedText text={renderTitle} />),
+          title: toMountPoint(<TruncatedText text={renderTitle} />, { i18n, theme }),
           text: toMountPoint(
             <CaseToastSuccessContent
               content={renderContent}
               onViewCaseClick={url != null ? onViewCaseClick : undefined}
-            />
+            />,
+            { i18n, theme }
           ),
         });
       },
@@ -175,7 +177,7 @@ export const useCasesToast = () => {
         });
       },
     }),
-    [appId, getUrlForApp, navigateToUrl, toasts]
+    [i18n, theme, appId, getUrlForApp, navigateToUrl, toasts]
   );
 };
 

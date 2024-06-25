@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_COLDSTART,
@@ -84,13 +80,10 @@ export async function getServerlessFunctionsOverview({
     },
   };
 
-  const response = await apmEventClient.search(
-    'ger_serverless_functions_overview',
-    params
-  );
+  const response = await apmEventClient.search('ger_serverless_functions_overview', params);
 
-  const serverlessFunctionsOverview =
-    response.aggregations?.serverlessFunctions?.buckets?.map((bucket) => {
+  const serverlessFunctionsOverview = response.aggregations?.serverlessFunctions?.buckets?.map(
+    (bucket) => {
       const serverlessId = bucket.key as string;
       return {
         serverlessId,
@@ -104,7 +97,8 @@ export async function getServerlessFunctionsOverview({
         }),
         memorySize: bucket.maxTotalMemory.value,
       };
-    });
+    }
+  );
 
   return serverlessFunctionsOverview || [];
 }

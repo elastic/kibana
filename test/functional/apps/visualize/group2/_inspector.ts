@@ -96,13 +96,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ['Other', '6,920', '13,123,599,766.011'],
           ]);
 
-          await inspector.filterForTableCell(1, 1);
+          await inspector.filterForTableCell({ column: 1, row: 1, filter: 'in' });
           await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([['win 8', '2,904', '13,031,579,645.108']]);
         });
 
         it('should allow filtering out values', async function () {
-          await inspector.filterOutTableCell(1, 1);
+          await inspector.filterForTableCell({ column: 1, row: 1, filter: 'out' });
           await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win xp', '2,858', '13,073,190,186.423'],
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow filtering for other values', async function () {
-          await inspector.filterForTableCell(1, 3);
+          await inspector.filterForTableCell({ column: 1, row: 3, filter: 'in' });
           await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win 7', '2,814', '13,186,695,551.251'],
@@ -122,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should allow filtering out other values', async function () {
-          await inspector.filterOutTableCell(1, 3);
+          await inspector.filterForTableCell({ column: 1, row: 3, filter: 'out' });
           await PageObjects.visChart.waitForVisualization();
           await inspector.expectTableData([
             ['win 8', '2,904', '13,031,579,645.108'],

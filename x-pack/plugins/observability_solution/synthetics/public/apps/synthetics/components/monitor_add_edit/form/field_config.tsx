@@ -80,12 +80,24 @@ import {
   RequestBodyCheck,
   SourceType,
 } from '../types';
-import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
+import {
+  AlertConfigKey,
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  ALLOWED_SCHEDULES_IN_SECONDS,
+} from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
-const getScheduleContent = (value: number) => {
+const getScheduleContent = (value: number, seconds?: boolean) => {
+  if (seconds) {
+    return i18n.translate('xpack.synthetics.monitorConfig.schedule.seconds.label', {
+      defaultMessage: 'Every {value, number} {value, plural, one {second} other {seconds}}',
+      values: {
+        value,
+      },
+    });
+  }
   if (value > 60) {
     return i18n.translate('xpack.synthetics.monitorConfig.schedule.label', {
       defaultMessage: 'Every {value, number} {value, plural, one {hour} other {hours}}',
@@ -103,10 +115,25 @@ const getScheduleContent = (value: number) => {
   }
 };
 
-const SCHEDULES = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
-  value,
-  text: getScheduleContent(parseInt(value, 10)),
-}));
+const getSchedules = (monitorType?: MonitorTypeEnum) => {
+  const minutes = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
+    value,
+    text: getScheduleContent(parseInt(value, 10)),
+  }));
+  const allowSeconds =
+    monitorType === MonitorTypeEnum.HTTP ||
+    monitorType === MonitorTypeEnum.TCP ||
+    monitorType === MonitorTypeEnum.ICMP;
+  if (allowSeconds) {
+    const seconds = ALLOWED_SCHEDULES_IN_SECONDS.map((value) => ({
+      value,
+      text: getScheduleContent(parseInt(value, 10), true),
+    }));
+    return [...seconds, ...minutes];
+  } else {
+    return minutes;
+  }
+};
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
@@ -372,7 +399,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
   },
   ['schedule.number']: {
-    fieldKey: `${ConfigKey.SCHEDULE}.number`,
+    fieldKey: `schedule.number`,
     required: true,
     component: Select,
     label: i18n.translate('xpack.synthetics.monitorConfig.frequency.label', {
@@ -382,13 +409,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
-    props: (): EuiSelectProps => {
-      return {
-        'data-test-subj': 'syntheticsMonitorConfigSchedule',
-        options: SCHEDULES,
-        disabled: readOnly,
-      };
-    },
+    props: ({ formState }): EuiSelectProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigSchedule',
+      options: getSchedules(formState.defaultValues?.[ConfigKey.MONITOR_TYPE]),
+      disabled: readOnly,
+    }),
   },
   [ConfigKey.LOCATIONS]: {
     fieldKey: ConfigKey.LOCATIONS,
@@ -824,7 +849,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           id="xpack.synthetics.monitorConfig.indexResponseHeaders.helpText"
           defaultMessage="Controls the indexing of the HTTP response headers to "
         />
-        <EuiCode>http.response.body.headers</EuiCode>
+        <EuiCode>{'http.response.body.headers'}</EuiCode>
       </>
     ),
     props: (): Omit<EuiCheckboxProps, ControlledFieldProp> => ({
@@ -845,7 +870,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           id="xpack.synthetics.monitorConfig.indexResponseBody.helpText"
           defaultMessage="Controls the indexing of the HTTP response body contents to"
         />
-        <EuiCode>http.response.body.contents</EuiCode>
+        <EuiCode>{'http.response.body.contents'}</EuiCode>
       </>
     ),
     props: (): ResponseBodyIndexFieldProps => ({
@@ -1044,7 +1069,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.params.helpText"
         defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
         values={{
-          paramsValue: <EuiCode>params.value</EuiCode>,
+          paramsValue: <EuiCode>{'params.value'}</EuiCode>,
         }}
       />
     ),
@@ -1420,8 +1445,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.syntheticsArgs.mode.helpText"
         defaultMessage="If {any}, the monitor pings only one IP address for a hostname. If {all}, the monitor pings all resolvable IPs for a hostname. {all} is useful if you are using a DNS-load balancer and want to ping every IP address for the specified hostname."
         values={{
-          all: <EuiCode>all</EuiCode>,
-          any: <EuiCode>any</EuiCode>,
+          all: <EuiCode>{'all'}</EuiCode>,
+          any: <EuiCode>{'any'}</EuiCode>,
         }}
       />
     ),

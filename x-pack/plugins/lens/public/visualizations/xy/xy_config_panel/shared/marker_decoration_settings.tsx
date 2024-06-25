@@ -119,7 +119,6 @@ export function MarkerDecorationPosition<Icon extends string = string>({
                 defaultMessage: 'Decoration position',
               })}
               data-test-subj="lnsXY_markerPosition"
-              name="markerPosition"
               isDisabled={!hasIcon(currentConfig?.icon) && !currentConfig?.textVisibility}
               buttonSize="compressed"
               options={getIconPositionOptions({

@@ -99,15 +99,13 @@ export const ConfigPanelQueryAnnotation = ({
         <FieldPicker
           compressed
           options={options}
-          selectedOptions={
+          activeField={
             selectedField
-              ? [
-                  {
-                    label: selectedField,
-                    value: { type: 'field', field: selectedField },
-                  },
-                ]
-              : []
+              ? {
+                  label: selectedField,
+                  value: { type: 'field', field: selectedField },
+                }
+              : undefined
           }
           onChoose={function (choice: FieldOptionValue | undefined): void {
             if (choice) {

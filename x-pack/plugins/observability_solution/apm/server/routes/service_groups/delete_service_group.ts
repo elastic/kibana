@@ -12,12 +12,6 @@ interface Options {
   savedObjectsClient: SavedObjectsClientContract;
   serviceGroupId: string;
 }
-export async function deleteServiceGroup({
-  savedObjectsClient,
-  serviceGroupId,
-}: Options) {
-  return savedObjectsClient.delete(
-    APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-    serviceGroupId
-  );
+export async function deleteServiceGroup({ savedObjectsClient, serviceGroupId }: Options) {
+  return savedObjectsClient.delete(APM_SERVICE_GROUP_SAVED_OBJECT_TYPE, serviceGroupId);
 }

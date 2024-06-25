@@ -49,9 +49,6 @@ interface RuleDetailsPathParams {
 export function RuleDetailsPage() {
   const {
     application: { capabilities, navigateToUrl },
-    charts: {
-      theme: { useChartsBaseTheme },
-    },
     http: { basePath },
     share: {
       url: { locators },
@@ -69,9 +66,6 @@ export function RuleDetailsPage() {
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
-
-  const baseTheme = useChartsBaseTheme();
-
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useFetchRuleTypes({
@@ -200,7 +194,6 @@ export function RuleDetailsPage() {
       : '';
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
-
   if (!rule || isError) return <NoRuleFoundPanel />;
 
   return (
@@ -233,7 +226,6 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={{ baseTheme }}
             featureIds={featureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}

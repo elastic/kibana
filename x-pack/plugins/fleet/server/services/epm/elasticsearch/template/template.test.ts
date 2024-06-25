@@ -14,6 +14,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
+import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
@@ -23,6 +25,7 @@ import {
   FLEET_COMPONENT_TEMPLATES,
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
 } from '../../../../constants';
 
 import {
@@ -81,7 +84,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
@@ -126,7 +130,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
@@ -146,7 +151,8 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
@@ -338,6 +344,26 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithIndexFalseMapping);
+  });
+
+  it('tests processing text field with store true', () => {
+    const textWithStoreTrueYml = `
+- name: someTextId
+  type: text
+  store: true
+`;
+    const textWithStoreTrueMapping = {
+      properties: {
+        someTextId: {
+          type: 'text',
+          store: true,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithStoreTrueYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(textWithStoreTrueMapping);
   });
 
   it('tests processing text field with multi fields', () => {
@@ -1311,6 +1337,103 @@ describe('EPM template', () => {
     const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing store true in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: messages.*
+  type: text
+  store: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        messages: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'messages.*': {
+            match_mapping_type: 'string',
+            path_match: 'messages.*',
+            mapping: {
+              type: 'text',
+              store: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template object', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template field', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 

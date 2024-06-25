@@ -63,7 +63,6 @@ export interface FetchAlertResp {
   getInspectQuery: GetInspectQuery;
   refetch: Refetch;
   totalAlerts: number;
-  updatedAt: number;
 }
 
 type AlertResponseState = Omit<FetchAlertResp, 'getInspectQuery' | 'refetch'>;
@@ -105,7 +104,6 @@ const initialAlertState: AlertStateReducer = {
     ecsAlertsData: [],
     totalAlerts: -1,
     isInitializing: true,
-    updatedAt: 0,
   },
 };
 
@@ -123,7 +121,6 @@ function alertReducer(state: AlertStateReducer, action: AlertActions) {
           totalAlerts: action.totalAlerts,
           oldAlertsData: action.oldAlertsData,
           ecsAlertsData: action.ecsAlertsData,
-          updatedAt: Date.now(),
         },
       };
     case 'resetPagination':

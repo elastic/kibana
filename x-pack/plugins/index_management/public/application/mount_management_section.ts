@@ -7,16 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import SemVer from 'semver/classes/semver';
-import { CoreSetup, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
+import { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-
 import { CloudSetup } from '@kbn/cloud-plugin/public';
-import { Observable } from 'rxjs';
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
-import { ExtensionsService } from '../services';
-import { StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
@@ -26,6 +22,8 @@ import { renderApp } from '.';
 import { setUiMetricService } from './services/api';
 import { notificationService } from './services/notification';
 import { httpService } from './services/http';
+import { ExtensionsService } from '../services/extensions_service';
+import { StartDependencies } from '../types';
 
 function initSetup({
   usageCollection,
@@ -58,7 +56,6 @@ export function getIndexManagementDependencies({
   config,
   cloud,
   startDependencies,
-  theme$,
   uiMetricService,
 }: {
   core: CoreStart;
@@ -70,18 +67,14 @@ export function getIndexManagementDependencies({
   config: AppDependencies['config'];
   cloud?: CloudSetup;
   startDependencies: StartDependencies;
-  theme$: Observable<CoreTheme>;
   uiMetricService: UiMetricService;
 }): AppDependencies {
-  const { docLinks, fatalErrors, application, uiSettings, executionContext, settings, http } = core;
+  const { docLinks, application, uiSettings, settings } = core;
   const { url } = startDependencies.share;
   return {
     core: {
-      fatalErrors,
       getUrlForApp: application.getUrlForApp,
-      executionContext,
-      application,
-      http,
+      ...core,
     },
     plugins: {
       usageCollection,
@@ -89,6 +82,8 @@ export function getIndexManagementDependencies({
       share: startDependencies.share,
       cloud,
       console: startDependencies.console,
+      ml: startDependencies.ml,
+      licensing: startDependencies.licensing,
     },
     services: {
       httpService,
@@ -104,7 +99,6 @@ export function getIndexManagementDependencies({
     url,
     docLinks,
     kibanaVersion,
-    theme$,
   };
 }
 
@@ -127,7 +121,7 @@ export async function mountManagementSection({
   config: AppDependencies['config'];
   cloud?: CloudSetup;
 }) {
-  const { element, setBreadcrumbs, history, theme$ } = params;
+  const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -151,7 +145,6 @@ export async function mountManagementSection({
     isFleetEnabled,
     kibanaVersion,
     startDependencies,
-    theme$,
     uiMetricService,
     usageCollection,
   });

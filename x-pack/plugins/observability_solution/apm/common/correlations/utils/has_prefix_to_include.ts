@@ -8,7 +8,5 @@
 import { FIELD_PREFIX_TO_ADD_AS_CANDIDATE } from '../constants';
 
 export const hasPrefixToInclude = (fieldName: string) => {
-  return FIELD_PREFIX_TO_ADD_AS_CANDIDATE.some((prefix) =>
-    fieldName.startsWith(prefix)
-  );
+  return FIELD_PREFIX_TO_ADD_AS_CANDIDATE.some((prefix) => fieldName.startsWith(prefix));
 };

@@ -58,7 +58,7 @@ export class TermJoinKeyLabel extends Component<Props, State> {
     }
 
     const content = i18n.translate('xpack.maps.tooltip.joinPropertyTooltipContent', {
-      defaultMessage: `Shared key '{leftFieldName}' is joined with {rightSources}`,
+      defaultMessage: `Shared key ''{leftFieldName}'' is joined with {rightSources}`,
       values: {
         leftFieldName: this.props.leftFieldName,
         rightSources: this.state.rightSourceLabels.join(','),

@@ -9,11 +9,26 @@
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { monaco } from '@kbn/monaco';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { MapCache } from 'lodash';
 
 export type MonacoMessage = monaco.editor.IMarkerData;
+
+interface IntegrationsResponse {
+  items: Array<{
+    name: string;
+    title?: string;
+    dataStreams: Array<{
+      name: string;
+      title?: string;
+    }>;
+  }>;
+}
+
+const INTEGRATIONS_API = '/api/fleet/epm/packages/installed';
+const API_VERSION = '2023-10-31';
 
 export const useDebounceWithOptions = (
   fn: Function,
@@ -156,6 +171,7 @@ export const getDocumentationSections = async (language: string) => {
       initialSection,
       functions,
       aggregationFunctions,
+      groupingFunctions,
       operators,
     } = await import('./esql_documentation_sections');
     groups.push({
@@ -164,7 +180,14 @@ export const getDocumentationSections = async (language: string) => {
       }),
       items: [],
     });
-    groups.push(sourceCommands, processingCommands, functions, aggregationFunctions, operators);
+    groups.push(
+      sourceCommands,
+      processingCommands,
+      functions,
+      aggregationFunctions,
+      groupingFunctions,
+      operators
+    );
     return {
       groups,
       initialSection,
@@ -193,6 +216,20 @@ export const getIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
   return indices.map((index) => ({ name: index.name, hidden: index.name.startsWith('.') }));
 };
 
+export const getRemoteIndicesList = async (dataViews: DataViewsPublicPluginStart) => {
+  const indices = await dataViews.getIndices({
+    showAllIndices: false,
+    pattern: '*:*',
+    isRollupIndex: () => false,
+  });
+  const finalIndicesList = indices.filter((source) => {
+    const [_, index] = source.name.split(':');
+    return !index.startsWith('.') && !Boolean(source.item.indices);
+  });
+
+  return finalIndicesList.map((source) => ({ name: source.name, hidden: false }));
+};
+
 // refresh the esql cache entry after 10 minutes
 const CACHE_INVALIDATE_DELAY = 10 * 60 * 1000;
 
@@ -203,4 +240,40 @@ export const clearCacheWhenOld = (cache: MapCache, esqlQuery: string) => {
       cache.delete(esqlQuery);
     }
   }
+};
+
+const getIntegrations = async (core: CoreStart) => {
+  const fleetCapabilities = core.application.capabilities.fleet;
+  if (!fleetCapabilities?.read) {
+    return [];
+  }
+  // Ideally we should use the Fleet plugin constants to fetch the integrations
+  // import { EPM_API_ROUTES, API_VERSIONS } from '@kbn/fleet-plugin/common';
+  // but it complicates things as we need to use an x-pack plugin as dependency to get 2 constants
+  // and this needs to be done in various places in the codebase which use the editor
+  // https://github.com/elastic/kibana/issues/186061
+  const response = (await core.http
+    .get(INTEGRATIONS_API, { query: undefined, version: API_VERSION })
+    .catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to fetch integrations', error);
+    })) as IntegrationsResponse;
+
+  return (
+    response?.items?.map((source) => ({
+      name: source.name,
+      hidden: false,
+      title: source.title,
+      dataStreams: source.dataStreams,
+    })) ?? []
+  );
+};
+
+export const getESQLSources = async (dataViews: DataViewsPublicPluginStart, core: CoreStart) => {
+  const [remoteIndices, localIndices, integrations] = await Promise.all([
+    getRemoteIndicesList(dataViews),
+    getIndicesList(dataViews),
+    getIntegrations(core),
+  ]);
+  return [...localIndices, ...remoteIndices, ...integrations];
 };

@@ -16,8 +16,9 @@ import {
   getDefaultAwsCredentialsType,
   getDefaultAzureCredentialsType,
   getDefaultGcpHiddenVars,
+  findVariableDef,
 } from './utils';
-import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS } from './mocks';
+import { getMockPolicyAWS, getMockPolicyK8s, getMockPolicyEKS, getPackageInfoMock } from './mocks';
 
 describe('getPosturePolicy', () => {
   for (const [name, getPolicy, expectedVars] of [
@@ -484,5 +485,67 @@ describe('getDefaultGcpHiddenVars', () => {
       'gcp.credentials.type': { value: 'credentials-file', type: 'text' },
       setup_access: { value: 'manual', type: 'text' },
     });
+  });
+});
+
+describe('findVariableDef', () => {
+  it('Should return var item when key exist', () => {
+    const packageInfo = getPackageInfoMock() as PackageInfo;
+    const key = 'secret_access_key';
+    const result = findVariableDef(packageInfo, key);
+
+    expect(result).toMatchObject({
+      name: 'secret_access_key',
+      secret: true,
+      title: 'Secret Access Key',
+    });
+  });
+
+  it('Should return undefined when key is invalid', () => {
+    const packageInfo = getPackageInfoMock() as PackageInfo;
+    const key = 'invalid_access_key';
+    const result = findVariableDef(packageInfo, key);
+
+    expect(result).toBeUndefined();
+  });
+
+  it('Should return undefined when datastream is undefined', () => {
+    const packageInfo = {
+      data_streams: [{}],
+    } as PackageInfo;
+    const key = 'secret_access_key';
+    const result = findVariableDef(packageInfo, key);
+
+    expect(result).toBeUndefined();
+  });
+
+  it('Should return undefined when stream is undefined', () => {
+    const packageInfo = {
+      data_streams: [
+        {
+          title: 'Cloud Security Posture Findings',
+          streams: [{}],
+        },
+      ],
+    } as PackageInfo;
+    const key = 'secret_access_key';
+    const result = findVariableDef(packageInfo, key);
+
+    expect(result).toBeUndefined();
+  });
+
+  it('Should return undefined when stream.var is invalid', () => {
+    const packageInfo = {
+      data_streams: [
+        {
+          title: 'Cloud Security Posture Findings',
+          streams: [{ vars: {} }],
+        },
+      ],
+    } as PackageInfo;
+    const key = 'secret_access_key';
+    const result = findVariableDef(packageInfo, key);
+
+    expect(result).toBeUndefined();
   });
 });

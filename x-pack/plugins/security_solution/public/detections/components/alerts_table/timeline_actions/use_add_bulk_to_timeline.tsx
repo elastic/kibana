@@ -16,7 +16,7 @@ import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
@@ -29,7 +29,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
-import type { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { Direction } from '../../../../../common/search_strategy';
 
 const { setEventsLoading, setSelected } = dataTableActions;
@@ -80,24 +80,28 @@ export const useAddBulkToTimelineAction = ({
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
-    field: columnId,
-    direction: sortDirection as Direction,
-    esTypes: esTypes ?? [],
-    type: columnType,
-  }));
+  const timelineQuerySortField = useMemo(() => {
+    return sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
+      field: columnId,
+      direction: sortDirection as Direction,
+      esTypes: esTypes ?? [],
+      type: columnType,
+    }));
+  }, [sort]);
 
   const combinedFilters = useMemo(() => [...localFilters, ...filters], [localFilters, filters]);
 
-  const combinedQuery = combineQueries({
-    config: esQueryConfig,
-    dataProviders: [],
-    indexPattern,
-    filters: combinedFilters,
-    kqlQuery: { query: '', language: 'kuery' },
-    browserFields,
-    kqlMode: 'filter',
-  });
+  const combinedQuery = useMemo(() => {
+    return combineQueries({
+      config: esQueryConfig,
+      dataProviders: [],
+      indexPattern,
+      filters: combinedFilters,
+      kqlQuery: { query: '', language: 'kuery' },
+      browserFields,
+      kqlMode: 'filter',
+    });
+  }, [esQueryConfig, indexPattern, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';

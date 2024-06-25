@@ -8,7 +8,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
-import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { mockSourcererScope } from '../../../../sourcerer/containers/mocks';
 import { mockTimelineData } from '../../../../common/mock';
 import { transformTimelineItemToUnifiedRows } from './utils';
 
@@ -41,6 +41,7 @@ describe('utils', () => {
           'host.name': ['apache'],
           'host.ip': ['192.168.0.1'],
           'event.id': ['1'],
+          'event.kind': ['signal'],
           'event.action': ['Action'],
           'event.category': ['Access'],
           'event.module': ['nginx'],

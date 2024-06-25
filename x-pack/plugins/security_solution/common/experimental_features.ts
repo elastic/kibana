@@ -12,14 +12,10 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * This object is then used to validate and parse the value entered.
  */
 export const allowedExperimentalValues = Object.freeze({
-  tGridEnabled: true,
-  tGridEventRenderedViewEnabled: true,
-
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
 
   kubernetesEnabled: true,
-  chartEmbeddablesEnabled: true,
   donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
 
   /**
@@ -33,11 +29,6 @@ export const allowedExperimentalValues = Object.freeze({
   previewTelemetryUrlEnabled: false,
 
   /**
-   * Enables the insights module for related alerts by process ancestry
-   */
-  insightsRelatedAlertsByProcessAncestry: true,
-
-  /**
    * Enables extended rule execution logging to Event Log. When this setting is enabled:
    * - Rules write their console error, info, debug, and trace messages to Event Log,
    *   in addition to other events they log there (status changes and execution metrics).
@@ -45,11 +36,6 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
-
-  /**
-   * Enables streaming for Security AI Assistant - non-langchain only (knowledge base off)
-   */
-  assistantStreamingEnabled: false,
 
   /**
    * Enables the SOC trends timerange and stats on D&R page
@@ -86,10 +72,32 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV1Enabled: true,
 
   /**
-   * Enables use of SentinelOne response actions that complete asynchronously as well as support
-   * for more response actions.
+   * Enables use of SentinelOne response actions that complete asynchronously
+   *
+   * Release: v8.14.0
    */
-  responseActionsSentinelOneV2Enabled: false,
+  responseActionsSentinelOneV2Enabled: true,
+
+  /** Enables the `get-file` response action for SentinelOne */
+  responseActionsSentinelOneGetFileEnabled: false,
+
+  /**
+   * 8.15
+   * Enables use of agent status service to get agent status information
+   * for endpoint and third-party agents.
+   */
+  agentStatusClientEnabled: false,
+
+  /**
+   * Enables the ability to send Response actions to Crowdstrike and persist the results
+   * in ES.
+   */
+  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
+   * Enables scan response action on Endpoint
+   */
+  responseActionScanEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -102,25 +110,14 @@ export const allowedExperimentalValues = Object.freeze({
   alertTypeEnabled: false,
 
   /**
-   * Enables expandable flyout in create rule page, alert preview
+   * Disables expandable flyout
    */
-  expandableFlyoutInCreateRuleEnabled: true,
+  expandableFlyoutDisabled: false,
 
   /**
-   * Enables expandable flyout for event type documents
+   * Enables new notes
    */
-  expandableEventFlyoutEnabled: false,
-
-  /**
-   * Enables expandable flyout in timeline
-   */
-  expandableTimelineFlyoutEnabled: false,
-  /*
-
-  /**
-   * Enables new Set of filters on the Alerts page.
-   */
-  alertsPageFiltersEnabled: true,
+  securitySolutionNotesEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -128,20 +125,15 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables the new user details flyout displayed on the Alerts table.
+   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
    */
-  newUserDetailsFlyout: true,
+  assistantKnowledgeBaseByDefault: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
-   * To see this section you also need newUserDetailsFlyout flag enabled.
+   * To see this section you also need expandableFlyoutDisabled flag set to false.
    */
   newUserDetailsFlyoutManagedUser: false,
-
-  /**
-   * Enables the new host details flyout displayed on the Alerts table.
-   */
-  newHostDetailsFlyout: true,
 
   /**
    * Enable risk engine client and initialisation of datastream, component templates and mappings
@@ -170,6 +162,11 @@ export const allowedExperimentalValues = Object.freeze({
   disableTimelineSaveTour: false,
 
   /**
+   * Enables alerts suppression for ES|QL rules
+   */
+  alertSuppressionForEsqlRuleEnabled: false,
+
+  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
@@ -181,7 +178,9 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneDataInAnalyzerEnabled: true,
 
   /**
-   * Enables SentinelOne manual host manipulation actions
+   * Enables SentinelOne manual host isolation response actions directly through the connector
+   * sub-actions framework.
+   * v8.12.0
    */
   sentinelOneManualHostActionsEnabled: true,
 
@@ -189,6 +188,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: false,
+
+  /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: false,
 
   /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
@@ -232,7 +236,45 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  malwareOnWriteScanOptionAvailable: false,
+  malwareOnWriteScanOptionAvailable: true,
+
+  /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: false,
+
+  /**
+   *  Enables Security AI Assistant's Flyout mode
+   */
+  aiAssistantFlyoutMode: true,
+
+  /**
+   * Enables the new modal for the value list items
+   */
+  valueListItemsModalEnabled: true,
+
+  /**
+   * Enables the new rule's bulk action to manage custom highlighted fields
+   */
+  bulkCustomHighlightedFieldsEnabled: false,
+
+  /**
+   * Enables the manual rule run
+   */
+  manualRuleRunEnabled: false,
+
+  /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForEventFiltersEnabled: false,
+
+  /**
+   * Enables an ability to customize Elastic prebuilt rules.
+   *
+   * Ticket: https://github.com/elastic/security-team/issues/1974
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   */
+  prebuiltRulesCustomizationEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

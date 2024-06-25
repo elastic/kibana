@@ -5,12 +5,7 @@
  * 2.0.
  */
 import { keyBy } from 'lodash';
-import {
-  rangeQuery,
-  kqlQuery,
-  termQuery,
-  termsQuery,
-} from '@kbn/observability-plugin/server';
+import { rangeQuery, kqlQuery, termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';

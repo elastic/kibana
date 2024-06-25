@@ -30,12 +30,13 @@ import { AlertsSettings } from '../alerts/settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import type { KnowledgeBaseConfig } from '../assistant/types';
 import * as i18n from './translations';
-import { useDeleteKnowledgeBase } from './use_delete_knowledge_base';
-import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
-import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
+import { useDeleteKnowledgeBase } from '../assistant/api/knowledge_base/use_delete_knowledge_base';
+import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
+import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 
 const ESQL_RESOURCE = 'esql';
-const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-kb';
+const KNOWLEDGE_BASE_INDEX_PATTERN_OLD = '.kibana-elastic-ai-assistant-kb';
+const KNOWLEDGE_BASE_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-(SPACE)';
 
 interface Props {
   knowledgeBase: KnowledgeBaseConfig;
@@ -47,7 +48,10 @@ interface Props {
  */
 export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
   ({ knowledgeBase, setUpdatedKnowledgeBaseSettings }) => {
-    const { http } = useAssistantContext();
+    const {
+      assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
+      http,
+    } = useAssistantContext();
     const {
       data: kbStatus,
       isLoading,
@@ -60,14 +64,18 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const isElserEnabled = kbStatus?.elser_exists ?? false;
     const isKnowledgeBaseEnabled = (kbStatus?.index_exists && kbStatus?.pipeline_exists) ?? false;
     const isESQLEnabled = kbStatus?.esql_exists ?? false;
+    const isSetupInProgress = kbStatus?.is_setup_in_progress ?? false;
 
     // Resource availability state
-    const isLoadingKb = isLoading || isFetching || isSettingUpKB || isDeletingUpKB;
+    const isLoadingKb =
+      isLoading || isFetching || isSettingUpKB || isDeletingUpKB || isSetupInProgress;
     const isKnowledgeBaseAvailable = knowledgeBase.isEnabledKnowledgeBase && kbStatus?.elser_exists;
     const isESQLAvailable =
       knowledgeBase.isEnabledKnowledgeBase && isKnowledgeBaseAvailable && isKnowledgeBaseEnabled;
     // Prevent enabling if elser doesn't exist, but always allow to disable
-    const isSwitchDisabled = !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
+    const isSwitchDisabled = enableKnowledgeBaseByDefault
+      ? false
+      : !kbStatus?.elser_exists && !knowledgeBase.isEnabledKnowledgeBase;
 
     // Calculated health state for EuiHealth component
     const elserHealth = isElserEnabled ? 'success' : 'subdued';
@@ -84,12 +92,18 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
           isEnabledKnowledgeBase: event.target.checked,
         });
 
-        // If enabling and ELSER exists, try to set up automatically
-        if (event.target.checked && kbStatus?.elser_exists) {
+        // If enabling and ELSER exists or automatic KB setup FF is enabled, try to set up automatically
+        if (event.target.checked && (enableKnowledgeBaseByDefault || kbStatus?.elser_exists)) {
           setupKB(ESQL_RESOURCE);
         }
       },
-      [kbStatus?.elser_exists, knowledgeBase, setUpdatedKnowledgeBaseSettings, setupKB]
+      [
+        enableKnowledgeBaseByDefault,
+        kbStatus?.elser_exists,
+        knowledgeBase,
+        setUpdatedKnowledgeBaseSettings,
+        setupKB,
+      ]
     );
 
     const isEnabledKnowledgeBaseSwitch = useMemo(() => {
@@ -149,7 +163,11 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const knowledgeBaseDescription = useMemo(() => {
       return isKnowledgeBaseEnabled ? (
         <span data-test-subj="kb-installed">
-          {i18n.KNOWLEDGE_BASE_DESCRIPTION_INSTALLED(KNOWLEDGE_BASE_INDEX_PATTERN)}{' '}
+          {i18n.KNOWLEDGE_BASE_DESCRIPTION_INSTALLED(
+            enableKnowledgeBaseByDefault
+              ? KNOWLEDGE_BASE_INDEX_PATTERN
+              : KNOWLEDGE_BASE_INDEX_PATTERN_OLD
+          )}{' '}
           {knowledgeBaseActionButton}
         </span>
       ) : (
@@ -157,7 +175,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
           {i18n.KNOWLEDGE_BASE_DESCRIPTION} {knowledgeBaseActionButton}
         </span>
       );
-    }, [isKnowledgeBaseEnabled, knowledgeBaseActionButton]);
+    }, [enableKnowledgeBaseByDefault, isKnowledgeBaseEnabled, knowledgeBaseActionButton]);
 
     //////////////////////////////////////////////////////////////////////////////////////////
     // ESQL Resource
@@ -232,7 +250,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
             padding-left: 5px;
           `}
         >
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <div>
               <EuiHealth color={elserHealth}>{i18n.KNOWLEDGE_BASE_ELSER_LABEL}</EuiHealth>
               <EuiText
@@ -271,7 +289,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
               </EuiText>
             </div>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <div>
               <EuiHealth color={knowledgeBaseHealth}>{i18n.KNOWLEDGE_BASE_LABEL}</EuiHealth>
               <EuiText

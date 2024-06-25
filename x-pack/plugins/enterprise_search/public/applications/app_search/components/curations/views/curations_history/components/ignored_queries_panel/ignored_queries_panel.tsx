@@ -114,7 +114,6 @@ export const IgnoredQueriesPanel: React.FC = () => {
         itemId="query"
         // @ts-expect-error - EuiBasicTable wants an array of objects, but will accept strings if coerced
         columns={columns}
-        hasActions
         pagination={{
           ...convertMetaToPagination(meta),
           showPerPageOptions: false,

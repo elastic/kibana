@@ -7,17 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import type {
-  IHttpFetchError,
-  ResponseErrorBody,
-} from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
-import {
-  AutoAbortedAPMClient,
-  callApmApi,
-} from '../services/rest/create_call_apm_api';
+import { AutoAbortedAPMClient, callApmApi } from '../services/rest/create_call_apm_api';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -27,14 +21,11 @@ export enum FETCH_STATUS {
 }
 
 export const isPending = (fetchStatus: FETCH_STATUS) =>
-  fetchStatus === FETCH_STATUS.LOADING ||
-  fetchStatus === FETCH_STATUS.NOT_INITIATED;
+  fetchStatus === FETCH_STATUS.LOADING || fetchStatus === FETCH_STATUS.NOT_INITIATED;
 
-export const isFailure = (fetchStatus: FETCH_STATUS) =>
-  fetchStatus === FETCH_STATUS.FAILURE;
+export const isFailure = (fetchStatus: FETCH_STATUS) => fetchStatus === FETCH_STATUS.FAILURE;
 
-export const isSuccess = (fetchStatus: FETCH_STATUS) =>
-  fetchStatus === FETCH_STATUS.SUCCESS;
+export const isSuccess = (fetchStatus: FETCH_STATUS) => fetchStatus === FETCH_STATUS.SUCCESS;
 
 export interface FetcherResult<Data> {
   data?: Data;
@@ -42,9 +33,7 @@ export interface FetcherResult<Data> {
   error?: IHttpFetchError<ResponseErrorBody>;
 }
 
-function getDetailsFromErrorResponse(
-  error: IHttpFetchError<ResponseErrorBody>
-) {
+function getDetailsFromErrorResponse(error: IHttpFetchError<ResponseErrorBody>) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
     <>
@@ -87,9 +76,7 @@ const createAutoAbortedAPMClient = (
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
-type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
-  infer TResponseType
->
+type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<infer TResponseType>
   ? TResponseType
   : unknown;
 
@@ -103,9 +90,7 @@ export function useFetcher<TReturn>(
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
-  const [result, setResult] = useState<
-    FetcherResult<InferResponseType<TReturn>>
-  >({
+  const [result, setResult] = useState<FetcherResult<InferResponseType<TReturn>>>({
     data: undefined,
     status: FETCH_STATUS.NOT_INITIATED,
   });
@@ -123,9 +108,7 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(
-        createAutoAbortedAPMClient(signal, addInspectorRequest)
-      );
+      const promise = fn(createAutoAbortedAPMClient(signal, addInspectorRequest));
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
@@ -156,8 +139,7 @@ export function useFetcher<TReturn>(
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
 
         if (!signal.aborted) {
-          const errorDetails =
-            'response' in err ? getDetailsFromErrorResponse(err) : err.message;
+          const errorDetails = 'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
             notifications.toasts.danger({

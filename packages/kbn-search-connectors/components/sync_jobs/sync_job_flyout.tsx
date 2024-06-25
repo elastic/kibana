@@ -68,15 +68,20 @@ export const SyncJobFlyout: React.FC<SyncJobFlyoutProps> = ({ onClose, syncJob }
                       defaultMessage: 'ID',
                     }),
                   },
+                  {
+                    field: 'index_name',
+                    name: i18n.translate('searchConnectors.syncJobs.flyout.sync.index', {
+                      defaultMessage: 'Index name',
+                    }),
+                  },
                 ]}
-                items={[{ id: syncJob.id }]}
+                items={[{ id: syncJob.id, index_name: syncJob.connector.index_name }]}
               />
             </FlyoutPanel>
           </EuiFlexItem>
           <EuiFlexItem>
             <SyncJobDocumentsPanel
               added={syncJob.indexed_document_count}
-              total={syncJob.total_document_count ?? 0}
               removed={syncJob.deleted_document_count}
               volume={syncJob.indexed_document_volume ?? 0}
             />

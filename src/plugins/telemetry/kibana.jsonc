@@ -17,8 +17,7 @@
       "security"
     ],
     "requiredBundles": [
-      "kibanaUtils",
-      "kibanaReact"
+      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common/constants"

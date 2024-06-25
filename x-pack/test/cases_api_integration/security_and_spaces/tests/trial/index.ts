@@ -45,6 +45,9 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
 
+    // Connectors
+    loadTestFile(require.resolve('./connectors/cases/cases_connector'));
+
     // Common
     loadTestFile(require.resolve('../common'));
 

@@ -6,10 +6,7 @@
  */
 import { Environment } from '../../common/environment_rt';
 import { IUiSettingsClient } from '@kbn/core/public';
-import {
-  APMServiceDetailLocator,
-  APM_APP_LOCATOR_ID,
-} from './service_detail_locator';
+import { APMServiceDetailLocator, APM_APP_LOCATOR_ID } from './service_detail_locator';
 import {
   enableComparisonByDefault,
   defaultApmServiceEnvironment,

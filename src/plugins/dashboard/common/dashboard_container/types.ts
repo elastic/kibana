@@ -13,6 +13,7 @@ import {
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { Reference } from '@kbn/content-management-utils';
 import { RefreshInterval } from '@kbn/data-plugin/common';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
@@ -35,6 +36,10 @@ export interface DashboardPanelState<
    * embeddable's input. This key is needed for BWC, but its value will be removed on Dashboard save.
    */
   version?: string;
+  /**
+   * React embeddables are serialized and may pass references that are later used in factory's deserialize method.
+   */
+  references?: Reference[];
 }
 
 export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;
@@ -54,7 +59,7 @@ export interface DashboardContainerInput extends EmbeddableInput {
   viewMode: ViewMode;
   description?: string;
   isEmbeddedExternally?: boolean;
-  executionContext?: KibanaExecutionContext;
+  executionContext: KibanaExecutionContext;
 
   // dashboard options: TODO, build a new system to avoid all shared state appearing here. See https://github.com/elastic/kibana/issues/144532 for more information.
   hidePanelTitles: DashboardOptions['hidePanelTitles'];

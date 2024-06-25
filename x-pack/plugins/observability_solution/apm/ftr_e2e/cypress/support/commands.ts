@@ -84,38 +84,29 @@ Cypress.Commands.add('visitKibana', (url: string) => {
 // This command expects from and to both values to be present on the URL where
 // this command is being executed. If from and to values are not present,
 // the date picker renders singleValueInput where this command won't work.
-Cypress.Commands.add(
-  'selectAbsoluteTimeRange',
-  (start: string, end: string) => {
-    const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
+Cypress.Commands.add('selectAbsoluteTimeRange', (start: string, end: string) => {
+  const format = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
-    cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
-    cy.contains('Start date')
-      .nextAll()
-      .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
-      .clear({ force: true })
-      .type(moment(start).format(format), { force: true })
-      .type('{enter}');
+  cy.getByTestSubj('superDatePickerstartDatePopoverButton').click();
+  cy.contains('Start date')
+    .nextAll()
+    .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+    .clear({ force: true })
+    .type(moment(start).format(format), { force: true })
+    .type('{enter}');
 
-    cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
-    cy.contains('End date')
-      .nextAll()
-      .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
-      .clear({ force: true })
-      .type(moment(end).format(format), { force: true })
-      .type('{enter}');
-  }
-);
+  cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
+  cy.contains('End date')
+    .nextAll()
+    .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
+    .clear({ force: true })
+    .type(moment(end).format(format), { force: true })
+    .type('{enter}');
+});
 
 Cypress.Commands.add(
   'expectAPIsToHaveBeenCalledWith',
-  ({
-    apisIntercepted,
-    value,
-  }: {
-    apisIntercepted: string[];
-    value: string;
-  }) => {
+  ({ apisIntercepted, value }: { apisIntercepted: string[]; value: string }) => {
     cy.wait(apisIntercepted).then((interceptions) => {
       if (Array.isArray(interceptions)) {
         interceptions.map((interception) => {
@@ -128,22 +119,19 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add(
-  'updateAdvancedSettings',
-  (settings: Record<string, unknown>) => {
-    const kibanaUrl = Cypress.env('KIBANA_URL');
-    cy.request({
-      log: false,
-      method: 'POST',
-      url: `${kibanaUrl}/internal/kibana/settings`,
-      body: { changes: settings },
-      headers: {
-        'kbn-xsrf': 'e2e_test',
-      },
-      auth: { user: 'editor', pass: 'changeme' },
-    });
-  }
-);
+Cypress.Commands.add('updateAdvancedSettings', (settings: Record<string, unknown>) => {
+  const kibanaUrl = Cypress.env('KIBANA_URL');
+  cy.request({
+    log: false,
+    method: 'POST',
+    url: `${kibanaUrl}/internal/kibana/settings`,
+    body: { changes: settings },
+    headers: {
+      'kbn-xsrf': 'e2e_test',
+    },
+    auth: { user: 'editor', pass: 'changeme' },
+  });
+});
 
 Cypress.Commands.add('dismissServiceGroupsTour', () => {
   window.localStorage.setItem(

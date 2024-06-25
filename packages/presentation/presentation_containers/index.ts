@@ -6,6 +6,17 @@
  * Side Public License, v 1.
  */
 
+export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/can_add_new_panel';
+export {
+  apiHasRuntimeChildState,
+  apiHasSerializedChildState,
+  type HasRuntimeChildState,
+  type HasSerializedChildState,
+} from './interfaces/child_state';
+export {
+  apiHasSaveNotification,
+  type HasSaveNotification,
+} from './interfaces/has_save_notification';
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
@@ -15,17 +26,20 @@ export {
 export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
+  listenForCompatibleApi,
+  combineCompatibleChildrenApis,
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';
+export {
+  apiHasSerializableState,
+  type HasSerializableState,
+  type HasSnapshottableState,
+  type SerializedPanelState,
+} from './interfaces/serialized_state';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
 export {
-  type SerializedPanelState,
-  type HasSerializableState,
-  apiHasSerializableState,
-} from './interfaces/serialized_state';
-export {
-  type PublishesLastSavedState,
-  apiPublishesLastSavedState,
-  getLastSavedStateSubjectForChild,
-} from './interfaces/last_saved_state';
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+  type TracksQueryPerformance,
+} from './interfaces/performance_trackers';

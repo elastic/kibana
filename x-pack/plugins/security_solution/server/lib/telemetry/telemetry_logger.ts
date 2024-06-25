@@ -33,7 +33,10 @@ export interface TelemetryLogger extends Logger {
  * It makes easier to browse the logs by filtering by the structured argument `logger`.
  */
 export class TelemetryLoggerImpl implements TelemetryLogger {
-  constructor(private readonly delegate: Logger) {}
+  constructor(
+    private readonly delegate: Logger,
+    private readonly mdc?: LogMeta | object | undefined
+  ) {}
 
   l<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta | object | undefined): void {
     if (isElasticCloudDeployment) {
@@ -44,27 +47,27 @@ export class TelemetryLoggerImpl implements TelemetryLogger {
   }
 
   trace<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.delegate.trace(message, logMeta(meta));
+    this.delegate.trace(message, logMeta(meta, this.mdc));
   }
 
   debug<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.delegate.debug(message, logMeta(meta));
+    this.delegate.debug(message, logMeta(meta, this.mdc));
   }
 
   info<Meta extends LogMeta = LogMeta>(message: string, meta?: Meta): void {
-    this.delegate.info(message, logMeta(meta));
+    this.delegate.info(message, logMeta(meta, this.mdc));
   }
 
   warn<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.delegate.warn(errorOrMessage, logMeta(meta));
+    this.delegate.warn(errorOrMessage, logMeta(meta, this.mdc));
   }
 
   error<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.delegate.error(errorOrMessage, logMeta(meta));
+    this.delegate.error(errorOrMessage, logMeta(meta, this.mdc));
   }
 
   fatal<Meta extends LogMeta = LogMeta>(errorOrMessage: string | Error, meta?: Meta): void {
-    this.delegate.fatal(errorOrMessage, logMeta(meta));
+    this.delegate.fatal(errorOrMessage, logMeta(meta, this.mdc));
   }
 
   log(record: LogRecord): void {
@@ -76,7 +79,8 @@ export class TelemetryLoggerImpl implements TelemetryLogger {
   }
 
   get(...childContextPaths: string[]): Logger {
-    return this.delegate.get(...childContextPaths);
+    const logger = this.delegate.get(...childContextPaths);
+    return new TelemetryLoggerImpl(logger, this.mdc);
   }
 }
 
@@ -89,7 +93,7 @@ export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
 };
 
 // helper method to merge a given LogMeta with the cluster info (if exists)
-function logMeta(meta?: LogMeta | undefined): LogMeta {
+function logMeta(meta?: LogMeta | undefined, mdc?: LogMeta | undefined): LogMeta {
   const clusterInfoMeta = clusterInfo
     ? {
         cluster_uuid: clusterInfo?.cluster_uuid,
@@ -99,5 +103,6 @@ function logMeta(meta?: LogMeta | undefined): LogMeta {
   return {
     ...clusterInfoMeta,
     ...(meta ?? {}),
+    ...(mdc ?? {}),
   };
 }

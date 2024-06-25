@@ -5,20 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { FormProvider, useForm } from 'react-hook-form';
-import { ChatForm, SummarizationModelName } from '../types';
+import { ChatForm } from '../types';
 
 const queryClient = new QueryClient({});
 
-export const PlaygroundProvider: React.FC = ({ children }) => {
+export interface PlaygroundProviderProps {
+  children: React.ReactNode;
+}
+
+export const PlaygroundProvider: FC<PropsWithChildren<PlaygroundProviderProps>> = ({
+  children,
+}) => {
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
-      docSize: 5,
-      source_fields: [],
-      summarization_model: SummarizationModelName.gpt3_5_turbo,
+      doc_size: 3,
+      source_fields: {},
+      indices: [],
     },
   });
 

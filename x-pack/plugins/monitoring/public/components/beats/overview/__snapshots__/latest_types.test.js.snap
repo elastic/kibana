@@ -37,7 +37,6 @@ exports[`Latest Types that latest active component renders normally 1`] = `
       token="euiBasicTable.noItemsMessage"
     />
   }
-  responsive={true}
   tableLayout="fixed"
 />
 `;

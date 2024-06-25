@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
-import { BaseMessage } from 'langchain/schema';
+import { BaseMessage } from '@langchain/core/messages';
 import { ResponseBody } from '../langchain/types';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';
 

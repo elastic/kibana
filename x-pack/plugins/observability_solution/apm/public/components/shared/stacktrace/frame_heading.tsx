@@ -43,15 +43,8 @@ interface Props {
   idx: string;
 }
 
-function FrameHeading({
-  codeLanguage,
-  stackframe,
-  isLibraryFrame,
-  idx,
-}: Props) {
-  const FileDetail: ComponentType = isLibraryFrame
-    ? LibraryFrameFileDetail
-    : AppFrameFileDetail;
+function FrameHeading({ codeLanguage, stackframe, isLibraryFrame, idx }: Props) {
+  const FileDetail: ComponentType = isLibraryFrame ? LibraryFrameFileDetail : AppFrameFileDetail;
   let Renderer: ComponentType<FrameHeadingRendererProps>;
   switch (codeLanguage?.toString().toLowerCase()) {
     case 'c#':
@@ -76,11 +69,7 @@ function FrameHeading({
 
   return (
     <FileDetails data-test-subj="FrameHeading">
-      <Renderer
-        fileDetailComponent={FileDetail}
-        stackframe={stackframe}
-        idx={idx}
-      />
+      <Renderer fileDetailComponent={FileDetail} stackframe={stackframe} idx={idx} />
     </FileDetails>
   );
 }

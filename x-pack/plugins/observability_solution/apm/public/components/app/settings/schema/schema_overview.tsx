@@ -52,11 +52,9 @@ export function SchemaOverview({
   cloudApmPackagePolicy,
   latestApmPackageVersion,
 }: Props) {
-  const isDisabled =
-    !cloudApmMigrationEnabled || !hasCloudAgentPolicy || !hasRequiredRole;
+  const isDisabled = !cloudApmMigrationEnabled || !hasCloudAgentPolicy || !hasRequiredRole;
   const packageVersion = cloudApmPackagePolicy?.package?.version;
-  const isUpgradeAvailable =
-    packageVersion && semverLt(packageVersion, latestApmPackageVersion);
+  const isUpgradeAvailable = packageVersion && semverLt(packageVersion, latestApmPackageVersion);
 
   if (isLoading) {
     return (
@@ -86,9 +84,7 @@ export function SchemaOverview({
           <EuiFlexItem />
           <EuiFlexItem grow={2}>
             {isUpgradeAvailable ? (
-              <UpgradeAvailableCard
-                apmPackagePolicyId={cloudApmPackagePolicy?.id}
-              />
+              <UpgradeAvailableCard apmPackagePolicyId={cloudApmPackagePolicy?.id} />
             ) : (
               <SuccessfulMigrationCard />
             )}
@@ -107,10 +103,9 @@ export function SchemaOverview({
         <EuiFlexItem style={{ minWidth: '250px' }}>
           <EuiCard
             icon={<EuiIcon size="xxl" type="node" />}
-            title={i18n.translate(
-              'xpack.apm.settings.schema.migrate.classicIndices.title',
-              { defaultMessage: 'APM Server binary' }
-            )}
+            title={i18n.translate('xpack.apm.settings.schema.migrate.classicIndices.title', {
+              defaultMessage: 'APM Server binary',
+            })}
             display="subdued"
             description={i18n.translate(
               'xpack.apm.settings.schema.migrate.classicIndices.description',
@@ -140,10 +135,9 @@ export function SchemaOverview({
                 <img src={rocketLaunchGraphic} alt="rocket launch" />
               </div>
             }
-            title={i18n.translate(
-              'xpack.apm.settings.schema.migrate.dataStreams.title',
-              { defaultMessage: 'Elastic Agent' }
-            )}
+            title={i18n.translate('xpack.apm.settings.schema.migrate.dataStreams.title', {
+              defaultMessage: 'Elastic Agent',
+            })}
             description={i18n.translate(
               'xpack.apm.settings.schema.migrate.dataStreams.description',
               {
@@ -167,10 +161,9 @@ export function SchemaOverview({
                     isLoading={isLoadingConfirmation}
                     isDisabled={isDisabled}
                   >
-                    {i18n.translate(
-                      'xpack.apm.settings.schema.migrate.dataStreams.buttonText',
-                      { defaultMessage: 'Switch to Elastic Agent' }
-                    )}
+                    {i18n.translate('xpack.apm.settings.schema.migrate.dataStreams.buttonText', {
+                      defaultMessage: 'Switch to Elastic Agent',
+                    })}
                   </EuiButton>
                 </EuiToolTip>
               </div>
@@ -204,10 +197,9 @@ export function SchemaOverviewHeading() {
             ),
             superuserEmphasis: (
               <strong>
-                {i18n.translate(
-                  'xpack.apm.settings.schema.descriptionText.superuserEmphasisText',
-                  { defaultMessage: 'superuser' }
-                )}
+                {i18n.translate('xpack.apm.settings.schema.descriptionText.superuserEmphasisText', {
+                  defaultMessage: 'superuser',
+                })}
               </strong>
             ),
             elasticAgentDocLink: (
@@ -242,26 +234,23 @@ function getDisabledReason({
   const reasons: string[] = [];
   if (!cloudApmMigrationEnabled) {
     reasons.push(
-      i18n.translate(
-        'xpack.apm.settings.schema.disabledReason.cloudApmMigrationEnabled',
-        { defaultMessage: 'Cloud migration is not enabled' }
-      )
+      i18n.translate('xpack.apm.settings.schema.disabledReason.cloudApmMigrationEnabled', {
+        defaultMessage: 'Cloud migration is not enabled',
+      })
     );
   }
   if (hasRequiredRole && !hasCloudAgentPolicy) {
     reasons.push(
-      i18n.translate(
-        'xpack.apm.settings.schema.disabledReason.hasCloudAgentPolicy',
-        { defaultMessage: 'Cloud agent policy does not exist' }
-      )
+      i18n.translate('xpack.apm.settings.schema.disabledReason.hasCloudAgentPolicy', {
+        defaultMessage: 'Cloud agent policy does not exist',
+      })
     );
   }
   if (!hasRequiredRole) {
     reasons.push(
-      i18n.translate(
-        'xpack.apm.settings.schema.disabledReason.hasRequiredRole',
-        { defaultMessage: 'User does not have superuser role' }
-      )
+      i18n.translate('xpack.apm.settings.schema.disabledReason.hasRequiredRole', {
+        defaultMessage: 'User does not have superuser role',
+      })
     );
   }
   if (reasons.length) {

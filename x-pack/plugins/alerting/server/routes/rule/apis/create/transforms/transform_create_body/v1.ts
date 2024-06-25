@@ -10,73 +10,71 @@ import type {
   CreateRuleRequestBodyV1,
 } from '../../../../../../../common/routes/rule/apis/create';
 import type { CreateRuleData } from '../../../../../../application/rule/methods/create';
-import type { RuleParams } from '../../../../../../application/rule/types';
+import type {
+  RuleParams,
+  ActionRequest,
+  SystemActionRequest,
+} from '../../../../../../application/rule/types';
 
-const transformCreateBodyActions = (
-  actions: CreateRuleActionV1[],
-  isSystemAction: (connectorId: string) => boolean
-): CreateRuleData['actions'] => {
-  const defaultActions: CreateRuleData['actions'] = [];
-  if (!actions) return defaultActions;
+const transformCreateBodyActions = (actions: CreateRuleActionV1[]): ActionRequest[] => {
+  if (!actions) {
+    return [];
+  }
 
-  actions
-    .filter((action) => !isSystemAction(action.id))
-    .forEach(
-      ({
-        frequency,
-        alerts_filter: alertsFilter,
-        use_alert_data_for_template: useAlertDataForTemplate,
-        ...action
-      }) => {
-        defaultActions.push({
-          group: action.group ?? 'default',
-          id: action.id,
-          params: action.params,
-          actionTypeId: action.actionTypeId,
-          ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
-          ...(action.uuid ? { uuid: action.uuid } : {}),
-          ...(frequency
-            ? {
-                frequency: {
-                  summary: frequency.summary,
-                  throttle: frequency.throttle,
-                  notifyWhen: frequency.notify_when,
-                },
-              }
-            : {}),
-          ...(alertsFilter ? { alertsFilter } : {}),
-        });
-      }
-    );
-
-  return defaultActions;
+  return actions.map(
+    ({
+      group,
+      id,
+      params,
+      frequency,
+      uuid,
+      alerts_filter: alertsFilter,
+      use_alert_data_for_template: useAlertDataForTemplate,
+    }) => {
+      return {
+        group: group ?? 'default',
+        id,
+        params,
+        ...(uuid ? { uuid } : {}),
+        ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
+        ...(frequency
+          ? {
+              frequency: {
+                summary: frequency.summary,
+                throttle: frequency.throttle,
+                notifyWhen: frequency.notify_when,
+              },
+            }
+          : {}),
+        ...(alertsFilter ? { alertsFilter } : {}),
+      };
+    }
+  );
 };
 
-const transformCreateBodySystemActions = (
-  actions: CreateRuleActionV1[],
-  isSystemAction: (connectorId: string) => boolean
-): CreateRuleData['systemActions'] => {
-  const defaultActions: CreateRuleData['systemActions'] = [];
-  if (!actions) return defaultActions;
+const transformCreateBodySystemActions = (actions: CreateRuleActionV1[]): SystemActionRequest[] => {
+  if (!actions) {
+    return [];
+  }
 
-  actions
-    .filter((action) => isSystemAction(action.id))
-    .forEach((systemAction) => {
-      defaultActions.push({
-        id: systemAction.id,
-        params: systemAction.params,
-        actionTypeId: systemAction.actionTypeId,
-        ...(systemAction.uuid ? { uuid: systemAction.uuid } : {}),
-      });
-    });
-
-  return defaultActions;
+  return actions.map(({ id, params, uuid }) => {
+    return {
+      id,
+      params,
+      ...(uuid ? { uuid } : {}),
+    };
+  });
 };
 
-export const transformCreateBody = <Params extends RuleParams = never>(
-  createBody: CreateRuleRequestBodyV1<Params>,
-  isSystemAction: (connectorId: string) => boolean
-): CreateRuleData<Params> => {
+export const transformCreateBody = <Params extends RuleParams = never>({
+  createBody,
+  actions,
+  systemActions,
+}: {
+  createBody: CreateRuleRequestBodyV1<Params>;
+  actions: CreateRuleRequestBodyV1<Params>['actions'];
+  systemActions: CreateRuleRequestBodyV1<Params>['actions'];
+}): CreateRuleData<Params> => {
   return {
     name: createBody.name,
     alertTypeId: createBody.rule_type_id,
@@ -86,8 +84,8 @@ export const transformCreateBody = <Params extends RuleParams = never>(
     ...(createBody.throttle ? { throttle: createBody.throttle } : {}),
     params: createBody.params,
     schedule: createBody.schedule,
-    actions: transformCreateBodyActions(createBody.actions, isSystemAction),
-    systemActions: transformCreateBodySystemActions(createBody.actions, isSystemAction),
+    actions: transformCreateBodyActions(actions),
+    systemActions: transformCreateBodySystemActions(systemActions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
     ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
   };

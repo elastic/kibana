@@ -5,13 +5,14 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mockServices } from './services.mock';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 
-export const ServicesProvider: React.FC = ({ children }) => (
+export const ServicesProvider: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <I18nProvider>
     <KibanaContextProvider services={mockServices}>
       <NavigationProvider core={mockServices}>{children}</NavigationProvider>

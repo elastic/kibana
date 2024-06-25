@@ -72,7 +72,7 @@ export interface Rule<Params extends RuleParams = never> {
   muteAll: RuleSchemaType['muteAll'];
   notifyWhen?: RuleSchemaType['notifyWhen'];
   mutedInstanceIds: RuleSchemaType['mutedInstanceIds'];
-  executionStatus: RuleExecutionStatus;
+  executionStatus?: RuleExecutionStatus;
   monitoring?: RuleSchemaType['monitoring'];
   snoozeSchedule?: RuleSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleSchemaType['activeSnoozes'];
@@ -83,6 +83,7 @@ export interface Rule<Params extends RuleParams = never> {
   running?: RuleSchemaType['running'];
   viewInAppRelativeUrl?: RuleSchemaType['viewInAppRelativeUrl'];
   alertDelay?: RuleSchemaType['alertDelay'];
+  legacyId?: RuleSchemaType['legacyId'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -94,7 +95,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   consumer: RuleDomainSchemaType['consumer'];
   schedule: RuleDomainSchemaType['schedule'];
   actions: RuleDomainSchemaType['actions'];
-  systemActions: RuleDomainSchemaType['systemActions'];
+  systemActions?: RuleDomainSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleDomainSchemaType['mapped_params'];
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];
@@ -109,7 +110,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
   mutedInstanceIds: RuleDomainSchemaType['mutedInstanceIds'];
-  executionStatus: RuleExecutionStatus;
+  executionStatus?: RuleExecutionStatus;
   monitoring?: RuleDomainSchemaType['monitoring'];
   snoozeSchedule?: RuleDomainSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleDomainSchemaType['activeSnoozes'];
@@ -120,4 +121,5 @@ export interface RuleDomain<Params extends RuleParams = never> {
   running?: RuleDomainSchemaType['running'];
   viewInAppRelativeUrl?: RuleDomainSchemaType['viewInAppRelativeUrl'];
   alertDelay?: RuleSchemaType['alertDelay'];
+  legacyId?: RuleSchemaType['legacyId'];
 }

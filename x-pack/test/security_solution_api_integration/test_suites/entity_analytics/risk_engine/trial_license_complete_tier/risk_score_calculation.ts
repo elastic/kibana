@@ -8,12 +8,9 @@
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
-import {
-  ENABLE_ASSET_CRITICALITY_SETTING,
-  RISK_SCORE_CALCULATION_URL,
-} from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
+import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
 import { v4 as uuidv4 } from 'uuid';
+import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import { dataGeneratorFactory } from '../../../detections_response/utils';
 import { deleteAllAlerts, deleteAllRules } from '../../../../../common/utils/security_solution';
 import {
@@ -29,6 +26,7 @@ import {
   getLatestRiskScoreIndexMapping,
   riskEngineRouteHelpersFactory,
   cleanRiskEngine,
+  enableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -48,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
     body,
   }: {
     body: object;
-  }): Promise<{ scores: RiskScore[] }> => {
+  }): Promise<{ scores: EntityRiskScoreRecord[] }> => {
     const { body: result } = await supertest
       .post(RISK_SCORE_CALCULATION_URL)
       .set('kbn-xsrf', 'true')
@@ -80,9 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('@ess @serverless Risk Scoring Calculation API', () => {
     before(async () => {
-      await kibanaServer.uiSettings.update({
-        [ENABLE_ASSET_CRITICALITY_SETTING]: true,
-      });
+      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     context('with auditbeat data', () => {
@@ -142,8 +138,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(score).to.eql({
           calculated_level: 'Unknown',
           calculated_score: 21,
-          calculated_score_norm: 8.039816232771823,
-          category_1_score: 8.039816232771821,
+          calculated_score_norm: 8.10060175898781,
+          category_1_score: 8.10060175898781,
           category_1_count: 1,
           id_field: 'host.name',
           id_value: 'host-1',
@@ -357,8 +353,8 @@ export default ({ getService }: FtrProviderContext): void => {
             criticality_modifier: 1.5,
             calculated_level: 'Unknown',
             calculated_score: 21,
-            calculated_score_norm: 11.59366948840633,
-            category_1_score: 8.039816232771821,
+            calculated_score_norm: 11.677912063468526,
+            category_1_score: 8.10060175898781,
             category_1_count: 1,
             id_field: 'host.name',
             id_value: 'host-1',

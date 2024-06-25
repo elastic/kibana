@@ -8,21 +8,26 @@
 import React, { memo } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import {
-  IsolateHostPanel,
   DocumentDetailsIsolateHostPanelKey,
-} from './document_details/isolate_host';
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+  DocumentDetailsAlertReasonPanelKey,
+  DocumentDetailsRuleOverviewPanelKey,
+} from './document_details/shared/constants/panel_keys';
+import type { IsolateHostPanelProps } from './document_details/isolate_host';
+import { IsolateHostPanel } from './document_details/isolate_host';
 import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
-import type { RightPanelProps } from './document_details/right';
-import { RightPanel, DocumentDetailsRightPanelKey } from './document_details/right';
-import { RightPanelProvider } from './document_details/right/context';
-import type { LeftPanelProps } from './document_details/left';
-import { LeftPanel, DocumentDetailsLeftPanelKey } from './document_details/left';
-import { LeftPanelProvider } from './document_details/left/context';
-import type { PreviewPanelProps } from './document_details/preview';
-import { PreviewPanel, DocumentDetailsPreviewPanelKey } from './document_details/preview';
-import { PreviewPanelProvider } from './document_details/preview/context';
+import type { DocumentDetailsProps } from './document_details/shared/types';
+import { DocumentDetailsProvider } from './document_details/shared/context';
+import { RightPanel } from './document_details/right';
+import { LeftPanel } from './document_details/left';
+import type { AlertReasonPanelProps } from './document_details/alert_reason';
+import { AlertReasonPanel } from './document_details/alert_reason';
+import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
+import type { RuleOverviewPanelProps } from './document_details/rule_overview';
+import { RuleOverviewPanel } from './document_details/rule_overview';
+import { RuleOverviewPanelProvider } from './document_details/rule_overview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
 import { UserPanel, UserPanelKey } from './entity_details/user_right';
 import type { UserDetailsPanelProps } from './entity_details/user_details_left';
@@ -40,25 +45,33 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: DocumentDetailsRightPanelKey,
     component: (props) => (
-      <RightPanelProvider {...(props as RightPanelProps).params}>
-        <RightPanel path={props.path as RightPanelProps['path']} />
-      </RightPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <RightPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {
     key: DocumentDetailsLeftPanelKey,
     component: (props) => (
-      <LeftPanelProvider {...(props as LeftPanelProps).params}>
-        <LeftPanel path={props.path as LeftPanelProps['path']} />
-      </LeftPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <LeftPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {
-    key: DocumentDetailsPreviewPanelKey,
+    key: DocumentDetailsAlertReasonPanelKey,
     component: (props) => (
-      <PreviewPanelProvider {...(props as PreviewPanelProps).params}>
-        <PreviewPanel path={props.path as PreviewPanelProps['path']} />
-      </PreviewPanelProvider>
+      <AlertReasonPanelProvider {...(props as AlertReasonPanelProps).params}>
+        <AlertReasonPanel />
+      </AlertReasonPanelProvider>
+    ),
+  },
+  {
+    key: DocumentDetailsRuleOverviewPanelKey,
+    component: (props) => (
+      <RuleOverviewPanelProvider {...(props as RuleOverviewPanelProps).params}>
+        <RuleOverviewPanel />
+      </RuleOverviewPanelProvider>
     ),
   },
   {

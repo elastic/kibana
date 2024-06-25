@@ -12,6 +12,7 @@ import {
   SavedObjectsResolveResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { SavedObject, BulkResolveError } from '../..';
 
 /**
@@ -513,4 +514,9 @@ export interface ISavedObjectsSecurityExtension {
     spaceId: string,
     objects: Array<SavedObjectsFindResult<T>>
   ) => void;
+
+  /**
+   * Retrieves the current user from the request context if available
+   */
+  getCurrentUser: () => AuthenticatedUser | null;
 }

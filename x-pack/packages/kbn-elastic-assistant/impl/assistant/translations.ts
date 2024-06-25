@@ -18,20 +18,6 @@ export const DEFAULT_ASSISTANT_TITLE = i18n.translate(
   }
 );
 
-export const SHOW_ANONYMIZED = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleLabel',
-  {
-    defaultMessage: 'Show anonymized',
-  }
-);
-
-export const SHOW_ANONYMIZED_TOOLTIP = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedTooltip',
-  {
-    defaultMessage: 'Show the anonymized values sent to and from the assistant',
-  }
-);
-
 export const SUBMIT_MESSAGE = i18n.translate('xpack.elasticAssistant.assistant.submitMessage', {
   defaultMessage: 'Submit message',
 });
@@ -53,3 +39,38 @@ export const DOCUMENTATION = i18n.translate(
     defaultMessage: 'documentation',
   }
 );
+
+export const EMPTY_SCREEN_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.emptyScreen.title',
+  {
+    defaultMessage: 'How I can help you?',
+  }
+);
+
+export const EMPTY_SCREEN_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.emptyScreen.description',
+  {
+    defaultMessage:
+      'Ask me anything from "Summarize this alert" to "Help me build a query" using the following system prompt:',
+  }
+);
+
+export const WELCOME_SCREEN_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.welcomeScreen.title',
+  {
+    defaultMessage: 'Welcome to Security AI Assistant!',
+  }
+);
+
+export const WELCOME_SCREEN_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.assistant.welcomeScreen.description',
+  {
+    defaultMessage:
+      "First things first, we'll need to set up a Generative AI Connector to get this chat experience going!",
+  }
+);
+
+export const DISCLAIMER = i18n.translate('xpack.elasticAssistant.assistant.disclaimer', {
+  defaultMessage:
+    'Responses from Al systems may not always be entirely accurate, although they can seem convincing. For more information on the assistant feature and its usage, please reference the documentation.',
+});

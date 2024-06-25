@@ -27,11 +27,12 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import {
-  CustomMetricExpressionParams,
-  BaseMetricExpressionParams,
   aggType,
-  ThresholdParams,
+  CustomThresholdSearchSourceFields,
+  BaseMetricExpressionParams,
+  CustomMetricExpressionParams,
   MetricExpressionParams,
+  ThresholdParams,
 } from '../../../common/custom_threshold_rule/types';
 import { ObservabilityPublicStart } from '../../plugin';
 
@@ -56,7 +57,7 @@ export interface AlertParams {
   filterQuery?: string;
   alertOnNoData?: boolean;
   alertOnGroupDisappear?: boolean;
-  searchConfiguration: SerializedSearchSourceFields;
+  searchConfiguration: CustomThresholdSearchSourceFields;
   shouldDropPartialBuckets?: boolean;
 }
 

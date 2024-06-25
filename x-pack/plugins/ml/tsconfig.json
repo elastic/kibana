@@ -120,5 +120,13 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/ml-time-buckets",
     "@kbn/aiops-change-point-detection",
+    "@kbn/inference_integration_flyout",
+    "@kbn/presentation-containers",
+    "@kbn/presentation-panel-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/react-kibana-context-render",
+    "@kbn/esql-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/json-schemas",
   ],
 }

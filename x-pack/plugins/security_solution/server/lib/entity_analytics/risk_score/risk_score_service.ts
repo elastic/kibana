@@ -6,11 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import type {
   CalculateAndPersistScoresParams,
-  CalculateAndPersistScoresResponse,
   CalculateScoresParams,
-  CalculateScoresResponse,
   EntityAnalyticsConfig,
   RiskEngineConfiguration,
 } from '../types';
@@ -22,19 +22,20 @@ import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
 import { scheduleLatestTransformNow } from '../utils/transforms';
 
-type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
+export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
 };
 export interface RiskScoreService {
-  calculateScores: (params: CalculateScoresParams) => Promise<CalculateScoresResponse>;
+  calculateScores: (params: CalculateScoresParams) => Promise<RiskScoresPreviewResponse>;
   calculateAndPersistScores: (
     params: CalculateAndPersistScoresParams
-  ) => Promise<CalculateAndPersistScoresResponse>;
+  ) => Promise<RiskScoresCalculationResponse>;
   getConfigurationWithDefaults: (
     entityAnalyticsConfig: EntityAnalyticsConfig
   ) => Promise<RiskEngineConfigurationWithDefaults | null>;
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
+  refreshRiskScoreIndex: () => Promise<void>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -44,6 +45,7 @@ export interface RiskScoreServiceFactoryParams {
   riskEngineDataClient: RiskEngineDataClient;
   riskScoreDataClient: RiskScoreDataClient;
   spaceId: string;
+  refresh?: 'wait_for';
 }
 
 export const riskScoreServiceFactory = ({
@@ -82,5 +84,7 @@ export const riskScoreServiceFactory = ({
     };
   },
   getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
-  scheduleLatestTransformNow: () => scheduleLatestTransformNow({ namespace: spaceId, esClient }),
+  scheduleLatestTransformNow: () =>
+    scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
+  refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
 });

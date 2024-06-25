@@ -80,17 +80,18 @@ export function registerTelemetryOptInStatsRoutes(
           },
           response: {
             200: {
-              body: schema.arrayOf(
-                schema.object({
-                  clusterUuid: schema.string(),
-                  stats: schema.object({
-                    cluster_uuid: schema.string(),
-                    opt_in_status: schema.boolean(),
-                  }),
-                })
-              ),
+              body: () =>
+                schema.arrayOf(
+                  schema.object({
+                    clusterUuid: schema.string(),
+                    stats: schema.object({
+                      cluster_uuid: schema.string(),
+                      opt_in_status: schema.boolean(),
+                    }),
+                  })
+                ),
             },
-            503: { body: schema.string() },
+            503: { body: () => schema.string() },
           },
         },
       },

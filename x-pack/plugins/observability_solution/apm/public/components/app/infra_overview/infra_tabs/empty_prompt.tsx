@@ -24,20 +24,14 @@ export function EmptyPrompt() {
       body={
         <EuiDescriptionList compressed>
           <EuiDescriptionListTitle>
-            {i18n.translate(
-              'xpack.apm.infraTabs.emptyMessagePromptTimeRangeTitle',
-              {
-                defaultMessage: 'Expand your time range',
-              }
-            )}
+            {i18n.translate('xpack.apm.infraTabs.emptyMessagePromptTimeRangeTitle', {
+              defaultMessage: 'Expand your time range',
+            })}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            {i18n.translate(
-              'xpack.apm.infraTabs.emptyMessagePromptDescription',
-              {
-                defaultMessage: 'Try searching over a longer period of time.',
-              }
-            )}
+            {i18n.translate('xpack.apm.infraTabs.emptyMessagePromptDescription', {
+              defaultMessage: 'Try searching over a longer period of time.',
+            })}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       }
@@ -60,16 +54,10 @@ export function EmptyPrompt() {
 function NoResultsIllustration() {
   const theme = useTheme();
 
-  const illustration = theme.darkMode
-    ? noResultsIllustrationDark
-    : noResultsIllustrationLight;
+  const illustration = theme.darkMode ? noResultsIllustrationDark : noResultsIllustrationLight;
 
   return (
-    <EuiImage
-      alt={noResultsIllustrationAlternativeText}
-      size="fullWidth"
-      src={illustration}
-    />
+    <EuiImage alt={noResultsIllustrationAlternativeText} size="fullWidth" src={illustration} />
   );
 }
 

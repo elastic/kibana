@@ -7,12 +7,13 @@
 
 import { invert } from 'lodash/fp';
 import { v4 } from 'uuid';
+import { Replacements } from '../../schemas';
 
 export const getAnonymizedValue = ({
   currentReplacements,
   rawValue,
 }: {
-  currentReplacements: Record<string, string> | undefined;
+  currentReplacements: Replacements | undefined;
   rawValue: string;
 }): string => {
   if (currentReplacements != null) {

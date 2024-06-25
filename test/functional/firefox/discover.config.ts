@@ -18,10 +18,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [
       require.resolve('../apps/discover/classic'),
+      require.resolve('../apps/discover/esql'),
       require.resolve('../apps/discover/group1'),
-      require.resolve('../apps/discover/group2'),
+      require.resolve('../apps/discover/group2_data_grid1'),
+      require.resolve('../apps/discover/group2_data_grid2'),
+      require.resolve('../apps/discover/group2_data_grid3'),
       require.resolve('../apps/discover/group3'),
       require.resolve('../apps/discover/group4'),
+      require.resolve('../apps/discover/group5'),
+      require.resolve('../apps/discover/group6'),
+      require.resolve('../apps/discover/group7'),
+      require.resolve('../apps/discover/group8'),
     ],
 
     junit: {

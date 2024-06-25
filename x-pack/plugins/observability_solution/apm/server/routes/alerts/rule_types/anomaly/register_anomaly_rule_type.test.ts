@@ -35,17 +35,13 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
       expect(services.alertsClient.report).not.toHaveBeenCalled();
     });
 
     it('ml jobs are not available', async () => {
-      jest
-        .spyOn(GetServiceAnomalies, 'getMLJobs')
-        .mockReturnValue(Promise.resolve([]));
+      jest.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(Promise.resolve([]));
 
       const { services, dependencies, executor } = createRuleTypeMocks();
 
@@ -65,9 +61,7 @@ describe('Transaction duration anomaly alert', () => {
       };
 
       await executor({ params });
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
 
       expect(services.alertsClient.report).not.toHaveBeenCalled();
     });
@@ -102,9 +96,7 @@ describe('Transaction duration anomaly alert', () => {
                           metrics: {
                             record_score: 0,
                             job_id: '1',
-                            detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
-                            ),
+                            detector_index: getAnomalyDetectorIndex(AnomalyDetectorType.txLatency),
                           },
                         },
                       ],
@@ -132,9 +124,7 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
 
-      expect(
-        services.scopedClusterClient.asCurrentUser.search
-      ).not.toHaveBeenCalled();
+      expect(services.scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(services.alertsClient.report).not.toHaveBeenCalled();
     });
   });
@@ -174,9 +164,7 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '1',
                             partition_field_value: 'foo',
                             by_field_value: 'type-foo',
-                            detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
-                            ),
+                            detector_index: getAnomalyDetectorIndex(AnomalyDetectorType.txLatency),
                           },
                         },
                       ],
@@ -192,9 +180,7 @@ describe('Transaction duration anomaly alert', () => {
                             job_id: '2',
                             parttition_field_value: 'bar',
                             by_field_value: 'type-bar',
-                            detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
-                            ),
+                            detector_index: getAnomalyDetectorIndex(AnomalyDetectorType.txLatency),
                           },
                         },
                       ],

@@ -44,12 +44,9 @@ export async function getExitSpanThroughput({
       rollupInterval: RollupInterval.OneMinute,
       intervalString,
       filter: filter.concat(
-        ...termQuery(
-          SPAN_DESTINATION_SERVICE_RESOURCE,
-          spanDestinationServiceResource
-        )
+        ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, spanDestinationServiceResource)
       ),
-      groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
+      groupByFields: [SPAN_DESTINATION_SERVICE_RESOURCE],
       aggs: {
         value: {
           bucket_script: {

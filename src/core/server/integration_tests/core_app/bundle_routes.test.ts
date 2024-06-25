@@ -14,7 +14,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { HttpService } from '@kbn/core-http-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
 
 const buildHash = 'buildHash';
@@ -31,7 +31,7 @@ describe('bundle routes', () => {
     logger = loggingSystemMock.create();
     fileHashCache = new FileHashCache();
 
-    server = createHttpServer({ logger });
+    server = createHttpService({ logger });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
   });
 
@@ -154,7 +154,7 @@ describe('bundle routes', () => {
         .get(`/${buildHash}/bundles/plugin/foo/gzip_chunk.js`)
         .expect(200);
 
-      expect(response.get('cache-control')).toEqual('max-age=31536000');
+      expect(response.get('cache-control')).toEqual('public, max-age=31536000, immutable');
       expect(response.get('etag')).toBeUndefined();
     });
   });

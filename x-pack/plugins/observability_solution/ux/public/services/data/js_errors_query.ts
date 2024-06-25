@@ -76,12 +76,7 @@ export function jsErrorsQuery(
             },
             sample: {
               top_hits: {
-                _source: [
-                  ERROR_EXC_MESSAGE,
-                  ERROR_EXC_TYPE,
-                  ERROR_GROUP_ID,
-                  '@timestamp',
-                ],
+                _source: [ERROR_EXC_MESSAGE, ERROR_EXC_TYPE, ERROR_GROUP_ID, '@timestamp'],
                 sort: [{ '@timestamp': 'desc' as const }],
                 size: 1,
               },

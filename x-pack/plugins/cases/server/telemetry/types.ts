@@ -213,6 +213,10 @@ export interface CasesTelemetry {
     obs: CustomFieldsSolutionTelemetry;
     main: CustomFieldsSolutionTelemetry;
   };
+  casesSystemAction: {
+    totalCasesCreated: number;
+    totalRules: number;
+  };
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;

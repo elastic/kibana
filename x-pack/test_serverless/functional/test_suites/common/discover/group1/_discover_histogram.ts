@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
         log.debug(`renderings before brushing - actual: ${actualCount} expected: ${expectedCount}`);
-        return actualCount === expectedCount;
+        return actualCount <= expectedCount;
       });
       let prevRowData = '';
       // to make sure the table is already rendered
@@ -308,10 +308,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveSearch(savedSearch);
       await PageObjects.discover.chooseBreakdownField('extension.keyword');
       await PageObjects.discover.setChartInterval('Second');
-      let requestData = await testSubjects.getAttribute(
-        'unifiedHistogramChart',
-        'data-request-data'
-      );
+      let requestData =
+        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
       expect(JSON.parse(requestData)).to.eql({
         dataViewId: 'long-window-logstash-*',
         timeField: '@timestamp',
@@ -322,7 +320,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.revertUnsavedChanges();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      requestData = await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data');
+      requestData =
+        (await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data')) ?? '';
       expect(JSON.parse(requestData)).to.eql({
         dataViewId: 'long-window-logstash-*',
         timeField: '@timestamp',

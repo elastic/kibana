@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'header']);
   const actions = getService('actions');
   const testSubjects = getService('testSubjects');
-
+  const additionalFields = `{\n` + `"my_custom_field_id": "custom_field_value"`;
   describe('jira connector', function () {
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('connectors');
@@ -32,6 +32,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('jira-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
       await testSubjects.click('toastCloseButton');
+      const editor = await testSubjects.find('kibanaCodeEditor');
+      await editor.clearValue();
+      await testSubjects.setValue('kibanaCodeEditor', additionalFields, {
+        clearWithKeyboard: true,
+      });
       await commonScreenshots.takeScreenshot('jira-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });

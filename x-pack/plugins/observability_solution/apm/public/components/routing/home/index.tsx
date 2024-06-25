@@ -38,9 +38,7 @@ function serviceGroupPage<TPath extends string>({
   path: TPath;
   element: React.ReactElement<any, any>;
   title: string;
-  serviceGroupContextTab: ComponentProps<
-    typeof ServiceGroupTemplate
-  >['serviceGroupContextTab'];
+  serviceGroupContextTab: ComponentProps<typeof ServiceGroupTemplate>['serviceGroupContextTab'];
 }): Record<
   TPath,
   {
@@ -53,10 +51,7 @@ function serviceGroupPage<TPath extends string>({
     [path]: {
       element: (
         <Breadcrumb title={title} href={path}>
-          <ServiceGroupTemplate
-            pageTitle={title}
-            serviceGroupContextTab={serviceGroupContextTab}
-          >
+          <ServiceGroupTemplate pageTitle={title} serviceGroupContextTab={serviceGroupContextTab}>
             {element}
           </ServiceGroupTemplate>
         </Breadcrumb>
@@ -76,18 +71,12 @@ function serviceGroupPage<TPath extends string>({
   >;
 }
 
-export const ServiceInventoryTitle = i18n.translate(
-  'xpack.apm.views.serviceInventory.title',
-  {
-    defaultMessage: 'Services',
-  }
-);
-export const ServiceMapTitle = i18n.translate(
-  'xpack.apm.views.serviceMap.title',
-  {
-    defaultMessage: 'Service Map',
-  }
-);
+export const ServiceInventoryTitle = i18n.translate('xpack.apm.views.serviceInventory.title', {
+  defaultMessage: 'Services',
+});
+export const ServiceMapTitle = i18n.translate('xpack.apm.views.serviceMap.title', {
+  defaultMessage: 'Service Map',
+});
 
 export const DependenciesOperationsTitle = i18n.translate(
   'xpack.apm.views.dependenciesOperations.title',
@@ -194,10 +183,7 @@ export const homeRoute = {
             params: t.type({
               query: t.type({
                 query: t.string,
-                type: t.union([
-                  t.literal(TraceSearchType.kql),
-                  t.literal(TraceSearchType.eql),
-                ]),
+                type: t.union([t.literal(TraceSearchType.kql), t.literal(TraceSearchType.eql)]),
                 showCriticalPath: toBooleanRt,
               }),
             }),

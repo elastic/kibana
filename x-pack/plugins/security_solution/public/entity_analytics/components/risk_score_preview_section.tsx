@@ -25,17 +25,17 @@ import {
 import type { BoolQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityRiskScoreRecord } from '../../../common/api/entity_analytics/common';
 import {
   RiskScoreEntity,
   RISK_SCORE_INDEX_PATTERN,
-  type RiskScore,
 } from '../../../common/entity_analytics/risk_engine';
 import { RiskScorePreviewTable } from './risk_score_preview_table';
 import * as i18n from '../translations';
 import { useRiskScorePreview } from '../api/hooks/use_preview_risk_scores';
 import { useKibana } from '../../common/lib/kibana';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../sourcerer/store/model';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_risk_engine_privileges';
 import { userHasRiskEngineReadPermissions } from '../common';
@@ -43,11 +43,11 @@ interface IRiskScorePreviewPanel {
   showMessage: string;
   hideMessage: string;
   isLoading: boolean;
-  items: RiskScore[];
+  items: EntityRiskScoreRecord[];
   type: RiskScoreEntity;
 }
 
-const getRiskiestScores = (scores: RiskScore[] = [], field: string) =>
+const getRiskiestScores = (scores: EntityRiskScoreRecord[] = [], field: string) =>
   scores
     ?.filter((item) => item?.id_field === field)
     ?.sort((a, b) => b?.calculated_score_norm - a?.calculated_score_norm)
@@ -227,6 +227,7 @@ const RiskEnginePreview = () => {
             showDatePicker={true}
             displayStyle={'inPage'}
             submitButtonStyle={'iconOnly'}
+            dataTestSubj="risk-score-preview-search-bar-input"
           />
         )}
       </EuiFormRow>

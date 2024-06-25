@@ -24,12 +24,9 @@ export function Stacktrace({ stackframes = [], codeLanguage }: Props) {
   if (isEmpty(stackframes)) {
     return (
       <EmptyMessage
-        heading={i18n.translate(
-          'xpack.apm.stacktraceTab.noStacktraceAvailableLabel',
-          {
-            defaultMessage: 'No stack trace available.',
-          }
-        )}
+        heading={i18n.translate('xpack.apm.stacktraceTab.noStacktraceAvailableLabel', {
+          defaultMessage: 'No stack trace available.',
+        })}
         hideSubheading
       />
     );

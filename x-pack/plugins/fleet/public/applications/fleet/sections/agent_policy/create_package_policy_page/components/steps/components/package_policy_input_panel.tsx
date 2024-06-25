@@ -5,31 +5,33 @@
  * 2.0.
  */
 
-import React, { useState, Fragment, memo, useMemo } from 'react';
+import React, { useState, Fragment, memo, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
   EuiText,
+  EuiTitle,
   EuiHorizontalRule,
   EuiSpacer,
   EuiButtonEmpty,
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import type {
-  NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
   RegistryStreamWithDataStream,
+  RegistryVarsEntry,
 } from '../../../../../../types';
 import type { PackagePolicyInputValidationResults } from '../../../services';
 import { hasInvalidButRequiredVar, countValidationErrors } from '../../../services';
+import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
 import { PackagePolicyInputConfig } from './package_policy_input_config';
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
@@ -73,10 +75,8 @@ export const shouldShowStreamsByDefault = (
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInfo: PackageInfo;
-  packagePolicy: NewPackagePolicy;
   packageInputStreams: RegistryStreamWithDataStream[];
   packagePolicyInput: NewPackagePolicyInput;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
@@ -87,14 +87,14 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
     packageInfo,
     packageInputStreams,
     packagePolicyInput,
-    packagePolicy,
-    updatePackagePolicy,
     updatePackagePolicyInput,
     inputValidationResults,
     forceShowErrors,
     isEditPage = false,
   }) => {
     const defaultDataStreamId = useDataStreamId();
+    const { isAgentlessEnabled } = useAgentless();
+
     // Showing streams toggle state
     const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
       shouldShowStreamsByDefault(
@@ -105,6 +105,33 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       )
     );
 
+    // Hide registry variables based on `hide_in_deployment_modes` value
+    const hideRegistryVars = useCallback(
+      (registryVar: RegistryVarsEntry) => {
+        if (!registryVar.hide_in_deployment_modes) return false;
+        return (
+          (isAgentlessEnabled &&
+            !!registryVar.hide_in_deployment_modes?.find((mode) => mode === 'agentless')) ||
+          (!isAgentlessEnabled &&
+            !!registryVar.hide_in_deployment_modes?.find((mode) => mode === 'default'))
+        );
+      },
+      [isAgentlessEnabled]
+    );
+
+    const packageInputStreamShouldBeVisible = useCallback(
+      (packageInputStream: RegistryStreamWithDataStream) => {
+        return (
+          !!packageInputStream.vars &&
+          packageInputStream.vars.length > 0 &&
+          !!packageInputStream.vars.find(
+            (registryVar: RegistryVarsEntry) => !hideRegistryVars(registryVar)
+          )
+        );
+      },
+      [hideRegistryVars]
+    );
+
     // Errors state
     const errorCount = inputValidationResults && countValidationErrors(inputValidationResults);
     const hasErrors = forceShowErrors && errorCount;
@@ -113,9 +140,11 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
       () => packageInputStreams.length > 0,
       [packageInputStreams.length]
     );
+
     const inputStreams = useMemo(
       () =>
         packageInputStreams
+          .filter((packageInputStream) => packageInputStreamShouldBeVisible(packageInputStream))
           .map((packageInputStream) => {
             return {
               packageInputStream,
@@ -125,8 +154,10 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
             };
           })
           .filter((stream) => Boolean(stream.packagePolicyInputStream)),
-      [packageInputStreams, packagePolicyInput.streams]
+      [packageInputStreamShouldBeVisible, packageInputStreams, packagePolicyInput.streams]
     );
+
+    const titleElementId = useMemo(() => htmlIdGenerator()(), []);
 
     return (
       <>
@@ -134,12 +165,18 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiSwitch
+              data-test-subj="PackagePolicy.InputStreamConfig.Switch"
               label={
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiText>
-                      <h4>{packageInput.title || packageInput.type}</h4>
-                    </EuiText>
+                    <EuiTitle size="xs">
+                      <h3
+                        data-test-subj="PackagePolicy.InputStreamConfig.title"
+                        id={titleElementId}
+                      >
+                        {packageInput.title || packageInput.type}
+                      </h3>
+                    </EuiTitle>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
@@ -179,27 +216,8 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   onClick={() => setIsShowingStreams(!isShowingStreams)}
                   iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}
                   iconSide="right"
-                  aria-label={
-                    isShowingStreams
-                      ? i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.hideStreamsAriaLabel',
-                          {
-                            defaultMessage: 'Hide {type} inputs',
-                            values: {
-                              type: packageInput.type,
-                            },
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.showStreamsAriaLabel',
-                          {
-                            defaultMessage: 'Show {type} inputs',
-                            values: {
-                              type: packageInput.type,
-                            },
-                          }
-                        )
-                  }
+                  aria-expanded={isShowingStreams}
+                  aria-labelledby={titleElementId}
                 >
                   {
                     <FormattedMessage
@@ -219,6 +237,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
         {isShowingStreams && packageInput.vars && packageInput.vars.length ? (
           <Fragment>
             <PackagePolicyInputConfig
+              data-test-subj="PackagePolicy.InputConfig"
               hasInputStreams={hasInputStreams}
               packageInputVars={packageInput.vars}
               packagePolicyInput={packagePolicyInput}
@@ -233,15 +252,14 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
 
         {/* Per-stream policy */}
         {isShowingStreams ? (
-          <EuiFlexGroup direction="column">
+          <EuiFlexGroup direction="column" data-test-subj="PackagePolicy.InputConfig.streams">
             {inputStreams.map(({ packageInputStream, packagePolicyInputStream }, index) => (
               <EuiFlexItem key={index}>
                 <PackagePolicyInputStreamConfig
+                  data-test-subj="PackagePolicy.InputStreamConfig"
                   packageInfo={packageInfo}
-                  packagePolicy={packagePolicy}
                   packageInputStream={packageInputStream}
                   packagePolicyInputStream={packagePolicyInputStream!}
-                  updatePackagePolicy={updatePackagePolicy}
                   updatePackagePolicyInputStream={(
                     updatedStream: Partial<PackagePolicyInputStream>
                   ) => {

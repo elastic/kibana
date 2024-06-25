@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
+import { termQuery, kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   FAAS_BILLED_DURATION,
@@ -25,11 +21,7 @@ import { RollupInterval } from '../../../../common/rollup';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { computeUsageAvgScript } from './get_compute_usage_chart';
-import {
-  calcEstimatedCost,
-  calcMemoryUsedRate,
-  convertComputeUsageToGbSec,
-} from './helper';
+import { calcEstimatedCost, calcMemoryUsedRate, convertComputeUsageToGbSec } from './helper';
 
 export type AwsLambdaArchitecture = 'arm' | 'x86_64';
 
@@ -78,10 +70,7 @@ async function getServerlessTransactionThroughput({
     },
   };
 
-  const response = await apmEventClient.search(
-    'get_serverless_transaction_throughout',
-    params
-  );
+  const response = await apmEventClient.search('get_serverless_transaction_throughout', params);
 
   return response.hits.total.value;
 }
@@ -176,13 +165,12 @@ export async function getServerlessSummary({
     estimatedCost: calcEstimatedCost({
       awsLambdaPriceFactor,
       awsLambdaRequestCostPerMillion,
-      architecture: response.aggregations?.sample?.top?.[0]?.metrics?.[
-        HOST_ARCHITECTURE
-      ] as AwsLambdaArchitecture | undefined,
+      architecture: response.aggregations?.sample?.top?.[0]?.metrics?.[HOST_ARCHITECTURE] as
+        | AwsLambdaArchitecture
+        | undefined,
       transactionThroughput,
       computeUsageGbSec: convertComputeUsageToGbSec({
-        computeUsageBytesMs:
-          response.aggregations?.avgComputeUsageBytesMs.value,
+        computeUsageBytesMs: response.aggregations?.avgComputeUsageBytesMs.value,
         countInvocations: response.aggregations?.countInvocations.value,
       }),
     }),

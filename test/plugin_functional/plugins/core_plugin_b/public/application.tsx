@@ -10,6 +10,7 @@ import { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Route } from '@kbn/shared-ux-router';
 
 import {
@@ -119,7 +120,12 @@ const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<BarApp history={history} coreStart={coreStart} />, element);
+  ReactDOM.render(
+    <KibanaRenderContextProvider {...coreStart}>
+      <BarApp history={history} coreStart={coreStart} />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

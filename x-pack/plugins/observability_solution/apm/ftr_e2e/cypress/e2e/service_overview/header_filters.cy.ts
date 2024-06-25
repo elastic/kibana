@@ -18,8 +18,7 @@ const serviceOverviewHref = url.format({
 
 const apisToIntercept = [
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/charts/latency?*',
     name: 'latencyChartRequest',
   },
   {
@@ -27,13 +26,11 @@ const apisToIntercept = [
     name: 'throughputChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/charts/error_rate?*',
     name: 'errorRateChartRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/groups/detailed_statistics?*',
     name: 'transactionGroupsDetailedRequest',
   },
   {
@@ -42,27 +39,22 @@ const apisToIntercept = [
     name: 'instancesDetailedRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/service_overview_instances/main_statistics?*',
     name: 'instancesMainStatisticsRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
+    endpoint: '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
     name: 'transactonBreakdownRequest',
   },
   {
-    endpoint:
-      '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
+    endpoint: '/internal/apm/services/opbeans-node/transactions/groups/main_statistics?*',
     name: 'transactionsGroupsMainStatisticsRequest',
   },
 ];
 
 describe('Service overview - header filters', () => {
   before(() => {
-    synthtrace.index(
-      opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() })
-    );
+    synthtrace.index(opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() }));
   });
 
   after(() => {
@@ -77,16 +69,10 @@ describe('Service overview - header filters', () => {
       cy.visitKibana(serviceOverviewHref);
       cy.contains('opbeans-node');
       cy.url().should('not.include', 'transactionType');
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'request'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
       cy.getByTestSubj('headerFilterTransactionType').select('Worker');
       cy.url().should('include', 'transactionType=Worker');
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'Worker'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
     });
 
     it('calls APIs with correct transaction type', () => {
@@ -94,10 +80,7 @@ describe('Service overview - header filters', () => {
         cy.intercept('GET', endpoint).as(name);
       });
       cy.visitKibana(serviceOverviewHref);
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'request'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'request');
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: apisToIntercept.map(({ name }) => `@${name}`),
@@ -106,10 +89,7 @@ describe('Service overview - header filters', () => {
 
       cy.getByTestSubj('headerFilterTransactionType').select('Worker');
       cy.url().should('include', 'transactionType=Worker');
-      cy.getByTestSubj('headerFilterTransactionType').should(
-        'have.value',
-        'Worker'
-      );
+      cy.getByTestSubj('headerFilterTransactionType').should('have.value', 'Worker');
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: apisToIntercept.map(({ name }) => `@${name}`),
         value: 'transactionType=Worker',
@@ -131,21 +111,14 @@ describe('Service overview - header filters', () => {
       cy.contains('opbeans-java');
       cy.getByTestSubj('apmUnifiedSearchBar').type('transaction.n');
       cy.contains('transaction.name');
-      cy.getByTestSubj(
-        'autocompleteSuggestion-field-transaction.name-'
-      ).click();
+      cy.getByTestSubj('autocompleteSuggestion-field-transaction.name-').click();
       cy.getByTestSubj('apmUnifiedSearchBar').type(':');
       cy.getByTestSubj('autoCompleteSuggestionText').should('have.length', 1);
       cy.getByTestSubj(
-        Cypress.$.escapeSelector(
-          'autocompleteSuggestion-value-"GET-/api/product"-'
-        )
+        Cypress.$.escapeSelector('autocompleteSuggestion-value-"GET-/api/product"-')
       ).click();
       cy.getByTestSubj('apmUnifiedSearchBar').type('{enter}');
-      cy.url().should(
-        'include',
-        '&kuery=transaction.name%20:%22GET%20%2Fapi%2Fproduct%22%20'
-      );
+      cy.url().should('include', '&kuery=transaction.name%20:%22GET%20%2Fapi%2Fproduct%22%20');
     });
   });
 });

@@ -124,7 +124,14 @@ export interface RouterRoute {
   method: RouteMethod;
   path: string;
   options: RouteConfigOptions<RouteMethod>;
-  validationSchemas?: RouteValidator<unknown, unknown, unknown> | false;
+  /**
+   * @note if providing a function to lazily load your validation schemas assume
+   *       that the function will only be called once.
+   */
+  validationSchemas?:
+    | (() => RouteValidator<unknown, unknown, unknown>)
+    | RouteValidator<unknown, unknown, unknown>
+    | false;
   handler: (
     req: Request,
     responseToolkit: ResponseToolkit

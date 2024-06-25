@@ -44,25 +44,27 @@ export const generateSystemLogsYml = ({
         api_key: apiKey,
       },
     },
-    inputs: [
-      {
-        id: `system-logs-${uuid}`,
-        type: 'logfile',
-        data_stream: {
-          namespace,
-        },
-        streams: getSystemLogsDataStreams(uuid),
-      },
-    ],
+    inputs: getSystemLogsInputs(uuid, namespace),
   });
+};
+
+export const getSystemLogsInputs = (uuid: string, namespace: string = 'default') => {
+  return [
+    {
+      id: `system-logs-${uuid}`,
+      type: 'logfile',
+      data_stream: {
+        namespace,
+      },
+      streams: getSystemLogsDataStreams(uuid),
+    },
+  ];
 };
 
 /*
  * Utils
  */
-export const getSystemLogsDataStreams = (
-  uuid: string = ''
-): SystemLogsStream[] => [
+export const getSystemLogsDataStreams = (uuid: string = ''): SystemLogsStream[] => [
   {
     id: `logfile-system.auth-${uuid}`,
     data_stream: {

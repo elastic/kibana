@@ -436,7 +436,6 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           columns={columns}
           itemId="id"
           itemIdToExpandedRowMap={expandedRowMap}
-          isExpandable
           pagination={tablePagination}
           onChange={onChange}
           loading={loading}

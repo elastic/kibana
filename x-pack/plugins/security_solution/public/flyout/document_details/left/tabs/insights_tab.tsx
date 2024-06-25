@@ -14,13 +14,16 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
+  INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON_TEST_ID,
+  INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID,
   INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID,
 } from './test_ids';
-import { useLeftPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '..';
+import { useDocumentDetailsContext } from '../../shared/context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '..';
 import { ENTITIES_TAB_ID, EntitiesDetails } from '../components/entities_details';
 import {
   THREAT_INTELLIGENCE_TAB_ID,
@@ -35,10 +38,12 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
     id: ENTITIES_TAB_ID,
     label: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
-        defaultMessage="Entities"
-      />
+      <div data-test-subj={INSIGHTS_TAB_ENTITIES_BUTTON_LABEL_TEST_ID}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.entitiesButtonLabel"
+          defaultMessage="Entities"
+        />
+      </div>
     ),
     'data-test-subj': INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
   },
@@ -55,10 +60,12 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
     id: PREVALENCE_TAB_ID,
     label: (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
-        defaultMessage="Prevalence"
-      />
+      <div data-test-subj={INSIGHTS_TAB_PREVALENCE_BUTTON_LABEL_TEST_ID}>
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.left.insights.prevalenceButtonLabel"
+          defaultMessage="Prevalence"
+        />
+      </div>
     ),
     'data-test-subj': INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID,
   },
@@ -77,9 +84,9 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
 /**
  * Insights view displayed in the document details expandable flyout left section
  */
-export const InsightsTab: React.FC = memo(() => {
+export const InsightsTab = memo(() => {
   const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
+  const { eventId, indexName, scopeId, getFieldsData } = useDocumentDetailsContext();
   const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
@@ -87,14 +94,12 @@ export const InsightsTab: React.FC = memo(() => {
 
   // insight tabs based on whether document is alert or non-alert
   // alert: entities, threat intelligence, prevalence, correlations
-  // non-alert: entities, prevalence
+  // non-alert: entities, prevalence, correlations
   const buttonGroup = useMemo(
     () =>
       isEventKindSignal
         ? insightsButtons
-        : insightsButtons.filter(
-            (tab) => tab.id === ENTITIES_TAB_ID || tab.id === PREVALENCE_TAB_ID
-          ),
+        : insightsButtons.filter((tab) => tab.id !== THREAT_INTELLIGENCE_TAB_ID),
     [isEventKindSignal]
   );
 
@@ -113,7 +118,7 @@ export const InsightsTab: React.FC = memo(() => {
         },
       });
       telemetry.reportDetailsFlyoutTabClicked({
-        tableId: scopeId,
+        location: scopeId,
         panel: 'left',
         tabId: optionId,
       });
@@ -135,7 +140,7 @@ export const InsightsTab: React.FC = memo(() => {
         buttonSize="compressed"
         isFullWidth
         data-test-subj={INSIGHTS_TAB_BUTTON_GROUP_TEST_ID}
-        style={!isEventKindSignal ? { maxWidth: 300 } : undefined}
+        style={!isEventKindSignal ? { maxWidth: 450 } : undefined}
       />
       <EuiSpacer size="m" />
       {activeInsightsId === ENTITIES_TAB_ID && <EntitiesDetails />}

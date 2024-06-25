@@ -13,7 +13,7 @@ import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historica
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
-import { SloListItem } from '../slo_list_item';
+import { SloListItem } from './slo_list_item';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -31,7 +31,7 @@ export function SloListView({ sloList, loading, error }: Props) {
   });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
-      list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
+      sloList,
     });
 
   if (!loading && !error && sloList.length === 0) {

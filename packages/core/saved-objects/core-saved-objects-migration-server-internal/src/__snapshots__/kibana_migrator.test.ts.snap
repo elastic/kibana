@@ -24,6 +24,9 @@ Object {
     "created_at": Object {
       "type": "date",
     },
+    "created_by": Object {
+      "type": "keyword",
+    },
     "managed": Object {
       "type": "boolean",
     },
@@ -58,6 +61,9 @@ Object {
     },
     "updated_at": Object {
       "type": "date",
+    },
+    "updated_by": Object {
+      "type": "keyword",
     },
   },
 }

@@ -219,7 +219,7 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
     },
 
     async scrollRowIntoView(rowIndex: number) {
-      const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+      const rowSubj = (await this.getRowSubjByRowIndex(rowIndex)) ?? '';
       await testSubjects.scrollIntoView(rowSubj);
     },
   };

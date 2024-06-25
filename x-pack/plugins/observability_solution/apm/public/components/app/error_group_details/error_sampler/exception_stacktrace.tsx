@@ -16,27 +16,16 @@ interface ExceptionStacktraceProps {
   exceptions: Exception[];
 }
 
-export function ExceptionStacktrace({
-  codeLanguage,
-  exceptions,
-}: ExceptionStacktraceProps) {
+export function ExceptionStacktrace({ codeLanguage, exceptions }: ExceptionStacktraceProps) {
   const message = exceptions[0]?.message;
   const type = exceptions[0]?.type;
 
   return (
     <>
-      <ExceptionStacktraceTitle
-        type={type}
-        message={message}
-        codeLanguage={codeLanguage}
-      />
+      <ExceptionStacktraceTitle type={type} message={message} codeLanguage={codeLanguage} />
       {exceptions.map((ex, index) => {
         return index === 0 ? (
-          <Stacktrace
-            key={index}
-            stackframes={ex.stacktrace}
-            codeLanguage={codeLanguage}
-          />
+          <Stacktrace key={index} stackframes={ex.stacktrace} codeLanguage={codeLanguage} />
         ) : (
           <CauseStacktrace
             codeLanguage={codeLanguage}

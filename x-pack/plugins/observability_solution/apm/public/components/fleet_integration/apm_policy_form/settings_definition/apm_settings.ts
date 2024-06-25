@@ -16,21 +16,16 @@ export function getApmSettings(): SettingsRow[] {
       type: 'text',
       key: 'host',
       labelAppend: REQUIRED_LABEL,
-      label: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.hostLabel',
-        { defaultMessage: 'Host' }
-      ),
-      rowTitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.hostTitle',
-        { defaultMessage: 'Server configuration' }
-      ),
-      rowDescription: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.hostDescription',
-        {
-          defaultMessage:
-            'Host defines the host and port the server is listening on. URL is the unchangeable, publicly reachable server URL for deployments on Elastic Cloud or ECK.',
-        }
-      ),
+      label: i18n.translate('xpack.apm.fleet_integration.settings.apm.hostLabel', {
+        defaultMessage: 'Host',
+      }),
+      rowTitle: i18n.translate('xpack.apm.fleet_integration.settings.apm.hostTitle', {
+        defaultMessage: 'Server configuration',
+      }),
+      rowDescription: i18n.translate('xpack.apm.fleet_integration.settings.apm.hostDescription', {
+        defaultMessage:
+          'Host defines the host and port the server is listening on. URL is the unchangeable, publicly reachable server URL for deployments on Elastic Cloud or ECK.',
+      }),
       dataTestSubj: 'packagePolicyHostInput',
       required: true,
     },
@@ -38,12 +33,9 @@ export function getApmSettings(): SettingsRow[] {
       type: 'text',
       key: 'url',
       labelAppend: REQUIRED_LABEL,
-      label: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.urlLabel',
-        {
-          defaultMessage: 'URL',
-        }
-      ),
+      label: i18n.translate('xpack.apm.fleet_integration.settings.apm.urlLabel', {
+        defaultMessage: 'URL',
+      }),
       dataTestSubj: 'packagePolicyUrlInput',
       required: true,
     },
@@ -54,19 +46,16 @@ export function getApmSettings(): SettingsRow[] {
           key: 'max_header_bytes',
           type: 'integer',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.maxHeaderBytesLabel',
-            { defaultMessage: "Maximum size of a request's header (bytes)" }
-          ),
-          rowTitle: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.maxHeaderBytesTitle',
-            { defaultMessage: 'Limits' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.maxHeaderBytesLabel', {
+            defaultMessage: "Maximum size of a request's header (bytes)",
+          }),
+          rowTitle: i18n.translate('xpack.apm.fleet_integration.settings.apm.maxHeaderBytesTitle', {
+            defaultMessage: 'Limits',
+          }),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.maxHeaderBytesDescription',
             {
-              defaultMessage:
-                'Set limits on request headers sizes and timing configurations.',
+              defaultMessage: 'Set limits on request headers sizes and timing configurations.',
             }
           ),
           validation: getIntegerRt({ min: 1 }),
@@ -75,66 +64,54 @@ export function getApmSettings(): SettingsRow[] {
           key: 'idle_timeout',
           type: 'duration',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.idleTimeoutLabel',
-            {
-              defaultMessage:
-                'Idle time before underlying connection is closed',
-            }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.idleTimeoutLabel', {
+            defaultMessage: 'Idle time before underlying connection is closed',
+          }),
           validation: getDurationRt({ min: '1ms' }),
         },
         {
           key: 'read_timeout',
           type: 'duration',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.readTimeoutLabel',
-            { defaultMessage: 'Maximum duration for reading an entire request' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.readTimeoutLabel', {
+            defaultMessage: 'Maximum duration for reading an entire request',
+          }),
           validation: getDurationRt({ min: '1ms' }),
         },
         {
           key: 'shutdown_timeout',
           type: 'duration',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.shutdownTimeoutLabel',
-            {
-              defaultMessage:
-                'Maximum duration before releasing resources when shutting down',
-            }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.shutdownTimeoutLabel', {
+            defaultMessage: 'Maximum duration before releasing resources when shutting down',
+          }),
           validation: getDurationRt({ min: '1ms' }),
         },
         {
           key: 'write_timeout',
           type: 'duration',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.writeTimeoutLabel',
-            { defaultMessage: 'Maximum duration for writing a response' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.writeTimeoutLabel', {
+            defaultMessage: 'Maximum duration for writing a response',
+          }),
           validation: getDurationRt({ min: '1ms' }),
         },
         {
           key: 'max_event_bytes',
           type: 'integer',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.maxEventBytesLabel',
-            { defaultMessage: 'Maximum size per event (bytes)' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.maxEventBytesLabel', {
+            defaultMessage: 'Maximum size per event (bytes)',
+          }),
           validation: getIntegerRt({ min: 1 }),
         },
         {
           key: 'max_connections',
           type: 'integer',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.maxConnectionsLabel',
-            { defaultMessage: 'Simultaneously accepted connections' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.maxConnectionsLabel', {
+            defaultMessage: 'Simultaneously accepted connections',
+          }),
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.maxConnectionsHelpText',
             { defaultMessage: '0 for unlimited' }
@@ -145,10 +122,9 @@ export function getApmSettings(): SettingsRow[] {
           key: 'response_headers',
           type: 'area',
           labelAppend: OPTIONAL_LABEL,
-          label: i18n.translate(
-            'xpack.apm.fleet_integration.settings.apm.responseHeadersLabel',
-            { defaultMessage: 'Custom HTTP headers added to HTTP responses' }
-          ),
+          label: i18n.translate('xpack.apm.fleet_integration.settings.apm.responseHeadersLabel', {
+            defaultMessage: 'Custom HTTP headers added to HTTP responses',
+          }),
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.apm.responseHeadersHelpText',
             { defaultMessage: 'Might be used for security policy compliance.' }

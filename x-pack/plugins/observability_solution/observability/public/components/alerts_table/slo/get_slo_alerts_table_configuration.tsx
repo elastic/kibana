@@ -24,11 +24,7 @@ export const getSloAlertsTableConfiguration = (
   id: SLO_ALERTS_TABLE_CONFIG_ID,
   cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
   columns,
-  getRenderCellValue: ({ setFlyoutAlert }) =>
-    getRenderCellValue({
-      observabilityRuleTypeRegistry,
-      setFlyoutAlert,
-    }),
+  getRenderCellValue,
   sort: [
     {
       [ALERT_DURATION]: {

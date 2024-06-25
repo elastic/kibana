@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'discover',
     'observabilityLogsExplorer',
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
       await PageObjects.observabilityLogsExplorer.navigateTo();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
@@ -85,9 +86,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
-        });
+        await dataViews.waitForSwitcherToBe('All logs');
+
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             '@timestamp',
@@ -145,9 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         expect(await browser.getCurrentUrl()).contain('/app/discover');
 
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).not.to.eql('All logs');
-        });
+        await dataViews.waitForSwitcherToBe('All logs');
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).not.to.eql([

@@ -13,11 +13,13 @@ import type { TestData } from '../../types';
 export const kibanaLogsDataViewTestData: TestData = {
   suiteTitle: 'kibana sample data logs',
   analysisType: LOG_RATE_ANALYSIS_TYPE.SPIKE,
+  autoRun: true,
   dataGenerator: 'kibana_sample_data_logs',
   isSavedSearch: false,
   sourceIndexOrSavedSearch: 'kibana_sample_data_logstsdb',
   brushIntervalFactor: 1,
   chartClickCoordinates: [235, 0],
+  columnSelectorSearch: 'p-value',
   fieldSelectorSearch: 'referer',
   fieldSelectorApplyAvailable: true,
   action: {
@@ -68,6 +70,16 @@ export const kibanaLogsDataViewTestData: TestData = {
       logRate: 'Chart type:bar chart',
       impact: 'High',
     })),
+    columnSelectorPopover: [
+      'Log rate',
+      'Doc count',
+      'p-value',
+      'Impact',
+      'Baseline rate',
+      'Deviation rate',
+      'Log rate change',
+      'Actions',
+    ],
     fieldSelectorPopover: [
       'agent.keyword',
       'clientip',

@@ -4,11 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  ApmSynthtraceEsClient,
-  createLogger,
-  LogLevel,
-} from '@kbn/apm-synthtrace';
+import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
 import { initPlugin } from '@frsource/cypress-plugin-visual-regression-diff/plugins';
@@ -16,10 +12,7 @@ import del from 'del';
 import { some } from 'lodash';
 import { Readable } from 'stream';
 
-export function setupNodeEvents(
-  on: Cypress.PluginEvents,
-  config: Cypress.PluginConfigOptions
-) {
+export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
   const logger = createLogger(LogLevel.info);
 
   const client = createEsClientForTesting({
@@ -35,7 +28,9 @@ export function setupNodeEvents(
     version: config.env.APM_PACKAGE_VERSION,
   });
 
-  synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
+  synthtraceEsClient.pipeline(
+    synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
+  );
 
   initPlugin(on, config);
 

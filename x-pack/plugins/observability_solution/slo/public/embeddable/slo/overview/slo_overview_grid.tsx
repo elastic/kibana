@@ -96,12 +96,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
   });
 
   const { data: historicalSummaries = [] } = useFetchHistoricalSummary({
-    list: [
-      {
-        sloId,
-        instanceId: ALL_VALUE,
-      },
-    ],
+    sloList: sloList?.results ?? [],
   });
 
   const { colors } = useSloCardColor();
@@ -158,7 +153,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   return (
     <>
-      <div style={{ width: '100%' }}>
+      <div data-shared-item="" style={{ width: '100%' }}>
         <Chart>
           <Settings
             baseTheme={DARK_THEME}

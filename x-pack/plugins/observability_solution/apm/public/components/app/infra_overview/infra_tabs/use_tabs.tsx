@@ -12,11 +12,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApmPluginStartDeps } from '../../../../plugin';
-import {
-  KUBERNETES_POD_NAME,
-  HOST_NAME,
-  CONTAINER_ID,
-} from '../../../../../common/es_fields/apm';
+import { KUBERNETES_POD_NAME, HOST_NAME, CONTAINER_ID } from '../../../../../common/es_fields/apm';
 type Tab = NonNullable<EuiTabbedContentProps['tabs']>[0] & {
   id: 'containers' | 'pods' | 'hosts';
   hidden?: boolean;

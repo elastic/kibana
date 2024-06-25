@@ -9,7 +9,6 @@ import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
-import '../../mock/match_media';
 import { FiltersGlobal } from './filters_global';
 import { TestProviders } from '../../mock/test_providers';
 

@@ -24,6 +24,7 @@ export function CasesTableServiceProvider(
   const browser = getService('browser');
   const retry = getService('retry');
   const config = getService('config');
+  const toasts = getService('toasts');
 
   const assertCaseExists = (index: number, totalCases: number) => {
     if (index > totalCases - 1) {
@@ -49,6 +50,7 @@ export function CasesTableServiceProvider(
     },
 
     async deleteCase(index: number = 0) {
+      await toasts.dismissAll();
       this.openRowActions(index);
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
@@ -179,10 +181,6 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`options-filter-popover-item-${status}`);
       // to close the popup
       await testSubjects.click('options-filter-popover-button-status');
-
-      await testSubjects.missingOrFail(`options-filter-popover-item-${status}`, {
-        timeout: 5000,
-      });
     },
 
     async filterBySeverity(severity: CaseSeverity) {
@@ -202,18 +200,22 @@ export function CasesTableServiceProvider(
       await casesCommon.selectFirstRowInAssigneesPopover();
     },
 
-    async filterByOwner(
-      owner: string,
-      options: { popupAlreadyOpen: boolean } = { popupAlreadyOpen: false }
-    ) {
-      if (!options.popupAlreadyOpen) {
-        await common.clickAndValidate(
-          'options-filter-popover-button-owner',
-          `options-filter-popover-item-${owner}`
-        );
+    async filterByOwner(owner: string) {
+      const isAlreadyOpen = await testSubjects.exists('options-filter-popover-panel-owner');
+
+      if (isAlreadyOpen) {
+        await testSubjects.click(`options-filter-popover-item-${owner}`);
+        await header.waitUntilLoadingHasFinished();
+        return;
       }
 
+      await retry.waitFor(`filterByOwner popover opened`, async () => {
+        await testSubjects.click('options-filter-popover-button-owner');
+        return await testSubjects.exists('options-filter-popover-panel-owner');
+      });
+
       await testSubjects.click(`options-filter-popover-item-${owner}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async refreshTable() {

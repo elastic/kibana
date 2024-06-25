@@ -28,10 +28,10 @@ import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
 import { useStartServices } from '../../../hooks';
 
-export const RequirementItem: React.FunctionComponent<{ isMissing: boolean }> = ({
-  isMissing,
-  children,
-}) => {
+export const RequirementItem: React.FunctionComponent<{
+  children: React.ReactNode;
+  isMissing: boolean;
+}> = ({ isMissing, children }) => {
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart">
       <EuiFlexItem grow={false}>

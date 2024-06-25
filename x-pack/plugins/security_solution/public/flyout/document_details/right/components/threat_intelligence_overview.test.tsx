@@ -8,10 +8,11 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
 import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
@@ -45,18 +46,18 @@ const panelContextValue = {
   eventId: 'event id',
   indexName: 'indexName',
   dataFormattedForFieldBrowser: [],
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-const renderThreatIntelligenceOverview = (contextValue: RightPanelContext) => (
+const renderThreatIntelligenceOverview = (contextValue: DocumentDetailsContext) => (
   <TestProviders>
-    <RightPanelContext.Provider value={contextValue}>
+    <DocumentDetailsContext.Provider value={contextValue}>
       <ThreatIntelligenceOverview />
-    </RightPanelContext.Provider>
+    </DocumentDetailsContext.Provider>
   </TestProviders>
 );
 
@@ -160,9 +161,9 @@ describe('<ThreatIntelligenceOverview />', () => {
     });
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <ThreatIntelligenceOverview />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 

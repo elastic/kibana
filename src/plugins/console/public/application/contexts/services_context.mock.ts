@@ -7,9 +7,9 @@
  */
 
 import {
+  coreMock,
   notificationServiceMock,
   httpServiceMock,
-  themeServiceMock,
   docLinksServiceMock,
 } from '@kbn/core/public/mocks';
 
@@ -22,6 +22,8 @@ import { createApi, createEsHostService } from '../lib';
 
 import { ContextValue } from './services_context';
 
+const coreStart = coreMock.createStart();
+
 export const serviceContextMock = {
   create: (): ContextValue => {
     const storage = new StorageMock({} as unknown as Storage, 'test');
@@ -30,6 +32,7 @@ export const serviceContextMock = {
     const esHostService = createEsHostService({ api });
     (storage.keys as jest.Mock).mockImplementation(() => []);
     return {
+      ...coreStart,
       services: {
         trackUiMetric: { count: () => {}, load: () => {} },
         storage,
@@ -42,7 +45,6 @@ export const serviceContextMock = {
         autocompleteInfo: new AutocompleteInfoMock(),
       },
       docLinkVersion: 'NA',
-      theme$: themeServiceMock.create().start().theme$,
       docLinks: docLinksServiceMock.createStartContract().links,
       config: {
         isMonacoEnabled: false,
