@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, sortBy } from 'lodash';
+import { isEqual } from 'lodash';
 import { MissingVersion } from './three_way_diff';
 
 /**
@@ -57,13 +57,13 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
   let baseEqlCurrent: boolean;
   let baseEqlTarget: boolean;
   if (baseVersion !== MissingVersion) {
-    baseEqlCurrent = isEqual(sortBy(baseVersion), sortBy(currentVersion));
-    baseEqlTarget = isEqual(sortBy(baseVersion), sortBy(targetVersion));
+    baseEqlCurrent = arraysHaveSameElements(baseVersion, currentVersion);
+    baseEqlTarget = arraysHaveSameElements(baseVersion, targetVersion);
   } else {
     baseEqlCurrent = false;
     baseEqlTarget = false;
   }
-  const currentEqlTarget = isEqual(sortBy(currentVersion), sortBy(targetVersion));
+  const currentEqlTarget = arraysHaveSameElements(currentVersion, targetVersion);
 
   return getThreeWayDiffOutcome({
     baseEqlCurrent,
@@ -117,4 +117,23 @@ export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolea
     diffCase === ThreeWayDiffOutcome.StockValueCanUpdate ||
     diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate
   );
+};
+/**
+ * Returns a boolean if 2 arrays contain same the elements agnostic of order after being deduplicated
+ */
+const arraysHaveSameElements = <T>(arr1: T[], arr2: T[]) => {
+  const set1 = new Set(arr1);
+  const set2 = new Set(arr2);
+
+  if (set1.size !== set2.size) {
+    return false;
+  }
+
+  for (const val of set1) {
+    if (!set2.has(val)) {
+      return false;
+    }
+  }
+
+  return true;
 };
