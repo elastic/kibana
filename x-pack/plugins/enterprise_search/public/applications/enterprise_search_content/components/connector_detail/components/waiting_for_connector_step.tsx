@@ -14,11 +14,13 @@ export interface WaitingForConnectorStepProps {
   isLoading: boolean;
   isRecheckDisabled: boolean;
   recheck: () => void;
+  showFinishLaterButton?: boolean;
 }
 export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = ({
   recheck,
   isLoading,
   isRecheckDisabled,
+  showFinishLaterButton = false,
 }) => {
   return (
     <>
@@ -61,22 +63,24 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
               )}
             </EuiButton>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="warning"
-              data-test-subj="entSearchContent-connector-waitingForConnector-callout-finishLaterButton"
-              data-telemetry-id="entSearchContent-connector-waitingForConnector-callout-finishLaterButton"
-              iconType="save"
-              onClick={() => {}}
-            >
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.finishLaterButton.label',
-                {
-                  defaultMessage: 'Finish deployment later',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
+          {showFinishLaterButton && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="warning"
+                data-test-subj="entSearchContent-connector-waitingForConnector-callout-finishLaterButton"
+                data-telemetry-id="entSearchContent-connector-waitingForConnector-callout-finishLaterButton"
+                iconType="save"
+                onClick={() => {}}
+              >
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.finishLaterButton.label',
+                  {
+                    defaultMessage: 'Finish deployment later',
+                  }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiCallOut>
     </>

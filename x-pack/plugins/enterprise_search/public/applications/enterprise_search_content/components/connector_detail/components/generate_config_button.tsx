@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export interface GenerateConfigButtonProps {
@@ -40,21 +40,6 @@ export const GenerateConfigButton: React.FC<GenerateConfigButtonProps> = ({
             }
           )}
         </EuiButton>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="entSearchContent-connector-configuration-moreOptionsButton"
-          data-telemetry-id="entSearchContent-connector-configuration-moreOptionsButton"
-          display="fill"
-          iconType="boxesVertical"
-          size="m"
-          aria-label={i18n.translate(
-            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.generateApiKey.moreOptionsButton.label',
-            {
-              defaultMessage: 'More options',
-            }
-          )}
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

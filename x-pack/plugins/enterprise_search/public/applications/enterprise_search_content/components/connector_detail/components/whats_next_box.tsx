@@ -7,27 +7,57 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPanel,
+  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ConnectorStatus } from '@kbn/search-connectors';
+
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { KibanaLogic } from '../../../../shared/kibana';
+import { EuiButtonTo } from '../../../../shared/react_router_helpers';
+import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
+import { SyncsContextMenu } from '../../shared/header_actions/syncs_context_menu';
+
+import { ConnectorDetailTabId } from '../connector_detail';
+
 export interface WhatsNextBoxProps {
   disabled?: boolean;
+  isWaitingForConnector?: boolean;
+  connectorId: string;
+  connectorIndex?: string;
+  connectorStatus: ConnectorStatus;
+  isSyncing?: boolean;
 }
 
-export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({ disabled = false }) => {
+export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
+  disabled = false,
+  isWaitingForConnector = false,
+  connectorId,
+  connectorIndex,
+  connectorStatus,
+  isSyncing = false,
+}) => {
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const isConfigured = !(
+    connectorStatus === ConnectorStatus.NEEDS_CONFIGURATION ||
+    connectorStatus === ConnectorStatus.CREATED
+  );
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder style={{ position: 'relative' }}>
+      {isSyncing && <EuiProgress size="xs" position="absolute" />}
       <EuiTitle size="s">
         <h3>
           {i18n.translate('xpack.enterpriseSearch.whatsNextBox.whatsNextPanelLabel', {
@@ -51,6 +81,11 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({ disabled = false }) 
             data-test-subj="enterpriseSearchWhatsNextBoxSearchPlaygroundButton"
             iconType="sparkles"
             disabled={disabled}
+            onClick={() => {
+              navigateToUrl('/app/enterprise_search/applications/playground', {
+                shouldNotCreateHref: true,
+              });
+            }}
           >
             <FormattedMessage
               id="xpack.enterpriseSearch.whatsNextBox.searchPlaygroundButtonLabel"
@@ -59,51 +94,29 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({ disabled = false }) 
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="enterpriseSearchWhatsNextBoxButton"
-            iconType="eye"
-            disabled={disabled}
+          <EuiButtonTo
+            data-test-subj="entSearchContent-connector-configuration-setScheduleAndSync"
+            data-telemetry-id="entSearchContent-connector-configuration-setScheduleAndSync"
+            isDisabled={isWaitingForConnector || !connectorIndex || !isConfigured}
+            to={`${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+              connectorId,
+              tabId: ConnectorDetailTabId.SCHEDULING,
+            })}`}
           >
-            <EuiFlexGroup responsive={false} gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.enterpriseSearch.whatsNextBox.exploreDataFlexItemLabel', {
-                  defaultMessage: 'Explore data',
-                })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="arrowDown" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiButton>
+            {i18n.translate(
+              'xpack.enterpriseSearch.content.connector_detail.configurationConnector.steps.schedule.button.label',
+              {
+                defaultMessage: 'Set schedule and sync',
+              }
+            )}
+          </EuiButtonTo>
         </EuiFlexItem>
+
         <EuiFlexItem>
           <EuiFlexGroup responsive={false} gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                disabled={disabled}
-                data-test-subj="enterpriseSearchWhatsNextBoxButton"
-                iconType="refresh"
-                fill
-              >
-                <EuiFlexGroup responsive={false} gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    {i18n.translate('xpack.enterpriseSearch.whatsNextBox.syncDataFlexItemLabel', {
-                      defaultMessage: 'Sync data',
-                    })}
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="arrowDown" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                disabled={disabled}
-                display="fill"
-                size="m"
-                data-test-subj="enterpriseSearchWhatsNextBoxButton"
-                iconType="boxesVertical"
+              <SyncsContextMenu
+                disabled={isWaitingForConnector || !connectorIndex || !isConfigured}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

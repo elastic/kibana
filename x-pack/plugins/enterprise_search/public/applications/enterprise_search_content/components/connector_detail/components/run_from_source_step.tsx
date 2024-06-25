@@ -46,7 +46,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
   isWaitingForConnector,
   serviceType,
 }) => {
-  const [isOpen, setIsOpen] = React.useState<EuiAccordionProps['forceState']>('closed');
+  const [isOpen, setIsOpen] = React.useState<EuiAccordionProps['forceState']>('open');
   useEffect(() => {
     if (!isWaitingForConnector) {
       setIsOpen('closed');

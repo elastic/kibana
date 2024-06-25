@@ -30,6 +30,8 @@ import { hasNonEmptyAdvancedSnippet, isExampleConnector } from '../../utils/conn
 
 import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/connector_filtering_logic';
 
+import { IndexViewLogic } from '../search_index/index_view_logic';
+
 import { AttachIndexBox } from './attach_index_box';
 import { AdvancedConfigOverrideCallout } from './components/advanced_config_override_callout';
 import { ConfigurationSkeleton } from './components/configuration_skeleton';
@@ -41,6 +43,7 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { connector, updateConnectorConfigurationStatus } = useValues(ConnectorViewLogic);
+  const { isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { http } = useValues(HttpLogic);
   const { advancedSnippet } = useValues(ConnectorFilteringLogic);
@@ -108,10 +111,17 @@ export const ConnectorConfiguration: React.FC = () => {
                   }
                 />
               </EuiPanel>
+              <EuiSpacer />
+              <WhatsNextBox
+                connectorId={connector.id}
+                disabled={isWaitingForConnector || !connector.last_synced}
+                isWaitingForConnector={isWaitingForConnector}
+                connectorIndex={connector.index_name}
+                connectorStatus={connector.status}
+                isSyncing={Boolean(isSyncing || isWaitingForSync)}
+              />
             </>
           )}
-          <EuiSpacer />
-          <WhatsNextBox />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

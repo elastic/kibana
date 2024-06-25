@@ -77,8 +77,6 @@ export interface ConnectorViewValues {
   isCanceling: boolean;
   isHiddenIndex: boolean;
   isLoading: boolean;
-  isSyncing: boolean;
-  isWaitingForSync: boolean;
   lastUpdated: string | null;
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
