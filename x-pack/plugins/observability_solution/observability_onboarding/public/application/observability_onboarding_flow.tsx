@@ -18,6 +18,7 @@ import { Header } from './header/header';
 import { SystemLogsPanel } from './quickstart_flows/system_logs';
 import { CustomLogsPanel } from './quickstart_flows/custom_logs';
 import { OtelLogsPanel } from './quickstart_flows/otel_logs';
+import { AutoDetectPanel } from './quickstart_flows/auto_detect';
 import { BackButton } from './shared/back_button';
 
 const queryClient = new QueryClient();
@@ -53,6 +54,10 @@ export function ObservabilityOnboardingFlow() {
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section paddingSize="xl" color="subdued" restrictWidth>
           <Routes>
+            <Route path="/auto-detect">
+              <BackButton />
+              <AutoDetectPanel />
+            </Route>
             <Route path="/systemLogs">
               <BackButton />
               <SystemLogsPanel />

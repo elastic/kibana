@@ -17,7 +17,7 @@ import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
-import { AppContext, ConfigSchema } from '..';
+import { AppContext, ConfigSchema, ObservabilityOnboardingAppServices } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
@@ -40,15 +40,19 @@ export const breadcrumbsApp = {
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,
   core,
-  deps,
-  corePlugins: { observability, data },
+  corePlugins,
   config,
   context,
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
-  const plugins = { ...deps };
+  const services: ObservabilityOnboardingAppServices = {
+    ...core,
+    ...corePlugins,
+    config,
+    context,
+  };
 
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
@@ -64,16 +68,7 @@ export function ObservabilityOnboardingAppRoot({
             application: core.application,
           }}
         >
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              observability,
-              data,
-              config,
-              context,
-            }}
-          >
+          <KibanaContextProvider services={services}>
             <KibanaThemeProvider
               theme={{ theme$ }}
               modify={{
