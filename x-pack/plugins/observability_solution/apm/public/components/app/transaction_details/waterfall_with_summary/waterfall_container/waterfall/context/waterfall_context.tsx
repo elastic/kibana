@@ -30,6 +30,7 @@ export const WaterfallContext = React.createContext<
     criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
     showCriticalPath: boolean;
     traceList: IWaterfallNodeFlatten[];
+    totalDuration: number;
     getErrorCount: (waterfallItemId: string) => number;
     updateTreeNode: (newTree: IWaterfallNodeFlatten) => void;
   } & Pick<WaterfallContextProps, 'showCriticalPath'>
@@ -37,6 +38,7 @@ export const WaterfallContext = React.createContext<
   criticalPathSegmentsById: {} as Dictionary<CriticalPathSegment[]>,
   showCriticalPath: false,
   traceList: [],
+  totalDuration: 0,
   getErrorCount: () => 0,
   updateTreeNode: () => undefined,
 });
@@ -63,7 +65,7 @@ export function WaterfallContextProvider({
   }, [tree]);
 
   const getErrorCount = useCallback(
-    (waterfallItemId) => waterfall.getErrorCount(waterfallItemId),
+    (waterfallItemId) => waterfall.getErrorCount?.(waterfallItemId),
     [waterfall]
   );
 
@@ -110,6 +112,7 @@ export function WaterfallContextProvider({
         getErrorCount,
         traceList,
         updateTreeNode,
+        totalDuration: waterfall.duration,
       }}
     >
       {children}

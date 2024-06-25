@@ -65,6 +65,7 @@ export function getTimelineItemsfromConversation({
   hasConnector,
   messages,
   chatState,
+  scrollElement,
   onActionClick,
 }: {
   chatService: ObservabilityAIAssistantChatService;
@@ -72,6 +73,7 @@ export function getTimelineItemsfromConversation({
   hasConnector: boolean;
   messages: Message[];
   chatState: ChatState;
+  scrollElement?: React.RefObject<HTMLDivElement>;
   onActionClick: ({
     message,
     payload,
@@ -170,6 +172,7 @@ export function getTimelineItemsfromConversation({
                 <RenderFunction
                   name={message.message.name}
                   arguments={prevFunctionCall?.arguments}
+                  scrollElement={scrollElement}
                   response={message.message}
                   onActionClick={(payload) => {
                     onActionClick({ message, payload });

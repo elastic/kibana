@@ -86,3 +86,12 @@ export interface WaterfallError {
     name: string;
   };
 }
+
+export interface WaterfallTraceItems {
+  exceedsMax: boolean;
+  traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
+  errorDocs: WaterfallError[];
+  spanLinksCountById: Record<string, number>;
+  traceDocsTotal: number;
+  maxTraceItems: number;
+}
