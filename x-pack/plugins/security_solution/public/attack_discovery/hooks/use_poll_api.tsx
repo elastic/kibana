@@ -40,6 +40,7 @@ export interface AttackDiscoveryData extends AttackDiscoveryResponse {
 
 interface UsePollApi {
   cancelAttackDiscovery: () => Promise<void>;
+  didInitialFetch: boolean;
   status: AttackDiscoveryStatus | null;
   data: AttackDiscoveryData | null;
   stats: AttackDiscoveryStats | null;
@@ -58,8 +59,11 @@ export const usePollApi = ({
   const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const connectorIdRef = useRef<string | undefined>(undefined);
 
+  const [didInitialFetch, setDidInitialFetch] = useState(false);
+
   useEffect(() => {
     connectorIdRef.current = connectorId;
+    setDidInitialFetch(false);
     return () => {
       connectorIdRef.current = undefined;
       // when a connectorId changes, clear timeout
@@ -72,6 +76,7 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
+      setDidInitialFetch(true);
       if (responseData == null) {
         setStatus(null);
         setData(null);
@@ -176,7 +181,7 @@ export const usePollApi = ({
     }
   }, [connectorId, handleResponse, http, toasts]);
 
-  return { cancelAttackDiscovery, status, data, pollApi, stats };
+  return { cancelAttackDiscovery, didInitialFetch, status, data, pollApi, stats };
 };
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {

@@ -13,6 +13,7 @@ export const getMockUseAttackDiscoveriesWithCachedAttackDiscoveries = (
   alertsContextCount: 20,
   approximateFutureTime: null,
   isLoadingPost: false,
+  didInitialFetch: true,
   failureReason: null,
   generationIntervals: [
     {
@@ -188,6 +189,7 @@ export const getMockUseAttackDiscoveriesWithNoAttackDiscoveriesLoading = (
   generationIntervals: undefined,
   attackDiscoveries: [],
   isLoadingPost: false,
+  didInitialFetch: true,
   failureReason: null,
   lastUpdated: null,
   replacements: {},

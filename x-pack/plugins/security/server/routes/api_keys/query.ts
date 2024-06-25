@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { QueryApiKeyResult } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '..';
-import type { QueryApiKeyResult } from '../../../common/model';
 import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   ATTACK_DISCOVERY_STORAGE_KEY,
@@ -71,6 +71,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     alertsContextCount,
     approximateFutureTime,
     attackDiscoveries,
+    didInitialFetch,
     failureReason,
     fetchAttackDiscoveries,
     generationIntervals,
@@ -176,69 +177,74 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           />
           <EuiSpacer size="m" />
         </HeaderPage>
+        {!didInitialFetch ? (
+          <EuiEmptyPrompt icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />} />
+        ) : (
+          <>
+            {showSummary({
+              attackDiscoveriesCount,
+              connectorId,
+              loadingConnectorId,
+            }) && (
+              <Summary
+                alertsCount={alertsCount}
+                attackDiscoveriesCount={attackDiscoveriesCount}
+                lastUpdated={selectedConnectorLastUpdated}
+                onToggleShowAnonymized={onToggleShowAnonymized}
+                showAnonymized={showAnonymized}
+              />
+            )}
 
-        {showSummary({
-          attackDiscoveriesCount,
-          connectorId,
-          loadingConnectorId,
-        }) && (
-          <Summary
-            alertsCount={alertsCount}
-            attackDiscoveriesCount={attackDiscoveriesCount}
-            lastUpdated={selectedConnectorLastUpdated}
-            onToggleShowAnonymized={onToggleShowAnonymized}
-            showAnonymized={showAnonymized}
-          />
-        )}
-
-        <>
-          {showLoading({
-            attackDiscoveriesCount,
-            connectorId,
-            isLoading: isLoading || isLoadingPost,
-            loadingConnectorId,
-          }) ? (
-            <LoadingCallout
-              alertsCount={knowledgeBase.latestAlerts}
-              approximateFutureTime={approximateFutureTime}
-              connectorIntervals={connectorIntervals}
-            />
-          ) : (
-            selectedConnectorAttackDiscoveries.map((attackDiscovery, i) => (
-              <React.Fragment key={attackDiscovery.id}>
-                <AttackDiscoveryPanel
-                  attackDiscovery={attackDiscovery}
-                  initialIsOpen={getInitialIsOpen(i)}
-                  showAnonymized={showAnonymized}
-                  replacements={selectedConnectorReplacements}
+            <>
+              {showLoading({
+                attackDiscoveriesCount,
+                connectorId,
+                isLoading: isLoading || isLoadingPost,
+                loadingConnectorId,
+              }) ? (
+                <LoadingCallout
+                  alertsCount={knowledgeBase.latestAlerts}
+                  approximateFutureTime={approximateFutureTime}
+                  connectorIntervals={connectorIntervals}
                 />
-                <EuiSpacer size="l" />
-              </React.Fragment>
-            ))
-          )}
-        </>
-        <EuiFlexGroup
-          css={css`
-            max-height: 100%;
-            min-height: 100%;
-          `}
-          direction="column"
-          gutterSize="none"
-        >
-          <EuiSpacer size="xxl" />
-          <EuiFlexItem grow={false}>
-            <EmptyStates
-              aiConnectorsCount={aiConnectors?.length ?? null}
-              alertsContextCount={alertsContextCount}
-              alertsCount={knowledgeBase.latestAlerts}
-              attackDiscoveriesCount={attackDiscoveriesCount}
-              failureReason={failureReason}
-              connectorId={connectorId}
-              isLoading={isLoading || isLoadingPost}
-              onGenerate={onGenerate}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              ) : (
+                selectedConnectorAttackDiscoveries.map((attackDiscovery, i) => (
+                  <React.Fragment key={attackDiscovery.id}>
+                    <AttackDiscoveryPanel
+                      attackDiscovery={attackDiscovery}
+                      initialIsOpen={getInitialIsOpen(i)}
+                      showAnonymized={showAnonymized}
+                      replacements={selectedConnectorReplacements}
+                    />
+                    <EuiSpacer size="l" />
+                  </React.Fragment>
+                ))
+              )}
+            </>
+            <EuiFlexGroup
+              css={css`
+                max-height: 100%;
+                min-height: 100%;
+              `}
+              direction="column"
+              gutterSize="none"
+            >
+              <EuiSpacer size="xxl" />
+              <EuiFlexItem grow={false}>
+                <EmptyStates
+                  aiConnectorsCount={aiConnectors?.length ?? null}
+                  alertsContextCount={alertsContextCount}
+                  alertsCount={knowledgeBase.latestAlerts}
+                  attackDiscoveriesCount={attackDiscoveriesCount}
+                  failureReason={failureReason}
+                  connectorId={connectorId}
+                  isLoading={isLoading || isLoadingPost}
+                  onGenerate={onGenerate}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
         <SpyRoute pageName={SecurityPageName.attackDiscovery} />
       </SecurityRoutePageWrapper>
     </div>
