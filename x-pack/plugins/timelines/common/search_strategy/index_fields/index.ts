@@ -76,8 +76,6 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  */
 export interface BrowserField {
   aggregatable: boolean;
-  description: string | null; // FIXME: replace with customDescription or EcsFlat
-  example: string | number | null; // FIXME: not there, could be pulled from the ecs
   fields: Record<string, Partial<BrowserField>>; // FIXME: missing in FieldSpec
   format: string;
   indexes: string[]; // FIXME: missing in FieldSpec
