@@ -10,7 +10,6 @@ import { EcsMappingRequestBody } from './ecs_route';
 import { getEcsMappingRequestMock } from '../model/api_test.mock';
 
 describe('Ecs Mapping request schema', () => {
-
   test('full request validate', () => {
     const payload: EcsMappingRequestBody = getEcsMappingRequestMock();
 

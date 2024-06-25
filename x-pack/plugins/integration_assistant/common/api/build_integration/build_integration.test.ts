@@ -10,7 +10,6 @@ import { BuildIntegrationRequestBody } from './build_integration';
 import { getBuildIntegrationRequestMock } from '../model/api_test.mock';
 
 describe('Build Integration request schema', () => {
-
   test('full request validate', () => {
     const payload: BuildIntegrationRequestBody = getBuildIntegrationRequestMock();
 

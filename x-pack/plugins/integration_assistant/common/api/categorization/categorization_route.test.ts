@@ -10,7 +10,6 @@ import { CategorizationRequestBody } from './categorization_route';
 import { getCategorizationRequestMock } from '../model/api_test.mock';
 
 describe('Categorization request schema', () => {
-
   test('full request validate', () => {
     const payload: CategorizationRequestBody = getCategorizationRequestMock();
 
