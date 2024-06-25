@@ -21,12 +21,21 @@ export const BASE_SYSTEM_PROMPTS: Prompt[] = [
     id: 'default-system-prompt',
     content: DEFAULT_SYSTEM_PROMPT_NON_I18N,
     name: DEFAULT_SYSTEM_PROMPT_NAME,
+    consumer: 'securitySolutionUI',
     promptType: 'system',
   },
   {
     id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
     content: SUPERHERO_SYSTEM_PROMPT_NON_I18N,
     name: SUPERHERO_SYSTEM_PROMPT_NAME,
+    consumer: 'securitySolutionUI',
+    promptType: 'system',
+  },
+  {
+    id: 'default-system-prompt-discover',
+    content: 'You are a helpful, expert assistant who answers questions about Elastic Logs.',
+    name: 'Discover default system prompt',
+    consumer: 'discover',
     promptType: 'system',
   },
 ];

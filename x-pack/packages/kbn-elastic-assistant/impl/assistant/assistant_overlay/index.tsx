@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiModal, EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
 
@@ -23,7 +24,7 @@ import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 const StyledEuiModal = styled(EuiModal)`
-  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
+  ${() => `margin-top: ${euiThemeVars.euiSizeXXL};`}
   min-width: 95vw;
   min-height: 25vh;
 `;

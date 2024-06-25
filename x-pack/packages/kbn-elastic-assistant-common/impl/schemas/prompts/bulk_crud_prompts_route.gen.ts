@@ -51,7 +51,7 @@ export const PromptResponse = z.object({
   content: z.string(),
   isNewConversationDefault: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  isShared: z.boolean().optional(),
+  consumer: z.string().optional(),
   updatedAt: z.string().optional(),
   updatedBy: z.string().optional(),
   createdAt: z.string().optional(),
@@ -111,7 +111,7 @@ export const PromptCreateProps = z.object({
   content: z.string(),
   isNewConversationDefault: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  isShared: z.boolean().optional(),
+  consumer: z.string().optional(),
 });
 
 export type PromptUpdateProps = z.infer<typeof PromptUpdateProps>;
@@ -120,7 +120,7 @@ export const PromptUpdateProps = z.object({
   content: z.string().optional(),
   isNewConversationDefault: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  isShared: z.boolean().optional(),
+  consumer: z.string().optional(),
 });
 
 export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;

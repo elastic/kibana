@@ -44,7 +44,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     selectedQuickPrompt,
     setUpdatedQuickPromptSettings,
   }) => {
-    const { basePromptContexts } = useAssistantContext();
+    const { assistantDefaults, currentAppId } = useAssistantContext();
 
     // Prompt
     const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
@@ -107,10 +107,9 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     // Prompt Contexts
     const selectedPromptContexts = useMemo(
       () =>
-        basePromptContexts.filter((bpc) =>
-          selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
-        ) ?? [],
-      [basePromptContexts, selectedQuickPrompt?.categories]
+        [].filter((bpc) => selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)) ??
+        [],
+      [selectedQuickPrompt?.categories]
     );
 
     const onPromptContextSelectionChange = useCallback(
@@ -146,6 +145,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
               title: quickPrompt ?? '',
               prompt: '',
               color: DEFAULT_COLOR,
+              consumer: currentAppId.getValue() ?? '',
               categories: [],
             }
           : quickPrompt;
@@ -164,7 +164,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
 
         onSelectedQuickPromptChange(newSelectedQuickPrompt);
       },
-      [onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
+      [currentAppId, onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
     );
 
     const onQuickPromptDeleted = useCallback(
@@ -216,7 +216,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
           <PromptContextSelector
             isDisabled={selectedQuickPrompt == null}
             onPromptContextSelectionChange={onPromptContextSelectionChange}
-            promptContexts={basePromptContexts}
+            promptContexts={[]}
             selectedPromptContexts={selectedPromptContexts}
           />
         </EuiFormRow>

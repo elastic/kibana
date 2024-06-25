@@ -103,6 +103,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               id: '',
               title: c ?? '',
               category: 'assistant',
+              consumer: 'security',
               messages: [],
               replacements: {},
               ...(defaultConnector

@@ -7,6 +7,7 @@
 
 export const PLUGIN_ID = 'elasticAssistant';
 export const PLUGIN_NAME = 'elasticAssistant';
+export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 
 export const BASE_PATH = '/internal/elastic_assistant';
 

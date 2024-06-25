@@ -51,6 +51,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
     const {
       assistantFeatures: { assistantKnowledgeBaseByDefault: enableKnowledgeBaseByDefault },
       http,
+      currentAppId,
     } = useAssistantContext();
     const {
       data: kbStatus,
@@ -320,11 +321,12 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
-
-        <AlertsSettings
-          knowledgeBase={knowledgeBase}
-          setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-        />
+        {currentAppId.getValue() === 'securitySolutionUI' ? (
+          <AlertsSettings
+            knowledgeBase={knowledgeBase}
+            setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
+          />
+        ) : null}
       </>
     );
   }

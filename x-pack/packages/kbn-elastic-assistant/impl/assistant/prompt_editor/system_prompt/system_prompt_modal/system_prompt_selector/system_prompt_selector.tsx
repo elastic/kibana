@@ -19,7 +19,7 @@ import {
 
 import { css } from '@emotion/react';
 import { TEST_IDS } from '../../../../constants';
-import { Prompt } from '../../../../../..';
+import { Prompt, useAssistantContext } from '../../../../../..';
 import * as i18n from './translations';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
 
@@ -49,16 +49,20 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     onSystemPromptSelectionChange,
     selectedSystemPrompt,
   }) => {
+    const { currentAppId } = useAssistantContext();
+
     // Form options
     const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
-      systemPrompts.map((sp) => ({
-        value: {
-          isDefault: sp.isDefault ?? false,
-          isNewConversationDefault: sp.isNewConversationDefault ?? false,
-        },
-        label: sp.name,
-        'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
-      }))
+      systemPrompts
+        .filter((s) => s.consumer === currentAppId.getValue())
+        .map((sp) => ({
+          value: {
+            isDefault: sp.isDefault ?? false,
+            isNewConversationDefault: sp.isNewConversationDefault ?? false,
+          },
+          label: sp.name,
+          'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
+        }))
     );
     const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
       return selectedSystemPrompt

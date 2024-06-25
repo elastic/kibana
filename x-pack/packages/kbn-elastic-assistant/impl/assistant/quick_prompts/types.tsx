@@ -20,6 +20,7 @@ export interface QuickPrompt {
   title: string;
   prompt: string;
   color: string;
+  consumer: string;
   categories?: Array<PromptContext['category']>;
   isDefault?: boolean;
 }

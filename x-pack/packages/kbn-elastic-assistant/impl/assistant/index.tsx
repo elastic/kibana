@@ -136,7 +136,6 @@ const AssistantComponent: React.FC<Props> = ({
     getLastConversationId,
     title,
     allSystemPrompts,
-    baseConversations,
   } = useAssistantContext();
 
   const {
@@ -158,8 +157,8 @@ const AssistantComponent: React.FC<Props> = ({
 
   const onFetchedConversations = useCallback(
     (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations(baseConversations, conversationsData),
-    [baseConversations]
+      mergeBaseWithPersistedConversations({}, conversationsData),
+    []
   );
   const [isStreaming, setIsStreaming] = useState(false);
 

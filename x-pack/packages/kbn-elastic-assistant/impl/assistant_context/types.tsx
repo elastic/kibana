@@ -49,6 +49,7 @@ export interface Conversation {
     name?: string;
   };
   category: string;
+  consumer: string;
   id: string;
   title: string;
   messages: ClientMessage[];

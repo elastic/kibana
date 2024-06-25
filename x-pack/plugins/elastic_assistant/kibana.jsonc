@@ -6,15 +6,32 @@
   "plugin": {
     "id": "elasticAssistant",
     "server": true,
-    "browser": false,
+    "browser": true,
     "requiredPlugins": [
       "actions",
+      "alerting",
       "data",
-      "ml",
       "taskManager",
+      "triggersActionsUi",
       "licensing",
+      "stackConnectors",
+      "savedObjects",
+      "notifications",
       "spaces",
+      "uiActions",
+      "controls",
       "security"
-    ]
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "guidedOnboarding",
+      "home",
+      "telemetry",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+    ],
+    "runtimePluginDependencies": [ "ml" ]
   }
 }

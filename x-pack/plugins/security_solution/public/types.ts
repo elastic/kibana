@@ -26,6 +26,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
+import type { ElasticAssistantPublicPluginStart } from '@kbn/elastic-assistant-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
@@ -115,6 +116,7 @@ export interface SetupPlugins {
  */
 export interface StartPlugins {
   cases: CasesPublicStart;
+  elasticAssistant: ElasticAssistantPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dashboard?: DashboardStart;

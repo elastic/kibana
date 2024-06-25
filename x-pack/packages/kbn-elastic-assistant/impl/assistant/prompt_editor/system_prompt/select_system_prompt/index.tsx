@@ -65,7 +65,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   showTitles = false,
   isFlyoutMode = false,
 }) => {
-  const { setSelectedSettingsTab } = useAssistantContext();
+  const { setSelectedSettingsTab, currentAppId } = useAssistantContext();
   const { setApiConfig } = useConversation();
 
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
@@ -112,8 +112,13 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
 
   // SuperSelect State/Actions
   const options = useMemo(
-    () => getOptions({ prompts: allSystemPrompts, showTitles, isFlyoutMode }),
-    [allSystemPrompts, showTitles, isFlyoutMode]
+    () =>
+      getOptions({
+        prompts: allSystemPrompts.filter((o) => o.consumer === currentAppId.getValue()),
+        showTitles,
+        isFlyoutMode,
+      }),
+    [allSystemPrompts, currentAppId, showTitles, isFlyoutMode]
   );
 
   const onChange = useCallback(

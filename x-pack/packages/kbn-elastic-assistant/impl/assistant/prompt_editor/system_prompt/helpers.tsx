@@ -10,6 +10,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
@@ -17,7 +18,7 @@ import type { Prompt } from '../../types';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
+  margin-right: ${euiThemeVars.euiSizeS};
 `;
 
 export const getOptionFromPrompt = ({

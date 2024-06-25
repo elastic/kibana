@@ -32,7 +32,7 @@ export const transformESToPrompts = (response: EsPromptsSchema[]): PromptRespons
       id: promptSchema.id,
       name: promptSchema.name,
       promptType: promptSchema.prompt_type,
-      isShared: promptSchema.is_shared,
+      consumer: promptSchema.consumer,
       createdBy: promptSchema.created_by,
       updatedBy: promptSchema.updated_by,
     };
@@ -65,7 +65,7 @@ export const transformESSearchToPrompts = (
         id: hit._id,
         name: promptSchema.name,
         promptType: promptSchema.prompt_type,
-        isShared: promptSchema.is_shared,
+        consumer: promptSchema.consumer,
         createdBy: promptSchema.created_by,
         updatedBy: promptSchema.updated_by,
       };
@@ -77,14 +77,14 @@ export const transformESSearchToPrompts = (
 export const transformToUpdateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { content, isNewConversationDefault, isShared, id }: PromptUpdateProps
+  { content, isNewConversationDefault, consumer, id }: PromptUpdateProps
 ): UpdatePromptSchema => {
   return {
     id,
     updated_at: updatedAt,
     content: content ?? '',
     is_new_conversation_default: isNewConversationDefault,
-    is_shared: isShared,
+    consumer,
     users: [
       {
         id: user.profile_uid,
@@ -97,13 +97,13 @@ export const transformToUpdateScheme = (
 export const transformToCreateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { content, isDefault, isNewConversationDefault, isShared, name, promptType }: PromptCreateProps
+  { content, isDefault, isNewConversationDefault, consumer, name, promptType }: PromptCreateProps
 ): CreatePromptSchema => {
   return {
     updated_at: updatedAt,
     content: content ?? '',
     is_new_conversation_default: isNewConversationDefault,
-    is_shared: isShared,
+    consumer,
     name,
     is_default: isDefault,
     prompt_type: promptType,

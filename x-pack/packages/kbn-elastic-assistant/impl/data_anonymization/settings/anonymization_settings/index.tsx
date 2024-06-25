@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import styled from 'styled-components';
 import React, { useCallback } from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
@@ -14,6 +24,10 @@ import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import type { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 import * as i18n from './translations';
+
+const StatFlexItem = styled(EuiFlexItem)`
+  margin-right: ${() => euiThemeVars.euiSizeL};
+`;
 
 export interface Props {
   defaultPageSize?: number;

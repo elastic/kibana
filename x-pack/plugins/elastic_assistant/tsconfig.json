@@ -8,6 +8,8 @@
     "server/lib/**/*",
     "server/**/*",
     "scripts/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
     // must declare *.json explicitly per https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "../../../typings/**/*"
@@ -31,6 +33,7 @@
     "@kbn/elastic-assistant-common",
     "@kbn/core-http-router-server-mocks",
     "@kbn/data-stream-adapter",
+    "@kbn/triggers-actions-ui-plugin",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/task-manager-plugin",

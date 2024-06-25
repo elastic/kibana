@@ -37,6 +37,7 @@ export const emptyWelcomeConvo: Conversation = {
   id: '',
   title: 'Welcome',
   category: 'assistant',
+  consumer: 'security',
   isDefault: true,
   messages: [],
   replacements: {},

@@ -23,13 +23,13 @@ export const assistantPromptsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  is_shared: {
+  is_new_conversation_default: {
     type: 'boolean',
     array: false,
     required: false,
   },
-  is_new_conversation_default: {
-    type: 'boolean',
+  consumer: {
+    type: 'keyword',
     array: false,
     required: false,
   },

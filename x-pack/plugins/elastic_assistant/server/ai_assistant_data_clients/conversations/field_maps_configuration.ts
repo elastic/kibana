@@ -37,6 +37,11 @@ export const conversationsFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  consumer: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   is_default: {
     type: 'boolean',
     array: false,

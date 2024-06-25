@@ -54,13 +54,12 @@ export const useSettingsUpdater = (
     allSystemPrompts,
     assistantTelemetry,
     knowledgeBase,
-    setAllQuickPrompts,
-    setAllSystemPrompts,
     assistantStreamingEnabled,
     setAssistantStreamingEnabled,
     setKnowledgeBase,
     http,
     toasts,
+    assistantDefaults,
   } = useAssistantContext();
 
   /**
@@ -72,8 +71,7 @@ export const useSettingsUpdater = (
   const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
     useState<ConversationsBulkActions>({});
   // Quick Prompts
-  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
-    useState<QuickPrompt[]>(allQuickPrompts);
+  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] = useState<QuickPrompt[]>([]);
   // System Prompts
   const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] =
     useState<Prompt[]>(allSystemPrompts);
@@ -94,13 +92,12 @@ export const useSettingsUpdater = (
   const resetSettings = useCallback((): void => {
     setConversationSettings(conversations);
     setConversationsSettingsBulkActions({});
-    setUpdatedQuickPromptSettings(allQuickPrompts);
+    setUpdatedQuickPromptSettings([]);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
     setUpdatedSystemPromptSettings(allSystemPrompts);
     setUpdatedAnonymizationData(anonymizationFields);
   }, [
-    allQuickPrompts,
     allSystemPrompts,
     anonymizationFields,
     assistantStreamingEnabled,
@@ -112,9 +109,6 @@ export const useSettingsUpdater = (
    * Save all pending settings
    */
   const saveSettings = useCallback(async (): Promise<boolean> => {
-    setAllQuickPrompts(updatedQuickPromptSettings);
-    setAllSystemPrompts(updatedSystemPromptSettings);
-
     const hasBulkConversations =
       conversationsSettingsBulkActions.create ||
       conversationsSettingsBulkActions.update ||
@@ -154,10 +148,6 @@ export const useSettingsUpdater = (
 
     return (bulkResult?.success ?? true) && (bulkAnonymizationFieldsResult?.success ?? true);
   }, [
-    setAllQuickPrompts,
-    updatedQuickPromptSettings,
-    setAllSystemPrompts,
-    updatedSystemPromptSettings,
     conversationsSettingsBulkActions,
     http,
     toasts,
