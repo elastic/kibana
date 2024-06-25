@@ -42,7 +42,6 @@ export const UserPreviewPanelFooter = ({
   }, [openFlyout, userName, contextID, isDraggable, scopeId]);
 
   return (
-    // <ContainerDiv>
     <FlyoutFooter data-test-subj={'user-preview-footer'}>
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false}>
@@ -54,6 +53,5 @@ export const UserPreviewPanelFooter = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     </FlyoutFooter>
-    // </ContainerDiv>
   );
 };

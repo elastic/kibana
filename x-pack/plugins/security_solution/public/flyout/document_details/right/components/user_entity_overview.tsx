@@ -55,7 +55,7 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 
 const USER_ICON = 'user';
 

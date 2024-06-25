@@ -54,7 +54,7 @@ import {
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 
 const HOST_ICON = 'storage';
 

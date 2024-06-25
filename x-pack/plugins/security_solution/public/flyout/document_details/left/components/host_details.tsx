@@ -54,9 +54,9 @@ import {
 } from './test_ids';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';

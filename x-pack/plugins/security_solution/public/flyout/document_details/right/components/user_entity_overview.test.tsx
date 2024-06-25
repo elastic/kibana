@@ -27,7 +27,7 @@ import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_sc
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';

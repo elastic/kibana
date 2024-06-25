@@ -23,7 +23,7 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';

@@ -22,9 +22,9 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { useGetAgentStatus } from '../../../../management/hooks/agents/use_get_agent_status';
 import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from './host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from './user_entity_overview';
 
 jest.mock('../../../../management/hooks');

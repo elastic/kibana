@@ -54,9 +54,9 @@ import {
   HOST_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
-import { HostPreviewPanelKey } from '../../../entity_details/host_preview';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
-import { UserPreviewPanelKey } from '../../../entity_details/user_preview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 
 export const PREVALENCE_TAB_ID = 'prevalence';
