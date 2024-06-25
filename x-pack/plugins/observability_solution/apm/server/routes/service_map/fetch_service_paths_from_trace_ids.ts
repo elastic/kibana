@@ -24,6 +24,7 @@ import {
   ServiceConnectionNode,
 } from '../../../common/service_map';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { calculateDocsPerShard } from './utils/calculate_docs_per_shard';
 
 const SCRIPTED_METRICS_FIELDS_TO_COPY = [
   PARENT_ID,
@@ -100,10 +101,15 @@ export async function fetchServicePathsFromTraceIds({
    */
 
   const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * AVG_BYTES_PER_FIELD; // estimated doc size in bytes
-  const totalShards = serviceMapQueryDataResponse._shards.successful;
-  const bytesPerRequest = Math.floor(serverlessServiceMapMaxAvailableBytes / numOfRequests);
-  const totalNumDocsAllowed = Math.floor(bytesPerRequest / avgDocSizeInBytes);
-  const numDocsPerShardAllowed = Math.floor(totalNumDocsAllowed / totalShards);
+  const totalShards = serviceMapQueryDataResponse._shards.total;
+
+  const numDocsPerShardAllowed = calculateDocsPerShard({
+    serverlessServiceMapMaxAvailableBytes,
+    avgDocSizeInBytes,
+    totalShards,
+    numOfRequests,
+  });
+
   const serviceMapAggs = {
     service_map: {
       scripted_metric: {
