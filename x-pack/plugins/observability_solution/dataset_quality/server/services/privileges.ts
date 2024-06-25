@@ -71,7 +71,7 @@ class DatasetQualityPrivileges {
   public async canReadDataset(
     esClient: ElasticsearchClient,
     type = DEFAULT_DATASET_TYPE,
-    datasetQuery = '*',
+    datasetQuery = '*-*',
     space = '*'
   ): Promise<boolean> {
     const datasetName = streamPartsToIndexPattern({
@@ -91,7 +91,7 @@ class DatasetQualityPrivileges {
   public async throwIfCannotReadDataset(
     esClient: ElasticsearchClient,
     type = DEFAULT_DATASET_TYPE,
-    datasetQuery = '*',
+    datasetQuery = '*-*',
     space = '*'
   ): Promise<void> {
     if (!(await this.canReadDataset(esClient, type, datasetQuery, space))) {

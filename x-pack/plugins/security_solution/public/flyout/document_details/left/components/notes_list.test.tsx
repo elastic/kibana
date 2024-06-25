@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { NOTES_COMMENT_TEST_ID, NOTES_LOADING_TEST_ID } from './test_ids';
+import { ADD_NOTE_LOADING_TEST_ID, NOTES_COMMENT_TEST_ID, NOTES_LOADING_TEST_ID } from './test_ids';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
 import { FETCH_NOTES_ERROR, NO_NOTES, NotesList } from './notes_list';
 import { ReqStatus } from '../../../../notes/store/notes.slice';
@@ -76,5 +76,19 @@ describe('NotesList', () => {
     expect(mockAddError).toHaveBeenCalledWith(null, {
       title: FETCH_NOTES_ERROR,
     });
+  });
+
+  it('should render create loading when user create a new note', () => {
+    const state = { ...mockGlobalState };
+    state.notes.status.createNote = ReqStatus.Loading;
+    const store = createMockStore(state);
+
+    const { getByTestId } = render(
+      <TestProviders store={store}>
+        <NotesList eventId={'event-id'} />
+      </TestProviders>
+    );
+
+    expect(getByTestId(ADD_NOTE_LOADING_TEST_ID)).toBeInTheDocument();
   });
 });
