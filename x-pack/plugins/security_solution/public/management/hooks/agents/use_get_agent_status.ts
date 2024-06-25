@@ -31,21 +31,19 @@ interface ErrorType {
 export const useGetAgentStatus = (
   agentIds: string[] | string,
   agentType: ResponseActionAgentType,
-  options: UseQueryOptions<AgentStatusRecords, IHttpFetchError<ErrorType>> = {}
+  options: Omit<UseQueryOptions<AgentStatusRecords, IHttpFetchError<ErrorType>>, 'queryFn'> = {}
 ): UseQueryResult<AgentStatusRecords, IHttpFetchError<ErrorType>> => {
-  // FIXME:PT where are the tests for this hook?
-
   const http = useHttp();
   const agentIdList = (Array.isArray(agentIds) ? agentIds : [agentIds]).filter(
     (agentId) => agentId.trim().length
   );
 
   return useQuery<AgentStatusRecords, IHttpFetchError<ErrorType>>({
-    queryKey: ['get-agent-status', agentIds],
+    queryKey: ['get-agent-status', agentIdList],
     refetchInterval: DEFAULT_POLL_INTERVAL,
     ...options,
     queryFn: () => {
-      if (agentIds.length === 0) {
+      if (agentIdList.length === 0) {
         return {};
       }
 
