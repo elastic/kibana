@@ -15,7 +15,6 @@ import {
   DataViewsPublicPluginStart,
   DataViewsPublicSetupDependencies,
   DataViewsPublicStartDependencies,
-  UserIdGetter,
 } from './types';
 
 import { DataViewsApiClient } from '.';
@@ -42,7 +41,6 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
-  protected userIdGetter: UserIdGetter = async () => undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -60,14 +58,6 @@ export class DataViewsPublicPlugin
       name: i18n.translate('dataViews.contentManagementType', {
         defaultMessage: 'Data view',
       }),
-    });
-
-    core.getStartServices().then(([coreStart]) => {
-      const getUserId = async function getUserId(): Promise<string | undefined> {
-        const currentUser = await coreStart.security.authc.getCurrentUser();
-        return currentUser?.profile_uid;
-      };
-      this.userIdGetter = getUserId;
     });
 
     return {
@@ -96,7 +86,10 @@ export class DataViewsPublicPlugin
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http, () => this.userIdGetter()),
+      apiClient: new DataViewsApiClient(http, async () => {
+        const currentUser = await core.security.authc.getCurrentUser();
+        return currentUser?.profile_uid;
+      }),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {
