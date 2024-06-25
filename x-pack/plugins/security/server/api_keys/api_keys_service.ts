@@ -11,12 +11,6 @@ import type { SecurityLicense } from '@kbn/security-plugin-types-common';
 
 import { APIKeys } from '../authentication/api_keys';
 
-// import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
-
-// export type { UpdateAPIKeyParams, UpdateAPIKeyResult };
-
-const ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER = 'es-client-authentication';
-
 /**
  * Represents the options to create an APIKey class instance that will be
  * shared between functions (create, invalidate, etc).
