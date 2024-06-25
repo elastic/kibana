@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { AirdropPluginSetup, AirdropPluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';

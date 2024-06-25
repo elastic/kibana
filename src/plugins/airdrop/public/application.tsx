@@ -14,16 +14,11 @@ import { AirdropApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  { navigation }: AppPluginStartDependencies,
+  {}: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <AirdropApp
-      basename={appBasePath}
-      notifications={notifications}
-      http={http}
-      navigation={navigation}
-    />,
+    <AirdropApp basename={appBasePath} notifications={notifications} http={http} />,
     element
   );
 
