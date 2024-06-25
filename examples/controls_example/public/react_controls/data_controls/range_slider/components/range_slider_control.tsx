@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { FC, useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { debounce } from 'lodash';
 import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
 import { RangeValue } from '../types';
@@ -148,6 +148,22 @@ export const RangeSliderControl: FC<Props> = ({
     [isInvalid, step]
   );
 
+  const minInputProps = useMemo(() => {
+    return getCommonInputProps({
+      inputValue: displayedValue[0],
+      testSubj: 'lowerBoundFieldNumber',
+      placeholder: String(min ?? -Infinity),
+    });
+  }, [getCommonInputProps, min, displayedValue]);
+
+  const maxInputProps = useMemo(() => {
+    return getCommonInputProps({
+      inputValue: displayedValue[1],
+      testSubj: 'upperBoundFieldNumber',
+      placeholder: String(max ?? Infinity),
+    });
+  }, [getCommonInputProps, max, displayedValue]);
+
   return (
     <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${uuid}`}>
       <EuiDualRange
@@ -195,16 +211,8 @@ export const RangeSliderControl: FC<Props> = ({
         readOnly={disablePopover}
         showInput={'inputWithPopover'}
         data-test-subj="rangeSlider__slider"
-        minInputProps={getCommonInputProps({
-          inputValue: displayedValue[0],
-          testSubj: 'lowerBoundFieldNumber',
-          placeholder: String(min ?? -Infinity),
-        })}
-        maxInputProps={getCommonInputProps({
-          inputValue: displayedValue[1],
-          testSubj: 'upperBoundFieldNumber',
-          placeholder: String(max ?? Infinity),
-        })}
+        minInputProps={minInputProps}
+        maxInputProps={maxInputProps}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
         onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
           setDisplayedValue([String(minSelection), String(maxSelection)]);
