@@ -169,7 +169,7 @@ describe('EventFieldsBrowser', () => {
     });
   });
 
-  describe.only('value', () => {
+  describe('value', () => {
     test('it renders the expected value for the data provided', () => {
       const wrapper = mount(
         <TestProviders>
@@ -182,7 +182,6 @@ describe('EventFieldsBrowser', () => {
           />
         </TestProviders>
       );
-      console.log(wrapper.html());
       expect(wrapper.find('[data-test-subj="localized-date-tool-tip"]').at(0).text()).toEqual(
         'Feb 28, 2019 @ 16:50:54.621'
       );
