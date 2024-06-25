@@ -28,10 +28,22 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import { getQueryFilter as getQueryFilterNoLoadFields } from './get_query_filter';
 import { getQueryFilterLoadFields } from './get_query_filter_load_fields';
+import { getDataTierFilter } from './get_data_tier_filter';
+
+/**
+ * EQL rule support tier filtering too, but it is implemented in rule itself
+ */
+const ruleTypesSupportingTierFilters = new Set<Type>([
+  'threat_match',
+  'threshold',
+  'new_terms',
+  'query',
+  'saved_query',
+]);
 
 export interface GetFilterArgs {
   type: Type;
-  filters: unknown | undefined;
+  filters: unknown[] | undefined;
   language: LanguageOrUndefined;
   query: RuleQuery | undefined;
   savedId: SavedIdOrUndefined;
@@ -66,12 +78,19 @@ export const getFilter = async ({
   const getQueryFilter = loadFields
     ? getQueryFilterLoadFields(services.dataViews)
     : getQueryFilterNoLoadFields;
+
+  const dataTiersFilters = ruleTypesSupportingTierFilters.has(type)
+    ? await getDataTierFilter({ uiSettingsClient: services.uiSettingsClient })
+    : [];
+
+  const mergedFilters = [...(filters ? filters : []), ...dataTiersFilters];
+
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
       return getQueryFilter({
         query,
         language,
-        filters: filters || [],
+        filters: mergedFilters,
         index,
         exceptionFilter,
         fields,
@@ -103,7 +122,7 @@ export const getFilter = async ({
           return getQueryFilter({
             query,
             language,
-            filters: filters || [],
+            filters: mergedFilters,
             index,
             exceptionFilter,
             fields,
