@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector, IngestPipelineParams, IngestionMethod } from '@kbn/search-connectors';
+import { Connector, IngestionMethod, IngestPipelineParams } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -33,9 +33,10 @@ import {
 import { getConnectorLastSeenError, isLastSeenOld } from '../../utils/connector_status_helpers';
 
 import {
-  ConnectorNameAndDescriptionLogic,
   ConnectorNameAndDescriptionActions,
+  ConnectorNameAndDescriptionLogic,
 } from './connector_name_and_description_logic';
+import { DeploymentLogic, DeploymentLogicActions } from './deployment_logic';
 
 export interface ConnectorViewActions {
   fetchConnector: CachedFetchConnectorByIdApiLogicActions['makeRequest'];
@@ -46,6 +47,7 @@ export interface ConnectorViewActions {
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
+  generateConfigurationSuccess: DeploymentLogicActions['generateConfigurationSuccess'];
   nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
   nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
   startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
@@ -111,6 +113,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ],
       ConnectorNameAndDescriptionLogic,
       ['apiSuccess as nameAndDescriptionApiSuccess', 'apiError as nameAndDescriptionApiError'],
+      DeploymentLogic,
+      ['generateConfigurationSuccess'],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -146,6 +150,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     fetchConnectorApiSuccess: ({ connector }) => {
       if (!values.index && connector?.index_name) {
         actions.fetchIndex({ indexName: connector.index_name });
+      }
+    },
+    generateConfigurationSuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
       }
     },
   }),

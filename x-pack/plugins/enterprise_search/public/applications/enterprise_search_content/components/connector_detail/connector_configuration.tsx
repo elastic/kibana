@@ -10,7 +10,6 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -28,7 +27,6 @@ import { docLinks } from '../../../shared/doc_links';
 import { HttpLogic } from '../../../shared/http';
 import { LicensingLogic } from '../../../shared/licensing';
 import { hasNonEmptyAdvancedSnippet, isExampleConnector } from '../../utils/connector_helpers';
-import { isLastSeenOld } from '../../utils/connector_status_helpers';
 
 import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/connector_filtering_logic';
 
@@ -36,6 +34,7 @@ import { AttachIndexBox } from './attach_index_box';
 import { AdvancedConfigOverrideCallout } from './components/advanced_config_override_callout';
 import { ConfigurationSkeleton } from './components/configuration_skeleton';
 import { ExampleConfigCallout } from './components/example_config_callout';
+import { WhatsNextBox } from './components/whats_next_box';
 import { ConnectorViewLogic } from './connector_view_logic';
 import { ConnectorDeployment } from './deployment';
 import { NativeConnectorConfiguration } from './native_connector_configuration';
@@ -60,7 +59,6 @@ export const ConnectorConfiguration: React.FC = () => {
 
   return (
     <>
-      <EuiSpacer />
       {
         // TODO remove this callout when example status is removed
         isExampleConnector(connector) && <ExampleConfigCallout />
@@ -102,20 +100,6 @@ export const ConnectorConfiguration: React.FC = () => {
                         '/app/management/stack/license_management'
                       )}
                     >
-                      {!isLastSeenOld(connector) && (
-                        <EuiCallOut
-                          iconType="check"
-                          color="success"
-                          title={i18n.translate(
-                            'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorConnected',
-                            {
-                              defaultMessage:
-                                'Your connector {name} has connected to Search successfully.',
-                              values: { name: connector.name },
-                            }
-                          )}
-                        />
-                      )}
                       <EuiSpacer size="s" />
                       {hasNonEmptyAdvancedSnippet(connector, advancedSnippet) && (
                         <AdvancedConfigOverrideCallout />
@@ -126,6 +110,8 @@ export const ConnectorConfiguration: React.FC = () => {
               </EuiPanel>
             </>
           )}
+          <EuiSpacer />
+          <WhatsNextBox />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

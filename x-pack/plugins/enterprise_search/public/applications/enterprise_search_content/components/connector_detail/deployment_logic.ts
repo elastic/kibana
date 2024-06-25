@@ -27,14 +27,19 @@ export interface DeploymentLogicValues {
     connectorId: Connector['id'];
     indexName: string;
   };
+  isGenerateLoading: boolean;
 }
 export interface DeploymentLogicActions {
   generateConfiguration: GenerateConfigApiActions['makeRequest'];
+  generateConfigurationSuccess: GenerateConfigApiActions['apiSuccess'];
 }
 
 export const DeploymentLogic = kea<MakeLogicType<DeploymentLogicValues, DeploymentLogicActions>>({
   connect: {
-    actions: [GenerateConfigApiLogic, ['makeRequest as generateConfiguration']],
+    actions: [
+      GenerateConfigApiLogic,
+      ['makeRequest as generateConfiguration', 'apiSuccess as generateConfigurationSuccess'],
+    ],
     values: [
       GenerateConfigApiLogic,
       [
@@ -42,6 +47,12 @@ export const DeploymentLogic = kea<MakeLogicType<DeploymentLogicValues, Deployme
         'data as generatedData',
         'error as generateConfigurationError',
       ],
+    ],
+  },
+  selectors: {
+    isGenerateLoading: [
+      (selectors) => [selectors.generateConfigurationStatus],
+      (status) => status === Status.LOADING,
     ],
   },
 });
