@@ -24,6 +24,7 @@ import {
 } from './add_panel_action_menu_items';
 import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
 import type { DashboardServices } from '../../services/types';
+import { useDashboardAPI } from '../dashboard_app';
 
 export interface FactoryGroup {
   id: string;
@@ -119,6 +120,7 @@ interface EditorMenuProps {
 export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
   const isMounted = useRef(false);
   const flyoutRef = useRef<ReturnType<DashboardServices['overlays']['openFlyout']>>();
+  const dashboard = useDashboardAPI();
 
   useEffect(() => {
     isMounted.current = true;
@@ -215,8 +217,10 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
         } else {
           factoryGroupMap[group.id] = {
             id: group.id,
-            appName: group.getDisplayName ? group.getDisplayName({ embeddable }) : group.id,
-            icon: group.getIconType?.({ embeddable }),
+            appName: group.getDisplayName
+              ? group.getDisplayName({ embeddable: dashboard })
+              : group.id,
+            icon: group.getIconType?.({ embeddable: dashboard }),
             factories: [factory],
             order: group.order ?? 0,
           };
@@ -228,8 +232,10 @@ export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProp
       if (!factoryGroupMap[fallbackGroup.id]) {
         factoryGroupMap[fallbackGroup.id] = {
           id: fallbackGroup.id,
-          appName: fallbackGroup.getDisplayName ? fallbackGroup.getDisplayName() : fallbackGroup.id,
-          icon: fallbackGroup.getIconType(),
+          appName: fallbackGroup.getDisplayName
+            ? fallbackGroup.getDisplayName({ embeddable: dashboard })
+            : fallbackGroup.id,
+          icon: fallbackGroup.getIconType?.({ embeddable: dashboard }) || 'empty',
           factories: [],
           order: fallbackGroup.order ?? 0,
         };

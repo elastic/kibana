@@ -102,9 +102,9 @@ export const getAddPanelActionMenuItemsGroup = (
       if (!grouped[fallbackGroup.id]) {
         grouped[fallbackGroup.id] = {
           id: fallbackGroup.id,
-          title: fallbackGroup.getDisplayName?.() || '',
+          title: fallbackGroup.getDisplayName?.({ embeddable: api }) || '',
           'data-test-subj': `dashboardEditorMenu-${fallbackGroup.id}Group`,
-          order: fallbackGroup.order,
+          order: fallbackGroup.order || 0,
           items: [],
         };
       }
