@@ -121,12 +121,14 @@ In this project, you can run various commands to execute tests and workflows, ea
 The `supertest` service is logged with the `admin` role by default on serverless. Ideally, every test that runs on serverless should use the most appropriate role.
 
 The `securitySolutionUtils` helper exports the `createSuperTest` function, which accepts the role as a parameter.
-You need to call `createSuperTest` from a lifecycle hook and wait for it to return the `superset` instance.
+You need to call `createSuperTest` from a lifecycle hook and wait for it to return the `supertest` instance.
 All API calls using the returned instance will inject the required auth headers.
 
 **On ESS, `createSuperTest` returns a basic `supertest` instance without headers.*
 
 ```js
+import TestAgent from 'supertest/lib/agent';
+
 export default ({ getService }: FtrProviderContext) => {
    const utils = getService('securitySolutionUtils');
 
