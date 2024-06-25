@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
   httpServiceMock,
   savedObjectsRepositoryMock,
+  securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { ActionTypeDisabledError } from './errors';
@@ -96,6 +97,7 @@ const actionExecutorInitializerParams = {
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger,
   inMemoryConnectors: [],
+  security: securityServiceMock.createStart(),
 };
 
 const taskRunnerFactoryInitializerParams = {
