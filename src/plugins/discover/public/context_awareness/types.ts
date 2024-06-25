@@ -10,6 +10,7 @@ import type { CustomCellRenderer, UnifiedDataTableProps } from '@kbn/unified-dat
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldsSubgroup, GetFieldSubgroupId } from '@kbn/unified-field-list';
 
 export interface DocViewerExtension {
   title: string | undefined;
@@ -39,4 +40,8 @@ export interface Profile {
   getDocViewer: (params: DocViewerExtensionParams) => DocViewerExtension;
   getDefaultAppState: (params: DefaultAppStateExtensionParams) => DefaultAppStateExtension;
   getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'];
+  getFieldListSubgroups: () => {
+    subgroups: FieldsSubgroup[];
+    getSubgroupId: GetFieldSubgroupId;
+  };
 }

@@ -35,6 +35,74 @@ export const createLogsDataSourceProfileProvider = (
       ...prev(),
       'log.level': LogLevelBadgeCell,
     }),
+    getFieldListSubgroups: (prev) => () => {
+      const prevValue = prev();
+
+      return {
+        subgroups: [
+          ...prevValue.subgroups,
+          {
+            id: 'aws-s3',
+            title: 'AWS S3',
+          },
+          {
+            id: 'container',
+            title: 'Container',
+          },
+          {
+            id: 'event',
+            title: 'Event',
+          },
+          {
+            id: 'host',
+            title: 'Host',
+          },
+          {
+            id: 'http',
+            title: 'HTTP',
+          },
+          {
+            id: 'kubernetes',
+            title: 'Kubernetes',
+          },
+          {
+            id: 'log',
+            title: 'Log',
+          },
+          {
+            id: 'process',
+            title: 'Process',
+          },
+        ],
+        getSubgroupId: (field) => {
+          if (field.name.startsWith('aws.s3.')) {
+            return 'aws-s3';
+          }
+          if (field.name.startsWith('container.')) {
+            return 'container';
+          }
+          if (field.name.startsWith('event.')) {
+            return 'event';
+          }
+          if (field.name.startsWith('host.')) {
+            return 'host';
+          }
+          if (field.name.startsWith('http.')) {
+            return 'http';
+          }
+          if (field.name.startsWith('kubernetes.')) {
+            return 'kubernetes';
+          }
+          if (field.name.startsWith('log.') || field.name === 'message') {
+            return 'log';
+          }
+          if (field.name.startsWith('process.')) {
+            return 'process';
+          }
+          return prevValue.getSubgroupId(field);
+        },
+      };
+    },
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);

@@ -20,8 +20,6 @@ import {
   type UnifiedFieldListSidebarContainerProps,
   type UnifiedFieldListSidebarContainerApi,
   FieldsGroupNames,
-  FieldsSubgroup,
-  GetFieldSubgroupId,
 } from '@kbn/unified-field-list';
 import { PLUGIN_ID } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -41,6 +39,7 @@ import {
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useProfileAccessor } from '../../../../context_awareness';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -382,74 +381,15 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     });
   }, [isSidebarCollapsed, unifiedFieldListSidebarContainerApi, sidebarToggleState$]);
 
-  const subgroupProps = useMemo<{
-    fieldsSubgroups: FieldsSubgroup[];
-    getFieldSubgroupId: GetFieldSubgroupId;
-  }>(
-    () => ({
-      fieldsSubgroups: [
-        {
-          id: 'aws-s3',
-          title: 'AWS S3',
-        },
-        {
-          id: 'container',
-          title: 'Container',
-        },
-        {
-          id: 'event',
-          title: 'Event',
-        },
-        {
-          id: 'host',
-          title: 'Host',
-        },
-        {
-          id: 'http',
-          title: 'HTTP',
-        },
-        {
-          id: 'kubernetes',
-          title: 'Kubernetes',
-        },
-        {
-          id: 'log',
-          title: 'Log',
-        },
-        {
-          id: 'process',
-          title: 'Process',
-        },
-      ],
-      getFieldSubgroupId: (field) => {
-        if (field.name.startsWith('aws.s3.')) {
-          return 'aws-s3';
-        }
-        if (field.name.startsWith('container.')) {
-          return 'container';
-        }
-        if (field.name.startsWith('event.')) {
-          return 'event';
-        }
-        if (field.name.startsWith('host.')) {
-          return 'host';
-        }
-        if (field.name.startsWith('http.')) {
-          return 'http';
-        }
-        if (field.name.startsWith('kubernetes.')) {
-          return 'kubernetes';
-        }
-        if (field.name.startsWith('log.') || field.name === 'message') {
-          return 'log';
-        }
-        if (field.name.startsWith('process.')) {
-          return 'process';
-        }
-      },
-    }),
-    []
-  );
+  const getFieldListSubgroupsAccessor = useProfileAccessor('getFieldListSubgroups');
+  const fieldListSubgroups = useMemo(() => {
+    const getFieldListSubgroups = getFieldListSubgroupsAccessor(() => ({
+      subgroups: [],
+      getSubgroupId: () => undefined,
+    }));
+
+    return getFieldListSubgroups();
+  }, [getFieldListSubgroupsAccessor]);
 
   return (
     <EuiFlexGroup
@@ -478,7 +418,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onFieldEdited={onFieldEdited}
             prependInFlyout={prependDataViewPickerForMobile}
             additionalFieldGroups={additionalFieldGroups}
-            {...subgroupProps}
+            fieldsSubgroups={fieldListSubgroups.subgroups}
+            getFieldSubgroupId={fieldListSubgroups.getSubgroupId}
           />
         ) : null}
       </EuiFlexItem>

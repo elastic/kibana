@@ -79,6 +79,9 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Prop to pass additional field groups to the field list
    */
   additionalFieldGroups?: AdditionalFieldGroups<DataViewField>;
+
+  fieldsSubgroups?: FieldsSubgroup[];
+  getFieldSubgroupId?: GetFieldSubgroupId;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -137,9 +140,6 @@ interface UnifiedFieldListSidebarInternalProps {
    * Trigger a field deletion
    */
   onDeleteField: UnifiedFieldListItemProps['onDeleteField'] | undefined;
-
-  fieldsSubgroups?: FieldsSubgroup[];
-  getFieldSubgroupId?: GetFieldSubgroupId;
 }
 
 export type UnifiedFieldListSidebarProps = UnifiedFieldListSidebarCustomizableProps &

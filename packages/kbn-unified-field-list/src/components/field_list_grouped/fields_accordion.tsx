@@ -260,20 +260,6 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
                 </>
               );
             })}
-            {/* <ul>
-              {paginatedFields.map((field, index) => (
-                <Fragment key={getFieldKey(field)}>
-                  {renderFieldItem({
-                    field,
-                    itemIndex: index,
-                    groupIndex,
-                    groupName,
-                    hideDetails,
-                    fieldSearchHighlight,
-                  })}
-                </Fragment>
-              ))}
-            </ul> */}
           </>
         ) : (
           renderCallout()
