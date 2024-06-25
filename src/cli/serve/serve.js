@@ -114,38 +114,11 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
   // only used to set cliArgs.envName, we don't want to inject that into the config
   delete extraCliOptions.env;
 
+  let isServerlessSamlSupported = false;
   if (opts.dev) {
     if (opts.serverless) {
       setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
-
-      // Configure realm if supported (ES only supports SAML when run with SSL)
-      if (opts.ssl && MOCK_IDP_PLUGIN_SUPPORTED) {
-        // Ensure the plugin is loaded in dynamically to exclude from production build
-        // eslint-disable-next-line import/no-dynamic-require
-        const { MOCK_IDP_REALM_NAME } = require(MOCK_IDP_PLUGIN_PATH);
-
-        if (has('server.basePath')) {
-          console.log(
-            `Custom base path is not supported when running in Serverless, it will be removed.`
-          );
-          _.unset(rawConfig, 'server.basePath');
-        }
-
-        set(`xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
-          order: Number.MAX_SAFE_INTEGER,
-          realm: MOCK_IDP_REALM_NAME,
-          icon: 'user',
-          description: 'Continue as Test User',
-          hint: 'Allows testing serverless user roles',
-        });
-        // Add basic realm since defaults won't be applied when a provider has been configured
-        if (!has('xpack.security.authc.providers.basic')) {
-          set('xpack.security.authc.providers.basic.basic', {
-            order: 0,
-            enabled: true,
-          });
-        }
-      }
+      isServerlessSamlSupported = tryConfigureServerlessSamlProvider(rawConfig, opts);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -182,7 +155,7 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
   }
 
   // Kib/ES encryption
-  if (opts.ssl) {
+  if (opts.ssl || isServerlessSamlSupported) {
     // @kbn/dev-utils is part of devDependencies
     // eslint-disable-next-line import/no-extraneous-dependencies
     const { CA_CERT_PATH } = require('@kbn/dev-utils');
@@ -278,6 +251,7 @@ export default function (program) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--no-ssl', 'Run the server without HTTPS')
       .option('--http2', 'Run the dev server using HTTP2 with TLS')
       .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
@@ -303,13 +277,14 @@ export default function (program) {
       serverless: opts.serverless || unknownOptions.serverless,
     });
 
-    const configsEvaluted = getConfigFromFiles(configs);
+    const configsEvaluated = getConfigFromFiles(configs);
     const isServerlessMode = !!(
-      configsEvaluted.serverless ||
+      configsEvaluated.serverless ||
       opts.serverless ||
       unknownOptions.serverless
     );
 
+    const isServerlessSamlSupported = isServerlessMode && opts.ssl !== false;
     const cliArgs = {
       dev: !!opts.dev,
       envName: unknownOptions.env ? unknownOptions.env.name : undefined,
@@ -324,7 +299,7 @@ export default function (program) {
       // elastic.co links.
       // We also want to run without base path when running in serverless mode so that Elasticsearch can
       // connect to Kibana's mock identity provider.
-      basePath: opts.runExamples || isServerlessMode ? false : !!opts.basePath,
+      basePath: opts.runExamples || isServerlessSamlSupported ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,
@@ -361,4 +336,77 @@ function mergeAndReplaceArrays(objValue, srcValue) {
     // default to default merging
     return undefined;
   }
+}
+
+/**
+ * Tries to configure SAML provider in serverless mode and applies the necessary configuration.
+ * @param rawConfig Full configuration object.
+ * @param opts CLI options.
+ * @returns {boolean} True if SAML provider was successfully configured.
+ */
+function tryConfigureServerlessSamlProvider(rawConfig, opts) {
+  if (!MOCK_IDP_PLUGIN_SUPPORTED || opts.ssl === false) {
+    return false;
+  }
+
+  // Ensure the plugin is loaded in dynamically to exclude from production build
+  // eslint-disable-next-line import/no-dynamic-require
+  const { MOCK_IDP_REALM_NAME } = require(MOCK_IDP_PLUGIN_PATH);
+
+  // Check if there are any custom authentication providers already configure with the order `0` reserved for the
+  // Serverless SAML provider.
+  let hasBasicOrTokenProviderConfigured = false;
+  const providersConfig = _.get(rawConfig, 'xpack.security.authc.providers', {});
+  for (const [providerType, providers] of Object.entries(providersConfig)) {
+    if (providerType === 'basic' || providerType === 'token') {
+      hasBasicOrTokenProviderConfigured = true;
+    }
+
+    for (const [providerName, provider] of Object.entries(providers)) {
+      if (provider.order === 0) {
+        console.warn(
+          `The serverless SAML authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}".` +
+            `Please update the custom provider to use a different order or remove it to allow the serverless SAML provider to be configured.`
+        );
+        return false;
+      }
+    }
+  }
+
+  if (_.has(rawConfig, 'server.basePath')) {
+    console.warn(
+      `Custom base path is not supported when running in Serverless, it will be removed.`
+    );
+    _.unset(rawConfig, 'server.basePath');
+  }
+
+  if (opts.ssl) {
+    console.info(
+      'Kibana is being served over HTTPS. Make sure to adjust the `--kibanaUrl` parameter while running the local Serverless ES cluster.'
+    );
+  }
+
+  // Make SAML provider the first in the provider chain
+  lodashSet(rawConfig, `xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+    order: 0,
+    realm: MOCK_IDP_REALM_NAME,
+    icon: 'user',
+    description: 'Continue as Test User',
+    hint: 'Allows testing serverless user roles',
+  });
+
+  // Disable login selector to automatically trigger SAML authentication, unless it's explicitly enabled.
+  if (!_.has(rawConfig, 'xpack.security.authc.selector.enabled')) {
+    lodashSet(rawConfig, 'xpack.security.authc.selector.enabled', false);
+  }
+
+  // Since we explicitly configured SAML authentication provider, default Basic provider won't be automatically
+  // configured, and we have to do it manually instead unless other Basic or Token provider was already configured.
+  if (!hasBasicOrTokenProviderConfigured) {
+    lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
+      order: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  return true;
 }
