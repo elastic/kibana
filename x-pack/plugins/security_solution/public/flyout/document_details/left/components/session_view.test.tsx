@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
 import { SessionView } from './session_view';
@@ -46,12 +46,12 @@ jest.mock('../../../../common/lib/kibana', () => {
   };
 });
 
-const renderSessionView = (contextValue: LeftPanelContext) =>
+const renderSessionView = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <SessionView />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -60,7 +60,7 @@ describe('<SessionView />', () => {
     const contextValue = {
       getFieldsData: mockFieldsData,
       indexName: '.ds-logs-endpoint.events.process-default',
-    } as unknown as LeftPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('<SessionView />', () => {
     const contextValue = {
       getFieldsData: mockFieldsData,
       indexName: '.alerts-security', // it should prioritize KIBANA_ANCESTOR_INDEX above indexName
-    } as unknown as LeftPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderSessionView(contextValue);
     expect(wrapper.getByTestId(SESSION_VIEW_TEST_ID)).toBeInTheDocument();

@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { PrevalenceDetails } from './prevalence_details';
 import {
   PREVALENCE_DETAILS_TABLE_ALERT_COUNT_CELL_TEST_ID,
@@ -53,16 +53,16 @@ const panelContextValue = {
   indexName: 'indexName',
   browserFields: {},
   dataFormattedForFieldBrowser: [],
-} as unknown as LeftPanelContext;
+} as unknown as DocumentDetailsContext;
 
 const UPSELL_MESSAGE = 'Host and user prevalence are only available with a';
 
 const renderPrevalenceDetails = () =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={panelContextValue}>
+      <DocumentDetailsContext.Provider value={panelContextValue}>
         <PrevalenceDetails />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -170,9 +170,9 @@ describe('PrevalenceDetails', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <LeftPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <PrevalenceDetails />
-        </LeftPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -207,9 +207,9 @@ describe('PrevalenceDetails', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <LeftPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <PrevalenceDetails />
-        </LeftPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
