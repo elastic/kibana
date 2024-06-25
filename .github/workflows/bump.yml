@@ -39,15 +39,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Create Preview
-        uses: bump-sh/github-action@v1
-        with:
-          doc: serverless
-          token: ${{secrets.BUMP_TOKEN}}
-          file: oas_docs/kibana.serverless.yaml
-          command: preview
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Comment pull request with API diff
         uses: bump-sh/github-action@v1
         with:
