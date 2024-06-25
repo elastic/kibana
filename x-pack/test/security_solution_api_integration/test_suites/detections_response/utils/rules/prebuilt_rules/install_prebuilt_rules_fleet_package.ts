@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { epmRouteService } from '@kbn/fleet-plugin/common';
+import {
+  BulkInstallPackageInfo,
+  BulkInstallPackagesResponse,
+  epmRouteService,
+} from '@kbn/fleet-plugin/common';
 import type { Client } from '@elastic/elasticsearch';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';
@@ -36,7 +40,7 @@ export const installPrebuiltRulesFleetPackage = async ({
   version?: string;
   overrideExistingPackage: boolean;
   retryService: RetryService;
-}): Promise<InstallPackageResponse> => {
+}): Promise<InstallPackageResponse | BulkInstallPackagesResponse> => {
   if (version) {
     // Install a specific version
     const response = await retryService.tryWithRetries<InstallPackageResponse>(
@@ -65,24 +69,26 @@ export const installPrebuiltRulesFleetPackage = async ({
     return response;
   } else {
     // Install the latest version
-    const response = await retryService.tryWithRetries<InstallPackageResponse>(
+    const response = await retryService.tryWithRetries<BulkInstallPackagesResponse>(
       installPrebuiltRulesFleetPackage.name,
       async () => {
         const testResponse = await supertest
-          .post(epmRouteService.getInstallPath('security_detection_engine', ''))
+          .post(epmRouteService.getBulkInstallPath())
           .query({ prerelease: true })
           .set('kbn-xsrf', 'true')
           .send({
+            packages: ['security_detection_engine'],
             force: overrideExistingPackage,
           })
           .expect(200);
 
-        const body = testResponse.body as InstallPackageResponse;
+        const body = testResponse.body as BulkInstallPackagesResponse;
 
         // First and only item in the response should be the security_detection_engine package
         expect(body.items[0]).toBeDefined();
+        expect((body.items[0] as BulkInstallPackageInfo).result.assets).toBeDefined();
         // Endpoint call should have installed at least 1 security-rule asset
-        expect(body.items.length).toBeGreaterThan(0);
+        expect((body.items[0] as BulkInstallPackageInfo).result.assets?.length).toBeGreaterThan(0);
 
         return body;
       },
