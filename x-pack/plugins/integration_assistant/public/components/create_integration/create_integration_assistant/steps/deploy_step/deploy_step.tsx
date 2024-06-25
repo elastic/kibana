@@ -26,74 +26,70 @@ import * as i18n from './translations';
 interface DeployStepProps {
   integrationSettings: State['integrationSettings'];
   result: State['result'];
-  connectorId: State['connectorId'];
 }
 
-export const DeployStep = React.memo<DeployStepProps>(
-  ({ integrationSettings, result, connectorId }) => {
-    const { isLoading, error, integrationFile, integrationName } = useDeployIntegration({
-      integrationSettings,
-      result,
-      connectorId,
-    });
+export const DeployStep = React.memo<DeployStepProps>(({ integrationSettings, result }) => {
+  const { isLoading, error, integrationFile, integrationName } = useDeployIntegration({
+    integrationSettings,
+    result,
+  });
 
-    const onSaveZip = useCallback(() => {
-      saveAs(integrationFile, `${integrationName ?? 'custom_integration'}.zip`);
-    }, [integrationFile, integrationName]);
+  const onSaveZip = useCallback(() => {
+    saveAs(integrationFile, `${integrationName ?? 'custom_integration'}.zip`);
+  }, [integrationFile, integrationName]);
 
-    if (isLoading || error) {
-      return (
-        <SectionWrapper title={i18n.DEPLOYING}>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" justifyContent="center">
+  if (isLoading || error) {
+    return (
+      <SectionWrapper title={i18n.DEPLOYING}>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup direction="row" justifyContent="center">
+          <EuiFlexItem grow={false}>
+            {isLoading && <EuiLoadingSpinner size="xl" />}
+            {error && (
+              <EuiText color="danger" size="s">
+                {error}
+              </EuiText>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </SectionWrapper>
+    );
+  }
+  if (integrationName) {
+    return (
+      <SuccessSection integrationName={integrationName}>
+        <EuiSpacer size="m" />
+        <EuiPanel hasShadow={false} hasBorder paddingSize="l">
+          <EuiFlexGroup direction="row" alignItems="center">
+            <EuiFlexItem>
+              <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexStart">
+                <EuiFlexItem grow={false} css={{ marginTop: '3px' }}>
+                  <EuiIcon type="download" color="primary" size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiText>
+                        <h4>{i18n.DOWNLOAD_ZIP_TITLE}</h4>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiText color="subdued" size="s">
+                        {i18n.DOWNLOAD_ZIP_DESCRIPTION}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {isLoading && <EuiLoadingSpinner size="xl" />}
-              {error && (
-                <EuiText color="danger" size="s">
-                  {error}
-                </EuiText>
-              )}
+              <EuiLink onClick={onSaveZip}>{i18n.DOWNLOAD_ZIP_LINK}</EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </SectionWrapper>
-      );
-    }
-    if (integrationName) {
-      return (
-        <SuccessSection integrationName={integrationName}>
-          <EuiSpacer size="m" />
-          <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-            <EuiFlexGroup direction="row" alignItems="center">
-              <EuiFlexItem>
-                <EuiFlexGroup direction="row" alignItems="flexStart" justifyContent="flexStart">
-                  <EuiFlexItem grow={false} css={{ marginTop: '3px' }}>
-                    <EuiIcon type="download" color="primary" size="m" />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup direction="column" gutterSize="xs">
-                      <EuiFlexItem>
-                        <EuiText>
-                          <h4>{i18n.DOWNLOAD_ZIP_TITLE}</h4>
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText color="subdued" size="s">
-                          {i18n.DOWNLOAD_ZIP_DESCRIPTION}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiLink onClick={onSaveZip}>{i18n.DOWNLOAD_ZIP_LINK}</EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </SuccessSection>
-      );
-    }
-    return null;
+        </EuiPanel>
+      </SuccessSection>
+    );
   }
-);
+  return null;
+});
 DeployStep.displayName = 'DeployStep';

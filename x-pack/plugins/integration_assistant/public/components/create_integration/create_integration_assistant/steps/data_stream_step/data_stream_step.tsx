@@ -46,11 +46,11 @@ const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-
 
 interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];
-  connectorId: State['connectorId'];
+  connector: State['connector'];
   isGenerating: State['isGenerating'];
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
-  ({ integrationSettings, connectorId, isGenerating }) => {
+  ({ integrationSettings, connector, isGenerating }) => {
     const { setIntegrationSettings, setIsGenerating, setStep, setResult } = useActions();
     const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames(); // this is used to avoid duplicate names
 
@@ -217,7 +217,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           {isGenerating && (
             <GenerationModal
               integrationSettings={integrationSettings}
-              connectorId={connectorId}
+              connector={connector}
               onComplete={onGenerationCompleted}
               onClose={onGenerationClosed}
             />

@@ -23,14 +23,14 @@ import * as i18n from './translations';
 const AllowedActionTypeIds = ['.bedrock'];
 
 interface ConnectorStepProps {
-  connectorId: string | undefined;
+  connector: AIConnector | undefined;
 }
-export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) => {
+export const ConnectorStep = React.memo<ConnectorStepProps>(({ connector }) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { setConnectorId } = useActions();
+  const { setConnector } = useActions();
   const [connectors, setConnectors] = useState<AIConnector[]>();
   const {
     isLoading,
@@ -47,10 +47,10 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) =>
       setConnectors(filteredAiConnectors);
       if (filteredAiConnectors && filteredAiConnectors.length === 1) {
         // pre-select the connector if there is only one
-        setConnectorId(filteredAiConnectors[0].id);
+        setConnector(filteredAiConnectors[0]);
       }
     }
-  }, [aiConnectors, setConnectorId]);
+  }, [aiConnectors, setConnector]);
 
   const onConnectorSaved = useCallback(() => refetchConnectors(), [refetchConnectors]);
 
@@ -70,7 +70,7 @@ export const ConnectorStep = React.memo<ConnectorStepProps>(({ connectorId }) =>
             <>
               {hasConnectors ? (
                 <EuiFlexGroup alignItems="stretch" direction="column" gutterSize="s">
-                  <ConnectorSelector connectors={connectors} selectedConnectorId={connectorId} />
+                  <ConnectorSelector connectors={connectors} selectedConnectorId={connector?.id} />
                 </EuiFlexGroup>
               ) : (
                 <ConnectorSetup

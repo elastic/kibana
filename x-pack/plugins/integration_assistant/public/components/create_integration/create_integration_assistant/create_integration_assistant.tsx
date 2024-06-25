@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import React, { useReducer, useMemo, useCallback, useState, useEffect, useRef } from 'react';
-import { v4 as uuidV4 } from 'uuid';
+import React, { useReducer, useMemo, useCallback, useEffect } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { TelemetryEventType } from '../../../services/telemetry/types';
-import { useKibana } from '../../../common/hooks/use_kibana';
 import { Header } from './header';
 import { Footer } from './footer';
 import { ConnectorStep, isConnectorStepReady } from './steps/connector_step';
@@ -17,19 +14,24 @@ import { IntegrationStep, isIntegrationStepReady } from './steps/integration_ste
 import { DataStreamStep, isDataStreamStepReady } from './steps/data_stream_step';
 import { ReviewStep, isReviewStepReady } from './steps/review_step';
 import { DeployStep } from './steps/deploy_step';
-import { reducer, initialState, ActionsProvider, type Actions, type State } from './state';
+import { reducer, initialState, ActionsProvider, type Actions } from './state';
+import { useTelemetry } from '../telemetry';
 
 export const CreateIntegrationAssistant = React.memo(() => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  useTelemetry(state);
+
+  const telemetry = useTelemetry();
+  useEffect(() => {
+    telemetry.reportAssistantOpen();
+  }, [telemetry]);
 
   const actions = useMemo<Actions>(
     () => ({
       setStep: (payload) => {
         dispatch({ type: 'SET_STEP', payload });
       },
-      setConnectorId: (payload) => {
-        dispatch({ type: 'SET_CONNECTOR_ID', payload });
+      setConnector: (payload) => {
+        dispatch({ type: 'SET_CONNECTOR', payload });
       },
       setIntegrationSettings: (payload) => {
         dispatch({ type: 'SET_INTEGRATION_SETTINGS', payload });
@@ -64,29 +66,25 @@ export const CreateIntegrationAssistant = React.memo(() => {
       <KibanaPageTemplate>
         <Header currentStep={state.step} isGenerating={state.isGenerating} />
         <KibanaPageTemplate.Section grow paddingSize="l">
-          {state.step === 1 && <ConnectorStep connectorId={state.connectorId} />}
+          {state.step === 1 && <ConnectorStep connector={state.connector} />}
           {state.step === 2 && <IntegrationStep integrationSettings={state.integrationSettings} />}
           {state.step === 3 && (
             <DataStreamStep
               integrationSettings={state.integrationSettings}
-              connectorId={state.connectorId}
+              connector={state.connector}
               isGenerating={state.isGenerating}
             />
           )}
           {state.step === 4 && (
             <ReviewStep
               integrationSettings={state.integrationSettings}
-              connectorId={state.connectorId}
+              connector={state.connector}
               isGenerating={state.isGenerating}
               result={state.result}
             />
           )}
           {state.step === 5 && (
-            <DeployStep
-              integrationSettings={state.integrationSettings}
-              result={state.result}
-              connectorId={state.connectorId}
-            />
+            <DeployStep integrationSettings={state.integrationSettings} result={state.result} />
           )}
         </KibanaPageTemplate.Section>
         <Footer
@@ -100,25 +98,3 @@ export const CreateIntegrationAssistant = React.memo(() => {
   );
 });
 CreateIntegrationAssistant.displayName = 'CreateIntegrationAssistant';
-
-const useTelemetry = (state: State) => {
-  const { telemetry } = useKibana().services;
-  const generation = useRef({ id: uuidV4(), startedAt: Date.now() });
-  const step = useRef({ number: state.step, startedAt: Date.now() });
-
-  useEffect(() => {
-    if (state.step !== step.current.number) {
-      if (state.step > step.current.number) {
-        const { number: finishedStep, startedAt: finishedStepStartedAt } = step.current;
-
-        // telemetry.reportEvent(TelemetryEventType.AssistantStepFinish, {
-        //   processId: generation.current.id,
-        //   stepId: finishedStep.toString(),
-        //   duration: Date.now() - finishedStepStartedAt,
-        //   userId: 'user-id', // TODO: get the user ID
-        // });
-      }
-      step.current = { number: state.step, startedAt: Date.now() };
-    }
-  }, [state, telemetry]);
-};

@@ -38,17 +38,17 @@ const flyoutBodyCss = css`
 
 interface ReviewStepProps {
   integrationSettings: State['integrationSettings'];
-  connectorId: State['connectorId'];
+  connector: State['connector'];
   result: State['result'];
   isGenerating: State['isGenerating'];
 }
 export const ReviewStep = React.memo<ReviewStepProps>(
-  ({ integrationSettings, connectorId, isGenerating, result }) => {
+  ({ integrationSettings, connector, isGenerating, result }) => {
     const [customPipeline, setCustomPipeline] = useState<Pipeline>();
     const { error: checkPipelineError } = useCheckPipeline({
       customPipeline,
       integrationSettings,
-      connectorId,
+      connectorId: connector?.id,
     });
 
     const [isPipelineEditionVisible, setIsPipelineEditionVisible] = useState(false);

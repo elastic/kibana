@@ -16,67 +16,171 @@ type TelemetryEventsSchemas = {
  * Defines the schema for each of the event types
  * */
 export const telemetryEventsSchemas: TelemetryEventsSchemas = {
-  [TelemetryEventType.AssistantProcessStart]: {
-    processId: {
+  [TelemetryEventType.UploadIntegrationZipComplete]: {
+    integrationName: {
       type: 'keyword',
       _meta: {
-        description: 'Process ID to identify all the events of the same process',
-        optional: false,
+        description: 'The name of the integration in the zip file that was uploaded',
+        optional: true,
       },
     },
-    customerId: {
+    errorMessage: {
+      type: 'text',
+      _meta: {
+        description: 'The error message if the upload failed',
+        optional: true,
+      },
+    },
+  },
+
+  [TelemetryEventType.IntegrationAssistantOpen]: {
+    sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'The customer ID to identify the user',
+        description: 'The ID to identify all the events the same session',
         optional: false,
       },
     },
   },
 
-  [TelemetryEventType.AssistantProcessSuccess]: {
-    processId: {
+  [TelemetryEventType.IntegrationAssistantStepComplete]: {
+    sessionId: {
       type: 'keyword',
       _meta: {
-        description: 'Process ID to identify all the events of the same process',
+        description: 'The ID to identify all the events the same session',
         optional: false,
       },
     },
-    userId: {
-      type: 'keyword',
-      _meta: {
-        description: 'The user ID to identify the user',
-        optional: false,
-      },
-    },
-  },
-
-  [TelemetryEventType.AssistantStepFinish]: {
-    processId: {
-      type: 'keyword',
-      _meta: {
-        description: 'Process ID to identify all the events of the same process',
-        optional: false,
-      },
-    },
-    stepId: {
-      type: 'keyword',
-      _meta: {
-        description: 'The step ID to identify the step',
-        optional: false,
-      },
-    },
-    duration: {
+    step: {
       type: 'long',
       _meta: {
-        description: 'The duration of the step',
+        description: 'The step number',
         optional: false,
       },
     },
-    userId: {
+    stepName: {
       type: 'keyword',
       _meta: {
-        description: 'The user ID to identify the user',
+        description: 'The name of the step',
         optional: false,
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: {
+        description: 'Time spent in the current step',
+        optional: false,
+      },
+    },
+    sessionElapsedTime: {
+      type: 'long',
+      _meta: {
+        description: 'Total time spent in the current generation session',
+        optional: false,
+      },
+    },
+  },
+
+  [TelemetryEventType.IntegrationAssistantGenerationComplete]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events the same session',
+        optional: false,
+      },
+    },
+    sampleRows: {
+      type: 'long',
+      _meta: {
+        description: 'The number of log rows provided as sample data',
+        optional: false,
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: {
+        description: 'Time spent in the generation process',
+        optional: false,
+      },
+    },
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The action type ID',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The model used for the generation',
+        optional: false,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'The provider used for the generation',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'text',
+      _meta: {
+        description: 'The error message if the generation failed',
+        optional: true,
+      },
+    },
+  },
+
+  [TelemetryEventType.IntegrationAssistantComplete]: {
+    sessionId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID to identify all the events the same session',
+        optional: false,
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: {
+        description: 'Total time spent in the workflow',
+        optional: false,
+      },
+    },
+    integrationName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the integration',
+        optional: false,
+      },
+    },
+    integrationDescription: {
+      type: 'keyword',
+      _meta: {
+        description: 'The description of the integration',
+        optional: false,
+      },
+    },
+    dataStreamName: {
+      type: 'keyword',
+      _meta: {
+        description: 'The name of the data stream used for the integration',
+        optional: false,
+      },
+    },
+    inputType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The input type used for the integration',
+        optional: false,
+      },
+    },
+    errorMessage: {
+      type: 'text',
+      _meta: {
+        description: 'The error message if the workflow failed',
+        optional: true,
       },
     },
   },
