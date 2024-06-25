@@ -64,8 +64,7 @@ export const ATTACH_TO_TIMELINE_CHECKBOX = i18n.translate(
 export const ATTACH_TO_TIMELINE_INFO = i18n.translate(
   'xpack.securitySolution.notes.attachToTimelineInfoLabel',
   {
-    defaultMessage:
-      'The active timeline must be saved before a note can be associated with it',
+    defaultMessage: 'The active timeline must be saved before a note can be associated with it',
   }
 );
 
