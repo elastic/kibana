@@ -81,7 +81,6 @@ export const getLensAttributesFromSuggestion = ({
           adHocDataViews: { [dataView.id]: dataView.toMinimalSpec() },
         }),
     },
-    type: 'lens',
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   };
   return attributes;

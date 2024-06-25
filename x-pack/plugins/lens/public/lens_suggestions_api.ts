@@ -21,7 +21,6 @@ export enum ChartType {
   Tagcloud = 'Tag cloud',
   Waffle = 'Waffle',
   Table = 'Table',
-  Metric = 'Metric',
 }
 
 interface SuggestionsApiProps {
