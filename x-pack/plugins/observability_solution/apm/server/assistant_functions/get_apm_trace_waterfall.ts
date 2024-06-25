@@ -112,8 +112,8 @@ export function registerGetApmTraceWaterfallFunction({
     {
       name: 'get_apm_trace_waterfall',
       description: `Use this function to show a visualization of distributed traces for any services, transactions, or trace IDs.
-        Your ONLY job is to analyze the entire data and provide insights.
-        Users DO NOT need to see an ASCII representation of the trace. DO NOT UNDER ANY CIRCUMSTANCES display or render an ASCII trace waterfall, any ASCII visual representations, nor the listed sequence of operations in your response.
+        Your ONLY job is to analyze the entire content and provide insights of bottlenecks and points that require attention.
+        IMPORTANT: Users DO NOT need to see an ASCII representation of the trace. DO NOT UNDER ANY CIRCUMSTANCES display or render an ASCII trace waterfall, any ASCII visual representations, any code blocks, nor the listed sequence of operations in your response.
      `,
       parameters,
       // deprecated
