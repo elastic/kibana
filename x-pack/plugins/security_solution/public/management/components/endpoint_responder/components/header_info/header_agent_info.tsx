@@ -6,7 +6,14 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+  EuiIconTip,
+} from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -87,7 +94,16 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
                   size="s"
                   data-test-subj={testId('integrationSectionLabel')}
                 >
-                  {INTEGRATION_SECTION_LABEL}
+                  {INTEGRATION_SECTION_LABEL}&nbsp;
+                  <EuiIconTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.securitySolution.responder.header.integrationSectionLabelTooltip"
+                        defaultMessage="The integration used to execute the command on this host"
+                      />
+                    }
+                    position="right"
+                  />
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
