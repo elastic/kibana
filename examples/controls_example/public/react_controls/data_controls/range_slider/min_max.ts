@@ -68,7 +68,7 @@ export async function getMinMax({
   data,
   dataView,
   field,
-  filters,
+  unifiedSearchFilters,
   query,
   timeRange,
 }: {
@@ -76,7 +76,7 @@ export async function getMinMax({
   data: DataPublicPluginStart;
   dataView: DataView;
   field: DataViewField;
-  filters?: Filter[];
+  unifiedSearchFilters?: Filter[];
   query?: Query | AggregateQuery;
   timeRange?: TimeRange;
 }): Promise<{ min: number | undefined; max: number | undefined }> {
@@ -84,7 +84,7 @@ export async function getMinMax({
   searchSource.setField('size', 0);
   searchSource.setField('index', dataView);
 
-  const allFilters = filters ? filters : [];
+  const allFilters = unifiedSearchFilters ? unifiedSearchFilters : [];
   if (timeRange) {
     const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
     if (timeFilter) allFilters.push(timeFilter);

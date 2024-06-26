@@ -15,7 +15,6 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { buildRangeFilter, Filter, RangeFilterParams } from '@kbn/es-query';
-import { isEqual } from 'lodash';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import {
@@ -29,7 +28,6 @@ import { RangeSliderStrings } from './range_slider_strings';
 import { RangeSliderControl } from './components/range_slider_control';
 import { minMax$ } from './min_max';
 import { hasNoResults$ } from './has_no_results';
-import { DataControlFetchContext } from '../../control_group/types';
 
 export const getRangesliderControlFactory = (
   services: Services
@@ -111,25 +109,6 @@ export const getRangesliderControlFactory = (
         }
       );
 
-      const dataControlFetch$ = controlGroupApi.dataControlFetch$.pipe(
-        map((context: DataControlFetchContext) => {
-          // remove this controls filter from context
-          // TODO remove once dataControlFetch$ propertly passes chained filters
-          const rangeFilter = dataControl.api.filters$?.value?.[0];
-          return context.filters && rangeFilter
-            ? {
-                ...context,
-                filters: context.filters.filter((filter) => {
-                  return (
-                    !isEqual(rangeFilter.meta, filter.meta) ||
-                    !isEqual(rangeFilter.query, filter.query)
-                  );
-                }),
-              }
-            : context;
-        })
-      );
-
       const dataLoadingSubscription = combineLatest([loadingMinMax$, loadingHasNoResults$])
         .pipe(
           map((values) => {
@@ -157,7 +136,7 @@ export const getRangesliderControlFactory = (
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
         data: services.data,
-        dataControlFetch$,
+        dataControlFetch$: controlGroupApi.dataControlFetch$,
         dataViews$: dataControl.api.dataViews,
         fieldName$: dataControl.stateManager.fieldName,
         setIsLoading: (isLoading: boolean) => {
@@ -214,7 +193,7 @@ export const getRangesliderControlFactory = (
         dataViews$: dataControl.api.dataViews,
         filters$: dataControl.api.filters$,
         ignoreParentSettings$: controlGroupApi.ignoreParentSettings$,
-        dataControlFetch$,
+        dataControlFetch$: controlGroupApi.dataControlFetch$,
         setIsLoading: (isLoading: boolean) => {
           loadingHasNoResults$.next(isLoading);
         },

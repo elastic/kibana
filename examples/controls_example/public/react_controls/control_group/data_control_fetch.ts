@@ -7,6 +7,7 @@
  */
 
 import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { debounceTime, map, merge, Observable, switchMap } from 'rxjs';
@@ -14,13 +15,17 @@ import { DataControlFetchContext } from './types';
 
 export function dataControlFetch$(
   ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>,
-  parentApi: Partial<PublishesUnifiedSearch>
+  parentApi: Partial<PublishesUnifiedSearch> & {
+    unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
+  }
 ): Observable<DataControlFetchContext> {
   return ignoreParentSettings$.pipe(
     switchMap((parentIgnoreSettings) => {
       const observables: Array<Observable<unknown>> = [];
-      if (!parentIgnoreSettings?.ignoreFilters && parentApi.filters$) {
-        observables.push(parentApi.filters$);
+      // Subscribe to parentApi.unifiedSearchFilters$ instead of parentApi.filters$
+      // to avoid passing control group filters back into control group
+      if (!parentIgnoreSettings?.ignoreFilters && parentApi.unifiedSearchFilters$) {
+        observables.push(parentApi.unifiedSearchFilters$);
       }
       if (!parentIgnoreSettings?.ignoreQuery && parentApi.query$) {
         observables.push(parentApi.query$);
@@ -40,10 +45,10 @@ export function dataControlFetch$(
     map(() => {
       const parentIgnoreSettings = ignoreParentSettings$.value;
       return {
-        filters:
-          parentIgnoreSettings?.ignoreFilters || !parentApi.filters$
+        unifiedSearchFilters:
+          parentIgnoreSettings?.ignoreFilters || !parentApi.unifiedSearchFilters$
             ? undefined
-            : parentApi.filters$.value,
+            : parentApi.unifiedSearchFilters$.value,
         query:
           parentIgnoreSettings?.ignoreQuery || !parentApi.query$
             ? undefined

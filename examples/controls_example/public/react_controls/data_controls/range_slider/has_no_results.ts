@@ -10,9 +10,10 @@ import { estypes } from '@elastic/elasticsearch';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesDataViews, PublishesFilters } from '@kbn/presentation-publishing';
+import { PublishesDataViews } from '@kbn/presentation-publishing';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { ControlGroupApi } from '../../control_group/types';
+import { DataControlApi } from '../types';
 
 export function hasNoResults$({
   data,
@@ -25,7 +26,7 @@ export function hasNoResults$({
   data: DataPublicPluginStart;
   dataControlFetch$: ControlGroupApi['dataControlFetch$'];
   dataViews$?: PublishesDataViews['dataViews'];
-  filters$: PublishesFilters['filters$'];
+  filters$: DataControlApi['filters$'];
   ignoreParentSettings$: ControlGroupApi['ignoreParentSettings$'];
   setIsLoading: (isLoading: boolean) => void;
 }) {
@@ -70,7 +71,7 @@ async function hasNoResults({
   abortSignal,
   data,
   dataView,
-  filters,
+  unifiedSearchFilters,
   query,
   rangeFilter,
   timeRange,
@@ -78,7 +79,7 @@ async function hasNoResults({
   abortSignal: AbortSignal;
   data: DataPublicPluginStart;
   dataView: DataView;
-  filters?: Filter[];
+  unifiedSearchFilters?: Filter[];
   query?: Query | AggregateQuery;
   rangeFilter: Filter;
   timeRange?: TimeRange;
@@ -91,7 +92,7 @@ async function hasNoResults({
   // "has no results" or "has results" vs the actual count
   searchSource.setField('trackTotalHits', 1);
 
-  const allFilters = filters ? filters : [];
+  const allFilters = unifiedSearchFilters ? unifiedSearchFilters : [];
   allFilters.push(rangeFilter);
   if (timeRange) {
     const timeFilter = data.query.timefilter.timefilter.createFilter(dataView, timeRange);
