@@ -374,7 +374,7 @@ export function getDateLiterals() {
         defaultMessage: 'Click to choose',
       }
     ),
-    sortText: 'A',
+    sortText: '1A',
     command: {
       id: 'esql.timepicker.choose',
       title: i18n.translate(
@@ -386,6 +386,21 @@ export function getDateLiterals() {
     },
   } as SuggestionRawDefinition;
   suggestions.push(
+    ...['?earliest', '?latest'].map(
+      (label) =>
+        ({
+          label,
+          text: label,
+          kind: 'Constant',
+          detail: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.autocomplete.namedParamDefinition',
+            {
+              defaultMessage: 'Named parameter',
+            }
+          ),
+          sortText: '1A',
+        } as SuggestionRawDefinition)
+    ),
     ...buildConstantsDefinitions(['?earliest', '?latest'], ''),
     timePickerSuggestion
   );
