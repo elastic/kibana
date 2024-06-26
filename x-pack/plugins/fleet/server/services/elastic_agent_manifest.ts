@@ -53,7 +53,9 @@ spec:
           image: docker.elastic.co/beats/elastic-agent:VERSION
           args: ["-c", "/etc/elastic-agent/agent.yml", "-e"]
           env:
-            # The basic authentication username used to connect to Elasticsearch
+            # The API Key with access privilleges to connect to Elasticsearch. https://www.elastic.co/guide/en/fleet/current/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
+            - name: API_KEY
+            # The basic authentication username used to connect to Elasticsearch. Alternative to API_KEY access.
             # This user needs the privileges required to publish events to Elasticsearch.
             - name: ES_USERNAME
               value: "elastic"
