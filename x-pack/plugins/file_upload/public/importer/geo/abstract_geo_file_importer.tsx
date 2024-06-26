@@ -197,7 +197,7 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
             settings: {},
             mappings: {},
             ingestPipeline: {
-              id: pipelineId,
+              id: pipelineId!, // !!!!! can this be undefined? !!!!!!!!!
             },
           });
 
