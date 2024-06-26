@@ -182,7 +182,10 @@ export const RangeSliderControl: FC<Props> = ({
         }}
         append={
           isInvalid ? (
-            <div className="rangeSlider__invalidToken">
+            <div
+              className="rangeSlider__invalidToken"
+              data-test-subj={`range-slider-control-invalid-append-${uuid}`}
+            >
               <EuiToolTip
                 position="top"
                 content={RangeSliderStrings.control.getInvalidSelectionWarningLabel()}

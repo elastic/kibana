@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { TimeRange } from '@kbn/es-query';
 import { BehaviorSubject, first, of, skip } from 'rxjs';
+import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
@@ -17,6 +20,10 @@ import { ControlApiRegistration } from '../../types';
 import { RangesliderControlApi, RangesliderControlState } from './types';
 import { StateComparators } from '@kbn/presentation-publishing';
 
+const DEFAULT_TOTAL_RESULTS = 20;
+const DEFAULT_MIN = 0;
+const DEFAULT_MAX = 1000;
+
 describe('RangesliderControlApi', () => {
   const uuid = 'myControl1';
   const dashboardApi = {
@@ -24,10 +31,13 @@ describe('RangesliderControlApi', () => {
   };
   const controlGroupApi = {
     dataControlFetch$: new BehaviorSubject<DataControlFetchContext>({}),
+    ignoreParentSettings$: new BehaviorSubject(undefined),
     parentApi: dashboardApi,
   } as unknown as ControlGroupApi;
   const dataStartServiceMock = dataPluginMock.createStartContract();
-  const totalResults = 20;
+  let totalResults = DEFAULT_TOTAL_RESULTS;
+  let min: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MIN;
+  let max: estypes.AggregationsSingleMetricAggregateBase['value'] = DEFAULT_MAX;
   dataStartServiceMock.search.searchSource.create = jest.fn().mockImplementation(() => {
     let isAggsRequest = false;
     return {
@@ -39,7 +49,7 @@ describe('RangesliderControlApi', () => {
       fetch$: () => {
         return isAggsRequest
           ? of({
-              rawResponse: { aggregations: { minAgg: { value: 0 }, maxAgg: { value: 1000 } } },
+              rawResponse: { aggregations: { minAgg: { value: min }, maxAgg: { value: max } } },
             })
           : of({
               rawResponse: { hits: { total: { value: totalResults } } },
@@ -64,12 +74,25 @@ describe('RangesliderControlApi', () => {
           },
         ].find((field) => fieldName === field.name);
       },
+      getFormatterForField: () => {
+        return {
+          getConverterFor: () => {
+            return (value: string) => `${value} units`;
+          },
+        };
+      },
     } as unknown as DataView;
   };
   const factory = getRangesliderControlFactory({
     core: coreMock.createStart(),
     data: dataStartServiceMock,
     dataViews: mockDataViews,
+  });
+
+  beforeEach(() => {
+    totalResults = DEFAULT_TOTAL_RESULTS;
+    min = DEFAULT_MIN;
+    max = DEFAULT_MAX;
   });
 
   function buildApiMock(
@@ -138,6 +161,28 @@ describe('RangesliderControlApi', () => {
           },
         ]);
         done();
+      });
+    });
+
+    describe('selected range has no results', () => {
+      test('should display invalid state', async () => {
+        totalResults = 0; // simulate no results by returning hits total of zero
+        min = null; // simulate no results by returning min aggregation value of null
+        max = null; // simulate no results by returning max aggregation value of null
+        const { Component } = factory.buildControl(
+          {
+            dataViewId: 'myDataViewId',
+            fieldName: 'myFieldName',
+            value: ['5', '10'],
+          },
+          buildApiMock,
+          uuid,
+          controlGroupApi
+        );
+        const { findByTestId } = render(<Component />);
+        await waitFor(async () => {
+          await findByTestId('range-slider-control-invalid-append-myControl1');
+        });
       });
     });
   });
