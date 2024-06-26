@@ -270,6 +270,7 @@ export class SecurityPlugin
       getCurrentUser,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
+
     const applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
     const apiKeysSetup = this.apiKeysService.setup({
       getClusterClient: () =>

@@ -19,7 +19,18 @@ function createSetupMock() {
   const mockAuthz = authorizationMock.create();
   return {
     audit: auditServiceMock.create(),
-    authc: { getCurrentUser: jest.fn() },
+    authc: {
+      getCurrentUser: jest.fn(),
+      apiKeys: {
+        areAPIKeysEnabled: jest.fn(),
+        areCrossClusterAPIKeysEnabled: jest.fn(),
+        validate: jest.fn(),
+        invalidate: jest.fn(),
+        invalidateAsInternalUser: jest.fn(),
+        grantAsInternalUser: jest.fn(),
+        create: jest.fn(),
+      },
+    },
     authz: {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
