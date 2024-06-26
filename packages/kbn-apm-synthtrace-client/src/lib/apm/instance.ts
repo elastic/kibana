@@ -72,9 +72,20 @@ export class Instance extends Entity<ApmFields> {
       'error.grouping_name': getErrorGroupingKey(message),
     });
   }
-  error({ message, type, culprit }: { message: string; type?: string; culprit?: string }) {
+  error({
+    message,
+    type,
+    culprit,
+    groupingKey,
+  }: {
+    message: string;
+    type?: string;
+    culprit?: string;
+    groupingKey?: string;
+  }) {
     return new ApmError({
       ...this.fields,
+      ...(groupingKey ? { 'error.grouping_key': groupingKey } : {}),
       'error.exception': [{ message, ...(type ? { type } : {}) }],
       'error.culprit': culprit,
     });

@@ -98,7 +98,7 @@ export class LlmProxy {
         waitForIntercept: () => Promise<LlmResponseSimulator>;
       }
     : {
-        complete: () => Promise<void>;
+        waitAndComplete: () => Promise<void>;
       } {
     const waitForInterceptPromise = Promise.race([
       new Promise<LlmResponseSimulator>((outerResolve) => {
@@ -149,7 +149,7 @@ export class LlmProxy {
         });
       }),
       new Promise<LlmResponseSimulator>((_, reject) => {
-        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 5000ms`)), 5000);
+        setTimeout(() => reject(new Error(`Interceptor "${name}" timed out after 20000ms`)), 20000);
       }),
     ]);
 
@@ -162,7 +162,7 @@ export class LlmProxy {
       : responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
 
     return {
-      complete: async () => {
+      waitAndComplete: async () => {
         const simulator = await waitForInterceptPromise;
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);
