@@ -97,6 +97,7 @@ const mockAttackDiscoveries = [
   },
 ];
 const setLoadingConnectorId = jest.fn();
+const setStatus = jest.fn();
 
 describe('useAttackDiscovery', () => {
   const mockPollApi = {
@@ -105,6 +106,7 @@ describe('useAttackDiscovery', () => {
     pollApi: jest.fn(),
     status: 'succeeded',
     stats: null,
+    setStatus,
     didInitialFetch: true,
   };
 
@@ -149,7 +151,7 @@ describe('useAttackDiscovery', () => {
     );
     // called on mount
     expect(mockPollApi.pollApi).toHaveBeenCalledTimes(1);
-    expect(result.current.isLoading).toBe(true);
+    expect(setStatus).toHaveBeenCalledWith('running');
     expect(result.current.isLoadingPost).toBe(false);
   });
 

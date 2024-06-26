@@ -45,6 +45,7 @@ interface UsePollApi {
   data: AttackDiscoveryData | null;
   stats: AttackDiscoveryStats | null;
   pollApi: () => void;
+  setStatus: (status: AttackDiscoveryStatus | null) => void;
 }
 
 export const usePollApi = ({
@@ -181,7 +182,7 @@ export const usePollApi = ({
     }
   }, [connectorId, handleResponse, http, toasts]);
 
-  return { cancelAttackDiscovery, didInitialFetch, status, data, pollApi, stats };
+  return { cancelAttackDiscovery, didInitialFetch, status, data, pollApi, stats, setStatus };
 };
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {

@@ -66,6 +66,7 @@ export const useAttackDiscovery = ({
     data: pollData,
     pollApi,
     status: pollStatus,
+    setStatus: setPollStatus,
     didInitialFetch,
     stats,
   } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
@@ -155,7 +156,8 @@ export const useAttackDiscovery = ({
         throw new Error(CONNECTOR_ERROR);
       }
       setLoadingConnectorId?.(connectorId ?? null);
-      setIsLoading(true);
+      // sets isLoading to true
+      setPollStatus('running');
       setIsLoadingPost(true);
       setApproximateFutureTime(null);
       // call the internal API to generate attack discoveries:
@@ -178,7 +180,7 @@ export const useAttackDiscovery = ({
         text: getErrorToastText(error),
       });
     }
-  }, [connectorId, http, requestBody, setLoadingConnectorId, toasts]);
+  }, [connectorId, http, requestBody, setLoadingConnectorId, setPollStatus, toasts]);
 
   return {
     alertsContextCount,
