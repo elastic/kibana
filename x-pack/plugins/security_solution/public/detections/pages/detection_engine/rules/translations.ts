@@ -584,6 +584,13 @@ export const MANUAL_RULE_RUN = i18n.translate(
   }
 );
 
+export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunTooltip',
+  {
+    defaultMessage: 'Manual run available only for enabled rules',
+  }
+);
+
 export const COLUMN_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.ruleTitle',
   {
