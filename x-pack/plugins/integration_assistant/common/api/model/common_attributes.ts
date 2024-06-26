@@ -81,6 +81,7 @@ export const InputType = z.enum([
   'aws_s3',
   'azure_blob_storage',
   'azure_eventhub',
+  'cel',
   'cloudfoundry',
   'filestream',
   'gcp_pubsub',
