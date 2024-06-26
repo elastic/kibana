@@ -18,8 +18,8 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-import { LeftPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 jest.mock('../../../../../common/detection_engine/utils', () => ({
@@ -46,12 +46,12 @@ const INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID = `${CORRELATIONS_DETAILS_SUPPRESSE
 const renderSuppressedAlerts = (alertSuppressionCount: number) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={mockContextValue}>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
         <SuppressedAlerts
           alertSuppressionCount={alertSuppressionCount}
           dataAsNestedObject={mockDataAsNestedObject}
         />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

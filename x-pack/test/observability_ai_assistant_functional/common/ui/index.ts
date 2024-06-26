@@ -44,6 +44,7 @@ const pages = {
     saveButton: 'create-connector-flyout-save-btn',
   },
   contextualInsights: {
+    container: 'obsAiAssistantInsightContainer',
     button: 'obsAiAssistantInsightButton',
     text: 'obsAiAssistantInsightResponse',
   },

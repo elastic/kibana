@@ -6,6 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import type { WithKueryAutocompletionLifecycleProps } from './with_kuery_autocompletion';
 import type { AutocompleteFieldProps } from './autocomplete_field';
 import type { RuleFlyoutKueryBarProps } from './kuery_bar';
 
@@ -25,6 +26,16 @@ export function AutocompleteField(props: AutocompleteFieldProps) {
   return (
     <Suspense fallback={null}>
       <AutocompleteFieldLazy {...props} />
+    </Suspense>
+  );
+}
+
+const WithKueryAutocompletionLazy = lazy(() => import('./with_kuery_autocompletion'));
+
+export function WithKueryAutocompletion(props: WithKueryAutocompletionLifecycleProps) {
+  return (
+    <Suspense fallback={null}>
+      <WithKueryAutocompletionLazy {...props} />
     </Suspense>
   );
 }
