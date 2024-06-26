@@ -88,8 +88,6 @@
       "@kbn/app-link-test-plugin/*": ["test/plugin_functional/plugins/app_link_test/*"],
       "@kbn/application-usage-test-plugin": ["x-pack/test/usage_collection/plugins/application_usage_test"],
       "@kbn/application-usage-test-plugin/*": ["x-pack/test/usage_collection/plugins/application_usage_test/*"],
-      "@kbn/assetManager-plugin": ["x-pack/plugins/observability_solution/asset_manager"],
-      "@kbn/assetManager-plugin/*": ["x-pack/plugins/observability_solution/asset_manager/*"],
       "@kbn/assets-data-access-plugin": ["x-pack/plugins/observability_solution/assets_data_access"],
       "@kbn/assets-data-access-plugin/*": ["x-pack/plugins/observability_solution/assets_data_access/*"],
       "@kbn/audit-log-plugin": ["x-pack/test/security_api_integration/plugins/audit_log"],
@@ -776,6 +774,8 @@
       "@kbn/enterprise-search-plugin/*": ["x-pack/plugins/enterprise_search/*"],
       "@kbn/entities-schema": ["x-pack/packages/kbn-entities-schema"],
       "@kbn/entities-schema/*": ["x-pack/packages/kbn-entities-schema/*"],
+      "@kbn/entityManager-plugin": ["x-pack/plugins/observability_solution/entity_manager"],
+      "@kbn/entityManager-plugin/*": ["x-pack/plugins/observability_solution/entity_manager/*"],
       "@kbn/error-boundary-example-plugin": ["examples/error_boundary"],
       "@kbn/error-boundary-example-plugin/*": ["examples/error_boundary/*"],
       "@kbn/es": ["packages/kbn-es"],
@@ -1448,6 +1448,10 @@
       "@kbn/searchprofiler-plugin/*": ["x-pack/plugins/searchprofiler/*"],
       "@kbn/security-api-integration-helpers": ["x-pack/test/security_api_integration/packages/helpers"],
       "@kbn/security-api-integration-helpers/*": ["x-pack/test/security_api_integration/packages/helpers/*"],
+      "@kbn/security-api-key-management": ["x-pack/packages/security/api_key_management"],
+      "@kbn/security-api-key-management/*": ["x-pack/packages/security/api_key_management/*"],
+      "@kbn/security-form-components": ["x-pack/packages/security/form_components"],
+      "@kbn/security-form-components/*": ["x-pack/packages/security/form_components/*"],
       "@kbn/security-hardening": ["packages/kbn-security-hardening"],
       "@kbn/security-hardening/*": ["packages/kbn-security-hardening/*"],
       "@kbn/security-plugin": ["x-pack/plugins/security"],
@@ -1872,7 +1876,9 @@
       "@kbn/zod-helpers/*": ["packages/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",

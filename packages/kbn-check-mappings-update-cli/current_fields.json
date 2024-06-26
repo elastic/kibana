@@ -290,6 +290,22 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-definition": [
+    "description",
+    "filter",
+    "id",
+    "identityFields",
+    "indexPatterns",
+    "managed",
+    "metadata",
+    "metrics",
+    "name",
+    "staticFields",
+    "type"
+  ],
+  "entity-discovery-api-key": [
+    "apiKey"
+  ],
   "epm-packages": [
     "es_index_patterns",
     "experimental_data_stream_features",
