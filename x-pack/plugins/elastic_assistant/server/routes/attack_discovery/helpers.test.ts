@@ -764,48 +764,44 @@ describe('helpers', () => {
         authenticatedUser: mockAuthenticatedUser,
         dataClient: mockDataClient,
       });
-      expect(stats).toEqual({
-        newConnectorResultsCount: 3,
-        newDiscoveriesCount: 5,
-        statsPerConnector: [
-          {
-            hasViewed: true,
-            status: 'failed',
-            count: 0,
-            connectorId: 'my-bedrock-old',
-          },
-          {
-            hasViewed: false,
-            status: 'failed',
-            count: 0,
-            connectorId: 'my-bedrock-old',
-          },
-          {
-            hasViewed: false,
-            status: 'running',
-            count: 1,
-            connectorId: 'my-gen-ai',
-          },
-          {
-            hasViewed: false,
-            status: 'succeeded',
-            count: 1,
-            connectorId: 'my-gpt4o-ai',
-          },
-          {
-            hasViewed: true,
-            status: 'canceled',
-            count: 1,
-            connectorId: 'my-bedrock',
-          },
-          {
-            hasViewed: false,
-            status: 'succeeded',
-            count: 4,
-            connectorId: 'my-gen-a2i',
-          },
-        ],
-      });
+      expect(stats).toEqual([
+        {
+          hasViewed: true,
+          status: 'failed',
+          count: 0,
+          connectorId: 'my-bedrock-old',
+        },
+        {
+          hasViewed: false,
+          status: 'failed',
+          count: 0,
+          connectorId: 'my-bedrock-old',
+        },
+        {
+          hasViewed: false,
+          status: 'running',
+          count: 1,
+          connectorId: 'my-gen-ai',
+        },
+        {
+          hasViewed: false,
+          status: 'succeeded',
+          count: 1,
+          connectorId: 'my-gpt4o-ai',
+        },
+        {
+          hasViewed: true,
+          status: 'canceled',
+          count: 1,
+          connectorId: 'my-bedrock',
+        },
+        {
+          hasViewed: false,
+          status: 'succeeded',
+          count: 4,
+          connectorId: 'my-gen-a2i',
+        },
+      ]);
     });
   });
 });

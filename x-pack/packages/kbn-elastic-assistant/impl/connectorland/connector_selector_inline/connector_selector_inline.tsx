@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiNotificationBadge,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
-import { UPDATED_CONNECTORS_MESSAGE } from '../connector_selector/translations';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -137,22 +129,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
       [selectedConversation, setApiConfig, onConnectorIdSelected, onConnectorSelected]
     );
 
-    const statusBadge = useMemo(() => {
-      if (stats && stats.newConnectorResultsCount > 0) {
-        return (
-          <EuiToolTip
-            position="bottom"
-            content={UPDATED_CONNECTORS_MESSAGE(stats.newConnectorResultsCount)}
-          >
-            <EuiNotificationBadge style={{ marginLeft: 5 }}>
-              {stats.newConnectorResultsCount}
-            </EuiNotificationBadge>
-          </EuiToolTip>
-        );
-      }
-      return null;
-    }, [stats]);
-
     if (isFlyoutMode) {
       return (
         <EuiFlexGroup
@@ -224,7 +200,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
                 size={'xs'}
               >
                 {selectedConnectorName}
-                {statusBadge}
               </EuiButtonEmpty>
             </span>
           )}

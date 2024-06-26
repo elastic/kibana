@@ -91,7 +91,6 @@ describe('getAttackDiscoveryRoute', () => {
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
       data: mockCurrentAd,
-      entryExists: true,
       stats: mockStats,
     });
   });
@@ -132,7 +131,6 @@ describe('getAttackDiscoveryRoute', () => {
     );
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      entryExists: false,
       stats: mockStats,
     });
   });

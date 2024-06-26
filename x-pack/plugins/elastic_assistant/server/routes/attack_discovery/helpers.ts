@@ -13,7 +13,6 @@ import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryResponse,
   AttackDiscoveryStat,
-  AttackDiscoveryStats,
   AttackDiscoveryStatus,
   ExecuteConnectorRequestBody,
   GenerationInterval,
@@ -446,46 +445,28 @@ export const findAttackDiscoveryByConnectorId = async ({
   });
 };
 
-const emptyDiscoveryStat: AttackDiscoveryStat[] = [];
 export const getAttackDiscoveryStats = async ({
   authenticatedUser,
   dataClient,
 }: {
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
-}): Promise<AttackDiscoveryStats> => {
+}): Promise<AttackDiscoveryStat[]> => {
   const attackDiscoveries = await dataClient.findAllAttackDiscoveries({
     authenticatedUser,
   });
 
-  return attackDiscoveries.reduce(
-    (acc, ad) => {
-      const updatedAt = moment(ad.updatedAt);
-      const lastViewedAt = moment(ad.lastViewedAt);
-      const timeSinceLastViewed = updatedAt.diff(lastViewedAt);
-      const hasViewed = timeSinceLastViewed <= 0;
-      const discoveryCount = ad.attackDiscoveries.length;
-      return {
-        ...acc,
-        statsPerConnector: [
-          ...acc.statsPerConnector,
-          {
-            hasViewed,
-            status: ad.status,
-            count: discoveryCount,
-            connectorId: ad.apiConfig.connectorId,
-          },
-        ],
-        newConnectorResultsCount:
-          !hasViewed && (ad.status === 'succeeded' || ad.status === 'failed')
-            ? acc.newConnectorResultsCount + 1
-            : acc.newConnectorResultsCount,
-        newDiscoveriesCount:
-          !hasViewed && ad.status === 'succeeded'
-            ? acc.newDiscoveriesCount + discoveryCount
-            : acc.newDiscoveriesCount,
-      };
-    },
-    { newDiscoveriesCount: 0, newConnectorResultsCount: 0, statsPerConnector: emptyDiscoveryStat }
-  );
+  return attackDiscoveries.map((ad) => {
+    const updatedAt = moment(ad.updatedAt);
+    const lastViewedAt = moment(ad.lastViewedAt);
+    const timeSinceLastViewed = updatedAt.diff(lastViewedAt);
+    const hasViewed = timeSinceLastViewed <= 0;
+    const discoveryCount = ad.attackDiscoveries.length;
+    return {
+      hasViewed,
+      status: ad.status,
+      count: discoveryCount,
+      connectorId: ad.apiConfig.connectorId,
+    };
+  });
 };

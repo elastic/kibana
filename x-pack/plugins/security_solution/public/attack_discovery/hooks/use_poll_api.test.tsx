@@ -71,42 +71,38 @@ const mockResponse = {
   id: '8e215edc-6318-4760-9566-d32f1844f9cb',
 };
 
-const mockStats = {
-  newConnectorResultsCount: 2,
-  newDiscoveriesCount: 4,
-  statsPerConnector: [
-    {
-      hasViewed: false,
-      status: 'failed',
-      count: 0,
-      connectorId: 'my-bedrock-old',
-    },
-    {
-      hasViewed: false,
-      status: 'running',
-      count: 1,
-      connectorId: 'my-gen-ai',
-    },
-    {
-      hasViewed: true,
-      status: 'succeeded',
-      count: 1,
-      connectorId: 'my-gpt4o-ai',
-    },
-    {
-      hasViewed: true,
-      status: 'canceled',
-      count: 1,
-      connectorId: 'my-bedrock',
-    },
-    {
-      hasViewed: false,
-      status: 'succeeded',
-      count: 4,
-      connectorId: 'my-gen-a2i',
-    },
-  ],
-};
+const mockStats = [
+  {
+    hasViewed: false,
+    status: 'failed',
+    count: 0,
+    connectorId: 'my-bedrock-old',
+  },
+  {
+    hasViewed: false,
+    status: 'running',
+    count: 1,
+    connectorId: 'my-gen-ai',
+  },
+  {
+    hasViewed: true,
+    status: 'succeeded',
+    count: 1,
+    connectorId: 'my-gpt4o-ai',
+  },
+  {
+    hasViewed: true,
+    status: 'canceled',
+    count: 1,
+    connectorId: 'my-bedrock',
+  },
+  {
+    hasViewed: false,
+    status: 'succeeded',
+    count: 4,
+    connectorId: 'my-gen-a2i',
+  },
+];
 
 describe('usePollApi', () => {
   beforeAll(() => {
@@ -139,7 +135,6 @@ describe('usePollApi', () => {
 
   test('should update didInitialFetch on connector change', async () => {
     http.fetch.mockResolvedValue({
-      entryExists: true,
       data: mockResponse,
       stats: mockStats,
     });
@@ -168,7 +163,6 @@ describe('usePollApi', () => {
 
   test('should update stats, status, and data on successful response', async () => {
     http.fetch.mockResolvedValue({
-      entryExists: true,
       data: mockResponse,
       stats: mockStats,
     });
@@ -183,7 +177,11 @@ describe('usePollApi', () => {
     expect(setApproximateFutureTime).toHaveBeenCalledWith(
       moment(mockResponse.updatedAt).add(mockResponse.averageIntervalMs, 'milliseconds').toDate()
     );
-    expect(result.current.stats).toEqual(mockStats);
+    expect(result.current.stats).toEqual({
+      newConnectorResultsCount: 2,
+      newDiscoveriesCount: 4,
+      statsPerConnector: mockStats,
+    });
   });
 
   test('When no connectorId and pollApi is called, should update status and data to null on error and show toast', async () => {

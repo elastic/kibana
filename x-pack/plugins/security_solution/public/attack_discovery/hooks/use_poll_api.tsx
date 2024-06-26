@@ -166,7 +166,27 @@ export const usePollApi = ({
         throw new Error('Failed to parse the attack discovery GET response');
       }
       handleResponse(parsedResponse.data.data ?? null);
-      setStats(parsedResponse.data.stats);
+      const allStats = parsedResponse.data.stats.reduce(
+        (acc, ad) => {
+          return {
+            ...acc,
+            newConnectorResultsCount:
+              !ad.hasViewed && (ad.status === 'succeeded' || ad.status === 'failed')
+                ? acc.newConnectorResultsCount + 1
+                : acc.newConnectorResultsCount,
+            newDiscoveriesCount:
+              !ad.hasViewed && ad.status === 'succeeded'
+                ? acc.newDiscoveriesCount + ad.count
+                : acc.newDiscoveriesCount,
+          };
+        },
+        {
+          newDiscoveriesCount: 0,
+          newConnectorResultsCount: 0,
+          statsPerConnector: parsedResponse.data.stats,
+        }
+      );
+      setStats(allStats);
       // poll every 5 seconds, regardless if current connector is running. Need stats object for connector dropdown stats
       timeoutIdRef.current = setTimeout(() => {
         pollApi();
