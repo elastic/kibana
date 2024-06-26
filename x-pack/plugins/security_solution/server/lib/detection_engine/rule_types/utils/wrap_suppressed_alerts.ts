@@ -62,7 +62,8 @@ export const wrapSuppressedAlerts = ({
 
     const id = generateId(
       event._index,
-      event._id,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      event._id!,
       String(event._version),
       `${spaceId}:${completeRule.alertId}`
     );

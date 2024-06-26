@@ -471,7 +471,8 @@ const createThresholdTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            _id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
           },
@@ -629,7 +630,8 @@ const createNewTermsTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            _id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
           },
@@ -795,7 +797,8 @@ const createSuppressedTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            _id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
           },
