@@ -10,24 +10,14 @@ import { i18n } from '@kbn/i18n';
 export const LOAD_ACTIONS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadActionTypes.errorMessage',
   {
-    defaultMessage:
-      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
+    defaultMessage: 'An error occurred loading the Kibana Actions. ',
   }
 );
 
 export const LOAD_CONNECTORS_ERROR_MESSAGE = i18n.translate(
   'xpack.elasticAssistant.connectors.useLoadConnectors.errorMessage',
   {
-    defaultMessage:
-      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into your Elastic Life. ',
-  }
-);
-
-export const WELCOME_SECURITY = i18n.translate(
-  'xpack.elasticAssistant.content.prompts.welcome.welcomeSecurityPrompt',
-  {
-    defaultMessage:
-      'Welcome to your Elastic AI Assistant! I am your 100% open-source portal into Elastic Security. ',
+    defaultMessage: 'An error occurred loading the Kibana Connectors. ',
   }
 );
 
@@ -56,13 +46,6 @@ export const ADD_CONNECTOR = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorSelector.addConnectorButtonLabel',
   {
     defaultMessage: 'Add connector',
-  }
-);
-
-export const INLINE_CONNECTOR_LABEL = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.connectorSelectorInline.connectorLabel',
-  {
-    defaultMessage: 'Connector:',
   }
 );
 
@@ -126,13 +109,6 @@ export const CONNECTOR_SETUP_SKIP = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.setup.skipTitle',
   {
     defaultMessage: 'Click to skip...',
-  }
-);
-
-export const CONNECTOR_SETUP_COMPLETE = i18n.translate(
-  'xpack.elasticAssistant.assistant.connectors.setup.complete',
-  {
-    defaultMessage: 'Connector setup complete!',
   }
 );
 

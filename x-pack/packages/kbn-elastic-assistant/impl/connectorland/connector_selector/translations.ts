@@ -22,7 +22,7 @@ export const IN_PROGRESS_MESSAGE = i18n.translate(
 );
 
 export const FAILURE_MESSAGE = i18n.translate('xpack.elasticAssistant.attackDiscovery.statusFail', {
-  defaultMessage: 'Attack discovery generation in progress.',
+  defaultMessage: 'The connector encountered an error while generating attack discoveries.',
 });
 
 export const UPDATED_CONNECTORS_MESSAGE = (totalUpdates: number) =>
