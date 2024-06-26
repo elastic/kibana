@@ -18,7 +18,7 @@ export const buildSchema = <TRequired extends z.ZodRawShape, TOptional extends z
 ) => {
   const optionalFields = Object.entries(fields.optional).reduce<z.ZodRawShape>(
     (acc, [key, schema]) => {
-      acc[key] = z.optional(schema);
+      acc[key] = schema.optional();
       return acc;
     },
     {}
