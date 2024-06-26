@@ -36,6 +36,7 @@ function split(value: string, splitToken: string) {
       index += splitToken.length - 1;
       statements.push(currentStatement.trim());
       currentStatement = '';
+      // eslint-disable-next-line no-continue
       continue;
     }
 
@@ -50,6 +51,7 @@ function split(value: string, splitToken: string) {
       if (applicableToken) {
         // start identifier
         delimiterToken = applicableToken;
+        // eslint-disable-next-line no-continue
         continue;
       } else if (char === '(') {
         groupingCount++;

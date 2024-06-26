@@ -30,7 +30,6 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UseCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import type { UseCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import type { UseIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
@@ -75,7 +74,6 @@ export interface CasesPublicSetupDependencies {
 export interface CasesPublicStartDependencies {
   apm?: ApmBase;
   data: DataPublicPluginStart;
-  dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;

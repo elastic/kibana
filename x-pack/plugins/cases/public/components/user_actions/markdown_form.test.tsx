@@ -30,6 +30,7 @@ const defaultProps = {
   draftStorageKey,
   onChangeEditable,
   onSaveContent,
+  timestamp: new Date().toISOString(),
 };
 
 describe('UserActionMarkdown ', () => {

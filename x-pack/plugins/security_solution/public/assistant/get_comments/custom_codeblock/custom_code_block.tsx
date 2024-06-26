@@ -8,7 +8,10 @@ import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '
 import { css } from '@emotion/css';
 import React from 'react';
 
-export const CustomCodeBlock = ({ value }: { value: string }) => {
+export interface CustomCodeBlockProps {
+  value: string;
+}
+export const CustomCodeBlock = ({ value }: CustomCodeBlockProps) => {
   const theme = useEuiTheme();
 
   return (

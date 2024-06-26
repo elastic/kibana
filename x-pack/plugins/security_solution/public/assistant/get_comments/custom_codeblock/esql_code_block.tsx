@@ -39,15 +39,13 @@ const saveVisualizationLabel = i18n.translate('xpack.securitySolution.lensESQLFu
   defaultMessage: 'Save visualization',
 });
 
-const EsqlCodeBlockComponent = ({
-  value,
-  actionsDisabled,
-  timestamp,
-}: {
+export interface EsqlCodeBlockProps {
   value: string;
   timestamp: string;
   actionsDisabled: boolean;
-}) => {
+}
+
+const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeBlockProps) => {
   const theme = useEuiTheme();
   const { lens, dataViews: dataViewService, data } = useKibana().services;
 

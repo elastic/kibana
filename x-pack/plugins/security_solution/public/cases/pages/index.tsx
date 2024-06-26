@@ -35,6 +35,8 @@ import * as timelineMarkdownPlugin from '../../common/components/markdown_editor
 import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
 import { useUpsellingMessage } from '../../common/hooks/use_upselling';
+import { Esql, CodeBlock } from '../../assistant/get_comments/stream/message_text';
+import { customCodeBlockLanguagePlugin } from '../../assistant/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
@@ -183,8 +185,12 @@ const CaseContainerComponent: React.FC = () => {
           showAlertDetails,
           timelineIntegration: {
             editor_plugins: {
-              parsingPlugin: timelineMarkdownPlugin.parser,
-              processingPluginRenderer: timelineMarkdownPlugin.renderer,
+              parsingPlugins: [timelineMarkdownPlugin.parser, customCodeBlockLanguagePlugin],
+              processingPluginRenderer: {
+                timeline: timelineMarkdownPlugin.renderer,
+                esql: Esql,
+                customCodeBlock: CodeBlock,
+              },
               uiPlugin: timelineMarkdownPlugin.plugin({ interactionsUpsellingMessage }),
             },
             hooks: {
