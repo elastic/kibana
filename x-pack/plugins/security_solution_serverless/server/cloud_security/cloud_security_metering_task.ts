@@ -78,9 +78,9 @@ export const getUsageRecords = (
   }
   const roundedCreationTimestamp = creationTimestamp.toISOString();
 
-  const metadata = resourceSubtypeCounter
-    ? { tier, resource_sub_type_count: resourceSubtypeCounter }
-    : { tier };
+  // const metadata = resourceSubtypeCounter
+  // ? { tier, resource_sub_type_count: resourceSubtypeCounter }
+  // : { tier };
 
   const usageRecord: UsageRecord = {
     id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
@@ -95,7 +95,7 @@ export const getUsageRecords = (
     source: {
       id: taskId,
       instance_group_id: projectId,
-      metadata,
+      metadata: { tier },
     },
   };
 
