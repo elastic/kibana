@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { from, of, shareReplay } from 'rxjs';
-
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 
@@ -17,8 +15,6 @@ export const isSolutionNavEnabled = (
   cloudExperiments?: CloudExperimentsPluginStart
 ) => {
   return Boolean(cloud?.isCloudEnabled) && cloudExperiments
-    ? from(
-        cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).catch(() => false)
-      ).pipe(shareReplay(1))
-    : of(false);
+    ? cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).catch(() => false)
+    : Promise.resolve(false);
 };

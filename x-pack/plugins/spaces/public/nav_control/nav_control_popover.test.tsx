@@ -15,7 +15,6 @@ import {
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { of } from 'rxjs';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
@@ -58,7 +57,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        isSolutionNavEnabled$={of(isSolutionNavEnabled)}
+        solutionNavExperiment={Promise.resolve(isSolutionNavEnabled)}
       />
     );
 
@@ -80,7 +79,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        isSolutionNavEnabled$={of(false)}
+        solutionNavExperiment={Promise.resolve(false)}
       />
     );
     expect(baseElement).toMatchSnapshot();
@@ -105,7 +104,7 @@ describe('NavControlPopover', () => {
         capabilities={{ navLinks: {}, management: {}, catalogue: {}, spaces: { manage: true } }}
         navigateToApp={jest.fn()}
         navigateToUrl={jest.fn()}
-        isSolutionNavEnabled$={of(false)}
+        solutionNavExperiment={Promise.resolve(false)}
       />
     );
 

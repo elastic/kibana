@@ -20,7 +20,6 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import type { Space } from '../../common';
 import type { ConfigType } from '../config';
-import { isSolutionNavEnabled } from '../experiments';
 import type { PluginsStart } from '../plugin';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -29,11 +28,12 @@ interface CreateParams {
   spacesManager: SpacesManager;
   config: ConfigType;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
+  solutionNavExperiment: Promise<boolean>;
 }
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, config }: CreateParams) {
+  create({ getStartServices, spacesManager, config, solutionNavExperiment }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -44,15 +44,8 @@ export const spacesManagementApp = Object.freeze({
       title,
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [
-          [coreStart, { features, cloud, cloudExperiments }],
-          { SpacesGridPage },
-          { ManageSpacePage },
-        ] = await Promise.all([
-          getStartServices(),
-          import('./spaces_grid'),
-          import('./edit_space'),
-        ]);
+        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
+          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
         const spacesFirstBreadcrumb = {
           text: title,
@@ -61,8 +54,6 @@ export const spacesManagementApp = Object.freeze({
         const { notifications, application, chrome } = coreStart;
 
         chrome.docTitle.change(title);
-
-        const isSolutionNavEnabled$ = isSolutionNavEnabled(cloud, cloudExperiments);
 
         const SpacesGridPageWithBreadcrumbs = () => {
           setBreadcrumbs([{ ...spacesFirstBreadcrumb, href: undefined }]);
@@ -75,7 +66,7 @@ export const spacesManagementApp = Object.freeze({
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
-              isSolutionNavEnabled$={isSolutionNavEnabled$}
+              solutionNavExperiment={solutionNavExperiment}
             />
           );
         };
@@ -98,7 +89,7 @@ export const spacesManagementApp = Object.freeze({
               spacesManager={spacesManager}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              isSolutionNavEnabled$={isSolutionNavEnabled$}
+              solutionNavExperiment={solutionNavExperiment}
             />
           );
         };
@@ -125,7 +116,7 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
-              isSolutionNavEnabled$={isSolutionNavEnabled$}
+              solutionNavExperiment={solutionNavExperiment}
             />
           );
         };

@@ -13,7 +13,7 @@ import {
   withEuiTheme,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
-import type { Observable, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -37,7 +37,7 @@ interface Props {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   serverBasePath: string;
   theme: WithEuiThemeProps['theme'];
-  isSolutionNavEnabled$: Observable<boolean>;
+  solutionNavExperiment: Promise<boolean>;
 }
 
 interface State {
@@ -52,7 +52,6 @@ const popoutContentId = 'headerSpacesMenuContent';
 
 class NavControlPopoverUI extends Component<Props, State> {
   private activeSpace$?: Subscription;
-  private spaceSolution$?: Subscription;
 
   constructor(props: Props) {
     super(props);
@@ -74,14 +73,13 @@ class NavControlPopoverUI extends Component<Props, State> {
       },
     });
 
-    this.spaceSolution$ = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
+    this.props.solutionNavExperiment.then((isEnabled) => {
       this.setState({ isSolutionNavEnabled: isEnabled });
     });
   }
 
   public componentWillUnmount() {
     this.activeSpace$?.unsubscribe();
-    this.spaceSolution$?.unsubscribe();
   }
 
   public render() {

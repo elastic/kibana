@@ -8,7 +8,6 @@
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
-import type { Observable } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -18,7 +17,7 @@ import type { SpacesManager } from '../spaces_manager';
 export function initSpacesNavControl(
   spacesManager: SpacesManager,
   core: CoreStart,
-  isSolutionNavEnabled$: Observable<boolean>
+  solutionNavExperiment: Promise<boolean>
 ) {
   core.chrome.navControls.registerLeft({
     order: 1000,
@@ -43,7 +42,7 @@ export function initSpacesNavControl(
               capabilities={core.application.capabilities}
               navigateToApp={core.application.navigateToApp}
               navigateToUrl={core.application.navigateToUrl}
-              isSolutionNavEnabled$={isSolutionNavEnabled$}
+              solutionNavExperiment={solutionNavExperiment}
             />
           </Suspense>
         </KibanaRenderContextProvider>,

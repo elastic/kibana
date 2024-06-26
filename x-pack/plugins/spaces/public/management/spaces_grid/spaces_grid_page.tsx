@@ -19,7 +19,6 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { Component, lazy, Suspense } from 'react';
-import type { Observable, Subscription } from 'rxjs';
 
 import type {
   ApplicationStart,
@@ -55,7 +54,7 @@ interface Props {
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
-  isSolutionNavEnabled$?: Observable<boolean>;
+  solutionNavExperiment?: Promise<boolean>;
 }
 
 interface State {
@@ -68,8 +67,6 @@ interface State {
 }
 
 export class SpacesGridPage extends Component<Props, State> {
-  private spaceSolution$?: Subscription;
-
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -87,13 +84,9 @@ export class SpacesGridPage extends Component<Props, State> {
       this.loadGrid();
     }
 
-    this.spaceSolution$ = this.props.isSolutionNavEnabled$?.subscribe((isEnabled) => {
+    this.props.solutionNavExperiment?.then((isEnabled) => {
       this.setState({ isSolutionNavEnabled: isEnabled });
     });
-  }
-
-  public componentWillUnmount() {
-    this.spaceSolution$?.unsubscribe();
   }
 
   public render() {
