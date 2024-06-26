@@ -86,7 +86,7 @@ export async function fetchServicePathsFromTraceIds({
   };
   // fetch without aggs to get shard count, first
   const serviceMapQueryDataResponse = await apmEventClient.search(
-    'get_service_paths_from_trace_ids_query_data',
+    'get_trace_ids_shard_data',
     serviceMapParams
   );
   /*
