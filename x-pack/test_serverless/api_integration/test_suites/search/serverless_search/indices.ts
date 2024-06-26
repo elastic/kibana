@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';
@@ -19,7 +19,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Indices routes', function () {
     describe('GET indices', function () {
-      before (async ()=>{
+      before(async () => {
         roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
       });
       after(async () => {

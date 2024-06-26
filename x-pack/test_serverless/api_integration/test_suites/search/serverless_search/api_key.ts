@@ -8,8 +8,8 @@
 import expect from 'expect';
 import { kibanaTestSuperuserServerless } from '@kbn/test';
 import { SecurityApiKey } from '@elastic/elasticsearch/lib/api/types';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
 
 const API_BASE_PATH = '/internal/serverless_search';
 
@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('API Key routes', function () {
     describe('GET api_keys', function () {
-      before (async ()=>{
+      before(async () => {
         roleAuthc = await svlUserManager.createApiKeyForRole('developer');
       });
       after(async () => {
@@ -47,7 +47,9 @@ export default function ({ getService }: FtrProviderContext) {
         let apiKeys: SecurityApiKey[];
         // Delete existing API keys
         try {
-          const apiKeysResult = await es.security.getApiKey({ username: kibanaTestSuperuserServerless.username });
+          const apiKeysResult = await es.security.getApiKey({
+            username: kibanaTestSuperuserServerless.username,
+          });
           apiKeys = apiKeysResult.api_keys;
         } catch (err) {
           log.debug('[Setup error] error listing API keys');
@@ -61,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const apiKeysToDelete = apiKeys.map(({ id }) => id);
         await es.security.invalidateApiKey({ ids: apiKeysToDelete });
-      }
+      };
       before(async () => {
         await deleteAllApiKeys();
         roleAuthc = await svlUserManager.createApiKeyForRole('developer');
@@ -73,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('can create a key that expires', async () => {
         const createBody = {
           name: 'test-api-key-001',
-          expiration: '60d'
+          expiration: '60d',
         };
         const { body } = await supertestWithoutAuth
           .post(`${API_BASE_PATH}/api_key`)
