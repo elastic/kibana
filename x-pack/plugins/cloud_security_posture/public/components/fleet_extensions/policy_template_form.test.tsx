@@ -1490,6 +1490,18 @@ describe('<CspPolicyTemplateForm />', () => {
   });
 
   describe('Agentless', () => {
+    it('should not render setup technology selector if agentless is not available and CSPM integration supports agentless', async () => {
+      const newPackagePolicy = getMockPolicyAWS();
+
+      const { queryByTestId } = render(
+        <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={false} />
+      );
+
+      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
+      // default state
+      expect(setupTechnologySelector).not.toBeInTheDocument();
+    });
+
     it('should render setup technology selector for AWS and allow to select agent-based', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 

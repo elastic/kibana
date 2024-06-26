@@ -29,9 +29,6 @@ export const getMockPolicyEKS = (vars?: PackagePolicyConfigRecord) =>
   getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks', vars);
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
-export const getMockAgentlessAgentPolicy = () => {
-  return createAgentPolicyMock({ id: 'agentless' });
-};
 export const getMockPackageInfo = () => getPackageInfoMock();
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
