@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React, { Profiler, useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
@@ -33,6 +33,8 @@ import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { onRender } from '../../../utils/on_render';
+import { useMonitorsSortedByStatus } from '../../../hooks/use_monitors_sorted_by_status';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -59,6 +61,7 @@ export const OverviewPage: React.FC = () => {
     data: { monitors },
     pageState,
   } = useSelector(selectOverviewState);
+  console.log('page state', pageState);
 
   const {
     loading: monitorsLoading,
@@ -84,6 +87,8 @@ export const OverviewPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, lastRefresh]);
 
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus();
+
   const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
@@ -97,7 +102,7 @@ export const OverviewPage: React.FC = () => {
   const noMonitorFound = monitorsLoaded && overviewLoaded && monitors?.length === 0;
 
   return (
-    <>
+    <Profiler id="OverviewPage" onRender={onRender}>
       <DisabledCallout total={absoluteTotal} />
       <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
@@ -126,11 +131,11 @@ export const OverviewPage: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-          <OverviewGrid />
+          <OverviewGrid monitorsSortedByStatus={monitorsSortedByStatus} />
         </>
       ) : (
         <NoMonitorsFound />
       )}
-    </>
+    </Profiler>
   );
 };

@@ -24,6 +24,7 @@ export function useMonitorsSortedByStatus() {
   const downMonitors = useRef<Record<string, string[]> | null>(null);
 
   const monitorsSortedByStatus = useMemo(() => {
+    console.log('has status', !!status, status);
     if (!status) {
       return {
         down: [],
@@ -50,16 +51,16 @@ export function useMonitorsSortedByStatus() {
 
     monitors.forEach((monitor) => {
       if (!monitor.isEnabled) {
-        orderedDisabledMonitors.push(monitor);
+        orderedDisabledMonitors.push({ ...monitor, status: 'disabled' });
       } else if (
         monitor.configId in downMonitorMap &&
         downMonitorMap[monitor.configId].includes(monitor.location.id)
       ) {
-        orderedDownMonitors.push(monitor);
+        orderedDownMonitors.push({ ...monitor, status: 'down' });
       } else if (pendingConfigs?.[`${monitor.configId}-${monitor.location.id}`]) {
-        orderedPendingMonitors.push(monitor);
+        orderedPendingMonitors.push({ ...monitor, status: 'pending' });
       } else {
-        orderedUpMonitors.push(monitor);
+        orderedUpMonitors.push({ ...monitor, status: 'up' });
       }
     });
     downMonitors.current = downMonitorMap;

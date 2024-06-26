@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { debounce } from 'redux-saga/effects';
+import { debounce, takeEvery, takeLeading } from 'redux-saga/effects';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchMonitorOverviewAction, quietFetchOverviewAction } from './actions';
-import { fetchMonitorOverview } from './api';
+import { fetchMonitorOverviewAction, quietFetchOverviewAction, trendStatsBatch } from './actions';
+import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
 
 export function* fetchMonitorOverviewEffect() {
   yield debounce(
@@ -19,5 +19,13 @@ export function* fetchMonitorOverviewEffect() {
       fetchMonitorOverviewAction.success,
       fetchMonitorOverviewAction.fail
     )
+  );
+}
+
+export function* fetchOverviewTrendStats() {
+  console.log('in effect');
+  yield takeLeading(
+    trendStatsBatch.get,
+    fetchEffectFactory(trendsApi, trendStatsBatch.success, trendStatsBatch.fail)
   );
 }

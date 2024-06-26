@@ -33,7 +33,7 @@ export const getTimeRangeFilter = (schedule: string) => {
     },
   };
 };
-
+let hits = 0;
 export function useLastXChecks<Fields>({
   monitorId,
   locationId,
@@ -80,7 +80,9 @@ export function useLastXChecks<Fields>({
       fields,
     },
   });
+  console.log('query', params);
 
+  return null;
   const { data } = useReduxEsSearch<Ping, typeof params>(params, [lastRefresh], {
     name: `zGetLastXChecks/${monitorId}/${locationId}`,
     isRequestReady: locationsLoaded && Boolean(timestamp), // don't run query until locations are loaded
