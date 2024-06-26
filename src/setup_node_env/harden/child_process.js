@@ -52,8 +52,8 @@ function patchOptions(hasArgs) {
       } else if (typeof newArgs[pos] === 'function') {
         // fn(arg1, callback)
         // fn(arg1, args, callback)
-        args.splice(pos, 0, prototypelessSpawnOpts());
-        newArgs = Object.setPrototypeOf([].concat(args), null);
+        // `newArgs` doesn't have prototype and hence `splice` method anymore.
+        Array.prototype.splice.call(newArgs, pos, 0, prototypelessSpawnOpts());
       }
     }
 
