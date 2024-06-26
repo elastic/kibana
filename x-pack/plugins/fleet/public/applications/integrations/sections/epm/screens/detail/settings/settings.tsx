@@ -53,7 +53,6 @@ import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
-import { InstallKibanaAssetsPanel } from './install_kibana_assets_panel';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -470,17 +469,6 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
                         </div>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    {!hideInstallOptions &&
-                    'installationInfo' in packageInfo &&
-                    packageInfo.installationInfo ? (
-                      <>
-                        <EuiSpacer size="l" />
-                        <InstallKibanaAssetsPanel
-                          title={packageInfo.title}
-                          installInfo={packageInfo.installationInfo}
-                        />
-                      </>
-                    ) : null}
                   </>
                 )}
               </div>

@@ -10,6 +10,8 @@ import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiTitle, EuiCallOut } from '@elastic/eui';
 
+import { ExperimentalFeaturesService } from '../../../../../../../services';
+
 import type {
   EsAssetReference,
   AssetSOObject,
@@ -31,12 +33,11 @@ import {
   useAuthz,
   useFleetStatus,
 } from '../../../../../hooks';
-
 import { sendGetBulkAssets } from '../../../../../hooks';
 
 import { DeferredAssetsSection } from './deferred_assets_accordion';
-
 import { AssetsAccordion } from './assets_accordion';
+import { InstallKibanaAssetsButton } from './install_kibana_assets_button';
 
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
@@ -49,6 +50,8 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const pkgkey = `${name}-${version}`;
   const { docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
+
+  const { useSpaceAwareness } = ExperimentalFeaturesService.get();
 
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
@@ -238,6 +241,13 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
                 }}
               />
             </p>
+            {useSpaceAwareness ? (
+              <InstallKibanaAssetsButton
+                installInfo={pkgInstallationInfo}
+                title={packageInfo.title}
+                onSuccess={forceRefreshAssets}
+              />
+            ) : null}
           </EuiCallOut>
 
           <EuiSpacer size="m" />
