@@ -70,7 +70,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be able to search by wildcard', async function () {
         await PageObjects.discover.findFieldByNameInDocViewer('relatedContent*image');
-
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
@@ -78,9 +77,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should be able to search with spaces as wildcard', async function () {
         await PageObjects.discover.findFieldByNameInDocViewer('relatedContent image');
-
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
       });
 
@@ -88,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.findFieldByNameInDocViewer('rel4tedContent.art');
 
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 3;
         });
       });
 
