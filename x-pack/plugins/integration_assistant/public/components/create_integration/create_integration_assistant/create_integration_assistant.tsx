@@ -78,7 +78,6 @@ export const CreateIntegrationAssistant = React.memo(() => {
           {state.step === 4 && (
             <ReviewStep
               integrationSettings={state.integrationSettings}
-              connector={state.connector}
               isGenerating={state.isGenerating}
               result={state.result}
             />
