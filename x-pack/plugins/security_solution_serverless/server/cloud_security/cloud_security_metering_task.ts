@@ -10,7 +10,6 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AGGREGATION_PRECISION_THRESHOLD,
   ASSETS_SAMPLE_GRANULARITY,
-  CLOUD_DEFEND,
   CLOUD_SECURITY_TASK_TYPE,
   CNVM,
   CSPM,
@@ -24,7 +23,6 @@ import type {
   CloudSecurityMeteringCallbackInput,
   CloudSecuritySolutions,
   AssetCountAggregation,
-  CloudDefendAssetCountAggregation,
 } from './types';
 
 export const getUsageRecords = (
@@ -58,18 +56,13 @@ export const getUsageRecords = (
     }
     const roundedCreationTimestamp = creationTimestamp.toISOString();
 
-    const subType =
-      cloudSecuritySolution === CLOUD_DEFEND
-        ? `${CLOUD_DEFEND}_block_action_enabled_${assetCountAggregation.key_as_string}`
-        : cloudSecuritySolution;
-
     const usageRecord: UsageRecord = {
       id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
       usage_timestamp: minTimestamp,
       creation_timestamp: creationTimestamp.toISOString(),
       usage: {
         type: CLOUD_SECURITY_TASK_TYPE,
-        sub_type: subType,
+        sub_type: cloudSecuritySolution,
         quantity: assetCount,
         period_seconds: periodSeconds,
       },
@@ -88,28 +81,6 @@ export const getUsageRecords = (
 export const getAggregationByCloudSecuritySolution = (
   cloudSecuritySolution: CloudSecuritySolutions
 ) => {
-  if (cloudSecuritySolution === CLOUD_DEFEND) {
-    return {
-      asset_count_groups: {
-        terms: {
-          field: 'cloud_defend.block_action_enabled',
-        },
-        aggs: {
-          unique_assets: {
-            cardinality: {
-              field: METERING_CONFIGS[cloudSecuritySolution].assets_identifier,
-            },
-          },
-          min_timestamp: {
-            min: {
-              field: '@timestamp',
-            },
-          },
-        },
-      },
-    };
-  }
-
   return {
     unique_assets: {
       cardinality: {
@@ -130,16 +101,6 @@ export const getSearchQueryByCloudSecuritySolution = (
   searchFrom: Date
 ) => {
   const mustFilters = [];
-
-  if (cloudSecuritySolution === CLOUD_DEFEND) {
-    mustFilters.push({
-      range: {
-        '@timestamp': {
-          gt: searchFrom.toISOString(),
-        },
-      },
-    });
-  }
 
   if (
     cloudSecuritySolution === CSPM ||
@@ -200,16 +161,6 @@ export const getAssetAggByCloudSecuritySolution = async (
   searchFrom: Date
 ): Promise<AssetCountAggregation[]> => {
   const assetsAggQuery = getAssetAggQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom);
-
-  if (cloudSecuritySolution === CLOUD_DEFEND) {
-    const response = await esClient.search<unknown, CloudDefendAssetCountAggregation>(
-      assetsAggQuery
-    );
-
-    if (!response.aggregations || !response.aggregations.asset_count_groups.buckets.length)
-      return [];
-    return response.aggregations.asset_count_groups.buckets;
-  }
 
   const response = await esClient.search<unknown, AssetCountAggregation>(assetsAggQuery);
   if (!response.aggregations) return [];

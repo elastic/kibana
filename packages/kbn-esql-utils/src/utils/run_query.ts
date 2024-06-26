@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { ESQLColumn, ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
+import type { ESQLColumn, ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
@@ -49,7 +49,7 @@ export async function getESQLQueryColumnsRaw({
       )
     );
 
-    return (response.rawResponse as unknown as ESQLSearchReponse).columns ?? [];
+    return (response.rawResponse as unknown as ESQLSearchResponse).columns ?? [];
   } catch (error) {
     throw new Error(
       i18n.translate('esqlUtils.columnsErrorMsg', {
@@ -100,7 +100,7 @@ export async function getESQLResults({
   filter?: unknown;
   dropNullColumns?: boolean;
 }): Promise<{
-  response: ESQLSearchReponse;
+  response: ESQLSearchResponse;
   params: ESQLSearchParams;
 }> {
   const result = await lastValueFrom(
@@ -119,7 +119,7 @@ export async function getESQLResults({
     )
   );
   return {
-    response: result.rawResponse as unknown as ESQLSearchReponse,
+    response: result.rawResponse as unknown as ESQLSearchResponse,
     params: result.requestParams as unknown as ESQLSearchParams,
   };
 }

@@ -262,5 +262,6 @@ export const GetInputsRequestSchema = {
       defaultValue: 'json',
     }),
     prerelease: schema.maybe(schema.boolean()),
+    ignoreUnverified: schema.maybe(schema.boolean()),
   }),
 };

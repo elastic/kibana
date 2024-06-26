@@ -109,7 +109,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                 {i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.review.title',
                   {
-                    defaultMessage: "Review the pipeline configuration for '{pipelineName}'",
+                    defaultMessage: "Review the pipeline configuration for ''{pipelineName}''",
                     values: { pipelineName },
                   }
                 )}
@@ -124,7 +124,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.successMessage',
                   {
-                    defaultMessage: "'{pipelineName}' has been created successfully.",
+                    defaultMessage: "''{pipelineName}'' has been created successfully.",
                     values: { pipelineName },
                   }
                 )}
@@ -173,7 +173,7 @@ export const ReviewAndCreatePipeline: FC<Props> = ({
                 title={i18n.translate(
                   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.create.failureMessage',
                   {
-                    defaultMessage: "Unable to create '{pipelineName}'.",
+                    defaultMessage: "Unable to create ''{pipelineName}''.",
                     values: { pipelineName },
                   }
                 )}

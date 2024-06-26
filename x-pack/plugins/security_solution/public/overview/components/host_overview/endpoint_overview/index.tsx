@@ -13,7 +13,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import {
   AgentStatus,
   EndpointAgentStatus,
-} from '../../../../common/components/agents/agent_status';
+} from '../../../../common/components/endpoint/agents/agent_status';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';

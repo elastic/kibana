@@ -29,8 +29,8 @@ import type {
   MetadataListResponse,
   ResponseActionApiResponse,
 } from '../../../../../common/endpoint/types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
-import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint/endpoint_isolation';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint/endpoint_pending_actions';
 import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import type { AppAction } from '../../../../common/store/actions';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
@@ -170,7 +170,7 @@ const getAgentAndPoliciesForEndpointsList = async (
   ).items.reduce<PolicyIds>(
     (list, packagePolicy) => {
       list.packagePolicy[packagePolicy.id as string] = true;
-      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_ids[0]; // TODO
 
       return list;
     },

@@ -13,6 +13,19 @@ import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '../utils/kibana_react';
 import { createMaintenanceWindow, CreateParams } from '../services/maintenance_windows_api/create';
 
+const onErrorWithMessage = (message: string) =>
+  i18n.translate('xpack.alerting.maintenanceWindowsCreateFailureWithMessage', {
+    defaultMessage: 'Failed to create maintenance window: {message}',
+    values: { message },
+  });
+
+const onErrorWithoutMessage = i18n.translate(
+  'xpack.alerting.maintenanceWindowsCreateFailureWithoutMessage',
+  {
+    defaultMessage: 'Failed to create maintenance window',
+  }
+);
+
 interface UseCreateMaintenanceWindowProps {
   onError?: (error: IHttpFetchError<KibanaServerError>) => void;
 }
@@ -33,7 +46,7 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
     onSuccess: (data) => {
       toasts.addSuccess(
         i18n.translate('xpack.alerting.maintenanceWindowsCreateSuccess', {
-          defaultMessage: "Created maintenance window '{title}'",
+          defaultMessage: "Created maintenance window ''{title}''",
           values: {
             title: data.title,
           },
@@ -41,10 +54,11 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
       );
     },
     onError: (error: IHttpFetchError<KibanaServerError>) => {
+      const getDefaultErrorMessage = (message?: string): string =>
+        !message ? onErrorWithoutMessage : onErrorWithMessage(message);
+
       toasts.addDanger(
-        i18n.translate('xpack.alerting.maintenanceWindowsCreateFailure', {
-          defaultMessage: 'Failed to create maintenance window.',
-        })
+        getDefaultErrorMessage(error.body?.statusCode === 400 ? error.body?.message : '')
       );
       onError?.(error);
     },

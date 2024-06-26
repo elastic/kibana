@@ -15,7 +15,7 @@ import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
 import { evalFunctionDefinitions } from '../src/definitions/functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
 import { getFunctionSignatures } from '../src/definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../src/definitions/literals';
+import { timeUnits, chronoLiterals } from '../src/definitions/literals';
 import { nonNullable } from '../src/shared/helpers';
 import {
   SupportedFieldType,
@@ -24,6 +24,7 @@ import {
   isSupportedFieldType,
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
+import { getMaxMinNumberOfParams } from '../src/validation/helpers';
 
 export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
 
@@ -51,6 +52,8 @@ function generateTestsForEvalFunction(definition: FunctionDefinition) {
   generateWhereCommandTestsForEvalFunction(definition, testCases);
   generateEvalCommandTestsForEvalFunction(definition, testCases);
   generateSortCommandTestsForEvalFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -60,6 +63,8 @@ function generateTestsForAggFunction(definition: FunctionDefinition) {
   generateSortCommandTestsForAggFunction(definition, testCases);
   generateWhereCommandTestsForAggFunction(definition, testCases);
   generateEvalCommandTestsForAggFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -67,7 +72,132 @@ function generateTestsForGroupingFunction(definition: FunctionDefinition) {
   const testCases: Map<string, string[]> = new Map();
   generateStatsCommandTestsForGroupingFunction(definition, testCases);
   generateSortCommandTestsForGroupingFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
+  generateImplicitDateCastingTestsForFunction(definition, testCases);
   return testCases;
+}
+
+function generateNullAcceptanceTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const { max, min } = getMaxMinNumberOfParams(definition);
+  const numberOfArgsToTest = max === Infinity ? min : max;
+  const signatureWithGreatestNumberOfParams = definition.signatures.find(
+    (signature) => signature.params.length === numberOfArgsToTest
+  )!;
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  // test that the function accepts nulls
+  testCases.set(
+    `from a_index | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'null' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+
+  testCases.set(
+    `row nullVar = null | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'nullVar' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+}
+
+/**
+ * Tests for strings being casted to dates
+ *
+ * @param definition
+ * @param testCases
+ * @returns
+ */
+function generateImplicitDateCastingTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const allSignaturesWithDateParams = definition.signatures.filter((signature) =>
+    signature.params.some(
+      (param, i) =>
+        param.type === 'date' &&
+        !definition.signatures.some((def) => getParamAtPosition(def, i)?.type === 'string') // don't count parameters that already accept a string
+    )
+  );
+
+  if (!allSignaturesWithDateParams.length) {
+    // no signatures contain date params
+    return;
+  }
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  for (const signature of allSignaturesWithDateParams) {
+    const mappedParams = getFieldMapping(signature.params);
+
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: '"2022"' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
+
+    testCases.set(
+      `from a_index | ${commandToTestWith} ${
+        getFunctionSignatures(
+          {
+            ...definition,
+            signatures: [
+              {
+                ...signature,
+                params: mappedParams.map((param) =>
+                  // overwrite dates with a string
+                  param.type === 'date' ? { ...param, name: 'concat("20", "22")' } : param
+                ),
+              },
+            ],
+          },
+          { withTypes: false }
+        )[0].declaration
+      }`,
+      []
+    );
+  }
 }
 
 function generateRowCommandTestsForEvalFunction(
@@ -262,9 +392,11 @@ function generateWhereCommandTestsForAggFunction(
 }
 
 function generateEvalCommandTestsForEvalFunction(
-  { name, signatures, alias, ...defRest }: FunctionDefinition,
+  definition: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
+  const { name, signatures, alias, ...defRest } = definition;
+
   for (const { params, ...signRest } of signatures) {
     const fieldMapping = getFieldMapping(params);
     testCases.set(
@@ -401,26 +533,10 @@ function generateEvalCommandTestsForEvalFunction(
 
   // test that additional args are spotted
 
-  const getNumberOfParams = (signature: FunctionDefinition['signatures'][number]) => ({
-    all: signature.params.length,
-    required: signature.params.filter(({ optional }) => !optional).length,
-  });
-
-  // get the signature with the greatest number of params
-  const [first, ...rest] = signatures;
-  let signatureWithGreatestNumberOfParams = first;
-  let { all: maxNumberOfArgs, required: minNumberOfArgs } = getNumberOfParams(first);
-
-  for (const signature of rest) {
-    const numberOfParams = signature.params.length;
-    if (numberOfParams > signatureWithGreatestNumberOfParams.params.length) {
-      signatureWithGreatestNumberOfParams = signature;
-    }
-
-    maxNumberOfArgs = Math.max(maxNumberOfArgs, numberOfParams);
-    const numberOfRequiredParams = signature.params.filter(({ optional }) => !optional).length;
-    minNumberOfArgs = Math.min(minNumberOfArgs, numberOfRequiredParams);
-  }
+  const { max: maxNumberOfArgs, min: minNumberOfArgs } = getMaxMinNumberOfParams(definition);
+  const signatureWithGreatestNumberOfParams = signatures.find(
+    (signature) => signature.params.length === maxNumberOfArgs
+  )!;
 
   const fieldMappingWithOneExtraArg = getFieldMapping(
     signatureWithGreatestNumberOfParams.params
@@ -930,7 +1046,7 @@ function getFieldName(
 
 const literals = {
   chrono_literal: chronoLiterals[0].name,
-  time_literal: timeLiterals[0].name,
+  time_literal: timeUnits[0],
 };
 
 function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {

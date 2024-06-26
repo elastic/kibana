@@ -78,6 +78,10 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     async getApiCredentialsForRole(role: string) {
       return sessionManager.getApiCredentialsForRole(role);
     },
+    async getEmail(role: string) {
+      return sessionManager.getEmail(role);
+    },
+
     async getUserData(role: string) {
       return sessionManager.getUserData(role);
     },

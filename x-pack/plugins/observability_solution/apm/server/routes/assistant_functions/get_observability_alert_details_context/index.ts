@@ -63,22 +63,28 @@ export const getAlertDetailsContextHandler = (
       },
     };
 
-    const [apmEventClient, annotationsClient, apmAlertsClient, coreContext, mlClient] =
-      await Promise.all([
-        getApmEventClient(resources),
-        resourcePlugins.observability.setup.getScopedAnnotationsClient(
-          resources.context,
-          requestContext.request
-        ),
-        getApmAlertsClient(resources),
-        requestContext.core,
-        getMlClient(resources),
-        getRandomSampler({
-          security: resourcePlugins.security,
-          probability: 1,
-          request: requestContext.request,
-        }),
-      ]);
+    const [
+      apmEventClient,
+      annotationsClient,
+      apmAlertsClient,
+      coreContext,
+      mlClient,
+      randomSampler,
+    ] = await Promise.all([
+      getApmEventClient(resources),
+      resourcePlugins.observability.setup.getScopedAnnotationsClient(
+        resources.context,
+        requestContext.request
+      ),
+      getApmAlertsClient(resources),
+      requestContext.core,
+      getMlClient(resources),
+      getRandomSampler({
+        security: resourcePlugins.security,
+        probability: 1,
+        request: requestContext.request,
+      }),
+    ]);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const alertStartedAt = query.alert_started_at;
@@ -139,6 +145,7 @@ export const getAlertDetailsContextHandler = (
               start: moment(alertStartedAt).subtract(24, 'hours').toISOString(),
               end: alertStartedAt,
             },
+            randomSampler,
           })
         )
       : undefined;

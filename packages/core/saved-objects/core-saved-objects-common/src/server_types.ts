@@ -76,6 +76,8 @@ export interface SavedObject<T = unknown> {
   created_by?: string;
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
+  /** The ID of the user who last updated this object. */
+  updated_by?: string;
   /** Error associated with this object, populated if an operation failed for this object.  */
   error?: SavedObjectError;
   /** The data for a Saved Object is stored as an object in the `attributes` property. **/

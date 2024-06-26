@@ -7,7 +7,7 @@
 
 import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import { appendToESQLQuery } from '@kbn/esql-utils';
 import { chunk } from 'lodash';
 import pLimit from 'p-limit';
@@ -74,7 +74,7 @@ const getESQLNumericFieldStatsInChunk = async ({
       },
     };
     try {
-      const fieldStatsResp = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
+      const fieldStatsResp = await runRequest(request, { strategy: ESQL_ASYNC_SEARCH_STRATEGY });
 
       if (fieldStatsResp) {
         const values = fieldStatsResp.rawResponse.values[0];

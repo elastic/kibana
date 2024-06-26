@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
@@ -61,6 +62,9 @@ export const DiscoverHistogramLayout = ({
         type: 'datatable' as 'datatable',
         rows: datatable.result!.map((r) => r.raw),
         columns: datatable.esqlQueryColumns || [],
+        meta: {
+          type: ESQL_TABLE_TYPE,
+        },
       };
     }
   }, [datatable, isEsqlMode]);

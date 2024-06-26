@@ -9,6 +9,7 @@
 export {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
+  hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   getIndexForESQLQuery,
@@ -22,4 +23,4 @@ export {
   TextBasedLanguages,
 } from './src';
 
-export { ENABLE_ESQL, ESQL_LATEST_VERSION } from './constants';
+export { ENABLE_ESQL } from './constants';

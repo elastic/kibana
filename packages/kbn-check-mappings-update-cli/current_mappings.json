@@ -993,6 +993,52 @@
     "dynamic": false,
     "properties": {}
   },
+  "entity-definition": {
+    "dynamic": false,
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "filter": {
+        "type": "keyword"
+      },
+      "id": {
+        "type": "keyword"
+      },
+      "identityFields": {
+        "type": "object"
+      },
+      "indexPatterns": {
+        "type": "keyword"
+      },
+      "managed": {
+        "type": "boolean"
+      },
+      "metadata": {
+        "type": "object"
+      },
+      "metrics": {
+        "type": "object"
+      },
+      "name": {
+        "type": "text"
+      },
+      "staticFields": {
+        "type": "object"
+      },
+      "type": {
+        "type": "keyword"
+      }
+    }
+  },
+  "entity-discovery-api-key": {
+    "dynamic": false,
+    "properties": {
+      "apiKey": {
+        "type": "binary"
+      }
+    }
+  },
   "epm-packages": {
     "properties": {
       "es_index_patterns": {
@@ -1546,6 +1592,19 @@
       }
     }
   },
+  "fleet-setup-lock": {
+    "properties": {
+      "started_at": {
+        "type": "date"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "uuid": {
+        "type": "text"
+      }
+    }
+  },
   "fleet-uninstall-tokens": {
     "dynamic": false,
     "properties": {
@@ -1677,6 +1736,10 @@
       },
       "fleet_server_host_id": {
         "type": "keyword"
+      },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
       },
       "inactivity_timeout": {
         "type": "integer"
@@ -2029,6 +2092,9 @@
         }
       },
       "policy_id": {
+        "type": "keyword"
+      },
+      "policy_ids": {
         "type": "keyword"
       },
       "revision": {
@@ -3054,6 +3120,9 @@
   "space": {
     "dynamic": false,
     "properties": {
+      "disabledFeatures": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
@@ -3062,10 +3131,17 @@
           }
         },
         "type": "text"
+      },
+      "solution": {
+        "type": "keyword"
       }
     }
   },
   "spaces-usage-stats": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "synthetics-dynamic-settings": {
     "dynamic": false,
     "properties": {}
   },

@@ -41,6 +41,7 @@ import type {
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -125,6 +126,7 @@ import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
+import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -135,6 +137,7 @@ export interface FleetSetupDeps {
   spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
+  fieldsMetadata: FieldsMetadataServerSetup;
 }
 
 export interface FleetStartDeps {
@@ -279,7 +282,7 @@ export class FleetPlugin
     });
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStartContract>, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
@@ -518,6 +521,18 @@ export class FleetPlugin
               asInternalUser: agentService.asInternalUser,
             };
           },
+          get uninstallTokenService() {
+            const uninstallTokenService = new UninstallTokenService(
+              appContextService.getEncryptedSavedObjectsStart()!.getClient({
+                includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+              }),
+              appContextService.getInternalUserSOClientForSpaceId(soClient.getCurrentNamespace())
+            );
+
+            return {
+              asCurrentUser: uninstallTokenService,
+            };
+          },
           get packagePolicyService() {
             const service = plugin.setupPackagePolicyService();
 
@@ -574,6 +589,9 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+
+    // Register fields metadata extractor
+    registerIntegrationFieldsExtractor({ core, fieldsMetadata: deps.fieldsMetadata });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -656,18 +674,24 @@ export class FleetPlugin
           )
           .toPromise();
 
+        const randomIntFromInterval = (min: number, max: number) => {
+          return Math.floor(Math.random() * (max - min + 1) + min);
+        };
+
         // Retry Fleet setup w/ backoff
         await backOff(
           async () => {
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-              core.elasticsearch.client.asInternalUser
+              core.elasticsearch.client.asInternalUser,
+              { useLock: true }
             );
           },
           {
             numOfAttempts: setupAttempts,
+            delayFirstAttempt: true,
             // 1s initial backoff
-            startingDelay: 1000,
+            startingDelay: randomIntFromInterval(100, 1000),
             // 5m max backoff
             maxDelay: 60000 * 5,
             timeMultiple: 2,

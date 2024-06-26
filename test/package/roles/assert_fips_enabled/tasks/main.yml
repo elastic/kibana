@@ -1,6 +1,6 @@
 - name: register kibana node getFips
   shell: 
-    cmd: "source /home/vagrant/.profile && {{ kibana_dist_path }}/node/bin/node --enable-fips --openssl-config={{ kibana_dist_path }}/config/nodejs.cnf -p 'crypto.getFips()'"
+    cmd: "source /home/vagrant/.profile && {{ kibana_dist_path }}/node/glibc-217/bin/node --enable-fips --openssl-config={{ kibana_dist_path }}/config/nodejs.cnf -p 'crypto.getFips()'"
     executable: /bin/bash
   register: kibana_node_fips
 

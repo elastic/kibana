@@ -6,17 +6,10 @@
  */
 
 import { finished } from 'stream/promises';
-import { Readable } from 'stream';
 import { Logger } from '@kbn/core/server';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-
-type StreamParser = (
-  responseStream: Readable,
-  logger: Logger,
-  abortSignal?: AbortSignal,
-  tokenHandler?: (token: string) => void
-) => Promise<string>;
+import { StreamParser } from './types';
 
 export const parseBedrockStream: StreamParser = async (
   responseStream,
@@ -187,7 +180,7 @@ const prepareBedrockOutput = (responseBody: CompletionChunk, logger?: Logger): s
       return responseBody.delta.text;
     }
   }
-  logger?.warn(`Failed to parse bedrock chunk ${JSON.stringify(responseBody)}`);
+  // ignore any chunks that do not include text output
   return '';
 };
 

@@ -153,13 +153,11 @@ export class Table extends PureComponent<TableProps, TableState> {
 
       if (updatedAt.diff(moment(), 'days') > -7) {
         return (
-          <FormattedRelative value={new Date(dateTime).getTime()}>
-            {(formattedDate: string) => (
-              <EuiToolTip content={updatedAt.format('LL LT')}>
-                <span>{formattedDate}</span>
-              </EuiToolTip>
-            )}
-          </FormattedRelative>
+          <EuiToolTip content={updatedAt.format('LL LT')}>
+            <span>
+              <FormattedRelative value={new Date(dateTime).getTime()} />
+            </span>
+          </EuiToolTip>
         );
       }
       return (

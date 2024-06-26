@@ -7,6 +7,7 @@
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
+import type { RolesAPIClient } from '@kbn/security-plugin-types-public';
 
 import { spacesManagementApp } from './spaces_management_app';
 import type { ConfigType } from '../config';
@@ -18,14 +19,21 @@ interface SetupDeps {
   getStartServices: StartServicesAccessor<PluginsStart>;
   spacesManager: SpacesManager;
   config: ConfigType;
+  getRolesAPIClient: () => Promise<RolesAPIClient>;
 }
 
 export class ManagementService {
   private registeredSpacesManagementApp?: ManagementApp;
 
-  public setup({ getStartServices, management, spacesManager, config }: SetupDeps) {
+  public setup({
+    getStartServices,
+    management,
+    spacesManager,
+    config,
+    getRolesAPIClient,
+  }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
-      spacesManagementApp.create({ getStartServices, spacesManager, config })
+      spacesManagementApp.create({ getStartServices, spacesManager, config, getRolesAPIClient })
     );
   }
 

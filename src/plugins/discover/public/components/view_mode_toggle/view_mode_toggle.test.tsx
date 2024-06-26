@@ -105,14 +105,14 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(false);
   });
 
-  it('should not render if ES|QL', async () => {
+  it('should show document and field stats view if ES|QL', async () => {
     const component = await mountComponent({ isEsqlMode: true });
-    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
+    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(true);
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
 
-    expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(false);
+    expect(findTestSubject(component, 'dscViewModeDocumentButton').exists()).toBe(true);
     expect(findTestSubject(component, 'dscViewModePatternAnalysisButton').exists()).toBe(false);
-    expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(false);
+    expect(findTestSubject(component, 'dscViewModeFieldStatsButton').exists()).toBe(true);
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when dscViewModeDocumentButton is clicked', async () => {

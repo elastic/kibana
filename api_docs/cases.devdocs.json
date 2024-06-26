@@ -757,7 +757,9 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            ") | undefined; }) => void; close: () => void; }; }"
+            ") | undefined; }) => void; close: () => void; }; useIsAddToCaseOpen: ",
+            "UseIsAddToCaseOpen",
+            "; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,

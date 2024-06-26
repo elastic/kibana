@@ -16,7 +16,7 @@ import { RISK_INFORMATION_FLYOUT_HEADER } from '../../../screens/entity_analytic
 import { navigateToHostRiskDetailTab } from '../../../tasks/host_risk';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
-describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
+describe('risk tab', { tags: ['@ess'] }, () => {
   describe('with legacy risk score', () => {
     beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -49,7 +49,7 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('with new risk score', () => {
+  describe('with new risk score', { tags: ['@serverless'] }, () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });

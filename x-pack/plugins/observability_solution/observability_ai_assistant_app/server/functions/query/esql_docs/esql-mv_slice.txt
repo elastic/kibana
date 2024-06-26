@@ -1,16 +1,31 @@
-MV_SLICE
+## MV_SLICE
 
-Syntax
-Parameters
-field
-Multivalue expression. If null, the function returns null.
-start
-Start position. If null, the function returns null. The start argument can be negative. An index of -1 is used to specify the last value in the list.
-end
-End position(included). Optional; if omitted, the position at start is returned. The end argument can be negative. An index of -1 is used to specify the last value in the list.
-DescriptionReturns a subset of the multivalued field using the start and end index values.Supported types
-Examples
+MV_SLICE is a function in ES|QL that returns a subset of a multivalued field using the start and end index values. 
+
+### Syntax
+
+`MV_SLICE(field, start, end)`
+
+#### Parameters
+
+- `field`: Multivalue expression. If null, the function returns null.
+- `start`: Start position. If null, the function returns null. The start argument can be negative. An index of -1 is used to specify the last value in the list.
+- `end`: End position(included). Optional; if omitted, the position at start is returned. The end argument can be negative. An index of -1 is used to specify the last value in the list.
+
+### Examples
+
+Here are a couple of examples of how to use the MV_SLICE function in ES|QL:
+
+```esql
 row a = [1, 2, 2, 3]
 | eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)
+```
+
+In this example, the MV_SLICE function is used to get subsets of the multivalued field `a`. The subsets are stored in the new fields `a1` and `a2`.
+
+```esql
 row a = [1, 2, 2, 3]
 | eval a1 = mv_slice(a, -2), a2 = mv_slice(a, -3, -1)
+```
+
+In this example, the MV_SLICE function is used with negative start and end positions to get subsets of the multivalued field `a` from the end of the list. The subsets are stored in the new fields `a1` and `a2`.

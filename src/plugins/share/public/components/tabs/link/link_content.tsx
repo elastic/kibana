@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { IShareContext } from '../../context';
 
 type LinkProps = Pick<
@@ -52,7 +52,7 @@ export const LinkContent = ({
   const [url, setUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
-  const [, setShortUrlCache] = useState<string | undefined>(undefined);
+  const [shortUrlCache, setShortUrlCache] = useState<string | undefined>(undefined);
 
   const getUrlWithUpdatedParams = useCallback(
     (tempUrl: string): string => {
@@ -72,7 +72,6 @@ export const LinkContent = ({
 
       // persist updated url to state
       setUrl(urlWithUpdatedParams);
-
       return urlWithUpdatedParams;
     },
     [urlParams]
@@ -93,6 +92,7 @@ export const LinkContent = ({
       const snapshotUrl = getSnapshotUrl();
       const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
       setShortUrlCache(shortUrl.url);
+
       return shortUrl.url;
     }
   }, [shareableUrlLocatorParams, urlService.shortUrls, getSnapshotUrl, setShortUrlCache]);
@@ -111,8 +111,14 @@ export const LinkContent = ({
     copyToClipboard(urlToCopy);
     setUrl(urlToCopy);
     setTextCopied(true);
+    return urlToCopy;
   }, [url, delegatedShareUrlHandler, allowShortUrl, createShortUrl, getSnapshotUrl]);
 
+  const handleTestUrl = useMemo(() => {
+    if (objectType !== 'search' || !allowShortUrl) return getSnapshotUrl();
+    else if (objectType === 'search' && allowShortUrl) return shortUrlCache;
+    return copyUrlHelper();
+  }, [objectType, getSnapshotUrl, allowShortUrl, shortUrlCache, copyUrlHelper]);
   return (
     <>
       <EuiForm>
@@ -154,7 +160,7 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              data-share-url={url}
+              data-share-url={handleTestUrl}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}

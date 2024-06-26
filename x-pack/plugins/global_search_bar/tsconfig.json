@@ -14,7 +14,6 @@
     "@kbn/i18n",
     "@kbn/saved-objects-tagging-oss-plugin",
     "@kbn/core-chrome-browser",
-    "@kbn/analytics-client",
     "@kbn/react-kibana-context-render",
   ],
   "exclude": [

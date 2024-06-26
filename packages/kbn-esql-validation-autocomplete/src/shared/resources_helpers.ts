@@ -18,7 +18,7 @@ export function buildQueryUntilPreviousCommand(ast: ESQLAst, queryString: string
 export function getFieldsByTypeHelper(queryText: string, resourceRetriever?: ESQLCallbacks) {
   const cacheFields = new Map<string, ESQLRealField>();
   const getFields = async () => {
-    if (!cacheFields.size) {
+    if (!cacheFields.size && queryText) {
       const fieldsOfType = await resourceRetriever?.getFieldsFor?.({ query: queryText });
       for (const field of fieldsOfType || []) {
         cacheFields.set(field.name, field);

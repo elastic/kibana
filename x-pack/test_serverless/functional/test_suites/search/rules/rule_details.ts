@@ -7,6 +7,7 @@
 
 import { expect } from 'expect';
 import { v4 as uuidv4 } from 'uuid';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   createEsQueryRule as createRule,
@@ -65,12 +66,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     let ruleIdList: string[];
     let connectorIdList: string[];
 
+    const svlCommonApi = getService('svlCommonApi');
+    const svlUserManager = getService('svlUserManager');
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
+    let roleAuthc: RoleCredentials;
+    let internalReqHeader: InternalRequestHeader;
+
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await svlCommonPage.login();
     });
 
     after(async () => {
       await svlCommonPage.forceLogout();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('Header', () => {
@@ -80,7 +90,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       before(async () => {
         const rule = await createRule({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           consumer: 'alerts',
           name: ruleName,
           ruleTypeId: RULE_TYPE_ID,
@@ -251,7 +263,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       before(async () => {
         const rule = await createRule({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           consumer: 'alerts',
           name: ruleName,
           ruleTypeId: RULE_TYPE_ID,
@@ -357,19 +371,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const testRunUuid = uuidv4();
 
         const connector1 = await createSlackConnector({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           name: `slack-${testRunUuid}-${0}`,
         });
 
         const connector2 = await createSlackConnector({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           name: `slack-${testRunUuid}-${1}`,
         });
 
         connectorIdList = [connector2.id];
 
         const rule = await createRule({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           consumer: 'alerts',
           name: testRunUuid,
           ruleTypeId: RULE_TYPE_ID,
@@ -432,13 +452,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show and update deleted connectors when there are no existing connectors of the same type', async () => {
         const testRunUuid = uuidv4();
         const connector = await createIndexConnector({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           name: `index-${testRunUuid}-${2}`,
           indexName: ALERT_ACTION_INDEX,
         });
 
         const rule = await createRule({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           consumer: 'alerts',
           name: testRunUuid,
           ruleTypeId: RULE_TYPE_ID,
@@ -554,19 +578,25 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const RULE_TYPE_ID = '.es-query';
 
         const connector1 = await createSlackConnector({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           name: `slack-${testRunUuid}-${0}`,
         });
 
         const connector2 = await createSlackConnector({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           name: `slack-${testRunUuid}-${1}`,
         });
 
         connectorIdList = [connector1.id, connector2.id];
 
         const rule = await createRule({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           consumer: 'alerts',
           name: `test-rule-${testRunUuid}`,
           ruleTypeId: RULE_TYPE_ID,
@@ -642,7 +672,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('renders a disabled rule details view in app button', async () => {
         const rule = await createRule({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           consumer: 'alerts',
           name: ruleName,
           ruleTypeId: RULE_TYPE_ID,

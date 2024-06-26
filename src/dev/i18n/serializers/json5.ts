@@ -12,7 +12,7 @@ import { Serializer } from '.';
 
 const ESCAPE_SINGLE_QUOTE_REGEX = /\\([\s\S])|(')/g;
 
-export const serializeToJson5: Serializer = (messages, formats = i18n.formats) => {
+export const serializeToJson5: Serializer = (messages, formats = i18n.getTranslation().formats) => {
   // .slice(0, -4): remove closing curly braces from json to append messages
   let jsonBuffer = Buffer.from(
     JSON5.stringify({ formats, messages: {} }, { quote: `'`, space: 2 }).slice(0, -4).concat('\n')

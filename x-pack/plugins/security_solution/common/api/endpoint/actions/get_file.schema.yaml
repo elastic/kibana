@@ -30,7 +30,6 @@ components:
         - type: object
           required:
             - parameters
-            - file
           properties:
             parameters:
               required:

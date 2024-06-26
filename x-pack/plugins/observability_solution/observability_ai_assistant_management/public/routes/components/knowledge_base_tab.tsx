@@ -25,15 +25,15 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { useAppContext } from '../../hooks/use_app_context';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function KnowledgeBaseTab() {
-  const { uiSettings } = useAppContext();
+  const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
@@ -103,6 +103,15 @@ export function KnowledgeBaseTab() {
           return <EuiBadge>{category.entries.length}</EuiBadge>;
         }
         return null;
+      },
+    },
+    {
+      name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.author', {
+        defaultMessage: 'Author',
+      }),
+      width: '140px',
+      render: (category: KnowledgeBaseEntryCategory) => {
+        return category.entries[0]?.user?.name;
       },
     },
     {
@@ -180,7 +189,7 @@ export function KnowledgeBaseTab() {
     isLoading,
     refetch,
   } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
-  const categories = categorizeEntries({ entries });
+  const categorizedEntries = categorizeEntries({ entries });
 
   const handleChangeSort = ({
     sort,
@@ -304,7 +313,7 @@ export function KnowledgeBaseTab() {
           <EuiBasicTable<KnowledgeBaseEntryCategory>
             data-test-subj="knowledgeBaseTable"
             columns={columns}
-            items={categories}
+            items={categorizedEntries}
             loading={isLoading}
             sorting={{
               sort: {
@@ -334,7 +343,10 @@ export function KnowledgeBaseTab() {
           selectedCategory.entries[0].role === 'assistant_summarization') ? (
           <KnowledgeBaseEditManualEntryFlyout
             entry={selectedCategory.entries[0]}
-            onClose={() => setSelectedCategory(undefined)}
+            onClose={() => {
+              setSelectedCategory(undefined);
+              refetch();
+            }}
           />
         ) : (
           <KnowledgeBaseCategoryFlyout

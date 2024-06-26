@@ -92,6 +92,7 @@ export type AlertsTableStateProps = {
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
   renderCellPopover?: AlertsTableProps['renderCellPopover'];
+  emptyStateHeight?: 'tall' | 'short';
 } & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'>;
 
 export interface AlertsTableStorage {
@@ -214,6 +215,7 @@ const AlertsTableStateWithQueryProvider = memo(
     shouldHighlightRow,
     dynamicRowHeight,
     lastReloadRequestTime,
+    emptyStateHeight,
   }: AlertsTableStateProps) => {
     const { cases: casesService, fieldFormats } = useKibana<{
       cases?: CasesService;
@@ -530,6 +532,7 @@ const AlertsTableStateWithQueryProvider = memo(
               controls={persistentControls}
               getInspectQuery={getInspectQuery}
               showInpectButton={showInspectButton}
+              height={emptyStateHeight}
             />
           </InspectButtonContainer>
         )}

@@ -23,7 +23,7 @@ const restorableDefaults = getDefaultDataVisualizerListState();
 const EmbeddableFieldStatsTableWrapper = (
   props: Required<FieldStatisticTableEmbeddableProps, 'dataView'>
 ) => {
-  const { onTableUpdate, onAddFilter, ...state } = props;
+  const { onTableUpdate, onAddFilter } = props;
 
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
@@ -46,11 +46,11 @@ const EmbeddableFieldStatsTableWrapper = (
     progress,
     overallStatsProgress,
     setLastRefresh,
-  } = useDataVisualizerGridData(state, dataVisualizerListState);
+  } = useDataVisualizerGridData(props, dataVisualizerListState);
 
   useEffect(() => {
     setLastRefresh(Date.now());
-  }, [state?.lastReloadRequestTime, setLastRefresh]);
+  }, [props?.lastReloadRequestTime, setLastRefresh]);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
@@ -60,17 +60,17 @@ const EmbeddableFieldStatsTableWrapper = (
           m[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
-              dataView={state.dataView}
+              dataView={props.dataView}
               combinedQuery={{ searchQueryLanguage, searchString }}
               onAddFilter={onAddFilter}
-              totalDocuments={state.totalDocuments}
+              totalDocuments={props.totalDocuments}
             />
           );
         }
         return m;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [state.dataView, searchQueryLanguage, searchString, state.totalDocuments, onAddFilter]
+    [props.dataView, searchQueryLanguage, searchString, props.totalDocuments, onAddFilter]
   );
 
   if (progress === 100 && configs.length === 0) {
@@ -83,10 +83,11 @@ const EmbeddableFieldStatsTableWrapper = (
       updatePageState={onTableChange}
       getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
       extendedColumns={extendedColumns}
-      showPreviewByDefault={state?.showPreviewByDefault}
+      showPreviewByDefault={props?.showPreviewByDefault}
       onChange={onTableUpdate}
       loading={progress < 100}
       overallStatsRunning={overallStatsProgress.isRunning}
+      renderFieldName={props.renderFieldName}
     />
   );
 };

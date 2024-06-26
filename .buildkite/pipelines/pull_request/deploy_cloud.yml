@@ -2,12 +2,10 @@ steps:
   - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
     label: 'Build and Deploy to Cloud'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: c3-standard-4
+      machineType: c4-standard-2
+      diskType: 'hyperdisk-balanced'
       preemptible: true
-      spotZones: 'us-central1-a,us-central1-b,us-central1-c'
+      spotZones: 'us-central1-a,us-central1-c'
     depends_on:
       - build
       - quick_checks

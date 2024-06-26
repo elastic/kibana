@@ -5,11 +5,15 @@
  * 2.0.
  */
 export type { FieldDataRowProps } from './field_data_row';
-export type {
+import type {
   FieldVisConfig,
   FileBasedFieldVisConfig,
   MetricFieldVisStats,
 } from '../../../../../../common/types/field_vis_config';
+
+export type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
+
+export type { FieldVisConfig, FileBasedFieldVisConfig, MetricFieldVisStats };
 export {
   isFileBasedFieldVisConfig,
   isIndexBasedFieldVisConfig,

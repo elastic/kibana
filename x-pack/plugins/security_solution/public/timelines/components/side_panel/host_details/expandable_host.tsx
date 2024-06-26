@@ -13,7 +13,7 @@ import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { HostDetailsLink } from '../../../../common/components/links';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import type { HostItem } from '../../../../../common/search_strategy';

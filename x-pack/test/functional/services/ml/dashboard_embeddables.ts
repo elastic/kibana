@@ -117,19 +117,19 @@ export function MachineLearningDashboardEmbeddablesProvider(
     async openAnomalyJobSelectionFlyout(
       mlEmbeddableType: 'ml_anomaly_swimlane' | 'ml_anomaly_charts' | 'ml_single_metric_viewer'
     ) {
+      const name = {
+        ml_anomaly_swimlane: 'Anomaly swim lane',
+        ml_single_metric_viewer: 'Single metric viewer',
+        ml_anomaly_charts: 'Anomaly chart',
+      };
       await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.clickEditorMenuButton();
         await testSubjects.existOrFail('dashboardEditorContextMenu', { timeout: 2000 });
 
         await dashboardAddPanel.clickEmbeddableFactoryGroupButton('ml');
 
-        if (mlEmbeddableType === 'ml_single_metric_viewer') {
-          await dashboardAddPanel.clickAddNewPanelFromUIActionLink('Single metric viewer');
-          await testSubjects.existOrFail('mlAnomalyJobSelectionControls', { timeout: 2000 });
-        } else {
-          await dashboardAddPanel.clickAddNewEmbeddableLink(mlEmbeddableType);
-          await mlDashboardJobSelectionTable.assertJobSelectionTableExists();
-        }
+        await dashboardAddPanel.clickAddNewPanelFromUIActionLink(name[mlEmbeddableType]);
+        await testSubjects.existOrFail('mlAnomalyJobSelectionControls', { timeout: 2000 });
       });
     },
   };

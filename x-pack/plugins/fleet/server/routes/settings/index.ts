@@ -53,7 +53,7 @@ export const putSettingsHandler: FleetRequestHandler<
 
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
-    await agentPolicyService.bumpAllAgentPolicies(soClient, esClient, {
+    await agentPolicyService.bumpAllAgentPolicies(esClient, {
       user: user || undefined,
     });
     const body = {
@@ -78,6 +78,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { readSettings: true },
       },
+      description: `Get settings`,
     })
     .addVersion(
       {
@@ -92,6 +93,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { allSettings: true },
       },
+      description: `Update settings`,
     })
     .addVersion(
       {
@@ -106,6 +108,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: (authz) => {
         return authz.fleet.addAgents || authz.fleet.addFleetServers;
       },
+      description: `Get enrollment settings`,
     })
     .addVersion(
       {

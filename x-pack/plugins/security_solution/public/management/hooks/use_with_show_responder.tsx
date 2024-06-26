@@ -51,11 +51,18 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
+  const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
   const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
 
   return useCallback(
     (props: ResponderInfoProps) => {
       const { agentId, agentType, capabilities, hostName, platform } = props;
+      const isExternalEdr =
+        (isSentinelOneV1Enabled && agentType === 'sentinel_one') ||
+        (responseActionsCrowdstrikeManualHostIsolationEnabled && agentType === 'crowdstrike');
+
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
         window.console.error(new Error(`Access denied to ${agentType} response actions console`));
@@ -112,7 +119,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps,
             PageTitleComponent: () => {
-              if (isSentinelOneV1Enabled && agentType === 'sentinel_one') {
+              if (isExternalEdr) {
                 return (
                   <EuiFlexGroup>
                     <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
@@ -145,11 +152,12 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
       }
     },
     [
+      isSentinelOneV1Enabled,
+      responseActionsCrowdstrikeManualHostIsolationEnabled,
       endpointPrivileges,
       isEnterpriseLicense,
       consoleManager,
       agentStatusClientEnabled,
-      isSentinelOneV1Enabled,
     ]
   );
 };

@@ -39,7 +39,7 @@ import {
   hostIsolationHttpMocks,
   hostIsolationRequestBodyMock,
   hostIsolationResponseMock,
-} from '../../../../common/lib/endpoint_isolation/mocks';
+} from '../../../../common/lib/endpoint/endpoint_isolation/mocks';
 import { endpointPageHttpMock, failedTransformStateMock } from '../mocks';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 

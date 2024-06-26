@@ -12,7 +12,7 @@ import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
   CommandDefinition,
@@ -143,14 +143,22 @@ export const buildVariablesDefinitions = (variables: string[]): SuggestionRawDef
     sortText: 'D',
   }));
 
-export const buildSourcesDefinitions = (sources: string[]): SuggestionRawDefinition[] =>
-  sources.map((label) => ({
-    label,
-    text: getSafeInsertText(label, { dashSupported: true }),
-    kind: 'Reference',
-    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
-      defaultMessage: `Index`,
-    }),
+export const buildSourcesDefinitions = (
+  sources: Array<{ name: string; isIntegration: boolean; title?: string }>
+): SuggestionRawDefinition[] =>
+  sources.map(({ name, isIntegration, title }) => ({
+    label: title ?? name,
+    text: name,
+    isSnippet: isIntegration,
+    ...(isIntegration && { command: TRIGGER_SUGGESTION_COMMAND }),
+    kind: isIntegration ? 'Class' : 'Issue',
+    detail: isIntegration
+      ? i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.integrationDefinition', {
+          defaultMessage: `Integration`,
+        })
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.sourceDefinition', {
+          defaultMessage: `Index`,
+        }),
     sortText: 'A',
   }));
 
@@ -290,7 +298,7 @@ export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition =>
 });
 
 export function getUnitDuration(unit: number = 1) {
-  const filteredTimeLiteral = timeLiterals.filter(({ name }) => {
+  const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
     const result = /s$/.test(name);
     return unit > 1 ? result : !result;
   });
@@ -324,7 +332,7 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   }
   // this is a special type built from the suggestion system, not inherited from the AST
   if (types.includes('time_literal_unit')) {
-    suggestions.push(...buildConstantsDefinitions(timeLiterals.map(({ name }) => name))); // i.e. year, month, ...
+    suggestions.push(...buildConstantsDefinitions(timeUnitsToSuggest.map(({ name }) => name))); // i.e. year, month, ...
   }
   if (types.includes('chrono_literal')) {
     suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY, ...

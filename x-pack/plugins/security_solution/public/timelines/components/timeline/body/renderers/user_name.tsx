@@ -14,7 +14,7 @@ import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailType } from '../../../../../../common/types';
-import { getScopedActions, isTimelineScope } from '../../../../../helpers';
+import { getScopedActions } from '../../../../../helpers';
 import type { TimelineTabs } from '../../../../../../common/types/timeline';
 import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
@@ -50,10 +50,7 @@ const UserNameComponent: React.FC<Props> = ({
 }) => {
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
-  const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
-  const expandableTimelineFlyoutEnabled = useIsExperimentalFeatureEnabled(
-    'expandableTimelineFlyoutEnabled'
-  );
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
   const { openRightPanel } = useExpandableFlyoutApi();
@@ -72,7 +69,7 @@ const UserNameComponent: React.FC<Props> = ({
 
       const { timelineID, tabType } = eventContext;
 
-      const openNewFlyout = () =>
+      if (!expandableFlyoutDisabled) {
         openRightPanel({
           id: UserPanelKey,
           params: {
@@ -82,8 +79,7 @@ const UserNameComponent: React.FC<Props> = ({
             isDraggable,
           },
         });
-
-      const openOldFlyout = () => {
+      } else {
         const updatedExpandedDetail: ExpandedDetailType = {
           panelView: 'userDetail',
           params: {
@@ -100,27 +96,15 @@ const UserNameComponent: React.FC<Props> = ({
             })
           );
         }
-      };
-
-      if (
-        (isTimelineScope(timelineID) &&
-          isNewUserDetailsFlyoutEnable &&
-          expandableTimelineFlyoutEnabled) ||
-        isNewUserDetailsFlyoutEnable
-      ) {
-        openNewFlyout();
-      } else {
-        openOldFlyout();
       }
     },
     [
       contextId,
       dispatch,
       eventContext,
-      expandableTimelineFlyoutEnabled,
+      expandableFlyoutDisabled,
       isDraggable,
       isInTimelineContext,
-      isNewUserDetailsFlyoutEnable,
       onClick,
       openRightPanel,
       userName,

@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { set } from '@kbn/safer-lodash-set';
 import { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import { TIMESTAMP_FIELD } from '../../../../../../common/constants';
-import { MetricsSourceConfigurationProperties } from '../../../../../../common/metrics_sources';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
 import { MetricsExplorerSeries } from '../../../../../../common/http_api/metrics_explorer';
 import {
@@ -31,7 +30,7 @@ import { createMetricLabel } from './create_metric_label';
  the field dropdowns are not populated correctly. This index pattern is a temporary fix.
  See: https://github.com/elastic/kibana/issues/73987
 */
-const TSVB_WORKAROUND_INDEX_PATTERN = 'metric*';
+export const TSVB_WORKAROUND_INDEX_PATTERN = 'metric*';
 
 export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === 'rate') {
@@ -143,15 +142,13 @@ const createTSVBIndexPattern = (alias: string) => {
 };
 
 export const createTSVBLink = (
-  source: MetricsSourceConfigurationProperties | undefined,
+  indexPattern: string,
   options: MetricsExplorerOptions,
   series: MetricsExplorerSeries,
   timeRange: MetricsExplorerTimeOptions,
   chartOptions: MetricsExplorerChartOptions
 ): LinkDescriptor => {
-  const tsvbIndexPattern = createTSVBIndexPattern(
-    (source && source.metricAlias) || TSVB_WORKAROUND_INDEX_PATTERN
-  );
+  const tsvbIndexPattern = createTSVBIndexPattern(indexPattern);
   const appState = {
     filters: [],
     linked: false,

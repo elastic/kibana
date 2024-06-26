@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Common Rule Attributes
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: false
+  schemas:
+    PackageName:
+      type: string
+      minLength: 1
+      description: Package name for the integration to be built.
+
+    DataStreamName:
+      type: string
+      minLength: 1
+      description: DataStream name for the integration to be built.
+
+    RawSamples:
+      type: array
+      items:
+        type: string
+      description: String array containing the json raw samples that are used for ecs mapping.
+
+    Mapping:
+      type: object
+      description: mapping object to ECS Mapping Request.
+
+    Connector:
+      type: string
+      description: LLM Connector to be used in each API request.
+
+    Docs:
+      type: array
+      description: An array of processed documents.
+      items:
+        type: object
+
+    Pipeline:
+      type: object
+      description: The pipeline object.
+      required:
+        - processors
+      properties:
+        name:
+          type: string
+          description: The name of the pipeline.
+        description:
+          type: string
+          description: The description of the pipeline.
+        version:
+          type: integer
+          description: The version of the pipeline.
+        processors:
+          type: array
+          items:
+            $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
+          description: The processors to execute.
+        on_failure:
+          type: array
+          items:
+            $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
+          description: The processors to execute if the pipeline fails.
+
+    InputType:
+      type: string
+      description: The input type for the dataStream to pull logs from.
+      enum:
+        - aws_cloudwatch
+        - aws_s3
+        - azure_blob_storage
+        - azure_eventhub
+        - cloudfoundry
+        - filestream
+        - gcp_pubsub
+        - gcs
+        - http_endpoint
+        - journald
+        - kafka
+        - tcp
+        - udp
+
+    DataStream:
+      type: object
+      description: The dataStream object.
+      required:
+        - name
+        - title
+        - description
+        - inputTypes
+        - rawSamples
+        - pipeline
+        - docs
+      properties:
+        name:
+          type: string
+          description: The name of the dataStream.
+        title:
+          type: string
+          description: The title of the dataStream.
+        description:
+          type: string
+          description: The description of the dataStream.
+        inputTypes:
+          type: array
+          items:
+            $ref: "#/components/schemas/InputType"
+          description: The input types of the dataStream.
+        rawSamples:
+          $ref: "#/components/schemas/RawSamples"
+          description: The raw samples of the dataStream.
+        pipeline:
+          $ref: "#/components/schemas/Pipeline"
+          description: The pipeline of the dataStream.
+        docs:
+          $ref: "#/components/schemas/Docs"
+          description: The documents of the dataStream.
+
+    Integration:
+      type: object
+      description: The integration object.
+      required:
+        - name
+        - title
+        - description
+        - dataStreams
+      properties:
+        name:
+          type: string
+          description: The name of the integration.
+        title:
+          type: string
+          description: The title of the integration.
+        description:
+          type: string
+          description: The description of the integration.
+        dataStreams:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataStream"
+          description: The dataStreams of the integration.
+        logo:
+          type: string
+          description: The logo of the integration.
+
+    PipelineResults:
+      type: array
+      description: An array of pipeline results.
+      items:
+        type: object
+
+    Errors:
+      type: array
+      description: An array of errors.
+      items:
+        type: object

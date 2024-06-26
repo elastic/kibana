@@ -12,17 +12,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIconTip,
   EuiSelect,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { first, range, xor } from 'lodash';
 import React from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
+import { QueryBuilder } from '../common/query_builder';
 import { COMPARATOR_OPTIONS } from '../../constants';
 import { CreateSLOForm } from '../../types';
 import { MetricInput } from './metric_input';
@@ -30,6 +32,7 @@ import { MetricInput } from './metric_input';
 interface MetricIndicatorProps {
   indexFields: FieldSpec[];
   isLoadingIndex: boolean;
+  dataView?: DataView;
 }
 
 export const NEW_TIMESLICE_METRIC = { name: 'A', aggregation: 'avg' as const, field: '' };
@@ -75,7 +78,7 @@ const thresholdTooltip = (
   />
 );
 
-export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicatorProps) {
+export function MetricIndicator({ indexFields, isLoadingIndex, dataView }: MetricIndicatorProps) {
   const { control, watch, setValue, register, getFieldState } = useFormContext<CreateSLOForm>();
 
   const { fields, append, remove } = useFieldArray({
@@ -112,7 +115,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
   return (
     <>
       <EuiFlexItem>
-        {fields?.map((metric, index) => (
+        {fields?.map((metric, index, arr) => (
           <React.Fragment key={metric.id}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <input hidden {...register(`indicator.params.metric.metrics.${index}.name`)} />
@@ -140,7 +143,29 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="xs" />
+            <QueryBuilder
+              dataTestSubj="timesliceMetricIndicatorFormMetricQueryInput"
+              dataView={dataView}
+              label={`${filterLabel} ${metric.name}`}
+              name={`indicator.params.metric.metrics.${index}.filter`}
+              placeholder={i18n.translate(
+                'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.placeholder',
+                { defaultMessage: 'KQL filter' }
+              )}
+              required={false}
+              tooltip={
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.slo.sloEdit.sliType.timesliceMetric.goodQuery.tooltip',
+                    {
+                      defaultMessage: 'This KQL query should return a subset of events.',
+                    }
+                  )}
+                  position="top"
+                />
+              }
+            />
+            {index !== arr.length - 1 && <EuiHorizontalRule size="quarter" />}
           </React.Fragment>
         ))}
         <EuiFlexGroup>
@@ -288,3 +313,7 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
     </>
   );
 }
+
+const filterLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.filterLabel', {
+  defaultMessage: 'Filter',
+});

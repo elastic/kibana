@@ -109,7 +109,7 @@ export interface AnnotationDoc {
 }
 
 export interface AnnotationTokens {
-  type: 'prompt_token_count' | 'context_token_count';
+  type: 'prompt_token_count' | 'context_token_count' | 'context_clipped';
   count: number;
 }
 
@@ -125,6 +125,7 @@ export interface AIMessage extends Message {
   inputTokens: {
     context: number;
     total: number;
+    contextClipped?: number;
   };
 }
 

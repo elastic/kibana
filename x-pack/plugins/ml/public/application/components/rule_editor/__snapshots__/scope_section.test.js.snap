@@ -6,10 +6,9 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
 <Fragment>
   <EuiTitle>
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scope"
         id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
-        values={Object {}}
       />
     </h2>
   </EuiTitle>
@@ -18,15 +17,11 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
   />
   <EuiCheckbox
     checked={true}
-    compressed={false}
-    disabled={false}
     id="enable_scope_checkbox"
-    indeterminate={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Add a filter list to limit where the job rule applies."
         id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
-        values={Object {}}
       />
     }
     onChange={[MockFunction]}
@@ -45,10 +40,9 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
 <Fragment>
   <EuiTitle>
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scope"
         id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
-        values={Object {}}
       />
     </h2>
   </EuiTitle>
@@ -57,15 +51,11 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
   />
   <EuiCheckbox
     checked={true}
-    compressed={false}
-    disabled={false}
     id="enable_scope_checkbox"
-    indeterminate={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Add a filter list to limit where the job rule applies."
         id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
-        values={Object {}}
       />
     }
     onChange={[MockFunction]}
@@ -98,10 +88,9 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
 <Fragment>
   <EuiTitle>
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scope"
         id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
-        values={Object {}}
       />
     </h2>
   </EuiTitle>
@@ -110,15 +99,11 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
   />
   <EuiCheckbox
     checked={true}
-    compressed={false}
-    disabled={false}
     id="enable_scope_checkbox"
-    indeterminate={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Add a filter list to limit where the job rule applies."
         id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
-        values={Object {}}
       />
     }
     onChange={[MockFunction]}
@@ -151,10 +136,9 @@ exports[`ScopeSection renders when not enabled 1`] = `
 <Fragment>
   <EuiTitle>
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scope"
         id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
-        values={Object {}}
       />
     </h2>
   </EuiTitle>
@@ -163,15 +147,11 @@ exports[`ScopeSection renders when not enabled 1`] = `
   />
   <EuiCheckbox
     checked={false}
-    compressed={false}
-    disabled={false}
     id="enable_scope_checkbox"
-    indeterminate={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Add a filter list to limit where the job rule applies."
         id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
-        values={Object {}}
       />
     }
     onChange={[MockFunction]}
@@ -189,10 +169,9 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
 <Fragment>
   <EuiTitle>
     <h2>
-      <FormattedMessage
+      <MemoizedFormattedMessage
         defaultMessage="Scope"
         id="xpack.ml.ruleEditor.scopeSection.scopeTitle"
-        values={Object {}}
       />
     </h2>
   </EuiTitle>
@@ -201,15 +180,11 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
   />
   <EuiCheckbox
     checked={true}
-    compressed={false}
-    disabled={false}
     id="enable_scope_checkbox"
-    indeterminate={false}
     label={
-      <FormattedMessage
+      <Memo(MemoizedFormattedMessage)
         defaultMessage="Add a filter list to limit where the job rule applies."
         id="xpack.ml.ruleEditor.scopeSection.addFilterListLabel"
-        values={Object {}}
       />
     }
     onChange={[MockFunction]}

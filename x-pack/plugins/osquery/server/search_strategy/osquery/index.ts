@@ -40,6 +40,8 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
         }),
         newDataStreamIndexExists: esClient.asInternalUser.indices.exists({
           index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
+          allow_no_indices: false,
+          expand_wildcards: 'all',
         }),
       }).pipe(
         mergeMap(({ actionsIndexExists, newDataStreamIndexExists }) => {

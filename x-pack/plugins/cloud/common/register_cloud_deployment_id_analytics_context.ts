@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsClient } from '@kbn/analytics-client';
+import type { AnalyticsClient } from '@kbn/ebt/client';
 import { of } from 'rxjs';
 import { parseDeploymentIdFromDeploymentUrl } from './parse_deployment_id_from_deployment_url';
 

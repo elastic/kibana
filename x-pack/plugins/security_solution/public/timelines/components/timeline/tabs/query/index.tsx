@@ -38,9 +38,9 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
 
 import type { TimelineModel } from '../../../../store/model';
@@ -203,7 +203,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const leadingControlColumns = useTimelineControlColumn(columns, sort);
+  const leadingControlColumns = useTimelineControlColumn({
+    columns,
+    sort,
+    timelineId,
+    activeTab: TimelineTabs.query,
+    refetch,
+  });
 
   useEffect(() => {
     dispatch(
@@ -259,41 +265,52 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   if (unifiedComponentsInTimelineEnabled) {
     return (
-      <UnifiedTimelineBody
-        header={
-          <QueryTabHeader
-            activeTab={activeTab}
-            filterManager={timelineFilterManager}
-            show={show && activeTab === TimelineTabs.query}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            status={status}
-            timelineId={timelineId}
-            showEventsCountBadge={showEventsCountBadge}
-            totalCount={totalCount}
-          />
-        }
-        columns={augmentedColumnHeaders}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        dataLoadingState={dataLoadingState}
-        totalCount={isBlankTimeline ? 0 : totalCount}
-        onEventClosed={onEventClosed}
-        expandedDetail={expandedDetail}
-        showExpandedDetails={showExpandedDetails}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        eventIdToNoteIds={eventIdToNoteIds}
-        pinnedEventIds={pinnedEventIds}
-        onChangePage={loadPage}
-        activeTab={activeTab}
-        updatedAt={refreshedAt}
-        isTextBasedQuery={false}
-        pageInfo={pageInfo}
-      />
+      <>
+        <TimelineRefetch
+          id={`${timelineId}-${TimelineTabs.query}`}
+          inputId={InputsModelId.timeline}
+          inspect={inspect}
+          loading={isQueryLoading}
+          refetch={refetch}
+          skip={!canQueryTimeline}
+        />
+
+        <UnifiedTimelineBody
+          header={
+            <QueryTabHeader
+              activeTab={activeTab}
+              filterManager={timelineFilterManager}
+              show={show && activeTab === TimelineTabs.query}
+              showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+              status={status}
+              timelineId={timelineId}
+              showEventsCountBadge={showEventsCountBadge}
+              totalCount={totalCount}
+            />
+          }
+          columns={augmentedColumnHeaders}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          itemsPerPage={itemsPerPage}
+          itemsPerPageOptions={itemsPerPageOptions}
+          sort={sort}
+          events={events}
+          refetch={refetch}
+          dataLoadingState={dataLoadingState}
+          totalCount={isBlankTimeline ? 0 : totalCount}
+          onEventClosed={onEventClosed}
+          expandedDetail={expandedDetail}
+          showExpandedDetails={showExpandedDetails}
+          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+          eventIdToNoteIds={eventIdToNoteIds}
+          pinnedEventIds={pinnedEventIds}
+          onChangePage={loadPage}
+          activeTab={activeTab}
+          updatedAt={refreshedAt}
+          isTextBasedQuery={false}
+          pageInfo={pageInfo}
+        />
+      </>
     );
   }
 

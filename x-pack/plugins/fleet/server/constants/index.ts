@@ -58,7 +58,6 @@ export {
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
   AGENT_POLICY_DEFAULT_MONITORING_DATASETS,
   // Fleet Server index
-  FLEET_SERVER_SERVERS_INDEX,
   ENROLLMENT_API_KEYS_INDEX,
   AGENTS_INDEX,
   // Preconfiguration
@@ -90,6 +89,7 @@ export {
   OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   // outputs
   OUTPUT_HEALTH_DATA_STREAM,
+  FLEET_SETUP_LOCK_TYPE,
   type PrivilegeMapObject,
 } from '../../common/constants';
 

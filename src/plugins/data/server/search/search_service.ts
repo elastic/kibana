@@ -316,6 +316,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
+            dataViews: scopedIndexPatterns,
             scriptedFieldsEnabled: true,
           };
 
