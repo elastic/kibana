@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export * from './action_types';
-export * from './alerts_types';
-export * from './rule_types';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+
+export type Alert = EcsFieldsResponse;
+export interface LegacyField {
+  field: string;
+  value: string[];
+}
+export interface EsQuerySnapshot {
+  request: string[];
+  response: string[];
+}
