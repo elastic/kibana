@@ -16,7 +16,8 @@ const legacyInvalidConfigExitCode = 64;
 
 export async function ensureValidConfiguration(
   configService: ConfigService,
-  params?: ConfigValidateParameters
+  params?: ConfigValidateParameters,
+  skipUnusedConfigKeysCheck?: boolean
 ) {
   try {
     await configService.validate(params);
@@ -29,7 +30,7 @@ export async function ensureValidConfiguration(
     return !ignoredPaths.some((ignoredPath) => unusedPath.startsWith(ignoredPath));
   });
 
-  if (unusedConfigKeys.length > 0) {
+  if (unusedConfigKeys.length > 0 && !skipUnusedConfigKeysCheck) {
     const message = `Unknown configuration key(s): ${unusedConfigKeys
       .map((key) => `"${key}"`)
       .join(', ')}. Check for spelling errors and ensure that expected plugins are installed.`;

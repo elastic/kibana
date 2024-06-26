@@ -264,9 +264,7 @@ export class Server {
       }
       // When running on serverless, we may allow unknown keys, but stripping them from the final config object.
       this.configService.setGlobalStripUnknownKeys(true);
-      await ensureValidConfiguration(this.configService, {
-        logDeprecations: true,
-      });
+      await ensureValidConfiguration(this.configService, void 0, true);
       this.log.error(
         `Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error: ${validationError}`
       );
