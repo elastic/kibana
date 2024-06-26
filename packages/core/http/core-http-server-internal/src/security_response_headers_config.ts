@@ -76,7 +76,7 @@ export function parseRawSecurityResponseHeadersConfig(
     securityResponseHeaders['Referrer-Policy'] = raw.referrerPolicy;
   }
 
-  const reportTo = rawPermissionsPolicyConfig.report_to
+  const reportTo = rawPermissionsPolicyConfig.report_to.length
     ? `;report-to=${rawPermissionsPolicyConfig.report_to}`
     : '';
 
