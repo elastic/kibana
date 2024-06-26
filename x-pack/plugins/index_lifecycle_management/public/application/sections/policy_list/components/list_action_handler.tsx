@@ -8,7 +8,8 @@
 import React from 'react';
 import { usePolicyListContext } from '../policy_list_context';
 import { IndexTemplatesFlyout } from '../../../components';
-import { ConfirmDelete, AddPolicyToTemplateConfirmModal, ViewPolicyFlyout } from '.';
+import { ViewPolicyFlyout } from '../policy_flyout';
+import { ConfirmDelete, AddPolicyToTemplateConfirmModal } from '.';
 
 interface Props {
   deletePolicyCallback: () => void;
