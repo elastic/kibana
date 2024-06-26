@@ -7,60 +7,31 @@
  */
 
 import { Observable } from 'rxjs';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { createContext, useContext } from 'react';
-import { SharedUXExecutionContext } from './types';
 
-/**
- * @public Execution context start and setup types are the same
- */
-export declare type SharedUXExecutionContextStart = SharedUXExecutionContextSetup;
-
-/**
- * Reduced the interface from ExecutionContextSetup from '@kbn/core-execution-context-browser' to only include properties needed for the Route
- */
-export interface SharedUXExecutionContextSetup {
-  /**
-   * The current context observable
-   **/
-  context$: Observable<SharedUXExecutionContext>;
-  /**
-   * Set the current top level context
-   **/
-  set(c$: SharedUXExecutionContext): void;
-  /**
-   * Get the current top level context
-   **/
-  get(): SharedUXExecutionContext;
-  /**
-   * clears the context
-   **/
-  clear(): void;
+export interface SharedUXExecutionContextKibanaDependencies {
+  core: {
+    http: {
+      executionContext: {
+        context$: Observable<KibanaExecutionContext>;
+        set(c$: KibanaExecutionContext): void;
+        get(): KibanaExecutionContext;
+        clear(): void;
+      };
+    };
+  };
 }
 
-/**
- * Taken from Core services exposed to the `Plugin` start lifecycle
- *
- * @public
- *
- * @internalRemarks We document the properties with
- * \@link tags to improve
- * navigation in the generated docs until there's a fix for
- * https://github.com/Microsoft/web-build-tools/issues/1237
- */
-export interface SharedUXExecutionContextSetup {
-  /** {@link SharedUXExecutionContextSetup} */
-  executionContext: SharedUXExecutionContextStart;
-}
+export declare type SharedUXExecutionContextStart = SharedUXExecutionContextKibanaDependencies;
 
-export type KibanaServices = Partial<SharedUXExecutionContextSetup>;
+export type KibanaServices = Partial<SharedUXExecutionContextKibanaDependencies>;
 
 export interface SharedUXRouterContextValue<Services extends KibanaServices> {
   readonly services: Services;
 }
 
-const defaultContextValue = {
-  services: {},
-};
+const defaultContextValue = { services: {} };
 
 export const sharedUXContext =
   createContext<SharedUXRouterContextValue<KibanaServices>>(defaultContextValue);
