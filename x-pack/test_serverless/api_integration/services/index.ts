@@ -27,6 +27,7 @@ import { SvlTemplatesHelpers } from './index_management/svl_templates.helpers';
 import { SvlTemplatesApi } from './index_management/svl_templates.api';
 import { SvlMappingsApi } from './index_management/svl_mappings.api';
 import { SynthtraceProvider } from './synthtrace';
+import { SvlClusterNodesApi } from './index_management/svl_cluster_nodes.api';
 
 export const services = {
   // deployment agnostic FTR services
@@ -51,6 +52,7 @@ export const services = {
   svlTemplatesHelpers: SvlTemplatesHelpers,
   svlTemplatesApi: SvlTemplatesApi,
   svlMappingsApi: SvlMappingsApi,
+  svlClusterNodesApi: SvlClusterNodesApi,
 };
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
