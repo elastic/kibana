@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { EuiSuperSelect } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -19,192 +17,25 @@ import {
   EuiDescribedFormGroup,
   EuiTitle,
   EuiText,
-  EuiSpacer,
 } from '@elastic/eui';
 
 import { Error } from '../../../../../components';
-import type { AgentPolicy, Output, PackageInfo } from '../../../../../types';
+import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import {
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
   ExperimentalFeaturesService,
 } from '../../../../../services';
-import {
-  useGetAgentPolicies,
-  useGetOutputs,
-  useFleetStatus,
-  useGetPackagePolicies,
-  sendBulkGetAgentPolicies,
-} from '../../../../../hooks';
-import {
-  FLEET_APM_PACKAGE,
-  SO_SEARCH_LIMIT,
-  outputType,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-} from '../../../../../../../../common/constants';
+import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
 
 import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
+import { useAgentPoliciesOptions } from './components/agent_policy_options';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {
     width: 100%;
   }
 `;
-
-function useAgentPoliciesOptions(packageInfo?: PackageInfo) {
-  // Fetch agent policies info
-  const {
-    data: agentPoliciesData,
-    error: agentPoliciesError,
-    isLoading: isAgentPoliciesLoading,
-  } = useGetAgentPolicies({
-    page: 1,
-    perPage: SO_SEARCH_LIMIT,
-    sortField: 'name',
-    sortOrder: 'asc',
-    noAgentCount: true, // agentPolicy.agents will always be 0
-    full: false, // package_policies will always be empty
-  });
-  const agentPolicies = useMemo(
-    () => agentPoliciesData?.items.filter((policy) => !policy.is_managed) || [],
-    [agentPoliciesData?.items]
-  );
-
-  const { data: outputsData, isLoading: isOutputLoading } = useGetOutputs();
-
-  // get all package policies with apm integration or the current integration
-  const { data: packagePoliciesForThisPackage, isLoading: isLoadingPackagePolicies } =
-    useGetPackagePolicies({
-      page: 1,
-      perPage: SO_SEARCH_LIMIT,
-      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: ${packageInfo?.name}`,
-    });
-
-  const packagePoliciesForThisPackageByAgentPolicyId = useMemo(
-    () =>
-      packagePoliciesForThisPackage?.items.reduce(
-        (acc: { [key: string]: boolean }, packagePolicy) => {
-          packagePolicy.policy_ids.forEach((policyId) => {
-            acc[policyId] = true;
-          });
-          return acc;
-        },
-        {}
-      ),
-    [packagePoliciesForThisPackage?.items]
-  );
-
-  const { getDataOutputForPolicy } = useMemo(() => {
-    const defaultOutput = (outputsData?.items ?? []).find((output) => output.is_default);
-    const outputsById = (outputsData?.items ?? []).reduce(
-      (acc: { [key: string]: Output }, output) => {
-        acc[output.id] = output;
-        return acc;
-      },
-      {}
-    );
-
-    return {
-      getDataOutputForPolicy: (policy: Pick<AgentPolicy, 'data_output_id'>) => {
-        return policy.data_output_id ? outputsById[policy.data_output_id] : defaultOutput;
-      },
-    };
-  }, [outputsData]);
-
-  const agentPolicyOptions: Array<EuiSuperSelectOption<string>> = useMemo(
-    () =>
-      packageInfo
-        ? agentPolicies.map((policy) => {
-            const isLimitedPackageAlreadyInPolicy =
-              isPackageLimited(packageInfo) &&
-              packagePoliciesForThisPackageByAgentPolicyId?.[policy.id];
-
-            const isAPMPackageAndDataOutputIsLogstash =
-              packageInfo?.name === FLEET_APM_PACKAGE &&
-              getDataOutputForPolicy(policy)?.type === outputType.Logstash;
-
-            return {
-              inputDisplay: (
-                <>
-                  <EuiText size="s">{policy.name}</EuiText>
-                  {isAPMPackageAndDataOutputIsLogstash && (
-                    <>
-                      <EuiSpacer size="xs" />
-                      <EuiText size="s">
-                        <FormattedMessage
-                          id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
-                          defaultMessage="Logstash output for integrations is not supported with APM"
-                        />
-                      </EuiText>
-                    </>
-                  )}
-                </>
-              ),
-              value: policy.id,
-              disabled: isLimitedPackageAlreadyInPolicy || isAPMPackageAndDataOutputIsLogstash,
-              'data-test-subj': 'agentPolicyItem',
-            };
-          })
-        : [],
-    [
-      packageInfo,
-      agentPolicies,
-      packagePoliciesForThisPackageByAgentPolicyId,
-      getDataOutputForPolicy,
-    ]
-  );
-
-  const agentPolicyMultiOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () =>
-      packageInfo && !isOutputLoading && !isAgentPoliciesLoading && !isLoadingPackagePolicies
-        ? agentPolicies.map((policy) => {
-            const isLimitedPackageAlreadyInPolicy =
-              isPackageLimited(packageInfo) &&
-              packagePoliciesForThisPackageByAgentPolicyId?.[policy.id];
-
-            const isAPMPackageAndDataOutputIsLogstash =
-              packageInfo?.name === FLEET_APM_PACKAGE &&
-              getDataOutputForPolicy(policy)?.type === outputType.Logstash;
-
-            return {
-              append: isAPMPackageAndDataOutputIsLogstash ? (
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyDisabledAPMLogstashOuputText"
-                      defaultMessage="Logstash output for integrations is not supported with APM"
-                    />
-                  }
-                >
-                  <EuiIcon size="s" type="warningFilled" />
-                </EuiToolTip>
-              ) : null,
-              key: policy.id,
-              label: policy.name,
-              disabled: isLimitedPackageAlreadyInPolicy || isAPMPackageAndDataOutputIsLogstash,
-              'data-test-subj': 'agentPolicyMultiItem',
-            };
-          })
-        : [],
-    [
-      packageInfo,
-      agentPolicies,
-      packagePoliciesForThisPackageByAgentPolicyId,
-      getDataOutputForPolicy,
-      isOutputLoading,
-      isAgentPoliciesLoading,
-      isLoadingPackagePolicies,
-    ]
-  );
-
-  return {
-    agentPoliciesError,
-    isLoading: isOutputLoading || isAgentPoliciesLoading || isLoadingPackagePolicies,
-    agentPolicyOptions,
-    agentPolicies,
-    agentPolicyMultiOptions,
-  };
-}
 
 function doesAgentPolicyHaveLimitedPackage(policy: AgentPolicy, pkgInfo: PackageInfo) {
   return policy

@@ -232,10 +232,13 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           defaultMessage: 'Agent policy',
         }),
         truncateText: true,
-        render(id, { agentPolicies }) {
+        render(id, { agentPolicies, packagePolicy }) {
           return agentPolicies.length > 0 ? (
-            canShowMultiplePoliciesCell && agentPolicies.length > 1 ? (
-              <MultipleAgentPoliciesSummaryLine policies={agentPolicies} />
+            canShowMultiplePoliciesCell ? (
+              <MultipleAgentPoliciesSummaryLine
+                policies={agentPolicies}
+                packagePolicyId={packagePolicy.id}
+              />
             ) : (
               <AgentPolicySummaryLine policy={agentPolicies[0]} />
             )
