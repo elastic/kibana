@@ -35,7 +35,7 @@ function generateId() {
   return uuidv4();
 }
 
-const saveVisualizationLabel = i18n.translate('xpack.securityAiAssistant.lensESQLFunction.save', {
+const saveVisualizationLabel = i18n.translate('xpack.securitySolution.lensESQLFunction.save', {
   defaultMessage: 'Save visualization',
 });
 
@@ -191,7 +191,7 @@ const EsqlCodeBlockComponent = ({
                     onClick={handleShowVisualization}
                     disabled={actionsDisabled}
                   >
-                    {i18n.translate('xpack.securityAiAssistant.visualizeThisQuery', {
+                    {i18n.translate('xpack.securitySolution.lensESQLFunction.visualizeThisQuery', {
                       defaultMessage: 'Generate Visualization',
                     })}
                   </EuiButtonEmpty>
@@ -229,7 +229,7 @@ const EsqlCodeBlockComponent = ({
                             isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'
                           }
                           onClick={() => setIsTableVisible(!isTableVisible)}
-                          data-test-subj="observabilityAiAssistantLensESQLDisplayTableButton"
+                          data-test-subj="securityAiAssistantLensESQLDisplayTableButton"
                           aria-label={
                             isTableVisible
                               ? i18n.translate(
@@ -254,7 +254,7 @@ const EsqlCodeBlockComponent = ({
                           size="xs"
                           iconType="save"
                           onClick={() => setIsSaveModalOpen(true)}
-                          data-test-subj="observabilityAiAssistantLensESQLSaveButton"
+                          data-test-subj="securityAiAssistantLensESQLSaveButton"
                           aria-label={saveVisualizationLabel}
                         />
                       </EuiToolTip>
