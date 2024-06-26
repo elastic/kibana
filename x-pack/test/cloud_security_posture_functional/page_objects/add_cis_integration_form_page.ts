@@ -13,7 +13,6 @@ export function AddCisIntegrationFormPageProvider({
 }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header']);
-  const browser = getService('browser');
 
   const cisAzure = {
     getPostInstallArmTemplateModal: async () => {
@@ -159,14 +158,9 @@ export function AddCisIntegrationFormPageProvider({
     await integrationList[0].click();
   };
 
-  const clickLaunchAndGetCurrentUrl = async (buttonId: string, tabNumber: number) => {
-    const button = await testSubjects.find(buttonId);
-    await button.click();
-    await browser.switchTab(tabNumber);
-    await new Promise((r) => setTimeout(r, 3000));
-    const currentUrl = await browser.getCurrentUrl();
-    await browser.switchTab(0);
-    return currentUrl;
+  const getElementUrl = async (selector: string) => {
+    const button = await testSubjects.find(selector);
+    return (await button.getAttribute('href')) ?? '';
   };
 
   const getIntegrationFormEntirePage = () => testSubjects.find('dataCollectionSetupStep');
@@ -269,7 +263,7 @@ export function AddCisIntegrationFormPageProvider({
     clickPolicyToBeEdited,
     clickFirstElementOnIntegrationTable,
     clickFirstElementOnIntegrationTableAddAgent,
-    clickLaunchAndGetCurrentUrl,
+    getElementUrl,
     getIntegrationFormEntirePage,
     getIntegrationPolicyTable,
     getIntegrationFormEditPage,
