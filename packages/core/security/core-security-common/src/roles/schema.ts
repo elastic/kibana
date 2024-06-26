@@ -270,5 +270,11 @@ export const getKibanaRoleSchema = (
     }
   );
 
+/**
+ * Type representing Elasticsearch specific portion of the role definition.
+ */
 export type ElasticsearchPrivilegesType = TypeOf<typeof elasticsearchRoleSchema>;
+/**
+ * Type representing Kibana specific portion of the role definition.
+ */
 export type KibanaPrivilegesType = TypeOf<ReturnType<typeof getKibanaRoleSchema>>;
