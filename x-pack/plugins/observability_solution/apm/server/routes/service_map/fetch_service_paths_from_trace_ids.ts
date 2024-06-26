@@ -205,10 +205,12 @@ export async function fetchServicePathsFromTraceIds({
                   // Only adds the parentId to the stack if it hasn't visited to prevent infinite loop scenarios
                   // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
                   // doesn't have a parent, in which case we should skip it
-                  if (parent == null && !visited.contains(parentId)) {
-                    // Add currentEventId to be reprocessed once its parent is processed
-                    reprocessStack.push(currentEventId); 
-                    stack.push(parentId);
+                  if (parent == null) {
+                    if (!visited.contains(parentId)) {
+                      // Add currentEventId to be reprocessed once its parent is processed
+                      reprocessStack.push(currentEventId); 
+                      stack.push(parentId);
+                    }
 
                     continue;
                   }
