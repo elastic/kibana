@@ -7,7 +7,10 @@
  */
 
 import React, { useMemo } from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { Filter, Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -19,6 +22,14 @@ import { useFlyoutActions } from './use_flyout_actions';
 import { useDiscoverCustomization } from '../../customizations';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 import { useProfileAccessor } from '../../context_awareness';
+
+const LazyDocViewerAnnotation = dynamic(() => import('./doc_viewer_annotation'), {
+  fallback: (
+    <EuiDelayRender delay={300}>
+      <EuiSkeletonText />
+    </EuiDelayRender>
+  ),
+});
 
 export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
 
@@ -78,10 +89,25 @@ export function DiscoverGridFlyout({
   const docViewer = useMemo(() => {
     const getDocViewer = getDocViewerAccessor(() => ({
       title: flyoutCustomization?.title,
-      docViewsRegistry: (registry: DocViewsRegistry) =>
-        typeof flyoutCustomization?.docViewsRegistry === 'function'
-          ? flyoutCustomization.docViewsRegistry(registry)
-          : registry,
+      docViewsRegistry: (registry: DocViewsRegistry) => {
+        const derivedRegistry =
+          typeof flyoutCustomization?.docViewsRegistry === 'function'
+            ? flyoutCustomization.docViewsRegistry(registry)
+            : registry;
+
+        derivedRegistry.add({
+          id: 'doc_view_annotation',
+          title: i18n.translate('unifiedDocViewer.docViews.docVisAnnotation.title', {
+            defaultMessage: 'Annotation',
+          }),
+          order: 100,
+          component: (props) => {
+            return <LazyDocViewerAnnotation {...props} />;
+          },
+        });
+
+        return derivedRegistry;
+      },
     }));
 
     return getDocViewer({ record: actualHit });
