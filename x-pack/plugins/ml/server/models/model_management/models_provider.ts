@@ -609,6 +609,8 @@ export class ModelsProvider {
       );
       return result;
     } catch (error) {
+      // Request timeouts will usually occur when the model is being downloaded/deployed
+      // Erroring out is misleading in these cases, so we return the model_id and task_type
       if (isRequestTimeout(error)) {
         return {
           model_id: modelConfig.service,
