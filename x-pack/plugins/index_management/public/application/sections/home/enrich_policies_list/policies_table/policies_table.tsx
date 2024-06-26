@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiSearchBarProps,
   EuiButton,
   EuiLink,
+  Criteria,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
+import {
+  useEuiTablePersistingPageSize,
+  DEFAULT_PAGE_SIZE_OPTIONS,
+} from '@kbn/shared-ux-table-pagination';
 import { useAppContext } from '../../../../app_context';
 
 export interface Props {
@@ -25,11 +30,6 @@ export interface Props {
   onDeletePolicyClick: (policyName: string) => void;
   onExecutePolicyClick: (policyName: string) => void;
 }
-
-const pagination = {
-  initialPageSize: 50,
-  pageSizeOptions: [25, 50, 100],
-};
 
 export const PoliciesTable: FunctionComponent<Props> = ({
   policies,
@@ -160,6 +160,21 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
   ];
 
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+
+  const pagination = {
+    pageSize,
+    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+  };
+
+  const onTableChange = ({ page }: Criteria<any>) => {
+    if (page) {
+      setPageSize(page.size);
+      setPersistingPageSize(page.size);
+    }
+  };
+
   return (
     <EuiInMemoryTable
       data-test-subj="enrichPoliciesTable"
@@ -169,6 +184,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
       search={search}
       pagination={pagination}
       sorting={true}
+      onTableChange={onTableChange}
     />
   );
 };

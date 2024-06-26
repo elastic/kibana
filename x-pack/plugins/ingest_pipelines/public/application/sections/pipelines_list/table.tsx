@@ -27,9 +27,14 @@ import {
   EuiSelectableOption,
   EuiFlexGroup,
   EuiFlexItem,
+  Criteria,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
+import {
+  useEuiTablePersistingPageSize,
+  DEFAULT_PAGE_SIZE_OPTIONS,
+} from '@kbn/shared-ux-table-pagination';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
@@ -114,6 +119,16 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
+
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+
+  const onTableChange = ({ page }: Criteria<any>) => {
+    if (page) {
+      setPageSize(page.size);
+      setPersistingPageSize(page.size);
+    }
+  };
 
   const filteredPipelines = useMemo(() => {
     // Filter pipelines list by whatever the user entered in the search bar
@@ -296,9 +311,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
       ],
     },
     pagination: {
-      initialPageSize: 10,
-      pageSizeOptions: [10, 20, 50],
+      initialPageSize: pageSize,
+      pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
     },
+    onTableChange,
     columns: [
       {
         width: '25%',

@@ -9,9 +9,20 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiLink,
+  EuiIcon,
+  Criteria,
+} from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import {
+  useEuiTablePersistingPageSize,
+  DEFAULT_PAGE_SIZE_OPTIONS,
+} from '@kbn/shared-ux-table-pagination';
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
@@ -188,9 +199,19 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+
   const pagination = {
-    initialPageSize: 20,
-    pageSizeOptions: [10, 20, 50],
+    pageSize,
+    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+  };
+
+  const onTableChange = ({ page }: Criteria<any>) => {
+    if (page) {
+      setPageSize(page.size);
+      setPersistingPageSize(page.size);
+    }
   };
 
   const sorting = {
@@ -284,6 +305,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         sorting={sorting}
         selection={selectionConfig}
         pagination={pagination}
+        onTableChange={onTableChange}
         rowProps={() => ({
           'data-test-subj': 'row',
         })}

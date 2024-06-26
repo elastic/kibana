@@ -22,9 +22,14 @@ import {
   EuiSelectable,
   EuiFilterButton,
   EuiSelectableOption,
+  Criteria,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import {
+  useEuiTablePersistingPageSize,
+  DEFAULT_PAGE_SIZE_OPTIONS,
+} from '@kbn/shared-ux-table-pagination';
 import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
@@ -87,6 +92,16 @@ export const ComponentTable: FunctionComponent<Props> = ({
   ]);
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
+
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+
+  const onTableChange = ({ page }: Criteria<any>) => {
+    if (page) {
+      setPageSize(page.size);
+      setPersistingPageSize(page.size);
+    }
+  };
 
   const filteredComponentTemplates = useMemo(() => {
     const inUseFilter = filterOptions.find(({ key }) => key === 'inUse')?.checked;
@@ -225,9 +240,10 @@ export const ComponentTable: FunctionComponent<Props> = ({
       defaultQuery: defaultFilter,
     },
     pagination: {
-      initialPageSize: 10,
-      pageSizeOptions: [10, 20, 50],
+      initialPageSize: pageSize,
+      pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
     },
+    onTableChange,
     columns: [
       {
         field: 'name',
