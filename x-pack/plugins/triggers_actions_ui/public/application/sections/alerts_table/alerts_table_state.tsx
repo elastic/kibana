@@ -20,7 +20,6 @@ import {
   EuiDataGridControlColumn,
 } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
@@ -28,14 +27,15 @@ import type {
   RuleRegistrySearchRequestPagination,
 } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
-import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { EmptyState } from './empty_state';
 import {
@@ -64,18 +64,13 @@ import { CasesService } from './types';
 import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
 import { ErrorBoundary, FallbackComponent } from '../common/components/error_boundary';
 
-const DefaultPagination = {
-  pageSize: 10,
-  pageIndex: 0,
-};
-
 export type AlertsTableStateProps = {
   alertsTableConfigurationRegistry: AlertsTableConfigurationRegistryContract;
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
-  pageSize?: number;
+  initialPageSize?: number;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   onLoaded?: (alerts: Alerts) => void;
@@ -199,7 +194,7 @@ const AlertsTableStateWithQueryProvider = memo(
     id,
     featureIds,
     query,
-    pageSize,
+    initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
     leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
     trailingControlColumns,
     rowHeightsOptions,
@@ -217,10 +212,13 @@ const AlertsTableStateWithQueryProvider = memo(
     lastReloadRequestTime,
     emptyStateHeight,
   }: AlertsTableStateProps) => {
-    const { cases: casesService, fieldFormats } = useKibana<{
+    const {
+      data,
+      cases: casesService,
+      fieldFormats,
+    } = useKibana().services as ReturnType<typeof useKibana>['services'] & {
       cases?: CasesService;
-      fieldFormats: FieldFormatsRegistry;
-    }>().services;
+    };
     const hasAlertsTableConfiguration =
       alertsTableConfigurationRegistry?.has(configurationId) ?? false;
 
@@ -273,13 +271,12 @@ const AlertsTableStateWithQueryProvider = memo(
     storageAlertsTable.current = getStorageConfig();
 
     const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
-    const [pagination, setPagination] = useState({
-      ...DefaultPagination,
-      pageSize: pageSize ?? DefaultPagination.pageSize,
-    });
+    const [pageIndex, setPageIndex] = useState(0);
+    const [pageSize, setPageSize] = useState(initialPageSize);
 
-    const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
-      setPagination(_pagination);
+    const onPageChange = useCallback((pagination: RuleRegistrySearchRequestPagination) => {
+      setPageIndex(pagination.pageIndex);
+      setPageSize(pagination.pageSize);
     }, []);
 
     const {
@@ -301,28 +298,35 @@ const AlertsTableStateWithQueryProvider = memo(
       initialBrowserFields: propBrowserFields,
     });
 
-    const [
+    const {
+      data: alertsData,
       isLoading,
-      {
-        alerts,
-        oldAlertsData,
-        ecsAlertsData,
-        isInitializing,
-        getInspectQuery,
-        refetch: refresh,
-        totalAlerts: alertsCount,
-      },
-    ] = useFetchAlerts({
-      fields,
+      refetch,
+      isInitialLoading,
+      isSuccess,
+    } = useSearchAlertsQuery({
+      data,
       featureIds,
+      fields,
       query,
-      pagination,
-      onPageChange,
-      onLoaded,
-      runtimeMappings,
       sort,
-      skip: false,
+      runtimeMappings,
+      pageIndex,
+      pageSize,
     });
+    const {
+      alerts = [],
+      oldAlertsData = [],
+      ecsAlertsData = [],
+      total: alertsCount = -1,
+      querySnapshot,
+    } = alertsData ?? {};
+
+    useEffect(() => {
+      if (onLoaded && isInitialLoading && !isLoading && isSuccess) {
+        onLoaded();
+      }
+    }, [isInitialLoading, isLoading, isSuccess, onLoaded]);
 
     const mutedAlertIds = useMemo(() => {
       return [...new Set(alerts.map((a) => a['kibana.alert.rule.uuid']![0]))];
@@ -350,14 +354,14 @@ const AlertsTableStateWithQueryProvider = memo(
 
     useEffect(() => {
       if (onUpdate) {
-        onUpdate({ isLoading, totalCount: alertsCount, refresh });
+        onUpdate({ isLoading, totalCount: alertsCount, refresh: refetch });
       }
-    }, [isLoading, alertsCount, onUpdate, refresh]);
+    }, [isLoading, alertsCount, onUpdate, refetch]);
     useEffect(() => {
       if (lastReloadRequestTime) {
-        refresh();
+        refetch();
       }
-    }, [lastReloadRequestTime, refresh]);
+    }, [lastReloadRequestTime, refetch]);
 
     const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
     const maintenanceWindowIds = useMemo(() => getMaintenanceWindowIdsFromAlerts(alerts), [alerts]);
@@ -462,15 +466,15 @@ const AlertsTableStateWithQueryProvider = memo(
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
-        isInitializing,
-        pagination,
+        querySnapshot,
+        pageIndex,
+        pageSize,
         sort,
         isLoading,
         alerts,
         oldAlertsData,
         ecsAlertsData,
-        getInspectQuery,
-        refetch: refresh,
+        refetch,
         alertsCount,
         onSortChange,
         onPageChange,
@@ -483,8 +487,8 @@ const AlertsTableStateWithQueryProvider = memo(
         columns,
         id,
         leadingControlColumns,
-        trailingControlColumns,
         showAlertStatusWithFlapping,
+        trailingControlColumns,
         visibleColumns,
         browserFields,
         onToggleColumn,
@@ -493,6 +497,7 @@ const AlertsTableStateWithQueryProvider = memo(
         onColumnResize,
         query,
         rowHeightsOptions,
+        cellContext,
         gridStyle,
         persistentControls,
         showInspectButton,
@@ -500,16 +505,15 @@ const AlertsTableStateWithQueryProvider = memo(
         shouldHighlightRow,
         dynamicRowHeight,
         featureIds,
-        cellContext,
-        isInitializing,
-        pagination,
+        querySnapshot,
+        pageIndex,
+        pageSize,
         sort,
         isLoading,
         alerts,
         oldAlertsData,
         ecsAlertsData,
-        getInspectQuery,
-        refresh,
+        refetch,
         alertsCount,
         onSortChange,
         onPageChange,
@@ -530,8 +534,8 @@ const AlertsTableStateWithQueryProvider = memo(
           <InspectButtonContainer>
             <EmptyState
               controls={persistentControls}
-              getInspectQuery={getInspectQuery}
-              showInpectButton={showInspectButton}
+              querySnapshot={querySnapshot}
+              showInspectButton={showInspectButton}
               height={emptyStateHeight}
             />
           </InspectButtonContainer>
