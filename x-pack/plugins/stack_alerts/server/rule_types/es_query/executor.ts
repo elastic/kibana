@@ -120,11 +120,6 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateEnd,
       });
 
-  const timeTo1s = start + 1000 - Date.now();
-  if (timeTo1s > 0) {
-    await new Promise((resolve) => setTimeout(resolve, timeTo1s));
-  }
-
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;
