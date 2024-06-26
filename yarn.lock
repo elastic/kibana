@@ -1510,6 +1510,15 @@
   resolved "https://registry.yarnpkg.com/@csstools/selector-specificity/-/selector-specificity-2.0.1.tgz#b6b8d81780b9a9f6459f4bfe9226ac6aefaefe87"
   integrity sha512-aG20vknL4/YjQF9BSV7ts4EWm/yrjagAN7OWBNmlbEOUiu0llj4OGrFoOKK3g2vey4/p2omKCoHrWtPxSwV3HA==
 
+"@cypress/debugging-proxy@2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@cypress/debugging-proxy/-/debugging-proxy-2.0.1.tgz#c0ef569af4c2efb6ceb329e5813bc770b133ab9e"
+  integrity sha512-kUFQSNQfvZUO5yqtiir65FPPJZKPQaA68trYiKlHuWhDu9sopjIAXoZv/ff0GbLSNDHdxIuF0VyJhJIRRHuhAw==
+  dependencies:
+    debug "^4.1.1"
+    http-proxy "^1.17.0"
+    self-signed-cert "^1.0.1"
+
 "@cypress/grep@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@cypress/grep/-/grep-4.0.1.tgz#bce679f85da286c4979bb9ffc79b2782dc5b75c6"
@@ -1649,10 +1658,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@65.2.0":
-  version "65.2.0"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-65.2.0.tgz#203496b6471e4845807cb70c48b0990676882ef4"
-  integrity sha512-yeqascGqvnDABvtYOHgd7sr6cEq5kivFWKaS3UWeb/GpOxk+O4Ef1PlbBxpchgDyInP957SWlhKDmhUFF1Ttzg==
+"@elastic/charts@66.0.3":
+  version "66.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-66.0.3.tgz#16b2290fd37d7ca4d5eb96bd63b947b59cace39d"
+  integrity sha512-McCg8X72U4DGqMihlQnuixsCoJEQHAt27lBKYLJWH9n6N/2EUDsdejUPIuiYqCRrEUyUOUq2XcyJMgOw4It50A==
   dependencies:
     "@popperjs/core" "^2.11.8"
     bezier-easing "^2.1.0"
@@ -1734,10 +1743,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.0.0-backport.0":
-  version "95.0.0-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.0.0-backport.0.tgz#6fdfbc813259cf82896f24641bb6e8a03587f3e8"
-  integrity sha512-aaCQYLdJ4/1uQUb8xsToa94HwUDN2HSjtZzrgh3iT3El7tieNk6TNzX9QtNePw9M57snpdt41wyg6QFM7Jhltg==
+"@elastic/eui@95.1.0-backport.0":
+  version "95.1.0-backport.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.1.0-backport.0.tgz#effc5a536d7630a7bad7ff1aae817c8beab3cfef"
+  integrity sha512-0V5+7hGk4PyiR1qi1UA15RctQMJCCRDvCZSlgtisj5BLQ1fbfPbKUwr3oVqpx7gwhswDDP2jWWbk1OmUR1nnfg==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2670,10 +2679,10 @@
     "@hapi/hoek" "9.x.x"
     "@hapi/validate" "1.x.x"
 
-"@hapi/hoek@9.x.x", "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.0.4", "@hapi/hoek@^9.2.1":
-  version "9.2.1"
-  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.2.1.tgz#9551142a1980503752536b5050fd99f4a7f13b17"
-  integrity sha512-gfta+H8aziZsm8pZa0vj04KO6biEiisppNgA1kbJvFrrWu9Vm7eaUEy76DIxsuTaWvti5fkJVhllWc6ZTE+Mdw==
+"@hapi/hoek@9.x.x", "@hapi/hoek@^9.0.0", "@hapi/hoek@^9.0.4", "@hapi/hoek@^9.2.1", "@hapi/hoek@^9.3.0":
+  version "9.3.0"
+  resolved "https://registry.yarnpkg.com/@hapi/hoek/-/hoek-9.3.0.tgz#8368869dcb735be2e7f5cb7647de78e167a251fb"
+  integrity sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==
 
 "@hapi/inert@^6.0.4":
   version "6.0.4"
@@ -2781,10 +2790,10 @@
   resolved "https://registry.yarnpkg.com/@hapi/teamwork/-/teamwork-5.1.1.tgz#4d2ba3cac19118a36c44bf49a3a47674de52e4e4"
   integrity sha512-1oPx9AE5TIv+V6Ih54RP9lTZBso3rP8j4Xhb6iSVwPXtAM+sDopl5TFMv5Paw73UnpZJ9gjcrTE1BXrWt9eQrg==
 
-"@hapi/topo@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@hapi/topo/-/topo-5.0.0.tgz#c19af8577fa393a06e9c77b60995af959be721e7"
-  integrity sha512-tFJlT47db0kMqVm3H4nQYgn6Pwg10GTZHb1pwmSiv1K4ks6drQOtfEF5ZnPjkvC+y4/bUPHK+bc87QvLcL+WMw==
+"@hapi/topo@^5.0.0", "@hapi/topo@^5.1.0":
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@hapi/topo/-/topo-5.1.0.tgz#dc448e332c6c6e37a4dc02fd84ba8d44b9afb012"
+  integrity sha512-foQZKJig7Ob0BMAYBfcJk8d77QtOe7Wo4ox7ff1lQYoNNAb6jwcY1ncdoy2e9wQZzvNy7ODZCYJkK8kzmcAnAg==
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
@@ -5232,6 +5241,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/json-schemas@link:x-pack/packages/ml/json_schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kbn-health-gateway-status-plugin@link:test/health_gateway/plugins/status":
   version "0.0.0"
   uid ""
@@ -5928,6 +5941,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/rollup@link:x-pack/packages/rollup":
+  version "0.0.0"
+  uid ""
+
 "@kbn/router-to-openapispec@link:packages/kbn-router-to-openapispec":
   version "0.0.0"
   uid ""
@@ -6089,6 +6106,14 @@
   uid ""
 
 "@kbn/security-api-integration-helpers@link:x-pack/test/security_api_integration/packages/helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-form-components@link:x-pack/packages/security/form_components":
   version "0.0.0"
   uid ""
 
@@ -8184,10 +8209,10 @@
     agentkeepalive "^4.1.3"
     lodash "^4.17.21"
 
-"@sideway/address@^4.1.3":
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/@sideway/address/-/address-4.1.4.tgz#03dccebc6ea47fdc226f7d3d1ad512955d4783f0"
-  integrity sha512-7vwq+rOHVWjyXxVlR76Agnvhy8I9rpzjosTESvmhNeXOXdZZB15Fl+TI9x1SiHZH5Jv2wTGduSxFDIaq0m3DUw==
+"@sideway/address@^4.1.5":
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/@sideway/address/-/address-4.1.5.tgz#4bc149a0076623ced99ca8208ba780d65a99b9d5"
+  integrity sha512-IqO/DUQHUkPeixNQ8n0JA6102hT9CmaljNTPmQ1u8MEhBo/R4Q8eKLN/vGZxuebwOroDB4cbpjheD4+/sKFK4Q==
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
@@ -19489,7 +19514,7 @@ http-proxy-middleware@^2.0.3:
     is-plain-obj "^3.0.0"
     micromatch "^4.0.2"
 
-http-proxy@^1.18.1:
+http-proxy@^1.17.0, http-proxy@^1.18.1:
   version "1.18.1"
   resolved "https://registry.yarnpkg.com/http-proxy/-/http-proxy-1.18.1.tgz#401541f0534884bbf95260334e72f88ee3976549"
   integrity sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==
@@ -21229,23 +21254,23 @@ jest@^29.6.1:
     import-local "^3.0.2"
     jest-cli "^29.6.1"
 
-joi-to-json@^4.2.1:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.2.1.tgz#be275866fd617c63f1ae81eea428fa5de6e036a4"
-  integrity sha512-HIPyrmT9akm2C4zOZ3qR30GkQs7JBr3LX1/oXXWyC2E1NUnDHjTczqHT0H6l495B99xAyFaJ6LM6KRFTdkKoxQ==
+joi-to-json@^4.3.0:
+  version "4.3.0"
+  resolved "https://registry.yarnpkg.com/joi-to-json/-/joi-to-json-4.3.0.tgz#c56131ecf8a772fce89fd98b7f81d7b0fac31dbc"
+  integrity sha512-j6wV/liW2CmPJBJCAsRHegS91JV2QQtg2J/Z/67VfdSvuE65njCx6DrYZY1cw0BXwlxHewpVtiDnY8W0aaNr+A==
   dependencies:
     combinations "^1.0.0"
     lodash "^4.17.21"
     semver-compare "^1.0.0"
 
-joi@^17.3.0, joi@^17.7.1:
-  version "17.7.1"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-17.7.1.tgz#854fc85c7fa3cfc47c91124d30bffdbb58e06cec"
-  integrity sha512-teoLhIvWE298R6AeJywcjR4sX2hHjB3/xJX4qPjg+gTg+c0mzUDsziYlqPmLomq9gVsfaMcgPaGc7VxtD/9StA==
+joi@^17.13.3, joi@^17.3.0:
+  version "17.13.3"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-17.13.3.tgz#0f5cc1169c999b30d344366d384b12d92558bcec"
+  integrity sha512-otDA4ldcIx+ZXsKHWmp0YizCweVRZG96J10b0FevjfuncLO1oX59THoAmHkNubYJ+9gWsYsp5k8v4ib6oDv1fA==
   dependencies:
-    "@hapi/hoek" "^9.0.0"
-    "@hapi/topo" "^5.0.0"
-    "@sideway/address" "^4.1.3"
+    "@hapi/hoek" "^9.3.0"
+    "@hapi/topo" "^5.1.0"
+    "@sideway/address" "^4.1.5"
     "@sideway/formula" "^3.0.1"
     "@sideway/pinpoint" "^2.0.0"
 
@@ -28088,6 +28113,11 @@ selenium-webdriver@^4.21.0:
     jszip "^3.10.1"
     tmp "^0.2.3"
     ws ">=8.16.0"
+
+self-signed-cert@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/self-signed-cert/-/self-signed-cert-1.0.1.tgz#9e2fae07503f84fb910f4a87c5c5c6becc207bf6"
+  integrity sha512-86d1jYydqaRdUEyR9tj5nQ0d059RUWB9gdZrzDy2MJaUHii1h9EyzbAepkV1rOLO2AkSkQbXtUrqWRH4FDYWHA==
 
 selfsigned@^2.0.1:
   version "2.0.1"

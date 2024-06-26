@@ -77,7 +77,7 @@ export interface TextBasedLanguagesEditorProps {
    * The text based queries are relying on adhoc dataviews which
    * can have an @timestamp timefield or nothing
    */
-  detectTimestamp?: boolean;
+  detectedTimestamp?: string;
   /** Array of errors */
   errors?: Error[];
   /** Warning string as it comes from ES */
@@ -147,7 +147,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   onTextLangQuerySubmit,
   expandCodeEditor,
   isCodeEditorExpanded,
-  detectTimestamp = false,
+  detectedTimestamp,
   errors: serverErrors,
   warning: serverWarning,
   isLoading,
@@ -221,7 +221,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && allowQueryCancellation) {
+    if (isQueryLoading && isLoading && allowQueryCancellation) {
       abortController?.abort();
       setIsQueryLoading(false);
     } else {
@@ -235,7 +235,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+  }, [
+    isQueryLoading,
+    isLoading,
+    allowQueryCancellation,
+    abortController,
+    onTextLangQuerySubmit,
+    language,
+  ]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -691,9 +698,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     quickSuggestions: true,
     readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
     renderLineHighlight: !isCodeEditorExpanded ? 'none' : 'line',
     renderLineHighlightOnlyWhenFocus: true,
     scrollbar: {
@@ -967,7 +972,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     onErrorClick={onErrorClick}
                     runQuery={onQuerySubmit}
                     updateQuery={onQueryUpdate}
-                    detectTimestamp={detectTimestamp}
+                    detectedTimestamp={detectedTimestamp}
                     editorIsInline={editorIsInline}
                     disableSubmitAction={disableSubmitAction}
                     hideRunQueryText={hideRunQueryText}
@@ -1066,7 +1071,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onErrorClick={onErrorClick}
           runQuery={onQuerySubmit}
           updateQuery={onQueryUpdate}
-          detectTimestamp={detectTimestamp}
+          detectedTimestamp={detectedTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}

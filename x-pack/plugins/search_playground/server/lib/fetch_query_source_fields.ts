@@ -53,25 +53,15 @@ const EMBEDDING_TYPE: Record<TaskType, SemanticEmbeddingType> = {
 export const getModelIdFields = (fieldCapsResponse: FieldCapsResponse) => {
   const { fields } = fieldCapsResponse;
   return Object.keys(fields).reduce<Array<{ path: string; aggField: string }>>((acc, fieldKey) => {
-    const field = fields[fieldKey];
     if (fieldKey.endsWith('model_id')) {
-      if ('keyword' in field && field.keyword.aggregatable) {
-        acc.push({
-          path: fieldKey,
-          aggField: fieldKey,
-        });
-        return acc;
-      }
-      const keywordModelIdField = fields[fieldKey + '.keyword'];
+      const multiField = Object.keys(fields)
+        .filter((key) => key.startsWith(fieldKey))
+        .find((key) => fields[key].keyword && fields[key].keyword.aggregatable);
 
-      if (
-        keywordModelIdField &&
-        `keyword` in keywordModelIdField &&
-        keywordModelIdField.keyword.aggregatable
-      ) {
+      if (multiField) {
         acc.push({
           path: fieldKey,
-          aggField: fieldKey + '.keyword',
+          aggField: multiField,
         });
         return acc;
       }

@@ -20,6 +20,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
+import { getEarliestLatestParams } from './utils/get_earliest_latest_params';
 import { getTime } from '../../query';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
 import { UiSettingsCommon } from '../..';
@@ -152,8 +153,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             const esQueryConfigs = getEsQueryConfig(
               uiSettings as Parameters<typeof getEsQueryConfig>[0]
             );
+
+            const timeParams = getEarliestLatestParams(query, input.timeRange);
+            const namedParams = [];
+            if (timeParams?.earliest) {
+              namedParams.push({ earliest: timeParams.earliest });
+            }
+            if (timeParams?.latest) {
+              namedParams.push({ latest: timeParams.latest });
+            }
+
+            if (namedParams.length) {
+              params.params = namedParams;
+            }
+
+            // don't send the timefilter if the time filter named params are already in the query
             const timeFilter =
               input.timeRange &&
+              (!timeParams?.earliest || !timeParams?.latest) &&
               getTime(undefined, input.timeRange, {
                 fieldName: timeField,
               });
