@@ -9,6 +9,7 @@ import React, { memo, useEffect, useState } from 'react';
 import type { EuiIconProps } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { getAgentTypeName } from '../../../../translations';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 const fetchSentinelOneLogoSvg = (): Promise<string> =>
@@ -17,7 +18,7 @@ const fetchCrowdstrikeLogoSvg = (): Promise<string> =>
   import('./images/crowdstrike_logo.svg').then((response) => response.default);
 
 export interface AgentTypeVendorLogoProps
-  extends Pick<EuiIconProps, 'size' | 'data-test-subj' | 'color' | 'title'> {
+  extends Pick<EuiIconProps, 'size' | 'data-test-subj' | 'color'> {
   agentType: ResponseActionAgentType;
 }
 
@@ -50,7 +51,14 @@ export const AgentTypeVendorLogo = memo<AgentTypeVendorLogoProps>(
       }
     }, [agentType, isMounted]);
 
-    return <EuiIcon type={iconType} size="m" {...otherIconProps} />;
+    return (
+      <EuiIcon
+        type={iconType}
+        title={iconType === 'empty' ? '' : getAgentTypeName(agentType)}
+        size="m"
+        {...otherIconProps}
+      />
+    );
   }
 );
 AgentTypeVendorLogo.displayName = 'AgentTypeVendorLogo';
