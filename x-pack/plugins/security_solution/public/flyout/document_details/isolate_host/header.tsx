@@ -35,7 +35,11 @@ export const PanelHeader: FC = () => {
       <EuiFlexItem grow={false} data-test-subj="flyoutHostIsolationHeaderTitle">
         {isolateAction === 'isolateHost' ? <>{ISOLATE_HOST}</> : <>{UNISOLATE_HOST}</>}
         <EuiSpacer size="s" />
-        <AgentTypeIntegration agentType={agentType} layout="horizontal" />
+        <AgentTypeIntegration
+          agentType={agentType}
+          layout="horizontal"
+          data-test-subj="flyoutHostIsolationHeaderIntegration"
+        />
       </EuiFlexItem>
       {showTechPreviewBadge && (
         <EuiFlexItem grow={false}>

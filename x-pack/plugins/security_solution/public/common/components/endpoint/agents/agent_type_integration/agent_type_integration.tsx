@@ -39,7 +39,11 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
     const testId = useTestIdGenerator(dataTestSubj);
 
     return (
-      <EuiFlexGroup direction={layout === 'horizontal' ? 'row' : 'column'} gutterSize="s">
+      <EuiFlexGroup
+        direction={layout === 'horizontal' ? 'row' : 'column'}
+        gutterSize="s"
+        data-test-subj={testId()}
+      >
         <EuiFlexItem grow={false}>
           <EuiText color="subdued" size={textSize} data-test-subj={testId('label')}>
             {INTEGRATION_SECTION_LABEL}&nbsp;
