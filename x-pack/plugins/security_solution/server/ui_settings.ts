@@ -335,8 +335,8 @@ export const initUiSettings = (
         'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
         {
           defaultMessage: `
-            Exclude events from frozen or cold data tiers during rule execution. Alerts won't be generated.
-            <br>Use this option for faster performance or reduce rule execution time if it's too long or timeouts.
+            Events from frozen or cold data tiers won;t generate alerts during rule execution.
+            <br>Use this option for faster performance or to reduce rule execution time, if it's too large or timeouts.
             <br>Comma delimit to exclude multiple tiers - data_frozen,data_cold.`,
         }
       ),
