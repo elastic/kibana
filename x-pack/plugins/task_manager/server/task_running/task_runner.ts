@@ -629,11 +629,20 @@ export class TaskManagerRunner implements TaskRunner {
             return asOk({ status: TaskStatus.ShouldDelete });
           }
 
-          const { startedAt, schedule } = this.instance.task;
+          const { runAt: originalRunAt, schedule } = this.instance.task;
 
+          const nextRunAt = new Date(
+            Math.max(
+              intervalFromDate(
+                originalRunAt,
+                reschedule?.interval ?? schedule?.interval
+              )!.getTime(),
+              Date.now()
+            )
+          );
+          console.log('RESCHEDULING TASK', JSON.stringify(this.instance.task, null, 2), 'TO', nextRunAt);
           return asOk({
-            runAt:
-              runAt || intervalFromDate(startedAt!, reschedule?.interval ?? schedule?.interval)!,
+            runAt: runAt || nextRunAt,
             state,
             schedule: reschedule ?? schedule,
             attempts,
