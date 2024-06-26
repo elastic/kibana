@@ -56,6 +56,7 @@ import { notificationService } from '../../../../services/notification';
 import { SemanticTextBanner } from './semantic_text_banner';
 import { TrainedModelsDeploymentModal } from './trained_models_deployment_modal';
 import { parseMappings } from '../../../../shared/parse_mappings';
+import { UnsavedChangesCallout } from './unsaved_changes_callout';
 
 export const DetailsPageMappingsContent: FunctionComponent<{
   index: Index;
@@ -590,6 +591,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           url={url}
         />
       )}
+      {<UnsavedChangesCallout hasUnsavedChanges={isAddingFields} />}
     </>
   );
 };
