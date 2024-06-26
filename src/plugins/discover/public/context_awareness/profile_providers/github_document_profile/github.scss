@@ -1,123 +1,117 @@
-.disco-container {
-  position: relative;
-  display: inline-block;
-  margin: 20px;
-}
-
-.avatar {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  animation: dance 1s infinite, rotate 2s infinite linear;
-}
-
-.emojis {
+.shooter_btm {
+  max-width: 100%;
+  width: 300px;
+  height: 5px;
+  background-color: #fff;
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 200px;
-  height: 200px;
-  margin-top: -100px;
-  margin-left: -100px;
-  pointer-events: none;
-}
-
-.emoji {
-  position: absolute;
-  font-size: 30px;
-  animation: float 2s infinite;
-}
-
-.emoji:nth-child(1) {
-  top: 0;
-  left: 50%;
-  animation-delay: 0s;
-}
-
-.emoji:nth-child(2) {
-  top: 50%;
   left: 0;
-  animation-delay: 0.4s;
+  z-index: 1;
+  animation: bottom_shooter 3.5s ease-in-out infinite alternate
 }
 
-.emoji:nth-child(3) {
-  top: 50%;
+.shooter_btm:after {
+  content: "";
+  z-index: -1;
+  height: 15px;
+  width: 5px;
+  background-color: #000;
+  position: absolute;
+  left: 0;
   right: 0;
-  animation-delay: 0.8s;
+  margin: 0 auto;
+  animation: move_bullet 3.5s ease-in-out infinite;
+  animation-delay: .75s;
+  opacity: 0
 }
 
-.emoji:nth-child(4) {
-  bottom: 0;
-  left: 50%;
-  animation-delay: 1.2s;
-}
-
-.emoji:nth-child(5) {
-  top: 50%;
-  left: 50%;
-  animation-delay: 1.6s;
-}
-
-@keyframes dance {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes rotate {
+@keyframes bottom_shooter {
   0% {
-    transform: rotate(0deg);
+    left: -50px
+  }
+
+  to {
+    left: calc(50px)
+  }
+}
+
+@keyframes move_bullet {
+  0% {
+    bottom: 0;
+    opacity: 0
+  }
+
+  50% {
+    opacity: 1
+  }
+
+  to {
+    bottom: 400px
+  }
+}
+
+.invaders_box {
+  text-align: center;
+  font-size: 46px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  position: relative;
+  height: 230px
+}
+
+.invader_team {
+  width: 100%;
+  text-align: center
+}
+
+.invaders {
+  position: relative;
+  width: 300px;
+  margin-bottom: 100px;
+}
+
+.invader {
+  display: block;
+  animation: move-invaders 2s 1;
+  animation-fill-mode: forwards;
+  margin-left: -300px
+}
+
+@keyframes move-invaders {
+  0% {
+    transform: translateY(0)
+  }
+
+  20% {
+    transform: translateX(150px)
+  }
+
+  50% {
+    transform: translateY(20px)
+  }
+
+  to {
+    transform: translateX(150px)
+  }
+}
+
+.invaders {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.invader {
+  animation: moveInvaders 2s linear infinite alternate;
+}
+
+@keyframes moveInvaders {
+  0% {
+    transform: translateX(0);
   }
   100% {
-    transform: rotate(360deg);
+    transform: translateX(200px); /* Adjust the 200px based on your .invader width */
   }
 }
 
-
-.game-container {
-  position: relative;
-  width: 400px;
-  height: 600px;
-  border: 2px solid black;
-  overflow: hidden;
-  background-color: black;
-  margin: 0 auto;
-}
-
-.ship {
-  position: absolute;
-  bottom: 10%;
-  width: 40px;
-  height: 40px;
-  background-size: cover;
-  background-position: center;
-}
-
-.alien {
-  position: absolute;
-  font-size: 30px;
-  color: white;
-}
-
-.bullet {
-  position: absolute;
-  width: 5px;
-  height: 20px;
-  background-color: red;
-}
-
-.githubMarkDown img {
-  max-width: 100%;
-}
