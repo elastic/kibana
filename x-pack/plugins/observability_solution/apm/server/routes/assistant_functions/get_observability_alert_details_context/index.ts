@@ -6,9 +6,9 @@
  */
 
 import { Logger } from '@kbn/core/server';
-import {
-  AlertDetailsContextualInsightsHandlerQuery,
-  AlertDetailsContextualInsightsRequestContext,
+import type {
+  AlertDetailsContextualInsight,
+  AlertDetailsContextualInsightsHandler,
 } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
@@ -30,11 +30,8 @@ import { getApmErrors } from './get_apm_errors';
 export const getAlertDetailsContextHandler = (
   resourcePlugins: APMRouteHandlerResources['plugins'],
   logger: Logger
-) => {
-  return async (
-    requestContext: AlertDetailsContextualInsightsRequestContext,
-    query: AlertDetailsContextualInsightsHandlerQuery
-  ) => {
+): AlertDetailsContextualInsightsHandler => {
+  return async (requestContext, query) => {
     const resources = {
       getApmIndices: async () => {
         const coreContext = await requestContext.core;
@@ -119,13 +116,7 @@ export const getAlertDetailsContextHandler = (
         })
       : undefined;
 
-    const dataFetchers: Array<
-      () => Promise<{
-        key: string;
-        description: string;
-        data: unknown[] | object | undefined;
-      }>
-    > = [];
+    const dataFetchers: Array<() => Promise<AlertDetailsContextualInsight>> = [];
 
     // service summary
     if (serviceName) {
@@ -279,7 +270,7 @@ export const getAlertDetailsContextHandler = (
       })
     );
 
-    return items.filter((item) => item && !isEmpty(item.data));
+    return items.filter((item) => item && !isEmpty(item.data)) as AlertDetailsContextualInsight[];
   };
 };
 
