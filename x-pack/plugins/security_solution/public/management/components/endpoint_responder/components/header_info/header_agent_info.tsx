@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import { AgentTypeIntegration } from '../../../../../common/components/endpoint/agent_type_integration';
+import { AgentTypeIntegration } from '../../../../../common/components/endpoint/agents/agent_type_integration';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { Platform } from './platforms';

@@ -10,10 +10,10 @@ import type { EuiTextProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
-import { AgentTypeVendorLogo } from '../agents/agent_type_vendor_logo';
-import { getAgentTypeName } from '../../../translations';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { useTestIdGenerator } from '../../../../../management/hooks/use_test_id_generator';
+import { AgentTypeVendorLogo } from '../agent_type_vendor_logo';
+import { getAgentTypeName } from '../../../../translations';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export const INTEGRATION_SECTION_LABEL = i18n.translate(
   'xpack.securitySolution.agentTypeIntegration.integrationSectionLabel',

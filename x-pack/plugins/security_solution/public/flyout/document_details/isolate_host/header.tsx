@@ -8,7 +8,7 @@
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { AgentTypeIntegration } from '../../../common/components/endpoint/agent_type_integration';
+import { AgentTypeIntegration } from '../../../common/components/endpoint/agents/agent_type_integration';
 import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../common/translations';
 import { useIsolateHostPanelContext } from './context';

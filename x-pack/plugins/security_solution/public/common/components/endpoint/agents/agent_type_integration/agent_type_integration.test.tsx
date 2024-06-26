@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import type { AppContextTestRender } from '../../../mock/endpoint';
-import { createAppRootMockRenderer } from '../../../mock/endpoint';
+import type { AppContextTestRender } from '../../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../mock/endpoint';
 import type { AgentTypeIntegrationProps } from './agent_type_integration';
 import { AgentTypeIntegration, INTEGRATION_SECTION_LABEL } from './agent_type_integration';
-import { getAgentTypeName } from '../../../translations';
-import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
+import { getAgentTypeName } from '../../../../translations';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 describe('AgentTypeIntegration component', () => {
   let props: AgentTypeIntegrationProps;
