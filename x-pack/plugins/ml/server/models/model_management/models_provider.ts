@@ -616,6 +616,8 @@ export class ModelsProvider {
           model_id: modelConfig.service,
           task_type: taskType,
         };
+      } else {
+        throw error;
       }
     }
   }
