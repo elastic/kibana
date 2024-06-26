@@ -13,7 +13,7 @@ import {
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { TestProviders } from '../../../../common/mock';
@@ -51,14 +51,14 @@ const panelContextValue = {
   eventId: 'event id',
   indexName: 'indexName',
   scopeId: 'scopeId',
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
 const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={panelContextValue}>
+      <DocumentDetailsContext.Provider value={panelContextValue}>
         <HighlightedFieldsCell values={values} field={field} />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

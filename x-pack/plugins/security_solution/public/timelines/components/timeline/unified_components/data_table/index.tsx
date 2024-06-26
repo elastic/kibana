@@ -394,6 +394,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
           eventIdToNoteIds={eventIdToNoteIds}
+          rowHeight={rowHeight}
           setCustomGridBodyProps={setCustomGridBodyProps}
           events={events}
           enabledRowRenderers={enabledRowRenderers}
@@ -409,6 +410,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         eventIdToNoteIds,
         cellContext?.eventIdsAddingNotes,
         cellContext?.onToggleShowNotes,
+        rowHeight,
         refetch,
       ]
     );
