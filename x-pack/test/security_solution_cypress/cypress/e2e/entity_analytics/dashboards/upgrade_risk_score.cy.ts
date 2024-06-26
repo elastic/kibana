@@ -32,15 +32,16 @@ import { RiskScoreEntity } from '../../../tasks/risk_scores/common';
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { upgradeRiskEngine } from '../../../tasks/entity_analytics';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const spaceId = 'default';
 
 // Failing: See https://github.com/elastic/kibana/issues/185024
-describe.skip('Upgrade risk scores', { tags: ['@ess'] }, () => {
+describe('Upgrade risk scores', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     deleteRiskEngineConfiguration();
-    createRule(getNewRule({ rule_id: 'rule1' }));
+    deleteAlertsAndRules();
   });
 
   describe('show upgrade risk button', () => {
