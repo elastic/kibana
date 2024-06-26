@@ -14,10 +14,10 @@ export const GENERATE = i18n.translate(
   }
 );
 
-export const LOADING = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.pages.header.loadingButton',
+export const CANCEL = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.header.cancelButton',
   {
-    defaultMessage: 'Loading...',
+    defaultMessage: 'Cancel',
   }
 );
 
