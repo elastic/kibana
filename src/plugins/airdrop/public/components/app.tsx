@@ -29,6 +29,8 @@ interface AirdropAppDeps {
   http: CoreStart['http'];
 }
 
+const TRANSFER_DATA_TYPE = 'kibana';
+
 export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) => {
   const [formState, setFormState] = useState<FormState>({
     firstName: '',
@@ -55,7 +57,7 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
 
   const onDragStart = (e: DragEvent) => {
     setIsDragging(true);
-    e.dataTransfer.setData('application/json', JSON.stringify(formState));
+    e.dataTransfer.setData(TRANSFER_DATA_TYPE, JSON.stringify(formState));
   };
 
   const onDragEnd = () => {
@@ -63,33 +65,40 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
   };
 
   const handleDragOver = (e: DragEvent) => {
-    e.preventDefault();
+    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
+      e.preventDefault();
+    }
   };
 
   const handleDragEnter = (e: DragEvent) => {
-    e.preventDefault(); // Necessary to allow a drop
-    if (isDragging) return;
-    if (isDraggingOver) return;
-    timeRef.current = Date.now();
-    setIsDraggingOver(true);
+    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
+      e.preventDefault();
+      if (isDragging || isDraggingOver) return;
+      timeRef.current = Date.now();
+      setIsDraggingOver(true);
+    }
   };
 
   const handleDragLeave = (e: DragEvent) => {
-    e.preventDefault(); // Necessary to allow a drop
-    const diff = Date.now() - timeRef.current; // Needed to prevent flickering
-    if (isDragging) return;
-    if (diff < 100) return;
-    setIsDraggingOver(false);
+    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
+      e.preventDefault();
+      const diff = Date.now() - timeRef.current; // Needed to prevent flickering
+      if (isDragging) return;
+      if (diff < 100) return;
+      setIsDraggingOver(false);
+    }
   };
 
   const handleDrop = (e: DragEvent) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-    if (isDragging) return;
-    const data = e.dataTransfer.getData('application/json');
-    const jsonObject = JSON.parse(data);
-    setFormState(jsonObject);
-    console.log(jsonObject);
+    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
+      e.preventDefault();
+      setIsDraggingOver(false);
+      if (isDragging) return;
+      const data = e.dataTransfer.getData(TRANSFER_DATA_TYPE);
+      const jsonObject = JSON.parse(data);
+      setFormState(jsonObject);
+      console.log(jsonObject);
+    }
   };
 
   return (
@@ -137,10 +146,6 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
                       onDragStart={onDragStart}
                       onDragEnd={onDragEnd}
                       style={{
-                        // padding: '10px',
-                        // border: '1px solid black',
-                        // width: '100px',
-                        // textAlign: 'center',
                         cursor: 'grab',
                       }}
                     >
