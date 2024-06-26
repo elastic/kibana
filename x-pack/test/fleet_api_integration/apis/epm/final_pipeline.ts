@@ -69,7 +69,7 @@ export default function (providerContext: FtrProviderContext) {
 
       for (const hit of res.hits.hits) {
         await es.delete({
-          id: hit._id,
+          id: hit._id!,
           index: hit._index,
         });
       }
