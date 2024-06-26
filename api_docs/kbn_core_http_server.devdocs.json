@@ -4731,42 +4731,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/ping.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/assets/index.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/assets/hosts.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/assets/services.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/assets/containers.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/assets/pods.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/get.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/check.ts"
-              },
-              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/apm.ts"
               },
@@ -7249,18 +7213,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/create.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/reset.ts"
-              },
-              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
@@ -8759,10 +8711,6 @@
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/enable.ts"
-              },
-              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -9681,18 +9629,6 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/plugins/grokdebugger/server/lib/kibana_framework.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/delete.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/disable.ts"
               },
               {
                 "plugin": "synthetics",
@@ -14516,6 +14452,10 @@
               },
               {
                 "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/get_attack_discovery.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/user_conversations/read_route.ts"
               },
               {
@@ -15280,6 +15220,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/inference_models.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/cancel_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",

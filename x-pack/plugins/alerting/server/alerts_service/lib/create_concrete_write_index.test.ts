@@ -645,6 +645,7 @@ describe('createConcreteWriteIndex', () => {
       it(`should log and return when simulating updated mappings returns null`, async () => {
         clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
         clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        // @ts-expect-error type mismatch: mappings cannot be null
         clusterClient.indices.simulateIndexTemplate.mockImplementationOnce(async () => ({
           ...SimulateTemplateResponse,
           template: { ...SimulateTemplateResponse.template, mappings: null },
