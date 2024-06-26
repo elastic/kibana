@@ -16,7 +16,7 @@ import { statuses } from '../status';
 import * as i18n from './translations';
 
 const isStatusValid = (status: string): status is CaseStatuses =>
-  Object.prototype.hasOwnProperty.call(statuses, status);
+  Object.hasOwn(statuses, status);
 
 const getLabelTitle = (userAction: SnakeToCamelCase<StatusUserAction>) => {
   const status = userAction.payload.status ?? '';

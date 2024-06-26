@@ -138,7 +138,7 @@ function findInvalidEcsFields(ecsMapping: AnyObject): string[] {
   );
 
   for (const [ecsValue, paths] of Object.entries(filteredOutput)) {
-    if (!Object.prototype.hasOwnProperty.call(ecsDict, ecsValue)) {
+    if (!Object.hasOwn(ecsDict, ecsValue)) {
       const field = paths.map((p) => p.join('.'));
       results.push(`Invalid ECS field mapping identified for ${ecsValue} : ${field.join(', ')}`);
     }
