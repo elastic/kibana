@@ -14,7 +14,7 @@ import {
   ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  INFERENCE_ENDPOINTS_PLUGIN,
   ENTERPRISE_SEARCH_PRODUCT_NAME,
   AI_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
@@ -27,6 +27,8 @@ import { stripLeadingSlash } from '../../../../common/strip_slashes';
 import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
+
+import { getHomeURL } from './breadcrumbs_home';
 
 /**
  * Types
@@ -106,7 +108,7 @@ export const useSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: SEARCH_PRODUCT_NAME,
-      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      path: getHomeURL(),
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,
@@ -116,7 +118,7 @@ export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
       text: ENTERPRISE_SEARCH_PRODUCT_NAME,
-      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+      path: getHomeURL(),
       shouldNotCreateHref: true,
     },
     ...breadcrumbs,
@@ -150,6 +152,9 @@ export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs =
     { text: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE, path: '/' },
     ...breadcrumbs,
   ]);
+
+export const useEnterpriseSearchRelevanceBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useSearchBreadcrumbs([{ text: INFERENCE_ENDPOINTS_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
 
 export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);

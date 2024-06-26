@@ -45,11 +45,9 @@ export const FilebeatConfigFlyout: FC<Props> = ({ index, results, pipelineId, cl
   } = useDataVisualizerKibana();
 
   useEffect(() => {
-    if (security !== undefined) {
-      security.authc.getCurrentUser().then((user) => {
-        setUsername(user.username === undefined ? null : user.username);
-      });
-    }
+    security.authc.getCurrentUser().then((user) => {
+      setUsername(user.username === undefined ? null : user.username);
+    });
   }, [security]);
 
   useEffect(() => {
