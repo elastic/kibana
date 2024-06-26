@@ -41,10 +41,8 @@ export const entitiesIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
         {
           entity_metrics: {
             mapping: {
-              // @ts-expect-error this should work per: https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html#match-mapping-type
               type: '{dynamic_type}',
             },
-            // @ts-expect-error this should work per: https://www.elastic.co/guide/en/elasticsearch/reference/current/dynamic-templates.html#match-mapping-type
             match_mapping_type: ['long', 'double'],
             path_match: 'entity.metrics.*',
           },

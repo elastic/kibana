@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import type { RuleResponse } from './rule_schemas.gen';
 
-export function getMoment(date?: string | number | null | Date) {
-  if (!date) {
-    return null;
-  }
-
-  return moment(date);
+export function isCustomizedPrebuiltRule(rule: RuleResponse): boolean {
+  return rule.rule_source?.type === 'external' && rule.rule_source.is_customized;
 }
