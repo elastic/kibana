@@ -43,8 +43,9 @@ interface Options {
   instanceId?: string;
   remoteName?: string;
   groupBy?: string;
-  groupings?: Record<string, unknown>;
+  groupings?: Record<string, string>;
 }
+
 export class GetPreviewData {
   constructor(
     private esClient: ElasticsearchClient,
@@ -69,7 +70,11 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    this.getGroupingsFilter(options, filter);
+
+    const groupingFilters = this.getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -170,7 +175,10 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -270,7 +278,10 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -338,7 +349,10 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -408,9 +422,10 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-
-    this.getGroupingsFilter(options, filter);
-
+    const groupingFilters = this.getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
@@ -462,8 +477,10 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -513,18 +530,18 @@ export class GetPreviewData {
     }));
   }
 
-  private getGroupingsFilter(options: Options, filter: estypes.QueryDslQueryContainer[]) {
-    const groupingsKeys = Object.keys(options.groupings || []);
+  private getGroupingsFilter(options: Options): estypes.QueryDslQueryContainer[] | undefined {
+    const groupingsKeys = Object.keys(options.groupings ?? {});
     if (groupingsKeys.length) {
-      groupingsKeys.forEach((key) => {
-        filter.push({
-          term: { [key]: options.groupings?.[key] },
-        });
-      });
+      return groupingsKeys.map((key) => ({
+        term: { [key]: options.groupings![key] },
+      }));
     } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
+      return [
+        {
+          term: { [options.groupBy]: options.instanceId },
+        },
+      ];
     }
   }
 
