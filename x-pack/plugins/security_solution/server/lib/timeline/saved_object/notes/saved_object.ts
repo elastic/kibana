@@ -19,6 +19,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
+  BareNote,
   BareNoteWithoutExternalRefs,
   ResponseNote,
 } from '../../../../../common/api/timeline';
@@ -87,7 +88,7 @@ export const persistNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: BareNoteWithoutExternalRefs;
+  note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }): Promise<ResponseNote> => {
   try {
@@ -128,7 +129,7 @@ export const createNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: BareNoteWithoutExternalRefs;
+  note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -196,7 +197,7 @@ export const updateNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string;
-  note: BareNoteWithoutExternalRefs;
+  note: BareNote | BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -296,7 +297,7 @@ export const convertSavedObjectToSavedNote = (savedObject: unknown): Note => {
 
 export const pickSavedNote = (
   noteId: string | null,
-  savedNote: BareNoteWithoutExternalRefs,
+  savedNote: BareNote | BareNoteWithoutExternalRefs,
   userInfo: AuthenticatedUser | null
 ) => {
   if (noteId == null) {

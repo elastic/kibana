@@ -17,6 +17,7 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
+  BareNote,
   PinnedEvent,
   AllTimelinesResponse,
   ExportTimelineNotFoundError,
@@ -610,12 +611,15 @@ export const copyTimeline = async (
 
   const copiedNotes = Promise.all(
     notes.map((_note) => {
+      const newNote: BareNote = {
+        ..._note,
+        timelineId: newTimelineId,
+      };
       return note.persistNote({
         request,
         noteId: null,
-        note: {
-          ..._note,
-        },
+        note: newNote,
+        overrideOwner: false,
       });
     })
   );
