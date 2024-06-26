@@ -15,6 +15,7 @@ export const ALERT_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.alertAction', {
     defaultMessage: 'Critical',
   }),
+  severity: { level: 3 },
 };
 
 export const HIGH_PRIORITY_ACTION_ID = 'slo.burnRate.high';
@@ -23,6 +24,7 @@ export const HIGH_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.highPriorityAction', {
     defaultMessage: 'High',
   }),
+  severity: { level: 2 },
 };
 
 export const MEDIUM_PRIORITY_ACTION_ID = 'slo.burnRate.medium';
@@ -31,6 +33,7 @@ export const MEDIUM_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.mediumPriorityAction', {
     defaultMessage: 'Medium',
   }),
+  severity: { level: 1 },
 };
 
 export const LOW_PRIORITY_ACTION_ID = 'slo.burnRate.low';
@@ -39,6 +42,7 @@ export const LOW_PRIORITY_ACTION = {
   name: i18n.translate('xpack.slo.alerting.burnRate.lowPriorityAction', {
     defaultMessage: 'Low',
   }),
+  severity: { level: 0 },
 };
 
 export const SUPPRESSED_PRIORITY_ACTION_ID = 'slo.burnRate.suppressed';

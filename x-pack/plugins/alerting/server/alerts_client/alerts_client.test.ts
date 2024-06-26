@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -22,6 +23,7 @@ import {
   ALERT_FLAPPING_HISTORY,
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_TIMESTAMP,
@@ -33,6 +35,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -235,6 +238,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
+  [ALERT_SEVERITY_IMPROVING]: false,
   [ALERT_START]: date,
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: date },
@@ -253,6 +257,8 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
+  [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_SEVERITY_IMPROVING]: undefined,
   ...overrides,
 });
 
@@ -267,6 +273,8 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: date },
   [ALERT_STATUS]: 'recovered',
   [ALERT_CONSECUTIVE_MATCHES]: 0,
+  [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
+  [ALERT_SEVERITY_IMPROVING]: true,
   ...overrides,
 });
 
@@ -682,6 +690,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -964,6 +973,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1013,6 +1023,7 @@ describe('Alerts Client', () => {
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+                [ALERT_PREVIOUS_ACTION_GROUP]: 'default',
                 [ALERT_RULE_CATEGORY]: 'My test rule',
                 [ALERT_RULE_CONSUMER]: 'bar',
                 [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1023,6 +1034,7 @@ describe('Alerts Client', () => {
                 [ALERT_RULE_TYPE_ID]: 'test.rule-type',
                 [ALERT_RULE_TAGS]: ['rule-', '-tags'],
                 [ALERT_RULE_UUID]: '1',
+                [ALERT_SEVERITY_IMPROVING]: true,
                 [ALERT_START]: '2023-03-28T12:27:28.159Z',
                 [ALERT_END]: date,
                 [ALERT_STATUS]: 'recovered',
