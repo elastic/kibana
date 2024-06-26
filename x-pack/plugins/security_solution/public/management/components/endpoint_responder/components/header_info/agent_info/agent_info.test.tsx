@@ -124,5 +124,18 @@ describe('Responder header Agent Info', () => {
       const platformIcon = await renderResult.findByTestId('responseConsole-platformIcon');
       expect(platformIcon).toBeTruthy();
     });
+
+    it('should show agent type integration info', async () => {
+      getAgentStatusMock.mockReturnValue({
+        data: {
+          [agentId]: { ...baseData, agentType, status: HostStatus.HEALTHY },
+        },
+        isLoading: false,
+        isFetched: true,
+      });
+      render(agentType);
+
+      expect(renderResult.getByTestId('responseConsole-integration'));
+    });
   });
 });
