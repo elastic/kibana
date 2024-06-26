@@ -11,8 +11,6 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { NotesFlyoutKey } from '../../../flyout/notes/right';
 import { selectTimelineById } from '../../../timelines/store/selectors';
 import {
   eventHasNotes,
@@ -220,22 +218,9 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [isEventViewer, unifiedComponentsInTimelineEnabled]
   );
 
-  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
-
   const toggleNotes = useCallback(() => {
     toggleShowNotes?.();
-    openFlyout({
-      right: {
-        id: NotesFlyoutKey,
-        params: {
-          eventId,
-          refetch,
-          eventIdToNoteIds,
-          onToggleShowNotes: closeFlyout,
-        },
-      },
-    });
-  }, [refetch, eventIdToNoteIds, openFlyout, toggleShowNotes, eventId, closeFlyout]);
+  }, [toggleShowNotes]);
 
   const noteIds = useMemo(
     () => (eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes),
@@ -285,7 +270,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               toggleShowNotes={toggleNotes}
               timelineType={timelineType}
               eventId={eventId}
-              notesCount={noteIds.length}
+              eventIdToNoteIds={eventIdToNoteIds}
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}

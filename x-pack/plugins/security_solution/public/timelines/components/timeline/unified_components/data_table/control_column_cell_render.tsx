@@ -40,7 +40,6 @@ export const ControlColumnCellRender = memo(function ControlColumnCellRender(
       isEventViewer={false}
       onEventDetailsPanelOpened={noOp}
       onRuleChange={noOp}
-      showNotes={true}
       timelineId={timelineId}
       toggleShowNotes={onToggleShowNotes}
       rowIndex={rowIndex}

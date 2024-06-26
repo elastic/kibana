@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiIcon, EuiHeaderSectionItemButton, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -37,20 +37,28 @@ interface SmallNotesButtonProps {
   toggleShowNotes: (eventId?: string) => void;
   timelineType: TimelineTypeLiteral;
   eventId?: string;
-  notesCount?: number;
+  notesCount: number;
 }
 
 export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
+export const NotificationDot = styled.span`
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.eui.euiColorDanger};
+  top: 15%;
+  left: 65%;
+`;
+
+const NotesButtonContainer = styled(EuiFlexGroup)`
+  position: relative;
+`;
+
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({
-    ariaLabel = i18n.NOTES,
-    isDisabled,
-    toggleShowNotes,
-    timelineType,
-    eventId,
-    notesCount = 0,
-  }) => {
+  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId, notesCount }) => {
     const isTemplate = timelineType === TimelineType.template;
     const onClick = useCallback(() => {
       if (eventId != null) {
@@ -61,17 +69,21 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
     }, [toggleShowNotes, eventId]);
 
     return (
-      <EuiHeaderSectionItemButton
-        aria-label={ariaLabel}
-        data-test-subj="timeline-notes-button-small"
-        disabled={isDisabled}
-        onClick={onClick}
-        isDisabled={isTemplate}
-        notification={notesCount > 0 ? true : false}
-        className={NOTES_BUTTON_CLASS_NAME}
-      >
-        <EuiIcon type="editorComment" size="m" />
-      </EuiHeaderSectionItemButton>
+      <NotesButtonContainer>
+        <EuiFlexItem grow={false}>
+          {notesCount > 0 ? <NotificationDot /> : null}
+          <EuiButtonIcon
+            aria-label={ariaLabel}
+            className={NOTES_BUTTON_CLASS_NAME}
+            data-test-subj="timeline-notes-button-small"
+            disabled={isDisabled}
+            iconType="editorComment"
+            onClick={onClick}
+            size="s"
+            isDisabled={isTemplate}
+          />
+        </EuiFlexItem>
+      </NotesButtonContainer>
     );
   }
 );
@@ -95,7 +107,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
         toggleShowNotes={toggleShowNotes}
         timelineType={timelineType}
         eventId={eventId}
-        notesCount={notesCount}
+        notesCount={notesCount ?? 0}
       />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
@@ -105,7 +117,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
           toggleShowNotes={toggleShowNotes}
           timelineType={timelineType}
           eventId={eventId}
-          notesCount={notesCount}
+          notesCount={notesCount ?? 0}
         />
       </EuiToolTip>
     )
