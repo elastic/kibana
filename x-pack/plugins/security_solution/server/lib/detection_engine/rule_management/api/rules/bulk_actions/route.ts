@@ -237,6 +237,7 @@ export const performBulkActionRoute = (
                   }
 
                   const duplicateRuleToCreate = await duplicateRule({
+                    actionsClient,
                     rule,
                   });
 

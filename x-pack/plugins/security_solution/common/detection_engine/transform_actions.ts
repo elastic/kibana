@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { RuleAction as AlertingRuleAction } from '@kbn/alerting-plugin/common';
+import type {
+  RuleAction as AlertingRuleAction,
+  RuleSystemAction as AlertingRuleSystemAction,
+} from '@kbn/alerting-plugin/common';
 import type { NormalizedAlertAction } from '@kbn/alerting-plugin/server/rules_client';
 import type { NormalizedRuleAction } from '../api/detection_engine/rule_management';
 import type {
@@ -23,7 +26,7 @@ export const transformRuleToAlertAction = ({
   uuid,
   frequency,
   alerts_filter: alertsFilter,
-}: RuleAction): AlertingRuleAction => ({
+}: RuleAction): AlertingRuleAction | AlertingRuleSystemAction => ({
   id,
   params: params as AlertingRuleAction['params'],
   actionTypeId,
@@ -51,6 +54,18 @@ export const transformAlertToRuleAction = ({
   ...(uuid && { uuid }),
   ...(frequency && { frequency }),
   ...(group && { group }),
+});
+
+export const transformAlertToRuleSystemAction = ({
+  id,
+  actionTypeId,
+  params,
+  uuid,
+}: AlertingRuleSystemAction): RuleAction => ({
+  id,
+  params,
+  action_type_id: actionTypeId,
+  ...(uuid && { uuid }),
 });
 
 export const transformNormalizedRuleToAlertAction = ({

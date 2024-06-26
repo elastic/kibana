@@ -47,14 +47,9 @@ export const importRule = async (
     console.error('OLD ACTIONS', oldActions);
     console.error('sys actions 1', systemActions);
 
-    const internalRule = convertCreateAPIToInternalSchema(
-      {
-        ...ruleToImport,
-        actions: oldActions,
-        systemActions,
-      },
-      { immutable: false }
-    );
+    const internalRule = convertCreateAPIToInternalSchema(ruleToImport, actionsClient, {
+      immutable: false,
+    });
 
     return rulesClient.create<RuleParams>({
       data: internalRule,
@@ -64,6 +59,7 @@ export const importRule = async (
     const newInternalRule = convertUpdateAPIToInternalSchema({
       existingRule,
       ruleUpdate: ruleToImport,
+      actionsClient,
     });
 
     return rulesClient.update({

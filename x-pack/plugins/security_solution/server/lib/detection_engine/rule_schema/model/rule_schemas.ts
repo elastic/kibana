@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import type {
+  SanitizedRuleConfig,
+  RuleSystemAction as AlertingRuleSystemAction,
+} from '@kbn/alerting-plugin/common';
 import type {
   RuleActionArrayCamel,
   RuleActionNotifyWhen,
@@ -343,7 +346,7 @@ export interface InternalRuleCreate {
   };
   enabled: IsRuleEnabled;
   actions: RuleActionArrayCamel;
-  systemActions: RuleActionArrayCamel;
+  systemActions: AlertingRuleSystemAction[];
   params: RuleParams;
   throttle?: RuleActionThrottle | null;
   notifyWhen?: RuleActionNotifyWhen | null;
@@ -356,6 +359,7 @@ export interface InternalRuleUpdate {
     interval: string;
   };
   actions: RuleActionArrayCamel;
+  systemActions: AlertingRuleSystemAction[];
   params: RuleParams;
   throttle?: RuleActionThrottle | null;
   notifyWhen?: RuleActionNotifyWhen | null;

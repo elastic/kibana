@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { CreatePrebuiltRuleArgs } from '../detection_rules_client_interface';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
@@ -16,6 +17,7 @@ import { transform } from '../../../utils/utils';
 import { validateMlAuth, RuleResponseValidationError } from '../utils';
 
 export const createPrebuiltRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   args: CreatePrebuiltRuleArgs,
   mlAuthz: MlAuthz
@@ -24,7 +26,7 @@ export const createPrebuiltRule = async (
 
   await validateMlAuth(mlAuthz, params.type);
 
-  const internalRule = convertCreateAPIToInternalSchema(params, {
+  const internalRule = convertCreateAPIToInternalSchema(params, actionsClient, {
     immutable: true,
     defaultEnabled: false,
   });

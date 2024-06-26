@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { partition } from 'lodash';
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
@@ -25,18 +24,10 @@ export const createCustomRule = async (
 ): Promise<RuleResponse> => {
   const { params } = args;
   await validateMlAuth(mlAuthz, params.type);
-  const [oldActions, systemActions] = partition(params.actions, (action) =>
-    actionsClient.isSystemAction(action.action_type_id)
-  );
 
-  const internalRule = convertCreateAPIToInternalSchema(
-    {
-      ...params,
-      actions: oldActions,
-      systemActions,
-    },
-    { immutable: false }
-  );
+  const internalRule = convertCreateAPIToInternalSchema(params, actionsClient, {
+    immutable: false,
+  });
   const rule = await rulesClient.create<RuleParams>({
     data: internalRule,
   });

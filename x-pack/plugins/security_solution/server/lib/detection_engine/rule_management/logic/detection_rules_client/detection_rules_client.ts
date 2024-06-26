@@ -46,7 +46,7 @@ export const createDetectionRulesClient = (
 
   async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
-      return createPrebuiltRule(rulesClient, args, mlAuthz);
+      return createPrebuiltRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
@@ -58,7 +58,7 @@ export const createDetectionRulesClient = (
 
   async patchRule(args: PatchRuleArgs): Promise<RuleAlertType> {
     return withSecuritySpan('DetectionRulesClient.patchRule', async () => {
-      return patchRule(rulesClient, args, mlAuthz);
+      return patchRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
@@ -70,7 +70,7 @@ export const createDetectionRulesClient = (
 
   async upgradePrebuiltRule(args: UpgradePrebuiltRuleArgs): Promise<RuleAlertType> {
     return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
-      return upgradePrebuiltRule(rulesClient, args, mlAuthz);
+      return upgradePrebuiltRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 

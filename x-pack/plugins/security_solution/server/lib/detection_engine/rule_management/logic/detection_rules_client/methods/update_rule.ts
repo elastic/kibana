@@ -48,17 +48,10 @@ export const updateRule = async (
     actionsClient.isSystemAction(action.actionTypeId)
   );
 
-  const [oldRuleUpdateActions, ruleUpdateSystemActions] = partition(ruleUpdate.actions, (action) =>
-    actionsClient.isSystemAction(action.action_type_id)
-  );
-
   const newInternalRule = convertUpdateAPIToInternalSchema({
     existingRule: { ...existingRule, actions: oldActions, systemActions },
-    ruleUpdate: {
-      ...ruleUpdate,
-      actions: oldRuleUpdateActions,
-      systemActions: ruleUpdateSystemActions,
-    },
+    ruleUpdate,
+    actionsClient,
   });
 
   console.error('newInternalRule', JSON.stringify(newInternalRule));

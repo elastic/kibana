@@ -105,6 +105,7 @@ export const previewRulesRoute = (
           const searchSourceClient = await data.search.searchSource.asScoped(request);
           const savedObjectsClient = coreContext.savedObjects.client;
           const siemClient = (await context.securitySolution).getAppClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           const timeframeEnd = request.body.timeframeEnd;
           let invocationCount = request.body.invocationCount;
@@ -118,7 +119,7 @@ export const previewRulesRoute = (
             });
           }
 
-          const internalRule = convertCreateAPIToInternalSchema(request.body);
+          const internalRule = convertCreateAPIToInternalSchema(request.body, actionsClient);
           const previewRuleParams = internalRule.params;
 
           const mlAuthz = buildMlAuthz({
