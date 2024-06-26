@@ -937,7 +937,7 @@
     "@langchain/langgraph": "^0.0.23",
     "@langchain/openai": "^0.0.34",
     "@langtrase/trace-attributes": "^3.0.8",
-    "@launchdarkly/node-server-sdk": "^9.4.5",
+    "@launchdarkly/node-server-sdk": "^9.4.6",
     "@loaders.gl/core": "^3.4.7",
     "@loaders.gl/json": "^3.4.7",
     "@loaders.gl/shapefile": "^3.4.7",
