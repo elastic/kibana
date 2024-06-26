@@ -9,7 +9,7 @@ import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from './constants';
 
 export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitionSchema.parse({
-  id: `${BUILT_IN_ID_PREFIX}services`,
+  id: `${BUILT_IN_ID_PREFIX}services_raw_transaction`,
   name: 'Services from logs',
   type: 'service',
   managed: true,
@@ -38,7 +38,6 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     'service.version',
     'service.runtime.name',
     'service.runtime.version',
-    'service.node.name',
     'service.language.name',
     'cloud.provider',
     'cloud.availability_zone',
@@ -61,7 +60,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     },
     {
       name: 'throughput',
-      equation: 'A / 5',
+      equation: 'A',
       metrics: [
         {
           name: 'A',
@@ -104,7 +103,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     },
     {
       name: 'logRatePerMinute',
-      equation: 'A / 5',
+      equation: 'A',
       metrics: [
         {
           name: 'A',
