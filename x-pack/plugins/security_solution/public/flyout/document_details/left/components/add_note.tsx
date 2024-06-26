@@ -91,7 +91,10 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
   // if the flyout is open from a timeline and that timeline is saved, we automatically check the checkbox to associate the note to it
   const isTimelineFlyout = useIsTimelineFlyoutOpen();
   const [checked, setChecked] = useState(isTimelineFlyout && activeTimeline.savedObjectId != null);
-  const onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => setChecked(e.target.checked);
+  const onCheckboxChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => setChecked(e.target.checked),
+    []
+  );
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
   const createError = useSelector((state: State) => selectCreateNoteError(state));
@@ -117,6 +120,9 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
       });
     }
   }, [addErrorToast, createError, createStatus]);
+
+  const checkBoxDisabled =
+    !isTimelineFlyout || (isTimelineFlyout && activeTimeline.savedObjectId == null);
 
   return (
     <>
@@ -151,9 +157,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
                   </EuiToolTip>
                 </>
               }
-              disabled={
-                !isTimelineFlyout || (isTimelineFlyout && activeTimeline.savedObjectId == null)
-              }
+              disabled={checkBoxDisabled}
               checked={checked}
               onChange={(e) => onCheckboxChange(e)}
             />
