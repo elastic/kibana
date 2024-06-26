@@ -655,7 +655,7 @@ export default ({ getService }: FtrProviderContext) => {
           const alerts = await getAlerts(supertest, log, es, createdRule);
 
           expect(alerts.hits.hits).toHaveLength(1);
-          const alertId = alerts.hits.hits[0]._id;
+          const alertId = alerts.hits.hits[0]._id!;
 
           // close generated alert
           await supertest
