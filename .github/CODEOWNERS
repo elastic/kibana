@@ -727,6 +727,8 @@ packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
+x-pack/packages/security/api_key_management @elastic/kibana-security
+x-pack/packages/security/form_components @elastic/kibana-security
 packages/kbn-security-hardening @elastic/kibana-security
 x-pack/plugins/security @elastic/kibana-security
 x-pack/packages/security/plugin_types_common @elastic/kibana-security

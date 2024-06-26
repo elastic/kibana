@@ -112,6 +112,7 @@ import {
 } from '../../../../detections/components/rules/rule_execution_status';
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
@@ -785,13 +786,17 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
-                  <ExecutionLogTable
-                    ruleId={ruleId}
-                    selectAlertsTab={navigateToAlertsTab}
-                    analytics={analytics}
-                    i18n={i18nStart}
-                    theme={theme}
-                  />
+                  <>
+                    <ExecutionLogTable
+                      ruleId={ruleId}
+                      selectAlertsTab={navigateToAlertsTab}
+                      analytics={analytics}
+                      i18n={i18nStart}
+                      theme={theme}
+                    />
+                    <EuiSpacer size="xl" />
+                    <RuleBackfillsInfo ruleId={ruleId} />
+                  </>
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />

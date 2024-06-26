@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
@@ -16,7 +16,6 @@ import { buildAlertsKqlFilter } from '../../../../detections/components/alerts_t
 import { getTacticMetadata } from '../../../helpers';
 import { AttackDiscoveryMarkdownFormatter } from '../../../attack_discovery_markdown_formatter';
 import * as i18n from './translations';
-import type { AttackDiscovery } from '../../../types';
 import { ViewInAiAssistant } from '../../view_in_ai_assistant';
 
 interface Props {
