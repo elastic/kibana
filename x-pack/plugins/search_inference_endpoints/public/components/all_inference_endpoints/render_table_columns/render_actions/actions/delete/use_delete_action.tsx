@@ -12,17 +12,17 @@ import * as i18n from '../../../../../../../common/translations';
 import type { UseActionProps } from '../types';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
 
-export const useDeleteAction = ({ onAction, onActionSuccess }: UseActionProps) => {
+export const useDeleteAction = ({ onActionSuccess }: UseActionProps) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [endpointToBeDeleted, setEndpointToBeDeleted] = useState<InferenceEndpointUI | null>(null);
   const onCloseModal = useCallback(() => setIsModalVisible(false), []);
   const openModal = useCallback(
     (selectedEndpoint: InferenceEndpointUI) => {
-      onAction();
+      onActionSuccess();
       setIsModalVisible(true);
       setEndpointToBeDeleted(selectedEndpoint);
     },
-    [onAction]
+    [onActionSuccess]
   );
 
   const { mutate: deleteEndpoint } = useDeleteEndpoint();
@@ -44,11 +44,8 @@ export const useDeleteAction = ({ onAction, onActionSuccess }: UseActionProps) =
       name: <EuiTextColor color={'danger'}>{i18n.DELETE_ACTION_LABEL}</EuiTextColor>,
       onClick: () => openModal(selectedEndpoint),
       icon: <EuiIcon type="trash" size="m" color={'danger'} />,
-      key: 'inference-endpoint-action-delete',
     };
   };
 
   return { getAction, isModalVisible, onConfirmDeletion, onCloseModal };
 };
-
-export type UseDeleteAction = ReturnType<typeof useDeleteAction>;

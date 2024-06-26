@@ -6,7 +6,6 @@
  */
 
 export interface UseActionProps {
-  onAction: () => void;
   onActionSuccess: () => void;
 }
 

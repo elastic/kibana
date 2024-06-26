@@ -40,16 +40,13 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
   };
 
   return (
-    <>
-      <MultiSelectFilter<TaskTypes>
-        buttonLabel={i18n.TASK_TYPE}
-        id={'type'}
-        onChange={onSystemFilterChange}
-        options={options}
-        renderOption={renderOption}
-        selectedOptionKeys={optionKeys}
-      />
-    </>
+    <MultiSelectFilter<TaskTypes>
+      buttonLabel={i18n.TASK_TYPE}
+      id={'type'}
+      onChange={onSystemFilterChange}
+      options={options}
+      renderOption={renderOption}
+      selectedOptionKeys={optionKeys}
+    />
   );
 };
-TaskTypeFilter.displayName = 'TaskTypeFilter';

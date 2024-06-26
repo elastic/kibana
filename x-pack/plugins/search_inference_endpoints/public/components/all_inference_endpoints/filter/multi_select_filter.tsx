@@ -164,5 +164,3 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
     </EuiFilterGroup>
   );
 };
-
-MultiSelectFilter.displayName = 'MultiSelectFilter';

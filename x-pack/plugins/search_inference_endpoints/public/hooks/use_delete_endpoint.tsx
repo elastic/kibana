@@ -21,7 +21,7 @@ export const useDeleteEndpoint = () => {
 
   return useMutation(
     async ({ type, id }: MutationArgs) => {
-      await services.http.delete<{}>(`/internal/inference_endpoint/${type}/${id}`);
+      await services.http.delete<{}>(`/internal/inference_endpoint/endpoints/${type}/${id}`);
     },
     {
       onSuccess: () => {
