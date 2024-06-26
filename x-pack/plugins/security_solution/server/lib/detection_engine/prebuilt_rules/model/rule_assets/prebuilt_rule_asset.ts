@@ -9,7 +9,6 @@ import * as z from 'zod';
 import {
   RuleSignatureId,
   RuleVersion,
-  BaseCreateProps,
   EqlRuleCreateFields,
   QueryRuleCreateFields,
   SavedQueryRuleCreateFields,
@@ -18,16 +17,45 @@ import {
   MachineLearningRuleCreateFields,
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
+  BaseCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
-import type { TypeSpecificCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
-type RuleAssetFieldKeys = keyof Omit<TypeSpecificCreateProps, 'type'>;
+type BaseFields = keyof BaseCreateProps;
+type SpecificFields =
+  | keyof Omit<EqlRuleCreateFields, 'type'>
+  | keyof Omit<QueryRuleCreateFields, 'type'>
+  | keyof Omit<SavedQueryRuleCreateFields, 'type'>
+  | keyof Omit<ThresholdRuleCreateFields, 'type'>
+  | keyof Omit<ThreatMatchRuleCreateFields, 'type'>
+  | keyof Omit<MachineLearningRuleCreateFields, 'type'>
+  | keyof Omit<NewTermsRuleCreateFields, 'type'>
+  | keyof Omit<EsqlRuleCreateFields, 'type'>;
 
-const PROPERTIES_TO_OMIT: Record<RuleAssetFieldKeys, boolean> = {
+type AllRuleProperties = BaseFields | SpecificFields;
+
+type OmittedProperties = Extract<
+  AllRuleProperties,
+  | 'alert_suppression'
+  | 'actions'
+  | 'throttle'
+  | 'meta'
+  | 'output_index'
+  | 'namespace'
+  | 'alias_purpose'
+  | 'alias_target_id'
+  | 'outcome'
+>;
+
+const PROPERTIES_TO_OMIT: Record<OmittedProperties, true> = {
   alert_suppression: true,
   actions: true,
   throttle: true,
   meta: true,
+  output_index: true,
+  namespace: true,
+  alias_purpose: true,
+  alias_target_id: true,
+  outcome: true,
 };
 
 const RuleAssetBaseCreateProps = BaseCreateProps.omit(PROPERTIES_TO_OMIT);
