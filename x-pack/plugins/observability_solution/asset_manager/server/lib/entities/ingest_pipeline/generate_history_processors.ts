@@ -22,7 +22,7 @@ function mapDestinationToPainless(destination: string, source: string) {
         .map((s) => `["${s}"]`)
         .join('')} = ctx.entity.metadata.${source}.keySet();`;
     }
-    return `${acc}\n  ctx${parts
+    return `${acc}\n if(ctx.${parts.slice(0, currentIndex + 1).join('.')} == null)  ctx${parts
       .slice(0, currentIndex + 1)
       .map((s) => `["${s}"]`)
       .join('')} = new HashMap();`;
