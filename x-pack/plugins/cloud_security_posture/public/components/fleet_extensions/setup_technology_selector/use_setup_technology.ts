@@ -25,7 +25,7 @@ export const useSetupTechnology = ({
   const isCspmGcp = input.type === CLOUDBEAT_GCP;
   const isCspmAzure = input.type === CLOUDBEAT_AZURE;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
-  const isAgentlessAvailable = Boolean(isAgentlessSupportedForCloudProvider && isAgentlessEnabled);
+  const isAgentlessAvailable = isAgentlessSupportedForCloudProvider && isAgentlessEnabled;
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(() => {
     if (isEditPage && isAgentlessAvailable) {
       return SetupTechnology.AGENTLESS;
