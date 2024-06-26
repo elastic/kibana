@@ -736,20 +736,32 @@ describe('CommonFlyout ', () => {
 
       await waitFor(() => {
         expect(newProps.onSaveField).toBeCalledWith({
-          connectorId: 'none',
-          customFields: {
-            first_custom_field_key: 'Updated custom field value',
+          caseFields: {
+            connector: {
+              fields: null,
+              id: 'none',
+              name: 'none',
+              type: '.none',
+            },
+            customFields: [
+              {
+                key: 'first_custom_field_key',
+                type: 'text',
+                value: 'Updated custom field value',
+              },
+            ],
+            description: 'case desc',
+            settings: {
+              syncAlerts: true,
+            },
+            severity: 'low',
+            tags: ['sample-4'],
+            title: 'Updated case using template',
           },
-          description: 'case desc',
-          category: null,
+          description: 'This is a fourth test template',
           key: 'test_template_4',
           name: 'Template name',
-          severity: 'low',
-          syncAlerts: true,
-          tags: ['sample-4'],
-          templateDescription: 'This is a fourth test template',
-          templateTags: ['foo', 'bar'],
-          title: 'Updated case using template',
+          tags: ['foo', 'bar'],
         });
       });
     });
