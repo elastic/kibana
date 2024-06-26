@@ -816,6 +816,8 @@ describe('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
+        // tech debt: this should be converted to use MSW to mock the API calls
+        // https://github.com/elastic/security-team/issues/9816
         expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
         expect(sendCreateAgentPolicy).toHaveBeenCalled();
         expect(sendCreatePackagePolicy).toHaveBeenCalled();
