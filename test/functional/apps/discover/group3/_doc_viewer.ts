@@ -75,6 +75,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
       });
+      it('should be able to search with fuzzy search (1 typo)', async function () {
+        await PageObjects.discover.findFieldByNameInDocViewer('rel4tedContent');
+
+        await retry.waitFor('updates', async () => {
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
+        });
+      });
 
       it('should be able to search with spaces as wildcard', async function () {
         await PageObjects.discover.findFieldByNameInDocViewer('relatedContent image');

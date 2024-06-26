@@ -49,7 +49,7 @@ export const fieldNameWildcardMatcher = (
   return testFuzzySearch(field, fieldSearchHighlight);
 };
 
-const STRING_MIN_LENGTH = 3;
+const STRING_MIN_LENGTH = 4;
 const FUZZY_SEARCH_DISTANCE = 1;
 
 const testFuzzySearch = (field: { name: string; displayName?: string }, searchValue: string) => {
