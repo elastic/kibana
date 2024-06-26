@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { render, within } from '@testing-library/react';
 import React from 'react';
 import {
   ADD_NOTE_LOADING_TEST_ID,
   DELETE_NOTE_BUTTON_TEST_ID,
+  NOTE_AVATAR_TEST_ID,
   NOTES_COMMENT_TEST_ID,
   NOTES_LOADING_TEST_ID,
 } from './test_ids';
 import { createMockStore, mockGlobalState, TestProviders } from '../../../../common/mock';
-import { DELETE_NOTE_ERROR, FETCH_NOTES_ERROR, NO_NOTES, NotesList } from './notes_list';
+import { FETCH_NOTES_ERROR, NO_NOTES, NotesList } from './notes_list';
 import { ReqStatus } from '../../../../notes/store/notes.slice';
 
 const mockAddError = jest.fn();
@@ -46,6 +47,7 @@ describe('NotesList', () => {
     expect(getByTestId(`${NOTES_COMMENT_TEST_ID}-0`)).toBeInTheDocument();
     expect(getByText('note-1')).toBeInTheDocument();
     expect(getByTestId(`${DELETE_NOTE_BUTTON_TEST_ID}-0`)).toBeInTheDocument();
+    expect(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`)).toBeInTheDocument();
   });
 
   it('should render loading spinner if notes are being fetched', () => {
@@ -91,6 +93,33 @@ describe('NotesList', () => {
   });
 
   it('should render error toast if fetching notes fails', () => {
+    const store = createMockStore({
+      ...mockGlobalState,
+      notes: {
+        ...mockGlobalState.notes,
+        status: {
+          ...mockGlobalState.notes.status,
+          fetchNotesByDocumentId: ReqStatus.Failed,
+        },
+        error: {
+          ...mockGlobalState.notes.error,
+          fetchNotesByDocumentId: { type: 'http', status: 500 },
+        },
+      },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <NotesList eventId={'event-id'} />
+      </TestProviders>
+    );
+
+    expect(mockAddError).toHaveBeenCalledWith(null, {
+      title: FETCH_NOTES_ERROR,
+    });
+  });
+
+  it('should render ? in avatar is user is missing', () => {
     const store = createMockStore({
       ...mockGlobalState,
       notes: {
@@ -177,25 +206,29 @@ describe('NotesList', () => {
       ...mockGlobalState,
       notes: {
         ...mockGlobalState.notes,
-        status: {
-          ...mockGlobalState.notes.status,
-          deleteNote: ReqStatus.Failed,
-        },
-        error: {
-          ...mockGlobalState.notes.error,
-          deleteNote: { type: 'http', status: 500 },
+        entities: {
+          '1': {
+            eventId: 'event-id',
+            noteId: '1',
+            note: 'note-1',
+            timelineId: '',
+            created: 1663882629000,
+            createdBy: 'elastic',
+            updated: 1663882629000,
+            updatedBy: null,
+            version: 'version',
+          },
         },
       },
     });
 
-    render(
+    const { getByTestId } = render(
       <TestProviders store={store}>
         <NotesList eventId={'event-id'} />
       </TestProviders>
     );
+    const { getByText } = within(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`));
 
-    expect(mockAddError).toHaveBeenCalledWith(null, {
-      title: DELETE_NOTE_ERROR,
-    });
+    expect(getByText('?')).toBeInTheDocument();
   });
 });

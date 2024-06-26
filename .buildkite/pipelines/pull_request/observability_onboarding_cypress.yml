@@ -8,7 +8,6 @@ steps:
       - build
       - quick_checks
     timeout_in_minutes: 120
-    parallelism: 2
     retry:
       automatic:
         - exit_status: '-1'

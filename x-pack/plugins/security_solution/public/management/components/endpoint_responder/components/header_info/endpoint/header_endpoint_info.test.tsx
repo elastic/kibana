@@ -10,15 +10,17 @@ import { EndpointActionGenerator } from '../../../../../../../common/endpoint/da
 import type { HostInfo } from '../../../../../../../common/endpoint/types';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { useGetEndpointDetails } from '../../../../../hooks/endpoint/use_get_endpoint_details';
+import { useGetEndpointDetails as _useGetEndpointDetails } from '../../../../../hooks/endpoint/use_get_endpoint_details';
 import { useGetEndpointPendingActionsSummary } from '../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { mockEndpointDetailsApiResult } from '../../../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { HeaderEndpointInfo } from './header_endpoint_info';
+import { agentStatusGetHttpMock } from '../../../../../mocks';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../../hooks/endpoint/use_get_endpoint_details');
 jest.mock('../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
 
-const getEndpointDetails = useGetEndpointDetails as jest.Mock;
+const useGetEndpointDetailsMock = _useGetEndpointDetails as jest.Mock;
 const getPendingActions = useGetEndpointPendingActionsSummary as jest.Mock;
 
 describe('Responder header endpoint info', () => {
@@ -27,12 +29,12 @@ describe('Responder header endpoint info', () => {
   let mockedContext: AppContextTestRender;
   let endpointDetails: HostInfo;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
     render = () =>
       (renderResult = mockedContext.render(<HeaderEndpointInfo endpointId={'1234'} />));
     endpointDetails = mockEndpointDetailsApiResult();
-    getEndpointDetails.mockReturnValue({ data: endpointDetails });
+    useGetEndpointDetailsMock.mockReturnValue({ data: endpointDetails });
     getPendingActions.mockReturnValue({
       data: {
         data: [
@@ -42,7 +44,11 @@ describe('Responder header endpoint info', () => {
         ],
       },
     });
+    const apiMock = agentStatusGetHttpMock(mockedContext.coreStart.http);
     render();
+    await waitFor(() => {
+      expect(apiMock.responseProvider.getAgentStatus).toHaveBeenCalled();
+    });
   });
 
   afterEach(() => {
@@ -56,7 +62,7 @@ describe('Responder header endpoint info', () => {
     const agentStatus = await renderResult.findByTestId(
       'responderHeaderEndpointAgentIsolationStatus'
     );
-    expect(agentStatus.textContent).toBe(`UnhealthyIsolating`);
+    expect(agentStatus.textContent).toBe(`Healthy`);
   });
   it('should show last checkin time', async () => {
     const lastUpdated = await renderResult.findByTestId('responderHeaderLastSeen');

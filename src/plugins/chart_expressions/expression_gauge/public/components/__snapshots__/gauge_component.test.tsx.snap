@@ -38,6 +38,7 @@ exports[`GaugeComponent renders the chart 1`] = `
             },
           },
           "isolatedPoint": Object {
+            "enabled": true,
             "fill": "white",
             "opacity": 1,
             "radius": 2,
@@ -427,6 +428,7 @@ exports[`GaugeComponent renders the chart 1`] = `
             },
           },
           "isolatedPoint": Object {
+            "enabled": true,
             "fill": "white",
             "opacity": 1,
             "radius": 2,

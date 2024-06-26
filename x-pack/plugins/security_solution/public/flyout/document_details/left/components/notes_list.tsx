@@ -7,18 +7,20 @@
 
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import {
+  EuiAvatar,
   EuiButtonIcon,
   EuiComment,
   EuiCommentList,
   EuiLoadingElastic,
-  EuiMarkdownFormat,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
 import {
   ADD_NOTE_LOADING_TEST_ID,
   DELETE_NOTE_BUTTON_TEST_ID,
+  NOTE_AVATAR_TEST_ID,
   NOTES_COMMENT_TEST_ID,
   NOTES_LOADING_TEST_ID,
 } from './test_ids';
@@ -138,8 +140,15 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
               isLoading={deletingNoteId === note.noteId && deleteStatus === ReqStatus.Loading}
             />
           }
+          timelineAvatar={
+            <EuiAvatar
+              data-test-subj={`${NOTE_AVATAR_TEST_ID}-${index}`}
+              size="l"
+              name={note.updatedBy || '?'}
+            />
+          }
         >
-          <EuiMarkdownFormat textSize="s">{note.note || ''}</EuiMarkdownFormat>
+          <MarkdownRenderer>{note.note || ''}</MarkdownRenderer>
         </EuiComment>
       ))}
       {createStatus === ReqStatus.Loading && (

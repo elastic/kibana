@@ -18,7 +18,6 @@ import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointConsoleCommands,
-  HeaderEndpointInfo,
   OfflineCallout,
 } from '../components/endpoint_responder';
 import { useConsoleManager } from '../components/console';
@@ -54,7 +53,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsCrowdstrikeManualHostIsolationEnabled'
   );
-  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
 
   return useCallback(
     (props: ResponderInfoProps) => {
@@ -89,22 +87,14 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
           TitleComponent: () => {
-            if (agentStatusClientEnabled || agentType !== 'endpoint') {
-              return (
-                <AgentInfo
-                  agentId={agentId}
-                  agentType={agentType}
-                  hostName={hostName}
-                  platform={platform}
-                />
-              );
-            }
-            // TODO: 8.15 remove this if block when agentStatusClientEnabled is enabled/removed
-            if (agentType === 'endpoint') {
-              return <HeaderEndpointInfo endpointId={agentId} />;
-            }
-
-            return null;
+            return (
+              <AgentInfo
+                agentId={agentId}
+                agentType={agentType}
+                hostName={hostName}
+                platform={platform}
+              />
+            );
           },
         };
 
@@ -157,7 +147,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
       endpointPrivileges,
       isEnterpriseLicense,
       consoleManager,
-      agentStatusClientEnabled,
     ]
   );
 };

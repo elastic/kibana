@@ -130,7 +130,7 @@ export const EditPackagePolicyForm = memo<{
   });
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-  useSetIsReadOnly(canWriteIntegrationPolicies);
+  useSetIsReadOnly(!canWriteIntegrationPolicies);
   const newSecrets = useMemo(() => {
     if (!packageInfo) {
       return [];

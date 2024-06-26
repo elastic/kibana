@@ -344,7 +344,7 @@ export class KnowledgeBaseService {
     return response.hits.hits.map((hit) => ({
       ...hit._source!,
       score: hit._score!,
-      id: hit._id,
+      id: hit._id!,
     }));
   }
 
@@ -515,7 +515,7 @@ export class KnowledgeBaseService {
           ...hit._source!,
           role: hit._source!.role ?? KnowledgeBaseEntryRole.UserEntry,
           score: hit._score,
-          id: hit._id,
+          id: hit._id!,
         })),
       };
     } catch (error) {

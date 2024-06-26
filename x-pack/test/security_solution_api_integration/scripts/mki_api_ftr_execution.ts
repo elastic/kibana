@@ -161,6 +161,7 @@ export const cli = () => {
           TEST_CLOUD: testCloud.toString(),
           TEST_ES_URL: testEsUrl,
           TEST_KIBANA_URL: testKibanaUrl,
+          TEST_CLOUD_HOST_NAME: new URL(BASE_ENV_URL).hostname,
         };
 
         statusCode = await executeCommand(command, envVars, log);

@@ -262,7 +262,7 @@ describe('find', () => {
 
         noNamespaceSearchResults.hits.hits.forEach((doc, i) => {
           expect(response.saved_objects[i]).toEqual({
-            id: doc._id.replace(/(index-pattern|config|globalType)\:/, ''),
+            id: doc._id!.replace(/(index-pattern|config|globalType)\:/, ''),
             type: doc._source!.type,
             originId: doc._source!.originId,
             ...mockTimestampFields,
@@ -293,7 +293,7 @@ describe('find', () => {
 
         namespacedSearchResults.hits.hits.forEach((doc, i) => {
           expect(response.saved_objects[i]).toEqual({
-            id: doc._id.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
+            id: doc._id!.replace(/(foo-namespace\:)?(index-pattern|config|globalType)\:/, ''),
             type: doc._source!.type,
             originId: doc._source!.originId,
             ...mockTimestampFields,
@@ -337,7 +337,7 @@ describe('find', () => {
         );
         expectMigrationArgs({
           type,
-          id: noNamespaceSearchResults.hits.hits[0]._id.replace(
+          id: noNamespaceSearchResults.hits.hits[0]._id!.replace(
             /(index-pattern|config|globalType)\:/,
             ''
           ),
