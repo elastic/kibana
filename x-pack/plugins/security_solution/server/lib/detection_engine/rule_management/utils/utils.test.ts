@@ -38,7 +38,7 @@ import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../
 
 import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../logic/import/import_rules_utils';
-import { internalRuleToAPIResponse } from '../normalization/rule_converters';
+import { internalRuleToAPIResponse } from '../logic/detection_rules_client/converters/internal_rule_to_api_response';
 
 type PromiseFromStreams = RuleToImport | Error;
 

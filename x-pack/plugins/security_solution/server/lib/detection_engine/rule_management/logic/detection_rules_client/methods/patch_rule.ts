@@ -6,34 +6,35 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { stringifyZodError } from '@kbn/zod-helpers';
+import type {
+  RulePatchProps,
+  RuleResponse,
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
-import type { PatchRuleArgs } from '../detection_rules_client_interface';
+import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
+import { applyRulePatch } from '../mergers/apply_rule_patch';
 import { getIdError } from '../../../utils/utils';
-import {
-  convertPatchAPIToInternalSchema,
-  internalRuleToAPIResponse,
-} from '../../../normalization/rule_converters';
-import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
+import { convertRuleResponseToAlertingRule } from '../converters/convert_rule_response_to_alerting_rule';
+import { ClientError, toggleRuleEnabledOnUpdate, validateMlAuth } from '../utils';
+import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 
-import {
-  validateMlAuth,
-  ClientError,
-  toggleRuleEnabledOnUpdate,
-  RuleResponseValidationError,
-} from '../utils';
+interface PatchRuleOptions {
+  rulesClient: RulesClient;
+  prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
+  rulePatch: RulePatchProps;
+  mlAuthz: MlAuthz;
+}
 
-import { readRules } from '../read_rules';
+export const patchRule = async ({
+  rulesClient,
+  prebuiltRuleAssetClient,
+  rulePatch,
+  mlAuthz,
+}: PatchRuleOptions): Promise<RuleResponse> => {
+  const { rule_id: ruleId, id } = rulePatch;
 
-export const patchRule = async (
-  rulesClient: RulesClient,
-  args: PatchRuleArgs,
-  mlAuthz: MlAuthz
-): Promise<RuleResponse> => {
-  const { nextParams } = args;
-  const { rule_id: ruleId, id } = nextParams;
-
-  const existingRule = await readRules({
+  const existingRule = await getRuleByIdOrRuleId({
     rulesClient,
     ruleId,
     id,
@@ -44,32 +45,20 @@ export const patchRule = async (
     throw new ClientError(error.message, error.statusCode);
   }
 
-  await validateMlAuth(mlAuthz, nextParams.type ?? existingRule.params.type);
+  await validateMlAuth(mlAuthz, rulePatch.type ?? existingRule.type);
 
-  const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
+  const patchedRule = await applyRulePatch({
+    prebuiltRuleAssetClient,
+    existingRule,
+    rulePatch,
+  });
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,
-    data: patchedRule,
+    data: convertRuleResponseToAlertingRule(patchedRule),
   });
 
-  const { enabled } = await toggleRuleEnabledOnUpdate(
-    rulesClient,
-    existingRule,
-    nextParams.enabled
-  );
+  const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);
 
-  /* Trying to convert the internal rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(
-    internalRuleToAPIResponse({ ...patchedInternalRule, enabled })
-  );
-
-  if (!parseResult.success) {
-    throw new RuleResponseValidationError({
-      message: stringifyZodError(parseResult.error),
-      ruleId: patchedInternalRule.params.ruleId,
-    });
-  }
-
-  return parseResult.data;
+  return convertAlertingRuleToRuleResponse({ ...patchedInternalRule, enabled });
 };

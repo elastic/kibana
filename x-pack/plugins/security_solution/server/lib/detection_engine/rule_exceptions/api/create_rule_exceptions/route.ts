@@ -295,7 +295,7 @@ export const createAndAssociateDefaultExceptionList = async ({
     : existingRuleExceptionLists;
 
   await detectionRulesClient.patchRule({
-    nextParams: {
+    rulePatch: {
       rule_id: rule.params.ruleId,
       ...rule.params,
       exceptions_list: [

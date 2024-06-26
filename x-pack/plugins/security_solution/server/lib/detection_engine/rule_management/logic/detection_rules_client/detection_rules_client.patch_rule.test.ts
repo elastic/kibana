@@ -12,17 +12,20 @@ import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks'
 import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateRulesSchemaMock,
+  getRulesMlSchemaMock,
+  getRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
-import { readRules } from './read_rules';
+import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
 
-jest.mock('./read_rules');
+jest.mock('./methods/get_rule_by_rule_id');
 
 describe('DetectionRulesClient.patchRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
@@ -32,97 +35,78 @@ describe('DetectionRulesClient.patchRule', () => {
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    const savedObjectsClient = savedObjectsClientMock.create();
+    detectionRulesClient = createDetectionRulesClient({ rulesClient, mlAuthz, savedObjectsClient });
   });
 
   it('calls the rulesClient with expected params', async () => {
-    const nextParams = getCreateRulesSchemaMock();
-    const existingRule = getRuleMock(getQueryRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+    // Mock the existing rule
+    const existingRule = getRulesSchemaMock();
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+    // Mock the rule update
+    const rulePatch = getCreateRulesSchemaMock('query-rule-id');
+    rulePatch.name = 'new name';
+    rulePatch.description = 'new description';
+
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    await detectionRulesClient.patchRule({ nextParams });
+    await detectionRulesClient.patchRule({ rulePatch });
 
     expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
-          name: nextParams.name,
+          name: rulePatch.name,
           params: expect.objectContaining({
-            ruleId: nextParams.rule_id,
-            description: nextParams.description,
+            ruleId: rulePatch.rule_id,
+            description: rulePatch.description,
           }),
         }),
       })
     );
   });
 
-  it('returns rule enabled: true if the nexParams have enabled: true', async () => {
-    const nextParams = { ...getCreateRulesSchemaMock(), enabled: true };
-    const existingRule = getRuleMock(getQueryRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+  it('enables the rule if the nexParams have enabled: true', async () => {
+    // Mock the existing rule
+    const existingRule = getRulesSchemaMock();
+    existingRule.enabled = false;
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+    // Mock the rule update
+    const rulePatch = { ...getCreateRulesSchemaMock(), enabled: true };
+
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    const rule = await detectionRulesClient.patchRule({ nextParams });
+    const rule = await detectionRulesClient.patchRule({ rulePatch });
 
     expect(rule.enabled).toBe(true);
-  });
-
-  it('calls the rulesClient with legacy ML params', async () => {
-    const nextParams = getCreateMachineLearningRulesSchemaMock();
-    const existingRule = getRuleMock(getMlRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
-    rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
-
-    await detectionRulesClient.patchRule({ nextParams });
-    expect(rulesClient.update).toHaveBeenCalledWith(
+    expect(rulesClient.enable).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({
-          params: expect.objectContaining({
-            anomalyThreshold: 58,
-            machineLearningJobId: ['typical-ml-job-id'],
-          }),
-        }),
+        id: existingRule.id,
       })
     );
   });
 
-  it('calls the rulesClient with new ML params', async () => {
-    const nextParams = {
-      ...getCreateMachineLearningRulesSchemaMock(),
-      machine_learning_job_id: ['new_job_1', 'new_job_2'],
-    };
-    const existingRule = getRuleMock(getMlRuleParams());
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
-    rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
+  it('disables the rule if the nexParams have enabled: false', async () => {
+    // Mock the existing rule
+    const existingRule = getRulesSchemaMock();
+    existingRule.enabled = true;
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
 
-    await detectionRulesClient.patchRule({ nextParams });
+    // Mock the rule update
+    const rulePatch = { ...getCreateRulesSchemaMock(), enabled: false };
 
-    expect(rulesClient.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          params: expect.objectContaining({
-            anomalyThreshold: 58,
-            machineLearningJobId: ['new_job_1', 'new_job_2'],
-          }),
-        }),
-      })
-    );
-  });
-
-  it('should call rulesClient.disable if the rule was enabled and enabled is false', async () => {
-    const nextParams = {
-      ...getCreateRulesSchemaMock(),
-      enabled: false,
-    };
-    const existingRule = {
-      ...getRuleMock(getQueryRuleParams()),
-      enabled: true,
-    };
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    await detectionRulesClient.patchRule({ nextParams });
+    const rule = await detectionRulesClient.patchRule({ rulePatch });
 
+    expect(rule.enabled).toBe(false);
     expect(rulesClient.disable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: existingRule.id,
@@ -130,23 +114,29 @@ describe('DetectionRulesClient.patchRule', () => {
     );
   });
 
-  it('should call rulesClient.enable if the rule was disabled and enabled is true', async () => {
-    const nextParams = {
-      ...getCreateRulesSchemaMock(),
-      enabled: true,
-    };
-    const existingRule = {
-      ...getRuleMock(getQueryRuleParams()),
-      enabled: false,
-    };
-    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
-    rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+  it('calls the rulesClient with new ML params', async () => {
+    // Mock the existing rule
+    const existingRule = getRulesMlSchemaMock();
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
 
-    await detectionRulesClient.patchRule({ nextParams });
+    // Mock the rule update
+    const rulePatch = getCreateMachineLearningRulesSchemaMock();
+    rulePatch.anomaly_threshold = 42;
+    rulePatch.machine_learning_job_id = ['new-job-id'];
 
-    expect(rulesClient.enable).toHaveBeenCalledWith(
+    // Mock the rule returned after update; not used for this test directly but
+    // needed so that the patchRule method does not throw
+    rulesClient.update.mockResolvedValue(getRuleMock(getMlRuleParams()));
+
+    await detectionRulesClient.patchRule({ rulePatch });
+    expect(rulesClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: existingRule.id,
+        data: expect.objectContaining({
+          params: expect.objectContaining({
+            anomalyThreshold: rulePatch.anomaly_threshold,
+            machineLearningJobId: rulePatch.machine_learning_job_id,
+          }),
+        }),
       })
     );
   });
@@ -156,21 +146,23 @@ describe('DetectionRulesClient.patchRule', () => {
       throw new Error('mocked MLAuth error');
     });
 
-    const nextParams = {
-      ...getCreateRulesSchemaMock(),
-      enabled: true,
-    };
+    const rulePatch = getCreateRulesSchemaMock();
 
-    await expect(detectionRulesClient.patchRule({ nextParams })).rejects.toThrow(
+    await expect(detectionRulesClient.patchRule({ rulePatch })).rejects.toThrow(
       'mocked MLAuth error'
     );
 
     expect(rulesClient.create).not.toHaveBeenCalled();
   });
 
-  describe('regression tests', () => {
+  describe('actions', () => {
     it("updates the rule's actions if provided", async () => {
-      const nextParams = {
+      // Mock the existing rule
+      const existingRule = getRulesSchemaMock();
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      // Mock the rule update
+      const rulePatch = {
         ...getCreateRulesSchemaMock(),
         actions: [
           {
@@ -183,11 +175,12 @@ describe('DetectionRulesClient.patchRule', () => {
           },
         ],
       };
-      const existingRule = getRuleMock(getQueryRuleParams());
-      (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      // Mock the rule returned after update; not used for this test directly but
+      // needed so that the patchRule method does not throw
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-      await detectionRulesClient.patchRule({ nextParams });
+      await detectionRulesClient.patchRule({ rulePatch });
 
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -209,12 +202,12 @@ describe('DetectionRulesClient.patchRule', () => {
     });
 
     it('does not update actions if none are specified', async () => {
-      const nextParams = getCreateRulesSchemaMock();
-      delete nextParams.actions;
-      const existingRule = getRuleMock(getQueryRuleParams());
+      // Mock the existing rule
+      const existingRule = getRulesSchemaMock();
+      (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(existingRule);
       existingRule.actions = [
         {
-          actionTypeId: '.slack',
+          action_type_id: '.slack',
           id: '2933e581-d81c-4fe3-88fe-c57c6b8a5bfd',
           params: {
             message: 'Rule {{context.rule.name}} generated {{state.signals_count}} signals',
@@ -222,10 +215,16 @@ describe('DetectionRulesClient.patchRule', () => {
           group: 'default',
         },
       ];
-      (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+
+      // Mock the rule update
+      const rulePatch = getCreateRulesSchemaMock();
+      delete rulePatch.actions;
+
+      // Mock the rule returned after update; not used for this test directly but
+      // needed so that the patchRule method does not throw
       rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-      await detectionRulesClient.patchRule({ nextParams });
+      await detectionRulesClient.patchRule({ rulePatch });
 
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
