@@ -32,6 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Disable Homepage Feature Flag
       await uiSettings.deleteUISetting(roleAuthc, HOMEPAGE_FF_UI_SETTING);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('has search homepage with Home sidenav', async () => {
