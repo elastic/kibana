@@ -162,6 +162,12 @@ export const TableView = (props: Props) => {
   );
 
   return (
-    <EuiInMemoryTable pagination={true} sorting={initialSorting} items={items} columns={columns} />
+    <EuiInMemoryTable
+      rowHeader="name"
+      pagination={true}
+      sorting={initialSorting}
+      items={items}
+      columns={columns}
+    />
   );
 };
