@@ -8,6 +8,10 @@
 
 import { uniq } from 'lodash';
 import {
+  githubSummaryDataSourceProfileProvider,
+  githubSummaryDocumentProfileProvider,
+} from './github_document_profile';
+import {
   githubDocumentProfileProvider,
   githubDataSourceProfileProvider,
 } from './github_document_profile/profile';
@@ -46,6 +50,8 @@ export const registerProfileProviders = ({
   const enabledProfileIds = uniq([
     githubDocumentProfileProvider.profileId,
     githubDataSourceProfileProvider.profileId,
+    githubSummaryDocumentProfileProvider.profileId,
+    githubSummaryDataSourceProfileProvider.profileId,
     ...extractProfileIds(rootProfileProviders),
     ...extractProfileIds(dataSourceProfileProviders),
     ...extractProfileIds(documentProfileProviders),
@@ -63,6 +69,7 @@ export const registerProfileProviders = ({
     availableProviders: [
       exampleDataSourceProfileProvider,
       githubDataSourceProfileProvider,
+      githubSummaryDataSourceProfileProvider,
       ...dataSourceProfileProviders,
     ],
     enabledProfileIds,
@@ -72,6 +79,7 @@ export const registerProfileProviders = ({
     profileService: documentProfileService,
     availableProviders: [
       githubDocumentProfileProvider,
+      githubSummaryDocumentProfileProvider,
       exampleDocumentProfileProvider,
       ...documentProfileProviders,
     ],

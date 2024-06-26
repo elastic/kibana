@@ -59,7 +59,7 @@ export function getDisplayedColumns(
           {
             name: '__document__',
             displayName: i18n.translate('discover.docTable.tableHeader.documentHeader', {
-              defaultMessage: 'Document',
+              defaultMessage: 'Summary',
             }),
             isSortable: false,
             isRemoveable: false,

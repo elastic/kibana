@@ -6,4 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { githubDocumentProfileProvider } from './profile';
+export { githubDocumentProfileProvider, githubDataSourceProfileProvider } from './profile';
+export {
+  githubSummaryDocumentProfileProvider,
+  githubSummaryDataSourceProfileProvider,
+} from './profile_summary';
