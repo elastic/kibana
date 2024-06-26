@@ -128,7 +128,7 @@ export const OverviewGrid = memo(({ monitorsSortedByStatus }: { monitorsSortedBy
                 <InfiniteLoader
                   ref={infiniteLoaderRef}
                   isItemLoaded={(idx: number) => vpage[idx] !== undefined}
-                  itemCount={monitorsSortedByStatus.length / 4}
+                  itemCount={monitorsSortedByStatus.length + 1 / 4}
                   loadMoreItems={(start: number, stop: number) => {
                     console.log('load more itesm', start, stop);
                     const newRows = [];
@@ -162,7 +162,6 @@ export const OverviewGrid = memo(({ monitorsSortedByStatus }: { monitorsSortedBy
                       ref={listRef}
                     >
                       {(props) => {
-                        // console.log('props', props);
                         return (
                           <EuiFlexGroup gutterSize="m" style={props.style}>
                             {props.data
@@ -177,7 +176,6 @@ export const OverviewGrid = memo(({ monitorsSortedByStatus }: { monitorsSortedBy
                               ))}
                           </EuiFlexGroup>
                         );
-                        return <div>hi!</div>;
                       }}
                     </FixedSizeList>
                   )}

@@ -75,10 +75,10 @@ export const MetricItem = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
-  // const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
-  //   configId: monitor.configId,
-  //   locationId: monitor.location.id,
-  // });
+  const { status, timestamp, ping, configIdByLocation } = useStatusByLocationOverview({
+    configId: monitor.configId,
+    locationId: monitor.location.id,
+  });
   const theme = useTheme();
 
   const testInProgress = useSelector(manualTestRunInProgressSelector(monitor.configId));
@@ -206,7 +206,7 @@ export const MetricItem = ({
             locationId={monitor.location.id}
           />
         </div>
-        {/* {configIdByLocation && (
+        {configIdByLocation && (
           <MetricItemIcon
             monitor={monitor}
             status={status}
@@ -214,7 +214,7 @@ export const MetricItem = ({
             timestamp={timestamp}
             configIdByLocation={configIdByLocation}
           />
-        )} */}
+        )}
       </EuiPanel>
       <EuiSpacer size="s" />
     </div>

@@ -27,17 +27,6 @@ export const OverviewGridItem = ({
   onClick: (params: FlyoutParamProps) => void;
   style?: React.CSSProperties;
 }) => {
-  // const { timestamp } = useStatusByLocationOverview({
-  //   configId: monitor.configId,
-  //   locationId: monitor.location.id,
-  // });
-
-  // const { data, medianDuration, maxDuration, avgDuration, minDuration } = useLast50DurationChart({
-  //   locationId: monitor.location?.id,
-  //   monitorId: monitor.id,
-  //   timestamp,
-  //   schedule: monitor.schedule,
-  // });
   return (
     <MetricItem
       style={style}
