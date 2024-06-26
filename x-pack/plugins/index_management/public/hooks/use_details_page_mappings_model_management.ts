@@ -18,7 +18,7 @@ import {
   DeploymentState,
   NormalizedFields,
 } from '../application/components/mappings_editor/types';
-import { getInferenceModels } from '../application/services/api';
+import { getInferenceEndpoints } from '../application/services/api';
 
 interface InferenceModel {
   data: InferenceAPIConfigResponse[];
@@ -91,7 +91,7 @@ export const useDetailsPageMappingsModelManagement = (
   const dispatch = useDispatch();
 
   const fetchInferenceModelsAndTrainedModelStats = useCallback(async () => {
-    const inferenceModels = await getInferenceModels();
+    const inferenceModels = await getInferenceEndpoints();
 
     const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
 

@@ -32,6 +32,7 @@ import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import type { ModelDownloadState, PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
+import { isRequestTimeout } from '../job_service/error_utils';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
@@ -597,11 +598,24 @@ export class ModelsProvider {
     taskType: InferenceTaskType,
     modelConfig: InferenceModelConfig
   ) {
-    return await this._client.asCurrentUser.inference.putModel({
-      inference_id: inferenceId,
-      task_type: taskType,
-      model_config: modelConfig,
-    });
+    try {
+      const result = await this._client.asCurrentUser.inference.putModel(
+        {
+          inference_id: inferenceId,
+          task_type: taskType,
+          model_config: modelConfig,
+        },
+        { maxRetries: 0 }
+      );
+      return result;
+    } catch (error) {
+      if (isRequestTimeout(error)) {
+        return {
+          model_id: modelConfig.service,
+          task_type: taskType,
+        };
+      }
+    }
   }
 
   async getModelsDownloadStatus() {
