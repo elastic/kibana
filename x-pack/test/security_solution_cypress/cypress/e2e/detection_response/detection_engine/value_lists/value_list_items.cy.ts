@@ -42,7 +42,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { getDefaultUsername } from '../../../../tasks/common/users';
 
 // Failing: See https://github.com/elastic/kibana/issues/183713
-describe.skip(
+describe(
   'Value list items',
   {
     tags: ['@ess', '@serverless'],
