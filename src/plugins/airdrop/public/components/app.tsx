@@ -21,6 +21,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+
+import { TRANSFER_DATA_TYPE } from '../constants';
 import { Form, FormState } from './form';
 
 interface AirdropAppDeps {
@@ -28,8 +30,6 @@ interface AirdropAppDeps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
 }
-
-const TRANSFER_DATA_TYPE = 'kibana';
 
 export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) => {
   const [formState, setFormState] = useState<FormState>({
@@ -104,7 +104,7 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
   return (
     <Router basename={basename}>
       <I18nProvider>
-        <div
+        {/* <div
           id="dropzone"
           onDragOver={handleDragOver}
           onDragEnter={handleDragEnter}
@@ -114,73 +114,74 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
             border: isDraggingOver ? '6px solid #4169e1' : '6px solid rgba(0,0,0,0)',
           }}
         >
-          <div css={{ pointerEvents: isDraggingOver ? 'none' : 'auto' }}>
-            <EuiPageTemplate
-              restrictWidth="1000px"
-              css={{ minBlockSize: 'max(460px,100vh - 108px) !important' }}
-            >
-              <EuiPageTemplate.Header>
-                <EuiTitle size="l">
-                  <h1>Airdrop</h1>
+          <div css={{ pointerEvents: isDraggingOver ? 'none' : 'auto' }}> */}
+        <EuiPageTemplate
+          restrictWidth="1000px"
+          css={{ minBlockSize: 'max(460px,100vh - 108px) !important' }}
+        >
+          <EuiPageTemplate.Header>
+            <EuiTitle size="l">
+              <h1>Airdrop</h1>
+            </EuiTitle>
+          </EuiPageTemplate.Header>
+          <EuiPageTemplate.Section>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiTitle>
+                  <h2>My form</h2>
                 </EuiTitle>
-              </EuiPageTemplate.Header>
-              <EuiPageTemplate.Section>
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem>
-                    <EuiTitle>
-                      <h2>My form</h2>
-                    </EuiTitle>
-                    <EuiText>
-                      <p>
-                        <FormattedMessage
-                          id="airdrop.content"
-                          defaultMessage="Some cool form to fill out"
-                        />
-                      </p>
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <div
-                      id="draggable"
-                      draggable
-                      onDragStart={onDragStart}
-                      onDragEnd={onDragEnd}
-                      style={{
-                        cursor: 'grab',
-                      }}
-                    >
-                      <EuiButtonIcon
-                        display="base"
-                        iconSize="m"
-                        size="m"
-                        iconType="watchesApp"
-                        aria-label="Next"
-                      />
-                    </div>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <EuiHorizontalRule />
-
-                <EuiSpacer />
-
-                <Form
-                  form={formState}
-                  onChange={setFormState}
-                  onSubmit={() => {
-                    console.log('submit', formState);
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="airdrop.content"
+                      defaultMessage="Some cool form to fill out"
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div
+                  id="draggable"
+                  draggable
+                  onDragStart={onDragStart}
+                  onDragEnd={onDragEnd}
+                  style={{
+                    cursor: 'grab',
+                    transform: 'translate(0, 0)', // avoids parent bkg rendering
                   }}
-                />
+                >
+                  <EuiButtonIcon
+                    display="base"
+                    iconSize="m"
+                    size="m"
+                    iconType="watchesApp"
+                    aria-label="Next"
+                  />
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-                {/* <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+            <EuiHorizontalRule />
+
+            <EuiSpacer />
+
+            <Form
+              form={formState}
+              onChange={setFormState}
+              onSubmit={() => {
+                console.log('submit', formState);
+              }}
+            />
+
+            {/* <EuiCodeBlock language="json" paddingSize="s" isCopyable>
                     {JSON.stringify(formState, null, 2)}
                   </EuiCodeBlock> */}
 
-                <EuiSpacer />
-              </EuiPageTemplate.Section>
-            </EuiPageTemplate>
-          </div>
-        </div>
+            <EuiSpacer />
+          </EuiPageTemplate.Section>
+        </EuiPageTemplate>
+        {/* </div>
+        </div> */}
       </I18nProvider>
     </Router>
   );

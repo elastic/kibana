@@ -9,10 +9,13 @@
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { AirdropPluginSetup, AirdropPluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
+import { AirdropService } from './airdrop_service';
 
 export class AirdropPlugin
   implements Plugin<AirdropPluginSetup, AirdropPluginStart, object, AppPluginStartDependencies>
 {
+  private airdropService = new AirdropService();
+
   public setup(core: CoreSetup<AppPluginStartDependencies>): AirdropPluginSetup {
     // Register an application into the side navigation menu
     core.application.register({
@@ -27,11 +30,15 @@ export class AirdropPlugin
       },
     });
 
+    this.airdropService.setup();
+
     // Return methods that should be available to other plugins
     return {};
   }
 
   public start(core: CoreStart): AirdropPluginStart {
+    this.airdropService.start();
+
     return {};
   }
 
