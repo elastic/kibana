@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import { policyHasFleetServer } from '../../../../../../../../common/services';
-import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -44,6 +43,7 @@ import {
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
+import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 interface PackagePoliciesPanelProps {
   name: string;
@@ -103,7 +103,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const {
     data,
@@ -173,7 +173,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     [setPagination]
   );
   const canShowMultiplePoliciesCell =
-    enableReusableIntegrationPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
+    canUseMultipleAgentPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
   const columns: Array<EuiTableFieldDataColumnType<InMemoryPackagePolicyAndAgentPolicy>> = useMemo(
     () => [
       {

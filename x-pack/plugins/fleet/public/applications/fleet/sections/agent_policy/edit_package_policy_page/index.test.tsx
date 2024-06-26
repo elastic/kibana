@@ -8,8 +8,6 @@
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
-
 import type { TestRenderer } from '../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
@@ -24,6 +22,7 @@ import {
   sendCreateAgentPolicy,
   sendBulkGetAgentPolicies,
   useGetAgentPolicies,
+  useMultipleAgentPolicies,
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
@@ -39,6 +38,7 @@ jest.mock('../../../hooks', () => {
     sendGetOnePackagePolicy: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
     sendUpgradePackagePolicyDryRun: jest.fn(),
+    useMultipleAgentPolicies: jest.fn(),
     sendGetPackageInfoByKey: jest.fn().mockImplementation((name, version) =>
       Promise.resolve({
         data: {
@@ -201,6 +201,10 @@ const TestComponent = async () => {
   };
 };
 
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+  typeof useMultipleAgentPolicies
+>;
+
 describe('edit package policy page', () => {
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
@@ -250,6 +254,7 @@ describe('edit package policy page', () => {
       isLoading: false,
       resendRequest: jest.fn(),
     });
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
   it('should disable submit button on invalid form with empty package var', async () => {
@@ -486,9 +491,8 @@ describe('edit package policy page', () => {
 
   describe('modify agent policies', () => {
     beforeEach(() => {
-      jest
-        .spyOn(ExperimentalFeaturesService, 'get')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true });
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+
       (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
         data: { results: { total: 0 } },
       });

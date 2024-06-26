@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { Error } from '../../../../../components';
+
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
 import {
   isPackageLimited,
@@ -27,6 +28,8 @@ import {
   ExperimentalFeaturesService,
 } from '../../../../../services';
 import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
+
+import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { AgentPolicyMultiSelect } from './components/agent_policy_multi_select';
 import { useAgentPoliciesOptions } from './components/agent_policy_options';
@@ -60,7 +63,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const {
     isLoading,
@@ -120,12 +123,10 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       isFirstLoad &&
       selectedPolicyIds.length === 0 &&
       existingAgentPolicies.length &&
-      (enableReusableIntegrationPolicies
-        ? agentPolicyMultiOptions.length
-        : agentPolicyOptions.length)
+      (canUseMultipleAgentPolicies ? agentPolicyMultiOptions.length : agentPolicyOptions.length)
     ) {
       setIsFirstLoad(false);
-      if (enableReusableIntegrationPolicies) {
+      if (canUseMultipleAgentPolicies) {
         const enabledOptions = agentPolicyMultiOptions.filter((option) => !option.disabled);
         if (enabledOptions.length === 1) {
           setSelectedPolicyIds([enabledOptions[0].key!]);
@@ -144,7 +145,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   }, [
     agentPolicyOptions,
     agentPolicyMultiOptions,
-    enableReusableIntegrationPolicies,
+    canUseMultipleAgentPolicies,
     selectedAgentPolicyIds,
     selectedPolicyIds,
     existingAgentPolicies,
@@ -255,7 +256,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 ) : null
               }
             >
-              {enableReusableIntegrationPolicies ? (
+              {canUseMultipleAgentPolicies ? (
                 <AgentPolicyMultiSelect
                   isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicies}
                   selectedPolicyIds={selectedPolicyIds}
