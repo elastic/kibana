@@ -397,7 +397,7 @@ export async function installKibanaSavedObjects({
 
       const { successResults: resolveSuccessResults = [], errors: resolveErrors = [] } =
         await savedObjectsImporter.resolveImportErrors({
-          readStream: createListStream(toBeSavedObjects),
+          readStream,
           createNewCopies: false,
           managed: true,
           retries,
