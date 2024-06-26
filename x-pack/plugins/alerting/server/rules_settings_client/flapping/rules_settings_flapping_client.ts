@@ -74,11 +74,16 @@ async function getSettingsFromCache(savedObjectsClient: SavedObjectsClientContra
     RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID
   );
   settingsPromise = promise;
-  const result = await promise;
-  settings = result;
-  lastGet = Date.now();
-  settingsPromise = undefined;
-  return result;
+  try {
+    const result = await promise;
+    settings = result;
+    lastGet = Date.now();
+    settingsPromise = undefined;
+    return result;
+  } catch (e) {
+    settingsPromise = undefined;
+    throw e;
+  }
 }
 
 export class RulesSettingsFlappingClient {
