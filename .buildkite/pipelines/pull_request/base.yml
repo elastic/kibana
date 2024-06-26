@@ -10,8 +10,7 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
-      machineType: c4-standard-16
-      diskType: 'hyperdisk-balanced'
+      machineType: n2-standard-32
       preemptible: true
       spotZones: 'us-central1-a,us-central1-c'
     key: build
@@ -25,8 +24,7 @@ steps:
   - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
-      machineType: c4-standard-16
-      diskType: 'hyperdisk-balanced'
+      machineType: n2-standard-32
       preemptible: true
       spotZones: 'us-central1-a,us-central1-c'
     key: quick_checks
