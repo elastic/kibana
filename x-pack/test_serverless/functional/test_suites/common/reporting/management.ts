@@ -70,8 +70,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    // Cant auth into the route as it's structured currently
-    xit(`user sees a job they've created`, async () => {
+    it(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
       } = await reportingAPI.createReportJobInternal(
