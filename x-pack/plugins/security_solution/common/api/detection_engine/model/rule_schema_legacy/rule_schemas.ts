@@ -47,7 +47,6 @@ import {
   RuleFalsePositiveArray,
   RuleFilterArray,
   RuleLicense,
-  RuleMetadata,
   RuleName,
   RuleNameOverride,
   RuleQuery,
@@ -66,7 +65,6 @@ import {
 } from './common_attributes';
 import { EventCategoryOverride, TiebreakerField, TimestampField } from './eql_attributes';
 import { HistoryWindowStart, NewTermsFields } from './new_terms_attributes';
-import { AlertSuppression } from './query_attributes';
 import { Threshold } from './threshold_attributes';
 
 export const buildRuleSchemas = <
@@ -140,7 +138,6 @@ export const baseSchema = buildRuleSchemas({
     building_block_type: BuildingBlockType,
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
-    meta: RuleMetadata,
     investigation_fields: InvestigationFields,
     // Throttle
     throttle: RuleActionThrottle,
@@ -288,7 +285,6 @@ const querySchema = buildRuleSchemas({
     filters: RuleFilterArray,
     saved_id,
     response_actions: ResponseActionArray,
-    alert_suppression: AlertSuppression,
   },
   defaultable: {
     query: RuleQuery,
@@ -312,7 +308,6 @@ const savedQuerySchema = buildRuleSchemas({
     query: RuleQuery,
     filters: RuleFilterArray,
     response_actions: ResponseActionArray,
-    alert_suppression: AlertSuppression,
   },
   defaultable: {
     language: KqlQueryLanguage,
