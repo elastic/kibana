@@ -49,7 +49,6 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
@@ -127,7 +126,6 @@ import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_wit
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
-import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -184,10 +182,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsLoading,
   clearSelected,
 }) => {
-  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
-    'prebuiltRulesCustomizationEnabled'
-  );
-
   const {
     analytics,
     i18n: i18nStart,
@@ -600,9 +594,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 subtitle={subTitle}
                 subtitle2={
                   <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                    {isPrebuiltRulesCustomizationEnabled && isCustomizedPrebuiltRule(rule) && (
-                      <CustomizedPrebuiltRuleBadge />
-                    )}
+                    <CustomizedPrebuiltRuleBadge rule={rule} />
                     <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
                         {ruleStatusI18n.STATUS}

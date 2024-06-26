@@ -8,7 +8,28 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import * as i18n from './translations';
+import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine/model/rule_schema/utils';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-export const CustomizedPrebuiltRuleBadge = () => (
-  <EuiBadge color="hollow">{i18n.CUSTOMIZED_PREBUILT_RULE_LABEL}</EuiBadge>
-);
+interface CustomizedPrebuiltRuleBadgeProps {
+  rule: RuleResponse | null;
+}
+
+export const CustomizedPrebuiltRuleBadge: React.FC<CustomizedPrebuiltRuleBadgeProps> = ({
+  rule,
+}) => {
+  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
+
+  if (!isPrebuiltRulesCustomizationEnabled) {
+    return null;
+  }
+
+  if (rule === null || !isCustomizedPrebuiltRule(rule)) {
+    return null;
+  }
+
+  return <EuiBadge color="hollow">{i18n.CUSTOMIZED_PREBUILT_RULE_LABEL}</EuiBadge>;
+};

@@ -7,6 +7,6 @@
 
 import type { RuleResponse } from './rule_schemas.gen';
 
-export function isCustomizedPrebuiltRule(rule?: RuleResponse | null): boolean {
-  return rule?.rule_source?.type === 'external' && rule.rule_source.is_customized;
+export function isCustomizedPrebuiltRule(rule: RuleResponse): boolean {
+  return rule.rule_source?.type === 'external' && rule.rule_source.is_customized;
 }
