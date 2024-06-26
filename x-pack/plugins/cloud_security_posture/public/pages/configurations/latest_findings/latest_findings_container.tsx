@@ -75,7 +75,7 @@ const SubGrouping = ({
 };
 
 export const LatestFindingsContainer = () => {
-  const { grouping, isFetching, setUrlQuery, onResetFilters, error, isEmptyResults } =
+  const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
     useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
 
   const renderChildComponent = ({
@@ -145,7 +145,7 @@ export const LatestFindingsContainer = () => {
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -155,7 +155,7 @@ export const LatestFindingsContainer = () => {
 
   return (
     <>
-      <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
       <div>
         {renderChildComponent({
           level: 0,
