@@ -112,6 +112,6 @@ async function hasNoResults({
       legacyHitsTotal: false,
     })
   );
-  const count = (resp?.rawResponse?.hits?.total as estypes.SearchTotalHits)?.value;
-  return typeof count === 'number' && count === 0;
+  const count = (resp?.rawResponse?.hits?.total as estypes.SearchTotalHits)?.value ?? 0;
+  return count === 0;
 }
