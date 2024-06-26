@@ -251,16 +251,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
           )}
         </>
-        {timelineId === 'alerts-page' && (
-          <AddEventNoteAction
-            ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
-            key="add-event-note"
-            showNotes={false}
-            toggleShowNotes={() => {}}
-            timelineType={timelineType}
-            eventId={eventId}
-          />
-        )}
         {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction

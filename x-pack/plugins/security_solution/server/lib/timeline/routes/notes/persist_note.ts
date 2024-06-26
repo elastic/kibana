@@ -11,10 +11,7 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { NOTE_URL } from '../../../../../common/constants';
 
 import type { SetupPlugins } from '../../../../plugin';
-import {
-  // buildRouteValidationWithExcess,
-  buildRouteValidation,
-} from '../../../../utils/build_validation/route_validation';
+import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../..';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
