@@ -92,7 +92,7 @@ describe('AssetCriticalityDataClient', () => {
       await subject.search({ query: { match_all: {} } });
 
       expect(esClientMock.search).toHaveBeenCalledWith(
-        expect.objectContaining({ body: { query: { match_all: {} } } })
+        expect.objectContaining({ query: { match_all: {} } })
       );
     });
 

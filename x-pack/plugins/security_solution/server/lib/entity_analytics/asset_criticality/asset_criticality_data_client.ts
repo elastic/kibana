@@ -75,7 +75,7 @@ export class AssetCriticalityDataClient {
    */
   public async search({
     query,
-    size,
+    size = DEFAULT_CRITICALITY_RESPONSE_SIZE,
     from,
     sort,
   }: {
@@ -88,7 +88,7 @@ export class AssetCriticalityDataClient {
       index: this.getIndex(),
       ignore_unavailable: true,
       query,
-      size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
+      size: Math.min(size, MAX_CRITICALITY_RESPONSE_SIZE),
       from,
       sort,
     });
