@@ -21,7 +21,12 @@ const toolDetails = {
   id: 'knowledge-base-retrieval-tool',
   name: 'KnowledgeBaseRetrievalTool',
 };
-export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
+
+const schema = z.object({
+  query: z.string().describe(`Summary of items/things to search for in the knowledge base`),
+});
+
+export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool<typeof schema> = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is KnowledgeBaseRetrievalToolParams => {

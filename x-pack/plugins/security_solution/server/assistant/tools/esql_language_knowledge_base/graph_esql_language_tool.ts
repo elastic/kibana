@@ -369,51 +369,46 @@ const shouldRegenerate = (state: IState) => {
 };
 
 const schema = z.object({
-  query: z.string().describe(`The user's exact question about ESQL`),
+  question: z.string().describe(`The user's exact question about ESQL`),
 });
 
 export const GRAPH_ESQL_TOOL: AssistantTool<typeof schema> = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: AssistantToolParams): params is GraphESQLToolParams => {
-    const { chain, isEnabledKnowledgeBase, modelExists } = params;
-    return isEnabledKnowledgeBase && modelExists && chain != null;
-  },
+  isSupported: () => true,
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { chain, esClient, search, llm } = params as GraphESQLToolParams;
-    if (chain == null) return null;
+    const { esClient, search, llm } = params;
+    if (!llm) return null;
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
       schema,
       func: async (input, _, cbManager) => {
-        if (llm) {
-          const workflow = new StateGraph<IState>({
-            channels: graphState,
-          })
-            .addNode('classifyEsql', getClassifyEsql({ userQuery: input.query, llm, esClient }))
-            .addNode('generateQuery', getGenerateQuery({ userQuery: input.query, llm }))
-            .addNode('validateQuery', getValidateQuery({ search }))
-            .addEdge(START, 'classifyEsql')
-            .addEdge('classifyEsql', 'generateQuery')
-            .addEdge('generateQuery', 'validateQuery')
-            .addConditionalEdges('validateQuery', shouldRegenerate);
+        const workflow = new StateGraph<IState>({
+          channels: graphState,
+        })
+          .addNode('classifyEsql', getClassifyEsql({ userQuery: input.question, llm, esClient }))
+          .addNode('generateQuery', getGenerateQuery({ userQuery: input.question, llm }))
+          .addNode('validateQuery', getValidateQuery({ search }))
+          .addEdge(START, 'classifyEsql')
+          .addEdge('classifyEsql', 'generateQuery')
+          .addEdge('generateQuery', 'validateQuery')
+          .addConditionalEdges('validateQuery', shouldRegenerate);
 
-          const app = workflow.compile();
+        const app = workflow.compile();
 
-          let query;
+        let query;
 
-          try {
-            query = await app.invoke({}, { recursionLimit: 20 });
-          } catch (e) {
-            return 'error';
-          }
-
-          return query.esqlQuery;
+        try {
+          query = await app.invoke({ question: input.question }, { recursionLimit: 20 });
+        } catch (e) {
+          return 'error';
         }
+
+        return query.esqlQuery;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });

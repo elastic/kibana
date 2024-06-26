@@ -22,7 +22,17 @@ const toolDetails = {
   id: 'knowledge-base-write-tool',
   name: 'KnowledgeBaseWriteTool',
 };
-export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
+
+const schema = z.object({
+  query: z.string().describe(`Summary of items/things to save in the knowledge base`),
+  required: z
+    .boolean()
+    .describe(
+      `Whether or not the entry is required to always be included in conversations. Is only true if the user explicitly asks for it to be required or always included in conversations, otherwise this is always false.`
+    ),
+});
+
+export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool<typeof schema> = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is KnowledgeBaseWriteToolParams => {

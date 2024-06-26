@@ -18,7 +18,12 @@ const toolDetails = {
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
 };
-export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
+
+const schema = z.object({
+  question: z.string().describe(`The user's exact question about ESQL`),
+});
+
+export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool<typeof schema> = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is EsqlKnowledgeBaseToolParams => {
@@ -34,9 +39,7 @@ export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
-      schema: z.object({
-        question: z.string().describe(`The user's exact question about ESQL`),
-      }),
+      schema,
       func: async (input, _, cbManager) => {
         const result = await chain.invoke(
           {
