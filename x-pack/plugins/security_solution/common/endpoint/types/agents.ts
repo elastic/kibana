@@ -11,22 +11,20 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../service/response_actions/constants';
 
-export interface AgentStatusRecords {
-  [agentId: string]: {
-    agentId: string;
-    agentType: ResponseActionAgentType;
-    found: boolean;
-    isolated: boolean;
-    lastSeen: string; // ISO date
-    pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
-    status: HostStatus;
-  };
+export interface AgentStatusInfo {
+  agentId: string;
+  agentType: ResponseActionAgentType;
+  found: boolean;
+  isolated: boolean;
+  lastSeen: string; // ISO date
+  pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
+  status: HostStatus;
 }
 
-// TODO: 8.15 remove when `agentStatusClientEnabled` is enabled/removed
-export interface AgentStatusInfo {
-  [agentId: string]: AgentStatusRecords[string] & {
-    isPendingUninstall: boolean;
-    isUninstalled: boolean;
-  };
+export interface AgentStatusRecords {
+  [agentId: string]: AgentStatusInfo;
+}
+
+export interface AgentStatusApiResponse {
+  data: AgentStatusRecords;
 }
