@@ -193,13 +193,13 @@ const EsqlCodeBlockComponent: React.FC<EsqlCodeBlockProps> = ({
               <EuiFlexGroup direction="row" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="securityAiAssistantEsqlCodeBlockVisualizeThisQueryButton"
+                    data-test-subj="casesEsqlCodeBlockVisualizeThisQueryButton"
                     size="xs"
                     iconType="lensApp"
                     onClick={() => setShowVisualization(true)}
                     disabled={actionsDisabled}
                   >
-                    {i18n.translate('xpack.securityAiAssistant.visualizeThisQuery', {
+                    {i18n.translate('xpack.cases.lensESQLFunction.visualizeThisQuery', {
                       defaultMessage: 'Generate Visualization',
                     })}
                   </EuiButtonEmpty>
