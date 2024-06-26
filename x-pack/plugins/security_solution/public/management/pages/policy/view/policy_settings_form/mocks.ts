@@ -201,19 +201,31 @@ export const exactMatchText = (text: string): RegExp => {
  * @param turnOff
  * @param includePopup
  * @param includeSubfeatures
+ * @param includeAntivirus
  */
-export const setMalwareMode = (
-  policy: PolicyConfig,
-  turnOff: boolean = false,
-  includePopup: boolean = true,
-  includeSubfeatures: boolean = true
-) => {
+export const setMalwareMode = ({
+  policy,
+  turnOff = false,
+  includePopup = true,
+  includeSubfeatures = true,
+  includeAntivirus = false,
+}: {
+  policy: PolicyConfig;
+  turnOff?: boolean;
+  includePopup?: boolean;
+  includeSubfeatures?: boolean;
+  includeAntivirus?: boolean;
+}) => {
   const mode = turnOff ? ProtectionModes.off : ProtectionModes.prevent;
   const enableValue = mode !== ProtectionModes.off;
 
   set(policy, 'windows.malware.mode', mode);
   set(policy, 'mac.malware.mode', mode);
   set(policy, 'linux.malware.mode', mode);
+
+  if (includeAntivirus) {
+    set(policy, 'windows.antivirus_registration.enabled', !turnOff);
+  }
 
   if (includePopup) {
     set(policy, 'windows.popup.malware.enabled', enableValue);

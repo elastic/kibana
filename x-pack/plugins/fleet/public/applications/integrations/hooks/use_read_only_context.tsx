@@ -33,7 +33,7 @@ export function useIsReadOnly() {
 export function useSetIsReadOnly(isReadOnly: boolean) {
   const context = useContext(ReadOnlyContext);
   useEffect(() => {
-    context.setIsReadOnly(true);
+    context.setIsReadOnly(isReadOnly);
     return () => context.setIsReadOnly(false);
-  }, [context]);
+  }, [context, isReadOnly]);
 }
