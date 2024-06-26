@@ -24,8 +24,8 @@ export const FlyoutBody: FC<FlyoutBodyProps> = memo(({ children, ...flyoutBodyPr
       css={css`
         .euiFlyoutBody__overflow {
           // fix a bug with red overlay when position was not set
-          // remove when position: relative is added in EUI
-          mask-image: none;
+          // remove when changes in EUI are merged
+          transform: translateZ(0);
         }
       `}
     >
