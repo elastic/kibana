@@ -107,6 +107,7 @@ test('generates tag cloud chart config', async () => {
                 "query": Object {
                   "esql": "from test | count=count() by category",
                 },
+                "timeField": undefined,
               },
             },
           },
@@ -123,8 +124,8 @@ test('generates tag cloud chart config', async () => {
           "minFontSize": 12,
           "orientation": "single",
           "showLabel": true,
-          "tagAccessor": "category",
-          "valueAccessor": "count",
+          "tagAccessor": "metric_formula_accessor_breakdown",
+          "valueAccessor": "metric_formula_accessor",
         },
       },
       "title": "test",
