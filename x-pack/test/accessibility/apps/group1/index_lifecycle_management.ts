@@ -51,18 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.setValue('ilmSearchBar', policyName);
   };
 
-  const findPolicyLinkInListView = async (policyName: string) => {
-    await filterByPolicyName(policyName);
-    const links = await testSubjects.findAll('policyTablePolicyNameLink');
-    for (const link of links) {
-      const name = await link.getVisibleText();
-      if (name === policyName) {
-        return link;
-      }
-    }
-    throw new Error(`Could not find ${policyName} in policy table`);
-  };
-
   describe('Index Lifecycle Management Accessibility', async () => {
     before(async () => {
       await esClient.snapshot.createRepository({
