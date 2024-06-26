@@ -6,13 +6,13 @@
  */
 import { useQuery } from '@tanstack/react-query';
 
-import { NotebookCatalog } from '../../common/types';
+import { NotebookCatalogResponse } from '../../common/types';
 import { useKibanaServices } from './use_kibana';
 
 export const useNotebooksCatalog = () => {
   const { http } = useKibanaServices();
   return useQuery({
     queryKey: ['fetchNotebooksCatalog'],
-    queryFn: () => http.get<NotebookCatalog>('/internal/search_notebooks/notebooks'),
+    queryFn: () => http.get<NotebookCatalogResponse>('/internal/search_notebooks/notebooks'),
   });
 };
