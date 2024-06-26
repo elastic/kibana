@@ -10,8 +10,11 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { getKibanaRoleSchema, elasticsearchRoleSchema } from '@kbn/security-plugin-types-common';
+import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../roles';
 
+/**
+ * Interface for managing API keys in Elasticsearch, including creation, validation, and invalidation of API keys, as well as checking the status of API key features.
+ */
 export interface APIKeys {
   /**
    * Determines if API Keys are enabled in Elasticsearch.
@@ -121,6 +124,9 @@ export interface ValidateAPIKeyParams {
  * Represents the params for invalidating multiple API keys
  */
 export interface InvalidateAPIKeysParams {
+  /**
+   * List of unique API key IDs
+   */
   ids: string[];
 }
 
@@ -163,6 +169,7 @@ export const restApiKeySchema = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
+/** */
 export const getRestApiKeyWithKibanaPrivilegesSchema = (
   getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
 ) =>

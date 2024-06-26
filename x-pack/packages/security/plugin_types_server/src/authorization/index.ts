@@ -42,12 +42,3 @@ export type {
   PrivilegeDeprecationsRolesByFeatureIdResponse,
 } from './deprecations';
 export type { AuthorizationMode } from './mode';
-export type {
-  ElasticsearchPrivilegesType,
-  KibanaPrivilegesType,
-} from '@kbn/security-plugin-types-common';
-export {
-  getKibanaRoleSchema,
-  elasticsearchRoleSchema,
-  GLOBAL_RESOURCE,
-} from '@kbn/security-plugin-types-common';

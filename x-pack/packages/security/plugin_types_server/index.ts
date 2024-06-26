@@ -39,7 +39,6 @@ export type {
   CheckPrivilegesWithRequest,
   CheckSavedObjectsPrivilegesWithRequest,
   CheckPrivilegesDynamicallyWithRequest,
-  KibanaPrivilegesType,
   SavedObjectActions,
   UIActions,
   CheckPrivilegesPayload,
@@ -51,7 +50,6 @@ export type {
   CheckPrivilegesOptions,
   CheckUserProfilesPrivilegesPayload,
   CheckUserProfilesPrivilegesResponse,
-  ElasticsearchPrivilegesType,
   CasesActions,
   CheckPrivileges,
   AlertingActions,
@@ -80,8 +78,9 @@ export {
   updateCrossClusterApiKeySchema,
 } from './src/authentication';
 
+export type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '@kbn/core-security-common';
 export {
-  GLOBAL_RESOURCE,
   getKibanaRoleSchema,
   elasticsearchRoleSchema,
-} from '@kbn/security-plugin-types-common';
+  GLOBAL_RESOURCE,
+} from '@kbn/core-security-common';

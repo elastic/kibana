@@ -30,3 +30,6 @@ export {
   crossClusterApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
 } from './src/api_keys';
+
+export { elasticsearchRoleSchema, getKibanaRoleSchema, GLOBAL_RESOURCE } from './src/roles';
+export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';

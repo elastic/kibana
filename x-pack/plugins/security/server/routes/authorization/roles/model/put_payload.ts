@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
+import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/core-security-common';
 
 import type { ElasticsearchRole } from '../../../../authorization';
 import { transformPrivilegesToElasticsearchPrivileges } from '../../../../lib';

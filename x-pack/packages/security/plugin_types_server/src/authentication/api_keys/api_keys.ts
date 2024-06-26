@@ -8,8 +8,12 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { restApiKeySchema, crossClusterApiKeySchema } from '@kbn/core-security-common';
-import { getKibanaRoleSchema, elasticsearchRoleSchema } from '@kbn/security-plugin-types-common';
+import {
+  restApiKeySchema,
+  crossClusterApiKeySchema,
+  elasticsearchRoleSchema,
+  getKibanaRoleSchema,
+} from '@kbn/core-security-common';
 
 /**
  * Response of Kibana Update API key endpoint.
