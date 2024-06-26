@@ -117,7 +117,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables new notes
    */
-  notesEnabled: false,
+  securitySolutionNotesEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -269,9 +269,17 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForEventFiltersEnabled: false,
 
   /**
+   * Enables an ability to customize Elastic prebuilt rules.
+   *
+   * Ticket: https://github.com/elastic/security-team/issues/1974
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   */
+  prebuiltRulesCustomizationEnabled: false,
+
+  /**
    * Adds a new langgraph-based ESQL generation tool
    */
-  graphEsqlTool: true,
+  aiAssistantGraphEsqlTool: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
