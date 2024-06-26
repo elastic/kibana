@@ -2,8 +2,6 @@ env:
   DISABLE_CI_STATS_SHIPPING: 'true'
   KBN_ENABLE_FIPS: 'true'
   TEST_BROWSER_HEADLESS: 1
-  # TODO: remove
-  KIBANA_BUILD_ID: '01904a8a-fb5d-4e75-9e51-6e1caf21fb1c'
 agents:
   provider: 'gcp'
   image: 'family/kibana-fips-ubuntu-2004'
@@ -43,7 +41,7 @@ steps:
       preemptible: true
 
   - command: .buildkite/scripts/steps/fips/smoke_test.sh
-    label: 'Pick Test Group Run Order'
+    label: 'Pick Smoke Test Group Run Order'
     depends_on: build
     timeout_in_minutes: 10
     env:
