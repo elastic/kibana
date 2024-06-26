@@ -13,7 +13,16 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   name: 'Services from logs',
   type: 'service',
   managed: true,
-  indexPatterns: ['logs-*', 'filebeat*'],
+  indexPatterns: [
+    'logs-*',
+    'filebeat*',
+    'apm*',
+    'traces-*',
+    'remote_cluster:logs*',
+    'remote_cluster:filebeat*',
+    'remote_cluster:apm*',
+    'remote_cluster:traces-*',
+  ],
   history: {
     timestampField: '@timestamp',
     interval: '1m',
@@ -25,42 +34,82 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
   metadata: [
     'data_stream.type',
-    'service.instance.id',
     'service.namespace',
     'service.version',
     'service.runtime.name',
     'service.runtime.version',
     'service.node.name',
     'service.language.name',
-    'agent.name',
     'cloud.provider',
-    'cloud.instance.id',
     'cloud.availability_zone',
-    'cloud.instance.name',
     'cloud.machine.type',
-    'host.name',
-    'container.id',
+    'service.name',
+    'service.environment',
   ],
   metrics: [
     {
-      name: 'logRate',
+      name: 'latency',
+      equation: 'A',
+      metrics: [
+        {
+          name: 'A',
+          aggregation: 'avg',
+          filter: 'processor.event: "transaction"',
+          field: 'transaction.duration.us',
+        },
+      ],
+    },
+    {
+      name: 'throughput',
       equation: 'A / 5',
       metrics: [
         {
           name: 'A',
+          aggregation: 'doc_count',
+          filter: 'processor.event: "transaction"',
+        },
+      ],
+    },
+    {
+      name: 'failedTransactionRate',
+      equation: 'A / B',
+      metrics: [
+        {
+          name: 'A',
+          aggregation: 'doc_count',
+          filter: 'processor.event: "transaction" AND event.outcome: "failure"',
+        },
+        {
+          name: 'B',
+          aggregation: 'doc_count',
+          filter: 'processor.event: "transaction" AND event.outcome: *',
+        },
+      ],
+    },
+    {
+      name: 'logErrorRate',
+      equation: 'A / B',
+      metrics: [
+        {
+          name: 'A',
+          aggregation: 'doc_count',
+          filter: 'log.level: "error"',
+        },
+        {
+          name: 'B',
           aggregation: 'doc_count',
           filter: 'log.level: *',
         },
       ],
     },
     {
-      name: 'errorRate',
+      name: 'logRatePerMinute',
       equation: 'A / 5',
       metrics: [
         {
           name: 'A',
           aggregation: 'doc_count',
-          filter: 'log.level: "ERROR"',
+          filter: 'log.level: "error"',
         },
       ],
     },
