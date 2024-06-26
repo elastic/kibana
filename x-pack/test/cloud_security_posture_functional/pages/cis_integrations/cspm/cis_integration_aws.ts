@@ -74,12 +74,9 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect(
-          (
-            await cisIntegration.clickLaunchAndGetCurrentUrl(
-              'confirmCloudFormationModalConfirmButton',
-              2
-            )
-          ).includes('console.aws.amazon.com%2Fcloudformation')
+          (await cisIntegration.getElementUrl('confirmCloudFormationModalConfirmButton')).includes(
+            'console.aws.amazon.com%2Fcloudformation'
+          )
         ).to.be(true);
       });
     });
