@@ -47,7 +47,6 @@ packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
-x-pack/plugins/observability_solution/asset_manager @elastic/obs-knowledge-team
 x-pack/plugins/observability_solution/assets_data_access @elastic/obs-knowledge-team
 x-pack/test/security_api_integration/plugins/audit_log @elastic/kibana-security
 packages/kbn-axe-config @elastic/kibana-qa
@@ -391,6 +390,7 @@ x-pack/examples/embedded_lens_example @elastic/kibana-visualizations
 x-pack/plugins/encrypted_saved_objects @elastic/kibana-security
 x-pack/plugins/enterprise_search @elastic/search-kibana
 x-pack/packages/kbn-entities-schema @elastic/obs-knowledge-team
+x-pack/plugins/observability_solution/entity_manager @elastic/obs-knowledge-team
 examples/error_boundary @elastic/appex-sharedux
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
@@ -727,6 +727,8 @@ packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 packages/kbn-search-types @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/kibana-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
+x-pack/packages/security/api_key_management @elastic/kibana-security
+x-pack/packages/security/form_components @elastic/kibana-security
 packages/kbn-security-hardening @elastic/kibana-security
 x-pack/plugins/security @elastic/kibana-security
 x-pack/packages/security/plugin_types_common @elastic/kibana-security
