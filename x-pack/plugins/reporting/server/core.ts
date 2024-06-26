@@ -19,6 +19,7 @@ import {
   PackageInfo,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
@@ -38,7 +39,7 @@ import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
@@ -82,7 +83,7 @@ export interface ReportingInternalStart {
   licensing: LicensingPluginStart;
   logger: Logger;
   screenshotting?: ScreenshottingStart;
-  security?: SecurityPluginStart;
+  securityServiceStart: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
 
