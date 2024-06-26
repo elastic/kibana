@@ -50,13 +50,14 @@ import {
 
 import { AGENTLESS_POLICY_ID } from '../../../../../../common/constants';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import {
   getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
 } from '../../../../../../common/services';
+import { useMultipleAgentPolicies } from '../../../hooks';
 
 import { RootPrivilegesCallout } from '../create_package_policy_page/single_page_layout/root_callout';
 
@@ -103,7 +104,7 @@ export const EditPackagePolicyForm = memo<{
     agents: { enabled: isFleetEnabled },
   } = useConfig();
   const { getHref } = useLink();
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const {
     // data
@@ -129,7 +130,7 @@ export const EditPackagePolicyForm = memo<{
   });
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-  useSetIsReadOnly(canWriteIntegrationPolicies);
+  useSetIsReadOnly(!canWriteIntegrationPolicies);
   const newSecrets = useMemo(() => {
     if (!packageInfo) {
       return [];
@@ -520,7 +521,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {enableReusableIntegrationPolicies ? (
+            {canUseMultipleAgentPolicies ? (
               <StepsWithLessPadding steps={steps} />
             ) : (
               replaceConfigurePackage || configurePackage
