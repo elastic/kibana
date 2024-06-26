@@ -20,10 +20,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'svlCommonPage', 'header']);
   const reportingAPI = getService('svlReportingApi');
-  const config = getService('config');
-  const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
+  const svlCommonApi = getService('svlCommonApi');
   let roleAuthc: RoleCredentials;
+  let roleName: string;
   let internalReqHeader: InternalRequestHeader;
 
   const navigateToReportingManagement = async () => {
@@ -56,11 +56,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     // Kibana CI and MKI use different users
-    const TEST_USERNAME = config.get('servers.kibana.username');
-    const TEST_PASSWORD = config.get('servers.kibana.password');
-
     before('initialize saved object archive', async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleName = 'admin';
+      roleAuthc = await svlUserManager.createApiKeyForRole(roleName);
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
       // add test saved search object
       await kibanaServer.importExport.load(savedObjectsArchive);
@@ -69,10 +67,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after('clean up archives', async () => {
       await kibanaServer.importExport.unload(savedObjectsArchive);
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    // Cant auth into the route as it's structured currently
-    xit(`user sees a job they've created`, async () => {
+    it(`user sees a job they've created`, async () => {
       const {
         job: { id: jobId },
       } = await reportingAPI.createReportJobInternal(
@@ -87,16 +85,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     // Skipping test for now because functionality is not yet possible to test
+    // See details: https://github.com/elastic/kibana/issues/186558
     xit(`user doesn't see a job another user has created`, async () => {
-      log.debug(`creating a csv report job as '${TEST_USERNAME}'`);
+      log.debug(`creating a csv report job using api keys for role: [${roleName}]`);
 
       const {
         job: { id: jobId },
       } = await reportingAPI.createReportJobInternal(
         CSV_REPORT_TYPE_V2,
         job,
-        TEST_USERNAME,
-        TEST_PASSWORD
+        roleAuthc,
+        internalReqHeader
       );
 
       await navigateToReportingManagement();
