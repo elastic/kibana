@@ -297,6 +297,7 @@ describe('fetch_query_source_fields', () => {
               field: 'ml.inference.body_content.predicted_value',
               indices: ['search-test-e5'],
               model_id: '.multilingual-e5-small_linux-x86_64',
+              nested: false,
             },
           ],
           elser_query_fields: [],
