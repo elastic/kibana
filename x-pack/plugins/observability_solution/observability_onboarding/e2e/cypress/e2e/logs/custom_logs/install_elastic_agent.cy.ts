@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// Failing: See https://github.com/elastic/kibana/issues/186925
-describe.skip('[Logs onboarding] Custom logs - install elastic agent', () => {
+describe('[Logs onboarding] Custom logs - install elastic agent', () => {
   const CUSTOM_INTEGRATION_NAME = 'mylogs';
 
   const configureCustomLogs = (loginFn = () => cy.loginAsLogMonitoringUser()) => {
