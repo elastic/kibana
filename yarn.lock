@@ -1783,9 +1783,9 @@
     vfile "^4.2.1"
 
 "@elastic/eui@^94.5.2":
-  version "94.5.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.5.2.tgz#f26a94343b92388f9e18be9e4bb5659957e92d44"
-  integrity sha512-rSheSetb35YbyfLGmLE4vLYgvNbQERHb5k3abKce+mo19cuvQZxuRj1b87N6B4ZSe1zvipGyvfuvFMp2p2spdQ==
+  version "94.6.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.6.0.tgz#fd56be1dbdcdea259cdb3504085c8479fa35bcef"
+  integrity sha512-lYXVcylXn4Iz2WumBuOEkc1PRFoUby7CTnNhTS/gVrbTP7Mn0ombcoPFUSiZcA7VuN2mHfPmTUdBQptC/apTzA==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -1826,23 +1826,17 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/help-center-common@^0.0.1", "@elastic/help-center-common@file:../help-center-sdk/packages/common":
-  version "0.0.1"
-  dependencies:
-    "@reduxjs/toolkit" "^1.9.7"
-    redux-dynamic-middlewares "^2.2.0"
+"@elastic/help-center-common@^0.0.1":
+  version "0.0.0"
+  uid ""
 
-"@elastic/help-center-host@file:../help-center-sdk/packages/host":
-  version "0.0.1"
-  dependencies:
-    "@elastic/datemath" "^5.0.3"
-    "@elastic/eui" "^94.5.2"
-    "@elastic/help-center-common" "^0.0.1"
-    "@reduxjs/toolkit" "1.9.7"
-    moment "^2.30.1"
-    react "^17.0.2"
-    react-redux "^7.2.8"
-    react-use "^17.5.0"
+"@elastic/help-center-common@link:../help-center-sdk/packages/common":
+  version "0.0.0"
+  uid ""
+
+"@elastic/help-center-host@link:../help-center-sdk/packages/host":
+  version "0.0.0"
+  uid ""
 
 "@elastic/makelogs@^6.1.1":
   version "6.1.1"
@@ -19699,9 +19693,9 @@ hyphenate-style-name@^1.0.2:
   integrity sha512-EcuixamT82oplpoJ2XU4pDtKGWQ7b00CD9f1ug9IaQ3p1bkHMiKCZ9ut9QDI6qsa6cpUuB+A/I+zLtdNK4n2DQ==
 
 hyphenate-style-name@^1.0.3:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.0.4.tgz#691879af8e220aea5750e8827db4ef62a54e361d"
-  integrity sha512-ygGZLjmXfPHj+ZWh6LwbC37l43MhfztxetbFCoYTM2VjkIUpeHgSNn7QIyVFj7YQ1Wl9Cbw5sholVJPzWvC2MQ==
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/hyphenate-style-name/-/hyphenate-style-name-1.1.0.tgz#1797bf50369588b47b72ca6d5e65374607cf4436"
+  integrity sha512-WDC/ui2VVRrz3jOVi+XtjqkDjiVjTtFaAGiW37k6b+ohyQ5wYDOGkvCZa8+H0nx3gyvv0+BST9xuOgIyGQ00gw==
 
 i18n-iso-countries@^4.3.1:
   version "4.3.1"
