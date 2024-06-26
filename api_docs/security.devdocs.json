@@ -1255,16 +1255,7 @@
           "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/filebeat_config_flyout/filebeat_config_flyout.tsx"
-            },
-            {
-              "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-            }
-          ]
+          "references": []
         },
         {
           "parentPluginId": "security",
@@ -5704,6 +5695,10 @@
               "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/disable.ts"
             },
             {
+              "plugin": "observabilityOnboarding",
+              "path": "x-pack/plugins/observability_solution/observability_onboarding/server/routes/flow/route.ts"
+            },
+            {
               "plugin": "synthetics",
               "path": "x-pack/plugins/observability_solution/synthetics/server/synthetics_service/get_api_key.ts"
             },
@@ -6613,47 +6608,6 @@
               "{ [x: string]: string[]; }"
             ],
             "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-common.RestApiKey",
-        "type": "Interface",
-        "tags": [],
-        "label": "RestApiKey",
-        "description": [
-          "\nInterface representing a REST API key the way it is returned by Elasticsearch GET endpoint.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
-        ],
-        "signature": [
-          {
-            "pluginId": "security",
-            "scope": "common",
-            "docId": "kibSecurityPluginApi",
-            "section": "def-common.RestApiKey",
-            "text": "RestApiKey"
-          },
-          " extends ",
-          "BaseApiKey"
-        ],
-        "path": "x-pack/plugins/security/common/model/api_key.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-common.RestApiKey.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"rest\""
-            ],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7976,31 +7930,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "security",
-        "id": "def-common.ApiKey",
-        "type": "Type",
-        "tags": [],
-        "label": "ApiKey",
-        "description": [
-          "\nInterface representing an API key the way it is returned by Elasticsearch GET endpoint."
-        ],
-        "signature": [
-          {
-            "pluginId": "security",
-            "scope": "common",
-            "docId": "kibSecurityPluginApi",
-            "section": "def-common.RestApiKey",
-            "text": "RestApiKey"
-          },
-          " | ",
-          "CrossClusterApiKey"
-        ],
-        "path": "x-pack/plugins/security/common/model/api_key.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "security",
         "id": "def-common.LoginLayout",

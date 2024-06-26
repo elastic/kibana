@@ -9,13 +9,13 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { InvestigationGuide } from './investigation_guide';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
@@ -33,9 +33,9 @@ const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.'
 const renderInvestigationGuide = () =>
   render(
     <IntlProvider locale="en">
-      <RightPanelContext.Provider value={mockContextValue}>
+      <DocumentDetailsContext.Provider value={mockContextValue}>
         <InvestigationGuide />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </IntlProvider>
   );
 
@@ -109,9 +109,9 @@ describe('<InvestigationGuide />', () => {
   it('should render preview message when flyout is in preview', () => {
     const { queryByTestId, getByTestId } = render(
       <IntlProvider locale="en">
-        <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+        <DocumentDetailsContext.Provider value={{ ...mockContextValue, isPreview: true }}>
           <InvestigationGuide />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </IntlProvider>
     );
 

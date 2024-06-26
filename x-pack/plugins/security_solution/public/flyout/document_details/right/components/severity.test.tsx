@@ -7,18 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { SEVERITY_VALUE_TEST_ID } from './test_ids';
 import { DocumentSeverity } from './severity';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { TestProviders } from '../../../../common/mock';
 
-const renderDocumentSeverity = (contextValue: RightPanelContext) =>
+const renderDocumentSeverity = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <DocumentSeverity />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -27,7 +27,7 @@ describe('<DocumentSeverity />', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderDocumentSeverity(contextValue);
 
@@ -40,7 +40,7 @@ describe('<DocumentSeverity />', () => {
     const contextValue = {
       getFieldsData: jest.fn(),
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderDocumentSeverity(contextValue);
 
@@ -51,7 +51,7 @@ describe('<DocumentSeverity />', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(() => ['abc']),
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderDocumentSeverity(contextValue);
 
@@ -62,7 +62,7 @@ describe('<DocumentSeverity />', () => {
     const contextValue = {
       getFieldsData: jest.fn().mockImplementation(() => 'abc'),
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { container } = renderDocumentSeverity(contextValue);
 

@@ -17,9 +17,9 @@ import {
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
@@ -76,9 +76,9 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const renderUserEntityOverview = () =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={panelContextValue}>
+      <DocumentDetailsContext.Provider value={panelContextValue}>
         <UserEntityOverview userName={userName} />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -139,9 +139,9 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
             <UserEntityOverview userName={userName} />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -154,9 +154,9 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
             <UserEntityOverview userName={userName} />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -169,9 +169,9 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId } = render(
         <TestProviders>
-          <RightPanelContext.Provider value={panelContextValue}>
+          <DocumentDetailsContext.Provider value={panelContextValue}>
             <UserEntityOverview userName={userName} />
-          </RightPanelContext.Provider>
+          </DocumentDetailsContext.Provider>
         </TestProviders>
       );
 

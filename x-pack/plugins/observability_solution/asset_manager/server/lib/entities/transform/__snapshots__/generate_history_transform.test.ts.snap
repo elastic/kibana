@@ -49,6 +49,12 @@ Object {
           "size": 1000,
         },
       },
+      "entity.metadata.host.os.name": Object {
+        "terms": Object {
+          "field": "host.os.name",
+          "size": 1000,
+        },
+      },
       "entity.metadata.tags": Object {
         "terms": Object {
           "field": "tags",

@@ -83,8 +83,13 @@ Array [
   ctx[\\"tags\\"] = ctx.entity.metadata.tags.keySet();
 }
 if (ctx.entity?.metadata?.host?.name != null) {
-  ctx[\\"host\\"] = new HashMap();
+ if(ctx.host == null)  ctx[\\"host\\"] = new HashMap();
   ctx[\\"host\\"][\\"name\\"] = ctx.entity.metadata.host.name.keySet();
+}
+if (ctx.entity?.metadata?.host?.os?.name != null) {
+ if(ctx.host == null)  ctx[\\"host\\"] = new HashMap();
+ if(ctx.host.os == null)  ctx[\\"host\\"][\\"os\\"] = new HashMap();
+  ctx[\\"host\\"][\\"os\\"][\\"name\\"] = ctx.entity.metadata.host.os.name.keySet();
 }
 ",
     },

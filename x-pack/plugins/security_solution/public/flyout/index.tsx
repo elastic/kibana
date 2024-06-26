@@ -18,12 +18,10 @@ import {
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
 import { IsolateHostPanel } from './document_details/isolate_host';
 import { IsolateHostPanelProvider } from './document_details/isolate_host/context';
-import type { RightPanelProps } from './document_details/right';
+import type { DocumentDetailsProps } from './document_details/shared/types';
+import { DocumentDetailsProvider } from './document_details/shared/context';
 import { RightPanel } from './document_details/right';
-import { RightPanelProvider } from './document_details/right/context';
-import type { LeftPanelProps } from './document_details/left';
 import { LeftPanel } from './document_details/left';
-import { LeftPanelProvider } from './document_details/left/context';
 import type { AlertReasonPanelProps } from './document_details/alert_reason';
 import { AlertReasonPanel } from './document_details/alert_reason';
 import { AlertReasonPanelProvider } from './document_details/alert_reason/context';
@@ -47,17 +45,17 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: DocumentDetailsRightPanelKey,
     component: (props) => (
-      <RightPanelProvider {...(props as RightPanelProps).params}>
-        <RightPanel path={props.path as RightPanelProps['path']} />
-      </RightPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <RightPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {
     key: DocumentDetailsLeftPanelKey,
     component: (props) => (
-      <LeftPanelProvider {...(props as LeftPanelProps).params}>
-        <LeftPanel path={props.path as LeftPanelProps['path']} />
-      </LeftPanelProvider>
+      <DocumentDetailsProvider {...(props as DocumentDetailsProps).params}>
+        <LeftPanel path={props.path as DocumentDetailsProps['path']} />
+      </DocumentDetailsProvider>
     ),
   },
   {

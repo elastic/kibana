@@ -184,8 +184,7 @@ describe('ES|QL query generation', () => {
           'Assume my metrics data is in `metrics-*`. I want to see what a query would look like that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m.',
         expected: `FROM .ds-metrics-apm*
         | WHERE @timestamp >= NOW() - 15 minutes
-        | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
-        | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY bucket, service.name
+        | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY BUCKET(@timestamp, 1m), service.name
         | SORT avg_cpu DESC
         | LIMIT 10`,
         execute: false,
@@ -310,9 +309,8 @@ describe('ES|QL query generation', () => {
         question: `i have logs in logs-apm*. Using ESQL, show me the error rate as a percetage of the error logs (identified as processor.event containing the value error) vs the total logs per day for the last 7 days `,
         expected: `FROM logs-apm*
         | WHERE @timestamp >= NOW() - 7 days
-        | EVAL day = DATE_TRUNC(1 day, @timestamp)
         | EVAL error = CASE(processor.event == "error", 1, 0)
-        | STATS total_logs = COUNT(*), total_errors = SUM(is_error) BY day
+        | STATS total_logs = COUNT(*), total_errors = SUM(is_error) BY BUCKET(@timestamp, 1 day)
         | EVAL error_rate = total_errors / total_logs * 100
         | SORT day ASC`,
         execute: true,

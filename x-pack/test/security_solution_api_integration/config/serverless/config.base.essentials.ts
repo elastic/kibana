@@ -11,7 +11,7 @@ export interface CreateTestConfigOptions {
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
-import { services } from '../../../../test_serverless/api_integration/services';
+import { services } from './services';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {

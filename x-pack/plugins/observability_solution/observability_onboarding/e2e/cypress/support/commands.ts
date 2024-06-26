@@ -24,6 +24,10 @@ export type InstallationStepStatus =
   | 'danger'
   | 'current';
 
+export interface ElasticAgentStepPayload {
+  agentId: string;
+}
+
 Cypress.Commands.add('loginAsViewerUser', () => {
   return cy.loginAs({
     username: ObservabilityOnboardingUsername.viewerUser,
@@ -151,7 +155,12 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
 
 Cypress.Commands.add(
   'updateInstallationStepStatus',
-  (onboardingId: string, step: InstallationStep, status: InstallationStepStatus) => {
+  (
+    onboardingId: string,
+    step: InstallationStep,
+    status: InstallationStepStatus,
+    payload: ElasticAgentStepPayload | undefined
+  ) => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
 
     cy.log(onboardingId, step, status);
@@ -166,6 +175,7 @@ Cypress.Commands.add(
       auth: { user: 'editor', pass: 'changeme' },
       body: {
         status,
+        payload,
       },
     });
   }

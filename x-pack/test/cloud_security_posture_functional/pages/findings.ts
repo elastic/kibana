@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -100,9 +99,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     },
   ];
 
-  const ruleName1 = data[0].rule.name;
-  const ruleName2 = data[1].rule.name;
-
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
     const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
       type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
@@ -151,39 +147,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/174472
-    describe.skip('SearchBar', () => {
-      it('add filter', async () => {
-        // Filter bar uses the field's customLabel in the DataView
-        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
-      });
-
-      it('remove filter', async () => {
-        await filterBar.removeFilter('rule.name');
-
-        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
-        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      });
-
-      it('set search query', async () => {
-        await queryBar.setQuery(ruleName1);
-        await queryBar.submitQuery();
-
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
-        expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName2)).to.be(false);
-
-        await queryBar.setQuery('');
-        await queryBar.submitQuery();
-
-        expect(await latestFindingsTable.getRowsCount()).to.be(data.length);
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/152913
-    describe.skip('Table Sort', () => {
+    describe('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)

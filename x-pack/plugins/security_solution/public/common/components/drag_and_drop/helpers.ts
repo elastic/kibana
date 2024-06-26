@@ -231,7 +231,6 @@ export const addFieldToColumns = ({
     dispatch(
       scopedActions.upsertColumn({
         column: {
-          category: column.category,
           columnHeaderType: 'not-filtered',
           description: isString(column.description) ? column.description : undefined,
           example: isString(column.example) ? column.example : undefined,

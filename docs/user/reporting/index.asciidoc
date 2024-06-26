@@ -171,3 +171,5 @@ NOTE: *Public URL* is available only when anonymous access is configured and you
 
 include::automating-report-generation.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]
+include::reporting-csv-troubleshooting.asciidoc[leveloffset=+1]
+include::reporting-pdf-troubleshooting.asciidoc[leveloffset=+1]

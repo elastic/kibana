@@ -706,7 +706,7 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       queries,
       categories,
-      asCurrentUser: this.dependencies.esClient.asCurrentUser,
+      esClient: this.dependencies.esClient,
       uiSettingsClient: this.dependencies.uiSettingsClient,
     });
   };

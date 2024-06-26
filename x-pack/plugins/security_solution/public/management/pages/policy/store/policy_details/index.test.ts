@@ -325,8 +325,8 @@ describe('policy details: ', () => {
                     },
                     logging: { file: 'info' },
                     antivirus_registration: {
-                      enabled: false,
-                      mode: 'disabled',
+                      enabled: true,
+                      mode: 'sync_with_malware_prevent',
                     },
                   },
                   mac: {

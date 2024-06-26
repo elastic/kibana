@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, waitFor, fireEvent } from '@testing-library/react';
 import { RightPanelTour } from './tour';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import {
   createMockStore,
   createSecuritySolutionStorageMock,
@@ -37,15 +37,15 @@ const mockCasesContract = casesPluginMock.createStartContract();
 const mockUseIsAddToCaseOpen = mockCasesContract.hooks.useIsAddToCaseOpen as jest.Mock;
 mockUseIsAddToCaseOpen.mockReturnValue(false);
 
-const renderRightPanelTour = (context: RightPanelContext = mockContextValue) =>
+const renderRightPanelTour = (context: DocumentDetailsContext = mockContextValue) =>
   render(
     <TestProviders store={mockStore}>
-      <RightPanelContext.Provider value={context}>
+      <DocumentDetailsContext.Provider value={context}>
         <RightPanelTour />
         {Object.values(FLYOUT_TOUR_CONFIG_ANCHORS).map((i, idx) => (
           <div key={idx} data-test-subj={i} />
         ))}
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

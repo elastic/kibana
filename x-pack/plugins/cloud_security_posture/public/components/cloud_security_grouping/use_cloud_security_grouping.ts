@@ -128,6 +128,7 @@ export const useCloudSecurityGrouping = ({
     query,
     error,
     selectedGroup,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,

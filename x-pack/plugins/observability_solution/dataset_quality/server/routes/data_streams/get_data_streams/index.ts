@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DEFAULT_DATASET_TYPE } from '../../../../common/constants';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamService, datasetQualityPrivileges } from '../../../services';
@@ -16,11 +17,11 @@ export async function getDataStreams(options: {
   datasetQuery?: string;
   uncategorisedOnly: boolean;
 }) {
-  const { esClient, type, datasetQuery, uncategorisedOnly } = options;
+  const { esClient, type = DEFAULT_DATASET_TYPE, datasetQuery, uncategorisedOnly } = options;
 
   const datasetName = streamPartsToIndexPattern({
-    typePattern: type ?? '*',
-    datasetPattern: datasetQuery ? `*${datasetQuery}*` : '*',
+    typePattern: type,
+    datasetPattern: datasetQuery ? `*${datasetQuery}*` : '*-*',
   });
 
   const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(

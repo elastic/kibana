@@ -37,8 +37,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const kibanaServer = getService('kibanaServer');
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   const { indexEnhancedDocuments, indexListOfDocuments, indexGeneratedDocuments } =
     dataGeneratorFactory({
@@ -66,6 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
     // First test creates a real rule - remaining tests use preview API
     it('should generate 1 alert with during actual rule execution', async () => {
       const id = uuidv4();
+      const username = await utils.getUsername();
       const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
       const doc1 = { agent: { name: 'test-1' } };
       const doc2 = { agent: { name: 'test-2' } };
@@ -140,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.risk_score': 55,
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
-        'kibana.alert.rule.created_by': ELASTICSEARCH_USERNAME,
+        'kibana.alert.rule.created_by': username,
         'kibana.alert.rule.description': 'Detecting root and admin users',
         'kibana.alert.rule.enabled': true,
         'kibana.alert.rule.exceptions_list': [],
@@ -157,7 +157,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.threat': [],
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'esql',
-        'kibana.alert.rule.updated_by': ELASTICSEARCH_USERNAME,
+        'kibana.alert.rule.updated_by': username,
         'kibana.alert.rule.version': 1,
         'kibana.alert.workflow_tags': [],
         'kibana.alert.workflow_assignee_ids': [],
