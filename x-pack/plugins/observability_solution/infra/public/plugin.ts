@@ -47,10 +47,6 @@ import type {
 } from './types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_overview_fetchers';
 import type { LogStreamSerializedState } from './components/log_stream/types';
-import {
-  logStreamEmbeddableDisplayName,
-  LogStreamPanelActionMenuItem,
-} from './components/log_stream_panel_action_menu_item';
 
 export class Plugin implements InfraClientPluginClass {
   public config: InfraPublicConfig;
@@ -404,8 +400,10 @@ export class Plugin implements InfraClientPluginClass {
 
     plugins.uiActions.registerAction<EmbeddableApiContext>({
       id: ADD_LOG_STREAM_ACTION_ID,
-      MenuItem: LogStreamPanelActionMenuItem,
-      getDisplayName: () => logStreamEmbeddableDisplayName,
+      getDisplayName: () =>
+        i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
+          defaultMessage: 'Log stream',
+        }),
       getDisplayNameTooltip: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.description', {
           defaultMessage: 'Add a table of live streaming logs.',
