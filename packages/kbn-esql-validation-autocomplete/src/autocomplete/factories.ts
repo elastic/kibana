@@ -356,3 +356,38 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   }
   return suggestions;
 }
+
+export function getDateLiterals() {
+  const suggestions: SuggestionRawDefinition[] = [];
+  const timePickerSuggestion = {
+    label: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePickerLabel',
+      {
+        defaultMessage: 'Choose from time picker',
+      }
+    ),
+    text: '',
+    kind: 'Issue',
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+      {
+        defaultMessage: 'Click to choose',
+      }
+    ),
+    sortText: 'A',
+    command: {
+      id: 'esql.timepicker.choose',
+      title: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.chooseFromTimePicker',
+        {
+          defaultMessage: 'Click to choose',
+        }
+      ),
+    },
+  } as SuggestionRawDefinition;
+  suggestions.push(
+    ...buildConstantsDefinitions(['?earliest', '?latest'], ''),
+    timePickerSuggestion
+  );
+  return suggestions;
+}

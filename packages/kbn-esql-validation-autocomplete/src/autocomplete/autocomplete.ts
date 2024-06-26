@@ -65,6 +65,7 @@ import {
   getCompatibleFunctionDefinition,
   buildMatchingFieldsDefinition,
   getCompatibleLiterals,
+  getDateLiterals,
   buildConstantsDefinitions,
   buildVariablesDefinitions,
   buildOptionDefinition,
@@ -1075,7 +1076,10 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
+  const isDateType = types.includes('date');
+
   const suggestions = filteredFieldsByType.concat(
+    isDateType ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
