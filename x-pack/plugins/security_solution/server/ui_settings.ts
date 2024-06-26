@@ -336,8 +336,8 @@ export const initUiSettings = (
         {
           defaultMessage: `
           Use this option for faster rules performance or to reduce rule execution time if it is too long or times out. 
-          <br>Note that events from the selected data tiers will not be searched to generate alerts.
-          <br>Comma delimit to exclude multiple tiers - data_frozen,data_cold.`,
+          <br/>Note that events from the selected data tiers will not be searched to generate alerts.
+          <br/>Comma delimit to exclude multiple tiers - data_frozen,data_cold.`,
         }
       ),
       type: 'array',

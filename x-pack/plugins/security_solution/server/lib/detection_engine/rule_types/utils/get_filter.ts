@@ -110,7 +110,7 @@ export const getFilter = async ({
         return getQueryFilter({
           query: savedObject.attributes.query.query,
           language: savedObject.attributes.query.language,
-          filters: savedObject.attributes.filters,
+          filters: [...savedObject.attributes.filters, ...dataTiersFilters],
           index,
           exceptionFilter,
           fields,
