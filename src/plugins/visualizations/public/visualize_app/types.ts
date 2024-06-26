@@ -9,6 +9,7 @@
 import type { EventEmitter } from 'events';
 import type { History } from 'history';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { Reference } from '@kbn/content-management-utils';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -43,17 +44,11 @@ import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-searc
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  Vis,
-  VisualizeEmbeddableContract,
-  VisSavedObject,
-  PersistedState,
-  VisParams,
-} from '..';
+import type { Vis, VisSavedObject, PersistedState, VisParams } from '..';
 
-import type { ListingViewRegistry, SavedVisState } from '../types';
-import type { createVisEmbeddableFromObject } from '../embeddable';
+import type { ListingViewRegistry, SavedVisState, SerializedVis } from '../types';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
+import { EmbeddableApiHandler } from './utils/use/use_embeddable_api_handler';
 
 export interface VisualizeAppState {
   dataView?: string;
@@ -105,7 +100,6 @@ export interface VisualizeServices extends CoreStart {
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   setActiveUrl: (newUrl: string) => void;
-  createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
@@ -125,9 +119,9 @@ export interface VisualizeServices extends CoreStart {
 
 export interface VisInstance {
   vis: Vis;
-  savedVis: VisSavedObject;
+  savedVis: SerializedVis;
+  references?: Reference[];
   savedSearch?: SavedSearch;
-  embeddableHandler: VisualizeEmbeddableContract;
   panelTitle?: string;
   panelDescription?: string;
   panelTimeRange?: TimeRange;
@@ -141,7 +135,8 @@ export type VisEditorConstructor<TVisParams extends VisParams = VisParams> = new
   element: HTMLElement,
   vis: Vis<TVisParams>,
   eventEmitter: EventEmitter,
-  embeddableHandler: VisualizeEmbeddableContract
+  embeddableApiHandler: EmbeddableApiHandler,
+  references?: Reference[]
 ) => IEditorController;
 
 export interface IEditorController {
@@ -150,16 +145,15 @@ export interface IEditorController {
 }
 
 export interface EditorRenderProps {
-  core: CoreStart;
-  data: DataPublicPluginStart;
   filters: Filter[];
   timeRange: TimeRange;
   query?: Query;
   savedSearch?: SavedSearch;
   uiState: PersistedState;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
    * Flag to determine if visualiztion is linked to the saved search
    */
   linked: boolean;
 }
+
+export type { EmbeddableApiHandler };

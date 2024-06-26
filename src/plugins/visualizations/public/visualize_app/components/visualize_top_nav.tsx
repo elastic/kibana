@@ -24,6 +24,11 @@ import type {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
+import {
+  NavigateToLensFn,
+  OpenInspectorFn,
+  SerializeStateFn,
+} from '../utils/use/use_embeddable_api_handler';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -43,6 +48,9 @@ interface VisualizeTopNavProps {
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
   eventEmitter?: EventEmitter;
+  openInspectorFn?: OpenInspectorFn;
+  navigateToLensFn?: NavigateToLensFn;
+  serializeStateFn: SerializeStateFn;
 }
 
 const TopNav = ({
@@ -61,18 +69,20 @@ const TopNav = ({
   embeddableId,
   onAppLeave,
   eventEmitter,
+  openInspectorFn,
+  navigateToLensFn,
+  serializeStateFn,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const {
-    embeddableHandler,
     vis,
     savedVis: { managed },
   } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const [navigateToLens, setNavigateToLens] = useState(false);
-  const [displayEditInLensItem, setDisplayEditInLensItem] = useState(false);
+  const displayEditInLensItem = !!navigateToLensFn;
   // If the user has clicked the edit in lens button, we want to hide the badge.
   // The information is stored in local storage to persist across reloads.
   const [hideTryInLensBadge, setHideTryInLensBadge] = useLocalStorage(
@@ -84,9 +94,10 @@ const TopNav = ({
   }, [setHideTryInLensBadge]);
 
   const openInspector = useCallback(() => {
-    const session = embeddableHandler.openInspector();
+    if (!openInspectorFn) return;
+    const session = openInspectorFn();
     setInspectorSession(session);
-  }, [embeddableHandler]);
+  }, [openInspectorFn]);
 
   const doReload = useCallback(async () => {
     // start a new session to make sure all data is up to date
@@ -104,19 +115,6 @@ const TopNav = ({
     [doReload]
   );
 
-  useEffect(() => {
-    const subscription = embeddableHandler
-      .getExpressionVariables$()
-      .subscribe((expressionVariables) => {
-        setDisplayEditInLensItem(
-          Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
-        );
-      });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [embeddableHandler, vis]);
-
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
       return getTopNavConfig(
@@ -130,14 +128,16 @@ const TopNav = ({
           originatingPath,
           visInstance,
           stateContainer,
-          visualizationIdFromUrl,
           stateTransfer: services.stateTransferService,
           embeddableId,
           displayEditInLensItem,
           hideLensBadge,
           setNavigateToLens,
+          navigateToLensFn,
+          serializeState: serializeStateFn,
           showBadge: !hideTryInLensBadge && displayEditInLensItem,
           eventEmitter,
+          hasInspector: !!openInspectorFn,
         },
         services
       );
@@ -153,13 +153,15 @@ const TopNav = ({
     originatingPath,
     visInstance,
     stateContainer,
-    visualizationIdFromUrl,
     services,
     embeddableId,
     displayEditInLensItem,
     hideLensBadge,
     hideTryInLensBadge,
     eventEmitter,
+    openInspectorFn,
+    navigateToLensFn,
+    serializeStateFn,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {

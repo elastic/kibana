@@ -6,42 +6,43 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import moment from 'moment';
-import EventEmitter from 'events';
-import { i18n } from '@kbn/i18n';
 import { EuiBetaBadgeProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import EventEmitter from 'events';
+import moment from 'moment';
 import { parse } from 'query-string';
+import React from 'react';
 
 import { Capabilities } from '@kbn/core/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import {
-  showSaveModal,
-  SavedObjectSaveModalOrigin,
-  SavedObjectSaveOpts,
-  OnSaveProps,
-} from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
-
 import {
-  VisualizeServices,
+  OnSaveProps,
+  SavedObjectSaveModalOrigin,
+  SavedObjectSaveOpts,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
+import { getFullPath, VisSavedObject, VISUALIZE_EMBEDDABLE_TYPE } from '../..';
+import { saveVisualization } from '../../utils/saved_visualize_utils';
+
+import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeLocatorParams, VISUALIZE_APP_LOCATOR } from '../../../common/locator';
+import { getUiActions } from '../../services';
+import { AGG_BASED_VISUALIZATION_TRIGGER, VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
+import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
-import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
-import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
+import { NavigateToLensFn, SerializeStateFn } from './use/use_embeddable_api_handler';
 import './visualize_navigation.scss';
 
 interface VisualizeCapabilities {
@@ -62,14 +63,16 @@ export interface TopNavConfigParams {
   hasUnappliedChanges: boolean;
   visInstance: VisualizeEditorVisInstance;
   stateContainer: VisualizeAppStateContainer;
-  visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
   displayEditInLensItem: boolean;
   hideLensBadge: () => void;
   setNavigateToLens: (flag: boolean) => void;
+  serializeState: SerializeStateFn;
+  navigateToLensFn?: NavigateToLensFn;
   showBadge: boolean;
   eventEmitter?: EventEmitter;
+  hasInspector: boolean;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -93,14 +96,16 @@ export const getTopNavConfig = (
     hasUnappliedChanges,
     visInstance,
     stateContainer,
-    visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
     displayEditInLensItem,
     hideLensBadge,
     setNavigateToLens,
+    navigateToLensFn,
+    serializeState,
     showBadge,
     eventEmitter,
+    hasInspector,
   }: TopNavConfigParams,
   {
     data,
@@ -119,8 +124,7 @@ export const getTopNavConfig = (
     ...startServices
   }: VisualizeServices
 ) => {
-  const { vis, embeddableHandler } = visInstance;
-  const savedVis = visInstance.savedVis;
+  const { vis } = visInstance;
 
   /**
    * Called when the user clicks "Save" button.
@@ -128,24 +132,53 @@ export const getTopNavConfig = (
   async function doSave(
     saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
   ) {
-    const newlyCreated = !Boolean(savedVis.id) || saveOptions.copyOnSave;
+    const {
+      savedVis: serializedVis,
+      lastSavedTitle,
+      displayName,
+      getDisplayName,
+      getEsType,
+      managed,
+    } = serializeState().rawState;
+
+    const newlyCreated = !Boolean(serializedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
     stateContainer.transitions.setVis({
-      title: savedVis.title,
+      title: serializedVis.title,
     });
 
-    savedVis.savedSearchId = vis.data.savedSearchId;
-    savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
-    savedVis.visState = stateContainer.getState().vis;
-    savedVis.uiStateJSON = vis.uiState.toString();
-
     setHasUnsavedChanges(false);
+    const visSavedObjectAttributes = {
+      id: serializedVis.id,
+      title: serializedVis.title,
+      description: serializedVis.description,
+      visState: {
+        type: serializedVis.type,
+        params: serializedVis.params,
+        aggs: serializedVis.data.aggs,
+        title: serializedVis.title,
+      },
+      savedSearchId: serializedVis.data.savedSearchId,
+      savedSearchRefName: String(serializedVis.data.savedSearchRefName),
+      searchSourceFields: serializedVis.data.searchSource,
+      uiStateJSON: vis.uiState.toString(),
+      lastSavedTitle: lastSavedTitle ?? '',
+      displayName: displayName ?? serializedVis.title,
+      getDisplayName,
+      getEsType,
+      managed,
+    };
 
     try {
-      const id = await saveVisualization(savedVis, saveOptions, {
-        savedObjectsTagging,
-        ...startServices,
-      });
+      const id = await saveVisualization(
+        visSavedObjectAttributes,
+        saveOptions,
+        {
+          savedObjectsTagging,
+          ...startServices,
+        },
+        serializeState().references ?? []
+      );
 
       if (id) {
         toastNotifications.addSuccess({
@@ -154,14 +187,14 @@ export const getTopNavConfig = (
             {
               defaultMessage: `Saved ''{visTitle}''`,
               values: {
-                visTitle: savedVis.title,
+                visTitle: visSavedObjectAttributes.title,
               },
             }
           ),
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
-        chrome.recentlyAccessed.add(getFullPath(id), savedVis.title, String(id));
+        chrome.recentlyAccessed.add(getFullPath(id), visSavedObjectAttributes.title, String(id));
 
         if ((originatingApp && saveOptions.returnToOrigin) || saveOptions.dashboardId) {
           if (!embeddableId) {
@@ -201,14 +234,17 @@ export const getTopNavConfig = (
             // remove editor state so the connection is still broken after reload
             stateTransfer.clearEditorState(VisualizeConstants.APP_ID);
           }
-          chrome.docTitle.change(savedVis.lastSavedTitle);
-          if (serverless?.setBreadcrumbs) {
-            serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, savedVis.lastSavedTitle));
-          } else {
-            chrome.setBreadcrumbs(getEditBreadcrumbs({}, savedVis.lastSavedTitle));
+
+          if (lastSavedTitle) {
+            chrome.docTitle.change(lastSavedTitle);
+            if (serverless?.setBreadcrumbs) {
+              serverless.setBreadcrumbs(getEditServerlessBreadcrumbs({}, lastSavedTitle));
+            } else {
+              chrome.setBreadcrumbs(getEditBreadcrumbs({}, lastSavedTitle));
+            }
           }
 
-          if (id !== visualizationIdFromUrl) {
+          if (id !== serializedVis.id) {
             history.replace({
               ...history.location,
               pathname: `${VisualizeConstants.EDIT_PATH}/${id}`,
@@ -227,7 +263,7 @@ export const getTopNavConfig = (
           {
             defaultMessage: `Error on saving ''{visTitle}''`,
             values: {
-              visTitle: savedVis.title,
+              visTitle: serializedVis.title,
             },
           }
         ),
@@ -244,9 +280,7 @@ export const getTopNavConfig = (
     }
 
     const state = {
-      input: {
-        savedVis: vis.serialize(),
-      } as VisualizeInput,
+      input: serializeState().rawState,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
       searchSessionId: data.search.session.getSessionId(),
@@ -262,11 +296,11 @@ export const getTopNavConfig = (
   };
 
   const saveButtonLabel =
-    !savedVis.id && originatingApp
+    !visInstance.savedVis.id && originatingApp
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
-      : originatingApp && savedVis.id
+      : originatingApp && visInstance.savedVis.id
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
@@ -304,7 +338,7 @@ export const getTopNavConfig = (
               if (eventEmitter && visInstance.vis.data.savedSearchId) {
                 eventEmitter.emit('unlinkFromSavedSearch', false);
               }
-              const navigateToLensConfig = await visInstance.vis.type.navigateToLens?.(
+              const navigateToLensConfig = await navigateToLensFn?.(
                 vis,
                 data.query.timefilter.timefilter
               );
@@ -348,11 +382,11 @@ export const getTopNavConfig = (
       }),
       testId: 'openInspectorButton',
       disableButton() {
-        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
+        return !hasInspector;
       },
       run: openInspector,
       tooltip() {
-        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
+        if (!hasInspector) {
           return i18n.translate('visualizations.topNavMenu.openInspectorDisabledButtonTooltip', {
             defaultMessage: `This visualization doesn't support any inspectors.`,
           });
@@ -372,8 +406,9 @@ export const getTopNavConfig = (
         if (share) {
           const currentState = stateContainer.getState();
           const searchParams = parse(history.location.search);
+          const serializedVis = serializeState().rawState.savedVis;
           const params: VisualizeLocatorParams = {
-            visId: savedVis?.id,
+            visId: serializedVis.id,
             filters: currentState.filters,
             refreshInterval: undefined,
             timeRange: data.query.timefilter.timefilter.getTime(),
@@ -392,7 +427,7 @@ export const getTopNavConfig = (
             allowEmbed: true,
             allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
             shareableUrl: unhashUrl(window.location.href),
-            objectId: savedVis?.id,
+            objectId: serializedVis.id,
             objectType: 'visualization',
             objectTypeMeta: {
               title: i18n.translate('visualizations.share.shareModal.title', {
@@ -401,7 +436,7 @@ export const getTopNavConfig = (
             },
             sharingData: {
               title:
-                savedVis?.title ||
+                serializedVis?.title ||
                 i18n.translate('visualizations.reporting.defaultReportTitle', {
                   defaultMessage: 'Visualization [{date}]',
                   values: { date: moment().toISOString(true) },
@@ -418,8 +453,8 @@ export const getTopNavConfig = (
           });
         }
       },
-      // disable the Share button if no action specified and fot byValue visualizations
-      disableButton: !share || Boolean(!savedVis.id && originatingApp),
+      // disable the Share button if no action specified and for byValue visualizations
+      disableButton: !share || Boolean(!visInstance.savedVis.id && originatingApp),
     },
     ...(originatingApp
       ? [
@@ -472,6 +507,7 @@ export const getTopNavConfig = (
               }
             },
             run: () => {
+              const serializedVis = serializeState().rawState.savedVis as VisSavedObject;
               const onSave = async ({
                 newTitle,
                 newCopyOnSave,
@@ -485,13 +521,12 @@ export const getTopNavConfig = (
                 dashboardId?: string | null;
                 addToLibrary?: boolean;
               }) => {
-                const currentTitle = savedVis.title;
-                savedVis.title = newTitle;
-                embeddableHandler.updateInput({ title: newTitle });
-                savedVis.description = newDescription;
+                const currentTitle = serializedVis.title;
+                serializedVis.title = newTitle;
+                serializedVis.description = newDescription;
 
                 if (savedObjectsTagging) {
-                  savedVis.tags = selectedTags;
+                  serializedVis.tags = selectedTags;
                 }
 
                 const saveOptions = {
@@ -513,13 +548,7 @@ export const getTopNavConfig = (
                   setActiveUrl(appPath);
 
                   const state = {
-                    input: {
-                      savedVis: {
-                        ...vis.serialize(),
-                        title: newTitle,
-                        description: newDescription,
-                      },
-                    } as VisualizeInput,
+                    input: serializeState().rawState,
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
                     searchSessionId: data.search.session.getSessionId(),
@@ -541,7 +570,7 @@ export const getTopNavConfig = (
                 const response = await doSave(saveOptions);
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
-                  savedVis.title = currentTitle;
+                  serializedVis.title = currentTitle;
                 }
 
                 return response;
@@ -551,7 +580,7 @@ export const getTopNavConfig = (
               let tagOptions: React.ReactNode | undefined;
 
               if (savedObjectsTagging) {
-                selectedTags = savedVis.tags || [];
+                selectedTags = serializedVis.tags || [];
                 tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}
@@ -568,7 +597,7 @@ export const getTopNavConfig = (
               if (originatingApp) {
                 saveModal = (
                   <SavedObjectSaveModalOrigin
-                    documentInfo={savedVis || { title: '' }}
+                    documentInfo={serializedVis || { title: '' }}
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
@@ -596,9 +625,9 @@ export const getTopNavConfig = (
                 saveModal = (
                   <SavedObjectSaveModalDashboard
                     documentInfo={{
-                      id: visualizeCapabilities.save ? savedVis?.id : undefined,
-                      title: savedVis?.title || '',
-                      description: savedVis?.description || '',
+                      id: visualizeCapabilities.save ? serializedVis?.id : undefined,
+                      title: serializedVis?.title || '',
+                      description: serializedVis?.description || '',
                     }}
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
                     onSave={onSave}
@@ -611,7 +640,7 @@ export const getTopNavConfig = (
                     )}
                     onClose={() => {}}
                     mustCopyOnSaveMessage={
-                      savedVis.managed
+                      serializedVis.managed // TODO: fix this
                         ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
                             defaultMessage:
                               'Elastic manages this visualization. Save any changes to a new visualization.',
@@ -658,7 +687,8 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              if (!savedVis?.id) {
+              const serializedVis = serializeState().rawState.savedVis;
+              if (!serializedVis.id) {
                 return createVisReference();
               }
               const saveOptions = {

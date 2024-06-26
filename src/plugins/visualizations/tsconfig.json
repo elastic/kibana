@@ -63,7 +63,6 @@
     "@kbn/content-management-utils",
     "@kbn/serverless",
     "@kbn/no-data-page-plugin",
-    "@kbn/search-response-warnings",
     "@kbn/logging",
     "@kbn/content-management-table-list-view-common",
     "@kbn/chart-expressions-common",
@@ -72,7 +71,10 @@
     "@kbn/presentation-publishing",
     "@kbn/shared-ux-markdown",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/core-execution-context-common",
+    "@kbn/presentation-containers",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
     "target/**/*",

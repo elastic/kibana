@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { VisualizeInput, VisSavedObject, Vis, VisParams } from '../..';
+import type { VisSavedObject, Vis, VisParams, VisualizeEditorInput } from '../..';
 import {
   getVisualizationInstance,
   getVisualizationInstanceFromInput,
@@ -57,9 +57,6 @@ describe('getVisualizationInstance', () => {
     getSavedVisualization.mockImplementation((opts: unknown) => savedVisMock);
     createVisAsync.mockImplementation(() => visMock);
     mockServices.data.search.showError = jest.fn().mockImplementation(() => {});
-    mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
-      getOutput$: jest.fn(() => subj.asObservable()),
-    }));
     mockServices.savedSearch = {
       ...savedSearchPluginMock.createStartContract(),
       get: jest.fn().mockImplementation(() => ({
@@ -70,15 +67,12 @@ describe('getVisualizationInstance', () => {
     };
   });
 
-  test('should create new instances of savedVis, vis and embeddableHandler', async () => {
+  test('should create new instances of savedVis and vis', async () => {
     const opts = {
       type: 'area',
       indexPattern: 'my_index_pattern',
     };
-    const { savedVis, savedSearch, vis, embeddableHandler } = await getVisualizationInstance(
-      mockServices,
-      opts
-    );
+    const { savedVis, savedSearch, vis } = await getVisualizationInstance(mockServices, opts);
 
     expect(getSavedVisualization.mock.calls[0][1]).toBe(opts);
     expect(savedVisMock.searchSourceFields).toEqual({
@@ -89,17 +83,9 @@ describe('getVisualizationInstance', () => {
       commonSerializedVisMock.type,
       commonSerializedVisMock
     );
-    expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
-      searchSessionId: undefined,
-      timeRange: undefined,
-      filters: undefined,
-      renderMode: 'edit',
-      id: '',
-    });
 
     expect(vis).toBe(visMock);
     expect(savedVis).toBe(savedVisMock);
-    expect(embeddableHandler).toBeDefined();
     expect(savedSearch).toBeUndefined();
   });
 
@@ -158,9 +144,6 @@ describe('getVisualizationInstanceInput', () => {
 
     createVisAsync.mockImplementation(() => visMock);
     getSavedVisualization.mockImplementation((opts: unknown) => savedVisMock);
-    mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
-      getOutput$: jest.fn(() => subj.asObservable()),
-    }));
   });
 
   test('should create new instances of savedVis, vis and embeddableHandler', async () => {
@@ -197,31 +180,16 @@ describe('getVisualizationInstanceInput', () => {
           },
         },
       },
-    } as unknown as VisualizeInput;
-    const {
-      savedVis,
-      savedSearch,
-      vis,
-      embeddableHandler,
-      panelDescription,
-      panelTitle,
-      panelTimeRange,
-    } = await getVisualizationInstanceFromInput(mockServices, input);
+    } as unknown as VisualizeEditorInput;
+    const { savedVis, savedSearch, vis, panelDescription, panelTitle, panelTimeRange } =
+      await getVisualizationInstanceFromInput(mockServices, input);
 
     expect(getSavedVisualization).toHaveBeenCalled();
     expect(createVisAsync).toHaveBeenCalledWith(serializedVisMock.type, input.savedVis);
-    expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
-      searchSessionId: undefined,
-      timeRange: undefined,
-      filters: undefined,
-      renderMode: 'edit',
-      id: '',
-    });
 
     expect(vis).toBe(visMock);
     expect(savedVis).toBe(savedVisMock);
     expect(savedVis.uiStateJSON).toBe(JSON.stringify(input.savedVis?.uiState));
-    expect(embeddableHandler).toBeDefined();
     expect(savedSearch).toBeUndefined();
     expect(panelDescription).toBe('description');
     expect(panelTitle).toBe('title');

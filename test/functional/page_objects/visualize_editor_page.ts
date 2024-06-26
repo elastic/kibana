@@ -72,6 +72,7 @@ export class VisualizeEditorPageObject extends FtrService {
     this.log.debug(`Before Rendering count ${prevRenderingCount}`);
     await this.testSubjects.clickWhenNotDisabledWithoutRetry('visualizeEditorRenderButton');
     await this.visChart.waitForRenderingCount(prevRenderingCount + 1);
+    await this.visChart.waitForVisualization();
   }
 
   public async removeDimension(aggNth: number) {

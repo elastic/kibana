@@ -17,18 +17,12 @@ import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeConstants } from '../../../../common/constants';
 import { createVisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
-import type { VisualizeServices } from '../../types';
+import type { EmbeddableApiHandler, VisualizeServices } from '../../types';
 import type { TypesStart } from '../../../vis_types';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
-const mockEmbeddableHandlerDestroy = jest.fn();
-const mockEmbeddableHandlerRender = jest.fn();
 const savedVisId = '9ca7aa90-b892-11e8-a6d9-e546fe2bba5f';
 const mockSavedVisInstance = {
-  embeddableHandler: {
-    destroy: mockEmbeddableHandlerDestroy,
-    render: mockEmbeddableHandlerRender,
-  },
   savedVis: {
     id: savedVisId,
     title: 'Test Vis',
@@ -37,6 +31,9 @@ const mockSavedVisInstance = {
     type: {},
   },
 };
+const mockEmbeddableApiHandler = {
+  openInspector: jest.fn(),
+} as unknown as EmbeddableApiHandler;
 
 jest.mock('../get_visualization_instance', () => ({
   getVisualizationInstance: jest.fn(() => mockSavedVisInstance),
@@ -108,15 +105,20 @@ describe('useSavedVisInstance', () => {
     } as unknown as VisualizeServices;
 
     mockDefaultEditorControllerDestroy.mockClear();
-    mockEmbeddableHandlerDestroy.mockClear();
-    mockEmbeddableHandlerRender.mockClear();
     toastNotifications.addWarning.mockClear();
     mockGetVisualizationInstance.mockClear();
   });
 
   test('should not load instance until chrome is defined', () => {
     const { result } = renderHook(() =>
-      useSavedVisInstance(mockServices, eventEmitter, undefined, undefined, undefined)
+      useSavedVisInstance(
+        mockServices,
+        eventEmitter,
+        undefined,
+        mockEmbeddableApiHandler,
+        undefined,
+        undefined
+      )
     );
     expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
     expect(result.current.visEditorController).toBeUndefined();
@@ -127,7 +129,14 @@ describe('useSavedVisInstance', () => {
   describe('edit saved visualization route', () => {
     test('should load instance and initiate an editor if chrome is set up', async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSavedVisInstance(mockServices, eventEmitter, true, undefined, savedVisId)
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          mockEmbeddableApiHandler,
+          undefined,
+          savedVisId
+        )
       );
 
       result.current.visEditorRef.current = document.createElement('div');
@@ -142,7 +151,6 @@ describe('useSavedVisInstance', () => {
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
-      expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
       expect(result.current.visEditorController).toBeDefined();
       expect(result.current.savedVisInstance).toBeDefined();
     });
@@ -160,6 +168,7 @@ describe('useSavedVisInstance', () => {
           mockServices,
           eventEmitter,
           true,
+          mockEmbeddableApiHandler,
           undefined,
           savedVisId,
           embeddableInput
@@ -178,7 +187,6 @@ describe('useSavedVisInstance', () => {
         'Test Vis'
       );
       expect(getCreateBreadcrumbs).not.toHaveBeenCalled();
-      expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
       expect(result.current.visEditorController).toBeDefined();
       expect(result.current.savedVisInstance).toBeDefined();
       expect(result.current.savedVisInstance?.panelTimeRange).toStrictEqual({
@@ -189,7 +197,14 @@ describe('useSavedVisInstance', () => {
 
     test('should destroy the editor and the savedVis on unmount if chrome exists', async () => {
       const { result, unmount, waitForNextUpdate } = renderHook(() =>
-        useSavedVisInstance(mockServices, eventEmitter, true, undefined, savedVisId)
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          mockEmbeddableApiHandler,
+          undefined,
+          savedVisId
+        )
       );
 
       result.current.visEditorRef.current = document.createElement('div');
@@ -198,7 +213,6 @@ describe('useSavedVisInstance', () => {
       unmount();
 
       expect(mockDefaultEditorControllerDestroy.mock.calls.length).toBe(1);
-      expect(mockEmbeddableHandlerDestroy).not.toHaveBeenCalled();
     });
   });
 
@@ -215,7 +229,14 @@ describe('useSavedVisInstance', () => {
 
     test('should create new visualization based on search params', async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined)
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          mockEmbeddableApiHandler,
+          undefined,
+          undefined
+        )
       );
 
       result.current.visEditorRef.current = document.createElement('div');
@@ -228,7 +249,6 @@ describe('useSavedVisInstance', () => {
       await waitForNextUpdate();
 
       expect(getCreateBreadcrumbs).toHaveBeenCalled();
-      expect(mockEmbeddableHandlerRender).not.toHaveBeenCalled();
       expect(result.current.visEditorController).toBeDefined();
       expect(result.current.savedVisInstance).toBeDefined();
     });
@@ -239,7 +259,16 @@ describe('useSavedVisInstance', () => {
         search: '?type=myVisType&indexPattern=1a2b3c4d',
       };
 
-      renderHook(() => useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined));
+      renderHook(() =>
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          mockEmbeddableApiHandler,
+          undefined,
+          undefined
+        )
+      );
 
       expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
       expect(redirectWhenMissing).toHaveBeenCalled();
@@ -252,7 +281,16 @@ describe('useSavedVisInstance', () => {
         search: '?type=area',
       };
 
-      renderHook(() => useSavedVisInstance(mockServices, eventEmitter, true, undefined, undefined));
+      renderHook(() =>
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          true,
+          mockEmbeddableApiHandler,
+          undefined,
+          undefined
+        )
+      );
 
       expect(mockGetVisualizationInstance).not.toHaveBeenCalled();
       expect(redirectWhenMissing).toHaveBeenCalled();
@@ -263,7 +301,14 @@ describe('useSavedVisInstance', () => {
   describe('embeded mode', () => {
     test('should create new visualization based on search params', async () => {
       const { result, unmount, waitForNextUpdate } = renderHook(() =>
-        useSavedVisInstance(mockServices, eventEmitter, false, undefined, savedVisId)
+        useSavedVisInstance(
+          mockServices,
+          eventEmitter,
+          false,
+          mockEmbeddableApiHandler,
+          undefined,
+          savedVisId
+        )
       );
 
       // mock editor ref
@@ -274,13 +319,11 @@ describe('useSavedVisInstance', () => {
 
       await waitForNextUpdate();
 
-      expect(mockEmbeddableHandlerRender).toHaveBeenCalled();
       expect(result.current.visEditorController).toBeUndefined();
       expect(result.current.savedVisInstance).toBeDefined();
 
       unmount();
       expect(mockDefaultEditorControllerDestroy).not.toHaveBeenCalled();
-      expect(mockEmbeddableHandlerDestroy.mock.calls.length).toBe(1);
     });
   });
 });

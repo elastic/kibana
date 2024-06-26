@@ -76,10 +76,6 @@ describe('useEditorUpdates', () => {
         title: visualizeAppStateStub.vis.title,
         setState: jest.fn(),
       },
-      embeddableHandler: {
-        updateInput: jest.fn(),
-        reload: jest.fn(),
-      },
       savedVis: {},
     } as unknown as SavedVisInstance;
     visEditorController = {
@@ -131,25 +127,6 @@ describe('useEditorUpdates', () => {
       query: visualizeAppStateStub.query,
       linked: false,
       savedSearch: undefined,
-    });
-  });
-
-  test('should update embeddable handler in embeded mode', () => {
-    renderHook(() =>
-      useEditorUpdates(
-        mockServices,
-        eventEmitter,
-        setHasUnsavedChangesMock,
-        appState,
-        savedVisInstance,
-        undefined
-      )
-    );
-
-    expect(savedVisInstance.embeddableHandler.updateInput).toHaveBeenCalledWith({
-      timeRange,
-      filters: mockFilters,
-      query: visualizeAppStateStub.query,
     });
   });
 
@@ -211,7 +188,6 @@ describe('useEditorUpdates', () => {
 
       expect(result.current.currentAppState).toEqual(visualizeAppStateStub);
       expect(setHasUnsavedChangesMock).toHaveBeenCalledWith(true);
-      expect(savedVisInstance.embeddableHandler.updateInput).toHaveBeenCalledTimes(2);
     });
 
     test('should update vis state and reload the editor if changes come from url', () => {
@@ -248,7 +224,6 @@ describe('useEditorUpdates', () => {
         ...visState,
         data: { aggs },
       });
-      expect(savedVisInstance.embeddableHandler.reload).toHaveBeenCalled();
       expect(updateEditorSpy).toHaveBeenCalled();
     });
 

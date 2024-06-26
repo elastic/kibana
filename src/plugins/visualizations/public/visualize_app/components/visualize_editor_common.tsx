@@ -8,7 +8,7 @@
 
 import './visualize_editor.scss';
 import { EventEmitter } from 'events';
-import React, { RefObject, useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
@@ -32,6 +32,11 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import {
+  NavigateToLensFn,
+  OpenInspectorFn,
+  SerializeStateFn,
+} from '../utils/use/use_embeddable_api_handler';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -43,17 +48,18 @@ interface VisualizeEditorCommonProps {
   hasUnappliedChanges: boolean;
   isEmbeddableRendered: boolean;
   onAppLeave: AppMountParameters['onAppLeave'];
-  visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
   originatingPath?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   eventEmitter?: EventEmitter;
+  openInspectorFn?: OpenInspectorFn;
+  navigateToLensFn?: NavigateToLensFn;
+  serializeStateFn?: SerializeStateFn;
 }
 
-export const VisualizeEditorCommon = ({
-  visInstance,
+export const VisualizeEditorCommon: React.FC<VisualizeEditorCommonProps> = ({
   appState,
   currentAppState,
   isChromeVisible,
@@ -67,9 +73,13 @@ export const VisualizeEditorCommon = ({
   setOriginatingApp,
   visualizationIdFromUrl,
   embeddableId,
-  visEditorRef,
   eventEmitter,
-}: VisualizeEditorCommonProps) => {
+  openInspectorFn,
+  navigateToLensFn,
+  serializeStateFn,
+  visInstance,
+  children,
+}) => {
   const { services } = useKibana<VisualizeServices>();
 
   useEffect(() => {
@@ -135,7 +145,7 @@ export const VisualizeEditorCommon = ({
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
-      {visInstance && appState && currentAppState && (
+      {visInstance && serializeStateFn && appState && currentAppState && (
         <VisualizeTopNav
           currentAppState={currentAppState}
           hasUnsavedChanges={hasUnsavedChanges}
@@ -152,6 +162,9 @@ export const VisualizeEditorCommon = ({
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           eventEmitter={eventEmitter}
+          openInspectorFn={openInspectorFn}
+          navigateToLensFn={navigateToLensFn}
+          serializeStateFn={serializeStateFn}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&
@@ -197,7 +210,7 @@ export const VisualizeEditorCommon = ({
           </h1>
         </EuiScreenReaderOnly>
       )}
-      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'} ref={visEditorRef} />
+      <div className={isChromeVisible ? 'visEditor__content' : 'visualize'}>{children}</div>
     </div>
   );
 };

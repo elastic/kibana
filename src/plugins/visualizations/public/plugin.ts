@@ -79,11 +79,7 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import {
-  createVisEmbeddableFromObject,
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeEmbeddableFactory,
-} from './embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -111,17 +107,18 @@ import {
   setSavedObjectsManagement,
   setContentManagement,
   setSavedSearch,
+  setDataViews,
+  setInspector,
+  getTypes,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry, SerializedVis } from './types';
+import { ListingViewRegistry } from './types';
 import {
   LATEST_VERSION,
   CONTENT_ID,
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
-import { SerializedVisData } from '../common';
-import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -327,7 +324,6 @@ export class VisualizationsPlugin
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
-          createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
           scopedHistory: params.history,
           restorePreviousUrl,
           setHeaderActionMenu: params.setHeaderActionMenu,
@@ -395,8 +391,33 @@ export class VisualizationsPlugin
     uiActions.registerTrigger(dashboardVisualizationPanelTrigger);
     const editInLensAction = new EditInLensAction(data.query.timefilter.timefilter);
     uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', editInLensAction);
-    const embeddableFactory = new VisualizeEmbeddableFactory({ start });
-    embeddable.registerEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, embeddableFactory);
+    embeddable.registerReactEmbeddableFactory(VISUALIZE_EMBEDDABLE_TYPE, async () => {
+      const {
+        plugins: { embeddable: embeddableStart },
+      } = start();
+
+      const { getVisualizeEmbeddableFactory } = await import('./react_embeddable');
+      return getVisualizeEmbeddableFactory(embeddableStart);
+    });
+    embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
+      onAdd: (container, savedObject) => {
+        container.addNewPanel({
+          panelType: VISUALIZE_EMBEDDABLE_TYPE,
+          initialState: {
+            savedObjectId: savedObject.id,
+          },
+        });
+      },
+      embeddableType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
+      savedObjectName: i18n.translate('visualizations.visualizeSavedObjectName', {
+        defaultMessage: 'Visualization',
+      }),
+      getIconForSavedObject: (savedObject) => {
+        const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
+        return getTypes().get(visState.type)?.icon ?? '';
+      },
+    });
 
     contentManagement.registry.register({
       id: CONTENT_ID,
@@ -404,37 +425,6 @@ export class VisualizationsPlugin
         latest: LATEST_VERSION,
       },
       name: 'Visualize Library',
-    });
-
-    embeddable.registerSavedObjectToPanelMethod<
-      VisualizationSavedObjectAttributes,
-      VisualizeByValueInput
-    >(CONTENT_ID, (savedObject) => {
-      const visState = savedObject.attributes.visState;
-
-      // not sure if visState actually is ever undefined, but following the type
-      if (!savedObject.managed || !visState) {
-        return {
-          savedObjectId: savedObject.id,
-        };
-      }
-
-      // data is not always defined, so I added a default value since the extract
-      // routine in the embeddable factory expects it to be there
-      const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
-        data?: SerializedVisData;
-      };
-
-      if (!savedVis.data) {
-        savedVis.data = {
-          searchSource: {},
-          aggs: [],
-        };
-      }
-
-      return {
-        savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
-      };
     });
 
     return {
@@ -451,7 +441,6 @@ export class VisualizationsPlugin
       expressions,
       uiActions,
       embeddable,
-      savedObjects,
       spaces,
       savedObjectsTaggingOss,
       fieldFormats,
@@ -459,6 +448,8 @@ export class VisualizationsPlugin
       savedObjectsManagement,
       contentManagement,
       savedSearch,
+      dataViews,
+      inspector,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -483,6 +474,8 @@ export class VisualizationsPlugin
     setSavedObjectsManagement(savedObjectsManagement);
     setContentManagement(contentManagement);
     setSavedSearch(savedSearch);
+    setDataViews(dataViews);
+    setInspector(inspector);
 
     if (spaces) {
       setSpaces(spaces);

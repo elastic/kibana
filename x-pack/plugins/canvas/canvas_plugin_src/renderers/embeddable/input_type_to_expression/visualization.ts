@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { VisualizeInput } from '@kbn/visualizations-plugin/public';
+import { VisualizeEditorInput } from '@kbn/visualizations-plugin/public';
 
-export function toExpression(input: VisualizeInput & { savedObjectId: string }): string {
+export function toExpression(input: VisualizeEditorInput & { savedObjectId: string }): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedVisualization');
@@ -31,7 +31,6 @@ export function toExpression(input: VisualizeInput & { savedObjectId: string }):
       .reduce((_, part) => expressionParts.push(part), 0);
   }
 
-  // @ts-expect-error LegendOpen missing on VisualizeInput type
   if (input.vis?.legendOpen !== undefined && input.vis.legendOpen === false) {
     expressionParts.push(`hideLegend=true`);
   }
