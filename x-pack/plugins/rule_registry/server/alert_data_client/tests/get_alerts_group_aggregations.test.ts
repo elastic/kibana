@@ -90,6 +90,8 @@ describe('getGroupAggregations()', () => {
       groupByField,
       aggregations,
       filters,
+      pageIndex: 0,
+      pageSize: DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
     });
 
     expect(alertsClient.find).toHaveBeenCalledWith({
