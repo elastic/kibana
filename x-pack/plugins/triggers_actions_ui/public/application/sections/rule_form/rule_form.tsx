@@ -94,6 +94,7 @@ import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
 import { getInitialInterval } from './get_initial_interval';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
+import { NotificationForm } from '../notification_form/notification_form';
 
 const ENTER_KEY = 13;
 
@@ -905,7 +906,8 @@ export const RuleForm = ({
         </>
       )}
       <EuiSpacer size="l" />
-      {canShowActions &&
+      <NotificationForm rule={rule} />
+      {/* {canShowActions &&
       defaultActionGroupId &&
       ruleTypeModel &&
       rule.ruleTypeId &&
@@ -966,7 +968,7 @@ export const RuleForm = ({
             minimumThrottleInterval={[ruleInterval, ruleIntervalUnit]}
           />
         </>
-      ) : null}
+      ) : null} */}
     </>
   );
 

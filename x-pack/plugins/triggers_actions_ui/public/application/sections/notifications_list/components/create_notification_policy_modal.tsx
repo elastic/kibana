@@ -108,8 +108,8 @@ export const CreateNotificationPolicyModal: React.FC<CreateNotificationPolicyMod
     []
   );
   const [selectedCadenceOptions, setSelectedCadenceOptions] = useState<ComboBoxFieldOption[]>([]);
-  const [throttle, setThrottle] = useState<number | undefined>(undefined);
-  const [throttleUnit, setThrottleUnit] = useState<string | undefined>(undefined);
+  const [throttle, setThrottle] = useState<number | undefined>(1);
+  const [throttleUnit, setThrottleUnit] = useState<string | undefined>('s');
   const [alertConditions, setAlertConditions] = useState<AlertCondition[]>([]);
   const [
     applyActiveActionGroupConditionToAllRuleTypes,
@@ -186,10 +186,24 @@ export const CreateNotificationPolicyModal: React.FC<CreateNotificationPolicyMod
       ...(selectedCadenceOptions?.[0].key === 'onThrottleInterval' && {
         throttle: `${throttle}${throttleUnit}`,
       }),
-      conditions: alertConditions.map((condition) => ({
-        type: condition.conditionType![0].key,
-        value: (condition.conditionValue ?? []).map((c) => c.key ?? c.label),
-      })),
+      conditions: alertConditions.map((condition) => {
+        let value = (condition.conditionValue ?? []).map((c) => c.key ?? c.label);
+        if (
+          condition.conditionType![0].key === 'active_action_group' &&
+          applyActiveActionGroupConditionToAllRuleTypes
+        ) {
+          value = ['all'];
+        } else if (
+          condition.conditionType![0].key === 'recovered_action_group' &&
+          applyRecoveredActionGroupConditionToAllRuleTypes
+        ) {
+          value = ['all'];
+        }
+        return {
+          type: condition.conditionType![0].key,
+          value,
+        };
+      }),
     };
     await createPolicy({ http, policy });
     onClose();

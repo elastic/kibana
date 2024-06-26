@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiPageHeader, EuiLoadingSpinner } from '@elastic/eui';
@@ -27,6 +27,7 @@ export const NotificationPoliciesHome: React.FunctionComponent<
   },
 }) => {
   const { chrome, setBreadcrumbs } = useKibana().services;
+  const [headerActions, setHeaderActions] = useState<React.ReactNode[] | undefined>();
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -45,10 +46,11 @@ export const NotificationPoliciesHome: React.FunctionComponent<
         description={i18n.translate('xpack.triggersActionsUI.connectors.home.description', {
           defaultMessage: 'Create and manage notification policies for your alerts',
         })}
+        rightSideItems={headerActions}
       />
       <EuiSpacer size="l" />
       <Suspense fallback={<EuiLoadingSpinner />}>
-        <NotificationPoliciesList />
+        <NotificationPoliciesList setHeaderActions={setHeaderActions} />
       </Suspense>
     </>
   );

@@ -18,7 +18,6 @@ export async function createPolicy({
   http: HttpSetup;
   policy: NotificationPolicy;
 }): Promise<NotificationPolicyWithId> {
-  console.log(`policy ${JSON.stringify(policy)}`);
   return await http.post<NotificationPolicyWithId>(`${INTERNAL_BASE_ACTION_API_PATH}/policy`, {
     body: JSON.stringify(policy),
   });
