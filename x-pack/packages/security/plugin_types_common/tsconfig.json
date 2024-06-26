@@ -3,8 +3,12 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["**/*.ts"],
-  "exclude": ["target/**/*"],
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/licensing-plugin",
     "@kbn/core-security-common",
