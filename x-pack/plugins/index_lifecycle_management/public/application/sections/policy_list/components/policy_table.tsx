@@ -260,6 +260,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
             setListAction({ selectedPolicy: policy, actionType: 'addIndexTemplate' }),
           'data-test-subj': 'addPolicyToTemplate',
         },
+
         {
           isPrimary: true,
           name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.deleteActionLabel', {
@@ -289,6 +290,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       name: i18n.translate('xpack.indexLifecycleMgmt.policyTable.headers.actionsHeader', {
         defaultMessage: 'Actions',
       }),
+      'data-test-subj': 'policyActionsCollapsedButton',
     });
   }
 
