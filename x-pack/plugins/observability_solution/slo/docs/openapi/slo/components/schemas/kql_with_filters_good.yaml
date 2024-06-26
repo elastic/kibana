@@ -1,4 +1,4 @@
-title: KQL with filters
+title: KQL query for good events
 description: The KQL query used to define the good events.
 oneOf:
   - description: the KQL query to filter the documents with.

@@ -35,7 +35,8 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationKspmPage();
     });
 
-    describe('KSPM EKS Assume Role', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186306
+    describe.skip('KSPM EKS Assume Role', async () => {
       it('KSPM EKS Assume Role workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
