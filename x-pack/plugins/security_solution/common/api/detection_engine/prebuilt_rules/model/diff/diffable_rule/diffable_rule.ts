@@ -7,14 +7,14 @@
 
 import { z } from 'zod';
 
-import {
-  concurrent_searches,
-  items_per_search,
-  machine_learning_job_id,
-  threat_index,
-  threat_indicator_path,
-  threat_mapping,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+// import {
+//   concurrent_searches,
+//   items_per_search,
+//   machine_learning_job_id,
+//   threat_index,
+//   threat_indicator_path,
+//   threat_mapping,
+// } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   BuildingBlockObject,
@@ -26,10 +26,11 @@ import {
   RuleSchedule,
   TimelineTemplateReference,
   TimestampOverrideObject,
+  KqlQueryType,
 } from './diffable_field_types';
 
 import { buildSchema } from './build_schema';
-import { anomaly_threshold } from '../../../../model/schemas';
+// import { anomaly_threshold } from '../../../../model/schemas';
 import {
   EventCategoryOverride,
   HistoryWindowStart,
@@ -144,7 +145,9 @@ export const DiffableEsqlFields = buildSchema({
   },
   // this is a new type of rule, no prebuilt rules created yet.
   // new properties might be added here during further rule type development
-  optional: {},
+  optional: {
+    name: RuleName,
+  },
 });
 
 export type DiffableThreatMatchFields = z.infer<typeof DiffableThreatMatchFields>;
