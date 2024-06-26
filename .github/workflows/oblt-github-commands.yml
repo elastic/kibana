@@ -18,13 +18,9 @@ permissions:
 jobs:
   comment-if-oblt-member:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.OBLT_TEST_ENV_GITHUB_TOKEN }}
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
-        with:
-          url: ${{ secrets.OBLT_VAULT_ADDR }}
-          roleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
-          secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
-
       - id: is_team_member
         name: Check if user is member of the Elastic org and Observability team
         run: |
@@ -34,13 +30,11 @@ jobs:
           else
             echo "result=false" >> $GITHUB_OUTPUT
           fi
-        env:
-          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
 
       - if: ${{ steps.is_team_member.outputs.result == 'true' }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
-          github-token: ${{ env.GITHUB_TOKEN }}
+          github-token: ${{ env.GH_TOKEN }}
           script: |
             const body = `
               ### :robot: GitHub comments

@@ -21,12 +21,6 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'ci:project-deploy-observability')
     runs-on: ubuntu-latest
     steps:
-      - uses: elastic/apm-pipeline-library/.github/actions/github-token@current
+      - uses: elastic/oblt-actions/oblt-cli/undeploy-my-kibana@v1
         with:
-          url: ${{ secrets.OBLT_VAULT_ADDR }}
-          roleId: ${{ secrets.OBLT_VAULT_ROLE_ID }}
-          secretId: ${{ secrets.OBLT_VAULT_SECRET_ID }}
-
-      - uses: elastic/apm-pipeline-library/.github/actions/undeploy-my-kibana@current
-        with:
-          token: ${{ env.GITHUB_TOKEN }}
+          github-token: ${{ secrets.OBLT_TEST_ENV_GITHUB_TOKEN }}
