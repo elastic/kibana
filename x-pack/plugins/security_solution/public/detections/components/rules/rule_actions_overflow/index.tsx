@@ -155,6 +155,11 @@ const RuleActionsOverflowComponent = ({
                     key={i18nActions.MANUAL_RULE_RUN}
                     icon="play"
                     disabled={!userHasPermissions || !rule.enabled}
+                    toolTipContent={
+                      !userHasPermissions || !rule.enabled
+                        ? i18nActions.MANUAL_RULE_RUN_TOOLTIP
+                        : ''
+                    }
                     data-test-subj="rules-details-manual-rule-run"
                     onClick={async () => {
                       startTransaction({ name: SINGLE_RULE_ACTIONS.MANUAL_RULE_RUN });
