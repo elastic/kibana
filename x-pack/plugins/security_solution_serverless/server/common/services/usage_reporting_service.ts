@@ -14,6 +14,7 @@ import type { UsageRecord } from '../../types';
 
 // TODO remove once we have the CA available
 const agent = new https.Agent({ rejectUnauthorized: false });
+// foo;
 export class UsageReportingService {
   public async reportUsage(
     records: UsageRecord[],
