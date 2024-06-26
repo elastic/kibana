@@ -6,15 +6,6 @@
  */
 
 export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  GrantAPIKeyResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,
   UpdateCrossClusterAPIKeyParams,
@@ -23,10 +14,7 @@ export type {
 } from './api_keys';
 export type { AuthenticationServiceStart } from './authentication_service';
 export {
-  restApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
   getUpdateRestApiKeyWithKibanaPrivilegesSchema,
-  crossClusterApiKeySchema,
   updateRestApiKeySchema,
   updateCrossClusterApiKeySchema,
 } from './api_keys';

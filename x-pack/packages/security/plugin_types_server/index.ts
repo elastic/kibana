@@ -14,15 +14,6 @@ export type {
   AuditLogger,
 } from './src/audit';
 export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  CreateRestAPIKeyParams,
-  GrantAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  InvalidateAPIKeyResult,
   APIKeys,
   AuthenticationServiceStart,
   UpdateAPIKeyParams,
@@ -70,17 +61,33 @@ export type {
 } from './src/user_profile';
 
 export {
-  restApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
   getUpdateRestApiKeyWithKibanaPrivilegesSchema,
-  crossClusterApiKeySchema,
   updateRestApiKeySchema,
   updateCrossClusterApiKeySchema,
 } from './src/authentication';
 
-export type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '@kbn/core-security-common';
+export type {
+  ElasticsearchPrivilegesType,
+  KibanaPrivilegesType,
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  GrantAPIKeyResult,
+} from '@kbn/core-security-common';
 export {
   getKibanaRoleSchema,
   elasticsearchRoleSchema,
   GLOBAL_RESOURCE,
 } from '@kbn/core-security-common';
+export {
+  restApiKeySchema,
+  crossClusterApiKeySchema,
+  getRestApiKeyWithKibanaPrivilegesSchema,
+} from '@kbn/core-security-common';
+
+export type { APIKeysService } from '@kbn/core-security-common';

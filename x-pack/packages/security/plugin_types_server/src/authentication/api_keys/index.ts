@@ -17,21 +17,3 @@ export {
   updateRestApiKeySchema,
   updateCrossClusterApiKeySchema,
 } from './api_keys';
-
-export {
-  restApiKeySchema,
-  crossClusterApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
-} from '@kbn/core-security-common';
-
-export type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  GrantAPIKeyResult,
-} from '@kbn/core-security-common';
