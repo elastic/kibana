@@ -76,7 +76,7 @@ export const AdvancedStepDetails: FC<{
           defaultMessage: 'Compute feature influence',
         }
       ),
-      description: computeFeatureInfluence,
+      description: computeFeatureInfluence.toString(),
     });
 
     advancedSecondCol.push({
