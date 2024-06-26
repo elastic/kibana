@@ -169,11 +169,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
-            credentialJsonName
-        ).to.be(true);
       });
     });
 
@@ -270,11 +265,6 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickSaveButton();
         pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(CREDENTIALS_JSON_TEST_ID)) ===
-            credentialJsonName
-        ).to.be(true);
       });
       it('Users are able to switch credentials_type from/to Credential File fields ', async () => {
         const credentialFileName = 'CRED_FILE_TEST_NAME';

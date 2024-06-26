@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef } from 'react';
+import React, { Suspense, useEffect, useRef } from 'react';
 import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
 import semverValid from 'semver/functions/valid';
@@ -15,13 +15,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { LazyPackagePolicyInputVarField, type NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +30,7 @@ import { GcpCredentialsType } from '../../../../common/types_old';
 import { CLOUDBEAT_GCP } from '../../../../common/constants';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
 import {
+  findVariableDef,
   getCspmCloudShellDefaultValue,
   getPosturePolicy,
   NewPackagePolicyPostureInput,
@@ -193,7 +194,10 @@ const credentialOptionsList = [
   },
 ];
 
-type GcpFields = Record<string, { label: string; type?: 'password' | 'text'; value?: string }>;
+type GcpFields = Record<
+  string,
+  { label: string; type?: 'password' | 'text'; value?: string; isSecret?: boolean }
+>;
 interface GcpInputFields {
   fields: GcpFields;
 }
@@ -222,7 +226,8 @@ export const gcpField: GcpInputFields = {
       label: i18n.translate('xpack.csp.findings.gcpIntegration.gcpInputText.credentialJSONText', {
         defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
       }),
-      type: 'text',
+      type: 'password',
+      isSecret: true,
     },
     'gcp.credentials.type': {
       label: i18n.translate(
@@ -489,6 +494,7 @@ export const GcpCredentialsForm = ({
             updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }))
           }
           isOrganization={isOrganization}
+          packageInfo={packageInfo}
         />
       )}
 
@@ -504,11 +510,13 @@ export const GcpInputVarFields = ({
   onChange,
   isOrganization,
   disabled,
+  packageInfo,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
   isOrganization: boolean;
   disabled: boolean;
+  packageInfo: PackageInfo;
 }) => {
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
@@ -581,15 +589,37 @@ export const GcpInputVarFields = ({
           </EuiFormRow>
         )}
         {credentialsTypeValue === credentialJSONValue && credentialJSONFields && (
-          <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
-            <EuiTextArea
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
-              id={credentialJSONFields.id}
-              fullWidth
-              value={credentialJSONFields.value || ''}
-              onChange={(event) => onChange(credentialJSONFields.id, event.target.value)}
-            />
-          </EuiFormRow>
+          <div
+            css={css`
+              width: 100%;
+              .euiFormControlLayout,
+              .euiFormControlLayout__childrenWrapper,
+              .euiFormRow,
+              input {
+                max-width: 100%;
+                width: 100%;
+              }
+            `}
+          >
+            <EuiSpacer size="m" />
+            <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+              <LazyPackagePolicyInputVarField
+                varDef={{
+                  ...findVariableDef(packageInfo, credentialJSONFields.id)!,
+                  required: true,
+                  type: 'textarea',
+                  secret: true,
+                }}
+                value={credentialJSONFields.value || ''}
+                onChange={(value) => {
+                  onChange(credentialJSONFields.id, value);
+                }}
+                errors={[]}
+                forceShowErrors={false}
+                isEditPage={true}
+              />
+            </Suspense>
+          </div>
         )}
       </EuiForm>
     </div>
