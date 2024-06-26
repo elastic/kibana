@@ -98,10 +98,7 @@ export const comboBoxFieldOptionMatcher = ({
 }: {
   option: { name?: string; label: string };
   searchValue: string;
-}) => {
-  const field = { name: name || label, displayName: label };
-  return fieldNameWildcardMatcher(field, searchValue);
-};
+}) => fieldNameWildcardMatcher({ name: name || label, displayName: label }, searchValue);
 
 /**
  * Get `highlight` string to be used together with `EuiHighlight`
