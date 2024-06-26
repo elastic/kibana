@@ -290,6 +290,22 @@
     "schemaVersion"
   ],
   "enterprise_search_telemetry": [],
+  "entity-definition": [
+    "description",
+    "filter",
+    "id",
+    "identityFields",
+    "indexPatterns",
+    "managed",
+    "metadata",
+    "metrics",
+    "name",
+    "staticFields",
+    "type"
+  ],
+  "entity-discovery-api-key": [
+    "apiKey"
+  ],
   "epm-packages": [
     "additional_spaces_installed_kibana",
     "es_index_patterns",
