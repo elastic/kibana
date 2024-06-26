@@ -1868,9 +1868,13 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         placeholder: 'me@example.com',
         required: true,
         sensitive: false,
-        tooltip: i18n.translate('searchConnectors.nativeConnectors.jira.cloudServiceAccountTooltip', {
-          defaultMessage: 'Email address associated with Jira Cloud account. E.g. jane.doe@gmail.com',
-        }),
+        tooltip: i18n.translate(
+          'searchConnectors.nativeConnectors.jira.cloudServiceAccountTooltip',
+          {
+            defaultMessage:
+              'Email address associated with Jira Cloud account. E.g. jane.doe@gmail.com',
+          }
+        ),
         type: FieldType.STRING,
         ui_restrictions: [],
         validations: [],
