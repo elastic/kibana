@@ -787,7 +787,6 @@ describe('When on the package policy create page', () => {
           ...useStartServices(),
           cloud: {
             ...useStartServices().cloud,
-            isServerlessEnabled: false,
             isCloudEnabled: true,
           },
         });
