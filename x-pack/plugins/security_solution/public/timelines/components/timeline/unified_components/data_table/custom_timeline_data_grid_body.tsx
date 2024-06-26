@@ -10,15 +10,9 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import type { FC } from 'react';
-import React, { memo, useMemo, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import type { RowRenderer } from '../../../../../../common/types';
-import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { appSelectors } from '../../../../../common/store';
-import { TimelineId } from '../../../../../../common/types/timeline';
-import { timelineActions } from '../../../../store';
-import type { TimelineResultNote } from '../../../open_timeline/types';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useStatefulRowRenderer } from '../../body/events/stateful_row_renderer/use_stateful_row_renderer';
 import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname';
@@ -26,14 +20,8 @@ import { useGetEventTypeRowClassName } from './use_get_event_type_row_classname'
 export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   rows: Array<DataTableRecord & TimelineItem> | undefined;
   enabledRowRenderers: RowRenderer[];
-  events: TimelineItem[];
-  eventIdToNoteIds?: Record<string, string[]> | null;
-  eventIdsAddingNotes?: Set<string>;
-  onToggleShowNotes: (eventId?: string) => void;
   refetch?: () => void;
 };
-
-const emptyNotes: string[] = [];
 
 /**
  *
@@ -50,47 +38,15 @@ const emptyNotes: string[] = [];
  * */
 export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = memo(
   function CustomTimelineDataGridBody(props) {
-    const {
-      Cell,
-      visibleColumns,
-      visibleRowData,
-      rows,
-      enabledRowRenderers,
-      events = [],
-      eventIdToNoteIds = {},
-      eventIdsAddingNotes = new Set<string>(),
-      onToggleShowNotes,
-      refetch,
-    } = props;
-    const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
-    const notesById = useDeepEqualSelector(getNotesByIds);
+    const { Cell, visibleColumns, visibleRowData, rows, enabledRowRenderers, refetch } = props;
     const visibleRows = useMemo(
       () => (rows ?? []).slice(visibleRowData.startRow, visibleRowData.endRow),
       [rows, visibleRowData]
     );
-    const eventIds = useMemo(() => events.map((event) => event._id), [events]);
 
     return (
       <>
         {visibleRows.map((row, rowIndex) => {
-          const eventId = eventIds[rowIndex];
-          const noteIds: string[] = (eventIdToNoteIds && eventIdToNoteIds[eventId]) || emptyNotes;
-          const notes = noteIds
-            .map((noteId) => {
-              const note = notesById[noteId];
-              if (note) {
-                return {
-                  savedObjectId: note.saveObjectId,
-                  note: note.note,
-                  noteId: note.id,
-                  updated: (note.lastEdit ?? note.created).getTime(),
-                  updatedBy: note.user,
-                };
-              } else {
-                return null;
-              }
-            })
-            .filter((note) => note !== null) as TimelineResultNote[];
           return (
             <CustomDataGridSingleRow
               rowData={row}
@@ -99,10 +55,6 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
               visibleColumns={visibleColumns}
               Cell={Cell}
               enabledRowRenderers={enabledRowRenderers}
-              notes={notes}
-              eventIdsAddingNotes={eventIdsAddingNotes}
-              eventId={eventId}
-              onToggleShowNotes={onToggleShowNotes}
               refetch={refetch}
             />
           );
@@ -175,10 +127,6 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 type CustomTimelineDataGridSingleRowProps = {
   rowData: DataTableRecord & TimelineItem;
   rowIndex: number;
-  notes?: TimelineResultNote[] | null;
-  eventId?: string;
-  eventIdsAddingNotes?: Set<string>;
-  onToggleShowNotes: (eventId?: string) => void;
 } & Pick<
   CustomTimelineDataGridBodyProps,
   'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch'
@@ -192,19 +140,7 @@ type CustomTimelineDataGridSingleRowProps = {
 const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   props: CustomTimelineDataGridSingleRowProps
 ) {
-  const {
-    rowIndex,
-    rowData,
-    enabledRowRenderers,
-    visibleColumns,
-    Cell,
-    notes,
-    eventIdsAddingNotes,
-    eventId = '',
-    onToggleShowNotes,
-    refetch,
-  } = props;
-  const dispatch = useDispatch();
+  const { rowIndex, rowData, enabledRowRenderers, visibleColumns, Cell } = props;
   const { canShowRowRenderer } = useStatefulRowRenderer({
     data: rowData.ecs,
     rowRenderers: enabledRowRenderers,
@@ -225,26 +161,6 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     [canShowRowRenderer]
   );
   const eventTypeRowClassName = useGetEventTypeRowClassName(rowData.ecs);
-
-  const associateNote = useCallback(
-    (noteId: string) => {
-      dispatch(
-        timelineActions.addNoteToEvent({
-          eventId,
-          id: TimelineId.active,
-          noteId,
-        })
-      );
-      if (refetch) {
-        refetch();
-      }
-    },
-    [dispatch, eventId, refetch]
-  );
-
-  const renderNotesContainer = useMemo(() => {
-    return ((notes && notes.length > 0) || eventIdsAddingNotes?.has(eventId)) ?? false;
-  }, [notes, eventIdsAddingNotes, eventId]);
 
   return (
     <CustomGridRow
@@ -267,18 +183,6 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
           return null;
         })}
       </CustomGridRowCellWrapper>
-      {/* {renderNotesContainer && ( */}
-      {/*   <NoteCards */}
-      {/*     ariaRowindex={rowIndex} */}
-      {/*     associateNote={associateNote} */}
-      {/*     className="udt--customRow" */}
-      {/*     data-test-subj="note-cards" */}
-      {/*     notes={notes ?? []} */}
-      {/*     showAddNote={eventIdsAddingNotes?.has(eventId) ?? false} */}
-      {/*     toggleShowAddNote={onToggleShowNotes} */}
-      {/*     eventId={eventId} */}
-      {/*   /> */}
-      {/* )} */}
 
       {/* Timeline Expanded Row */}
       {canShowRowRenderer ? (

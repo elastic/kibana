@@ -17,9 +17,7 @@ interface AddEventNoteActionProps {
   ariaLabel?: string;
   showNotes: boolean;
   timelineType: TimelineType;
-  toggleShowNotes: () => void;
   eventId?: string;
-  notesCount?: number;
   refetch?: () => void;
   eventIdToNoteIds?: Record<string, string[]>;
 }
@@ -30,9 +28,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   ariaLabel,
   showNotes,
   timelineType,
-  toggleShowNotes,
   eventId,
-  notesCount,
   refetch,
   eventIdToNoteIds,
 }) => {
@@ -40,8 +36,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
 
   const toggleNotes = useCallback(() => {
     setAreNotesVisible((prev) => !prev);
-    toggleShowNotes?.();
-  }, [toggleShowNotes]);
+  }, []);
 
   const handleNotesFlyoutClose = useCallback(() => {
     setAreNotesVisible(false);

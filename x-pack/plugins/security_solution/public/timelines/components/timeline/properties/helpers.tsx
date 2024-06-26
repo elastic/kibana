@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -13,12 +13,6 @@ import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 
 import * as i18n from './translations';
-
-const NotesCountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-` as unknown as typeof EuiBadge;
-
-NotesCountBadge.displayName = 'NotesCountBadge';
 
 interface NotesButtonProps {
   ariaLabel?: string;
@@ -71,7 +65,7 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
     return (
       <NotesButtonContainer>
         <EuiFlexItem grow={false}>
-          {notesCount > 0 ? <NotificationDot /> : null}
+          {notesCount > 0 ? <NotificationDot className="notes-notification-dot" /> : null}
           <EuiButtonIcon
             aria-label={ariaLabel}
             className={NOTES_BUTTON_CLASS_NAME}
@@ -122,4 +116,5 @@ export const NotesButton = React.memo<NotesButtonProps>(
       </EuiToolTip>
     )
 );
+
 NotesButton.displayName = 'NotesButton';

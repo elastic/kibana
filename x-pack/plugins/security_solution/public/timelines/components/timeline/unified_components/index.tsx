@@ -50,7 +50,6 @@ import { timelineActions } from '../../../store';
 import type { TimelineModel } from '../../../store/model';
 import { getFieldsListCreationOptions } from './get_fields_list_creation_options';
 import { defaultUdtHeaders } from './default_headers';
-import type { TimelineDataGridCellContext } from '../types';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -373,17 +372,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  const cellContext: TimelineDataGridCellContext = useMemo(() => {
-    return {
-      events,
-      pinnedEventIds,
-      eventIdsAddingNotes,
-      onToggleShowNotes,
-      eventIdToNoteIds,
-      refetch,
-    };
-  }, [events, pinnedEventIds, eventIdsAddingNotes, onToggleShowNotes, eventIdToNoteIds, refetch]);
-
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
@@ -460,7 +448,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                       onFilter={onAddFilter as DocViewFilterFn}
                       trailingControlColumns={trailingControlColumns}
                       leadingControlColumns={leadingControlColumns}
-                      cellContext={cellContext}
                       eventIdToNoteIds={eventIdToNoteIds}
                     />
                   </EventDetailsWidthProvider>

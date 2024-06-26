@@ -177,6 +177,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     timelineId,
     activeTab: TimelineTabs.pinned,
     refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
   });
 
   const isQueryLoading = useMemo(

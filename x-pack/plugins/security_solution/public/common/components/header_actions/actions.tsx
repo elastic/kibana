@@ -61,7 +61,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   onRuleChange,
   showNotes,
   timelineId,
-  toggleShowNotes,
   refetch,
 }) => {
   const dispatch = useDispatch();
@@ -213,14 +212,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
+
   const showExpandEvent = useMemo(
     () => !unifiedComponentsInTimelineEnabled || isEventViewer,
     [isEventViewer, unifiedComponentsInTimelineEnabled]
   );
-
-  const toggleNotes = useCallback(() => {
-    toggleShowNotes?.();
-  }, [toggleShowNotes]);
 
   const noteIds = useMemo(
     () => (eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes),
@@ -261,13 +257,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
           )}
         </>
-        {!isEventViewer && toggleShowNotes && (
+        {!isEventViewer && showNotes && (
           <>
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
               showNotes={showNotes ?? false}
-              toggleShowNotes={toggleNotes}
               timelineType={timelineType}
               eventId={eventId}
               eventIdToNoteIds={eventIdToNoteIds}

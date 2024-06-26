@@ -209,6 +209,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timelineId,
     activeTab: TimelineTabs.query,
     refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
   });
 
   useEffect(() => {

@@ -141,6 +141,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     timelineId,
     activeTab: TimelineTabs.eql,
     refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
   });
 
   const isQueryLoading = useMemo(
