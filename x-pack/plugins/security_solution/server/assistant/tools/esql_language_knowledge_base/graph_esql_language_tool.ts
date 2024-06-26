@@ -63,7 +63,7 @@ export type GraphESQLToolParams = AssistantToolParams;
 const TOOL_NAME = 'GraphESQLTool';
 
 const toolDetails = {
-  id: 'esql-knowledge-base-tool',
+  id: 'graph-esql-tool',
   name: TOOL_NAME,
   description: `You MUST use the "${TOOL_NAME}" function when the user wants to:
   - visualize data
@@ -325,9 +325,7 @@ const getGenerateQuery =
 
     const correctedResult = finalResult.replaceAll(INLINE_ESQL_QUERY_REGEX, (_match, query) => {
       const correction = correctCommonEsqlMistakes(query);
-      // if (correction.isCorrection) {
-      //   logger.error(`Corrected query, from: \n${correction.input}\nto:\n${correction.output}`);
-      // }
+
       return `\`\`\`esql\n${correction.output}\n\`\`\``;
     });
 

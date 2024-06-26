@@ -18,8 +18,7 @@ import { KNOWLEDGE_BASE_WRITE_TOOL } from './knowledge_base/knowledge_base_write
 export const getAssistantTools = (graphEsqlToolEnabled?: boolean): AssistantTool[] => [
   ALERT_COUNTS_TOOL,
   ATTACK_DISCOVERY_TOOL,
-  ...(graphEsqlToolEnabled ? [GRAPH_ESQL_TOOL] : []),
-  ESQL_KNOWLEDGE_BASE_TOOL,
+  ...(graphEsqlToolEnabled ? [GRAPH_ESQL_TOOL] : [ESQL_KNOWLEDGE_BASE_TOOL]),
   KNOWLEDGE_BASE_RETRIEVAL_TOOL,
   KNOWLEDGE_BASE_WRITE_TOOL,
   OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL,
