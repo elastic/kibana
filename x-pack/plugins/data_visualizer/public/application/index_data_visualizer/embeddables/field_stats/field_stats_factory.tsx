@@ -6,7 +6,11 @@
  */
 import type { Reference } from '@kbn/content-management-utils';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  generateFilters,
+  type DataPublicPluginStart,
+} from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -17,11 +21,11 @@ import {
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
+  useFetchContext,
 } from '@kbn/presentation-publishing';
 import { cloneDeep } from 'lodash';
 import React, { useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   map,
@@ -33,12 +37,14 @@ import {
 } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import fastIsEqual from 'fast-deep-equal';
 import { isDefined } from '@kbn/ml-is-defined';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { TimeRange } from '@kbn/es-query';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
+import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
@@ -47,6 +53,7 @@ import { FIELD_STATS_EMBEDDABLE_TYPE, FIELD_STATS_DATA_VIEW_REF_NAME } from './c
 import { initializeFieldStatsControls } from './initialize_field_stats_controls';
 import type { DataVisualizerStartDependencies } from '../../../common/types/data_visualizer_plugin';
 import type { FieldStatisticsTableEmbeddableApi } from './types';
+import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 export interface EmbeddableFieldStatsChartStartServices {
   data: DataPublicPluginStart;
@@ -54,6 +61,12 @@ export interface EmbeddableFieldStatsChartStartServices {
 export type EmbeddableFieldStatsChartType = typeof FIELD_STATS_EMBEDDABLE_TYPE;
 
 const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper'));
+
+const ERROR_MSG = {
+  APPLY_FILTER_ERR: i18n.translate('xpack.dataVisualizer.fieldStats.errors.errorApplyingFilter', {
+    defaultMessage: 'Error applying filter',
+  }),
+};
 
 export const getDependencies = async (
   getStartServices: StartServicesAccessor<
@@ -134,26 +147,50 @@ export const getFieldStatsChartEmbeddableFactory = (
         onFieldStatsTableDestroy,
         resetData$,
       } = initializeFieldStatsControls(state);
+      const { onError } = dataLoadingApi;
 
       const defaultDataViewId = await deps.data.dataViews.getDefaultId();
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
-        state.dataViewId !== '' && defaultDataViewId
-          ? [await deps.data.dataViews.get(state.dataViewId ?? defaultDataViewId)]
-          : undefined
-      );
+      const validDataViewId: string =
+        isDefined(state.dataViewId) && state.dataViewId !== ''
+          ? state.dataViewId
+          : defaultDataViewId ?? '';
+      let initialDataView: DataView[] | undefined;
+      try {
+        const dataView = await deps.data.dataViews.get(validDataViewId);
+        initialDataView = [dataView];
+      } catch (error) {
+        // Only need to publish blocking error if viewtype is data view, and no data view found
+        if (state.viewType === FieldStatsInitializerViewType.DATA_VIEW) {
+          onError(error);
+        }
+
+        if (isESQLQuery(state.query)) {
+          const indexPatternFromQuery = getIndexPatternFromESQLQuery(state.query.esql);
+
+          const adHocDataView = await getESQLAdHocDataview(
+            indexPatternFromQuery,
+            deps.data.dataViews
+          );
+          initialDataView = [adHocDataView];
+        }
+      }
+
+      const dataViews$ = new BehaviorSubject<DataView[] | undefined>(initialDataView);
 
       const subscriptions = new Subscription();
-      subscriptions.add(
-        fieldStatsControlsApi.dataViewId$
-          .pipe(
-            skip(1),
-            skipWhile((dataViewId) => dataViewId === '' && defaultDataViewId === null),
-            switchMap((dataViewId) => deps.data.dataViews.get(dataViewId ?? defaultDataViewId))
-          )
-          .subscribe((nextSelectedDataView) => {
-            dataViews$.next([nextSelectedDataView]);
-          })
-      );
+      if (fieldStatsControlsApi.dataViewId$) {
+        subscriptions.add(
+          fieldStatsControlsApi.dataViewId$
+            .pipe(
+              // skip(1),
+              skipWhile((dataViewId) => !dataViewId && !defaultDataViewId),
+              switchMap((dataViewId) => deps.data.dataViews.get(dataViewId ?? defaultDataViewId))
+            )
+            .subscribe((nextSelectedDataView) => {
+              dataViews$.next([nextSelectedDataView]);
+            })
+        );
+      }
 
       const api = buildApi(
         {
@@ -220,26 +257,42 @@ export const getFieldStatsChartEmbeddableFactory = (
         skipWhile((fetchContext) => !fetchContext.isReload),
         map(() => Date.now())
       );
-      const query$ = fetch$(api).pipe(
-        map((fetchContext) => fetchContext.query),
-        distinctUntilChanged(fastIsEqual)
-      );
-      const filters$ = fetch$(api).pipe(
-        map((fetchContext) => fetchContext.filters),
-        distinctUntilChanged(fastIsEqual)
-      );
       const reset$ = resetData$.pipe(skip(1), distinctUntilChanged());
-
-      const appliedTimeRange$: Observable<TimeRange | undefined> = fetch$(api).pipe(
-        map((fetchContext) => fetchContext.timeRange),
-        distinctUntilChanged(fastIsEqual)
-      );
 
       const onTableUpdate = (changes: Partial<DataVisualizerTableState>) => {
         if (isDefined(changes?.showDistributions)) {
           fieldStatsControlsApi.showDistributions$.next(changes.showDistributions);
         }
       };
+
+      const addFilters = (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+        if (!pluginStart.uiActions) {
+          onError(new Error(ERROR_MSG.APPLY_FILTER_ERR));
+          return;
+        }
+        const trigger = pluginStart.uiActions.getTrigger(APPLY_FILTER_TRIGGER);
+        if (!trigger) {
+          onError(new Error(ERROR_MSG.APPLY_FILTER_ERR));
+          // eslint-disable-next-line no-console
+          console.error(`${ERROR_MSG.APPLY_FILTER_ERR}: APPLY_FILTER_TRIGGER is undefined`);
+        }
+        const actionContext = {
+          embeddable: api,
+          trigger,
+        } as ActionExecutionContext;
+
+        const executeContext = {
+          ...actionContext,
+          filters,
+        };
+        try {
+          const action = pluginStart.uiActions.getAction(actionId);
+          action.execute(executeContext);
+        } catch (error) {
+          onError(error);
+        }
+      };
+
       const statsTableCss = css({
         width: '100%',
         height: '100%',
@@ -250,9 +303,10 @@ export const getFieldStatsChartEmbeddableFactory = (
         api,
         Component: () => {
           if (!apiHasExecutionContext(parentApi)) {
-            throw new Error('Parent API does not have execution context');
+            onError(new Error('Parent API does not have execution context'));
           }
 
+          const { filters: globalFilters, query: globalQuery, timeRange } = useFetchContext(api);
           const [dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
               api.dataViews,
@@ -260,10 +314,6 @@ export const getFieldStatsChartEmbeddableFactory = (
               api.viewType$,
               api.showDistributions$
             );
-
-          const timeRange = useObservable(appliedTimeRange$, undefined);
-          const globalQuery = useObservable(query$, undefined);
-          const globalFilters = useObservable(filters$, undefined);
           const lastReloadRequestTime = useObservable(reload$, Date.now());
 
           const isEsqlMode = viewType === FieldStatsInitializerViewType.ESQL;
@@ -275,7 +325,11 @@ export const getFieldStatsChartEmbeddableFactory = (
             value: string,
             operator: '+' | '-'
           ) => {
-            if (!dataView || !pluginStart.data) return;
+            if (!dataView || !pluginStart.data) {
+              onError(new Error(ERROR_MSG.APPLY_FILTER_ERR));
+              return;
+            }
+
             let filters = generateFilters(
               pluginStart.data.query.filterManager,
               field,
@@ -287,16 +341,14 @@ export const getFieldStatsChartEmbeddableFactory = (
               ...filter,
               $state: { store: FilterStateStore.APP_STATE },
             }));
-            pluginStart.data.query.filterManager.addFilters(filters);
+            addFilters(filters);
           };
 
           // On destroy
           useEffect(() => {
             return () => {
               subscriptions?.unsubscribe();
-              if (onFieldStatsTableDestroy) {
-                onFieldStatsTableDestroy();
-              }
+              onFieldStatsTableDestroy();
             };
           }, []);
 
