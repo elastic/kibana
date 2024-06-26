@@ -334,20 +334,15 @@ export const initUiSettings = (
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
         {
-          defaultMessage: `Selected data tiers will be excluded during rule execution. Events in these data tiers won'nt generate alerts. 
-            <br>Possible values: data_content, data_hot, data_warm, data_cold, data_frozen.
-            <br>Comma delimit to exclude multiple tiers - data_warm,data_cold.`,
+          defaultMessage: `
+            Exclude events from frozen or cold data tiers during rule execution. Alerts won't be generated.
+            <br>Use this option for faster performance or reduce rule execution time if it's too long or timeouts.
+            <br>Comma delimit to exclude multiple tiers - data_frozen,data_cold.`,
         }
       ),
       type: 'array',
       schema: schema.arrayOf(
-        schema.oneOf([
-          schema.literal(DataTier.data_content),
-          schema.literal(DataTier.data_hot),
-          schema.literal(DataTier.data_warm),
-          schema.literal(DataTier.data_cold),
-          schema.literal(DataTier.data_frozen),
-        ])
+        schema.oneOf([schema.literal(DataTier.data_cold), schema.literal(DataTier.data_frozen)])
       ),
       value: [],
       category: [APP_ID],
