@@ -69,6 +69,9 @@ export interface DocumentDetailsContext {
   isPreviewMode: boolean;
 }
 
+/**
+ * A context provider shared by the right, left and preview panels in expandable document details flyout
+ */
 export const DocumentDetailsContext = createContext<DocumentDetailsContext | undefined>(undefined);
 
 export type DocumentDetailsProviderProps = {
