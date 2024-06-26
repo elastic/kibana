@@ -9,7 +9,7 @@ import { debounce } from 'lodash';
 import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
-import { getElasticsearchQueryOrThrow } from '@kbn/observability-plugin/public';
+import { getElasticsearchQueryOrThrow } from '../../common/parse_kuery';
 import { useKibana } from '../utils/kibana_react';
 
 export interface UseFetchGroupByCardinalityResponse {

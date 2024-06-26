@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { NotesDetails } from './notes_details';
 
@@ -22,14 +22,14 @@ jest.mock('react-redux', () => {
 
 const panelContextValue = {
   eventId: 'event id',
-} as unknown as LeftPanelContext;
+} as unknown as DocumentDetailsContext;
 
 const renderNotesDetails = () =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={panelContextValue}>
+      <DocumentDetailsContext.Provider value={panelContextValue}>
         <NotesDetails />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
