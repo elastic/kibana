@@ -28,7 +28,7 @@ export interface AlertSummaryField {
   label: ReactNode | string;
   value: ReactNode | string | number;
 }
-interface AlertSummaryProps {
+export interface AlertSummaryProps {
   alert: TopAlert;
   alertSummaryFields?: AlertSummaryField[];
 }
@@ -110,3 +110,6 @@ export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
     </div>
   );
 }
+
+// eslint-disable-next-line import/no-default-export
+export default AlertSummary;
