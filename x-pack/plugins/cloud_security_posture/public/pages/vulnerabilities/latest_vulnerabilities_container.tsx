@@ -137,13 +137,13 @@ export const LatestVulnerabilitiesContainer = () => {
     );
   };
 
-  const { grouping, isFetching, setUrlQuery, onResetFilters, error, isEmptyResults } =
+  const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
     useLatestVulnerabilitiesGrouping({ groupPanelRenderer, groupStatsRenderer });
 
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -152,7 +152,7 @@ export const LatestVulnerabilitiesContainer = () => {
   }
   return (
     <>
-      <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar query={urlQuery} setQuery={setUrlQuery} loading={isFetching} />
       <EuiSpacer size="m" />
       <div>
         {renderChildComponent({
