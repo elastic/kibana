@@ -44,13 +44,13 @@ export function MochaReporterProvider({ getService }) {
       runner.on('suite end', this.onSuiteEnd);
       runner.on('end', this.onEnd);
 
-      const originalCommand = process.argv.join(' ');
+      const commandLine = process.argv.join(' ');
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
           metadata: config.get('junit.metadata'),
-          originalCommand,
+          commandLine,
         });
       }
 

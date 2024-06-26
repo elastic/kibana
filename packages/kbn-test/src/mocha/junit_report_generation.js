@@ -26,7 +26,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     rootDirectory = REPO_ROOT,
     getTestMetadata = () => ({}),
     metadata,
-    originalCommand,
+    commandLine,
   } = options;
 
   const stats = {};
@@ -111,7 +111,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       failures: failures.length,
       skipped: skippedResults.length,
       'metadata-json': JSON.stringify(metadata ?? {}),
-      'test-command': originalCommand,
+      'command-line': commandLine,
     });
 
     function addTestcaseEl(node, failed) {
@@ -120,7 +120,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
         classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,
         time: getDuration(node),
         'metadata-json': JSON.stringify(getTestMetadata(node) || {}),
-        'test-command': originalCommand,
+        'command-line': commandLine,
       };
 
       // adding code owners only for the failed test case

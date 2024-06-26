@@ -16,6 +16,7 @@ export type TestFailure = FailedTestCase['$'] & {
   'system-out'?: string;
   githubIssue?: string;
   failureCount?: number;
+  commandLine?: string;
 };
 
 const getText = (node?: Array<string | { _: string }>) => {
@@ -82,6 +83,7 @@ export function getFailures(report: TestReport) {
       failure,
       likelyIrrelevant,
       'system-out': getText(testCase['system-out']),
+      commandLine: testCase.$['command-line'],
     });
   }
 
