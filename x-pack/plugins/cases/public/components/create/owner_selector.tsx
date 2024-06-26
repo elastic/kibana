@@ -48,11 +48,18 @@ const CaseOwnerSelector: React.FC<Props> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
+      'data-test-subj': `${definition.id}OwnerOption`,
     }));
 
   return (
-    <EuiFormRow display="columnCompressed" label={i18n.SOLUTION_SELECTOR_LABEL} fullWidth>
+    <EuiFormRow
+      display="columnCompressed"
+      label={i18n.SOLUTION_SELECTOR_LABEL}
+      data-test-subj="caseOwnerSelector"
+      fullWidth
+    >
       <EuiSuperSelect
+        data-test-subj="caseOwnerSuperSelect"
         options={options}
         isLoading={isLoading}
         fullWidth

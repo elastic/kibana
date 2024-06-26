@@ -243,7 +243,11 @@ describe('Create case', () => {
   describe('Step 1 - Case Fields', () => {
     it('renders correctly', async () => {
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -268,7 +272,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -293,7 +301,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -327,7 +339,11 @@ describe('Create case', () => {
       const newCategory = 'First           ';
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -372,7 +388,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -407,7 +427,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -430,7 +454,11 @@ describe('Create case', () => {
 
     it('should select LOW as the default severity', async () => {
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -460,13 +488,12 @@ describe('Create case', () => {
         },
       ];
 
-      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
-        ...useGetAllCaseConfigurationsResponse,
-        data: configurations,
-      }));
-
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={configurations[0]}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} configuration={configurations[0]} />
           <SubmitCaseButton />
         </FormContext>
@@ -513,122 +540,6 @@ describe('Create case', () => {
       });
     });
 
-    it('should change custom fields based on the selected owner', async () => {
-      appMockRender = createAppMockRenderer({ owner: [] });
-
-      const securityCustomField = {
-        key: 'security_custom_field',
-        type: CustomFieldTypes.TEXT,
-        label: 'security custom field',
-        required: false,
-      };
-      const o11yCustomField = {
-        key: 'o11y_field_key',
-        type: CustomFieldTypes.TEXT,
-        label: 'observability custom field',
-        required: false,
-      };
-      const stackCustomField = {
-        key: 'stack_field_key',
-        type: CustomFieldTypes.TEXT,
-        label: 'stack custom field',
-        required: false,
-      };
-
-      const configurations = [
-        {
-          ...useGetAllCaseConfigurationsResponse.data[0],
-          owner: 'securitySolution',
-          customFields: [securityCustomField],
-        },
-        {
-          ...useGetAllCaseConfigurationsResponse.data[0],
-          owner: 'observability',
-          customFields: [o11yCustomField],
-        },
-        {
-          ...useGetAllCaseConfigurationsResponse.data[0],
-          owner: 'cases',
-          customFields: [stackCustomField],
-        },
-      ];
-
-      useGetAllCaseConfigurationsMock.mockImplementation(() => ({
-        ...useGetAllCaseConfigurationsResponse,
-        data: configurations,
-      }));
-
-      appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
-          <CreateCaseFormFields {...defaultCreateCaseForm} configuration={configurations[0]} />
-          <SubmitCaseButton />
-        </FormContext>
-      );
-
-      await waitForFormToRender(screen);
-      await fillFormReactTestingLib({ renderer: screen });
-
-      const createCaseCustomFields = await screen.findByTestId('caseCustomFields');
-
-      // the default selectedOwner is securitySolution
-      // only the security custom field should be displayed
-      expect(
-        await within(createCaseCustomFields).findByTestId(
-          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
-        )
-      ).toBeInTheDocument();
-      expect(
-        await within(createCaseCustomFields).queryByTestId(
-          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
-        )
-      ).not.toBeInTheDocument();
-      expect(
-        await within(createCaseCustomFields).queryByTestId(
-          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
-        )
-      ).not.toBeInTheDocument();
-
-      const caseOwnerSelector = await screen.findByTestId('caseOwnerSelector');
-
-      userEvent.click(await within(caseOwnerSelector).findByLabelText('Observability'));
-
-      // only the o11y custom field should be displayed
-      expect(
-        await within(createCaseCustomFields).findByTestId(
-          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
-        )
-      ).toBeInTheDocument();
-      expect(
-        await within(createCaseCustomFields).queryByTestId(
-          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
-        )
-      ).not.toBeInTheDocument();
-      expect(
-        await within(createCaseCustomFields).queryByTestId(
-          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
-        )
-      ).not.toBeInTheDocument();
-
-      userEvent.click(await within(caseOwnerSelector).findByLabelText('Stack'));
-
-      // only the stack custom field should be displayed
-      expect(
-        await within(createCaseCustomFields).findByTestId(
-          `${stackCustomField.key}-${stackCustomField.type}-create-custom-field`
-        )
-      ).toBeInTheDocument();
-      expect(
-        await within(createCaseCustomFields).queryByTestId(
-          `${securityCustomField.key}-${securityCustomField.type}-create-custom-field`
-        )
-      ).not.toBeInTheDocument();
-      expect(
-        await within(createCaseCustomFields).queryByTestId(
-          `${o11yCustomField.key}-${o11yCustomField.type}-create-custom-field`
-        )
-      ).not.toBeInTheDocument();
-    });
-
     it('should select the default connector set in the configuration', async () => {
       const configuration = {
         ...useCaseConfigureResponse.data,
@@ -651,7 +562,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields
             {...defaultCreateCaseForm}
             configuration={configuration}
@@ -709,7 +624,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields
             {...defaultCreateCaseForm}
             configuration={configuration}
@@ -742,7 +661,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -773,7 +696,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectorsMock} />
           <SubmitCaseButton />
         </FormContext>
@@ -846,7 +773,11 @@ describe('Create case', () => {
       });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} connectors={connectors} />
           <SubmitCaseButton />
         </FormContext>
@@ -900,6 +831,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
+        selectedOwner={'foo'}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         currentConfiguration={currentConfiguration}
@@ -967,6 +899,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
+        selectedOwner={'foo'}
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
         currentConfiguration={currentConfiguration}
@@ -1002,6 +935,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
+        selectedOwner={'foo'}
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
         currentConfiguration={currentConfiguration}
@@ -1041,6 +975,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
+        selectedOwner={'foo'}
         currentConfiguration={currentConfiguration}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
@@ -1096,7 +1031,11 @@ describe('Create case', () => {
       };
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -1127,7 +1066,11 @@ describe('Create case', () => {
 
     it('should submit assignees', async () => {
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -1166,7 +1109,11 @@ describe('Create case', () => {
       useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
 
       appMockRender.render(
-        <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+        <FormContext
+          selectedOwner={'foo'}
+          onSuccess={onFormSubmitSuccess}
+          currentConfiguration={currentConfiguration}
+        >
           <CreateCaseFormFields {...defaultCreateCaseForm} />
           <SubmitCaseButton />
         </FormContext>
@@ -1191,7 +1138,11 @@ describe('Create case', () => {
 
       it('should have session storage value same as draft comment', async () => {
         appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+          <FormContext
+            selectedOwner={'foo'}
+            onSuccess={onFormSubmitSuccess}
+            currentConfiguration={currentConfiguration}
+          >
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
@@ -1219,7 +1170,11 @@ describe('Create case', () => {
 
       it('should have session storage value same as draft comment', async () => {
         appMockRender.render(
-          <FormContext onSuccess={onFormSubmitSuccess} currentConfiguration={currentConfiguration}>
+          <FormContext
+            selectedOwner={'foo'}
+            onSuccess={onFormSubmitSuccess}
+            currentConfiguration={currentConfiguration}
+          >
             <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>

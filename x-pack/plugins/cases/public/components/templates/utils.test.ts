@@ -24,7 +24,7 @@ describe('utils', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
-        templateDescription: '',
+        templateDescription: undefined,
         title: '',
         description: '',
         templateTags: [],
@@ -33,19 +33,51 @@ describe('utils', () => {
         category: null,
       });
 
-      expect(res).toEqual({ fields: null });
+      expect(res).toEqual({
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
+        key: '',
+        name: '',
+        tags: [],
+      });
     });
 
     it('serializes connectors fields correctly', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
-        templateDescription: '',
+        templateDescription: undefined,
         fields: null,
       });
 
       expect(res).toEqual({
-        fields: null,
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
+        key: '',
+        name: '',
+        tags: [],
       });
     });
 
@@ -59,12 +91,23 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
+        caseFields: {
+          category: 'new',
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: 'description 1',
         key: 'key_1',
         name: 'template 1',
-        templateDescription: 'description 1',
-        category: 'new',
-        templateTags: ['sample'],
-        fields: null,
+        tags: ['sample'],
       });
     });
 
@@ -72,7 +115,7 @@ describe('utils', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
-        templateDescription: '',
+        templateDescription: undefined,
         customFields: {
           custom_field_1: 'foobar',
           custom_fields_2: '',
@@ -81,13 +124,22 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
         key: 'key_1',
         name: 'template 1',
-        customFields: {
-          custom_field_1: 'foobar',
-          custom_field_3: true,
-        },
-        fields: null,
+        tags: [],
       });
     });
 
@@ -95,7 +147,7 @@ describe('utils', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
-        templateDescription: '',
+        templateDescription: undefined,
         fields: {
           impact: 'high',
           severity: 'low',
@@ -106,15 +158,22 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
         key: 'key_1',
         name: 'template 1',
-        fields: {
-          impact: 'high',
-          severity: 'low',
-          category: null,
-          urgency: null,
-          subcategory: null,
-        },
+        tags: [],
       });
     });
   });
@@ -124,7 +183,7 @@ describe('utils', () => {
       const res = removeEmptyFields({
         key: '',
         name: '',
-        templateDescription: '',
+        templateDescription: undefined,
         title: '',
         description: '',
         templateTags: [],
@@ -157,7 +216,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: '',
+        templateDescription: undefined,
         templateTags: [],
         tags: [],
         connectorId: 'none',
@@ -204,7 +263,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: '',
+        templateDescription: undefined,
         templateTags: [],
         title: 'Case title',
         description: 'This is test case',
@@ -241,7 +300,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: '',
+        templateDescription: undefined,
         templateTags: [],
         tags: [],
         connectorId: 'none',
@@ -276,7 +335,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: '',
+        templateDescription: undefined,
         templateTags: [],
         tags: [],
         connectorId: 'servicenow-1',

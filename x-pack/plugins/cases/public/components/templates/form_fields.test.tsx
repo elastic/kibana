@@ -186,7 +186,10 @@ describe('form fields', () => {
     };
 
     appMockRenderer.render(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{ ...formDefaultValue, connectorId: 'servicenow-1' }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...newProps} />
       </FormTestComponent>
     );
@@ -355,7 +358,10 @@ describe('form fields', () => {
     };
 
     appMockRenderer.render(
-      <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+      <FormTestComponent
+        formDefaultValue={{ ...formDefaultValue, connectorId: 'servicenow-1' }}
+        onSubmit={onSubmit}
+      >
         <FormFields {...newProps} />
       </FormTestComponent>
     );

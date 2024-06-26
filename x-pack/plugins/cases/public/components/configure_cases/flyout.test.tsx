@@ -487,16 +487,21 @@ describe('CommonFlyout ', () => {
       await waitFor(() => {
         expect(newProps.onSaveField).toBeCalledWith({
           key: expect.anything(),
+          caseFields: {
+            connector: {
+              fields: null,
+              id: 'none',
+              name: 'none',
+              type: '.none',
+            },
+            customFields: [],
+            settings: {
+              syncAlerts: true,
+            },
+          },
+          description: 'Template description',
           name: 'Template name',
-          templateDescription: 'Template description',
-          templateTags: ['foo'],
-          title: '',
-          description: '',
-          tags: [],
-          severity: '',
-          category: null,
-          connectorId: 'none',
-          syncAlerts: true,
+          tags: ['foo'],
         });
       });
     });

@@ -177,16 +177,21 @@ describe('TemplateForm', () => {
 
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: true,
+          },
+        },
+        description: 'this is a first template',
         name: 'Template 1',
-        templateDescription: 'this is a first template',
-        templateTags: ['foo', 'bar'],
-        title: '',
-        description: '',
-        severity: '',
-        tags: [],
-        connectorId: 'none',
-        syncAlerts: true,
-        category: null,
+        tags: ['foo', 'bar'],
       });
     });
   });
@@ -217,16 +222,21 @@ describe('TemplateForm', () => {
 
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: true,
+          },
+        },
+        description: 'This is a first test template',
         name: 'First test template',
-        title: '',
-        description: '',
-        templateDescription: 'This is a first test template',
-        tags: [],
-        connectorId: 'none',
-        severity: '',
-        syncAlerts: true,
-        category: null,
-        templateTags: ['foo', 'bar'],
+        tags: ['foo', 'bar'],
       });
     });
   });
@@ -273,16 +283,25 @@ describe('TemplateForm', () => {
 
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          category: 'new',
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          description: 'This is a case description',
+          settings: {
+            syncAlerts: true,
+          },
+          tags: ['template-1'],
+          title: 'Case with Template 1',
+        },
+        description: undefined,
         name: 'Template 1',
-        templateDescription: '',
-        templateTags: [],
-        title: 'Case with Template 1',
-        description: 'This is a case description',
-        tags: ['template-1'],
-        severity: '',
-        category: 'new',
-        connectorId: 'none',
-        syncAlerts: true,
+        tags: [],
       });
     });
   });
@@ -313,16 +332,25 @@ describe('TemplateForm', () => {
 
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          description: 'case desc',
+          settings: {
+            syncAlerts: true,
+          },
+          severity: 'low',
+          tags: ['sample-4'],
+          title: 'Case with sample template 4',
+        },
+        description: 'This is a fourth test template',
         name: 'Fourth test template',
-        title: 'Case with sample template 4',
-        description: 'case desc',
-        templateDescription: 'This is a fourth test template',
-        tags: ['sample-4'],
-        connectorId: 'none',
-        severity: 'low',
-        syncAlerts: true,
-        category: null,
-        templateTags: ['foo', 'bar'],
+        tags: ['foo', 'bar'],
       });
     });
   });
@@ -357,12 +385,6 @@ describe('TemplateForm', () => {
       expect(formState).not.toBeUndefined();
     });
 
-    expect(await screen.findByTestId('connector-fields-sn-itsm')).toBeInTheDocument();
-
-    userEvent.selectOptions(await screen.findByTestId('urgencySelect'), '1');
-
-    userEvent.selectOptions(await screen.findByTestId('categorySelect'), ['software']);
-
     await act(async () => {
       const { data, isValid } = await formState!.submit();
 
@@ -370,23 +392,21 @@ describe('TemplateForm', () => {
 
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: true,
+          },
+        },
+        description: undefined,
         name: 'Template 1',
         tags: [],
-        templateDescription: '',
-        templateTags: [],
-        title: '',
-        description: '',
-        category: null,
-        severity: '',
-        connectorId: 'servicenow-1',
-        fields: {
-          category: 'software',
-          urgency: '1',
-          impact: '',
-          severity: '',
-          subcategory: null,
-        },
-        syncAlerts: true,
       });
     });
   });
@@ -441,23 +461,27 @@ describe('TemplateForm', () => {
 
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          connector: {
+            fields: {
+              category: 'Denial of Service',
+              impact: null,
+              severity: null,
+              subcategory: null,
+              urgency: null,
+            },
+            id: 'servicenow-1',
+            name: 'My SN connector',
+            type: '.servicenow',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: true,
+          },
+        },
+        description: undefined,
         name: 'Template 1',
         tags: [],
-        templateDescription: '',
-        templateTags: [],
-        title: '',
-        description: '',
-        category: null,
-        severity: '',
-        connectorId: 'servicenow-1',
-        fields: {
-          category: 'Denial of Service',
-          urgency: '',
-          impact: '',
-          severity: '',
-          subcategory: null,
-        },
-        syncAlerts: true,
       });
     });
   });
@@ -519,22 +543,37 @@ describe('TemplateForm', () => {
 
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [
+            {
+              key: 'test_key_1',
+              type: 'text',
+              value: 'My text test value 1',
+            },
+            {
+              key: 'test_key_2',
+              type: 'toggle',
+              value: true,
+            },
+            {
+              key: 'test_key_4',
+              type: 'toggle',
+              value: true,
+            },
+          ],
+          settings: {
+            syncAlerts: true,
+          },
+        },
+        description: undefined,
         name: 'Template 1',
         tags: [],
-        templateDescription: '',
-        templateTags: [],
-        title: '',
-        description: '',
-        severity: '',
-        category: null,
-        connectorId: 'none',
-        syncAlerts: true,
-        customFields: {
-          test_key_1: 'My text test value 1',
-          test_key_2: true,
-          test_key_3: '',
-          test_key_4: true,
-        },
       });
     });
   });
@@ -586,25 +625,39 @@ describe('TemplateForm', () => {
       const { data, isValid } = await formState!.submit();
 
       expect(isValid).toBe(true);
-
       expect(data).toEqual({
         key: expect.anything(),
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [
+            {
+              key: 'test_key_1',
+              type: 'text',
+              value: 'this is my first custom field value',
+            },
+            {
+              key: 'test_key_2',
+              type: 'toggle',
+              value: true,
+            },
+            {
+              key: 'test_key_4',
+              type: 'toggle',
+              value: false,
+            },
+          ],
+          settings: {
+            syncAlerts: true,
+          },
+        },
+        description: undefined,
         name: 'Template 1',
         tags: [],
-        templateDescription: '',
-        templateTags: [],
-        title: '',
-        description: '',
-        severity: '',
-        category: null,
-        connectorId: 'none',
-        syncAlerts: true,
-        customFields: {
-          test_key_1: 'this is my first custom field value',
-          test_key_2: true,
-          test_key_3: '',
-          test_key_4: false,
-        },
       });
     });
   });

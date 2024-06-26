@@ -79,7 +79,11 @@ describe('ConfigureCases', () => {
     beforeEach(() => {
       useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
       usePersistConfigurationMock.mockImplementation(() => usePersistConfigurationMockResponse);
-      useGetConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, data: [] }));
+      useGetConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        data: [],
+        isLoading: false,
+      }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
 
       wrapper = mount(<ConfigureCases />, {
@@ -127,7 +131,11 @@ describe('ConfigureCases', () => {
         },
       }));
 
-      useGetConnectorsMock.mockImplementation(() => ({ ...useConnectorsResponse, data: [] }));
+      useGetConnectorsMock.mockImplementation(() => ({
+        ...useConnectorsResponse,
+        data: [],
+        isLoading: false,
+      }));
       useGetUrlSearchMock.mockImplementation(() => searchURL);
       wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,
@@ -940,6 +948,8 @@ describe('ConfigureCases', () => {
     });
 
     it('should delete a template', async () => {
+      useGetConnectorsMock.mockImplementation(() => useConnectorsResponse);
+
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         data: {
@@ -974,6 +984,7 @@ describe('ConfigureCases', () => {
             { ...templatesConfigurationMock[1] },
             { ...templatesConfigurationMock[2] },
             { ...templatesConfigurationMock[3] },
+            { ...templatesConfigurationMock[4] },
           ],
           id: '',
           version: '',
