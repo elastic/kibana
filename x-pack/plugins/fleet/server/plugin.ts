@@ -178,7 +178,7 @@ export interface FleetAppContext {
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
-  sloStart: SLOPluginStart;
+  sloStart?: SLOPluginStart;
 }
 
 export type FleetSetupContract = void;
