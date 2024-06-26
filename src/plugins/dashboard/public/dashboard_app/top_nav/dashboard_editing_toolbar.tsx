@@ -19,21 +19,20 @@ import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import { addPanelMenuTrigger } from '../../triggers';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {
     usageCollection,
     data: { search },
+    uiActions,
     embeddable: { getStateTransfer },
-    visualizations: { getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
   const { euiTheme } = useEuiTheme();
 
   const dashboard = useDashboardAPI();
 
   const stateTransferService = getStateTransfer();
-
-  const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
 
   const trackUiMetric = usageCollection.reportUiCounter?.bind(
     usageCollection,
@@ -76,6 +75,21 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
     [stateTransferService, dashboard, search.session, trackUiMetric]
   );
 
+  const createNewLens = useCallback(() => {
+    const context = {
+      embeddable: dashboard,
+      trigger: addPanelMenuTrigger,
+    };
+
+    const createDSLLEnsChartAction = uiActions?.getAction?.('ACTION_CREATE_DSL_LENS_CHART');
+    if (createDSLLEnsChartAction) {
+      if (trackUiMetric) {
+        trackUiMetric(METRIC_TYPE.CLICK, `lens:create`);
+      }
+      createDSLLEnsChartAction.execute(context);
+    }
+  }, [uiActions, dashboard, trackUiMetric]);
+
   /**
    * embeddableFactory: Required, you can get the factory from embeddableStart.getEmbeddableFactory(<embeddable type, i.e. lens>)
    * initialInput: Optional, use it in case you want to pass your own input to the factory
@@ -111,7 +125,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
               isDisabled={isDisabled}
               iconType="lensApp"
               size="s"
-              onClick={createNewVisType(lensAlias)}
+              onClick={createNewLens}
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />

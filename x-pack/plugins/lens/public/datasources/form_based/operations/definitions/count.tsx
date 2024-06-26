@@ -26,6 +26,7 @@ import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { updateColumnParam } from '../layer_helpers';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
+import { documentField } from '../../document_field';
 
 const countLabel = i18n.translate('xpack.lens.indexPattern.countOf', {
   defaultMessage: 'Count of records',
@@ -116,7 +117,7 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
     }
   },
   getDefaultLabel: (column, columns, indexPattern) => {
-    const field = indexPattern?.getFieldByName(column.sourceField);
+    const field = indexPattern?.getFieldByName(column.sourceField) ?? documentField;
     return ofName(field, column.timeShift, column.timeScale, column.reducedTimeRange);
   },
   buildColumn({ field, previousColumn }, columnParams) {
