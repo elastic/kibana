@@ -431,7 +431,7 @@ describe('Actions', () => {
   });
 
   describe('Expand action', () => {
-    test('if isTourShown is false [isTourAnchor=false], SecurityTourStep is not active', () => {
+    test('if disableExpandAction is true, the expand action should not be visible', () => {
       const wrapper = mount(
         <TestProviders>
           <Actions {...defaultProps} disableExpandAction />
