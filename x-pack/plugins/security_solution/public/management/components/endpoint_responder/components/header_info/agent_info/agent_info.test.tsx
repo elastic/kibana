@@ -72,7 +72,7 @@ describe('Responder header Agent Info', () => {
       });
       render(agentType);
 
-      const name = await renderResult.findByTestId('responderHeaderHostName');
+      const name = await renderResult.findByTestId('responseConsole-hostName');
       expect(name.textContent).toBe('test-agent');
     });
 
@@ -107,7 +107,7 @@ describe('Responder header Agent Info', () => {
       });
       render(agentType);
 
-      const lastUpdated = await renderResult.findByTestId('responderHeaderLastSeen');
+      const lastUpdated = await renderResult.findByTestId('responseConsole-lastSeen');
       expect(lastUpdated).toBeTruthy();
     });
 
@@ -121,7 +121,7 @@ describe('Responder header Agent Info', () => {
       });
       render(agentType);
 
-      const platformIcon = await renderResult.findByTestId('responderHeaderHostPlatformIcon');
+      const platformIcon = await renderResult.findByTestId('responseConsole-platformIcon');
       expect(platformIcon).toBeTruthy();
     });
   });
