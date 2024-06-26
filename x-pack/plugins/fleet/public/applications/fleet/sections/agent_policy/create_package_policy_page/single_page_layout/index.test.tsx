@@ -788,17 +788,17 @@ describe('When on the package policy create page', () => {
           ...useStartServices(),
           cloud: {
             ...useStartServices().cloud,
-            isServerlessEnabled: false,
             isCloudEnabled: true,
           },
-          sendCreateAgentPolicy: jest.fn().mockResolvedValue({
-            data: {
-              item: { id: 'agentless-policy-1', name: 'Agentless policy 1', namespace: 'default' },
-            },
-          }),
-          sendCreatePackagePolicy: jest.fn().mockResolvedValue({
-            data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agentless-policy-1'] } },
-          }),
+        });
+        (sendCreateAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
+          data: {
+            item: { id: 'agentless-policy-1', name: 'Agentless policy 1', namespace: 'default' },
+          },
+        });
+
+        (sendCreatePackagePolicy as jest.MockedFunction<any>).mockResolvedValue({
+          data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agentless-policy-1'] } },
         });
         jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true });
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
@@ -814,6 +814,7 @@ describe('When on the package policy create page', () => {
         await act(async () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
+
         expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalled();
         expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
 
