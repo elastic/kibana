@@ -36,7 +36,7 @@ jest.mock('../application/app_context', () => ({
 }));
 
 jest.mock('../application/services/api', () => ({
-  getInferenceModels: jest.fn().mockResolvedValue({
+  getInferenceEndpoints: jest.fn().mockResolvedValue({
     data: [
       {
         model_id: 'e5',
