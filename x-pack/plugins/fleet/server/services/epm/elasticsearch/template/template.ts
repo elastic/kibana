@@ -1056,8 +1056,9 @@ const updateExistingDataStream = async ({
   } catch (err) {
     if (
       isResponseError(err) &&
-      err.statusCode === 400 &&
-      err.body?.error?.type === 'illegal_argument_exception'
+      ((err.statusCode === 400 && err.body?.error?.type === 'illegal_argument_exception') ||
+        // handling the mapper_exception error, it should also trigger a rollover
+        err.message.indexOf('mapper_exception') !== -1)
     ) {
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
       if (options?.skipDataStreamRollover === true) {
