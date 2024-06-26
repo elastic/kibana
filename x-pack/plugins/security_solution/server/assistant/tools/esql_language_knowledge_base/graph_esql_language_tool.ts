@@ -90,7 +90,7 @@ interface IState {
     intention: string;
   };
   errors: ValidationResult['errors'];
-  availableIndices: Record<string, unknown>;
+  availableIndices: string[];
   invalidQueries: string[];
 }
 
@@ -133,7 +133,7 @@ const graphState: StateGraphArgs<IState>['channels'] = {
   },
   availableIndices: {
     value: (x, y) => y ?? x,
-    default: () => ({}),
+    default: () => [],
   },
 };
 
@@ -248,7 +248,10 @@ const getClassifyEsql =
       'OPERATORS',
     ].map((keyword) => keyword.toUpperCase());
 
-    const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
+    const messagesToInclude = mapValues(
+      pick(esqlDocs, keywords),
+      ({ data }) => data
+    ) as unknown as IState['documentation'];
 
     const allDataStreams = await esClient.indices.getDataStream();
 
@@ -365,7 +368,11 @@ const shouldRegenerate = (state: IState) => {
   return END;
 };
 
-export const GRAPH_ESQL_TOOL: AssistantTool = {
+const schema = z.object({
+  query: z.string().describe(`The user's exact question about ESQL`),
+});
+
+export const GRAPH_ESQL_TOOL: AssistantTool<typeof schema> = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is GraphESQLToolParams => {
@@ -381,26 +388,32 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
-      schema: z.object({
-        query: z.string().describe(`The user's exact question about ESQL`),
-      }),
+      schema,
       func: async (input, _, cbManager) => {
-        const workflow = new StateGraph<IState>({
-          channels: graphState,
-        })
-          .addNode('classifyEsql', getClassifyEsql({ userQuery: input.query, llm, esClient }))
-          .addNode('generateQuery', getGenerateQuery({ userQuery: input.query, llm }))
-          .addNode('validateQuery', getValidateQuery({ search }))
-          .addEdge(START, 'classifyEsql')
-          .addEdge('classifyEsql', 'generateQuery')
-          .addEdge('generateQuery', 'validateQuery')
-          .addConditionalEdges('validateQuery', shouldRegenerate);
+        if (llm) {
+          const workflow = new StateGraph<IState>({
+            channels: graphState,
+          })
+            .addNode('classifyEsql', getClassifyEsql({ userQuery: input.query, llm, esClient }))
+            .addNode('generateQuery', getGenerateQuery({ userQuery: input.query, llm }))
+            .addNode('validateQuery', getValidateQuery({ search }))
+            .addEdge(START, 'classifyEsql')
+            .addEdge('classifyEsql', 'generateQuery')
+            .addEdge('generateQuery', 'validateQuery')
+            .addConditionalEdges('validateQuery', shouldRegenerate);
 
-        const app = workflow.compile();
+          const app = workflow.compile();
 
-        const query = await app.invoke({}, { recursionLimit: 20 });
+          let query;
 
-        return query.esqlQuery;
+          try {
+            query = await app.invoke({}, { recursionLimit: 20 });
+          } catch (e) {
+            return 'error';
+          }
+
+          return query.esqlQuery;
+        }
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });

@@ -206,13 +206,13 @@ export interface AIAssistantPrompts {
  * Interfaces for registering tools to be used by the elastic assistant
  */
 
-export interface AssistantTool {
+export interface AssistantTool<T> {
   id: string;
   name: string;
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
+  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool<T> | null;
 }
 
 export interface AssistantToolParams {
@@ -223,7 +223,7 @@ export interface AssistantToolParams {
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  llm?: ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
   logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
