@@ -5,47 +5,16 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import type * as z from 'zod';
+import { z } from 'zod';
 
 import {
   concurrent_searches,
   items_per_search,
   machine_learning_job_id,
-  RiskScore,
-  RiskScoreMapping,
-  Severity,
-  SeverityMapping,
   threat_index,
   threat_indicator_path,
   threat_mapping,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import {
-  EventCategoryOverride,
-  ExceptionListArray,
-  HistoryWindowStart,
-  InvestigationGuide,
-  MaxSignals,
-  NewTermsFields,
-  RelatedIntegrationArray,
-  RequiredFieldArray,
-  RuleAuthorArray,
-  RuleFalsePositiveArray,
-  RuleLicense,
-  RuleName,
-  RuleReferenceArray,
-  RuleSignatureId,
-  RuleTagArray,
-  RuleVersion,
-  SetupGuide,
-  ThreatArray,
-  Threshold,
-  TiebreakerField,
-  TimestampField,
-} from '../../../../model/rule_schema_legacy';
 
 import {
   BuildingBlockObject,
@@ -59,16 +28,38 @@ import {
   TimestampOverrideObject,
 } from './diffable_field_types';
 
-import { buildSchema, buildSchemaNew } from './build_schema';
+import { buildSchema } from './build_schema';
 import { anomaly_threshold } from '../../../../model/schemas';
 import {
-  RuleSignatureId as RuleSignatureIdNew,
-  RuleVersion as RuleVersionNew,
-  RuleName as RuleNameNew,
+  EventCategoryOverride,
+  HistoryWindowStart,
+  InvestigationGuide,
+  MaxSignals,
+  NewTermsFields,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  RiskScore,
+  RiskScoreMapping,
+  RuleAuthorArray,
   RuleDescription,
+  RuleExceptionList,
+  RuleFalsePositiveArray,
+  RuleLicense,
+  RuleName,
+  RuleReferenceArray,
+  RuleSignatureId,
+  RuleTagArray,
+  RuleVersion,
+  SetupGuide,
+  Severity,
+  SeverityMapping,
+  ThreatArray,
+  Threshold,
+  TiebreakerField,
+  TimestampField,
 } from '../../../../model/rule_schema';
 
-export type DiffableCommonFields = t.TypeOf<typeof DiffableCommonFields>;
+export type DiffableCommonFields = z.infer<typeof DiffableCommonFields>;
 export const DiffableCommonFields = buildSchema({
   required: {
     // Technical fields
@@ -80,6 +71,7 @@ export const DiffableCommonFields = buildSchema({
     // Main domain fields
     name: RuleName,
     tags: RuleTagArray,
+    description: RuleDescription,
     severity: Severity,
     severity_mapping: SeverityMapping,
     risk_score: RiskScore,
@@ -98,7 +90,7 @@ export const DiffableCommonFields = buildSchema({
 
     // Other domain fields
     rule_schedule: RuleSchedule, // NOTE: new field
-    exceptions_list: ExceptionListArray,
+    exceptions_list: RuleExceptionList,
     max_signals: MaxSignals,
   },
   optional: {
@@ -107,27 +99,11 @@ export const DiffableCommonFields = buildSchema({
     building_block: BuildingBlockObject, // NOTE: new field
   },
 });
-export type DiffableCommonFieldsNew = z.infer<typeof DiffableCommonFieldsNew>;
-export const DiffableCommonFieldsNew = buildSchemaNew({
-  required: {
-    // Technical fields
-    // NOTE: We might consider removing them from the schema and returning from the API
-    // not via the fields diff, but via dedicated properties in the response body.
-    rule_id: RuleSignatureIdNew,
-    version: RuleVersionNew,
 
-    // Main domain fields
-    name: RuleNameNew,
-  },
-  optional: {
-    rule_description: RuleDescription,
-  },
-});
-
-export type DiffableCustomQueryFields = t.TypeOf<typeof DiffableCustomQueryFields>;
+export type DiffableCustomQueryFields = z.infer<typeof DiffableCustomQueryFields>;
 export const DiffableCustomQueryFields = buildSchema({
   required: {
-    type: t.literal('query'),
+    type: z.literal('query'),
     kql_query: RuleKqlQuery, // NOTE: new field
   },
   optional: {
@@ -135,10 +111,10 @@ export const DiffableCustomQueryFields = buildSchema({
   },
 });
 
-export type DiffableSavedQueryFields = t.TypeOf<typeof DiffableSavedQueryFields>;
+export type DiffableSavedQueryFields = z.infer<typeof DiffableSavedQueryFields>;
 export const DiffableSavedQueryFields = buildSchema({
   required: {
-    type: t.literal('saved_query'),
+    type: z.literal('saved_query'),
     kql_query: RuleKqlQuery, // NOTE: new field
   },
   optional: {
@@ -146,10 +122,10 @@ export const DiffableSavedQueryFields = buildSchema({
   },
 });
 
-export type DiffableEqlFields = t.TypeOf<typeof DiffableEqlFields>;
+export type DiffableEqlFields = z.infer<typeof DiffableEqlFields>;
 export const DiffableEqlFields = buildSchema({
   required: {
-    type: t.literal('eql'),
+    type: z.literal('eql'),
     eql_query: RuleEqlQuery, // NOTE: new field
   },
   optional: {
@@ -160,10 +136,10 @@ export const DiffableEqlFields = buildSchema({
   },
 });
 
-export type DiffableEsqlFields = t.TypeOf<typeof DiffableEsqlFields>;
+export type DiffableEsqlFields = z.infer<typeof DiffableEsqlFields>;
 export const DiffableEsqlFields = buildSchema({
   required: {
-    type: t.literal('esql'),
+    type: z.literal('esql'),
     esql_query: RuleEsqlQuery, // NOTE: new field
   },
   // this is a new type of rule, no prebuilt rules created yet.
@@ -171,27 +147,27 @@ export const DiffableEsqlFields = buildSchema({
   optional: {},
 });
 
-export type DiffableThreatMatchFields = t.TypeOf<typeof DiffableThreatMatchFields>;
+export type DiffableThreatMatchFields = z.infer<typeof DiffableThreatMatchFields>;
 export const DiffableThreatMatchFields = buildSchema({
   required: {
-    type: t.literal('threat_match'),
+    type: z.literal('threat_match'),
     kql_query: RuleKqlQuery, // NOTE: new field
     threat_query: InlineKqlQuery, // NOTE: new field
-    threat_index,
-    threat_mapping,
+    // threat_index,
+    // threat_mapping,
   },
   optional: {
     data_source: RuleDataSource, // NOTE: new field
-    threat_indicator_path,
-    concurrent_searches, // Should combine concurrent_searches and items_per_search?
-    items_per_search,
+    // threat_indicator_path,
+    // concurrent_searches, // Should combine concurrent_searches and items_per_search?
+    // items_per_search,
   },
 });
 
-export type DiffableThresholdFields = t.TypeOf<typeof DiffableThresholdFields>;
+export type DiffableThresholdFields = z.infer<typeof DiffableThresholdFields>;
 export const DiffableThresholdFields = buildSchema({
   required: {
-    type: t.literal('threshold'),
+    type: z.literal('threshold'),
     kql_query: RuleKqlQuery, // NOTE: new field
     threshold: Threshold,
   },
@@ -200,20 +176,20 @@ export const DiffableThresholdFields = buildSchema({
   },
 });
 
-export type DiffableMachineLearningFields = t.TypeOf<typeof DiffableMachineLearningFields>;
+export type DiffableMachineLearningFields = z.infer<typeof DiffableMachineLearningFields>;
 export const DiffableMachineLearningFields = buildSchema({
   required: {
-    type: t.literal('machine_learning'),
-    machine_learning_job_id,
-    anomaly_threshold,
+    type: z.literal('machine_learning'),
+    // machine_learning_job_id,
+    // anomaly_threshold,
   },
   optional: {},
 });
 
-export type DiffableNewTermsFields = t.TypeOf<typeof DiffableNewTermsFields>;
+export type DiffableNewTermsFields = z.infer<typeof DiffableNewTermsFields>;
 export const DiffableNewTermsFields = buildSchema({
   required: {
-    type: t.literal('new_terms'),
+    type: z.literal('new_terms'),
     kql_query: InlineKqlQuery, // NOTE: new field
     new_terms_fields: NewTermsFields,
     history_window_start: HistoryWindowStart,
@@ -250,10 +226,10 @@ export const DiffableNewTermsFields = buildSchema({
  * top-level fields.
  */
 
-export type DiffableRule = t.TypeOf<typeof DiffableRule>;
-export const DiffableRule = t.intersection([
+export type DiffableRule = z.infer<typeof DiffableRule>;
+const DiffableRule = z.intersection(
   DiffableCommonFields,
-  t.union([
+  z.union([
     DiffableCustomQueryFields,
     DiffableSavedQueryFields,
     DiffableEqlFields,
@@ -262,8 +238,8 @@ export const DiffableRule = t.intersection([
     DiffableThresholdFields,
     DiffableMachineLearningFields,
     DiffableNewTermsFields,
-  ]),
-]);
+  ])
+);
 
 /**
  * This is a merge of all fields from all rule types into a single TS type.
