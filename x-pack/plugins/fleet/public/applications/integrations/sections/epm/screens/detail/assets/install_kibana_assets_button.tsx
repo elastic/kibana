@@ -41,7 +41,7 @@ export function InstallKibanaAssetsButton({
     } catch (err) {
       notifications.toasts.addError(err, {
         title: i18n.translate('xpack.fleet.fleetServerSetup.kibanaInstallAssetsErrorTitle', {
-          defaultMessage: 'Error installing kibana assets',
+          defaultMessage: 'Error installing Kibana assets',
         }),
       });
     }
@@ -57,7 +57,7 @@ export function InstallKibanaAssetsButton({
       {isLoading ? (
         <FormattedMessage
           id="xpack.fleet.integrations.installPackage.kibanaAssetsInstallingButtonLabel"
-          defaultMessage="Installing {title} kibana assets in current space"
+          defaultMessage="Installing Kibana assets in current space"
           values={{
             title,
           }}
@@ -65,7 +65,7 @@ export function InstallKibanaAssetsButton({
       ) : (
         <FormattedMessage
           id="xpack.fleet.integrations.installPackage.kibanaAssetsInstallButtonLabel"
-          defaultMessage="Install {title} kibana assets in current space"
+          defaultMessage="Install Kibana assets in current space"
           values={{
             title,
           }}
