@@ -8,6 +8,7 @@
 import { Capabilities } from '@kbn/core/public';
 import type { DataViewsContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { SOURCE_COLUMN } from '../../utils/columns';
 import { popularizeField } from '../../utils/popularize_field';
 
 /**
@@ -17,12 +18,10 @@ import { popularizeField } from '../../utils/popularize_field';
  * @param useNewFieldsApi should a new fields API be used
  */
 function buildColumns(columns: string[], useNewFieldsApi = false) {
-  if (columns.length > 1 && columns.indexOf('_source') !== -1) {
-    return columns.filter((col) => col !== '_source');
-  } else if (columns.length !== 0) {
+  if (columns.length !== 0) {
     return columns;
   }
-  return useNewFieldsApi ? [] : ['_source'];
+  return useNewFieldsApi ? [] : [SOURCE_COLUMN];
 }
 
 export function addColumn(columns: string[], columnName: string, useNewFieldsApi?: boolean) {

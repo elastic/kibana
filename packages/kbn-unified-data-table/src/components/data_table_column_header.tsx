@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataTableColumnsMeta } from '../types';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
+import { SOURCE_COLUMN } from '../utils/columns';
 
 interface DataTableColumnHeaderProps {
   dataView: DataView;
@@ -75,7 +76,7 @@ function getRenderedToken({
   columnName,
   columnsMeta,
 }: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'columnsMeta'>) {
-  if (!columnName || columnName === '_source') {
+  if (!columnName || columnName === SOURCE_COLUMN) {
     return null;
   }
 
