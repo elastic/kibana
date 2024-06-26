@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/elastic-assistant-agents",
+  "owner": ["@elastic/obs-knowledge-team", "@elastic/search-kibana", "@elastic/security-generative-ai"]
+}
