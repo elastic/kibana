@@ -13,6 +13,5 @@
     "@kbn/licensing-plugin",
     "@kbn/core-security-common",
     "@kbn/core-user-profile-common",
-    "@kbn/config-schema"
   ]
 }
