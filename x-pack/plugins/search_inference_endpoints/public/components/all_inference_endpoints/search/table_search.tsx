@@ -13,7 +13,7 @@ interface TableSearchComponentProps {
   setSearchKey: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const TableSearchComponent: React.FC<TableSearchComponentProps> = ({ searchKey, setSearchKey }) => {
+export const TableSearch: React.FC<TableSearchComponentProps> = ({ searchKey, setSearchKey }) => {
   const onSearch = useCallback(
     (newSearch) => {
       const trimSearch = newSearch.trim();
@@ -32,7 +32,3 @@ const TableSearchComponent: React.FC<TableSearchComponentProps> = ({ searchKey, 
     />
   );
 };
-
-TableSearchComponent.displayName = 'TableSearchComponent';
-
-export const TableSearch = React.memo(TableSearchComponent);

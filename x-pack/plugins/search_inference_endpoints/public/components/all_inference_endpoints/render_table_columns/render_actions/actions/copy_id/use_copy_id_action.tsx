@@ -32,11 +32,8 @@ export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
         });
       },
       icon: <EuiIcon type="copyClipboard" size="m" />,
-      key: 'inference-endpoints-action-copy-id',
     };
   };
 
   return { getAction };
 };
-
-export type UseCopyIDAction = ReturnType<typeof useCopyIDAction>;

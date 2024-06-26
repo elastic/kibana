@@ -44,16 +44,13 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
   };
 
   return (
-    <>
-      <MultiSelectFilter<ServiceProviderKeys>
-        buttonLabel={i18n.SERVICE_PROVIDER}
-        id={'provider'}
-        onChange={onSystemFilterChange}
-        options={options}
-        renderOption={renderOption}
-        selectedOptionKeys={optionKeys}
-      />
-    </>
+    <MultiSelectFilter<ServiceProviderKeys>
+      buttonLabel={i18n.SERVICE_PROVIDER}
+      id={'provider'}
+      onChange={onSystemFilterChange}
+      options={options}
+      renderOption={renderOption}
+      selectedOptionKeys={optionKeys}
+    />
   );
 };
-ProviderFilter.displayName = 'ProviderFilter';

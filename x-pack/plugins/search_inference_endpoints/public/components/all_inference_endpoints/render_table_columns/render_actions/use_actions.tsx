@@ -17,21 +17,19 @@ import { useCopyIDAction } from './actions/copy_id/use_copy_id_action';
 import { useDeleteAction } from './actions/delete/use_delete_action';
 import { ConfirmDeleteEndpointModal } from './actions/delete/confirm_delete_endpoint';
 
-const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> = ({
+export const ActionColumn: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> = ({
   interfaceEndpoint,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const refreshCases = () => {};
 
   const copyIDAction = useCopyIDAction({
     onActionSuccess: closePopover,
   });
 
   const deleteAction = useDeleteAction({
-    onAction: closePopover,
-    onActionSuccess: refreshCases,
+    onActionSuccess: closePopover,
   });
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
@@ -80,10 +78,6 @@ const ActionColumnComponent: React.FC<{ interfaceEndpoint: InferenceEndpointUI }
   );
 };
 
-ActionColumnComponent.displayName = 'ActionColumnComponent';
-
-const ActionColumn = React.memo(ActionColumnComponent);
-
 interface UseBulkActionsReturnValue {
   actions: EuiTableComputedColumnType<InferenceEndpointUI>;
 }
@@ -91,7 +85,6 @@ interface UseBulkActionsReturnValue {
 export const useActions = (): UseBulkActionsReturnValue => {
   return {
     actions: {
-      name: '',
       align: 'right',
       render: (interfaceEndpoint: InferenceEndpointUI) => {
         return (

@@ -15,7 +15,7 @@ interface ConfirmDeleteEndpointModalProps {
   onConfirm: () => void;
 }
 
-const ConfirmDeleteEndpointModalComp: React.FC<ConfirmDeleteEndpointModalProps> = ({
+export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProps> = ({
   onCancel,
   onConfirm,
 }) => {
@@ -34,6 +34,3 @@ const ConfirmDeleteEndpointModalComp: React.FC<ConfirmDeleteEndpointModalProps> 
     </EuiConfirmModal>
   );
 };
-ConfirmDeleteEndpointModalComp.displayName = 'ConfirmDeleteEndpointModalComp';
-
-export const ConfirmDeleteEndpointModal = React.memo(ConfirmDeleteEndpointModalComp);
