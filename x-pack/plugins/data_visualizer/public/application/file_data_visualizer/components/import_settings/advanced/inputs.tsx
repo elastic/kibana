@@ -49,7 +49,7 @@ export const Mappings: FC<JsonEditorProps> = ({ initialized, data, onChange, ind
       label={
         indexName ? (
           <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.mappingsLabel"
+            id="xpack.dataVisualizer.file.advancedImportSettings.mappingsOfIndexLabel"
             defaultMessage="Mappings of index {indexName}"
             values={{ indexName }}
           />

@@ -250,7 +250,7 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
                   <EuiFormRow
                     label={
                       <FormattedMessage
-                        id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
+                        id="xpack.dataVisualizer.file.advancedImportSettings.missingFields"
                         defaultMessage="Fields missing in mappings"
                       />
                     }
@@ -280,7 +280,7 @@ export const AdvancedWithExistingIndexSettings: FC<Props> = ({
               <EuiFormRow
                 label={
                   <FormattedMessage
-                    id="xpack.dataVisualizer.file.advancedImportSettings.ingestPipelineLabel"
+                    id="xpack.dataVisualizer.file.advancedImportSettings.existingIndex.ingestPipelineLabel"
                     defaultMessage="Ingest pipeline"
                   />
                 }
