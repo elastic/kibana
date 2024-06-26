@@ -55,7 +55,7 @@ import {
   CustomGridColumnsConfiguration,
   CustomControlColumnConfiguration,
 } from '../types';
-import { getDisplayedColumns } from '../utils/columns';
+import { getDisplayedColumns, hasOnlySourceColumn, SOURCE_COLUMN } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
@@ -476,7 +476,7 @@ export const UnifiedDataTable = ({
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
-  const defaultColumns = displayedColumns.includes('_source');
+  const defaultColumns = hasOnlySourceColumn(displayedColumns);
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const usedSelectedDocs = useMemo(() => {
@@ -956,12 +956,34 @@ export const UnifiedDataTable = ({
           maxAllowedSampleSize={maxAllowedSampleSize}
           sampleSize={sampleSizeState}
           onChangeSampleSize={onUpdateSampleSize}
+          showSummaryColumn={displayedColumns.some((column) => column === SOURCE_COLUMN)}
+          onChangeShowSummaryColumn={
+            defaultColumns
+              ? undefined
+              : (showSummaryColumn) => {
+                  const filteredColumns = visibleColumns.filter(
+                    (column) => column !== SOURCE_COLUMN
+                  );
+                  const dontModifyColumns = !shouldPrependTimeFieldColumn(filteredColumns);
+                  const insertIndex = timeFieldName
+                    ? filteredColumns.indexOf(timeFieldName) + 1
+                    : 0;
+
+                  if (showSummaryColumn) {
+                    filteredColumns.splice(insertIndex, 0, SOURCE_COLUMN);
+                  }
+
+                  onSetColumns(filteredColumns, dontModifyColumns);
+                }
+          }
         />
       );
     }
 
     return Object.keys(options).length ? options : undefined;
   }, [
+    defaultColumns,
+    displayedColumns,
     headerRowHeight,
     headerRowHeightLines,
     maxAllowedSampleSize,
@@ -969,12 +991,16 @@ export const UnifiedDataTable = ({
     onChangeHeaderRowHeightLines,
     onChangeRowHeight,
     onChangeRowHeightLines,
+    onSetColumns,
     onUpdateHeaderRowHeight,
     onUpdateRowHeight,
     onUpdateSampleSize,
     rowHeight,
     rowHeightLines,
     sampleSizeState,
+    shouldPrependTimeFieldColumn,
+    timeFieldName,
+    visibleColumns,
   ]);
 
   const inMemory = useMemo(() => {

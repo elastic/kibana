@@ -391,6 +391,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     return getFieldListSubgroups();
   }, [getFieldListSubgroupsAccessor]);
 
+  const filteredColumns = useMemo(
+    () => columns.filter((column) => column !== '_source'),
+    [columns]
+  );
+
   return (
     <EuiFlexGroup
       gutterSize="none"
@@ -410,7 +415,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             trackUiMetric={trackUiMetric}
             allFields={sidebarState.allFields}
             showFieldList={showFieldList}
-            workspaceSelectedFieldNames={columns}
+            workspaceSelectedFieldNames={filteredColumns}
             fullWidth
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
