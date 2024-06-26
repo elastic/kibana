@@ -67,13 +67,13 @@ describe('buildSecurityApi', () => {
   });
 
   describe('authc.apiKeys', () => {
-    it('properly delegates to the service', () => {
-      authc.apiKeys.areAPIKeysEnabled();
+    it('properly delegates to the service', async () => {
+      await authc.apiKeys.areAPIKeysEnabled();
       expect(authc.apiKeys.areAPIKeysEnabled).toHaveBeenCalledTimes(1);
     });
 
     it('returns the result from the service', async () => {
-      void authc.apiKeys.areAPIKeysEnabled.mockReturnValue(Promise.resolve(false));
+      authc.apiKeys.areAPIKeysEnabled.mockReturnValue(Promise.resolve(false));
 
       const areAPIKeysEnabled = await authc.apiKeys.areAPIKeysEnabled();
 
