@@ -169,7 +169,6 @@ export async function installKibanaAssets(options: {
 }
 
 export async function installSLOAssets({
-  sloAssets,
   sloClient,
   soClient,
   esClient,
@@ -181,14 +180,46 @@ export async function installSLOAssets({
   esClient: ElasticsearchClient;
   spaceId: string;
 }) {
-  if (!sloAssets.length) {
-    return;
-  }
+  // if (!sloAssets.length) {
+  //   return;
+  // }
+
+  const sloAssets = [
+    {
+      attributes: {
+        name: 'Nginx Availability',
+        description: '',
+        indicator: {
+          type: 'sli.kql.custom',
+          params: {
+            index: 'logs-nginx.*',
+            filter: '',
+            good: 'http.response.status_code < 500',
+            total: 'http.response.status_code : *',
+            timestampField: '@timestamp',
+          },
+        },
+        budgetingMethod: 'occurrences',
+        timeWindow: {
+          duration: '7d',
+          type: 'rolling',
+        },
+        objective: {
+          target: 0.99,
+        },
+        tags: [],
+      },
+      id: 'nginx-9eb25600-a1f0-11e7-928f-5dbe6f6f5510',
+      references: [],
+      type: 'slo',
+    },
+  ];
+
   for (const asset of sloAssets) {
     await sloClient.createSLO({
       soClient,
       esClient,
-      params: asset.attributes as any,
+      params: asset.attributes,
       spaceId,
     });
   }

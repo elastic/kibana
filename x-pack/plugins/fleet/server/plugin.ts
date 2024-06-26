@@ -140,7 +140,7 @@ export interface FleetSetupDeps {
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
-  slo: SLOPluginSetup;
+  slo?: SLOPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -151,7 +151,7 @@ export interface FleetStartDeps {
   telemetry?: TelemetryPluginStart;
   savedObjectsTagging: SavedObjectTaggingStart;
   taskManager: TaskManagerStartContract;
-  slo: SLOPluginStart;
+  slo?: SLOPluginStart;
 }
 
 export interface FleetAppContext {
@@ -178,7 +178,7 @@ export interface FleetAppContext {
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
   uninstallTokenService: UninstallTokenServiceInterface;
-  sloStart?: SLOPluginStart;
+  sloStart: SLOPluginStart;
 }
 
 export type FleetSetupContract = void;
@@ -637,6 +637,7 @@ export class FleetPlugin
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
       uninstallTokenService,
+      sloStart: plugins.slo,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
