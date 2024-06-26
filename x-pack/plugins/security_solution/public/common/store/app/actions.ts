@@ -23,18 +23,6 @@ export const addError = actionCreator<{ id: string; title: string; message: stri
 
 export const removeError = actionCreator<{ id: string }>('REMOVE_ERRORS');
 
-export const setEventIdsToFetchNotesFor = actionCreator<{ eventIds: string[] }>(
-  'SET_EVENT_IDS_TO_FETCH_NOTES_FOR'
-);
-
-export const setNonTimelineEventNotesLoading = actionCreator<{ isLoading: boolean }>(
-  'SET_NON_TIMELINE_EVENT_NOTES_LOADING'
-);
-
-export const serverReturnedNonAssociatedNotes = actionCreator<{ notes: Note[] }>(
-  'SERVER_RETURNED_NON_ASSOCIATED_NOTES'
-);
-
 export const addErrorHash = actionCreator<{
   id: string;
   hash: string;

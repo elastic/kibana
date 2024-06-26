@@ -615,9 +615,7 @@ export const copyTimeline = async (
         noteId: null,
         note: {
           ..._note,
-          timelineId: newTimelineId,
         },
-        overrideOwner: false,
       });
     })
   );

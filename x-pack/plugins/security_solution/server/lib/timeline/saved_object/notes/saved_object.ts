@@ -19,7 +19,6 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
-  // BareNote,
   BareNoteWithoutExternalRefs,
   ResponseNote,
 } from '../../../../../common/api/timeline';
@@ -29,8 +28,6 @@ import type { FrameworkRequest } from '../../../framework';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
-
-const UNASSOCIATED_NOTES_TIMELINE_ID = 'non-existent-timeline-id';
 
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
@@ -123,7 +120,7 @@ export const persistNote = async ({
   }
 };
 
-const createNote = async ({
+export const createNote = async ({
   request,
   noteId,
   note,
@@ -143,11 +140,11 @@ const createNote = async ({
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
-  if (references.length === 0) {
+  if (references.length === 1 && references[0].id === '') {
     // Limit unassociated events to 1000
     const notesCount = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>({
       type: noteSavedObjectType,
-      hasReference: { type: timelineSavedObjectType, id: UNASSOCIATED_NOTES_TIMELINE_ID },
+      hasReference: { type: timelineSavedObjectType, id: '' },
     });
     if (notesCount.total >= 1000) {
       return {
@@ -160,12 +157,6 @@ const createNote = async ({
           timelineId: '',
         },
       };
-    } else {
-      references.push({
-        type: timelineSavedObjectType,
-        name: 'associated',
-        id: UNASSOCIATED_NOTES_TIMELINE_ID,
-      });
     }
   }
   const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
@@ -197,7 +188,7 @@ const createNote = async ({
   };
 };
 
-const updateNote = async ({
+export const updateNote = async ({
   request,
   noteId,
   note,
@@ -295,14 +286,10 @@ export const convertSavedObjectToSavedNote = (savedObject: unknown): Note => {
         createdBy: savedNote.attributes.createdBy,
         updated: savedNote.attributes.updated,
         updatedBy: savedNote.attributes.updatedBy,
-        eventIngested: savedNote.attributes.eventIngested,
-        eventTimestamp: savedNote.attributes.eventTimestamp,
-        eventDataView: savedNote.attributes.eventDataView,
       };
     }),
     fold((errors) => {
-      console.log('would throw here');
-      // throw new Error(failure(errors).join('\n'));
+      throw new Error(failure(errors).join('\n'));
     }, identity)
   );
 };

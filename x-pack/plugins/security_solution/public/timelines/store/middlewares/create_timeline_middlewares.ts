@@ -10,7 +10,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { timelineChangedMiddleware } from './timeline_changed';
 import { favoriteTimelineMiddleware } from './timeline_favorite';
 import { addNoteToTimelineMiddleware } from './timeline_note';
-import { displayUnassociatedNotesMiddleware } from './unassociated_notes';
 import { addPinnedEventToTimelineMiddleware } from './timeline_pinned_event';
 import { saveTimelineMiddleware } from './timeline_save';
 
@@ -21,6 +20,5 @@ export function createTimelineMiddlewares(kibana: CoreStart) {
     addNoteToTimelineMiddleware(kibana),
     addPinnedEventToTimelineMiddleware(kibana),
     saveTimelineMiddleware(kibana),
-    displayUnassociatedNotesMiddleware(kibana),
   ];
 }

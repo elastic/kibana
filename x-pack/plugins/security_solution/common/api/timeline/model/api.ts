@@ -34,9 +34,6 @@ export const BareNoteSchema = runtimeTypes.intersection([
     createdBy: unionWithNullType(runtimeTypes.string),
     updated: unionWithNullType(runtimeTypes.number),
     updatedBy: unionWithNullType(runtimeTypes.string),
-    eventIngested: unionWithNullType(runtimeTypes.string),
-    eventTimestamp: unionWithNullType(runtimeTypes.string),
-    eventDataView: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 

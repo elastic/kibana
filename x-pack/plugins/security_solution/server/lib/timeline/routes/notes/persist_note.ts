@@ -20,7 +20,7 @@ import type { ConfigType } from '../../../..';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../utils/common';
-import { persistNoteSchema, persistNoteWithoutRefSchema } from '../../../../../common/api/timeline';
+import { persistNoteWithoutRefSchema } from '../../../../../common/api/timeline';
 import { persistNote } from '../../saved_object/notes';
 
 export const persistNoteRoute = (

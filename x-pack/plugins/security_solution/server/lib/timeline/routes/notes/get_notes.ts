@@ -42,7 +42,6 @@ export const getNotesByDocumentIdsRoute = (
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
           const alertIds = queryParams.alertIds ?? null;
-          console.log('alertIds:', alertIds);
           if (alertIds != null) {
             if (Array.isArray(alertIds)) {
               const alertIdSearchString = alertIds?.join(' | ');
@@ -78,12 +77,10 @@ export const getNotesByDocumentIdsRoute = (
               sortOrder,
               filter,
             };
-            console.log(options);
             const res = await getAllSavedNote(frameworkRequest, options);
             return response.ok({ body: res ?? {} });
           }
         } catch (err) {
-          console.log('err:', err);
           const error = transformError(err);
           const siemResponse = buildSiemResponse(response);
 

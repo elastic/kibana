@@ -18,7 +18,6 @@ interface AddEventNoteActionProps {
   timelineType: TimelineType;
   toggleShowNotes: () => void;
   eventId?: string;
-  eventCount?: number;
 }
 
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
@@ -27,7 +26,6 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   timelineType,
   toggleShowNotes,
   eventId,
-  eventCount,
 }) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
   const toolTip =
@@ -42,7 +40,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
         showNotes={showNotes}
         timelineType={timelineType}
         toggleShowNotes={toggleShowNotes}
-        toolTip={eventCount ?? toolTip}
+        toolTip={toolTip}
         eventId={eventId}
       />
     </ActionIconItem>

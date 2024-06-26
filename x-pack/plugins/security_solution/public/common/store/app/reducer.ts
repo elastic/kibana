@@ -9,16 +9,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import type { Note } from '../../lib/note';
 
-import {
-  addError,
-  addErrorHash,
-  addNotes,
-  removeError,
-  updateNote,
-  deleteNote,
-  setEventIdsToFetchNotesFor,
-  serverReturnedNonAssociatedNotes,
-} from './actions';
+import { addError, addErrorHash, addNotes, removeError, updateNote, deleteNote } from './actions';
 import type { AppModel, NotesById } from './model';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
@@ -28,8 +19,6 @@ export const initialAppState: AppState = {
   notesById: {},
   errors: [],
   enableExperimental: { ...allowedExperimentalValues },
-  eventIdsToFetch: [],
-  nonAssociatedNotes: [],
 };
 
 interface UpdateNotesByIdParams {
@@ -87,18 +76,6 @@ export const appReducer = reducerWithInitialState(initialAppState)
         { ...errorObj, hash, displayError: !state.errors.some((e) => e.hash === hash) },
         ...state.errors.slice(errorIdx + 1),
       ],
-    };
-  })
-  .case(setEventIdsToFetchNotesFor, (state, { eventIds }) => {
-    return {
-      ...state,
-      eventIdsToFetch: eventIds,
-    };
-  })
-  .case(serverReturnedNonAssociatedNotes, (state, { notes }) => {
-    return {
-      ...state,
-      nonAssociatedNotes: notes,
     };
   })
   .build();

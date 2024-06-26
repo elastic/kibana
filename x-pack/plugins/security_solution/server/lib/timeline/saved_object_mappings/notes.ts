@@ -31,15 +31,6 @@ export const noteSavedObjectMappings: SavedObjectsType['mappings'] = {
     updatedBy: {
       type: 'text',
     },
-    eventIngested: {
-      type: 'date',
-    },
-    eventTimestamp: {
-      type: 'date',
-    },
-    eventDataView: {
-      type: 'text',
-    },
   },
 };
 

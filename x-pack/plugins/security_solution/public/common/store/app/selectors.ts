@@ -48,24 +48,4 @@ export const notesByIdsSelector = () =>
 export const selectNotesAsCommentsListSelector = () =>
   createSelector(selectNotesById, getNotesAsCommentsList);
 
-export const selectEventIdsToFetchNotes = (state: State): string[] => state.app.eventIdsToFetch;
-
-export const selectNonAssociatedNotes = (state: State): Note[] => state.app.nonAssociatedNotes;
-
-export const nonAssociatedNotesSelector = createSelector(
-  selectNonAssociatedNotes,
-  (notes) => notes
-);
-
-export const nonAssociatedNotesByIdSelector = createSelector(
-  nonAssociatedNotesSelector,
-  (state: State, eventId: string) => eventId,
-  (notes, eventId) => notes.filter((note) => note.eventId === eventId)
-);
-
-export const selectEventIdsToFetchNotesSelector = createSelector(
-  selectEventIdsToFetchNotes,
-  (ids) => ids
-);
-
 export const errorsSelector = () => createSelector(getErrors, (errors) => errors);

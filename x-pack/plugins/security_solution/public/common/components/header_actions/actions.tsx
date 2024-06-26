@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -19,7 +19,6 @@ import {
 } from '../../../timelines/components/timeline/body/helpers';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { appSelectors } from '../../store';
 import { timelineActions } from '../../../timelines/store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
@@ -105,10 +104,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'))
     );
   }, [ecsData, eventType]);
-  const nonAssociatedNotes = useSelector((state) =>
-    appSelectors.nonAssociatedNotesByIdSelector(state, eventId)
-  );
-  console.log('nonAssociatedNotes', nonAssociatedNotes);
+
   const isDisabled = !useIsInvestigateInResolverActionEnabled(ecsData);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
@@ -263,7 +259,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
             toggleShowNotes={() => {}}
             timelineType={timelineType}
             eventId={eventId}
-            eventCount={nonAssociatedNotes.length}
           />
         )}
         {!isEventViewer && toggleShowNotes && (

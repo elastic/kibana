@@ -35,11 +35,14 @@ export const createNote = async ({ note }: { note: BareNote }) => {
  * Fetches all the notes for a document id
  */
 export const fetchNotesByDocumentId = async (documentId: string) => {
-  const response = {
-    totalCount: 1,
-    notes: [generateNoteMock(documentId)],
-  };
-  return response.notes;
+  const response = await KibanaServices.get().http.get<{ notes: Note[]; totalCount: number }>(
+    NOTE_URL,
+    {
+      query: { alertIds: [documentId] },
+      version: '2023-10-31',
+    }
+  );
+  return response;
 };
 
 // TODO remove when the API is available

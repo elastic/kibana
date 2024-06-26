@@ -78,7 +78,6 @@ export type AlertsTableStateProps = {
   pageSize?: number;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
-  onLoaded?: (alerts: Alerts) => void;
   runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
@@ -208,7 +207,6 @@ const AlertsTableStateWithQueryProvider = memo(
     gridStyle,
     browserFields: propBrowserFields,
     onUpdate,
-    onLoaded,
     runtimeMappings,
     showAlertStatusWithFlapping,
     toolbarVisibility,
@@ -318,7 +316,6 @@ const AlertsTableStateWithQueryProvider = memo(
       query,
       pagination,
       onPageChange,
-      onLoaded,
       runtimeMappings,
       sort,
       skip: false,

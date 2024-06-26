@@ -25,7 +25,6 @@ import {
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import { appActions } from '../../../common/store/app';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import { eventsDefaultModel } from '../../../common/components/events_viewer/default_model';
@@ -266,15 +265,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, []);
 
-  const onLoaded = useCallback(
-    (alerts) => {
-      const alertIds = alerts.map((alert) => alert._id);
-      console.log('Loaded alerts:', alertIds);
-      dispatch(appActions.setEventIdsToFetchNotesFor({ eventIds: alertIds }));
-    },
-    [dispatch]
-  );
-
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
@@ -290,7 +280,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
       cellContext,
-      onLoaded,
       runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
@@ -311,7 +300,6 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       runtimeMappings,
       isEventRenderedView,
       cellContext,
-      onLoaded,
     ]
   );
 
