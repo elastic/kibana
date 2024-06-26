@@ -491,6 +491,7 @@ async function installPackageFromRegistry({
         authorizationHeader,
         ignoreMappingUpdateErrors,
         skipDataStreamRollover,
+        sloClient,
       });
     } else {
       return await installPackageCommon({
@@ -720,6 +721,7 @@ async function installPackageWitStateMachine(options: {
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  sloClient: SLOClient;
   spaceId: string;
   force?: boolean;
   packageInstallContext: PackageInstallContext;
@@ -747,6 +749,7 @@ async function installPackageWitStateMachine(options: {
     ignoreMappingUpdateErrors,
     skipDataStreamRollover,
     packageInstallContext,
+    sloClient,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -843,6 +846,7 @@ async function installPackageWitStateMachine(options: {
       force,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      sloClient,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);

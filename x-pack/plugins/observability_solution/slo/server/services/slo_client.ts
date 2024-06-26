@@ -9,7 +9,8 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { IBasePath } from '@kbn/core-http-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { CreateSLOParams } from '@kbn/slo-schema';
+import { CreateSLOParams, createSLOParamsSchema } from '@kbn/slo-schema';
+import { isLeft } from 'fp-ts/Either';
 import { RegisterRoutesDependencies } from '../routes/register_routes';
 import { KibanaSavedObjectsSLORepository } from './slo_repository';
 import { DefaultTransformManager } from './transform_manager';
@@ -32,13 +33,17 @@ export class SLOClient {
     soClient,
     esClient,
     spaceId,
-    params,
+    params: rawParams,
   }: {
     spaceId: string;
     soClient: SavedObjectsClientContract;
     esClient: ElasticsearchClient;
     params: CreateSLOParams;
   }) {
+    const params = createSLOParamsSchema.decode({ body: rawParams });
+    if (isLeft(params)) {
+      throw new Error('Invalid params');
+    }
     const dataViews = await this.dependencies.getDataViewsStart();
 
     const repository = new KibanaSavedObjectsSLORepository(soClient, this.logger);
@@ -66,7 +71,7 @@ export class SLOClient {
       this.basePath
     );
 
-    return await createSLO.execute(params);
+    return await createSLO.execute(params.right.body);
   }
 
   updateSLO() {}

@@ -15,6 +15,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
+
 import { PackageSavedObjectConflictError } from '../../../../errors';
 
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
@@ -57,6 +59,7 @@ export interface InstallContext extends StateContext<StateNames> {
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
   esClient: ElasticsearchClient;
+  sloClient: SLOClient;
   logger: Logger;
   installedPkg?: SavedObject<Installation>;
   packageInstallContext: PackageInstallContext;

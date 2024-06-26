@@ -21,6 +21,8 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
     installedPkg,
     packageInstallContext,
     spaceId,
+    sloClient,
+    esClient,
   } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName, title: pkgTitle } = packageInfo;
@@ -37,6 +39,8 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
       installedPkg,
       logger,
       spaceId,
+      sloClient,
+      esClient,
       assetTags: packageInfo?.asset_tags,
     })
   );
