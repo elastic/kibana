@@ -20,6 +20,6 @@ export FTR_CONFIG_PATTERNS
 
 cd $KIBANA_DIR
 
-ls -al
+ls -al .buildkite/scripts/steps/test/
 
 source .buildkite/scripts/steps/test/pick_test_group_run_order.sh
