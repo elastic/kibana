@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`context successors function fetchSuccessors should perform multiple queries until the expected hit count is returned 1`] = `
+Array [
+  Object {
+    "format": "strict_date_optional_time",
+    "gte": "1978-03-19T00:00:00.000Z",
+    "lte": "1978-03-20T00:00:00.000Z",
+  },
+  Object {
+    "format": "strict_date_optional_time",
+    "gte": "1978-03-13T00:00:00.000Z",
+    "lte": "1978-03-19T00:00:00.000Z",
+  },
+  Object {
+    "format": "strict_date_optional_time",
+    "gte": "1978-02-18T00:00:00.000Z",
+    "lte": "1978-03-13T00:00:00.000Z",
+  },
+  Object {
+    "format": "strict_date_optional_time",
+    "gte": "1977-03-20T00:00:00.000Z",
+    "lte": "1978-02-18T00:00:00.000Z",
+  },
+]
+`;

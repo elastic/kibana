@@ -44,10 +44,13 @@ export function createSearchSourceStub(hits: EsHitRecord[], timeField?: string) 
   const searchSourceStub: any = {
     _stubHits: hits,
     _stubTimeField: timeField,
-    _createStubHit: (timestamp: number, tiebreaker = 0) => ({
-      [searchSourceStub._stubTimeField]: timestamp,
-      sort: [timestamp, tiebreaker],
-    }),
+    _createStubHit: (timestamp: number, tiebreaker = 0) => {
+      const value = moment(timestamp).toISOString();
+      return {
+        [searchSourceStub._stubTimeField]: value,
+        sort: [value, tiebreaker],
+      };
+    },
     setParent: sinon.spy(() => searchSourceStub),
     setField: sinon.spy(() => searchSourceStub),
     removeField: sinon.spy(() => searchSourceStub),
