@@ -189,21 +189,27 @@ export async function installKibanaAssetsAndReferences({
   assetTags?: PackageSpecTags[];
 }) {
   const kibanaAssets = await getKibanaAssets(packageInstallContext);
-  if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
+
+  if (installedPkg) {
+    await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
+  }
+
   // save new kibana refs before installing the assets
-  const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
-    savedObjectsClient,
-    pkgName,
-    kibanaAssets
+  const installedKibanaAssetsRefs = await withPackageSpan(
+    'Save Kibana Asset References to parent installation SO',
+    () => saveKibanaAssetsRefs(savedObjectsClient, pkgName, kibanaAssets)
   );
 
-  const importedAssets = await installKibanaAssets({
-    savedObjectsClient,
-    logger,
-    savedObjectsImporter,
-    pkgName,
-    kibanaAssets,
-  });
+  const importedAssets = await withPackageSpan('Import Kibana assets', () =>
+    installKibanaAssets({
+      savedObjectsClient,
+      logger,
+      savedObjectsImporter,
+      pkgName,
+      kibanaAssets,
+    })
+  );
+
   await withPackageSpan('Create and assign package tags', () =>
     tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -329,6 +335,8 @@ export async function installKibanaSavedObjects({
   if (toBeSavedObjects.length === 0) {
     return [];
   } else {
+    const readStream = createListStream(toBeSavedObjects);
+
     const {
       successResults: importSuccessResults = [],
       errors: importErrors = [],
@@ -336,7 +344,7 @@ export async function installKibanaSavedObjects({
     } = await retryImportOnConflictError(() =>
       savedObjectsImporter.import({
         overwrite: true,
-        readStream: createListStream(toBeSavedObjects),
+        readStream,
         createNewCopies: false,
         refresh: false,
         managed: true,
