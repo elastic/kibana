@@ -16,7 +16,6 @@ import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/publ
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -36,7 +35,6 @@ export interface DataVisualizerStartDependencies {
   fileUpload: FileUploadPluginStart;
   maps: MapsStartApi;
   embeddable: EmbeddableStart;
-  security?: SecurityPluginSetup;
   share: SharePluginStart;
   lens?: LensPublicStart;
   charts: ChartsPluginStart;
