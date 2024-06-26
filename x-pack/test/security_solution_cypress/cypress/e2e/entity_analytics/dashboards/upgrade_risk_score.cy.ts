@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../../objects/rule';
 import {
   UPGRADE_RISK_SCORE_BUTTON,
   USERS_TABLE,
@@ -23,7 +22,6 @@ import {
 } from '../../../tasks/api_calls/risk_scores';
 import { clickUpgradeRiskScore } from '../../../tasks/risk_scores';
 
-import { createRule } from '../../../tasks/api_calls/rules';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 
@@ -36,8 +34,7 @@ import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const spaceId = 'default';
 
-// Failing: See https://github.com/elastic/kibana/issues/185024
-describe('Upgrade risk scores', { tags: ['@ess'] }, () => {
+describe.only('Upgrade risk scores', { tags: ['@ess'] }, () => {
   beforeEach(() => {
     login();
     deleteRiskEngineConfiguration();
