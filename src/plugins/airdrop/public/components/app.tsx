@@ -9,8 +9,19 @@
 import React, { DragEvent, useState, useRef } from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { EuiHorizontalRule, EuiPageTemplate, EuiTitle, EuiText, EuiCodeBlock } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiPageTemplate,
+  EuiTitle,
+  EuiText,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+} from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { Form, FormState } from './form';
 
 interface AirdropAppDeps {
   basename: string;
@@ -19,16 +30,15 @@ interface AirdropAppDeps {
 }
 
 export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) => {
-  // Use React hooks to manage state.
+  const [formState, setFormState] = useState<FormState>({
+    firstName: '',
+    lastName: '',
+    acceptTerms: false,
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [timestamp, setTimestamp] = useState<string | undefined>();
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const timeRef = useRef(0);
-
-  const [formState, setFormState] = useState({
-    name: 'John Doe',
-    email: 'johndoe@foo.com',
-  });
 
   // const onClickHandler = () => {
   //   // Use the core http service to make a response to the server API.
@@ -78,6 +88,7 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
     if (isDragging) return;
     const data = e.dataTransfer.getData('application/json');
     const jsonObject = JSON.parse(data);
+    setFormState(jsonObject);
     console.log(jsonObject);
   };
 
@@ -105,69 +116,62 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
                 </EuiTitle>
               </EuiPageTemplate.Header>
               <EuiPageTemplate.Section>
-                <EuiTitle>
-                  <h2>My form</h2>
-                </EuiTitle>
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="airdrop.content"
-                      defaultMessage="Look through the generated code and check out the plugin development documentation."
-                    />
-                  </p>
-                  <EuiHorizontalRule />
-                  {/* <p>
-                  <FormattedMessage
-                    id="airdrop.timestampText"
-                    defaultMessage="Last timestamp: {time}"
-                    values={{ time: timestamp ? timestamp : 'Unknown' }}
-                  />
-                </p> */}
-                  <EuiCodeBlock language="json" paddingSize="s" isCopyable>
-                    {JSON.stringify(formState, null, 2)}
-                  </EuiCodeBlock>
-                  {/* <EuiButton
-                  color="primary"
-                  size="s"
-                  draggable
-                  onDragStart={onDragStart}
-                  onDragEnd={onDragEnd}
-                >
-                  Drag data
-                </EuiButton> */}
-                  <div
-                    id="draggable"
-                    draggable
-                    onDragStart={onDragStart}
-                    onDragEnd={onDragEnd}
-                    style={{
-                      padding: '10px',
-                      border: '1px solid black',
-                      width: '100px',
-                      textAlign: 'center',
-                      cursor: 'grab',
-                    }}
-                  >
-                    Drag me!
-                  </div>
-                </EuiText>
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem>
+                    <EuiTitle>
+                      <h2>My form</h2>
+                    </EuiTitle>
+                    <EuiText>
+                      <p>
+                        <FormattedMessage
+                          id="airdrop.content"
+                          defaultMessage="Some cool form to fill out"
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <div
+                      id="draggable"
+                      draggable
+                      onDragStart={onDragStart}
+                      onDragEnd={onDragEnd}
+                      style={{
+                        // padding: '10px',
+                        // border: '1px solid black',
+                        // width: '100px',
+                        // textAlign: 'center',
+                        cursor: 'grab',
+                      }}
+                    >
+                      <EuiButtonIcon
+                        display="base"
+                        iconSize="m"
+                        size="m"
+                        iconType="watchesApp"
+                        aria-label="Next"
+                      />
+                    </div>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-                {/* <div
-                id="dropzone"
-                draggable
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                style={{
-                  width: '100%',
-                  height: '300px',
-                  marginTop: '20px',
-                  border: '2px dashed #000',
-                  textAlign: 'center',
-                  paddingTop: '50px',
-                }}
-              >
-                Drop here!
-              </div> */}
+                <EuiHorizontalRule />
+
+                <EuiSpacer />
+
+                <Form
+                  form={formState}
+                  onChange={setFormState}
+                  onSubmit={() => {
+                    console.log('submit', formState);
+                  }}
+                />
+
+                {/* <EuiCodeBlock language="json" paddingSize="s" isCopyable>
+                    {JSON.stringify(formState, null, 2)}
+                  </EuiCodeBlock> */}
+
+                <EuiSpacer />
               </EuiPageTemplate.Section>
             </EuiPageTemplate>
           </div>
