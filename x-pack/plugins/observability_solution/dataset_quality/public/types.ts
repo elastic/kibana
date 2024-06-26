@@ -14,6 +14,10 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ObservabilitySharedPluginSetup } from '@kbn/observability-shared-plugin/public';
 
+import {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import type { CreateDatasetQualityController } from './controller';
 import type { DatasetQualityProps } from './components/dataset_quality';
 
@@ -33,8 +37,10 @@ export interface DatasetQualityStartDeps {
   lens: LensPublicStart;
   dataViews: DataViewsPublicPluginStart;
   observabilityShared: ObservabilitySharedPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export interface DatasetQualitySetupDeps {
   share: SharePluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
