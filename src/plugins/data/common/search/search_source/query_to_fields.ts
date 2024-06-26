@@ -32,8 +32,8 @@ export async function queryToFields({
       fields = fields.concat(queryFields);
     }
   }
-  const { filters } = request;
-  for (const f of filters ?? []) {
+  const { filters = [] } = request;
+  for (const f of typeof filters === 'function' ? filters() : filters) {
     // unified search bar filters have meta object and key (regular filters)
     // unified search bar "custom" filters ("Edit as query DSL", where meta.key is not present but meta is)
     // Any other Elasticsearch query DSL filter that gets passed in by consumers (not coming from unified search, and these probably won't have a meta key at all)
