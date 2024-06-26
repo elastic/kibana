@@ -167,7 +167,7 @@ export const getRangesliderControlFactory = (
         }
       );
 
-      const setOutputFilterSubscription = combineLatest([
+      const outputFilterSubscription = combineLatest([
         dataControl.api.dataViews,
         dataControl.stateManager.fieldName,
         value$,
@@ -228,7 +228,7 @@ export const getRangesliderControlFactory = (
               fieldChangedSubscription.unsubscribe();
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
-              setOutputFilterSubscription.unsubscribe();
+              outputFilterSubscription.unsubscribe();
             };
           }, []);
 
