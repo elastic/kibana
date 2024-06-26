@@ -18,7 +18,7 @@ import { CreateDataViewToolTip } from './create_data_view_tooltip';
 interface Props {
   index: string;
   initialized: boolean;
-  onIndexChange(): void;
+  onIndexChange(i: string): void;
   createDataView: boolean;
   onCreateDataViewChange(): void;
   indexNameError: string;

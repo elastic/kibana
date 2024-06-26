@@ -24,17 +24,76 @@ export async function analyzePdfFile(
         charset: 'utf-8',
         has_header_row: false,
         has_byte_order_marker: false,
-        field_stats: {},
         sample_start: '',
         quote: '',
         delimiter: '',
         need_client_timezone: false,
         num_lines_analyzed: numLinesAnalyzed,
         num_messages_analyzed: 0,
-
-        // @ts-expect-error empty mappings for now
+        field_stats: {
+          // @ts-expect-error semantic_text not supported
+          'attachment.content': {},
+          // @ts-expect-error semantic_text not supported
+          'attachment.content_length': {},
+          // @ts-expect-error semantic_text not supported
+          'attachment.content_type': {},
+          // @ts-expect-error semantic_text not supported
+          'attachment.format': {},
+          // @ts-expect-error semantic_text not supported
+          'attachment.language': {},
+        },
         mappings: {
-          // properties: {},
+          properties: {
+            attachment: {
+              // @ts-expect-error semantic_text not supported
+              properties: {
+                content: {
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
+                },
+                content_length: {
+                  type: 'long',
+                },
+                content_type: {
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
+                },
+                format: {
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
+                },
+                language: {
+                  type: 'text',
+                  fields: {
+                    keyword: {
+                      type: 'keyword',
+                      ignore_above: 256,
+                    },
+                  },
+                },
+              },
+            },
+            // content: {
+            //   // @ts-expect-error semantic_text not supported
+            //   type: 'semantic_text',
+            //   inference_id: 'test-elser',
+            // },
+          },
         },
         ingest_pipeline: {
           description: 'Ingest pipeline created by text structure finder',
@@ -45,6 +104,12 @@ export async function analyzePdfFile(
                 remove_binary: true,
               },
             },
+            // {
+            //   set: {
+            //     field: 'content',
+            //     copy_from: 'attachment.content',
+            //   },
+            // },
           ],
         },
       },

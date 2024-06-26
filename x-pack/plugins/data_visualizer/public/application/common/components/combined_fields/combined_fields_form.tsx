@@ -22,6 +22,7 @@ import {
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { CombinedField } from './types';
 import { GeoPointForm } from './geo_point';
+import { SemanticTextForm } from './semantic_text';
 import { CombinedFieldLabel } from './combined_field_label';
 import {
   addCombinedFieldsToMappings,
@@ -78,6 +79,27 @@ export class CombinedFieldsForm extends Component<Props, State> {
       JSON.stringify(addCombinedFieldsToPipeline(pipeline, [combinedField]), null, 2)
     );
     this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
+
+    this.closePopover();
+  };
+
+  addCombinedField2 = (
+    addToMappings: (mappings: any) => {},
+    addToPipeline: (pipeline: any) => {}
+  ) => {
+    // if (this.hasNameCollision(combinedField.combinedFieldName)) {
+    //   throw new Error(getNameCollisionMsg(combinedField.combinedFieldName));
+    // }
+
+    const mappings = this.parseMappings();
+    const pipeline = this.parsePipeline();
+
+    const newMappings = addToMappings(mappings);
+    const newPipeline = addToPipeline(pipeline);
+
+    this.props.onMappingsStringChange(JSON.stringify(newMappings, null, 2));
+    this.props.onPipelineStringChange(JSON.stringify(newPipeline, null, 2));
+    // this.props.onCombinedFieldsChange([...this.props.combinedFields, combinedField]);
 
     this.closePopover();
   };
@@ -155,6 +177,13 @@ export class CombinedFieldsForm extends Component<Props, State> {
         defaultMessage: 'Add geo point field',
       }
     );
+
+    const semanticTextLabel = i18n.translate(
+      'xpack.dataVisualizer.file.geoPointForm.combinedFieldLabel',
+      {
+        defaultMessage: 'Add semantic text field',
+      }
+    );
     const panels = [
       {
         id: 0,
@@ -162,6 +191,10 @@ export class CombinedFieldsForm extends Component<Props, State> {
           {
             name: geoPointLabel,
             panel: 1,
+          },
+          {
+            name: semanticTextLabel,
+            panel: 2,
           },
         ],
       },
@@ -171,6 +204,17 @@ export class CombinedFieldsForm extends Component<Props, State> {
         content: (
           <GeoPointForm
             addCombinedField={this.addCombinedField}
+            hasNameCollision={this.hasNameCollision}
+            results={this.props.results}
+          />
+        ),
+      },
+      {
+        id: 2,
+        title: semanticTextLabel,
+        content: (
+          <SemanticTextForm
+            addCombinedField={this.addCombinedField2}
             hasNameCollision={this.hasNameCollision}
             results={this.props.results}
           />

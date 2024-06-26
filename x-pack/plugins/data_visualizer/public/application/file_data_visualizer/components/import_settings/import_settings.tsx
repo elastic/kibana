@@ -23,7 +23,7 @@ interface Props {
   index: string;
   dataView: string;
   initialized: boolean;
-  onIndexChange(): void;
+  onIndexChange(i: string): void;
   createDataView: boolean;
   onCreateDataViewChange(): void;
   onDataViewChange(): void;
