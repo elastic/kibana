@@ -15,7 +15,6 @@ import {
   savedObjectsRepositoryMock,
   savedObjectsTypeRegistryMock,
 } from '@kbn/core/server/mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 import type { ClientInstanciator } from '.';
 import { setupSavedObjects } from '.';
@@ -47,14 +46,13 @@ describe('#setupSavedObjects', () => {
     setupContract = setupSavedObjects({
       service: mockEncryptedSavedObjectsService,
       savedObjects: coreSetupMock.savedObjects,
-      security: securityMock.createSetup(),
       getStartServices: coreSetupMock.getStartServices,
     });
   });
 
   describe('#setupContract', () => {
     it('includes hiddenTypes when specified', async () => {
-      await setupContract({ includedHiddenTypes: ['hiddenType'] });
+      setupContract({ includedHiddenTypes: ['hiddenType'] });
       expect(coreStartMock.savedObjects.createInternalRepository).toHaveBeenCalledWith([
         'hiddenType',
       ]);
