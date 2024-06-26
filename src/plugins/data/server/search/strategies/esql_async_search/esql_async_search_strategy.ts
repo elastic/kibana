@@ -7,12 +7,13 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { catchError, tap } from 'rxjs';
+import { catchError, map, tap } from 'rxjs';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import { SqlQueryRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SqlGetAsyncResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ESQLSearchParams } from '@kbn/es-types';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 import {
   getCommonDefaultAsyncSubmitParams,
   getCommonDefaultAsyncGetParams,
@@ -21,7 +22,6 @@ import { pollSearch } from '../../../../common';
 import { getKbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type { IAsyncSearchOptions } from '../../../../common';
-import { toAsyncKibanaSearchResponse } from './response_utils';
 import { SearchConfigSchema } from '../../../../config';
 
 // `drop_null_columns` is going to change the response
@@ -73,32 +73,35 @@ export const esqlAsyncSearchStrategyProvider = (
             ...(await getCommonDefaultAsyncSubmitParams(searchConfig, options)),
             ...requestParams,
           };
-      const { body, headers, meta } = id
+      const response = id
         ? await client.transport.request<SqlGetAsyncResponse>(
             {
               method: 'GET',
               path: `/_query/async/${id}`,
-              querystring: { ...params },
+              querystring: { ...params, format: 'cbor' },
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
           )
         : await client.transport.request<SqlGetAsyncResponse>(
             {
               method: 'POST',
               path: `/_query/async`,
               body: params,
-              querystring: dropNullColumns ? 'drop_null_columns' : '',
+              querystring: dropNullColumns ? 'format=cbor&drop_null_columns' : 'format=cbor',
             },
-            { ...options.transport, signal: options.abortSignal, meta: true }
+            { ...options.transport, signal: options.abortSignal, meta: true, asStream: true }
           );
 
-      const finalResponse = toAsyncKibanaSearchResponse(
-        body,
-        headers?.warning,
-        // do not return requestParams on polling calls
-        id ? undefined : meta?.request?.params
-      );
-      return finalResponse;
+      return {
+        id: response.id,
+        rawResponse: response.body,
+        isPartial: !response.body.complete,
+        isRunning: !response.body.complete && !response.body.aborted,
+        ...(response.headers?.warning ? { warning: response.headers?.warning } : {}),
+        ...(requestParams
+          ? { requestParams: sanitizeRequestParams(response.meta?.request?.params) }
+          : {}),
+      };
     };
 
     const cancel = async () => {
@@ -119,6 +122,7 @@ export const esqlAsyncSearchStrategyProvider = (
       ...options,
     }).pipe(
       tap((response) => (id = response.id)),
+      map((response) => response.rawResponse),
       catchError((e) => {
         throw getKbnSearchError(e);
       })
