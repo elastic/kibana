@@ -80,6 +80,7 @@
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
     "@kbn/navigation-plugin",
-    "@kbn/search-homepage"
+    "@kbn/search-homepage",
+    "@kbn/security-plugin-types-common"
   ]
 }

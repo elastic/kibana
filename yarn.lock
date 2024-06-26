@@ -3389,10 +3389,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/assetManager-plugin@link:x-pack/plugins/observability_solution/asset_manager":
-  version "0.0.0"
-  uid ""
-
 "@kbn/assets-data-access-plugin@link:x-pack/plugins/observability_solution/assets_data_access":
   version "0.0.0"
   uid ""
@@ -4765,6 +4761,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/entityManager-plugin@link:x-pack/plugins/observability_solution/entity_manager":
+  version "0.0.0"
+  uid ""
+
 "@kbn/error-boundary-example-plugin@link:examples/error_boundary":
   version "0.0.0"
   uid ""
@@ -6106,6 +6106,14 @@
   uid ""
 
 "@kbn/security-api-integration-helpers@link:x-pack/test/security_api_integration/packages/helpers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-api-key-management@link:x-pack/packages/security/api_key_management":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-form-components@link:x-pack/packages/security/form_components":
   version "0.0.0"
   uid ""
 

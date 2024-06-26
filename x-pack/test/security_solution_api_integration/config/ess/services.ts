@@ -7,8 +7,10 @@
 
 import { SpacesServiceProvider } from '../../../common/services/spaces';
 import { services as essServices } from '../../../api_integration/services';
+import { SecuritySolutionESSUtils } from '../services/security_solution_ess_utils';
 
 export const services = {
   ...essServices,
   spaces: SpacesServiceProvider,
+  securitySolutionUtils: SecuritySolutionESSUtils,
 };
