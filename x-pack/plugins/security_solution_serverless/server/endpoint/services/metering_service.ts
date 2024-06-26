@@ -87,14 +87,40 @@ export class EndpointMeteringService {
         sort: 'event.ingested',
         size: METERING_SERVICE_BATCH_SIZE,
         query: {
-          range: {
-            'event.ingested': {
-              gt: since.toISOString(),
+          bool: {
+            must: {
+              range: {
+                'event.ingested': {
+                  gt: since.toISOString(),
+                },
+              },
             },
+            should: [
+              {
+                term: {
+                  billable: true,
+                },
+              },
+              {
+                bool: {
+                  must_not: [
+                    {
+                      exists: {
+                        field: 'billable',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
           },
         },
       },
-      { signal: abortController.signal, ignore: [404] }
+      {
+        signal: abortController.signal,
+        ignore: [404],
+      }
     );
   }
 

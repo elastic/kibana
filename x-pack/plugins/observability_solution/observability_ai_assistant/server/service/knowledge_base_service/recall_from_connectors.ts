@@ -89,7 +89,7 @@ export async function recallFromConnectors({
     text: JSON.stringify(hit._source),
     score: hit._score!,
     is_correction: false,
-    id: hit._id,
+    id: hit._id!,
   }));
 
   return results;
