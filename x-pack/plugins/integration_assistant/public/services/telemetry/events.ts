@@ -106,21 +106,21 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
     actionTypeId: {
       type: 'keyword',
       _meta: {
-        description: 'The action type ID',
+        description: 'The connector action type ID',
         optional: false,
       },
     },
     model: {
       type: 'keyword',
       _meta: {
-        description: 'The model used for the generation',
+        description: 'The model used to generate the integration',
         optional: false,
       },
     },
     provider: {
       type: 'keyword',
       _meta: {
-        description: 'The provider used for the generation',
+        description: 'The provider of the LLM',
         optional: false,
       },
     },
@@ -173,6 +173,27 @@ export const telemetryEventsSchemas: TelemetryEventsSchemas = {
       type: 'keyword',
       _meta: {
         description: 'The input type used for the integration',
+        optional: false,
+      },
+    },
+    actionTypeId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The connector action type ID',
+        optional: false,
+      },
+    },
+    model: {
+      type: 'keyword',
+      _meta: {
+        description: 'The model used to generate the integration',
+        optional: false,
+      },
+    },
+    provider: {
+      type: 'keyword',
+      _meta: {
+        description: 'The provider of the LLM',
         optional: false,
       },
     },

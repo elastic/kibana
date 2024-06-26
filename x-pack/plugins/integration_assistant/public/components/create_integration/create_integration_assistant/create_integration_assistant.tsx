@@ -83,7 +83,11 @@ export const CreateIntegrationAssistant = React.memo(() => {
             />
           )}
           {state.step === 5 && (
-            <DeployStep integrationSettings={state.integrationSettings} result={state.result} />
+            <DeployStep
+              integrationSettings={state.integrationSettings}
+              result={state.result}
+              connector={state.connector}
+            />
           )}
         </KibanaPageTemplate.Section>
         <Footer

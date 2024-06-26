@@ -17,11 +17,16 @@ import { useTelemetry } from '../../../telemetry';
 interface PipelineGenerationProps {
   integrationSettings: State['integrationSettings'];
   result: State['result'];
+  connector: State['connector'];
 }
 
 export type ProgressItem = 'build' | 'install';
 
-export const useDeployIntegration = ({ integrationSettings, result }: PipelineGenerationProps) => {
+export const useDeployIntegration = ({
+  integrationSettings,
+  result,
+  connector,
+}: PipelineGenerationProps) => {
   const telemetry = useTelemetry();
   const { http, notifications } = useKibana().services;
   const [integrationFile, setIntegrationFile] = useState<Blob | null>(null);
@@ -32,6 +37,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
   useEffect(() => {
     if (
       http == null ||
+      connector == null ||
       integrationSettings == null ||
       notifications?.toasts == null ||
       result?.pipeline == null
@@ -78,6 +84,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
           telemetry.reportAssistantComplete({
             integrationName: integrationNameFromResponse,
             integrationSettings,
+            connector,
           });
         } else {
           throw new Error('Integration name not found in response');
@@ -97,6 +104,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
     setIntegrationFile,
     http,
     integrationSettings,
+    connector,
     notifications?.toasts,
     result?.docs,
     result?.pipeline,

@@ -50,6 +50,9 @@ interface IntegrationAssistantCompleteData {
   integrationDescription: string;
   dataStreamName: string;
   inputType: string;
+  actionTypeId: string;
+  model: string;
+  provider: string;
   errorMessage?: string;
 }
 

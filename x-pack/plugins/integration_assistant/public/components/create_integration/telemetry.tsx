@@ -38,6 +38,7 @@ type ReportGenerationComplete = (params: {
 type ReportAssistantComplete = (params: {
   integrationName: string;
   integrationSettings: IntegrationSettings;
+  connector: AIConnector;
 }) => void;
 
 interface TelemetryContextProps {
@@ -112,13 +113,16 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren<{}>>(({ chi
   );
 
   const reportAssistantComplete = useCallback<ReportAssistantComplete>(
-    ({ integrationName, integrationSettings }) => {
+    ({ integrationName, integrationSettings, connector }) => {
       telemetry.reportEvent(TelemetryEventType.IntegrationAssistantComplete, {
+        sessionId: sessionData.current.sessionId,
         integrationName,
         integrationDescription: integrationSettings?.description ?? 'unknown',
         dataStreamName: integrationSettings?.dataStreamName ?? 'unknown',
         inputType: integrationSettings?.inputType ?? 'unknown',
-        sessionId: sessionData.current.sessionId,
+        actionTypeId: connector.actionTypeId,
+        model: getConnectorModel(connector),
+        provider: connector.apiProvider ?? 'unknown',
         durationMs: Date.now() - sessionData.current.startedAt,
       });
     },
