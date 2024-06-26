@@ -565,6 +565,6 @@ export const generalSettings: RawSettingDefinition[] = [
         'such as `GET /users/42/cart` and `GET /users/73/cart` into a single transaction name `GET /users/*/cart`,\n' +
         'hence reducing the transaction name cardinality.',
     }),
-    includeAgents: ['java', 'dotnet']
+    includeAgents: ['java', 'dotnet'],
   },
 ];
