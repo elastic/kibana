@@ -16,6 +16,8 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
+import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
+
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import type { PackageInstallContext } from '../../../../common/types';
 import { getNormalizedDataStreams } from '../../../../common/services';
@@ -75,6 +77,7 @@ export async function _installPackage({
   authorizationHeader,
   ignoreMappingUpdateErrors,
   skipDataStreamRollover,
+  sloClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -92,6 +95,7 @@ export async function _installPackage({
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  sloClient: SLOClient;
 }): Promise<AssetReference[]> {
   const { packageInfo, paths } = packageInstallContext;
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
@@ -156,6 +160,7 @@ export async function _installPackage({
     logger.debug(`Package install - Installing Kibana assets`);
     const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
       installKibanaAssetsAndReferences({
+        esClient,
         savedObjectsClient,
         savedObjectsImporter,
         savedObjectTagAssignmentService,
@@ -166,6 +171,7 @@ export async function _installPackage({
         installedPkg,
         logger,
         spaceId,
+        sloClient,
         assetTags: packageInfo?.asset_tags,
       })
     );

@@ -21,17 +21,13 @@ import { partition } from 'lodash';
 
 import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
 
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
+import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type {
-  AssetType,
-  AssetReference,
-  AssetParts,
-  Installation,
-  PackageSpecTags,
-} from '../../../../types';
-import { savedObjectTypes } from '../../packages';
+import type { AssetReference, AssetParts, Installation, PackageSpecTags } from '../../../../types';
 import type { PackageInstallContext } from '../../../../../common/types';
 import {
   indexPatternTypes,
@@ -83,6 +79,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
+  [KibanaAssetType.slo]: KibanaSavedObjectType.slo,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -112,13 +109,17 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 }
 
 export async function installKibanaAssets(options: {
-  savedObjectsClient: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
   savedObjectsImporter: SavedObjectsImporterContract;
   logger: Logger;
   pkgName: string;
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
+  sloClient: SLOClient;
+  spaceId: string;
+  esClient: ElasticsearchClient;
 }): Promise<SavedObjectsImportSuccess[]> {
-  const { kibanaAssets, savedObjectsClient, savedObjectsImporter, logger } = options;
+  const { kibanaAssets, soClient, esClient, savedObjectsImporter, logger, sloClient, spaceId } =
+    options;
 
   const assetsToInstall = Object.entries(kibanaAssets).flatMap(([assetType, assets]) => {
     if (!validKibanaAssetTypes.has(assetType as KibanaAssetType)) {
@@ -152,18 +153,49 @@ export async function installKibanaAssets(options: {
     managed: true,
   });
 
-  await makeManagedIndexPatternsGlobal(savedObjectsClient);
+  await makeManagedIndexPatternsGlobal(soClient);
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: assetsToInstall,
+    kibanaAssets: assetsToInstall.filter((asset) => asset.type !== KibanaSavedObjectType.slo),
   });
+
+  const sloAssets = assetsToInstall.filter((asset) => asset.type === KibanaSavedObjectType.slo);
+
+  await installSLOAssets({ sloAssets, sloClient, soClient, esClient, spaceId });
 
   return installedAssets;
 }
 
+export async function installSLOAssets({
+  sloAssets,
+  sloClient,
+  soClient,
+  esClient,
+  spaceId,
+}: {
+  sloAssets: ArchiveAsset[];
+  sloClient: SLOClient;
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  spaceId: string;
+}) {
+  if (!sloAssets.length) {
+    return;
+  }
+  for (const asset of sloAssets) {
+    await sloClient.createSLO({
+      soClient,
+      esClient,
+      params: asset.attributes as any,
+      spaceId,
+    });
+  }
+}
+
 export async function installKibanaAssetsAndReferences({
+  esClient,
   savedObjectsClient,
   savedObjectsImporter,
   savedObjectTagAssignmentService,
@@ -175,8 +207,10 @@ export async function installKibanaAssetsAndReferences({
   installedPkg,
   spaceId,
   assetTags,
+  sloClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   savedObjectTagAssignmentService: IAssignmentService;
   savedObjectTagClient: ITagsClient;
@@ -187,6 +221,7 @@ export async function installKibanaAssetsAndReferences({
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];
+  sloClient: SLOClient;
 }) {
   const kibanaAssets = await getKibanaAssets(packageInstallContext);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
@@ -198,11 +233,14 @@ export async function installKibanaAssetsAndReferences({
   );
 
   const importedAssets = await installKibanaAssets({
-    savedObjectsClient,
+    soClient: savedObjectsClient,
     logger,
     savedObjectsImporter,
     pkgName,
     kibanaAssets,
+    sloClient,
+    esClient,
+    spaceId,
   });
   await withPackageSpan('Create and assign package tags', () =>
     tagKibanaAssets({
@@ -220,20 +258,6 @@ export async function installKibanaAssetsAndReferences({
   return installedKibanaAssetsRefs;
 }
 
-export const deleteKibanaInstalledRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string,
-  installedKibanaRefs: AssetReference[]
-) => {
-  const installedAssetsToSave = installedKibanaRefs.filter(({ id, type }) => {
-    const assetType = type as AssetType;
-    return !savedObjectTypes.includes(assetType);
-  });
-
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_kibana: installedAssetsToSave,
-  });
-};
 export async function getKibanaAssets(
   packageInstallContext: PackageInstallContext
 ): Promise<Record<KibanaAssetType, ArchiveAsset[]>> {

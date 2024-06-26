@@ -21,6 +21,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 
+import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
+
 import type { PackageDataStreamTypes, PackageInstallContext } from '../../../../common/types';
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import { isPackagePrerelease, getNormalizedDataStreams } from '../../../../common/services';
@@ -338,6 +340,7 @@ interface InstallRegistryPackageParams {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  sloClient?: SLOClient;
 }
 
 export interface CustomPackageDatasetConfiguration {
@@ -353,6 +356,7 @@ interface InstallCustomPackageParams {
   force?: boolean;
   authorizationHeader?: HTTPAuthorizationHeader | null;
   kibanaVersion: string;
+  sloClient: SLOClient;
 }
 interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -366,6 +370,7 @@ interface InstallUploadedArchiveParams {
   skipDataStreamRollover?: boolean;
   isBundledPackage?: boolean;
   skipRateLimitCheck?: boolean;
+  sloClient?: SLOClient;
 }
 
 function getTelemetryEvent(pkgName: string, pkgVersion: string): PackageUpdateEvent {
@@ -402,6 +407,8 @@ async function installPackageFromRegistry({
   skipDataStreamRollover = false,
 }: InstallRegistryPackageParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
+  const sloClient = appContextService.getSloStart()?.sloClient!;
+
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion: version } = Registry.splitPkgKey(pkgkey);
   let pkgVersion = version ?? '';
@@ -502,6 +509,7 @@ async function installPackageFromRegistry({
         authorizationHeader,
         ignoreMappingUpdateErrors,
         skipDataStreamRollover,
+        sloClient,
       });
     }
   } catch (e) {
@@ -540,6 +548,7 @@ async function installPackageCommon(options: {
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  sloClient: SLOClient;
 }): Promise<InstallResult> {
   const packageInfo = options.packageInstallContext.packageInfo;
 
@@ -558,6 +567,7 @@ async function installPackageCommon(options: {
     ignoreMappingUpdateErrors,
     skipDataStreamRollover,
     packageInstallContext,
+    sloClient,
   } = options;
   let { telemetryEvent } = options;
   const logger = appContextService.getLogger();
@@ -652,6 +662,7 @@ async function installPackageCommon(options: {
       force,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      sloClient,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -895,6 +906,7 @@ async function installPackageByUpload({
   skipRateLimitCheck,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
   const logger = appContextService.getLogger();
+  const sloClient = appContextService.getSloStart()?.sloClient!;
 
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -973,6 +985,7 @@ async function installPackageByUpload({
       authorizationHeader,
       ignoreMappingUpdateErrors,
       skipDataStreamRollover,
+      sloClient,
     });
   } catch (e) {
     return {
@@ -999,6 +1012,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
   }
 
   const logger = appContextService.getLogger();
+  const sloClient = appContextService.getSloStart()?.sloClient!;
   const { savedObjectsClient, esClient } = args;
 
   const authorizationHeader = args.authorizationHeader;
@@ -1088,6 +1102,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       force,
       authorizationHeader,
       kibanaVersion,
+      sloClient,
     });
     return response;
   }
@@ -1106,6 +1121,7 @@ export async function installCustomPackage(
     authorizationHeader,
     datasets,
     kibanaVersion,
+    sloClient,
   } = args;
 
   // Validate that we can create this package, validations will throw if they don't pass
@@ -1154,24 +1170,9 @@ export async function installCustomPackage(
     force,
     paths,
     authorizationHeader,
+    sloClient,
   });
 }
-
-export const updateVersion = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string,
-  pkgVersion: string
-) => {
-  auditLoggingService.writeCustomSoAuditLog({
-    action: 'update',
-    id: pkgName,
-    savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
-  });
-
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    version: pkgVersion,
-  });
-};
 
 export const updateInstallStatusToFailed = async ({
   logger,

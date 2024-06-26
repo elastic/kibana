@@ -36,6 +36,7 @@ interface RegisterRoutes {
 }
 
 export interface RegisterRoutesDependencies {
+  logger: Logger;
   pluginsSetup: {
     core: CoreSetup;
     ruleRegistry: RuleRegistryPluginSetupContract;
