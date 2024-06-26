@@ -14292,10 +14292,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/server/routes/json_schema.ts"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/notifications.ts"
               },
               {
@@ -14517,6 +14513,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/management.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/get_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",
@@ -15284,6 +15284,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/inference_models.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/cancel_attack_discovery.ts"
               },
               {
                 "plugin": "elasticAssistant",

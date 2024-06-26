@@ -261,7 +261,9 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
           });
 
           it('shows a success callout when elastic agent status is healthy', () => {
-            cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete');
+            cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete', {
+              agentId: 'test-agent-id',
+            });
             cy.getByTestSubj('obltOnboardingStepStatus-complete')
               .contains('Connected to the Elastic Agent')
               .should('exist');
@@ -299,7 +301,9 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-download', 'complete');
         cy.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
         cy.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
-        cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete');
+        cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete', {
+          agentId: 'test-agent-id',
+        });
       });
 
       it('shows loading callout when config is being downloaded to the host', () => {
@@ -340,7 +344,9 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-download', 'complete');
         cy.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
         cy.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
-        cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete');
+        cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete', {
+          agentId: 'test-agent-id',
+        });
       });
 
       it('shows loading callout when config is being downloaded to the host', () => {
@@ -424,7 +430,9 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
           cy.updateInstallationStepStatus(onboardingId, 'ea-download', 'complete');
           cy.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
           cy.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
-          cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete');
+          cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'complete', {
+            agentId: 'test-agent-id',
+          });
           cy.updateInstallationStepStatus(onboardingId, 'ea-config', 'complete');
         });
 
