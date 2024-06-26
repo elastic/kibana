@@ -111,6 +111,7 @@ export interface VisTypeAlias {
    * Set to true to hide edit links for visualization type in UIs.
    */
   disableEdit?: boolean;
+  hideCreateInDashboard?: boolean;
   isDeprecated?: boolean;
 
   appExtensions?: {

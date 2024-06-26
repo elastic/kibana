@@ -10,4 +10,5 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface DashboardUiActionsService {
   getTriggerCompatibleActions?: UiActionsStart['getTriggerCompatibleActions'];
+  getAction?: UiActionsStart['getAction'];
 }

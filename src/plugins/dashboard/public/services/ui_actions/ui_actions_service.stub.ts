@@ -13,5 +13,8 @@ export type UIActionsServiceFactory = PluginServiceFactory<DashboardUiActionsSer
 
 export const uiActionsServiceFactory: UIActionsServiceFactory = () => {
   const pluginMock = uiActionsPluginMock.createStartContract();
-  return { getTriggerCompatibleActions: pluginMock.getTriggerCompatibleActions };
+  return {
+    getTriggerCompatibleActions: pluginMock.getTriggerCompatibleActions,
+    getAction: pluginMock.getAction,
+  };
 };

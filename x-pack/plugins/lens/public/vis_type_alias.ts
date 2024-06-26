@@ -28,6 +28,7 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
     defaultMessage: 'Recommended for most users.',
   }),
   icon: 'lensApp',
+  hideCreateInDashboard: true,
   stage: 'production',
   appExtensions: {
     visualizations: {

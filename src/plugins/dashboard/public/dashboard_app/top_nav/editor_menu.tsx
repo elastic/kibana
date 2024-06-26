@@ -216,7 +216,10 @@ export const EditorMenu = ({
     .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
     )
-    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
+    .filter(
+      ({ disableCreate, hideCreateInDashboard }: VisTypeAlias) =>
+        !disableCreate && !hideCreateInDashboard
+    );
 
   const factories = unwrappedEmbeddableFactories.filter(
     ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
@@ -344,8 +347,8 @@ export const EditorMenu = ({
     )(factoryGroupMap, groupedAddPanelAction);
 
     const initialPanelItems = [
-      ...visTypeAliases.map(getVisTypeAliasMenuItem),
       ...ungroupedAddPanelActions,
+      ...visTypeAliases.map(getVisTypeAliasMenuItem),
       ...toolVisTypes.map(getVisTypeMenuItem),
       ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
       ...initialPanelGroups,

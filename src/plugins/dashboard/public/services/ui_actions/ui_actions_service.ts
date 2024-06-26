@@ -18,8 +18,9 @@ export const uiActionsServiceFactory: UsageCollectionServiceFactory = ({ startPl
   const { uiActions } = startPlugins;
   if (!uiActions) return {};
 
-  const { getTriggerCompatibleActions } = uiActions;
+  const { getTriggerCompatibleActions, getAction } = uiActions;
   return {
     getTriggerCompatibleActions,
+    getAction,
   };
 };

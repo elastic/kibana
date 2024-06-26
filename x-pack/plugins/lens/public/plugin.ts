@@ -106,6 +106,7 @@ import { getLensAliasConfig } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
 import { ConfigureInLensPanelAction } from './trigger_actions/open_lens_config/edit_action';
 import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
+import { CreateDSLPanelAction } from './trigger_actions/open_lens_config/create_dsl_action';
 import {
   inAppEmbeddableEditTrigger,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
@@ -645,6 +646,9 @@ export class LensPlugin {
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
       editLensEmbeddableAction
     );
+
+    const createDSLPanelAction = new CreateDSLPanelAction(startDependencies, core);
+    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createDSLPanelAction);
 
     // Displays the add ESQL panel in the dashboard add Panel menu
     const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);

@@ -178,6 +178,9 @@ export function getTextBasedDatasource({
 }) {
   const getSuggestionsForState = (state: TextBasedPrivateState) => {
     return Object.entries(state.layers)?.flatMap(([id, layer]) => {
+      if (!Array.isArray(layer.columns)) {
+        return [];
+      }
       const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
 
       const unchangedSuggestionTable = getUnchangedSuggestionTable(state, allColumns, id);
