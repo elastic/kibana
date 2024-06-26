@@ -18,5 +18,8 @@ printf -v FTR_CONFIG_PATTERNS '%s,' "${configs[@]}"
 FTR_CONFIG_PATTERNS="${FTR_CONFIG_PATTERNS%,}"
 export FTR_CONFIG_PATTERNS
 
-cd $KIBANA_DIR/.buildkite/scripts/steps/test
-source ./pick_test_group_run_order.sh
+cd $KIBANA_DIR
+
+ls -al
+
+source .buildkite/scripts/steps/test/pick_test_group_run_order.sh
