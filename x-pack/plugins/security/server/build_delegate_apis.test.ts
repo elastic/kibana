@@ -73,7 +73,7 @@ describe('buildSecurityApi', () => {
     });
 
     it('returns the result from the service', async () => {
-      authc.apiKeys.areAPIKeysEnabled.mockReturnValue(Promise.resolve(false));
+      void authc.apiKeys.areAPIKeysEnabled.mockReturnValue(Promise.resolve(false));
 
       const areAPIKeysEnabled = await authc.apiKeys.areAPIKeysEnabled();
 
