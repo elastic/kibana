@@ -15,7 +15,12 @@ import type {
   UpdateAPIKeyResult,
 } from '@kbn/security-plugin-types-server';
 
-import type { ApiKeyToInvalidate, QueryApiKeyResult } from '@kbn/security-plugin-types-common';
+import type {
+  ApiKeyToInvalidate,
+  CategorizedApiKey,
+  QueryApiKeyResult,
+} from '@kbn/security-plugin-types-common';
+import type { Criteria } from '@elastic/eui';
 
 export type { CreateAPIKeyParams, CreateAPIKeyResult, UpdateAPIKeyParams, UpdateAPIKeyResult };
 
@@ -29,23 +34,7 @@ export interface InvalidateApiKeysResponse {
   errors: any[];
 }
 
-export interface QueryApiKeySortOptions {
-  field:
-    | 'id'
-    | 'type'
-    | 'name'
-    | 'username'
-    | 'realm'
-    | 'creation'
-    | 'metadata'
-    | 'role_descriptors'
-    | 'expiration'
-    | 'invalidated'
-    | 'limited_by'
-    | '_sort'
-    | 'expired';
-  direction: 'asc' | 'desc';
-}
+export type QueryApiKeySortOptions = Required<Criteria<CategorizedApiKey>>['sort'];
 
 export interface QueryApiKeyParams {
   query: QueryContainer;

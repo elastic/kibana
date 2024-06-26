@@ -268,6 +268,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -657,6 +658,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -1200,6 +1202,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -1589,6 +1592,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -2192,6 +2196,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -2581,6 +2586,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -3186,6 +3192,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -3575,6 +3582,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -4118,6 +4126,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -4507,6 +4516,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -5005,6 +5015,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
@@ -5394,6 +5405,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
                   },
                 },
                 "isolatedPoint": Object {
+                  "enabled": true,
                   "fill": "white",
                   "opacity": 1,
                   "radius": 2,
