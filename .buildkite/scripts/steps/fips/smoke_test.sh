@@ -18,5 +18,7 @@ printf -v FTR_CONFIG_PATTERNS '%s,' "${configs[@]}"
 FTR_CONFIG_PATTERNS="${FTR_CONFIG_PATTERNS%,}"
 export FTR_CONFIG_PATTERNS
 
+echo "smoke pwd: $(pwd)"
+
 cd $KIBANA_DIR
 source .buildkite/scripts/steps/test/pick_test_group_run_order.sh
