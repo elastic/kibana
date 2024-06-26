@@ -752,7 +752,7 @@ export default function scheduleBackfillTests({ getService }: FtrProviderContext
           }
         });
 
-        it('testtest should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
+        it('should handle schedule request where some requests succeed and some requests fail appropriately', async () => {
           const start = moment().utc().startOf('day').subtract(7, 'days').toISOString();
           const end = moment().utc().startOf('day').subtract(5, 'days').toISOString();
           // create 2 rules
