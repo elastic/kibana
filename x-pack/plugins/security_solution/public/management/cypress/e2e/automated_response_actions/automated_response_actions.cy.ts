@@ -100,7 +100,7 @@ describe(
         closeAllToasts();
 
         changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
-        cy.getByTestSubj('expand-event').eq(0).click();
+        cy.getByTestSubj('expand-event').first().click();
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 

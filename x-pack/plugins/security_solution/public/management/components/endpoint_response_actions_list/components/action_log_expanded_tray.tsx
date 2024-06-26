@@ -14,6 +14,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import { reduce } from 'lodash';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -238,16 +239,18 @@ export const ActionsLogExpandedTray = memo<{
       {
         title: OUTPUT_MESSAGES.expandSection.hostname,
         description:
-          Object.values(hosts)
-            .reduce<string[]>((acc, host) => {
+          reduce(
+            hosts,
+            (acc, host) => {
               if (host.name.trim().length) {
                 acc.push(host.name);
               } else {
                 acc.push(emptyValue);
               }
               return acc;
-            }, [])
-            .join(', ') || emptyValue,
+            },
+            [] as string[]
+          ).join(', ') || emptyValue,
       },
     ];
 
