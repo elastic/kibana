@@ -7,8 +7,9 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 
-import { ROLES, SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
+import { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { HostOptions, SamlSessionManager } from '@kbn/test';
+import { DEFAULT_SERVERLESS_ROLE } from '../env_var_names_constants';
 
 export const samlAuthentication = async (
   on: Cypress.PluginEvents,
@@ -44,7 +45,7 @@ export const samlAuthentication = async (
       return sessionManager.getSessionCookieForRole(role);
     },
     getFullname: async (
-      role: string | SecurityRoleName = ROLES.platform_engineer
+      role: string | SecurityRoleName = DEFAULT_SERVERLESS_ROLE
     ): Promise<string> => {
       const sessionManager = new SamlSessionManager(
         {

@@ -6,13 +6,11 @@
  */
 import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
-import {
-  KNOWN_SERVERLESS_ROLE_DEFINITIONS,
-  ROLES,
-} from '@kbn/security-solution-plugin/common/test';
+import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
 import {
   CLOUD_SERVERLESS,
+  DEFAULT_SERVERLESS_ROLE,
   ELASTICSEARCH_PASSWORD,
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
@@ -48,7 +46,7 @@ export const login = (role?: SecurityRoleName): void => {
 
   if (Cypress.env(IS_SERVERLESS)) {
     if (!role) {
-      testRole = ROLES.platform_engineer;
+      testRole = DEFAULT_SERVERLESS_ROLE;
     } else {
       testRole = role;
     }
