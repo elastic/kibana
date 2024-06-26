@@ -645,11 +645,11 @@ export class TaskManagerRunner implements TaskRunner {
     )(result);
 
     if (this.isExpired) {
-      this.usageCounter?.incrementCounter({
-        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
-        counterType: 'taskManagerTaskRunner',
-        incrementBy: 1,
-      });
+      // this.usageCounter?.incrementCounter({
+      //   counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+      //   counterType: 'taskManagerTaskRunner',
+      //   incrementBy: 1,
+      // });
     } else if (fieldUpdates.status === TaskStatus.Failed) {
       // Delete the SO instead so it doesn't remain in the index forever
       this.instance = asRan(this.instance.task);
