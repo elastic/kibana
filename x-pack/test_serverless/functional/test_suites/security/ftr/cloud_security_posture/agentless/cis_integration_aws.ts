@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(
           (await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()) !== undefined
@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
       });
@@ -93,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(true);
       });
@@ -108,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_CREDENTIAL_SELECTOR);
         await cisIntegration.selectValue(AWS_CREDENTIAL_SELECTOR, 'temporary_keys');
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationAws.showLaunchCloudFormationAgentlessButton()).to.be(false);
       });
