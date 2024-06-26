@@ -204,6 +204,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
+        customFields: customFieldsConfiguration,
         templates,
       });
 
@@ -212,6 +213,78 @@ export default ({ getService }: FtrProviderContext): void => {
         ...getConfigurationOutput(true),
         customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
         templates,
+      });
+    });
+
+    it('should remove custom fields from templates', async () => {
+      const customFieldsConfiguration = [
+        {
+          key: 'text_field_1',
+          type: CustomFieldTypes.TEXT,
+          label: 'Text field 1',
+          required: true,
+        },
+        {
+          key: 'toggle_field_1',
+          label: '#2',
+          type: CustomFieldTypes.TOGGLE,
+          required: false,
+        },
+      ];
+
+      const templates = [
+        {
+          key: 'test_template_2',
+          name: 'Second test template',
+          description: 'This is a second test template',
+          caseFields: {
+            title: 'Case with sample template 2',
+            description: 'case desc',
+            severity: CaseSeverity.LOW,
+            category: null,
+            tags: ['sample-4'],
+            assignees: [],
+            customFields: [
+              {
+                key: 'text_field_1',
+                type: CustomFieldTypes.TEXT,
+                value: 'this is a text field value',
+              },
+              {
+                key: 'toggle_field_1',
+                value: true,
+                type: CustomFieldTypes.TOGGLE,
+              },
+            ],
+            connector: {
+              id: 'none',
+              name: 'My Connector',
+              type: ConnectorTypes.none,
+              fields: null,
+            },
+          },
+        },
+      ];
+
+      const configuration = await createConfiguration(supertest, {
+        ...getConfigurationRequest(),
+        customFields: customFieldsConfiguration as ConfigurationPatchRequest['customFields'],
+      });
+
+      // delete custom fields
+      const newConfiguration = await updateConfiguration(supertest, configuration.id, {
+        version: configuration.version,
+        customFields: [],
+        templates: templates as ConfigurationPatchRequest['templates'],
+      });
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(newConfiguration);
+      expect(data).to.eql({
+        ...getConfigurationOutput(true),
+        customFields: [],
+        templates: [
+          { ...templates[0], caseFields: { ...templates[0].caseFields, customFields: [] } },
+        ],
       });
     });
 
