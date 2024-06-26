@@ -234,8 +234,10 @@ export class TaskRunner<
         id: `alert:${ruleId}`,
         refresh: false,
         doc: {
-          ...mapKeys(attributes, (key) => `alert.${key}`),
-          'alert.running': false,
+          alert: {
+            ...attributes,
+            running: false,
+          },
         },
       });
     } catch (err) {
