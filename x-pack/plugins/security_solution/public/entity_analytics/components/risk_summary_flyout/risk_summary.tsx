@@ -52,6 +52,7 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   recalculatingScore: boolean;
   queryId: string;
   openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
 const RiskSummaryComponent = <T extends RiskScoreEntity>({
@@ -59,6 +60,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   recalculatingScore,
   queryId,
   openDetailsPanel,
+  isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -199,7 +201,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   />
                 ),
               },
-          iconType: 'arrowStart',
+          iconType: !isPreviewMode ? 'arrowStart' : undefined,
         }}
         expand={{
           expandable: false,

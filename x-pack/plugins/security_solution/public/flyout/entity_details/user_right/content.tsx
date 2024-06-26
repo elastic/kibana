@@ -35,6 +35,7 @@ interface UserPanelContentProps {
   isDraggable: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
 export const UserPanelContent = ({
@@ -48,6 +49,7 @@ export const UserPanelContent = ({
   isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
+  isPreviewMode,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
@@ -61,6 +63,7 @@ export const UserPanelContent = ({
             recalculatingScore={recalculatingScore}
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
           />
           <EuiHorizontalRule />
         </>

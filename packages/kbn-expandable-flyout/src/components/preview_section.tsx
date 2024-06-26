@@ -140,7 +140,6 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         css={css`
           margin: ${euiTheme.size.xs};
           box-shadow: 0 0 4px 4px ${euiTheme.colors.darkShade};
-          height: 90%;
         `}
         data-test-subj={PREVIEW_SECTION_TEST_ID}
         className="eui-fullHeight"

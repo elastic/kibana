@@ -161,6 +161,7 @@ export const HostPanel = ({
               openDetailsPanel={!isPreviewMode ? openTabPanel : undefined}
               recalculatingScore={recalculatingScore}
               onAssetCriticalityChange={calculateEntityRiskScore}
+              isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
               <HostPreviewPanelFooter

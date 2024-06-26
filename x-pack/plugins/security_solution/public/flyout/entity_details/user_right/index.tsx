@@ -175,6 +175,7 @@ export const UserPanel = ({
               scopeId={scopeId}
               isDraggable={!!isDraggable}
               openDetailsPanel={!isPreviewMode ? openPanelTab : undefined}
+              isPreviewMode={isPreviewMode}
             />
             {isPreviewMode && (
               <UserPreviewPanelFooter
