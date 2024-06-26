@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
-import type { AttackDiscovery } from './types';
 
 export const RECONNAISSANCE = 'Reconnaissance';
 export const INITIAL_ACCESS = 'Initial Access';
@@ -56,7 +56,7 @@ export const getTacticLabel = (tactic: string): string => {
   }
 };
 
-interface TacticMetadata {
+export interface TacticMetadata {
   detected: boolean;
   index: number;
   name: string;
