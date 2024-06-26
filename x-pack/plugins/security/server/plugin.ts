@@ -63,6 +63,7 @@ import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
 import type { AuthenticatedUser, SecurityLicense } from '../common';
+import { APPLICATION_PREFIX } from '../common/constants';
 import { SecurityLicenseService } from '../common/licensing';
 
 export type SpacesService = Pick<
@@ -269,12 +270,12 @@ export class SecurityPlugin
       getCurrentUser,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
-
+    const applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
     const apiKeysSetup = this.apiKeysService.setup({
       getClusterClient: () =>
         startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
       license,
-      applicationName: 'SomethingNameSid',
+      applicationName,
       getKibanaFeatures: () =>
         startServicesPromise.then((services) => services.features.getKibanaFeatures()),
     });
