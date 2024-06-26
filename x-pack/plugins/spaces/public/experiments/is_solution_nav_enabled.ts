@@ -15,6 +15,6 @@ export const isSolutionNavEnabled = (
   cloudExperiments?: CloudExperimentsPluginStart
 ) => {
   return Boolean(cloud?.isCloudEnabled) && cloudExperiments
-    ? cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).catch(() => false)
+    ? cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
     : Promise.resolve(false);
 };
