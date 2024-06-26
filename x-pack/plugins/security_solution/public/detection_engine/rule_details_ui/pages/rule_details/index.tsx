@@ -9,7 +9,6 @@
 // TODO: Disabling complexity is temporary till this component is refactored as part of lists UI integration
 
 import {
-  EuiBadge,
   EuiButtonIcon,
   EuiConfirmModal,
   EuiFlexGroup,
@@ -50,6 +49,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../common/hooks/use_selector';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
@@ -127,6 +127,7 @@ import { useRuleWithFallback } from '../../../rule_management/logic/use_rule_wit
 import type { BadgeOptions } from '../../../../common/components/header_page/types';
 import type { AlertsStackByField } from '../../../../detections/components/alerts_kpis/common/types';
 import type { RuleResponse, Status } from '../../../../../common/api/detection_engine';
+import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../../../detections/components/alerts_table/alerts_filter_group';
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -140,6 +141,7 @@ import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { RuleDefinitionSection } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { RuleScheduleSection } from '../../../rule_management/components/rule_details/rule_schedule_section';
+import { CustomizedPrebuiltRuleBadge } from '../../../rule_management/components/rule_details/customized_prebuilt_rule_badge';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
@@ -182,6 +184,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearEventsLoading,
   clearSelected,
 }) => {
+  const isPrebuiltRulesCustomizationEnabled = useIsExperimentalFeatureEnabled(
+    'prebuiltRulesCustomizationEnabled'
+  );
+
   const {
     analytics,
     i18n: i18nStart,
@@ -594,8 +600,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 subtitle={subTitle}
                 subtitle2={
                   <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="flexStart">
-                    {rule?.rule_source?.type === 'external' && rule.rule_source.is_customized && (
-                      <EuiBadge color="hollow">{i18n.CUSTOMIZED_PREBUILT_RULE_LABEL}</EuiBadge>
+                    {isPrebuiltRulesCustomizationEnabled && isCustomizedPrebuiltRule(rule) && (
+                      <CustomizedPrebuiltRuleBadge />
                     )}
                     <EuiFlexGroup alignItems="center" gutterSize="xs">
                       <EuiFlexItem grow={false}>
