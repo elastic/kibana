@@ -117,7 +117,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     titleText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptTitle', {
       defaultMessage: 'Exit without saving changes?',
     }),
-    messageText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptTitle', {
+    messageText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptMessage', {
       defaultMessage:
         'Your changes will be lost if you leave this page without saving the mapping.',
     }),
