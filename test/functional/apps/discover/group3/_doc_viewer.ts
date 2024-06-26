@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
         });
 
-        await PageObjects.discover.findFieldByNameInDocViewer('.s');
+        await PageObjects.discover.findFieldByNameInDocViewer('.sr');
 
         await retry.waitFor('second updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
@@ -75,16 +75,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
       });
-      it('should be able to search with fuzzy search (1 typo)', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('rel4tedContent');
+
+      it('should be able to search with spaces as wildcard', async function () {
+        await PageObjects.discover.findFieldByNameInDocViewer('relatedContent image');
 
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 2;
         });
       });
 
-      it('should be able to search with spaces as wildcard', async function () {
-        await PageObjects.discover.findFieldByNameInDocViewer('relatedContent image');
+      it('should be able to search with fuzzy search (1 typo)', async function () {
+        await PageObjects.discover.findFieldByNameInDocViewer('rel4tedContent.art');
 
         await retry.waitFor('updates', async () => {
           return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 4;
