@@ -120,7 +120,6 @@
     "@kbn/discover-plugin",
     "@kbn/files-plugin",
     "@kbn/shared-ux-file-types",
-    "@kbn/assetManager-plugin",
     "@kbn/guided-onboarding-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/ml-anomaly-utils",
