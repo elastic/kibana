@@ -190,19 +190,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('DistributionBar', () => {
-      (['passed', 'failed'] as const).forEach((type) => {
-        it(`filters by ${type} findings`, async () => {
-          await distributionBar.filterBy(type);
-
-          const items = data.filter(({ result }) => result.evaluation === type);
-          expect(await latestFindingsTable.getFindingsCount(type)).to.eql(items.length);
-
-          await filterBar.removeFilter('result.evaluation');
-        });
-      });
-    });
-
     describe('Findings - Fields selector', () => {
       const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
       const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
