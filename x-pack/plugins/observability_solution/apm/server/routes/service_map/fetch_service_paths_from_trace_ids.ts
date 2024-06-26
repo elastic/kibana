@@ -176,6 +176,7 @@ export async function fetchServicePathsFromTraceIds({
       
             def processAndReturnEvent(def context, def eventId) {
               def stack = new Stack();
+              def reprocessStack = new Stack();
 
               // Avoid reprocessing the same event
               def visited = new HashSet();
@@ -189,27 +190,26 @@ export async function fetchServicePathsFromTraceIds({
                 if (event == null || context.processedEvents.get(currentEventId) != null) {
                   continue;
                 }
-        
                 visited.add(currentEventId);
 
                 def service = new HashMap();
                 service['service.name'] = event['service.name'];
                 service['service.environment'] = event['service.environment'];
                 service['agent.name'] = event['agent.name'];
-        
+                
                 def basePath = new ArrayList();
                 def parentId = event['parent.id'];
-        
+
                 if (parentId != null && !parentId.equals(currentEventId)) {
                   def parent = context.processedEvents.get(parentId);
                   // Only adds the parentId to the stack if it hasn't visited to prevent infinite loop scenarios
                   // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
-                  // doesn't have a parent, in which case we should skip it */
+                  // doesn't have a parent, in which case we should skip it
                   if (parent == null && !visited.contains(parentId)) {
-                    visited.add(currentEventId);
-                    // Add currentEventId back to the stack to reprocess it after its parent is processed so that the path is correctly built
-                    stack.push(currentEventId); 
+                    // Add currentEventId to be reprocessed once its parent is processed
+                    reprocessStack.push(currentEventId); 
                     stack.push(parentId);
+
                     continue;
                   }
 
@@ -250,6 +250,11 @@ export async function fetchServicePathsFromTraceIds({
         
                 event.path = basePath;
                 context.processedEvents[currentEventId] = event;
+
+                // reprocess events which were waiting for their parents to be processed
+                while (!reprocessStack.isEmpty()) {
+                  stack.push(reprocessStack.pop());
+                }
               }
 
               return null;
