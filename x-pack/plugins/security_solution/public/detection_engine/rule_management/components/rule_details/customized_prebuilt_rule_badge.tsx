@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import * as i18n from './translations';
-import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine/model/rule_schema/utils';
-import type { RuleResponse } from '../../../../../common/api/detection_engine/model';
+import { isCustomizedPrebuiltRule } from '../../../../../common/api/detection_engine';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 interface CustomizedPrebuiltRuleBadgeProps {
