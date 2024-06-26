@@ -148,8 +148,8 @@ export const OverviewGrid = memo(({ monitorsSortedByStatus }: { monitorsSortedBy
                     dispatch(trendStatsBatch.get(fetchStatsActionPayload));
                     setvpage([...vpage, ...newRows]);
                   }}
-                  minimumBatchSize={8}
-                  threshold={4}
+                  minimumBatchSize={16}
+                  threshold={10}
                 >
                   {({ onItemsRendered, ref }) => (
                     <FixedSizeList

@@ -44,7 +44,9 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
         for (const location of by_location.buckets) {
           console.log('creating location bucket for ', key, location);
           ret[key + location.key] = {
-            data: location.last_50.hits.hits,
+            data: location.last_50.hits.hits
+              .reverse()
+              .map((hit, x) => ({ x, y: hit._source.monitor.duration.us })),
             ...location.stats,
             median: location.median.values['50.0'],
           };
