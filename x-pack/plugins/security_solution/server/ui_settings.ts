@@ -328,16 +328,16 @@ export const initUiSettings = (
       name: i18n.translate(
         'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
         {
-          defaultMessage: 'Exclude data tiers from search during rule execution',
+          defaultMessage: 'Exclude cold or frozen data tier from rule execution',
         }
       ),
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
         {
           defaultMessage: `
-            Events from frozen or cold data tiers won't generate alerts during rule execution.
-            <br>Use this option for faster performance or to reduce rule execution time, if it's too long or timeouts.
-            <br>Comma delimit to exclude multiple tiers - data_frozen,data_cold.`,
+          Use this option for faster rules performance or to reduce rule execution time if it is too long or times out. 
+          <br>Note that events from the selected data tiers will not be searched to generate alerts.
+          <br>Comma delimit to exclude multiple tiers - data_frozen,data_cold.`,
         }
       ),
       type: 'array',
