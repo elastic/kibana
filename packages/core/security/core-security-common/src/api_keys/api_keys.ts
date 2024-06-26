@@ -13,7 +13,9 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../roles';
 
 /**
- * Interface for managing API keys in Elasticsearch, including creation, validation, and invalidation of API keys, as well as checking the status of API key features.
+ * Interface for managing API keys in Elasticsearch, including creation,
+ * validation, and invalidation of API keys,
+ * as well as checking the status of API key features.
  */
 export interface APIKeys {
   /**
