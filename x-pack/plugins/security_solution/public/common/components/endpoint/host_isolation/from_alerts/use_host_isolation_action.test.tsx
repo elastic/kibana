@@ -168,4 +168,25 @@ describe('useHostIsolationAction', () => {
       ]);
     }
   );
+
+  it('should call isolate API when agent is currently NOT isolated', async () => {
+    const { result, waitForValueToChange } = render();
+    await waitForValueToChange(() => result.current);
+    result.current[0].onClick!({} as unknown as React.MouseEvent);
+
+    expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('isolateHost');
+  });
+
+  it('should call un-isolate API when agent is currently isolated', async () => {
+    apiMock.responseProvider.getAgentStatus.mockReturnValue(
+      agentStatusMocks.generateAgentStatusApiResponse({
+        data: { 'abfe4a35-d5b4-42a0-a539-bd054c791769': { isolated: true } },
+      })
+    );
+    const { result, waitForValueToChange } = render();
+    await waitForValueToChange(() => result.current);
+    result.current[0].onClick!({} as unknown as React.MouseEvent);
+
+    expect(hookProps.onAddIsolationStatusClick).toHaveBeenCalledWith('unisolateHost');
+  });
 });

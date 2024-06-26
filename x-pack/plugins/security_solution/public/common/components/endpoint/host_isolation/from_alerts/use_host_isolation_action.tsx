@@ -59,13 +59,13 @@ export const useHostIsolationAction = ({
     closePopover();
 
     if (doesHostSupportIsolation) {
-      if (agentStatus) {
+      if (!isHostIsolated) {
         onAddIsolationStatusClick('isolateHost');
       } else {
         onAddIsolationStatusClick('unisolateHost');
       }
     }
-  }, [agentStatus, closePopover, doesHostSupportIsolation, onAddIsolationStatusClick]);
+  }, [closePopover, doesHostSupportIsolation, isHostIsolated, onAddIsolationStatusClick]);
 
   const isHostAgentUnEnrolled = useMemo<boolean>(() => {
     return (
