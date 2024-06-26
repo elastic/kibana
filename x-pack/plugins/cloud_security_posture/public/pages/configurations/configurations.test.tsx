@@ -69,7 +69,7 @@ describe('<Findings />', () => {
     // loading findings
     await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
-    expect(screen.getByText(/2 findings/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
     expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
     expect(screen.getByText(finding1.resource.id)).toBeInTheDocument();
