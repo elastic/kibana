@@ -182,7 +182,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         subscriptions.add(
           fieldStatsControlsApi.dataViewId$
             .pipe(
-              // skip(1),
+              skip(1),
               skipWhile((dataViewId) => !dataViewId && !defaultDataViewId),
               switchMap((dataViewId) => deps.data.dataViews.get(dataViewId ?? defaultDataViewId))
             )
