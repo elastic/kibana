@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type { LinksFactory } from './embeddable';
-export { LinksFactoryDefinition, LinksEmbeddable } from './embeddable';
-
 import { LinksPlugin } from './plugin';
 
 export function plugin() {
