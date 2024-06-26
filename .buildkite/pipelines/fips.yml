@@ -52,3 +52,12 @@ steps:
       automatic:
         - exit_status: '*'
           limit: 1
+
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/scripts/lifecycle/post_build.sh
+    label: Post-Build
+    timeout_in_minutes: 10
+    agents:
+      machineType: n2-standard-2
