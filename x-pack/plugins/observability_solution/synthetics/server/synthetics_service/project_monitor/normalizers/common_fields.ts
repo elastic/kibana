@@ -146,6 +146,7 @@ export const getMonitorSchedule = (
   schedule: number | string | MonitorFields['schedule'],
   defaultValue?: MonitorFields['schedule']
 ) => {
+  console.log('schedule', schedule);
   if (!schedule && defaultValue) {
     return defaultValue;
   }

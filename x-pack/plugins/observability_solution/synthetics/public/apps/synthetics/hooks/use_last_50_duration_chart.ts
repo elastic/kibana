@@ -10,6 +10,7 @@ import { useLastXChecks } from './use_last_x_checks';
 
 const fields = ['monitor.duration.us'];
 
+// can we make this an ES query instead?
 export function useLast50DurationChart({
   monitorId,
   locationId,
@@ -21,6 +22,7 @@ export function useLast50DurationChart({
   locationId: string;
   schedule: string;
 }) {
+  return null;
   const { hits, loading } = useLastXChecks<{
     'monitor.duration.us': number[] | undefined;
   }>({
@@ -31,6 +33,7 @@ export function useLast50DurationChart({
     timestamp,
     schedule,
   });
+  return null;
   const { data, median, min, max, avg } = useMemo(() => {
     if (loading) {
       return {

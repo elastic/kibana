@@ -33,3 +33,22 @@ export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
 >('quietFetchOverviewAction');
+
+export const trendStatsBatch = createAsyncAction<
+  Array<{ configId: string; locationId: string }>,
+  Record<string, any>,
+  // {
+  //   by_id: {
+  //     buckets: Array<{
+  //       by_location: {
+  //         buckets: Array<{
+  //           median: { values: { '50.0': number } };
+  //           stats: { count: number; min: number; max: number; avg: number; sum: number };
+  //           last_50: { hits: { hits: }}
+  //         }>;
+  //       };
+  //     }>;
+  //   };
+  // },
+  any
+>('batchTrendStats');

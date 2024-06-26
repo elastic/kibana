@@ -57,3 +57,10 @@ export const fetchOverviewStatus = async (
   const params = toStatusOverviewQueryArgs(pageState);
   return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
 };
+
+export const fetchOverviewTrendStats = async (
+  filters: Array<{ configId: string; locationId: string }>
+): Promise<any> => {
+  console.log('in api', filters);
+  return apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, filters);
+};

@@ -1152,6 +1152,7 @@
     "react-use": "^15.3.8",
     "react-virtualized": "^9.22.5",
     "react-window": "^1.8.10",
+    "react-window-infinite-loader": "^1.0.9",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.2.1",
     "redux-actions": "^2.6.5",
@@ -1757,7 +1758,8 @@
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2",
-    "zod-to-json-schema": "^3.22.3"
+    "zod-to-json-schema": "^3.22.3",
+    "@types/react-window-infinite-loader": "^1.0.9"
   },
   "packageManager": "yarn@1.22.21"
 }
