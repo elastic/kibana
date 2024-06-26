@@ -22,18 +22,17 @@ import {
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
-import { APMTransactionDurationIndicator } from '../../domain/models';
-import { computeSLIForPreview } from '../../domain/services';
-import { typedSearch } from '../../utils/queries';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
+import { APMTransactionDurationIndicator } from '../domain/models';
+import { computeSLIForPreview } from '../domain/services';
+import { typedSearch } from '../utils/queries';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
   GetTimesliceMetricIndicatorAggregation,
-} from '../aggregations';
-import { getElasticsearchQueryOrThrow } from '../transform_generators';
-import { buildParamValues } from '../transform_generators/synthetics_availability';
-import { getGroupingsFilter } from './groupings_filter';
+} from './aggregations';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { buildParamValues } from './transform_generators/synthetics_availability';
 
 export interface Options {
   range: {
@@ -673,5 +672,20 @@ export class GetPreviewData {
     } catch (err) {
       return [];
     }
+  }
+}
+
+function getGroupingsFilter(options: Options): estypes.QueryDslQueryContainer[] | undefined {
+  const groupingsKeys = Object.keys(options.groupings ?? {});
+  if (groupingsKeys.length) {
+    return groupingsKeys.map((key) => ({
+      term: { [key]: options.groupings![key] },
+    }));
+  } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
+    return [
+      {
+        term: { [options.groupBy]: options.instanceId },
+      },
+    ];
   }
 }
