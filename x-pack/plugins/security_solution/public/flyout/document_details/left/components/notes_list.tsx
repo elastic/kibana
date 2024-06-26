@@ -5,17 +5,33 @@
  * 2.0.
  */
 
-import React, { memo, useEffect } from 'react';
-import { EuiComment, EuiCommentList, EuiLoadingElastic, EuiMarkdownFormat } from '@elastic/eui';
-import { useSelector } from 'react-redux';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import {
+  EuiAvatar,
+  EuiButtonIcon,
+  EuiComment,
+  EuiCommentList,
+  EuiLoadingElastic,
+} from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ADD_NOTE_LOADING_TEST_ID, NOTES_COMMENT_TEST_ID, NOTES_LOADING_TEST_ID } from './test_ids';
+import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
+import {
+  ADD_NOTE_LOADING_TEST_ID,
+  DELETE_NOTE_BUTTON_TEST_ID,
+  NOTE_AVATAR_TEST_ID,
+  NOTES_COMMENT_TEST_ID,
+  NOTES_LOADING_TEST_ID,
+} from './test_ids';
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
 import {
+  deleteNote,
   ReqStatus,
   selectCreateNoteStatus,
+  selectDeleteNoteError,
+  selectDeleteNoteStatus,
   selectFetchNotesByDocumentIdError,
   selectFetchNotesByDocumentIdStatus,
   selectNotesByDocumentId,
@@ -34,6 +50,15 @@ export const FETCH_NOTES_ERROR = i18n.translate(
 export const NO_NOTES = i18n.translate('xpack.securitySolution.notes.noNotesLabel', {
   defaultMessage: 'No notes have been created for this document',
 });
+export const DELETE_NOTE = i18n.translate('xpack.securitySolution.notes.deleteNoteLabel', {
+  defaultMessage: 'Delete note',
+});
+export const DELETE_NOTE_ERROR = i18n.translate(
+  'xpack.securitySolution.notes.deleteNoteErrorLabel',
+  {
+    defaultMessage: 'Error deleting note',
+  }
+);
 
 export interface NotesListProps {
   /**
@@ -45,9 +70,11 @@ export interface NotesListProps {
 /**
  * Renders a list of notes for the document.
  * If a note belongs to a timeline, a timeline icon will be shown the top right corner.
+ * Also, a delete icon is shown in the top right corner to delete a note.
  * When a note is being created, the component renders a loading spinner when the new note is about to be added.
  */
 export const NotesList = memo(({ eventId }: NotesListProps) => {
+  const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
 
   const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdStatus(state));
@@ -56,6 +83,18 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
+  const deleteStatus = useSelector((state: State) => selectDeleteNoteStatus(state));
+  const deleteError = useSelector((state: State) => selectDeleteNoteError(state));
+  const [deletingNoteId, setDeletingNoteId] = useState('');
+
+  const deleteNoteFc = useCallback(
+    (noteId: string) => {
+      setDeletingNoteId(noteId);
+      dispatch(deleteNote({ id: noteId }));
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     if (fetchStatus === ReqStatus.Failed && fetchError) {
       addErrorToast(null, {
@@ -63,6 +102,14 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
       });
     }
   }, [addErrorToast, fetchError, fetchStatus]);
+
+  useEffect(() => {
+    if (deleteStatus === ReqStatus.Failed && deleteError) {
+      addErrorToast(null, {
+        title: DELETE_NOTE_ERROR,
+      });
+    }
+  }, [addErrorToast, deleteError, deleteStatus]);
 
   if (fetchStatus === ReqStatus.Loading) {
     return <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />;
@@ -81,8 +128,27 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
           username={note.createdBy}
           timestamp={<>{note.created && <FormattedRelative value={new Date(note.created)} />}</>}
           event={ADDED_A_NOTE}
+          actions={
+            <EuiButtonIcon
+              data-test-subj={`${DELETE_NOTE_BUTTON_TEST_ID}-${index}`}
+              title={DELETE_NOTE}
+              aria-label={DELETE_NOTE}
+              color="text"
+              iconType="trash"
+              onClick={() => deleteNoteFc(note.noteId)}
+              disabled={deletingNoteId !== note.noteId && deleteStatus === ReqStatus.Loading}
+              isLoading={deletingNoteId === note.noteId && deleteStatus === ReqStatus.Loading}
+            />
+          }
+          timelineAvatar={
+            <EuiAvatar
+              data-test-subj={`${NOTE_AVATAR_TEST_ID}-${index}`}
+              size="l"
+              name={note.updatedBy || '?'}
+            />
+          }
         >
-          <EuiMarkdownFormat textSize="s">{note.note || ''}</EuiMarkdownFormat>
+          <MarkdownRenderer>{note.note || ''}</MarkdownRenderer>
         </EuiComment>
       ))}
       {createStatus === ReqStatus.Loading && (

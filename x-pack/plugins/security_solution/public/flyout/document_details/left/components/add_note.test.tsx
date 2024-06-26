@@ -52,9 +52,16 @@ describe('AddNote', () => {
   });
 
   it('should render the add note button in loading state while creating a new note', () => {
-    const state = { ...mockGlobalState };
-    state.notes.status.createNote = ReqStatus.Loading;
-    const store = createMockStore(state);
+    const store = createMockStore({
+      ...mockGlobalState,
+      notes: {
+        ...mockGlobalState.notes,
+        status: {
+          ...mockGlobalState.notes.status,
+          createNote: ReqStatus.Loading,
+        },
+      },
+    });
 
     const { container } = render(
       <TestProviders store={store}>
@@ -66,10 +73,20 @@ describe('AddNote', () => {
   });
 
   it('should render error toast if create a note fails', () => {
-    const state = { ...mockGlobalState };
-    state.notes.status.createNote = ReqStatus.Failed;
-    state.notes.error.createNote = { type: 'http', status: 500 };
-    const store = createMockStore(state);
+    const store = createMockStore({
+      ...mockGlobalState,
+      notes: {
+        ...mockGlobalState.notes,
+        status: {
+          ...mockGlobalState.notes.status,
+          createNote: ReqStatus.Failed,
+        },
+        error: {
+          ...mockGlobalState.notes.error,
+          createNote: { type: 'http', status: 500 },
+        },
+      },
+    });
 
     render(
       <TestProviders store={store}>
