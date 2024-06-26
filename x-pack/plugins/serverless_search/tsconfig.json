@@ -40,7 +40,6 @@
     "@kbn/index-management-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/es-types",
-    "@kbn/code-editor",
     "@kbn/console-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/core-logging-server-mocks",
@@ -49,7 +48,9 @@
     "@kbn/index-management",
     "@kbn/react-kibana-context-render",
     "@kbn/search-playground",
+    "@kbn/security-api-key-management",
     "@kbn/search-inference-endpoints",
     "@kbn/search-homepage",
+    "@kbn/security-plugin-types-common",
   ]
 }
