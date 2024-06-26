@@ -71,7 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let createConnector: () => Promise<void>;
 
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'searchPlayground',
       });
@@ -91,7 +91,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await removeOpenAIConnector?.();
       await esArchiver.unload(esArchiveIndex);
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('start chat page', () => {

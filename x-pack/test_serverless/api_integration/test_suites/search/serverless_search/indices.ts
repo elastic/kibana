@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Indices routes', function () {
     describe('GET indices', function () {
       before (async ()=>{
-        roleAuthc = await svlUserManager.createApiKeyForRole('developer');
+        roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
       });
       after(async () => {
         await svlUserManager.invalidateApiKeyForRole(roleAuthc);
