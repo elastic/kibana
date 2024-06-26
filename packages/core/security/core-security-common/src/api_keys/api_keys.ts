@@ -8,7 +8,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../roles';
 
