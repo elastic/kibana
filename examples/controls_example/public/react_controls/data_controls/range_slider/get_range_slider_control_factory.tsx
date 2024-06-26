@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, map, skip } from 'rxjs';
 import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import {
   useBatchedPublishingSubjects,
@@ -126,7 +126,10 @@ export const getRangesliderControlFactory = (
         dataControl.stateManager.fieldName,
         dataControl.stateManager.dataViewId,
       ])
-        .pipe(distinctUntilChanged(deepEqual))
+        .pipe(
+          distinctUntilChanged(deepEqual),
+          skip(1) // skip first filter output because it will have been applied in initialize
+        )
         .subscribe(() => {
           step$.next(1);
           value$.next(undefined);
@@ -164,9 +167,12 @@ export const getRangesliderControlFactory = (
         }
       );
 
-      const valueSubscription = value$.subscribe((value) => {
-        const dataView = dataControl.api.dataViews?.value?.[0];
-        const fieldName = dataControl.stateManager.fieldName.value;
+      const setOutputFilterSubscription = combineLatest([
+        dataControl.api.dataViews,
+        dataControl.stateManager.fieldName,
+        value$,
+      ]).subscribe(([dataViews, fieldName, value]) => {
+        const dataView = dataViews?.[0];
         const dataViewField =
           dataView && fieldName ? dataView.getFieldByName(fieldName) : undefined;
         const gte = parseFloat(value?.[0] ?? '');
@@ -222,7 +228,7 @@ export const getRangesliderControlFactory = (
               fieldChangedSubscription.unsubscribe();
               hasNotResultsSubscription.unsubscribe();
               minMaxSubscription.unsubscribe();
-              valueSubscription.unsubscribe();
+              setOutputFilterSubscription.unsubscribe();
             };
           }, []);
 

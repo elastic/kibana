@@ -44,7 +44,7 @@ export type ControlGroupUnsavedChanges = Omit<
 export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export interface DataControlFetchContext {
-  filters?: Filter[] | undefined;
+  unifiedSearchFilters?: Filter[] | undefined;
   query?: Query | AggregateQuery | undefined;
   timeRange?: TimeRange | undefined;
 }

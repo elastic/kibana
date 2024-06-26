@@ -10,7 +10,7 @@ import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { debounceTime, map, merge, Observable, switchMap } from 'rxjs';
+import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap } from 'rxjs';
 import { DataControlFetchContext } from './types';
 
 export function dataControlFetch$(
@@ -39,7 +39,7 @@ export function dataControlFetch$(
       if (apiPublishesReload(parentApi)) {
         observables.push(parentApi.reload$);
       }
-      return merge(...observables);
+      return observables.length ? merge(...observables) : new BehaviorSubject(undefined);
     }),
     debounceTime(0),
     map(() => {

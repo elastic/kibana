@@ -7,10 +7,10 @@
  */
 
 import { TimeRange } from '@kbn/es-query';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, first, of, skip } from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { ControlGroupApi } from '../../control_group/types';
+import { ControlGroupApi, DataControlFetchContext } from '../../control_group/types';
 import { getRangesliderControlFactory } from './get_range_slider_control_factory';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { ControlApiRegistration } from '../../types';
@@ -23,6 +23,7 @@ describe('RangesliderControlApi', () => {
     timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
   };
   const controlGroupApi = {
+    dataControlFetch$: new BehaviorSubject<DataControlFetchContext>({}),
     parentApi: dashboardApi,
   } as unknown as ControlGroupApi;
   const dataStartServiceMock = dataPluginMock.createStartContract();
@@ -46,11 +47,29 @@ describe('RangesliderControlApi', () => {
       },
     };
   });
-  const dataViewsServiceMock = dataViewPluginMocks.createStartContract();
+  const mockDataViews = dataViewPluginMocks.createStartContract();
+  // @ts-ignore
+  mockDataViews.get = async (id: string): Promise<DataView> => {
+    if (id !== 'myDataViewId') {
+      throw new Error(`Simulated error: no data view found for id ${id}`);
+    }
+    return {
+      id,
+      getFieldByName: (fieldName: string) => {
+        return [
+          {
+            displayName: 'My field name',
+            name: 'myFieldName',
+            type: 'string',
+          },
+        ].find((field) => fieldName === field.name);
+      },
+    } as unknown as DataView;
+  };
   const factory = getRangesliderControlFactory({
     core: coreMock.createStart(),
     data: dataStartServiceMock,
-    dataViews: dataViewsServiceMock,
+    dataViews: mockDataViews,
   });
 
   function buildApiMock(
@@ -67,16 +86,59 @@ describe('RangesliderControlApi', () => {
     };
   }
 
-  test('should not set filters when value is not provided', () => {
-    const { api } = factory.buildControl(
-      {
-        dataViewId: 'myDataView',
-        fieldName: 'myField',
-      },
-      buildApiMock,
-      uuid,
-      controlGroupApi
-    );
-    expect(api.filters$.value).toEqual(undefined);
+  describe('filters$', () => {
+    test('should not set filters$ when value is not provided', (done) => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataView',
+          fieldName: 'myFieldName',
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
+        expect(filter).toBeUndefined();
+        done();
+      });
+    });
+
+    test('should set filters$ when value is provided', (done) => {
+      const { api } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          value: ['5', '10'],
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      api.filters$.pipe(skip(1), first()).subscribe((filter) => {
+        expect(filter).toEqual([
+          {
+            meta: {
+              field: 'myFieldName',
+              index: 'myDataViewId',
+              key: 'myFieldName',
+              params: {
+                gte: 5,
+                lte: 10,
+              },
+              type: 'range',
+            },
+            query: {
+              range: {
+                myFieldName: {
+                  gte: 5,
+                  lte: 10,
+                },
+              },
+            },
+          },
+        ]);
+        done();
+      });
+    });
   });
 });
