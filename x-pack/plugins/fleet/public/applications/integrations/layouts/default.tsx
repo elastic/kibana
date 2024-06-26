@@ -8,7 +8,7 @@ import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink } from '../../../hooks';
+import { useLink, useStartServices } from '../../../hooks';
 import type { Section } from '../sections';
 
 import { WithHeaderLayout } from '.';
@@ -21,6 +21,7 @@ interface Props {
 
 export const DefaultLayout: React.FC<Props> = memo(
   ({ section, children, notificationsBySection }) => {
+    const { integrationAssistant } = useStartServices();
     const { getHref } = useLink();
     const tabs = [
       {
@@ -44,6 +45,8 @@ export const DefaultLayout: React.FC<Props> = memo(
         href: getHref('integrations_installed'),
       },
     ];
+
+    const CreateIntegrationCardButton = integrationAssistant?.CreateIntegrationCardButton;
 
     return (
       <WithHeaderLayout
@@ -70,7 +73,17 @@ export const DefaultLayout: React.FC<Props> = memo(
                 </p>
               </EuiText>
             </EuiFlexItem>
+
+            <EuiSpacer size="s" />
           </EuiFlexGroup>
+        }
+        rightColumnGrow={false}
+        rightColumn={
+          CreateIntegrationCardButton ? (
+            <EuiFlexItem grow={false}>
+              <CreateIntegrationCardButton href={getHref('integration_create')} />
+            </EuiFlexItem>
+          ) : undefined
         }
         tabs={tabs.map((tab) => {
           const notificationCount = notificationsBySection?.[tab.section];

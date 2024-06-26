@@ -628,7 +628,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "anthropic.claude-3-sonnet-20240229-v1:0",
+        "default": "anthropic.claude-3-5-sonnet-20240620-v1:0",
         "error": [Function],
         "presence": "optional",
       },
@@ -3822,7 +3822,7 @@ Object {
     },
     "defaultModel": Object {
       "flags": Object {
-        "default": "gemini-1.5-pro-preview-0409",
+        "default": "gemini-1.5-pro-001",
         "error": [Function],
         "presence": "optional",
       },
