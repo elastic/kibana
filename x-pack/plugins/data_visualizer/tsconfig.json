@@ -82,7 +82,8 @@
     "@kbn/presentation-publishing",
     "@kbn/shared-ux-utility",
     "@kbn/search-types",
-    "@kbn/unified-field-list"
+    "@kbn/unified-field-list",
+    "@kbn/core-http-browser"
   ],
   "exclude": [
     "target/**/*",
