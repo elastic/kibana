@@ -224,7 +224,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
     return (
       <EuiFormRow
         label={i18n.translate('xpack.dataVisualizer.combinedFieldsLabel', {
-          defaultMessage: 'Combined fields',
+          defaultMessage: 'Automatically created fields',
         })}
       >
         <div>
@@ -261,7 +261,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
               >
                 <FormattedMessage
                   id="xpack.dataVisualizer.addCombinedFieldsLabel"
-                  defaultMessage="Add combined field"
+                  defaultMessage="Add additional field"
                 />
               </EuiButtonEmpty>
             }

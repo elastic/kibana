@@ -150,6 +150,8 @@ export const AdvancedSettings: FC<Props> = ({
         isDisabled={initialized === true}
       />
 
+      <EuiSpacer size="s" />
+
       <EuiFlexGroup>
         <EuiFlexItem>
           <IndexSettings
