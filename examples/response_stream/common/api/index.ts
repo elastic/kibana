@@ -8,5 +8,6 @@
 
 export const RESPONSE_STREAM_API_ENDPOINT = {
   REDUCER_STREAM: '/internal/response_stream/reducer_stream',
+  REDUX_STREAM: '/internal/response_stream/redux_stream',
   SIMPLE_STRING_STREAM: '/internal/response_stream/simple_string_stream',
 } as const;

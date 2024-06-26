@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 
-import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/actions';
+import { type AiopsLogRateAnalysisApiAction } from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type {
   AiopsLogRateAnalysisSchema,
@@ -56,7 +56,7 @@ export interface ResponseStreamFetchOptions<T extends ApiVersion> extends Respon
   responseStream: {
     end: () => void;
     endWithUpdatedLoadingState: () => void;
-    push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'];
+    push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction>['push'];
     pushPingWithTimeout: () => void;
     pushError: (msg: string) => void;
   };
@@ -97,14 +97,14 @@ export const responseStreamFactory = <T extends ApiVersion>(options: ResponseStr
     end: streamEnd,
     push,
     responseWithHeaders,
-  } = streamFactory<AiopsLogRateAnalysisApiAction<T>>(
+  } = streamFactory<AiopsLogRateAnalysisApiAction>(
     headers,
     logger,
     requestBody.compressResponse,
     requestBody.flushFix
   );
 
-  const pushPingWithTimeout = streamPushPingWithTimeoutFactory<T>(state, push, logDebugMessage);
+  const pushPingWithTimeout = streamPushPingWithTimeoutFactory(state, push, logDebugMessage);
   const end = streamEndFactory(state, streamEnd, logDebugMessage);
   const endWithUpdatedLoadingState = streamEndWithUpdatedLoadingStateFactory(end, push);
   const pushError = streamPushErrorFactory(push, logDebugMessage);

@@ -48,7 +48,7 @@ export const EditName: React.FC<EditNameProps> = ({ connector }) => {
     },
     onSuccess: (successData) => {
       queryClient.setQueryData(queryKey, {
-        connector: { ...connector, service_type: successData },
+        connector: { ...connector, name: successData },
       });
       queryClient.invalidateQueries(queryKey);
       setIsEditing(false);

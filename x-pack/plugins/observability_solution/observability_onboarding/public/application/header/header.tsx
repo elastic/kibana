@@ -13,7 +13,7 @@ export const Header = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiTitle size="l">
+        <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
           <h1>
             {i18n.translate(
               'xpack.observability_onboarding.experimentalOnboardingFlow.addObservabilityDataTitleLabel',
@@ -27,7 +27,7 @@ export const Header = () => {
             'xpack.observability_onboarding.experimentalOnboardingFlow.startIngestingDataIntoTextLabel',
             {
               defaultMessage:
-                'Start ingesting data into your Observability project. Return to this page at any time by clicking Add data.',
+                'Start ingesting Observability data into Elastic. Return to this page at any time by clicking Add data.',
             }
           )}
         </EuiText>

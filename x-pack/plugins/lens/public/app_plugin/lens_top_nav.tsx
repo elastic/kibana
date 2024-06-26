@@ -279,13 +279,13 @@ export const LensTopNavMenu = ({
   initialContextIsEmbedded,
   topNavMenuEntryGenerators,
   initialContext,
-  theme$,
   indexPatternService,
   currentDoc,
   onTextBasedSavedAndExit,
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
+  startServices,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -623,16 +623,22 @@ export const LensTopNavMenu = ({
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
-              allowShortUrl: false, // we'll manage this implicitly via the new service
-              shareableUrl: shareableUrl || '',
-              shareableUrlForSavedObject: savedObjectURL.href,
+              allowShortUrl: false,
+              delegatedShareUrlHandler: () => {
+                return isCurrentStateDirty || !currentDoc?.savedObjectId
+                  ? shareableUrl!
+                  : savedObjectURL.href;
+              },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
-              objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
-                defaultMessage: 'visualization',
-              }),
+              objectTypeMeta: {
+                title: i18n.translate('xpack.lens.app.shareModal.title', {
+                  defaultMessage: 'Share this Lens visualization',
+                }),
+              },
               sharingData,
-              isDirty: isCurrentStateDirty,
+              // only want to know about changes when savedObjectURL.href
+              isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks
               disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
@@ -746,7 +752,7 @@ export const LensTopNavMenu = ({
             toggleSettingsMenuOpen({
               lensStore,
               anchorElement,
-              theme$,
+              startServices,
             }),
         },
       },
@@ -794,8 +800,8 @@ export const LensTopNavMenu = ({
     uiSettings,
     isOnTextBasedMode,
     lensStore,
-    theme$,
     notifications.toasts,
+    startServices,
   ]);
 
   const onQuerySubmitWrapped = useCallback(
@@ -815,7 +821,7 @@ export const LensTopNavMenu = ({
       if (newQuery) {
         if (!isEqual(newQuery, query)) {
           dispatchSetState({ query: newQuery });
-          // check if query is text-based (sql, essql etc) and switchAndCleanDatasource
+          // check if query is text-based (esql etc) and switchAndCleanDatasource
           if (isOfAggregateQueryType(newQuery) && !isOnTextBasedMode) {
             setIsOnTextBasedMode(true);
             dispatch(
@@ -904,10 +910,10 @@ export const LensTopNavMenu = ({
   const editField = useMemo(
     () =>
       canEditDataView
-        ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
+        ? async (fieldName?: string, _uiAction: 'edit' | 'add' = 'edit') => {
             if (currentIndexPattern?.id) {
               const indexPatternInstance = await data.dataViews.get(currentIndexPattern?.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: indexPatternInstance,
                 },

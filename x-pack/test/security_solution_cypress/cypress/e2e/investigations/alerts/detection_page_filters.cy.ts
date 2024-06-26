@@ -19,7 +19,6 @@ import {
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
   OPTION_SELECTABLE_COUNT,
-  FILTER_GROUP_CONTROL_ACTION_EDIT,
   FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -27,25 +26,25 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL, CASES_URL } from '../../../urls/navigation';
 import {
-  closePageFilterPopover,
   markAcknowledgedFirstAlert,
   openPageFilterPopover,
   resetFilters,
   selectCountTable,
+  selectPageFilterValue,
   togglePageFilterPopover,
   visitAlertsPageWithCustomFilters,
   waitForAlerts,
   waitForPageFilters,
 } from '../../../tasks/alerts';
-import { ALERTS_COUNT, ALERTS_REFRESH_BTN, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { kqlSearch } from '../../../tasks/security_header';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { kqlSearch, refreshPage } from '../../../tasks/security_header';
 import {
   addNewFilterGroupControlValues,
-  cancelFieldEditing,
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
-  editFilterGroupControls,
+  switchFilterGroupControlsToEditMode,
+  editSingleFilterControl,
   saveFilterGroupControls,
 } from '../../../tasks/common/filter_group';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
@@ -106,36 +105,35 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/171890
+// FLAKY: https://github.com/elastic/kibana/issues/167914
 describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
-    createRule(getNewRule({ rule_id: 'custom_rule_filters' }));
+    createRule(getNewRule());
     login();
     visitWithTimeRange(ALERTS_URL);
     waitForAlerts();
   });
 
-  it('Default page filters are populated when nothing is provided in the URL', () => {
+  it('should populate page filters with default values when nothing is provided in the URL', () => {
     assertFilterControlsWithFilterObject();
   });
 
   context('Alert Page Filters Customization ', () => {
-    it('should be able to delete Controls', () => {
-      waitForPageFilters();
-      editFilterGroupControls();
+    it('should be able to customize Controls', () => {
+      const fieldName = 'event.module';
+      const label = 'EventModule';
+      switchFilterGroupControlsToEditMode();
+      cy.log('should be able delete an existing control');
       deleteFilterGroupControl(3);
       cy.get(CONTROL_FRAMES).should((sub) => {
         expect(sub.length).lt(4);
       });
-      discardFilterGroupControls();
-    });
 
-    it('should be able to add new Controls', () => {
-      const fieldName = 'event.module';
-      const label = 'EventModule';
-      editFilterGroupControls();
-      deleteFilterGroupControl(3);
+      // ================================================
+      cy.log('should be able to add a new control');
+      // ================================================
+
       addNewFilterGroupControlValues({
         fieldName,
         label,
@@ -143,12 +141,12 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
       cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
       discardFilterGroupControls();
       cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
-    });
 
-    it('should be able to edit Controls', () => {
-      const fieldName = 'event.module';
-      const label = 'EventModule';
-      editFilterGroupControls();
+      // ================================================
+      cy.log('should be able to edit an existing control');
+      // ================================================
+
+      switchFilterGroupControlsToEditMode();
       editFilterGroupControl({ idx: 3, fieldName, label });
       cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
       discardFilterGroupControls();
@@ -157,7 +155,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
 
     it('should not sync to the URL in edit mode but only in view mode', () => {
       cy.url().then((urlString) => {
-        editFilterGroupControls();
+        switchFilterGroupControlsToEditMode();
         deleteFilterGroupControl(3);
         addNewFilterGroupControlValues({ fieldName: 'event.module', label: 'Event Module' });
         cy.url().should('eq', urlString);
@@ -167,7 +165,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     });
   });
 
-  it('Page filters are loaded with custom values provided in the URL', () => {
+  it('should load page filters with custom values provided in the URL', () => {
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.filter((item) => item.persist).map(
       (filter) => {
         return {
@@ -188,7 +186,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     });
   });
 
-  it('Page filters are loaded with custom filters and values', () => {
+  it('should load page filters with custom filters and values', () => {
     const CUSTOM_URL_FILTER = [
       {
         title: 'Process',
@@ -220,35 +218,48 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  context('with data modificiation', () => {
-    it(`Alert list is updated when the alerts are updated`, () => {
-      // mark status of one alert to be acknowledged
-      selectCountTable();
-      cy.get(ALERTS_COUNT)
-        .invoke('text')
-        .then((noOfAlerts) => {
-          const originalAlertCount = noOfAlerts.split(' ')[0];
-          markAcknowledgedFirstAlert();
-          waitForAlerts();
-          cy.get(OPTION_LIST_VALUES(0)).click();
-          cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible').trigger('click');
-          cy.get(ALERTS_COUNT)
-            .invoke('text')
-            .should((newAlertCount) => {
-              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
-            });
-        });
-    });
+  // Flaky: https://github.com/elastic/kibana/issues/181977
+  context.skip('with data modification', () => {
+    /*
+     *
+     * default scrollBehavior is true, which scrolls the element into view automatically without any scroll Margin
+     * if an element has some hover actions above the element, they get hidden on top of the window.
+     * So, we need to set scrollBehavior to false to avoid scrolling the element into view and we can scroll ourselves
+     * when needed.
+     *
+     * Ref : https://docs.cypress.io/guides/core-concepts/interacting-with-elements#Scrolling
+     */
+    it(
+      `should update alert status list when the alerts are updated`,
+      {
+        scrollBehavior: false,
+      },
+      () => {
+        // mark status of one alert to be acknowledged
+        selectCountTable();
+        cy.get(ALERTS_COUNT)
+          .invoke('text')
+          .then((noOfAlerts) => {
+            const originalAlertCount = noOfAlerts.split(' ')[0];
+            markAcknowledgedFirstAlert();
+            waitForAlerts();
+            selectPageFilterValue(0, 'acknowledged');
+            cy.get(ALERTS_COUNT)
+              .invoke('text')
+              .should((newAlertCount) => {
+                expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
+              });
+          });
+      }
+    );
   });
 
-  it(`URL is updated when filters are updated`, () => {
-    openPageFilterPopover(1);
-    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click();
-    closePageFilterPopover(1);
+  it(`should update URL when filters are updated`, () => {
+    selectPageFilterValue(1, 'high');
 
     const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
       return {
+        hideActionBar: false,
         ...filter,
         selectedOptions: filter.title === 'Severity' ? ['high'] : filter.selectedOptions,
       };
@@ -257,12 +268,10 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     cy.url().should('include', expectedVal);
   });
 
-  it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
-    cy.get(OPTION_LIST_VALUES(1)).click();
-    cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
-    cy.get(OPTION_SELECTABLE(1, 'high')).click({});
+  it(`should restore Filters from localstorage when user navigates back to the page.`, () => {
+    selectPageFilterValue(1, 'high');
 
-    // high should be scuccessfully selected.
+    // high should be successfully selected.
     cy.get(OPTION_LIST_VALUES(1)).contains('high');
     waitForPageFilters();
 
@@ -275,7 +284,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     cy.get(OPTION_LIST_VALUES(1)).contains('high'); // severity should be low as previously selected
   });
 
-  it('Custom filters from URLS are populated & changed banner is displayed', () => {
+  it('should populate Custom filters & display the changed banner', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
 
@@ -284,7 +293,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  it('Changed banner should hide on saving changes', () => {
+  it('should hide Changed banner on saving changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
@@ -292,7 +301,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  it('Changed banner should hide on discarding changes', () => {
+  it('should hide Changed banner on discarding changes', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
@@ -300,7 +309,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 
-  it('Changed banner should hide on Reset', () => {
+  it('should hide Changed banner on Reset', () => {
     visitAlertsPageWithCustomFilters(customFilters);
     waitForPageFilters();
     resetFilters();
@@ -310,9 +319,8 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
   context('Impact of inputs', () => {
     it('should recover from invalid kql Query result', () => {
       // do an invalid search
-      //
       kqlSearch('\\');
-      cy.get(ALERTS_REFRESH_BTN).click();
+      refreshPage();
       waitForPageFilters();
       cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
       togglePageFilterPopover(0);
@@ -323,7 +331,7 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
 
     it('should take kqlQuery into account', () => {
       kqlSearch('kibana.alert.workflow_status: "nothing"');
-      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      refreshPage();
       waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
@@ -342,31 +350,28 @@ describe.skip(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, ()
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
-    it('should take timeRange into account', () => {
-      const startDateWithZeroAlerts = 'Jan 1, 2002 @ 00:00:00.000';
-      const endDateWithZeroAlerts = 'Jan 1, 2010 @ 00:00:00.000';
-      setStartDate(startDateWithZeroAlerts);
-      setEndDate(endDateWithZeroAlerts);
 
-      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+    it('should take timeRange into account', () => {
+      const dateRangeWithZeroAlerts = ['Jan 1, 2002 @ 00:00:00.000', 'Jan 1, 2002 @ 00:00:00.000'];
+      setStartDate(dateRangeWithZeroAlerts[0]);
+      setEndDate(dateRangeWithZeroAlerts[1]);
+
+      refreshPage();
       waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
       cy.get(EMPTY_ALERT_TABLE).should('be.visible');
     });
   });
-  it('Number fields are not visible in field edit panel', () => {
+  it('should not show number fields are not visible in field edit panel', () => {
     const idx = 3;
     const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
-    editFilterGroupControls();
-    cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
-    cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click();
+    switchFilterGroupControlsToEditMode();
+    editSingleFilterControl(idx);
     cy.get(FILTER_FIELD_TYPE).click();
     cy.get(FIELD_TYPES.STRING).should('be.visible');
     cy.get(FIELD_TYPES.BOOLEAN).should('be.visible');
     cy.get(FIELD_TYPES.IP).should('be.visible');
     cy.get(FIELD_TYPES.NUMBER).should('not.exist');
-    cancelFieldEditing();
-    discardFilterGroupControls();
   });
 });

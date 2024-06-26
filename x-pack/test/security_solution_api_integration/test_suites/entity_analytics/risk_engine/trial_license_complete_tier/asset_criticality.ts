@@ -6,6 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
+import { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import {
   cleanRiskEngine,
   cleanAssetCriticality,
@@ -13,6 +15,7 @@ import {
   getAssetCriticalityDoc,
   getAssetCriticalityIndex,
   enableAssetCriticalityAdvancedSetting,
+  disableAssetCriticalityAdvancedSetting,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -27,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
       await cleanAssetCriticality({ log, es });
-      enableAssetCriticalityAdvancedSetting(kibanaServer, log);
+      await enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
     afterEach(async () => {
@@ -36,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('initialisation of resources', () => {
-      it('should has index installed on status api call', async () => {
+      it('should have index installed on status api call', async () => {
         let assetCriticalityIndexExist;
 
         try {
@@ -127,6 +130,20 @@ export default ({ getService }: FtrProviderContext) => {
           expectStatusCode: 400,
         });
       });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        const validAssetCriticality = {
+          id_field: 'host.name',
+          id_value: 'host-01',
+          criticality_level: 'high_impact',
+        };
+
+        await assetCriticalityRoutes.upsert(validAssetCriticality, {
+          expectStatusCode: 403,
+        });
+      });
     });
 
     describe('read', () => {
@@ -150,6 +167,14 @@ export default ({ getService }: FtrProviderContext) => {
       it('should return a 400 if id_field is invalid', async () => {
         await assetCriticalityRoutes.get('invalid', 'host-02', {
           expectStatusCode: 400,
+        });
+      });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        await assetCriticalityRoutes.get('host.name', 'doesnt-matter', {
+          expectStatusCode: 403,
         });
       });
     });
@@ -183,6 +208,108 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('bulk upload', () => {
+      const expectAssetCriticalityDocMatching = async (expectedDoc: {
+        id_field: string;
+        id_value: string;
+        criticality_level: string;
+      }) => {
+        const esDoc = await getAssetCriticalityDoc({
+          es,
+          idField: expectedDoc.id_field,
+          idValue: expectedDoc.id_value,
+        });
+
+        expect(omit(esDoc, '@timestamp')).to.eql(expectedDoc);
+      };
+
+      it('should return 400 if the records array is empty', async () => {
+        await assetCriticalityRoutes.bulkUpload([], {
+          expectStatusCode: 400,
+        });
+      });
+
+      it('should return 400 if the records array is too large', async () => {
+        const records = new Array(1001).fill({
+          id_field: 'host.name',
+          id_value: 'host-1',
+          criticality_level: 'high_impact',
+        });
+
+        await assetCriticalityRoutes.bulkUpload(records, {
+          expectStatusCode: 400,
+        });
+      });
+
+      it('should return a 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        const validRecord: CreateAssetCriticalityRecord = {
+          id_field: 'host.name',
+          id_value: 'delete-me',
+          criticality_level: 'high_impact',
+        };
+
+        await assetCriticalityRoutes.bulkUpload([validRecord], {
+          expectStatusCode: 403,
+        });
+      });
+
+      it('should correctly upload a valid record for one entity', async () => {
+        const validRecord: CreateAssetCriticalityRecord = {
+          id_field: 'host.name',
+          id_value: 'host-1',
+          criticality_level: 'high_impact',
+        };
+
+        const { body } = await assetCriticalityRoutes.bulkUpload([validRecord]);
+        expect(body.errors).to.eql([]);
+        expect(body.stats).to.eql({
+          total: 1,
+          successful: 1,
+          failed: 0,
+        });
+
+        await expectAssetCriticalityDocMatching(validRecord);
+      });
+
+      it('should correctly upload valid records for multiple entities', async () => {
+        const validRecords: CreateAssetCriticalityRecord[] = Array.from({ length: 50 }, (_, i) => ({
+          id_field: 'host.name',
+          id_value: `host-${i}`,
+          criticality_level: 'high_impact',
+        }));
+
+        const { body } = await assetCriticalityRoutes.bulkUpload(validRecords);
+        expect(body.errors).to.eql([]);
+        expect(body.stats).to.eql({
+          total: validRecords.length,
+          successful: validRecords.length,
+          failed: 0,
+        });
+
+        await Promise.all(validRecords.map(expectAssetCriticalityDocMatching));
+      });
+
+      it('should return a 400 if a record is invalid', async () => {
+        const invalidRecord = {
+          id_field: 'host.name',
+          id_value: 'host-1',
+          criticality_level: 'invalid',
+        } as unknown as CreateAssetCriticalityRecord;
+
+        const validRecord: CreateAssetCriticalityRecord = {
+          id_field: 'host.name',
+          id_value: 'host-2',
+          criticality_level: 'high_impact',
+        };
+
+        await assetCriticalityRoutes.bulkUpload([invalidRecord, validRecord], {
+          expectStatusCode: 400,
+        });
+      });
+    });
+
     describe('delete', () => {
       it('should correctly delete asset criticality', async () => {
         const assetCriticality = {
@@ -201,6 +328,14 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(doc).to.eql(undefined);
+      });
+
+      it('should return 403 if the advanced setting is disabled', async () => {
+        await disableAssetCriticalityAdvancedSetting(kibanaServer, log);
+
+        await assetCriticalityRoutes.delete('host.name', 'doesnt-matter', {
+          expectStatusCode: 403,
+        });
       });
     });
   });

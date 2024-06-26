@@ -6,11 +6,12 @@
  */
 
 import { useEffect, useState } from 'react';
+import { EuiStepsProps } from '@elastic/eui';
 import { type LogsFlowProgressStepId } from '../../common/logs_flow_progress_step_id';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
-import { type EuiStepStatus } from '../components/shared/install_elastic_agent_steps';
-import { useExperimentalOnboardingFlag } from './use_experimental_onboarding_flag';
 import { useKibana } from './use_kibana';
+
+type EuiStepStatus = EuiStepsProps['steps'][number]['status'];
 
 type StepsProgress = Partial<
   Record<LogsFlowProgressStepId, { status: EuiStepStatus; message?: string }>
@@ -23,7 +24,6 @@ export function useFlowProgressTelemetry(progress: StepsProgress | undefined, fl
   const {
     services: { analytics },
   } = useKibana();
-  const experimentalOnboardingFlowEnabled = useExperimentalOnboardingFlag();
   const [previousReportedSteps] = useState<Map<LogsFlowProgressStepId, EuiStepStatus>>(new Map());
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export function useFlowProgressTelemetry(progress: StepsProgress | undefined, fl
       }
 
       analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
-        uses_legacy_onboarding_page: !experimentalOnboardingFlowEnabled,
+        uses_legacy_onboarding_page: false,
         flow: flowId,
         step: stepId,
         step_status: step.status,
@@ -51,5 +51,5 @@ export function useFlowProgressTelemetry(progress: StepsProgress | undefined, fl
       });
       previousReportedSteps.set(stepId, step.status);
     });
-  }, [analytics, experimentalOnboardingFlowEnabled, flowId, progress, previousReportedSteps]);
+  }, [analytics, flowId, progress, previousReportedSteps]);
 }

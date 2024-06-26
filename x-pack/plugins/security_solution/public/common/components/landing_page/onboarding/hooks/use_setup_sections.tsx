@@ -101,14 +101,14 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
               id={currentSection.id}
               data-test-subj={`section-${currentSection.id}`}
             >
-              <span
+              <h2
                 css={css`
                   font-size: ${euiTheme.base * 1.375}px;
                   font-weight: ${euiTheme.font.weight.bold};
                 `}
               >
                 {currentSection.title}
-              </span>
+              </h2>
               <EuiSpacer size="l" />
               <EuiFlexGroup
                 gutterSize="none"

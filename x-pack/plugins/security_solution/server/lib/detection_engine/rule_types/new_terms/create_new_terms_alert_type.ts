@@ -147,7 +147,6 @@ export const createNewTermsAlertType = (
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: params.alertSuppression,
         licensing,
-        isFeatureDisabled: !experimentalFeatures?.alertSuppressionForNewTermsRuleEnabled,
       });
       let afterKey;
 

@@ -306,8 +306,11 @@ export const tlog = (logger: Logger, message: string, meta?: LogMeta) => {
   telemetryLogger(logger, message, meta);
 };
 
-export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
-  return new TelemetryLoggerImpl(logger);
+export const newTelemetryLogger = (
+  logger: Logger,
+  mdc?: LogMeta | object | undefined
+): TelemetryLogger => {
+  return new TelemetryLoggerImpl(logger, mdc);
 };
 
 function obfuscateString(clusterId: string, toHash: string): string {

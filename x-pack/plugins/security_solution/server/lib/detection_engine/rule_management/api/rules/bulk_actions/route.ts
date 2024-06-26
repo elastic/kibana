@@ -8,6 +8,8 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { ConfigType } from '../../../../../../config';
 import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -21,7 +23,6 @@ import {
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -34,7 +35,6 @@ import {
   dryRunValidateBulkEditRule,
   validateBulkDuplicateRule,
 } from '../../../logic/bulk_actions/validations';
-import { deleteRules } from '../../../logic/crud/delete_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import type { BulkActionError } from './bulk_actions_response';
@@ -47,6 +47,7 @@ const MAX_ROUTE_CONCURRENCY = 5;
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
+  config: ConfigType,
   ml: SetupPlugins['ml'],
   logger: Logger
 ) => {
@@ -119,6 +120,7 @@ export const performBulkActionRoute = (
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -143,6 +145,7 @@ export const performBulkActionRoute = (
               ids: body.ids,
               actions: body.edit,
               mlAuthz,
+              experimentalFeatures: config.experimentalFeatures,
             });
 
             return buildBulkResponse(response, {
@@ -200,9 +203,8 @@ export const performBulkActionRoute = (
                     return null;
                   }
 
-                  await deleteRules({
+                  await detectionRulesClient.deleteRule({
                     ruleId: rule.id,
-                    rulesClient,
                   });
 
                   return null;
@@ -303,7 +305,12 @@ export const performBulkActionRoute = (
                 concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
                 items: rules,
                 executor: async (rule) => {
-                  await dryRunValidateBulkEditRule({ mlAuthz, rule, edit: body.edit });
+                  await dryRunValidateBulkEditRule({
+                    mlAuthz,
+                    rule,
+                    edit: body.edit,
+                    experimentalFeatures: config.experimentalFeatures,
+                  });
 
                   return rule;
                 },

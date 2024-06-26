@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('URL capture', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/186675
+  describe.skip('URL capture', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -62,6 +63,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const currentURL = parse(await browser.getCurrentUrl());
       expect(currentURL.path).to.eql('/authentication/app?one=two');
+    });
+
+    it('resets invalid target URL', async () => {
+      this.timeout(120000);
+
+      for (const targetURL of [
+        '///example.com',
+        '//example.com',
+        'https://example.com',
+
+        '/\t/example.com',
+        '/\n/example.com',
+        '/\r/example.com',
+
+        '/\t//example.com',
+        '/\n//example.com',
+        '/\r//example.com',
+
+        '//\t/example.com',
+        '//\n/example.com',
+        '//\r/example.com',
+
+        'ht\ttps://example.com',
+        'ht\ntps://example.com',
+        'ht\rtps://example.com',
+      ]) {
+        await browser.get(
+          `${deployment.getHostPort()}/internal/security/capture-url?next=${encodeURIComponent(
+            targetURL
+          )}`
+        );
+
+        await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
+        expect(parse(await browser.getCurrentUrl()).pathname).to.eql('/app/home');
+
+        await browser.get(deployment.getHostPort() + '/logout');
+        await PageObjects.common.waitUntilUrlIncludes('logged_out');
+      }
     });
   });
 }

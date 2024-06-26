@@ -16,6 +16,7 @@ import {
 import styled from 'styled-components';
 
 export const TabHeaderContainer = styled.div`
+  margin-top: ${(props) => props.theme.eui.euiSizeS};
   width: 100%;
 `;
 
@@ -26,6 +27,7 @@ export const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
+  padding: 0;
 
   &.euiFlyoutHeader {
     ${({ theme }) => `padding: ${theme.eui.euiSizeS} 0 0 0;`}

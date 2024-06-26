@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo } from 'react';
+import React, { FC, PropsWithChildren, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
@@ -56,10 +56,11 @@ const cache = { default: emotionCache, global: globalCache, utility: utilitiesCa
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
  * should not be used.  Instead, refer to `KibanaRootContextProvider` to set up the root of Kibana.
  */
-export const KibanaEuiProvider: FC<KibanaEuiProviderProps> = ({
+export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = ({
   theme: { theme$ },
   globalStyles: globalStylesProp,
   colorMode: colorModeProp,
+  modify,
   children,
 }) => {
   const theme = useObservable(theme$, defaultTheme);
@@ -74,7 +75,7 @@ export const KibanaEuiProvider: FC<KibanaEuiProviderProps> = ({
   const globalStyles = globalStylesProp === false ? false : undefined;
 
   return (
-    <EuiProvider {...{ cache, colorMode, globalStyles, utilityClasses: globalStyles }}>
+    <EuiProvider {...{ cache, modify, colorMode, globalStyles, utilityClasses: globalStyles }}>
       {children}
     </EuiProvider>
   );

@@ -70,9 +70,17 @@
     "@kbn/es-errors",
     "@kbn/search-connectors-plugin",
     "@kbn/search-playground",
+    "@kbn/search-inference-endpoints",
     "@kbn/utility-types",
     "@kbn/index-management",
     "@kbn/deeplinks-search",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-types",
+    "@kbn/cloud",
+    "@kbn/try-in-console",
+    "@kbn/core-chrome-browser",
+    "@kbn/navigation-plugin",
+    "@kbn/search-homepage",
+    "@kbn/security-plugin-types-common"
   ]
 }

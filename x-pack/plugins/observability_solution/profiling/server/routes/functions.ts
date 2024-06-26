@@ -67,6 +67,7 @@ export function registerTopNFunctionsSearchRoute({
         const useStacktracesAPI = await core.uiSettings.client.get<boolean>(
           profilingFetchTopNFunctionsFromStacktraces
         );
+        const totalSeconds = endSecs - startSecs;
 
         const topNFunctions = useStacktracesAPI
           ? await profilingDataAccess.services.fetchFunctions({
@@ -74,7 +75,7 @@ export function registerTopNFunctionsSearchRoute({
               esClient,
               startIndex,
               endIndex,
-              totalSeconds: endSecs - startSecs,
+              totalSeconds,
               query,
             })
           : await profilingDataAccess.services.fetchESFunctions({
@@ -82,6 +83,7 @@ export function registerTopNFunctionsSearchRoute({
               esClient,
               query,
               aggregationField: 'service.name',
+              totalSeconds,
             });
 
         return response.ok({

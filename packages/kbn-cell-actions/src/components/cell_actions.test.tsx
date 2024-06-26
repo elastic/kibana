@@ -39,7 +39,7 @@ describe('CellActions', () => {
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} data={DATA}>
-          Field value
+          {'Field value'}
         </CellActions>
       </CellActionsProvider>
     );
@@ -58,7 +58,7 @@ describe('CellActions', () => {
     const { queryByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <CellActions mode={CellActionsMode.INLINE} triggerId={TRIGGER_ID} data={DATA}>
-          Field value
+          {'Field value'}
         </CellActions>
       </CellActionsProvider>
     );
@@ -77,7 +77,7 @@ describe('CellActions', () => {
     const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <CellActions mode={CellActionsMode.HOVER_DOWN} triggerId={TRIGGER_ID} data={DATA}>
-          Field value
+          {'Field value'}
         </CellActions>
       </CellActionsProvider>
     );
@@ -97,7 +97,7 @@ describe('CellActions', () => {
     const { getByTestId } = render(
       <CellActionsProvider getTriggerCompatibleActions={getActions}>
         <CellActions mode={CellActionsMode.HOVER_RIGHT} triggerId={TRIGGER_ID} data={DATA}>
-          Field value
+          {'Field value'}
         </CellActions>
       </CellActionsProvider>
     );

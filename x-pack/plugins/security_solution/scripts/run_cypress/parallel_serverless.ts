@@ -16,6 +16,7 @@ import cypress from 'cypress';
 import grep from '@cypress/grep/src/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
+import { exec } from 'child_process';
 import { createFailError } from '@kbn/dev-cli-errors';
 import axios, { AxiosError } from 'axios';
 import path from 'path';
@@ -24,9 +25,11 @@ import pRetry from 'p-retry';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
-import { exec } from 'child_process';
+import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
+import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
+import { prefixedOutputLogger } from '../endpoint/common/utils';
 
 import type { ProductType, Credentials, ProjectHandler } from './project_handler/project_handler';
 import { CloudHandler } from './project_handler/cloud_project_handler';
@@ -40,7 +43,11 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
-let log: ToolingLog;
+let log: ToolingLog = new ToolingLog({
+  level: 'info',
+  writeTo: process.stdout,
+});
+
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
@@ -63,7 +70,7 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
 };
 
 // Check if proxy service is up and running executing a healthcheck call.
-function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
+export function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
   const fetchHealthcheck = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
@@ -86,15 +93,17 @@ function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
 }
 
 // Wait until elasticsearch status goes green
-function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
-    const response = await axios.get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
+    const response = await axios
+      .get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
 
     log.info(`${runnerId}: Elasticsearch is ready with status ${response.data.status}.`);
   };
@@ -115,14 +124,20 @@ function waitForEsStatusGreen(esUrl: string, auth: string, runnerId: string): Pr
 }
 
 // Wait until Kibana is available
-function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForKibanaAvailable(
+  kbUrl: string,
+  auth: string,
+  runnerId: string
+): Promise<void> {
   const fetchKibanaStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if kibana is available.`);
-    const response = await axios.get(`${kbUrl}/api/status`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
+    const response = await axios
+      .get(`${kbUrl}/api/status`, {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
     if (response.data.status.overall.level !== 'available') {
       throw new Error(`${runnerId}: Kibana is not available. A retry will be triggered soon...`);
     } else {
@@ -147,15 +162,17 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
 }
 
 // Wait for Elasticsearch to be accessible
-function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
+export function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
   const fetchEsAccessAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if can be accessed.`);
 
-    await axios.get(`${esUrl}`, {
-      headers: {
-        Authorization: `Basic ${auth}`,
-      },
-    });
+    await axios
+      .get(`${esUrl}`, {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
@@ -183,9 +200,11 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 
   const fetchLoginStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if login can be performed.`);
-    axios.post(`${kbUrl}/internal/security/login`, body, {
-      headers: API_HEADERS,
-    });
+    axios
+      .post(`${kbUrl}/internal/security/login`, body, {
+        headers: API_HEADERS,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
@@ -228,12 +247,8 @@ const getProductTypes = (
 export const cli = () => {
   run(
     async (context) => {
-      log = new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      });
-
       // Checking if API key is either provided via env variable or in ~/.elastic.cloud.json
+      // This works for either local executions or fallback in case proxy service is unavailable.
       if (!process.env.CLOUD_QA_API_KEY && !getApiKeyFromElasticCloudJsonFile()) {
         log.error('The API key for the environment needs to be provided with the env var API_KEY.');
         log.error(
@@ -251,10 +266,17 @@ export const cli = () => {
         ? process.env.CLOUD_QA_API_KEY
         : getApiKeyFromElasticCloudJsonFile();
 
+      log.info(`PROXY_URL is defined : ${PROXY_URL !== undefined}`);
+      log.info(`PROXY_CLIENT_ID is defined : ${PROXY_CLIENT_ID !== undefined}`);
+      log.info(`PROXY_SECRET is defined : ${PROXY_SECRET !== undefined}`);
+      log.info(`API_KEY is defined : ${API_KEY !== undefined}`);
+
       let cloudHandler: ProjectHandler;
       if (PROXY_URL && PROXY_CLIENT_ID && PROXY_SECRET && (await proxyHealthcheck(PROXY_URL))) {
+        log.info('Proxy service is up and running, so the tests will run using the proxyHandler.');
         cloudHandler = new ProxyHandler(PROXY_URL, PROXY_CLIENT_ID, PROXY_SECRET);
       } else if (API_KEY) {
+        log.info('Proxy service is unavailable, so the tests will run using the cloudHandler.');
         cloudHandler = new CloudHandler(API_KEY, BASE_ENV_URL);
       } else {
         log.info('PROXY_URL or API KEY which are needed to create project could not be retrieved.');
@@ -329,6 +351,12 @@ ${JSON.stringify(argv, null, 2)}
         );
         cypressConfigFile.env.grepTags = '@serverlessQA --@skipInServerless --@skipInServerlessMKI';
       }
+
+      if (cypressConfigFile.env?.TOOLING_LOG_LEVEL) {
+        createToolingLogger.defaultLogLevel = cypressConfigFile.env.TOOLING_LOG_LEVEL;
+      }
+      // eslint-disable-next-line require-atomic-updates
+      log = prefixedOutputLogger('cy.parallel(svl)', createToolingLogger());
 
       const tier: string = argv.tier;
       const endpointAddon: boolean = argv.endpointAddon;
@@ -411,6 +439,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 ? getProductTypes(tier, endpointAddon, cloudAddon)
                 : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
+              log.info(`Running spec file: ${filePath}`);
               log.info(`${id}: Creating project ${PROJECT_NAME}...`);
               // Creating project for the test to run
               const project = await cloudHandler.createSecurityProject(
@@ -420,7 +449,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               );
 
               if (!project) {
-                log.info('Failed to create project.');
+                log.error('Failed to create project.');
                 // eslint-disable-next-line no-process-exit
                 return process.exit(1);
               }
@@ -437,7 +466,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               const credentials = await cloudHandler.resetCredentials(project.id, id);
 
               if (!credentials) {
-                log.info('Credentials could not be reset.');
+                log.error('Credentials could not be reset.');
                 // eslint-disable-next-line no-process-exit
                 return process.exit(1);
               }
@@ -460,16 +489,21 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // Wait until application is ready
               await waitForKibanaLogin(project.kb_url, credentials);
 
+              // Check if proxy service is used to define which org executes the tests.
+              const proxyOrg =
+                cloudHandler instanceof ProxyHandler ? project.proxy_org_name : undefined;
+              log.info(`Proxy Organization used id : ${proxyOrg}`);
+
               // Normalized the set of available env vars in cypress
               const cyCustomEnv = {
-                CYPRESS_BASE_URL: project.kb_url,
+                BASE_URL: project.kb_url,
 
                 ELASTICSEARCH_URL: project.es_url,
                 ELASTICSEARCH_USERNAME: credentials.username,
                 ELASTICSEARCH_PASSWORD: credentials.password,
 
                 // Used in order to handle the correct role_users file loading.
-                PROXY_ORG: PROXY_URL ? project.proxy_org_name : undefined,
+                PROXY_ORG: proxyOrg,
 
                 KIBANA_URL: project.kb_url,
                 KIBANA_USERNAME: credentials.username,
@@ -478,6 +512,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
                 CLOUD_SERVERLESS: true,
                 IS_SERVERLESS: true,
+                CLOUD_QA_API_KEY: API_KEY,
                 // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
                 TEST_CLOUD: 1,
               };
@@ -506,7 +541,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               } else {
                 try {
                   result = await cypress.run({
-                    browser: 'electron',
+                    browser: 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
@@ -519,6 +554,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                       numTestsKeptInMemory: 0,
                       env: cyCustomEnv,
                     },
+                    runnerUi: !process.env.CI,
                   });
                   if ((result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     failedSpecFilePaths.push(filePath);

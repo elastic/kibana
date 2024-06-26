@@ -14,6 +14,8 @@ export * from './index_statuses';
 // the request is 4096 bytes we can fit a max of 16 indices in a single request.
 export const MAX_INDICES_PER_REQUEST = 16;
 
+export const MAX_DATA_RETENTION = 'max_retention';
+
 export {
   UIM_APP_NAME,
   UIM_APP_LOAD,

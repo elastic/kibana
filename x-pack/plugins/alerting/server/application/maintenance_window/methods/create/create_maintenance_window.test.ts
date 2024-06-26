@@ -8,7 +8,11 @@
 import moment from 'moment-timezone';
 import { createMaintenanceWindow } from './create_maintenance_window';
 import { CreateMaintenanceWindowParams } from './types';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { SavedObject } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
@@ -19,6 +23,7 @@ import type { MaintenanceWindow } from '../../types';
 import { FilterStateStore } from '@kbn/es-query';
 
 const savedObjectsClient = savedObjectsClientMock.create();
+const uiSettings = uiSettingsServiceMock.createClient();
 
 const updatedMetadata = {
   createdAt: '2023-03-26T00:00:00.000Z',
@@ -31,6 +36,7 @@ const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
   getModificationMetadata: jest.fn(),
   savedObjectsClient,
+  uiSettings,
 };
 
 describe('MaintenanceWindowClient - create', () => {
@@ -223,6 +229,21 @@ describe('MaintenanceWindowClient - create', () => {
     ).toMatchInlineSnapshot(
       `"{\\"bool\\":{\\"must\\":[],\\"filter\\":[{\\"bool\\":{\\"should\\":[{\\"match\\":{\\"_id\\":\\"'1234'\\"}}],\\"minimum_should_match\\":1}},{\\"match_phrase\\":{\\"kibana.alert.action_group\\":\\"test\\"}}],\\"should\\":[],\\"must_not\\":[]}}"`
     );
+
+    expect(uiSettings.get).toHaveBeenCalledTimes(3);
+    expect(uiSettings.get.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "query:allowLeadingWildcards",
+        ],
+        Array [
+          "query:queryString:options",
+        ],
+        Array [
+          "courier:ignoreFilterIfFieldNotInIndex",
+        ],
+      ]
+    `);
   });
 
   it('should throw if trying to create a maintenance window with invalid scoped query', async () => {

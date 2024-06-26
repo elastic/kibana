@@ -90,21 +90,21 @@ export async function getTransactionDurationChartPreview({
   const allGroupByFields = getAllGroupByFields(ApmRuleType.TransactionDuration, groupByFields);
 
   const aggs = {
-    timeseries: {
-      date_histogram: {
-        field: '@timestamp',
-        fixed_interval: interval,
-        min_doc_count: 0,
-        extended_bounds: {
-          min: start,
-          max: end,
-        },
+    series: {
+      multi_terms: {
+        terms: getGroupByTerms(allGroupByFields),
+        size: 1000,
       },
       aggs: {
-        series: {
-          multi_terms: {
-            terms: [...getGroupByTerms(allGroupByFields)],
-            size: 1000,
+        timeseries: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: interval,
+            min_doc_count: 0,
+            extended_bounds: {
+              min: start,
+              max: end,
+            },
             ...getMultiTermsSortOrder(aggregationType),
           },
           aggs: {
@@ -130,14 +130,14 @@ export async function getTransactionDurationChartPreview({
     return { series: [], totalGroups: 0 };
   }
 
-  const seriesDataMap = resp.aggregations.timeseries.buckets.reduce((acc, bucket) => {
-    const x = bucket.key;
-    bucket.series.buckets.forEach((seriesBucket) => {
-      const bucketKey = seriesBucket.key.join('_');
+  const seriesDataMap = resp.aggregations.series.buckets.reduce((acc, bucket) => {
+    const bucketKey = bucket.key.join('_');
+    bucket.timeseries.buckets.forEach((timeseriesBucket) => {
+      const x = timeseriesBucket.key;
       const y =
-        'avgLatency' in seriesBucket
-          ? seriesBucket.avgLatency.value
-          : seriesBucket.pctLatency.values[0].value;
+        'avgLatency' in timeseriesBucket
+          ? timeseriesBucket.avgLatency.value
+          : timeseriesBucket.pctLatency.values[0].value;
       if (acc[bucketKey]) {
         acc[bucketKey].push({ x, y });
       } else {

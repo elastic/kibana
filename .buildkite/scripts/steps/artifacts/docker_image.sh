@@ -17,9 +17,6 @@ KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 echo "Checking manifest for $KIBANA_IMAGE"
 if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
@@ -30,15 +27,10 @@ echo "--- Build Kibana"
 node scripts/build \
   --debug \
   --release \
+  --serverless \
   --docker-cross-compile \
-  --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="$KIBANA_IMAGE_TAG" \
-  --skip-docker-ubuntu \
-  --skip-docker-ubi \
-  --skip-docker-fips \
-  --skip-docker-cloud \
-  --skip-docker-contexts
+  --docker-tag="$KIBANA_IMAGE_TAG"
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
@@ -67,8 +59,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
     --amend "$KIBANA_IMAGE-amd64"
   docker manifest push "$KIBANA_BASE_IMAGE:latest"
 fi
-
-docker logout docker.elastic.co
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
   ### Serverless Images
@@ -99,25 +89,16 @@ gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMM
 gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
 echo "--- Validate CDN assets"
-(
-  shopt -s globstar
-  THREADS=$(grep -c ^processor /proc/cpuinfo)
-  i=0
-  cd $CDN_ASSETS_FOLDER
-  for CDN_ASSET in **/*; do
-    ((i=(i+1)%THREADS)) || wait
-    if [[ -f "$CDN_ASSET" ]]; then
-      echo -n "Testing $CDN_ASSET..."
-      curl -I --write-out '%{http_code}\n' --fail --silent --output /dev/null "$GCS_SA_CDN_URL/$CDN_ASSET"
-    fi
-  done
-)
+ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  "$GCS_SA_CDN_URL" \
+  "$CDN_ASSETS_FOLDER"
 
 echo "--- Upload archives"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-x86_64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 

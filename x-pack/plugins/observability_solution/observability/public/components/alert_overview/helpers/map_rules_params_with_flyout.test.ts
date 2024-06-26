@@ -103,13 +103,13 @@ describe('Map rules params with flyout', () => {
             excludeHitsFromPreviousRun: false,
           },
           'kibana.alert.evaluation.value': 100870655162.18182,
-          'kibana.alert.evaluation.threshold': 1,
+          'kibana.alert.evaluation.threshold': [1],
         },
       },
       results: [
         {
           observedValue: [100870655162.18182],
-          threshold: [1],
+          threshold: '1',
           comparator: '>',
           pctAboveThreshold: ' (10087065516118.18% above the threshold)',
         },
@@ -149,7 +149,7 @@ describe('Map rules params with flyout', () => {
           observedValue: [4577],
           threshold: [100],
           comparator: 'more than',
-          pctAboveThreshold: ' (4477% above the threshold)',
+          pctAboveThreshold: ' (4477% more than the threshold)',
         },
       ],
     },
@@ -215,9 +215,47 @@ describe('Map rules params with flyout', () => {
       results: [
         {
           observedValue: '10.4 Mbit',
-          threshold: ['3 Mbit'],
+          threshold: '3 Mbit',
           comparator: '>',
           pctAboveThreshold: ' (247.54% above the threshold)',
+        },
+      ],
+    },
+    {
+      ruleType: 'metrics.alert.inventory.threshold',
+      alert: {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
+          'kibana.alert.rule.parameters': {
+            nodeType: 'host',
+            criteria: [
+              {
+                metric: 'rx',
+                comparator: '<',
+                threshold: [90],
+                timeSize: 1,
+                timeUnit: 'm',
+                customMetric: {
+                  type: 'custom',
+                  id: 'alert-custom-metric',
+                  field: 'system.memory.used.pct',
+                  aggregation: 'avg',
+                },
+              },
+            ],
+            sourceId: 'default',
+          },
+
+          'kibana.alert.evaluation.value': [130.4],
+          'kibana.alert.evaluation.threshold': 3000000,
+        },
+      },
+      results: [
+        {
+          comparator: '<',
+          observedValue: '13,040%',
+          pctAboveThreshold: ' (14388.89% below the threshold)',
+          threshold: '9,000%',
         },
       ],
     },

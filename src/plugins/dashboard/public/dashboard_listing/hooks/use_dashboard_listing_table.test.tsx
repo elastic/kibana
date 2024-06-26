@@ -154,7 +154,9 @@ describe('useDashboardListingTable', () => {
         onSave: expect.any(Function),
         isReadonly: false,
         customValidators: expect.any(Object),
+        showActivityView: true,
       },
+      createdByEnabled: true,
     };
 
     expect(tableListViewTableProps).toEqual(expectedProps);

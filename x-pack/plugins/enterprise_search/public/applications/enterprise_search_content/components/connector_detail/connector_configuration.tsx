@@ -28,6 +28,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
 
+import { EXAMPLE_CONNECTOR_SERVICE_TYPES } from '../../../../../common/constants';
+
 import { Status } from '../../../../../common/types/api';
 import { BetaConnectorCallout } from '../../../shared/beta/beta_connector_callout';
 import { useCloudDetails } from '../../../shared/cloud_details/cloud_details';
@@ -39,12 +41,14 @@ import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
 import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
-import { SyncsContextMenu } from '../search_index/components/header_actions/syncs_context_menu';
+import { isLastSeenOld } from '../../utils/connector_status_helpers';
+import { isAdvancedSyncRuleSnippetEmpty } from '../../utils/sync_rules_helpers';
 import { ApiKeyConfig } from '../search_index/connector/api_key_configuration';
 
 import { getConnectorTemplate } from '../search_index/connector/constants';
 
 import { ConnectorFilteringLogic } from '../search_index/connector/sync_rules/connector_filtering_logic';
+import { SyncsContextMenu } from '../shared/header_actions/syncs_context_menu';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
@@ -64,6 +68,7 @@ export const ConnectorConfiguration: React.FC = () => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { errorConnectingMessage, http } = useValues(HttpLogic);
   const { advancedSnippet } = useValues(ConnectorFilteringLogic);
+  const isAdvancedSnippetEmpty = isAdvancedSyncRuleSnippetEmpty(advancedSnippet);
 
   const { connectorTypes } = useValues(KibanaLogic);
   const BETA_CONNECTORS = useMemo(
@@ -86,13 +91,41 @@ export const ConnectorConfiguration: React.FC = () => {
     ({ serviceType }) => serviceType === connector.service_type
   )?.docsUrl;
 
-  const isBeta =
-    !connector.service_type ||
-    Boolean(BETA_CONNECTORS.find(({ serviceType }) => serviceType === connector.service_type));
+  const isBeta = Boolean(
+    BETA_CONNECTORS.find(({ serviceType }) => serviceType === connector.service_type)
+  );
 
   return (
     <>
       <EuiSpacer />
+      {
+        // TODO remove this callout when example status is removed
+        connector &&
+          connector.service_type &&
+          EXAMPLE_CONNECTOR_SERVICE_TYPES.includes(connector.service_type) && (
+            <>
+              <EuiCallOut
+                iconType="iInCircle"
+                color="warning"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.title',
+                  {
+                    defaultMessage: 'Example connector',
+                  }
+                )}
+              >
+                <EuiSpacer size="s" />
+                <EuiText size="s">
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.content.connectors.overview.connectorUnsupportedCallOut.description"
+                    defaultMessage="This is an example connector that serves as a building block for customizations. The design and code is being provided as-is with no warranties. This is not subject to the SLA of supported features."
+                  />
+                </EuiText>
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          )
+      }
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiPanel hasShadow={false} hasBorder>
@@ -131,7 +164,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           <EuiText size="s">
                             <FormattedMessage
                               id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.description.thirdParagraph"
-                              defaultMessage="In this step, you will need to clone or fork the elastic/connectors repository, and copy the API key and connector ID values to the config.yml file. Here's an {exampleLink}."
+                              defaultMessage="In this step, you will need the API key and connector ID values for your config.yml file. Here's an {exampleLink}."
                               values={{
                                 exampleLink: (
                                   <EuiLink
@@ -250,50 +283,54 @@ export const ConnectorConfiguration: React.FC = () => {
                               </EuiButton>
                             </EuiCallOut>
                           ) : (
-                            <EuiCallOut
-                              iconType="check"
-                              color="success"
-                              title={i18n.translate(
-                                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorConnected',
-                                {
-                                  defaultMessage:
-                                    'Your connector {name} has connected to Search successfully.',
-                                  values: { name: connector.name },
-                                }
-                              )}
-                            />
+                            !isLastSeenOld(connector) && (
+                              <EuiCallOut
+                                iconType="check"
+                                color="success"
+                                title={i18n.translate(
+                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.connectorConnected',
+                                  {
+                                    defaultMessage:
+                                      'Your connector {name} has connected to Search successfully.',
+                                    values: { name: connector.name },
+                                  }
+                                )}
+                              />
+                            )
                           )}
                           <EuiSpacer size="s" />
-                          {connector.status && hasAdvancedFilteringFeature && !!advancedSnippet && (
-                            <EuiCallOut
-                              title={i18n.translate(
-                                'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
-                                { defaultMessage: 'Configuration warning' }
-                              )}
-                              iconType="iInCircle"
-                              color="warning"
-                            >
-                              <FormattedMessage
-                                id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
-                                defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
-                                values={{
-                                  advancedSyncRulesDocs: (
-                                    <EuiLink
-                                      data-test-subj="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
-                                      data-telemetry-id="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
-                                      href={docLinks.syncRules}
-                                      target="_blank"
-                                    >
-                                      {i18n.translate(
-                                        'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
-                                        { defaultMessage: 'Advanced Sync Rules' }
-                                      )}
-                                    </EuiLink>
-                                  ),
-                                }}
-                              />
-                            </EuiCallOut>
-                          )}
+                          {connector.status &&
+                            hasAdvancedFilteringFeature &&
+                            !isAdvancedSnippetEmpty && (
+                              <EuiCallOut
+                                title={i18n.translate(
+                                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
+                                  { defaultMessage: 'Configuration warning' }
+                                )}
+                                iconType="iInCircle"
+                                color="warning"
+                              >
+                                <FormattedMessage
+                                  id="xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+                                  defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
+                                  values={{
+                                    advancedSyncRulesDocs: (
+                                      <EuiLink
+                                        data-test-subj="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+                                        data-telemetry-id="entSearchContent-connector-configuration-advancedSyncRulesDocsLink"
+                                        href={docLinks.syncRules}
+                                        target="_blank"
+                                      >
+                                        {i18n.translate(
+                                          'xpack.enterpriseSearch.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                                          { defaultMessage: 'Advanced Sync Rules' }
+                                        )}
+                                      </EuiLink>
+                                    ),
+                                  }}
+                                />
+                              </EuiCallOut>
+                            )}
                         </ConnectorConfigurationComponent>
                       ),
                       status:

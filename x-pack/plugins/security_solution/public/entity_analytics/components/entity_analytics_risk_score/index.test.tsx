@@ -34,11 +34,11 @@ jest.mock('../../../common/lib/kibana', () => {
 });
 
 const mockSeverityCount: SeverityCount = {
-  [RiskSeverity.low]: 1,
-  [RiskSeverity.high]: 1,
-  [RiskSeverity.moderate]: 1,
-  [RiskSeverity.unknown]: 1,
-  [RiskSeverity.critical]: 1,
+  [RiskSeverity.Low]: 1,
+  [RiskSeverity.High]: 1,
+  [RiskSeverity.Moderate]: 1,
+  [RiskSeverity.Unknown]: 1,
+  [RiskSeverity.Critical]: 1,
 };
 
 const mockUseQueryToggle = jest
@@ -68,8 +68,6 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
     useNavigateToAlertsPageWithFilters: () => mockOpenAlertsPageWithFilters,
   };
 });
-
-jest.mock('../../../common/components/hover_actions', () => ({ HoverActions: () => null }));
 
 const mockOpenRightPanel = jest.fn();
 jest.mock('@kbn/expandable-flyout', () => {
@@ -170,7 +168,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
             name: 'testUsername',
             risk: {
               rule_risks: [],
-              calculated_level: RiskSeverity.high,
+              calculated_level: RiskSeverity.High,
               calculated_score_norm: 75,
               multipliers: [],
             },
@@ -205,7 +203,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
             name,
             risk: {
               rule_risks: [],
-              calculated_level: RiskSeverity.high,
+              calculated_level: RiskSeverity.High,
               calculated_score_norm: 75,
               multipliers: [],
             },
@@ -234,8 +232,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/179234
-    it.skip('opens the expandable flyout when entity name is clicked', async () => {
+    it('opens the expandable flyout when entity name is clicked', async () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
       mockUseRiskScoreKpi.mockReturnValue({
         severityCount: mockSeverityCount,
@@ -249,7 +246,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
             name,
             risk: {
               rule_risks: [],
-              calculated_level: RiskSeverity.high,
+              calculated_level: RiskSeverity.High,
               calculated_score_norm: 75,
               multipliers: [],
             },
@@ -259,17 +256,21 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
       ];
       mockUseRiskScore.mockReturnValue({ ...defaultProps, data });
 
-      const { getByTestId } = render(
+      const { getByTestId, queryByTestId } = render(
         <TestProviders>
           <EntityAnalyticsRiskScores riskEntity={riskEntity} />
         </TestProviders>
       );
 
-      fireEvent.click(
-        getByTestId(
-          riskEntity === RiskScoreEntity.host ? `host-details-button` : `users-link-anchor`
-        )
+      await waitFor(() => {
+        expect(queryByTestId('loadingPanelRiskScore')).not.toBeInTheDocument();
+      });
+
+      const detailsButton = getByTestId(
+        riskEntity === RiskScoreEntity.host ? `host-details-button` : `users-link-anchor`
       );
+
+      fireEvent.click(detailsButton);
 
       await waitFor(() => {
         expect(mockOpenRightPanel).toHaveBeenCalledWith({

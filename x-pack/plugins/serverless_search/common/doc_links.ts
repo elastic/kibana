@@ -52,6 +52,14 @@ class ESDocLinks {
   public gettingStartedSearch: string = '';
   public gettingStartedExplore: string = '';
 
+  // Ingest processor
+  public dataEnrichment: string = '';
+  public dataFiltering: string = '';
+  public arrayOrJson: string = '';
+  public dataTransformation: string = '';
+  public pipelineHandling: string = '';
+  public pipelines: string = '';
+
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
@@ -94,7 +102,7 @@ class ESDocLinks {
     this.pythonApiReference = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonBasicConfig = newDocLinks.serverlessClients.pythonGettingStarted;
     this.pythonClient = newDocLinks.serverlessClients.pythonGettingStarted;
-    // Python
+    // Ruby
     this.rubyBasicConfig = newDocLinks.serverlessClients.rubyGettingStarted;
     this.rubyExamples = newDocLinks.serverlessClients.rubyApiReference;
     this.rubyClient = newDocLinks.serverlessClients.rubyGettingStarted;
@@ -103,6 +111,14 @@ class ESDocLinks {
     this.gettingStartedIngest = newDocLinks.serverlessSearch.gettingStartedIngest;
     this.gettingStartedSearch = newDocLinks.serverlessSearch.gettingStartedSearch;
     this.gettingStartedExplore = newDocLinks.serverlessSearch.gettingStartedExplore;
+
+    // Ingest processor
+    this.dataEnrichment = newDocLinks.ingest.dataEnrichment;
+    this.dataFiltering = newDocLinks.ingest.dataFiltering;
+    this.arrayOrJson = newDocLinks.ingest.arrayOrJson;
+    this.dataTransformation = newDocLinks.ingest.dataTransformation;
+    this.pipelineHandling = newDocLinks.ingest.pipelineHandling;
+    this.pipelines = newDocLinks.ingest.pipelines;
   }
 }
 

@@ -233,6 +233,17 @@ export class UnifiedFieldListPageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
   }
 
+  public async clickFieldListExistsFilter(field: string) {
+    const existsFilterTestSubj = `discoverFieldListPanelAddExistFilter-${field}`;
+    if (!(await this.testSubjects.exists(existsFilterTestSubj))) {
+      // field has to be open
+      await this.clickFieldListItem(field);
+    }
+    // this.testSubjects.find doesn't handle spaces in the data-test-subj value
+    await this.testSubjects.click(existsFilterTestSubj);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async openSidebarFieldFilter() {
     await this.testSubjects.click('fieldListFiltersFieldTypeFilterToggle');
     await this.testSubjects.existOrFail('fieldListFiltersFieldTypeFilterOptions');

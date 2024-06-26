@@ -7,7 +7,7 @@
 
 import { KnowledgeBaseConfig } from '../assistant/types';
 
-export const AI_INSIGHTS_STORAGE_KEY = 'aiInsights';
+export const ATTACK_DISCOVERY_STORAGE_KEY = 'attackDiscovery';
 export const DEFAULT_ASSISTANT_NAMESPACE = 'elasticAssistantDefault';
 export const QUICK_PROMPT_LOCAL_STORAGE_KEY = 'quickPrompts';
 export const SYSTEM_PROMPT_LOCAL_STORAGE_KEY = 'systemPrompts';

@@ -178,11 +178,11 @@ export const Tabs: React.FC<TabsProps> = ({
     docLinks,
     dataViewFieldEditor,
     overlays,
-    theme,
     dataViews,
     http,
     application,
     savedObjectsManagement,
+    ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
   const [syncingStateFunc, setSyncingStateFunc] = useState<{
@@ -308,8 +308,8 @@ export const Tabs: React.FC<TabsProps> = ({
   }, []);
 
   const openFieldEditor = useCallback(
-    (fieldName?: string) => {
-      closeEditorHandler.current = dataViewFieldEditor.openEditor({
+    async (fieldName?: string) => {
+      closeEditorHandler.current = await dataViewFieldEditor.openEditor({
         ctx: {
           dataView: indexPattern,
         },
@@ -377,7 +377,7 @@ export const Tabs: React.FC<TabsProps> = ({
                     isOpen={isIndexedFilterOpen}
                     closePopover={() => setIsIndexedFilterOpen(false)}
                   >
-                    {indexedFieldTypes.map((item, index) => {
+                    {indexedFieldTypes.map((item) => {
                       const isSelected = filteredIndexedFieldTypeFilter.includes(item.value);
                       return (
                         <EuiFilterSelectItem
@@ -582,8 +582,8 @@ export const Tabs: React.FC<TabsProps> = ({
                       getFieldInfo,
                     }}
                     openModal={overlays.openModal}
-                    theme={theme}
                     userEditPermission={dataViews.getCanSaveSync()}
+                    startServices={startServices}
                   />
                 )}
               </DeleteRuntimeFieldProvider>
@@ -661,7 +661,7 @@ export const Tabs: React.FC<TabsProps> = ({
       DeleteRuntimeFieldProvider,
       refreshFields,
       overlays,
-      theme,
+      startServices,
       dataViews,
       compositeRuntimeFields,
       http,

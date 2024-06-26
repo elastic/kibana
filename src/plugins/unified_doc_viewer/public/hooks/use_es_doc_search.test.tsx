@@ -87,7 +87,7 @@ describe('Test of <Doc /> helper / hook', () => {
           "fields": Array [
             Object {
               "field": "*",
-              "include_unmapped": "true",
+              "include_unmapped": true,
             },
           ],
           "query": Object {
@@ -131,7 +131,7 @@ describe('Test of <Doc /> helper / hook', () => {
           "fields": Array [
             Object {
               "field": "*",
-              "include_unmapped": "true",
+              "include_unmapped": true,
             },
           ],
           "query": Object {
@@ -185,7 +185,7 @@ describe('Test of <Doc /> helper / hook', () => {
           "fields": Array [
             Object {
               "field": "*",
-              "include_unmapped": "true",
+              "include_unmapped": true,
             },
           ],
           "query": Object {

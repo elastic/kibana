@@ -32,7 +32,7 @@ import {
   UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
@@ -310,9 +310,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     data,
     maps,
     embeddable,
-    discover,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,
@@ -325,9 +323,7 @@ export const IndexDataVisualizer: FC<Props> = ({
     data,
     maps,
     embeddable,
-    discover,
     share,
-    security,
     fileUpload,
     lens,
     dataViewFieldEditor,

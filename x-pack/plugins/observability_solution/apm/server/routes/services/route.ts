@@ -372,7 +372,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
     }),
     query: t.intersection([environmentRt, rangeRt]),
   }),
-  options: { tags: ['access:apm'] },
+  options: { tags: ['access:apm', 'oas-tag:APM annotations'] },
   handler: async (resources): Promise<ServiceAnnotationResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, plugins, context, request, logger, config } = resources;
@@ -416,7 +416,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
 const serviceAnnotationsCreateRoute = createApmServerRoute({
   endpoint: 'POST /api/apm/services/{serviceName}/annotation 2023-10-31',
   options: {
-    tags: ['access:apm', 'access:apm_write'],
+    tags: ['access:apm', 'access:apm_write', 'oas-tag:APM annotations'],
   },
   params: t.type({
     path: t.type({
@@ -761,8 +761,17 @@ export const serviceDependenciesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   async handler(resources): Promise<{ serviceDependencies: ServiceDependenciesResponse }> {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const { serviceName } = params.path;
     const { environment, numBuckets, start, end, offset } = params.query;
 
@@ -775,6 +784,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
         environment,
         numBuckets,
         offset,
+        randomSampler,
       }),
     };
   },
@@ -796,8 +806,17 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
   ): Promise<{
     breakdown: ServiceDependenciesBreakdownResponse;
   }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
+    const [apmEventClient, randomSampler] = await Promise.all([
+      getApmEventClient(resources),
+      getRandomSampler({ security, request, probability: 1 }),
+    ]);
+
     const { serviceName } = params.path;
     const { environment, start, end, kuery } = params.query;
 
@@ -808,6 +827,7 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
       serviceName,
       environment,
       kuery,
+      randomSampler,
     });
 
     return {

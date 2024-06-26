@@ -15,7 +15,8 @@ import { Assign, Ensure } from '@kbn/utility-types';
 import { ExpressionAstExpression, ExpressionAstArgument } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
-import type { ISearchOptions, ISearchSource } from '../../../public';
+import { ISearchOptions } from '@kbn/search-types';
+import type { ISearchSource } from '../../../public';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';

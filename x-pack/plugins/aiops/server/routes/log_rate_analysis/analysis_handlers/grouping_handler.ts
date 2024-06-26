@@ -21,10 +21,10 @@ import {
 import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
 
 import {
-  addSignificantItemsGroupAction,
-  addSignificantItemsGroupHistogramAction,
-  updateLoadingStateAction,
-} from '@kbn/aiops-log-rate-analysis/api/actions';
+  addSignificantItemsGroup,
+  addSignificantItemsGroupHistogram,
+  updateLoadingState,
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
 import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
@@ -46,7 +46,6 @@ export const groupingHandlerFactory =
     logDebugMessage,
     logger,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async (
     significantCategories: SignificantItem[],
@@ -57,7 +56,7 @@ export const groupingHandlerFactory =
 
     function pushHistogramDataLoadingState() {
       responseStream.push(
-        updateLoadingStateAction({
+        updateLoadingState({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
@@ -71,7 +70,7 @@ export const groupingHandlerFactory =
     }
 
     responseStream.push(
-      updateLoadingStateAction({
+      updateLoadingState({
         ccsWarning: false,
         loaded: stateHandler.loaded(),
         loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.groupingResults', {
@@ -134,7 +133,7 @@ export const groupingHandlerFactory =
         const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
         if (maxItems > 1) {
-          responseStream.push(addSignificantItemsGroupAction(significantItemGroups, version));
+          responseStream.push(addSignificantItemsGroup(significantItemGroups));
         }
 
         stateHandler.loaded(PROGRESS_STEP_GROUPING, false);
@@ -203,15 +202,6 @@ export const groupingHandlerFactory =
                   doc_count: 0,
                 };
 
-                if (version === '1') {
-                  return {
-                    key: o.key,
-                    key_as_string: o.key_as_string ?? '',
-                    doc_count_significant_term: current.doc_count,
-                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                  };
-                }
-
                 return {
                   key: o.key,
                   key_as_string: o.key_as_string ?? '',
@@ -221,20 +211,17 @@ export const groupingHandlerFactory =
               }) ?? [];
 
             responseStream.push(
-              addSignificantItemsGroupHistogramAction(
-                [
-                  {
-                    id: cpg.id,
-                    histogram,
-                  },
-                ],
-                version
-              )
+              addSignificantItemsGroupHistogram([
+                {
+                  id: cpg.id,
+                  histogram,
+                },
+              ])
             );
           }
         }, MAX_CONCURRENT_QUERIES);
 
-        groupHistogramQueue.push(significantItemGroups);
+        await groupHistogramQueue.push(significantItemGroups);
         await groupHistogramQueue.drain();
       }
     } catch (e) {

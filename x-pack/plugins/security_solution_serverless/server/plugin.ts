@@ -30,7 +30,7 @@ import { getProductProductFeaturesConfigurator, getSecurityProductTier } from '.
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import {
   endpointMeteringService,
-  setEndpointPackagePolicyServerlessFlag,
+  setEndpointPackagePolicyServerlessBillingFlags,
 } from './endpoint/services';
 import { enableRuleActions } from './rules/enable_rule_actions';
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
@@ -104,9 +104,6 @@ export class SecuritySolutionServerlessPlugin
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloud,
-      options: {
-        lookBackLimitMinutes: ENDPOINT_METERING_TASK.LOOK_BACK_LIMIT_MINUTES,
-      },
     });
 
     this.nlpCleanupTask = new NLPCleanupTask({
@@ -125,23 +122,27 @@ export class SecuritySolutionServerlessPlugin
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;
     const internalSOClient = coreStart.savedObjects.createInternalRepository();
 
-    this.cloudSecurityUsageReportingTask?.start({
-      taskManager: pluginsSetup.taskManager,
-      interval: cloudSecurityMetringTaskProperties.interval,
-    });
+    this.cloudSecurityUsageReportingTask
+      ?.start({
+        taskManager: pluginsSetup.taskManager,
+        interval: cloudSecurityMetringTaskProperties.interval,
+      })
+      .catch(() => {});
 
-    this.endpointUsageReportingTask?.start({
-      taskManager: pluginsSetup.taskManager,
-      interval: ENDPOINT_METERING_TASK.INTERVAL,
-    });
+    this.endpointUsageReportingTask
+      ?.start({
+        taskManager: pluginsSetup.taskManager,
+        interval: this.config.usageReportingTaskInterval,
+      })
+      .catch(() => {});
 
-    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager });
+    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
 
-    setEndpointPackagePolicyServerlessFlag(
+    setEndpointPackagePolicyServerlessBillingFlags(
       internalSOClient,
       internalESClient,
       pluginsSetup.fleet.packagePolicyService
-    );
+    ).catch(() => {});
     return {};
   }
 

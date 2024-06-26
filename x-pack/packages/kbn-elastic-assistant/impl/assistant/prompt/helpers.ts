@@ -84,7 +84,7 @@ export function getCombinedMessage({
     // trim ensures any extra \n and other whitespace is removed
     content: content.trim(),
     role: 'user', // we are combining the system and user messages into one message
-    timestamp: new Date().toLocaleString(),
+    timestamp: new Date().toISOString(),
     replacements,
   };
 }

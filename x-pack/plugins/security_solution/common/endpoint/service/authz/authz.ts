@@ -53,6 +53,7 @@ function hasAuthFactory(fleetAuthz: FleetAuthz, productFeatureService?: ProductF
  * @param licenseService
  * @param fleetAuthz
  * @param userRoles
+ * @param productFeaturesService
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
@@ -90,6 +91,7 @@ export const calculateEndpointAuthz = (
   const canWriteFileOperations = hasAuth('writeFileOperations');
 
   const canWriteExecuteOperations = hasAuth('writeExecuteOperations');
+  const canWriteScanOperations = hasAuth('writeScanOperations');
 
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
@@ -98,6 +100,9 @@ export const calculateEndpointAuthz = (
     canWriteSecuritySolution,
     canReadSecuritySolution,
     canAccessFleet: fleetAuthz?.fleet.all ?? false,
+    canReadFleetAgentPolicies: fleetAuthz?.fleet.readAgentPolicies ?? false,
+    canWriteFleetAgents: fleetAuthz?.fleet.allAgents ?? false,
+    canReadFleetAgents: fleetAuthz?.fleet.readAgents ?? false,
     canAccessEndpointManagement: hasEndpointManagementAccess, // TODO: is this one deprecated? it is the only place we need to check for superuser.
     canCreateArtifactsByPolicy: isPlatinumPlusLicense,
     canWriteEndpointList,
@@ -119,6 +124,7 @@ export const calculateEndpointAuthz = (
     canAccessResponseConsole: false, // set further below
     canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
+    canWriteScanOperations: canWriteScanOperations && isEnterpriseLicense,
 
     // ---------------------------------------------------------
     // artifacts
@@ -157,6 +163,9 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteSecuritySolution: false,
     canReadSecuritySolution: false,
     canAccessFleet: false,
+    canReadFleetAgentPolicies: false,
+    canReadFleetAgents: false,
+    canWriteFleetAgents: false,
     canAccessEndpointActionsLogManagement: false,
     canAccessEndpointManagement: false,
     canCreateArtifactsByPolicy: false,
@@ -174,6 +183,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canAccessResponseConsole: false,
     canWriteFileOperations: false,
     canWriteExecuteOperations: false,
+    canWriteScanOperations: false,
     canWriteTrustedApplications: false,
     canReadTrustedApplications: false,
     canWriteHostIsolationExceptions: false,

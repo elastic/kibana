@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RISK_SCORE_TITLE_TEST_ID, RISK_SCORE_VALUE_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 /**
  * Document details risk score displayed in flyout right section header
  */
-export const RiskScore: FC = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+export const RiskScore = memo(() => {
+  const { getFieldsData } = useDocumentDetailsContext();
   const fieldsData = getFieldsData(ALERT_RISK_SCORE);
 
   if (!fieldsData) {

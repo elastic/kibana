@@ -36,4 +36,4 @@ An example response for a successfully queued report:
 ---------------------------------------------------------
 
 <1> The relative path on the {kib} host for downloading the report.
-<2> (Not included in the example) Internal representation of the reporting job, as found in the `.reporting-*` index.
+<2> (Not included in the example) Internal representation of the reporting job, as found in the `.reporting-*` storage.

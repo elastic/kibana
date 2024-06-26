@@ -9,7 +9,6 @@
 import {
   createServerMock,
   getServerOptionsMock,
-  getListenerOptionsMock,
   hapiStartMock,
   hapiStopMock,
   hapiRouteMock,
@@ -54,9 +53,6 @@ describe('Server', () => {
       expect(createServerMock).toHaveBeenCalledTimes(1);
       expect(getServerOptionsMock).toHaveBeenCalledTimes(1);
       expect(getServerOptionsMock.mock.calls[0][0]).toEqual(
-        expect.objectContaining({ ...mockConfig })
-      );
-      expect(getListenerOptionsMock.mock.calls[0][0]).toEqual(
         expect.objectContaining({ ...mockConfig })
       );
     });

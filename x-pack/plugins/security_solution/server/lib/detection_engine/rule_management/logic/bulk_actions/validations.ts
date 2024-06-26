@@ -6,6 +6,7 @@
  */
 
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExperimentalFeatures } from '../../../../../../common';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { isEsqlRule } from '../../../../../../common/detection_engine/utils';
@@ -16,7 +17,7 @@ import type {
 } from '../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
-import { isIndexPatternsBulkEditAction } from './utils';
+import { isIndexPatternsBulkEditAction, isInvestigationFieldsBulkEditAction } from './utils';
 import { throwDryRunError } from './dry_run';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -37,6 +38,7 @@ interface DryRunBulkEditBulkActionsValidationArgs {
   rule: RuleAlertType;
   mlAuthz: MlAuthz;
   edit: BulkActionEditPayload[];
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -113,6 +115,7 @@ export const dryRunValidateBulkEditRule = async ({
   rule,
   edit,
   mlAuthz,
+  experimentalFeatures,
 }: DryRunBulkEditBulkActionsValidationArgs) => {
   await validateBulkEditRule({
     ruleType: rule.params.type,
@@ -141,5 +144,16 @@ export const dryRunValidateBulkEditRule = async ({
         "ES|QL rule doesn't have index patterns"
       ),
     BulkActionsDryRunErrCode.ESQL_INDEX_PATTERN
+  );
+
+  // check whether "custom highlighted fields" feature is enabled
+  await throwDryRunError(
+    () =>
+      invariant(
+        experimentalFeatures.bulkCustomHighlightedFieldsEnabled ||
+          !edit.some((action) => isInvestigationFieldsBulkEditAction(action.type)),
+        'Bulk custom highlighted fields action feature is disabled.'
+      ),
+    BulkActionsDryRunErrCode.INVESTIGATION_FIELDS_FEATURE
   );
 };

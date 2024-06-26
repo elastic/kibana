@@ -949,6 +949,7 @@ export interface PolicyConfig {
     cluster_uuid: string;
     cluster_name: string;
     serverless: boolean;
+    billable?: boolean;
     heartbeatinterval?: number;
   };
   global_manifest_version: 'latest' | string;
@@ -1000,7 +1001,7 @@ export interface PolicyConfig {
       };
     };
     antivirus_registration: {
-      mode?: AntivirusRegistrationModes;
+      mode: AntivirusRegistrationModes;
       enabled: boolean;
     };
     attack_surface_reduction: {
@@ -1123,7 +1124,7 @@ export interface BlocklistFields {
 }
 
 export interface OnWriteScanFields {
-  on_write_scan?: boolean;
+  on_write_scan: boolean;
 }
 
 /** Policy protection mode options */

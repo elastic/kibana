@@ -10,7 +10,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type {
-  AssetCriticalityCsvUploadResponse,
+  AssetCriticalityBulkUploadResponse,
   AssetCriticalityUpsert,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -141,7 +141,10 @@ export class AssetCriticalityDataClient {
     }
   }
 
-  public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityRecord> {
+  public async upsert(
+    record: AssetCriticalityUpsert,
+    refresh = 'wait_for' as const
+  ): Promise<AssetCriticalityRecord> {
     const id = createId(record);
     const doc = {
       id_field: record.idField,
@@ -153,6 +156,7 @@ export class AssetCriticalityDataClient {
     await this.options.esClient.update({
       id,
       index: this.getIndex(),
+      refresh: refresh ?? false,
       body: {
         doc,
         doc_as_upsert: true,
@@ -179,9 +183,9 @@ export class AssetCriticalityDataClient {
     recordsStream,
     flushBytes,
     retries,
-  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityCsvUploadResponse> => {
-    const errors: AssetCriticalityCsvUploadResponse['errors'] = [];
-    const stats: AssetCriticalityCsvUploadResponse['stats'] = {
+  }: BulkUpsertFromStreamOptions): Promise<AssetCriticalityBulkUploadResponse> => {
+    const errors: AssetCriticalityBulkUploadResponse['errors'] = [];
+    const stats: AssetCriticalityBulkUploadResponse['stats'] = {
       successful: 0,
       failed: 0,
       total: 0,
@@ -240,10 +244,11 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
-  public async delete(idParts: AssetCriticalityIdParts) {
+  public async delete(idParts: AssetCriticalityIdParts, refresh = 'wait_for' as const) {
     await this.options.esClient.delete({
       id: createId(idParts),
       index: this.getIndex(),
+      refresh: refresh ?? false,
     });
   }
 }

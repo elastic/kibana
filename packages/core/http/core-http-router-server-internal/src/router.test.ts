@@ -8,9 +8,10 @@
 
 import { Router, type RouterOptions } from './router';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { schema } from '@kbn/config-schema';
+import { isConfigSchema, schema } from '@kbn/config-schema';
 import { createFooValidation } from './router.test.util';
 import { createRequestMock } from '@kbn/hapi-mocks/src/request';
+import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
 
 const mockResponse: any = {
   code: jest.fn().mockImplementation(() => mockResponse),
@@ -32,13 +33,25 @@ const routerOptions: RouterOptions = {
 };
 
 describe('Router', () => {
+  let testValidation: ReturnType<typeof createFooValidation>;
+  beforeEach(() => {
+    testValidation = createFooValidation();
+  });
   afterEach(() => jest.clearAllMocks());
   describe('#getRoutes', () => {
     it('returns expected route metadata', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       const validation = schema.object({ foo: schema.string() });
       router.post(
-        { path: '/', validate: { body: validation, query: validation, params: validation } },
+        {
+          path: '/',
+          validate: { body: validation, query: validation, params: validation },
+          options: {
+            deprecated: true,
+            summary: 'post test summary',
+            description: 'post test description',
+          },
+        },
         (context, req, res) => res.ok()
       );
       const routes = router.getRoutes();
@@ -50,6 +63,11 @@ describe('Router', () => {
         path: '/',
         validationSchemas: { body: validation, query: validation, params: validation },
         isVersioned: false,
+        options: {
+          deprecated: true,
+          summary: 'post test summary',
+          description: 'post test description',
+        },
       });
     });
 
@@ -81,12 +99,10 @@ describe('Router', () => {
     });
   });
 
-  const { fooValidation, validateBodyFn, validateOutputFn, validateParamsFn, validateQueryFn } =
-    createFooValidation();
-
   it.each([['static' as const], ['lazy' as const]])(
     'runs %s route validations',
     async (staticOrLazy) => {
+      const { fooValidation } = testValidation;
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       router.post(
         {
@@ -104,6 +120,8 @@ describe('Router', () => {
         }),
         mockResponseToolkit
       );
+      const { validateBodyFn, validateParamsFn, validateQueryFn, validateOutputFn } =
+        testValidation;
       expect(validateBodyFn).toHaveBeenCalledTimes(1);
       expect(validateParamsFn).toHaveBeenCalledTimes(1);
       expect(validateQueryFn).toHaveBeenCalledTimes(1);
@@ -113,6 +131,16 @@ describe('Router', () => {
 
   it('constructs lazily provided validations once (idempotency)', async () => {
     const router = new Router('', logger, enhanceWithContext, routerOptions);
+    const { fooValidation } = testValidation;
+
+    const response200 = fooValidation.response[200].body;
+    const lazyResponse200 = jest.fn(() => response200());
+    fooValidation.response[200].body = lazyResponse200;
+
+    const response404 = fooValidation.response[404].body;
+    const lazyResponse404 = jest.fn(() => response404());
+    fooValidation.response[404].body = lazyResponse404;
+
     const lazyValidation = jest.fn(() => fooValidation);
     router.post(
       {
@@ -121,7 +149,7 @@ describe('Router', () => {
       },
       (context, req, res) => res.ok()
     );
-    const [{ handler }] = router.getRoutes();
+    const [{ handler, validationSchemas }] = router.getRoutes();
     for (let i = 0; i < 10; i++) {
       await handler(
         createRequestMock({
@@ -131,8 +159,25 @@ describe('Router', () => {
         }),
         mockResponseToolkit
       );
+
+      expect(
+        isConfigSchema(
+          (
+            validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
+          )().response![200].body()
+        )
+      ).toBe(true);
+      expect(
+        isConfigSchema(
+          (
+            validationSchemas as () => RouteValidatorRequestAndResponses<unknown, unknown, unknown>
+          )().response![404].body()
+        )
+      ).toBe(true);
     }
     expect(lazyValidation).toHaveBeenCalledTimes(1);
+    expect(lazyResponse200).toHaveBeenCalledTimes(1);
+    expect(lazyResponse404).toHaveBeenCalledTimes(1);
   });
 
   it('registers pluginId if provided', () => {

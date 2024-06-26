@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiProgress } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -67,6 +67,11 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     margin-top: 3px;
   }
 
+  .udtTimeline .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn {
+    padding: 0;
+    position: relative;
+  }
+
   .udtTimeline .euiDataGridRowCell--controlColumn {
     overflow: visible;
   }
@@ -100,8 +105,9 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.eqlSequence) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn {
-      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary};`}
+    .euiDataGridRowCell--lastColumn,
+    .udt--customRow {
+      ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorPrimary}`};
     }
     background: repeating-linear-gradient(
       127deg,
@@ -113,7 +119,8 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.eqlNonSequence) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn {
+    .euiDataGridRowCell--lastColumn,
+    .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorAccent};`}
     }
     background: repeating-linear-gradient(
@@ -126,13 +133,15 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
   .udtTimeline .euiDataGridRow:has(.nonRawEvent) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn {
+    .euiDataGridRowCell--lastColumn,
+    .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorWarning};`}
     }
   }
   .udtTimeline .euiDataGridRow:has(.rawEvent) {
     .euiDataGridRowCell--firstColumn,
-    .euiDataGridRowCell--lastColumn {
+    .euiDataGridRowCell--lastColumn,
+    .udt--customRow {
       ${({ theme }) => `border-left: 4px solid ${theme.eui.euiColorLightShade};`}
     }
   }
@@ -152,5 +161,16 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
+  }
+
+  .udtTimeline .euiDataGrid__leftControls {
+    display: flex;
+    align-items: baseline;
+  }
+`;
+
+export const UnifiedTimelineGlobalStyles = createGlobalStyle`
+  body:has(.timeline-portal-overlay-mask) .unifiedDataTable__cellPopover {
+    z-index: 1001 !important;
   }
 `;

@@ -80,7 +80,9 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
     const config = setupConfig();
-    registerGetRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+
+    registerGetRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });
@@ -109,6 +111,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     expect(result.body).toEqual(clientResponse);
     expect(coreUsageStatsClient.incrementSavedObjectsGet).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

@@ -13,30 +13,30 @@ describe('useIntegratrionCardList', () => {
       expect(toOnboardingPath({})).toBeNull();
     });
     it('returns just the `basePath` if no category or search is defined', () => {
-      expect(toOnboardingPath({ basePath: '' })).toBe('/app/experimental-onboarding');
+      expect(toOnboardingPath({ basePath: '' })).toBe('/app/observabilityOnboarding');
       expect(toOnboardingPath({ basePath: '/s/custom_space_name' })).toBe(
-        '/s/custom_space_name/app/experimental-onboarding'
+        '/s/custom_space_name/app/observabilityOnboarding'
       );
     });
     it('includes category in the URL', () => {
       expect(toOnboardingPath({ basePath: '/s/custom_space_name', category: 'logs' })).toBe(
-        '/s/custom_space_name/app/experimental-onboarding?category=logs'
+        '/s/custom_space_name/app/observabilityOnboarding?category=logs'
       );
       expect(toOnboardingPath({ basePath: '', category: 'infra' })).toBe(
-        '/app/experimental-onboarding?category=infra'
+        '/app/observabilityOnboarding?category=infra'
       );
     });
     it('includes search in the URL', () => {
       expect(toOnboardingPath({ basePath: '/s/custom_space_name', search: 'search' })).toBe(
-        '/s/custom_space_name/app/experimental-onboarding?search=search'
+        '/s/custom_space_name/app/observabilityOnboarding?search=search'
       );
     });
     it('includes category and search in the URL', () => {
       expect(
         toOnboardingPath({ basePath: '/s/custom_space_name', category: 'logs', search: 'search' })
-      ).toBe('/s/custom_space_name/app/experimental-onboarding?category=logs&search=search');
+      ).toBe('/s/custom_space_name/app/observabilityOnboarding?category=logs&search=search');
       expect(toOnboardingPath({ basePath: '', category: 'infra', search: 'search' })).toBe(
-        '/app/experimental-onboarding?category=infra&search=search'
+        '/app/observabilityOnboarding?category=infra&search=search'
       );
     });
   });
@@ -45,10 +45,10 @@ describe('useIntegratrionCardList', () => {
       expect(
         addPathParamToUrl(
           '/app/integrations?query-1',
-          '/app/experimental-onboarding?search=aws&category=infra'
+          '/app/observabilityOnboarding?search=aws&category=infra'
         )
       ).toBe(
-        '/app/integrations?query-1&observabilityOnboardingLink=%2Fapp%2Fexperimental-onboarding%3Fsearch%3Daws%26category%3Dinfra'
+        '/app/integrations?query-1&observabilityOnboardingLink=%2Fapp%2FobservabilityOnboarding%3Fsearch%3Daws%26category%3Dinfra'
       );
     });
     it('adds the onboarding link to url without existing params', () => {

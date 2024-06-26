@@ -2004,6 +2004,57 @@ describe('createConfig()', () => {
     ).toThrow('[audit.appender.1.layout]: expected at least one defined value but got [undefined]');
   });
 
+  it('allows filtering audit events', () => {
+    expect(
+      ConfigSchema.validate({
+        audit: {
+          enabled: true,
+          appender: {
+            type: 'file',
+            fileName: '/path/to/file.txt',
+            layout: {
+              type: 'json',
+            },
+          },
+          ignore_filters: [
+            {
+              actions: ['authentication_success', 'authorization_failure'],
+              categories: ['database'],
+              outcomes: ['unknown'],
+              spaces: ['default'],
+              types: ['index'],
+              users: ['elastic'],
+            },
+          ],
+        },
+      }).audit.ignore_filters
+    ).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "actions": Array [
+            "authentication_success",
+            "authorization_failure",
+          ],
+          "categories": Array [
+            "database",
+          ],
+          "outcomes": Array [
+            "unknown",
+          ],
+          "spaces": Array [
+            "default",
+          ],
+          "types": Array [
+            "index",
+          ],
+          "users": Array [
+            "elastic",
+          ],
+        },
+      ]
+    `);
+  });
+
   describe('#getExpirationTimeouts', () => {
     function createMockConfig(config: Record<string, any> = {}) {
       return createConfig(ConfigSchema.validate(config), loggingSystemMock.createLogger(), {

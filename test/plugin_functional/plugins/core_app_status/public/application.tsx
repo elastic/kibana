@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   EuiPage,
   EuiPageBody,
@@ -17,7 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountParameters } from '@kbn/core/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 const AppStatusApp = ({ appId }: { appId: string }) => (
   <EuiPage>
@@ -41,8 +42,17 @@ const AppStatusApp = ({ appId }: { appId: string }) => (
   </EuiPage>
 );
 
-export const renderApp = (appId: string, { element }: AppMountParameters) => {
-  render(<AppStatusApp appId={appId} />, element);
+export const renderApp = async (
+  appId: string,
+  { element }: AppMountParameters,
+  core: CoreStart
+) => {
+  render(
+    <KibanaRenderContextProvider {...core}>
+      <AppStatusApp appId={appId} />
+    </KibanaRenderContextProvider>,
+    element
+  );
 
   return () => unmountComponentAtNode(element);
 };

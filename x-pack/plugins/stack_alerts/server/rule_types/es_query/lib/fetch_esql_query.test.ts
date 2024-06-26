@@ -7,7 +7,7 @@
 
 import { OnlyEsqlQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
-import { getEsqlQuery } from './fetch_esql_query';
+import { getEsqlQuery, getSourceFields } from './fetch_esql_query';
 
 const getTimeRange = () => {
   const date = Date.now();
@@ -67,7 +67,6 @@ describe('fetchEsqlQuery', () => {
             },
           },
           "query": "from test",
-          "version": "2024.04.01",
         }
       `);
     });
@@ -95,8 +94,33 @@ describe('fetchEsqlQuery', () => {
             },
           },
           "query": "from test | limit 100",
-          "version": "2024.04.01",
         }
+      `);
+    });
+  });
+
+  describe('getSourceFields', () => {
+    it('should generate the correct source fields', async () => {
+      const sourceFields = getSourceFields({
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'ecs.version', type: 'keyword' },
+          { name: 'error.code', type: 'keyword' },
+        ],
+        values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
+      });
+
+      expect(sourceFields).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "label": "ecs.version",
+            "searchPath": "ecs.version",
+          },
+          Object {
+            "label": "error.code",
+            "searchPath": "error.code",
+          },
+        ]
       `);
     });
   });

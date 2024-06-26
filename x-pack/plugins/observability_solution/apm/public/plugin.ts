@@ -20,8 +20,8 @@ import {
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public/plugin';
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -69,6 +69,7 @@ import { map } from 'rxjs';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
+import { registerEmbeddables } from './embeddable/register_embeddables';
 import {
   getApmEnrollmentFlyoutData,
   LazyApmCustomAssetsExtension,
@@ -87,6 +88,7 @@ export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
   discover?: DiscoverSetup;
+  embeddable: EmbeddableSetup;
   exploratoryView: ExploratoryViewPublicSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
@@ -325,6 +327,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     // Register APM telemetry based events
     const telemetry = this.telemetry.start();
 
+    const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
+    const isServerlessEnv = pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
+    const kibanaEnvironment = {
+      isCloudEnv,
+      isServerlessEnv,
+      kibanaVersion: this.kibanaVersion,
+    };
+
     core.application.register({
       id: 'apm',
       title: 'APM',
@@ -371,18 +381,12 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           import('./application'),
           core.getStartServices(),
         ]);
-        const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
-        const isServerlessEnv = pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp({
           coreStart,
           pluginsSetup: pluginSetupDeps as ApmPluginSetupDeps,
           appMountParameters,
           config,
-          kibanaEnvironment: {
-            isCloudEnv,
-            isServerlessEnv,
-            kibanaVersion: this.kibanaVersion,
-          },
+          kibanaEnvironment,
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
@@ -393,6 +397,13 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     });
 
     registerApmRuleTypes(observabilityRuleTypeRegistry);
+    registerEmbeddables({
+      coreSetup: core,
+      pluginsSetup: plugins,
+      config,
+      kibanaEnvironment,
+      observabilityRuleTypeRegistry,
+    });
 
     const locator = plugins.share.url.locators.create(new APMServiceDetailLocator(core.uiSettings));
 

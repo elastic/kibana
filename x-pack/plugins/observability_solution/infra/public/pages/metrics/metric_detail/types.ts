@@ -6,6 +6,7 @@
  */
 
 import rt from 'io-ts';
+import { PropsWithChildren } from 'react';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { InventoryFormatterTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsTimeInput } from './hooks/use_metrics_time';
@@ -18,7 +19,7 @@ export interface LayoutProps {
   stopLiveStreaming?: () => void;
 }
 
-export type LayoutPropsWithTheme = LayoutProps & { theme: EuiTheme };
+export type LayoutPropsWithTheme = LayoutProps & PropsWithChildren<{ theme: EuiTheme }>;
 
 const ChartTypesRT = rt.keyof({
   area: null,

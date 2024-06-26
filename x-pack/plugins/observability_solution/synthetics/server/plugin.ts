@@ -25,7 +25,7 @@ import { SyntheticsMonitorClient } from './synthetics_service/synthetics_monitor
 import { initSyntheticsServer } from './server';
 import { uptimeFeature } from './feature';
 
-import { registerUptimeSavedObjects, savedObjectsAdapter } from './saved_objects/saved_objects';
+import { registerUptimeSavedObjects } from './saved_objects/saved_objects';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
@@ -47,8 +47,6 @@ export class Plugin implements PluginType {
 
   public setup(core: CoreSetup, plugins: SyntheticsPluginsSetupDependencies) {
     const config = this.initContext.config.get<UptimeConfig>();
-
-    savedObjectsAdapter.config = config;
 
     const { ruleDataService } = plugins.ruleRegistry;
 
@@ -79,7 +77,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService = new SyntheticsService(this.server);
 
-    this.syntheticsService.setup(plugins.taskManager);
+    this.syntheticsService.setup(plugins.taskManager).catch(() => {});
 
     this.syntheticsMonitorClient = new SyntheticsMonitorClient(this.syntheticsService, this.server);
 
@@ -112,7 +110,7 @@ export class Plugin implements PluginType {
 
     this.syntheticsService?.start(pluginsStart.taskManager);
 
-    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart);
+    this.telemetryEventsSender.start(pluginsStart.telemetry, coreStart).catch(() => {});
   }
 
   public stop() {}

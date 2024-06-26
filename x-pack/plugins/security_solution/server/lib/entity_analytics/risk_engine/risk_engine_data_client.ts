@@ -8,18 +8,16 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import type { InitRiskEngineResult } from '../../../../common/entity_analytics/risk_engine';
-import {
-  RiskEngineStatus,
-  MAX_SPACES_COUNT,
-  RiskScoreEntity,
-} from '../../../../common/entity_analytics/risk_engine';
+import { MAX_SPACES_COUNT, RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
 import { removeLegacyTransforms, getLegacyTransforms } from '../utils/transforms';
 import {
   updateSavedObjectAttribute,
   getConfiguration,
   initSavedObjects,
   getEnabledRiskEngineAmount,
+  deleteSavedObjects,
 } from './utils/saved_object_configuration';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
@@ -29,6 +27,11 @@ import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface InitOpts {
   namespace: string;
+  taskManager: TaskManagerStartContract;
+  riskScoreDataClient: RiskScoreDataClient;
+}
+
+interface TearDownParams {
   taskManager: TaskManagerStartContract;
   riskScoreDataClient: RiskScoreDataClient;
 }
@@ -196,10 +199,33 @@ export class RiskEngineDataClient {
     });
   }
 
+  /**
+   * Delete all risk engine resources.
+   *
+   * It returns an array of errors that occurred during the deletion.
+   *
+   * WARNING: It will remove all data.
+   */
+  public async tearDown({ taskManager, riskScoreDataClient }: TearDownParams) {
+    const errors: Error[] = [];
+    const addError = (e: Error) => errors.push(e);
+
+    await removeRiskScoringTask({
+      namespace: this.options.namespace,
+      taskManager,
+      logger: this.options.logger,
+    }).catch(addError);
+
+    await deleteSavedObjects({ savedObjectsClient: this.options.soClient }).catch(addError);
+    const riskScoreErrors = await riskScoreDataClient.tearDown();
+
+    return errors.concat(riskScoreErrors);
+  }
+
   public async disableLegacyRiskEngine({ namespace }: { namespace: string }) {
     const legacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    if (legacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED) {
+    if (legacyRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
       return true;
     }
 
@@ -221,17 +247,17 @@ export class RiskEngineDataClient {
 
     const newlegacyRiskEngineStatus = await this.getLegacyStatus({ namespace });
 
-    return newlegacyRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED;
+    return newlegacyRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED;
   }
 
   private async getCurrentStatus() {
     const configuration = await this.getConfiguration();
 
     if (configuration) {
-      return configuration.enabled ? RiskEngineStatus.ENABLED : RiskEngineStatus.DISABLED;
+      return configuration.enabled ? RiskEngineStatusEnum.ENABLED : RiskEngineStatusEnum.DISABLED;
     }
 
-    return RiskEngineStatus.NOT_INSTALLED;
+    return RiskEngineStatusEnum.NOT_INSTALLED;
   }
 
   private async getIsMaxAmountOfRiskEnginesReached() {
@@ -271,9 +297,9 @@ export class RiskEngineDataClient {
     });
 
     if (transforms.length === 0) {
-      return RiskEngineStatus.NOT_INSTALLED;
+      return RiskEngineStatusEnum.NOT_INSTALLED;
     }
 
-    return RiskEngineStatus.ENABLED;
+    return RiskEngineStatusEnum.ENABLED;
   }
 }

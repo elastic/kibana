@@ -7,7 +7,7 @@
 
 import type { FromSchema } from 'json-schema-to-ts';
 import { Observable } from 'rxjs';
-import { ChatCompletionChunkEvent } from '../../common/conversation_complete';
+import { ChatCompletionChunkEvent, ChatEvent } from '../../common/conversation_complete';
 import type {
   CompatibleJSONSchema,
   FunctionDefinition,
@@ -27,17 +27,33 @@ export type RespondFunctionResources = Pick<
   'context' | 'logger' | 'plugins' | 'request'
 >;
 
-export type ChatFn = (
-  ...args: Parameters<ObservabilityAIAssistantClient['chat']>
-) => Promise<Observable<ChatCompletionChunkEvent>>;
+export type ChatFunction = (
+  name: string,
+  params: Parameters<ObservabilityAIAssistantClient['chat']>[1]
+) => Observable<ChatEvent>;
+
+export type ChatFunctionWithoutConnector = (
+  name: string,
+  params: Omit<
+    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    'connectorId' | 'simulateFunctionCalling' | 'signal'
+  >
+) => Observable<ChatEvent>;
+
+export type FunctionCallChatFunction = (
+  name: string,
+  params: Omit<
+    Parameters<ObservabilityAIAssistantClient['chat']>[1],
+    'connectorId' | 'simulateFunctionCalling' | 'tracer'
+  >
+) => Observable<ChatCompletionChunkEvent>;
 
 type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
   options: {
     arguments: TArguments;
     messages: Message[];
-    connectorId: string;
     screenContexts: ObservabilityAIAssistantScreenContextRequest[];
-    chat: ChatFn;
+    chat: FunctionCallChatFunction;
   },
   signal: AbortSignal
 ) => Promise<TResponse>;

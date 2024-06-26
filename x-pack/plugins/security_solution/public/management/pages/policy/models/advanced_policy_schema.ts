@@ -46,6 +46,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+        ignoreTag: true,
       }
     ),
   },
@@ -260,6 +261,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+        ignoreTag: true,
       }
     ),
   },
@@ -484,6 +486,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Relative URL from which to download global artifact manifests. Default: /downloads/endpoint/manifest/artifacts-<version>.zip.',
+        ignoreTag: true,
       }
     ),
   },
@@ -850,6 +853,28 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Whether quarantine should be enabled when malware prevention is enabled. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.enable_fork_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_fork_scan',
+      {
+        defaultMessage:
+          'Enable memory scanning on process fork events. This will have the effect of more memory regions being scanned. Default: true.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.memory_protection.enable_shared_dirty_scan',
+    first_supported_version: '8.14',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.memory_protection.enable_shared_dirty_scan',
+      {
+        defaultMessage:
+          'Instead of ignoring regions with just no Private_Dirty bytes, ingore regions with the combination of no Private_Dirty bytes, no Shared_Dirty bytes and is file backed. This has the effect of scanning more memory regions because of the loosened restrictions. Default: true.',
       }
     ),
   },
@@ -1718,6 +1743,39 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'PEM-encoded certificate for security artifacts server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.event_on_access.file_paths',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.file_paths',
+      {
+        defaultMessage:
+          'Comma-separated list of additional wildcard patterns that will be monitored for read access. Endpoint will report at most one match per pattern per process. Endpoint will attempt to convert drive letters to NT paths (e.g. \\\\Device\\\\HarddiskVolume4), but conversion will fail for per-user drives such as network drives. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. See Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.event_on_access.registry_paths',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.event_on_access.registry_paths',
+      {
+        defaultMessage:
+          'Comma-separated list of registry paths that will be monitored for read access. These must be NT paths (e.g. \\\\REGISTRY\\\\MACHINE\\\\SOFTWARE\\\\Microsoft\\\\...). Endpoint will report at most one match per pattern per process. Put only commas (no spaces) between entries. Wildcard matching is case-insensitive. See Microsoft FsRtlIsNameInExpression documentation for wildcard matching rules.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.event_on_access.file_paths',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.event_on_access.file_paths',
+      {
+        defaultMessage:
+          'Comma-separated list of additional wildcard patterns that will be monitored for read access.  Put only commas (no spaces) between entries. Wildcard matching is case-insensitive.',
       }
     ),
   },

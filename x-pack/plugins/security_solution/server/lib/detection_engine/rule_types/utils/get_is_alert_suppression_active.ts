@@ -13,7 +13,7 @@ import type { AlertSuppressionCamel } from '../../../../../common/api/detection_
 
 interface GetIsAlertSuppressionActiveParams {
   alertSuppression: AlertSuppressionCamel | undefined;
-  isFeatureDisabled: boolean | undefined;
+  isFeatureDisabled?: boolean | undefined;
   licensing: LicensingPluginSetup;
 }
 

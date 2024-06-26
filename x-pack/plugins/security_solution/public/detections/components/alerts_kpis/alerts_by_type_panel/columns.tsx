@@ -8,6 +8,7 @@ import React from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import { TableId } from '@kbn/securitysolution-data-table';
 import {
   SecurityCellActions,
   CellActionsMode,
@@ -20,7 +21,7 @@ import { ALERTS_HEADERS_RULE_NAME } from '../../alerts_table/translations';
 import { ALERT_TYPE_COLOR, ALERT_TYPE_LABEL } from './helpers';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export const getAlertsTypeTableColumns = (
   isAlertTypeEnabled: boolean
@@ -41,6 +42,7 @@ export const getAlertsTypeTableColumns = (
           queryValue={rule}
           tooltipContent={null}
           truncate={true}
+          scopeId={TableId.alertsOnAlertsPage}
         />
       </EuiText>
     ),
@@ -66,7 +68,10 @@ export const getAlertsTypeTableColumns = (
                       field: 'event.type',
                     }}
                     sourcererScopeId={SourcererScopeName.detections}
-                    metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
+                    metadata={{
+                      negateFilters: type === 'Detection', // Detection: event.type != denied
+                      scopeId: TableId.alertsOnAlertsPage,
+                    }}
                   >
                     {ALERT_TYPE_LABEL[type as AlertType]}
                   </SecurityCellActions>

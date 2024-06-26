@@ -92,13 +92,12 @@ describe('use chat send', () => {
     expect(setPromptTextPreview).toHaveBeenCalledWith('new prompt');
     expect(setUserPrompt).toHaveBeenCalledWith('new prompt');
   });
-  it('handleButtonSendMessage sends message with context prompt when a valid prompt text is provided', async () => {
+  it('handleSendMessage sends message with context prompt when a valid prompt text is provided', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleButtonSendMessage(promptText);
-    expect(setUserPrompt).toHaveBeenCalledWith('');
+    result.current.handleSendMessage(promptText);
 
     await waitFor(() => {
       expect(sendMessage).toHaveBeenCalled();
@@ -108,7 +107,7 @@ describe('use chat send', () => {
       );
     });
   });
-  it('handleButtonSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
+  it('handleSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
     const promptText = 'prompt text';
     const { result } = renderHook(
       () =>
@@ -118,8 +117,7 @@ describe('use chat send', () => {
       }
     );
 
-    result.current.handleButtonSendMessage(promptText);
-    expect(setUserPrompt).toHaveBeenCalledWith('');
+    result.current.handleSendMessage(promptText);
 
     await waitFor(() => {
       expect(sendMessage).toHaveBeenCalled();
@@ -150,8 +148,7 @@ describe('use chat send', () => {
     const { result } = renderHook(() => useChatSend(testProps), {
       wrapper: TestProviders,
     });
-    result.current.handleButtonSendMessage(promptText);
-    expect(setUserPrompt).toHaveBeenCalledWith('');
+    result.current.handleSendMessage(promptText);
 
     await waitFor(() => {
       expect(reportAssistantMessageSent).toHaveBeenNthCalledWith(1, {

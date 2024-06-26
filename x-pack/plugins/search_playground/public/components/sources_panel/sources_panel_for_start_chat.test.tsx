@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render, screen } from '@testing-library/react';
 import { SourcesPanelForStartChat } from './sources_panel_for_start_chat';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
@@ -28,7 +28,7 @@ jest.mock('../../hooks/use_kibana', () => ({
   })),
 }));
 
-const Wrapper: React.FC = ({ children }) => {
+const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
       <IntlProvider locale="en">{children}</IntlProvider>
@@ -101,7 +101,7 @@ describe('SourcesPanelForStartChat component', () => {
       noFieldsIndicesWarning: 'index1',
     });
 
-    render(<SourcesPanelForStartChat />);
+    render(<SourcesPanelForStartChat />, { wrapper: Wrapper });
     expect(screen.getByTestId('NoIndicesFieldsMessage')).toBeInTheDocument();
     expect(screen.getByTestId('NoIndicesFieldsMessage')).toHaveTextContent('index1');
   });

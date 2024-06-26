@@ -26,6 +26,7 @@ export type {
   TimeIntervalTriggeringPolicyConfig,
   NumericRollingStrategyConfig,
   RollingStrategyConfig,
+  RetentionPolicyConfig,
 } from './rolling_file';
 
 /** @public */

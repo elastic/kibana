@@ -28,6 +28,7 @@ export const createMockExecutionContext = <ExtraContext extends object = object>
       requests: {},
       data: {},
     },
+    allowCache: false,
   } as unknown as ExecutionContext;
 
   return {

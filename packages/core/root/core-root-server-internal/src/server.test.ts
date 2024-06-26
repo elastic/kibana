@@ -219,6 +219,7 @@ test('runs services on "start"', async () => {
   expect(mockCustomBrandingService.start).toHaveBeenCalledTimes(1);
   expect(mockSecurityService.start).toHaveBeenCalledTimes(1);
   expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
+  expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {

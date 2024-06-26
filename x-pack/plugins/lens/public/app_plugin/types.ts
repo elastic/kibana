@@ -20,7 +20,6 @@ import type {
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
-  OverlayStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -54,6 +53,7 @@ import type {
   LensTopNavMenuEntryGenerator,
   VisualizationMap,
   UserMessagesGetter,
+  StartServices,
 } from '../types';
 import type { LensAttributeService } from '../lens_attribute_service';
 import type { LensEmbeddableInput } from '../embeddable/embeddable';
@@ -125,12 +125,12 @@ export interface LensTopNavMenuProps {
   topNavMenuEntryGenerators: LensTopNavMenuEntryGenerator[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   currentDoc: Document | undefined;
-  theme$: Observable<CoreTheme>;
   indexPatternService: IndexPatternServiceAPI;
   onTextBasedSavedAndExit: ({ onSave }: { onSave: () => void }) => Promise<void>;
   getUserMessages: UserMessagesGetter;
   shortUrlService: (params: LensAppLocatorParams) => Promise<string>;
   isCurrentStateDirty: boolean;
+  startServices: StartServices;
 }
 
 export interface HistoryLocationState {
@@ -139,11 +139,10 @@ export interface HistoryLocationState {
   originatingApp?: string;
 }
 
-export interface LensAppServices {
+export interface LensAppServices extends StartServices {
   http: HttpStart;
   executionContext: ExecutionContextStart;
   chrome: ChromeStart;
-  overlays: OverlayStart;
   storage: IStorageWrapper;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;

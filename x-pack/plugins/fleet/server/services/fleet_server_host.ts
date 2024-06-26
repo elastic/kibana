@@ -225,7 +225,7 @@ export async function bulkGetFleetServerHosts(
 
 export async function getFleetServerHostsForAgentPolicy(
   soClient: SavedObjectsClientContract,
-  agentPolicy: AgentPolicy
+  agentPolicy: Pick<AgentPolicy, 'fleet_server_host_id'>
 ) {
   if (agentPolicy.fleet_server_host_id) {
     return getFleetServerHost(soClient, agentPolicy.fleet_server_host_id);

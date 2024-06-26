@@ -19,7 +19,7 @@ import type {
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
@@ -40,7 +40,6 @@ import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logge
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -69,7 +68,7 @@ import { wrapSearchSourceClient } from './wrap_search_source_client';
 const PREVIEW_TIMEOUT_SECONDS = 60;
 const MAX_ROUTE_CONCURRENCY = 10;
 
-export const previewRulesRoute = async (
+export const previewRulesRoute = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
@@ -286,6 +285,7 @@ export const previewRulesRoute = async (
                 },
                 spaceId,
                 startedAt: startedAt.toDate(),
+                startedAtOverridden: true,
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
@@ -430,7 +430,7 @@ export const previewRulesRoute = async (
               );
               break;
             case 'esql':
-              if (!config.settings.ESQLEnabled || config.experimentalFeatures.esqlRulesDisabled) {
+              if (config.experimentalFeatures.esqlRulesDisabled) {
                 throw Error('ES|QL rule type is not supported');
               }
               const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));

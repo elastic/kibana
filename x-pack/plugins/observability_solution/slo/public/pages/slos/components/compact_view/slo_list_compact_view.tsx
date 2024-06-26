@@ -23,23 +23,25 @@ import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
-import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
-import { useCapabilities } from '../../../../hooks/use_capabilities';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
-import { useDeleteSlo } from '../../../../hooks/use_delete_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
+import { usePermissions } from '../../../../hooks/use_permissions';
+import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { useSpace } from '../../../../hooks/use_space';
 import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import {
   createRemoteSloDeleteUrl,
   createRemoteSloEditUrl,
+  createRemoteSloResetUrl,
 } from '../../../../utils/slo/remote_slo_urls';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
@@ -72,22 +74,33 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
 
-  const { hasWriteCapabilities } = useCapabilities();
+  const { data: permissions } = usePermissions();
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
-  const { mutate: deleteSlo } = useDeleteSlo();
+
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
   const [sloToDelete, setSloToDelete] = useState<SLOWithSummaryResponse | undefined>(undefined);
+  const [sloToReset, setSloToReset] = useState<SLOWithSummaryResponse | undefined>(undefined);
 
   const handleDeleteConfirm = () => {
-    if (sloToDelete) {
-      deleteSlo({ id: sloToDelete.id, name: sloToDelete.name });
-    }
     setSloToDelete(undefined);
   };
 
   const handleDeleteCancel = () => {
     setSloToDelete(undefined);
+  };
+
+  const handleResetConfirm = async () => {
+    if (sloToReset) {
+      await resetSlo({ id: sloToReset.id, name: sloToReset.name });
+      setSloToReset(undefined);
+    }
+  };
+
+  const handleResetCancel = () => {
+    setSloToReset(undefined);
   };
 
   const handleSavedRule = async () => {
@@ -160,7 +173,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Edit',
       }),
       'data-test-subj': 'sloActionsEdit',
-      enabled: (slo) => (hasWriteCapabilities && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+      enabled: (slo) =>
+        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         const remoteEditUrl = createRemoteSloEditUrl(slo, spaceId);
         if (!!remoteEditUrl) {
@@ -180,7 +194,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Create new alert rule',
       }),
       'data-test-subj': 'sloActionsCreateRule',
-      enabled: (slo: SLOWithSummaryResponse) => hasWriteCapabilities && !isRemote(slo),
+      enabled: (slo: SLOWithSummaryResponse) =>
+        !!permissions?.hasAllWriteRequested && !isRemote(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         setSloToAddRule(slo);
       },
@@ -195,7 +210,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         defaultMessage: 'Manage rules',
       }),
       'data-test-subj': 'sloActionsManageRules',
-      enabled: (slo: SLOWithSummaryResponse) => hasWriteCapabilities && !isRemote(slo),
+      enabled: (slo: SLOWithSummaryResponse) =>
+        !!permissions?.hasAllWriteRequested && !isRemote(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         const locator = locators.get<RulesParams>(rulesLocatorID);
         locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
@@ -214,7 +230,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       }),
       'data-test-subj': 'sloActionsClone',
       enabled: (slo: SLOWithSummaryResponse) =>
-        (hasWriteCapabilities && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         navigateToClone(slo);
       },
@@ -232,13 +248,36 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       }),
       'data-test-subj': 'sloActionsDelete',
       enabled: (slo: SLOWithSummaryResponse) =>
-        (hasWriteCapabilities && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
       onClick: (slo: SLOWithSummaryResponse) => {
         const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
         if (!!remoteDeleteUrl) {
           window.open(remoteDeleteUrl, '_blank');
         } else {
           setSloToDelete(slo);
+        }
+      },
+    },
+    {
+      type: 'icon',
+      icon: 'refresh',
+      name: buildActionName(
+        i18n.translate('xpack.slo.item.actions.reset', {
+          defaultMessage: 'Reset',
+        })
+      ),
+      description: i18n.translate('xpack.slo.item.actions.reset', {
+        defaultMessage: 'Reset',
+      }),
+      'data-test-subj': 'sloActionsReset',
+      enabled: (slo: SLOWithSummaryResponse) =>
+        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+      onClick: (slo: SLOWithSummaryResponse) => {
+        const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);
+        if (!!remoteResetUrl) {
+          window.open(remoteResetUrl, '_blank');
+        } else {
+          setSloToReset(slo);
         }
       },
     },
@@ -313,7 +352,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       render: (_, slo: SLOWithSummaryResponse) => {
         const groups = [slo.groupBy].flat();
         return !groups.includes(ALL_VALUE) ? (
-          <SLOGroupings slo={slo} direction="column" />
+          <SLOGroupings slo={slo} direction="column" gutterSize={'none'} />
         ) : (
           <span>{NOT_AVAILABLE_LABEL}</span>
         );
@@ -435,10 +474,19 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       ) : null}
 
       {sloToDelete ? (
-        <SloDeleteConfirmationModal
+        <SloDeleteModal
           slo={sloToDelete}
           onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
+          onSuccess={handleDeleteConfirm}
+        />
+      ) : null}
+
+      {sloToReset ? (
+        <SloResetConfirmationModal
+          slo={sloToReset}
+          onCancel={handleResetCancel}
+          onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
         />
       ) : null}
     </>

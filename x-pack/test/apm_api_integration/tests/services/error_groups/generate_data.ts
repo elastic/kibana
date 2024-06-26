@@ -17,12 +17,12 @@ export const config = {
 };
 
 export async function generateData({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   serviceName,
   start,
   end,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   start: number;
   end: number;
@@ -43,7 +43,7 @@ export async function generateData({
     ERROR_NAME_2,
   } = config;
 
-  await synthtraceEsClient.index([
+  await apmSynthtraceEsClient.index([
     timerange(start, end)
       .interval('1m')
       .rate(PROD_LIST_RATE)

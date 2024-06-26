@@ -18,17 +18,24 @@ import {
 } from '../../../common/es_fields';
 import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 
+interface ResultBucket {
+  dataset: string;
+  count: number;
+}
+
+const SIZE_LIMIT = 10000;
+
 export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
   datasetQuery?: string;
   after?: {
-    dataset: string;
-    namespace: string;
+    degradedDocs?: { dataset: string; namespace: string };
+    docsCount?: { dataset: string; namespace: string };
   };
-  prevResults?: DegradedDocs[];
+  prevResults?: { degradedDocs: ResultBucket[]; docsCount: ResultBucket[] };
 }): Promise<DegradedDocs[]> {
   const {
     esClient,
@@ -37,61 +44,85 @@ export async function getDegradedDocsPaginated(options: {
     start,
     end,
     after,
-    prevResults = [],
+    prevResults = { degradedDocs: [], docsCount: [] },
   } = options;
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const response = await datasetQualityESClient.search({
-    index: '*',
-    size: 0,
-    query: {
-      bool: {
-        ...(datasetQuery
-          ? {
-              should: [
-                ...wildcardQuery(DATA_STREAM_DATASET, datasetQuery),
-                ...wildcardQuery(DATA_STREAM_NAMESPACE, datasetQuery),
-              ],
-              minimum_should_match: 1,
-            }
-          : {}),
-        filter: [...rangeQuery(start, end), ...termQuery(DATA_STREAM_TYPE, type)],
-      },
-    },
-    aggs: {
-      datasets: {
-        composite: {
-          ...(after ? { after } : {}),
-          size: 10000,
-          sources: [
-            { dataset: { terms: { field: DATA_STREAM_DATASET } } },
-            { namespace: { terms: { field: DATA_STREAM_NAMESPACE } } },
+  const datasetFilter = {
+    ...(datasetQuery
+      ? {
+          should: [
+            ...wildcardQuery(DATA_STREAM_DATASET, datasetQuery),
+            ...wildcardQuery(DATA_STREAM_NAMESPACE, datasetQuery),
           ],
-        },
-        aggs: {
-          degraded: {
-            filter: {
-              exists: {
-                field: _IGNORED,
-              },
-            },
-          },
-        },
+          minimum_should_match: 1,
+        }
+      : {}),
+  };
+
+  const otherFilters = [...rangeQuery(start, end), ...termQuery(DATA_STREAM_TYPE, type)];
+
+  const aggs = (afterKey?: { dataset: string; namespace: string }) => ({
+    datasets: {
+      composite: {
+        ...(afterKey ? { after: afterKey } : {}),
+        size: SIZE_LIMIT,
+        sources: [
+          { dataset: { terms: { field: 'data_stream.dataset' } } },
+          { namespace: { terms: { field: 'data_stream.namespace' } } },
+        ],
       },
     },
   });
 
+  const response = await datasetQualityESClient.msearch({ index: `${type}-*-*` }, [
+    // degraded docs per dataset
+    {
+      size: 0,
+      query: {
+        bool: {
+          ...datasetFilter,
+          filter: otherFilters,
+          must: { exists: { field: _IGNORED } },
+        },
+      },
+      aggs: aggs(after?.degradedDocs),
+    },
+    // total docs per dataset
+    {
+      size: 0,
+      query: {
+        bool: {
+          ...datasetFilter,
+          filter: otherFilters,
+        },
+      },
+      aggs: aggs(after?.docsCount),
+    },
+  ]);
+  const [degradedDocsResponse, totalDocsResponse] = response.responses;
+
   const currDegradedDocs =
-    response.aggregations?.datasets.buckets.map((bucket) => ({
+    degradedDocsResponse.aggregations?.datasets.buckets.map((bucket) => ({
       dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
-      percentage: (bucket.degraded.doc_count * 100) / bucket.doc_count,
-      count: bucket.degraded.doc_count,
+      count: bucket.doc_count,
     })) ?? [];
 
-  const degradedDocs = [...prevResults, ...currDegradedDocs];
+  const degradedDocs = [...prevResults.degradedDocs, ...currDegradedDocs];
 
-  if (response.aggregations?.datasets.after_key) {
+  const currTotalDocs =
+    totalDocsResponse.aggregations?.datasets.buckets.map((bucket) => ({
+      dataset: `${type}-${bucket.key.dataset}-${bucket.key.namespace}`,
+      count: bucket.doc_count,
+    })) ?? [];
+
+  const docsCount = [...prevResults.docsCount, ...currTotalDocs];
+
+  if (
+    totalDocsResponse.aggregations?.datasets.after_key &&
+    totalDocsResponse.aggregations?.datasets.buckets.length === SIZE_LIMIT
+  ) {
     return getDegradedDocsPaginated({
       esClient,
       type,
@@ -99,12 +130,37 @@ export async function getDegradedDocsPaginated(options: {
       end,
       datasetQuery,
       after: {
-        dataset: response.aggregations?.datasets.after_key.dataset as string,
-        namespace: response.aggregations?.datasets.after_key.namespace as string,
+        degradedDocs:
+          (degradedDocsResponse.aggregations?.datasets.after_key as {
+            dataset: string;
+            namespace: string;
+          }) || after?.degradedDocs,
+        docsCount:
+          (totalDocsResponse.aggregations?.datasets.after_key as {
+            dataset: string;
+            namespace: string;
+          }) || after?.docsCount,
       },
-      prevResults: degradedDocs,
+      prevResults: { degradedDocs, docsCount },
     });
   }
 
-  return degradedDocs;
+  const degradedDocsMap = degradedDocs.reduce(
+    (acc, curr) => ({
+      ...acc,
+      [curr.dataset]: curr.count,
+    }),
+    {}
+  );
+
+  return docsCount.map((curr) => {
+    const degradedDocsCount = degradedDocsMap[curr.dataset as keyof typeof degradedDocsMap] || 0;
+
+    return {
+      ...curr,
+      docsCount: curr.count,
+      count: degradedDocsCount,
+      percentage: (degradedDocsCount / curr.count) * 100,
+    };
+  });
 }

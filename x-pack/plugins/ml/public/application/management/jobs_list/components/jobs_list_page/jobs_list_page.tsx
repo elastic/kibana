@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 
 import {
@@ -74,6 +74,8 @@ export const JobsListPage: FC<Props> = ({
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
+  // callback to allow import flyout to refresh jobs list
+  const [refreshJobs, setRefreshJobs] = useState<(() => void) | null>(null);
 
   const mlServices = useMemo(
     () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
@@ -109,97 +111,118 @@ export const JobsListPage: FC<Props> = ({
   }
 
   function onCloseSyncFlyout() {
+    if (typeof refreshJobs === 'function') {
+      refreshJobs();
+    }
     setShowSyncFlyout(false);
   }
 
   if (accessDenied) {
-    return <AccessDeniedPage />;
+    return (
+      <I18nProvider>
+        <KibanaRenderContextProvider {...coreStart}>
+          <AccessDeniedPage />
+        </KibanaRenderContextProvider>
+      </I18nProvider>
+    );
   }
 
   if (isPlatinumOrTrialLicense === false) {
-    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
+    return (
+      <I18nProvider>
+        <KibanaRenderContextProvider {...coreStart}>
+          <InsufficientLicensePage basePath={coreStart.http.basePath} />
+        </KibanaRenderContextProvider>
+      </I18nProvider>
+    );
   }
 
   return (
-    <KibanaRenderContextProvider {...coreStart}>
-      <RedirectAppLinks
-        coreStart={{
-          application: coreStart.application,
-        }}
-      >
-        <KibanaContextProvider
-          services={{
-            ...coreStart,
-            share,
-            data,
-            usageCollection,
-            fieldFormats,
-            spacesApi,
-            mlServices,
+    <I18nProvider>
+      <KibanaRenderContextProvider {...coreStart}>
+        <RedirectAppLinks
+          coreStart={{
+            application: coreStart.application,
           }}
         >
-          <ContextWrapper feature={PLUGIN_ID}>
-            <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
-              <Router history={history}>
-                <EuiPageTemplate.Header
-                  pageTitle={
-                    <FormattedMessage
-                      id="xpack.ml.management.jobsList.jobsListTitle"
-                      defaultMessage="Machine Learning"
-                    />
-                  }
-                  description={
-                    <FormattedMessage
-                      id="xpack.ml.management.jobsList.jobsListTagline"
-                      defaultMessage="Identify, analyze, and process your data using advanced analysis techniques."
-                    />
-                  }
-                  rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
-                  bottomBorder
-                  paddingSize={'none'}
-                />
-
-                <EuiSpacer size="l" />
-
-                <EuiPageTemplate.Section
-                  paddingSize={'none'}
-                  id="kibanaManagementMLSection"
-                  data-test-subj="mlPageStackManagementJobsList"
-                >
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <>
-                        <EuiButtonEmpty
-                          onClick={() => setShowSyncFlyout(true)}
-                          data-test-subj="mlStackMgmtSyncButton"
-                        >
-                          {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                            defaultMessage: 'Synchronize saved objects',
-                          })}
-                        </EuiButtonEmpty>
-                        {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                        <EuiSpacer size="s" />
-                      </>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ExportJobsFlyout
-                        isDisabled={false}
-                        currentTab={
-                          currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
-                        }
+          <KibanaContextProvider
+            services={{
+              ...coreStart,
+              share,
+              data,
+              usageCollection,
+              fieldFormats,
+              spacesApi,
+              mlServices,
+            }}
+          >
+            <ContextWrapper feature={PLUGIN_ID}>
+              <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                <Router history={history}>
+                  <EuiPageTemplate.Header
+                    pageTitle={
+                      <FormattedMessage
+                        id="xpack.ml.management.jobsList.jobsListTitle"
+                        defaultMessage="Machine Learning"
                       />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ImportJobsFlyout isDisabled={false} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
-                </EuiPageTemplate.Section>
-              </Router>
-            </EnabledFeaturesContextProvider>
-          </ContextWrapper>
-        </KibanaContextProvider>
-      </RedirectAppLinks>
-    </KibanaRenderContextProvider>
+                    }
+                    description={
+                      <FormattedMessage
+                        id="xpack.ml.management.jobsList.jobsListTagline"
+                        defaultMessage="Identify, analyze, and process your data using advanced analysis techniques."
+                      />
+                    }
+                    rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
+                    bottomBorder
+                    paddingSize={'none'}
+                  />
+
+                  <EuiSpacer size="l" />
+
+                  <EuiPageTemplate.Section
+                    paddingSize={'none'}
+                    id="kibanaManagementMLSection"
+                    data-test-subj="mlPageStackManagementJobsList"
+                  >
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <>
+                          <EuiButtonEmpty
+                            onClick={() => setShowSyncFlyout(true)}
+                            data-test-subj="mlStackMgmtSyncButton"
+                          >
+                            {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                              defaultMessage: 'Synchronize saved objects',
+                            })}
+                          </EuiButtonEmpty>
+                          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                          <EuiSpacer size="s" />
+                        </>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ExportJobsFlyout
+                          isDisabled={false}
+                          currentTab={
+                            currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
+                          }
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ImportJobsFlyout isDisabled={false} onImportComplete={refreshJobs} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <SpaceManagement
+                      spacesApi={spacesApi}
+                      onTabChange={setCurrentTabId}
+                      onReload={setRefreshJobs}
+                    />
+                  </EuiPageTemplate.Section>
+                </Router>
+              </EnabledFeaturesContextProvider>
+            </ContextWrapper>
+          </KibanaContextProvider>
+        </RedirectAppLinks>
+      </KibanaRenderContextProvider>
+    </I18nProvider>
   );
 };

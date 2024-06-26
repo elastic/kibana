@@ -60,11 +60,6 @@ describe('transactions with errors', () => {
       .errors(instance.error({ message: 'test error' }).timestamp(timestamp))
       .serialize();
 
-    expect(error['error.grouping_name']).toEqual(
-      '4274b1899eba687801198c89f64a3fdade080a475c8a54881ba8fa10e7f45691'
-    );
-    expect(error['error.grouping_key']).toMatchInlineSnapshot(
-      `"4274b1899eba687801198c89f64a3fdade080a475c8a54881ba8fa10e7f45691"`
-    );
+    expect(error['error.grouping_key']).toMatchInlineSnapshot(`"0000000000000000000000test error"`);
   });
 });

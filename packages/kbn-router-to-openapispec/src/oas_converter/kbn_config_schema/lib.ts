@@ -7,7 +7,7 @@
  */
 
 import joi from 'joi';
-import { isConfigSchema, Type, metaFields } from '@kbn/config-schema';
+import { isConfigSchema, Type } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters } from '../../type';
@@ -15,38 +15,6 @@ import { isReferenceObject } from '../common';
 import { parse } from './parse';
 
 import { createCtx, IContext } from './post_process_mutations';
-
-export const getSharedComponentId = (schema: OpenAPIV3.SchemaObject) => {
-  if (metaFields.META_FIELD_X_OAS_REF_ID in schema) {
-    return schema[metaFields.META_FIELD_X_OAS_REF_ID] as string;
-  }
-};
-
-export const removeSharedComponentId = (
-  schema: OpenAPIV3.SchemaObject & { [metaFields.META_FIELD_X_OAS_REF_ID]?: string }
-) => {
-  const { [metaFields.META_FIELD_X_OAS_REF_ID]: id, ...rest } = schema;
-  return rest;
-};
-
-export const sharedComponentIdToRef = (id: string): OpenAPIV3.ReferenceObject => {
-  return {
-    $ref: `#/components/schemas/${id}`,
-  };
-};
-
-type IdSchemaTuple = [id: string, schema: OpenAPIV3.SchemaObject];
-
-export const tryConvertToRef = (schema: OpenAPIV3.SchemaObject) => {
-  const sharedId = getSharedComponentId(schema);
-  if (sharedId) {
-    const idSchema: IdSchemaTuple = [sharedId, removeSharedComponentId(schema)];
-    return {
-      idSchema,
-      ref: sharedComponentIdToRef(sharedId),
-    };
-  }
-};
 
 const isObjectType = (schema: joi.Schema | joi.Description): boolean => {
   return schema.type === 'object';
@@ -100,8 +68,17 @@ export const unwrapKbnConfigSchema = (schema: unknown): joi.Schema => {
 
 export const convert = (kbnConfigSchema: unknown) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  const { result, shared } = parse({ schema, ctx: createCtx({ refs: true }) });
-  return { schema: result, shared: Object.fromEntries(shared.entries()) };
+  const { result, shared } = parse({ schema, ctx: createCtx() });
+  return { schema: result, shared };
+};
+
+export const getParamSchema = (knownParameters: KnownParameters, schemaKey: string) => {
+  return (
+    knownParameters[schemaKey] ??
+    // Handle special path parameters
+    knownParameters[schemaKey + '*'] ??
+    knownParameters[schemaKey + '?*']
+  );
 };
 
 const convertObjectMembersToParameterObjects = (
@@ -117,7 +94,11 @@ const convertObjectMembersToParameterObjects = (
     const anyOf = (result as OpenAPIV3.SchemaObject).anyOf as OpenAPIV3.SchemaObject[];
     properties = anyOf.find((s) => s.type === 'object')!.properties!;
   } else if (isObjectType(schema)) {
-    const { result } = parse({ schema, ctx }) as { result: OpenAPIV3.SchemaObject };
+    const { result } = parse({ schema, ctx });
+    if ('$ref' in result)
+      throw new Error(
+        `Found a reference to "${result.$ref}". Runtime types with IDs are not supported in path or query parameters.`
+      );
     properties = (result as OpenAPIV3.SchemaObject).properties!;
     (result.required ?? []).forEach((key) => required.set(key, true));
   } else if (isRecordType(schema)) {
@@ -127,7 +108,8 @@ const convertObjectMembersToParameterObjects = (
   }
 
   return Object.entries(properties).map(([schemaKey, schemaObject]) => {
-    if (!knownParameters[schemaKey] && isPathParameter) {
+    const paramSchema = getParamSchema(knownParameters, schemaKey);
+    if (!paramSchema && isPathParameter) {
       throw createError(`Unknown parameter: ${schemaKey}, are you sure this is in your path?`);
     }
     const isSubSchemaRequired = required.has(schemaKey);
@@ -143,7 +125,7 @@ const convertObjectMembersToParameterObjects = (
     return {
       name: schemaKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !knownParameters[schemaKey].optional : isSubSchemaRequired,
+      required: isPathParameter ? !paramSchema.optional : isSubSchemaRequired,
       schema: finalSchema,
       description,
     };
@@ -152,11 +134,11 @@ const convertObjectMembersToParameterObjects = (
 
 export const convertQuery = (kbnConfigSchema: unknown) => {
   const schema = unwrapKbnConfigSchema(kbnConfigSchema);
-  const ctx = createCtx({ refs: false }); // For now context is not shared between body, params and queries
+  const ctx = createCtx();
   const result = convertObjectMembersToParameterObjects(ctx, schema, {}, false);
   return {
     query: result,
-    shared: Object.fromEntries(ctx.sharedSchemas.entries()),
+    shared: ctx.getSharedSchemas(),
   };
 };
 
@@ -172,7 +154,7 @@ export const convertPathParameters = (
   const result = convertObjectMembersToParameterObjects(ctx, schema, knownParameters, true);
   return {
     params: result,
-    shared: Object.fromEntries(ctx.sharedSchemas.entries()),
+    shared: ctx.getSharedSchemas(),
   };
 };
 

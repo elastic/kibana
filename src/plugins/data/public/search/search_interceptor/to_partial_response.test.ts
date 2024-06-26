@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { IEsSearchResponse } from '@kbn/search-types';
 
 import { toPartialResponseAfterTimeout } from './to_partial_response';
-import { IEsSearchResponse } from '../../../common';
 
 describe('toPartialResponseAfterTimeout', () => {
   it('should transform a non-CCS response', () => {
@@ -143,7 +143,7 @@ describe('toPartialResponseAfterTimeout', () => {
       id: 'FmZBc2NuYlhsU1JxSk5LZXNRczVxdEEed3l6LUVycTVTVGl1LWtDSVdta2VkQToxODUzODUx',
       rawResponse: {
         took: 4414,
-        timed_out: false,
+        timed_out: true,
         terminated_early: false,
         num_reduce_phases: 2,
         _shards: {

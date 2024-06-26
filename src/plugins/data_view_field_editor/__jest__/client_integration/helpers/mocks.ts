@@ -9,6 +9,7 @@
 export interface EsDoc {
   _id: string;
   _index: string;
+  fields: TestDoc;
   _source: TestDoc;
 }
 
@@ -36,32 +37,41 @@ export const createPreviewError = ({
   };
 };
 
+const firstDoc = {
+  title: 'First doc - title',
+  subTitle: 'First doc - subTitle',
+  description: 'First doc - description',
+};
+
+const secondDoc = {
+  title: 'Second doc - title',
+  subTitle: 'Second doc - subTitle',
+  description: 'Second doc - description',
+};
+
+const thirdDoc = {
+  title: 'Third doc - title',
+  subTitle: 'Third doc - subTitle',
+  description: 'Third doc - description',
+};
+
 export const mockDocuments: EsDoc[] = [
   {
     _id: '001',
     _index: 'testIndex',
-    _source: {
-      title: 'First doc - title',
-      subTitle: 'First doc - subTitle',
-      description: 'First doc - description',
-    },
+    fields: firstDoc,
+    _source: firstDoc,
   },
   {
     _id: '002',
     _index: 'testIndex',
-    _source: {
-      title: 'Second doc - title',
-      subTitle: 'Second doc - subTitle',
-      description: 'Second doc - description',
-    },
+    fields: secondDoc,
+    _source: secondDoc,
   },
   {
     _id: '003',
     _index: 'testIndex',
-    _source: {
-      title: 'Third doc - title',
-      subTitle: 'Third doc - subTitle',
-      description: 'Third doc - description',
-    },
+    fields: thirdDoc,
+    _source: thirdDoc,
   },
 ];

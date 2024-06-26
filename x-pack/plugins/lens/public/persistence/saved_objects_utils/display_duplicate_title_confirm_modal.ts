@@ -6,19 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { OverlayStart } from '@kbn/core/public';
+import type { StartServices } from '../../types';
 import type { ConfirmModalSavedObjectMeta } from './types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
 export function displayDuplicateTitleConfirmModal(
   { title, displayName }: ConfirmModalSavedObjectMeta,
-  overlays: OverlayStart
+  startServices: StartServices
 ): Promise<boolean> {
   const confirmMessage = i18n.translate(
     'xpack.lens.confirmModal.saveDuplicateConfirmationMessage',
     {
-      defaultMessage: `A {name} with the title '{title}' already exists. Would you like to save anyway?`,
+      defaultMessage: `A {name} with the title ''{title}'' already exists. Would you like to save anyway?`,
       values: { title, name: displayName },
     }
   );
@@ -28,7 +28,7 @@ export function displayDuplicateTitleConfirmModal(
     values: { name: displayName },
   });
   try {
-    return confirmModalPromise(confirmMessage, '', confirmButtonText, overlays);
+    return confirmModalPromise(confirmMessage, '', confirmButtonText, startServices);
   } catch {
     return Promise.reject(new Error(SAVE_DUPLICATE_REJECTED));
   }

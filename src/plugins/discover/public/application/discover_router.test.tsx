@@ -11,7 +11,7 @@ import { Redirect, RouteProps } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { createSearchSessionMock } from '../__mocks__/search_session';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
-import { DiscoverRouter } from './discover_router';
+import { DiscoverRoutes } from './discover_router';
 import { DiscoverMainRoute } from './main';
 import { SingleDocRoute } from './doc';
 import { ContextAppRoute } from './context';
@@ -43,7 +43,7 @@ describe('DiscoverRouter', () => {
     pathMap = {};
     const { history } = createSearchSessionMock();
     const component = shallow(
-      <DiscoverRouter
+      <DiscoverRoutes
         services={mockDiscoverServices}
         history={history}
         customizationContext={mockCustomizationContext}

@@ -44,6 +44,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'dashboard',
     'timeToVisualize',
     'unifiedSearch',
+    'share',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -119,10 +120,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async selectOptionFromComboBox(testTargetId: string, name: string) {
+    async selectOptionFromComboBox(testTargetId: string, name: string | string[]) {
       const target = await testSubjects.find(testTargetId, 1000);
       await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, name);
+      const names = Array.isArray(name) ? name : [name];
+      for (const option of names) {
+        await comboBox.setElement(target, option);
+      }
     },
 
     async configureQueryAnnotation(opts: {
@@ -746,7 +750,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.timeToVisualize.setSaveModalValues(title, {
         saveAsNew,
@@ -754,6 +759,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         addToDashboard: addToDashboard ? addToDashboard : null,
         dashboardId,
         saveToLibrary,
+        description,
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
@@ -774,7 +780,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       redirectToOrigin?: boolean,
       saveToLibrary?: boolean,
       addToDashboard?: 'new' | 'existing' | null,
-      dashboardId?: string
+      dashboardId?: string,
+      description?: string
     ) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('lnsApp_saveButton');
@@ -785,7 +792,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         redirectToOrigin,
         saveToLibrary,
         addToDashboard,
-        dashboardId
+        dashboardId,
+        description
       );
     },
 
@@ -1349,17 +1357,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getMetricDatum(tile: WebElementWrapper) {
+      // using getAttribute('innerText') because getVisibleText() fails when the text overflows the metric panel.
+      // The reported "visible" text is somewhat inaccurate and just report the full innerText of just the visible DOM elements.
+      // In the case of Metric, suffixes that are on a sub-element are not considered visible.
       return {
-        title: await (await this.getMetricElementIfExists('h2', tile))?.getVisibleText(),
+        title: await (await this.getMetricElementIfExists('h2', tile))?.getAttribute('innerText'),
         subtitle: await (
           await this.getMetricElementIfExists('.echMetricText__subtitle', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         extraText: await (
           await this.getMetricElementIfExists('.echMetricText__extra', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         value: await (
           await this.getMetricElementIfExists('.echMetricText__value', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
@@ -1797,75 +1808,60 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async clickShareMenu() {
-      await testSubjects.click('lnsApp_shareButton');
+    async clickShareModal() {
+      return await testSubjects.click('lnsApp_shareButton');
     },
 
     async isShareable() {
       return await testSubjects.isEnabled('lnsApp_shareButton');
     },
 
-    async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports') {
+    async isShareActionEnabled(action: 'export' | 'link') {
       switch (action) {
-        case 'csvDownload':
-          return await testSubjects.isEnabled('sharePanel-CSVDownload');
-        case 'permalinks':
-          return await testSubjects.isEnabled('sharePanel-Permalinks');
+        case 'link':
+          return await testSubjects.isEnabled('link');
         default:
-          return await testSubjects.isEnabled(`sharePanel-${action}`);
+          return await testSubjects.isEnabled(action);
       }
     },
 
-    async ensureShareMenuIsOpen(
-      action: 'csvDownload' | 'permalinks' | 'PNGReports' | 'PDFReports'
-    ) {
-      await this.clickShareMenu();
+    async ensureShareMenuIsOpen(action: 'export' | 'link') {
+      await this.clickShareModal();
 
-      if (!(await testSubjects.exists('shareContextMenu'))) {
-        await this.clickShareMenu();
+      if (!(await testSubjects.exists('shareContextModal'))) {
+        await this.clickShareModal();
       }
       if (!(await this.isShareActionEnabled(action))) {
         throw Error(`${action} sharing feature is disabled`);
       }
+      return await testSubjects.click(action);
     },
 
     async openPermalinkShare() {
-      await this.ensureShareMenuIsOpen('permalinks');
-      await testSubjects.click('sharePanel-Permalinks');
+      await this.ensureShareMenuIsOpen('link');
+      await testSubjects.click('link');
     },
 
-    async getAvailableUrlSharingOptions() {
-      if (!(await testSubjects.exists('shareUrlForm'))) {
-        await this.openPermalinkShare();
-      }
-      const el = await testSubjects.find('shareUrlForm');
-      const available = await el.findAllByCssSelector('input:not([disabled])');
-      const ids = await Promise.all(available.map((node) => node.getAttribute('id')));
-      return ids;
+    closeShareModal() {
+      return PageObjects.share.closeShareModal();
     },
 
-    async getUrl(type: 'snapshot' | 'savedObject' = 'snapshot') {
-      if (!(await testSubjects.exists('shareUrlForm'))) {
-        await this.openPermalinkShare();
-      }
-      const options = await this.getAvailableUrlSharingOptions();
-      const optionIndex = options.findIndex((option) => option === type);
-      if (optionIndex < 0) {
-        throw Error(`Sharing URL of type ${type} is not available`);
-      }
-      const testSubFrom = `exportAs${type[0].toUpperCase()}${type.substring(1)}`;
-      await testSubjects.click(testSubFrom);
-      const copyButton = await testSubjects.find('copyShareUrlButton');
-      const url = await copyButton.getAttribute('data-share-url');
+    async getUrl() {
+      await this.ensureShareMenuIsOpen('link');
+      const url = await PageObjects.share.getSharedUrl();
+
       if (!url) {
         throw Error('No data-share-url attribute found');
       }
+
+      // close share modal after url is copied
+      await this.closeShareModal();
       return url;
     },
 
     async openCSVDownloadShare() {
-      await this.ensureShareMenuIsOpen('csvDownload');
-      await testSubjects.click('sharePanel-CSVDownload');
+      await this.ensureShareMenuIsOpen('export');
+      await testSubjects.click('export');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
@@ -1875,12 +1871,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openReportingShare(type: 'PNG' | 'PDF') {
-      await this.ensureShareMenuIsOpen(`${type}Reports`);
-      await testSubjects.click(`sharePanel-${type}Reports`);
+      await this.ensureShareMenuIsOpen(`export`);
+      await testSubjects.click(`export`);
+      if (type === 'PDF') {
+        return await testSubjects.click('printablePdfV2-radioOption');
+      }
+      if (type === 'PNG') {
+        return await testSubjects.click('pngV2-radioOption');
+      }
     },
 
     async getCSVContent() {
-      await testSubjects.click('lnsApp_downloadCSVButton');
+      await testSubjects.click('generateReportButton');
       return await browser.execute<
         [void],
         Record<string, { content: string; type: string }> | undefined

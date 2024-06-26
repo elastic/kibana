@@ -13,16 +13,11 @@ import { ExperimentalFeatures } from '../../common/config';
 
 export interface PluginContextValue {
   isDev?: boolean;
+  isServerless?: boolean;
   appMountParameters?: AppMountParameters;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   experimentalFeatures?: ExperimentalFeatures;
 }
 
-export interface OverviewEmbeddableContextValue {
-  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
-}
-
-export const PluginContext = createContext(
-  {} as PluginContextValue | OverviewEmbeddableContextValue
-);
+export const PluginContext = createContext<PluginContextValue | null>(null);

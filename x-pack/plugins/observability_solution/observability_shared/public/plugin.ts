@@ -18,6 +18,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
+import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
 import {
   type AssetDetailsFlyoutLocator,
   AssetDetailsFlyoutLocatorDefinition,
@@ -27,6 +28,10 @@ import {
   AssetDetailsLocatorDefinition,
 } from './locators/infra/asset_details_locator';
 import { type HostsLocator, HostsLocatorDefinition } from './locators/infra/hosts_locator';
+import {
+  type InventoryLocator,
+  InventoryLocatorDefinition,
+} from './locators/infra/inventory_locator';
 import {
   type FlamegraphLocator,
   FlamegraphLocatorDefinition,
@@ -69,6 +74,7 @@ interface ObservabilitySharedLocators {
     assetDetailsLocator: AssetDetailsLocator;
     assetDetailsFlyoutLocator: AssetDetailsFlyoutLocator;
     hostsLocator: HostsLocator;
+    inventoryLocator: InventoryLocator;
   };
   profiling: {
     flamegraphLocator: FlamegraphLocator;
@@ -97,6 +103,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     });
 
     return {
+      registerProfilingComponent,
       locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
@@ -137,6 +144,7 @@ export class ObservabilitySharedPlugin implements Plugin {
           new AssetDetailsFlyoutLocatorDefinition()
         ),
         hostsLocator: urlService.locators.create(new HostsLocatorDefinition()),
+        inventoryLocator: urlService.locators.create(new InventoryLocatorDefinition()),
       },
       profiling: {
         flamegraphLocator: urlService.locators.create(new FlamegraphLocatorDefinition()),

@@ -7,24 +7,33 @@
 
 export type IndicesQuerySourceFields = Record<string, QuerySourceFields>;
 
-interface ModelFields {
+interface ModelField {
   field: string;
   model_id: string;
-  nested: boolean;
+  indices: string[];
+}
+
+interface SemanticField {
+  field: string;
+  inferenceId: string;
+  embeddingType: 'sparse_vector' | 'dense_vector';
   indices: string[];
 }
 
 export interface QuerySourceFields {
-  elser_query_fields: ModelFields[];
-  dense_vector_query_fields: ModelFields[];
+  elser_query_fields: ModelField[];
+  dense_vector_query_fields: ModelField[];
   bm25_query_fields: string[];
   source_fields: string[];
+  semantic_fields: SemanticField[];
+  skipped_fields: number;
 }
 
 export enum APIRoutes {
   POST_API_KEY = '/internal/search_playground/api_key',
   POST_CHAT_MESSAGE = '/internal/search_playground/chat',
   POST_QUERY_SOURCE_FIELDS = '/internal/search_playground/query_source_fields',
+  GET_INDICES = '/internal/search_playground/indices',
 }
 
 export enum LLMs {
@@ -42,4 +51,17 @@ export interface ChatRequestData {
   summarization_model?: string;
   source_fields: string;
   doc_size: number;
+}
+
+export interface SearchPlaygroundConfigType {
+  ui: {
+    enabled: boolean;
+  };
+}
+
+export interface ModelProvider {
+  name: string;
+  model: string;
+  promptTokenLimit: number;
+  provider: LLMs;
 }

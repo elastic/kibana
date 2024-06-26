@@ -11,7 +11,7 @@ import React, { createContext } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { distinctUntilChanged, skip, Subject, Subscription, switchMap } from 'rxjs';
 
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
   AttributeService,
   Embeddable,

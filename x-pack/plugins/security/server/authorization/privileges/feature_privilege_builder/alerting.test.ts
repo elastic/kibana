@@ -90,6 +90,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-feature/rule/getBackfill",
+            "alerting:alert-type/my-feature/rule/findBackfill",
           ]
         `);
       });
@@ -177,6 +179,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-feature/rule/getBackfill",
+            "alerting:alert-type/my-feature/rule/findBackfill",
             "alerting:alert-type/my-feature/alert/get",
             "alerting:alert-type/my-feature/alert/find",
             "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
@@ -224,6 +228,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-feature/rule/getBackfill",
+            "alerting:alert-type/my-feature/rule/findBackfill",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -241,6 +247,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
             "alerting:alert-type/my-feature/rule/runSoon",
+            "alerting:alert-type/my-feature/rule/scheduleBackfill",
+            "alerting:alert-type/my-feature/rule/deleteBackfill",
           ]
         `);
       });
@@ -329,6 +337,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-feature/rule/getBackfill",
+            "alerting:alert-type/my-feature/rule/findBackfill",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -346,6 +356,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
             "alerting:alert-type/my-feature/rule/runSoon",
+            "alerting:alert-type/my-feature/rule/scheduleBackfill",
+            "alerting:alert-type/my-feature/rule/deleteBackfill",
             "alerting:alert-type/my-feature/alert/get",
             "alerting:alert-type/my-feature/alert/find",
             "alerting:alert-type/my-feature/alert/getAuthorizedAlertsIndices",
@@ -394,6 +406,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-feature/rule/getBackfill",
+            "alerting:alert-type/my-feature/rule/findBackfill",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -411,6 +425,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
             "alerting:alert-type/my-feature/rule/runSoon",
+            "alerting:alert-type/my-feature/rule/scheduleBackfill",
+            "alerting:alert-type/my-feature/rule/deleteBackfill",
             "alerting:readonly-alert-type/my-feature/rule/get",
             "alerting:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
@@ -418,6 +434,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
             "alerting:readonly-alert-type/my-feature/rule/find",
             "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:readonly-alert-type/my-feature/rule/getBackfill",
+            "alerting:readonly-alert-type/my-feature/rule/findBackfill",
           ]
         `);
       });
@@ -510,6 +528,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/getActionErrorLog",
             "alerting:alert-type/my-feature/rule/find",
             "alerting:alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:alert-type/my-feature/rule/getBackfill",
+            "alerting:alert-type/my-feature/rule/findBackfill",
             "alerting:alert-type/my-feature/rule/create",
             "alerting:alert-type/my-feature/rule/delete",
             "alerting:alert-type/my-feature/rule/update",
@@ -527,6 +547,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:alert-type/my-feature/rule/bulkDisable",
             "alerting:alert-type/my-feature/rule/unsnooze",
             "alerting:alert-type/my-feature/rule/runSoon",
+            "alerting:alert-type/my-feature/rule/scheduleBackfill",
+            "alerting:alert-type/my-feature/rule/deleteBackfill",
             "alerting:readonly-alert-type/my-feature/rule/get",
             "alerting:readonly-alert-type/my-feature/rule/getRuleState",
             "alerting:readonly-alert-type/my-feature/rule/getAlertSummary",
@@ -534,6 +556,8 @@ describe(`feature_privilege_builder`, () => {
             "alerting:readonly-alert-type/my-feature/rule/getActionErrorLog",
             "alerting:readonly-alert-type/my-feature/rule/find",
             "alerting:readonly-alert-type/my-feature/rule/getRuleExecutionKPI",
+            "alerting:readonly-alert-type/my-feature/rule/getBackfill",
+            "alerting:readonly-alert-type/my-feature/rule/findBackfill",
             "alerting:another-alert-type/my-feature/alert/get",
             "alerting:another-alert-type/my-feature/alert/find",
             "alerting:another-alert-type/my-feature/alert/getAuthorizedAlertsIndices",

@@ -57,7 +57,7 @@ describe('TelemetryEventsSender', () => {
     revision: 1,
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     logger = loggingSystemMock.createLogger();
     sender = new TelemetryEventsSender(logger);
     sender['fetchLicenseInfo'] = jest.fn(async () => {
@@ -73,7 +73,7 @@ describe('TelemetryEventsSender', () => {
         },
       } as InfoResponse;
     });
-    sender.start(undefined, {
+    await sender.start(undefined, {
       elasticsearch: { client: { asInternalUser: { info: jest.fn(async () => ({})) } } },
     } as any);
   });

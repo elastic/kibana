@@ -17,7 +17,7 @@ import { DEFAULT_LOGS_DATA_VIEW } from '../../common/constants';
 import { indexNameToDataStreamParts } from '../../common/utils';
 import { getLensAttributes } from '../components/flyout/degraded_docs_trend/lens_attributes';
 import { useCreateDataView } from './use_create_dataview';
-import { useLinkToLogsExplorer } from './use_link_to_logs_explorer';
+import { useRedirectLink } from './use_redirect_link';
 import { useDatasetQualityFlyout } from './use_dataset_quality_flyout';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -25,6 +25,13 @@ const exploreDataInLogsExplorerText = i18n.translate(
   'xpack.datasetQuality.flyoutChartExploreDataInLogsExplorerText',
   {
     defaultMessage: 'Explore data in Logs Explorer',
+  }
+);
+
+const exploreDataInDiscoverText = i18n.translate(
+  'xpack.datasetQuality.flyoutChartExploreDataInDiscoverText',
+  {
+    defaultMessage: 'Explore data in Discover',
   }
 );
 
@@ -62,7 +69,6 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     () => getDataViewField(dataView, breakdownField),
     [breakdownField, dataView]
   );
-  const filterQuery = `_index: ${dataStream ?? 'match-none'}`;
 
   const handleChartLoading = (isLoading: boolean) => {
     setIsChartLoading(isLoading);
@@ -79,16 +85,22 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
   );
 
   useEffect(() => {
-    if (dataView) {
-      const lensAttributes = getLensAttributes({
-        color: euiTheme.colors.danger,
-        dataView,
-        query: filterQuery,
-        breakdownFieldName: breakdownDataViewField?.name,
-      });
-      setAttributes(lensAttributes);
-    }
-  }, [breakdownDataViewField?.name, dataView, euiTheme.colors.danger, filterQuery, setAttributes]);
+    const dataStreamName = dataStream ?? DEFAULT_LOGS_DATA_VIEW;
+
+    const lensAttributes = getLensAttributes({
+      color: euiTheme.colors.danger,
+      dataStream: dataStreamName,
+      datasetTitle: dataStreamStat?.title ?? dataStreamName,
+      breakdownFieldName: breakdownDataViewField?.name,
+    });
+    setAttributes(lensAttributes);
+  }, [
+    breakdownDataViewField?.name,
+    euiTheme.colors.danger,
+    setAttributes,
+    dataStream,
+    dataStreamStat?.title,
+  ]);
 
   const openInLensCallback = useCallback(() => {
     if (attributes) {
@@ -120,7 +132,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
     };
   }, [openInLensCallback]);
 
-  const logsExplorerLinkProps = useLinkToLogsExplorer({
+  const redirectLinkProps = useRedirectLink({
     dataStreamStat: dataStreamStat!,
     query: { language: 'kuery', query: '_ignored:*' },
     timeRangeConfig: timeRange,
@@ -132,10 +144,12 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
       id: ACTION_EXPLORE_IN_LOGS_EXPLORER,
       type: 'link',
       getDisplayName(): string {
-        return exploreDataInLogsExplorerText;
+        return redirectLinkProps?.isLogsExplorerAvailable
+          ? exploreDataInLogsExplorerText
+          : exploreDataInDiscoverText;
       },
       getHref: async () => {
-        return logsExplorerLinkProps.href;
+        return redirectLinkProps.href;
       },
       getIconType(): string | undefined {
         return 'popout';
@@ -144,11 +158,11 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
         return true;
       },
       async execute(): Promise<void> {
-        return logsExplorerLinkProps.navigate();
+        return redirectLinkProps.navigate();
       },
       order: 18,
     };
-  }, [logsExplorerLinkProps]);
+  }, [redirectLinkProps]);
 
   const extraActions: Action[] = [getOpenInLensAction, getOpenInLogsExplorerAction];
 

@@ -38,7 +38,8 @@ export type PersistenceAlertService = <T>(
       _id: string;
       _source: T;
     }>
-  >
+  >,
+  currentTimeOverride?: Date
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
 export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
