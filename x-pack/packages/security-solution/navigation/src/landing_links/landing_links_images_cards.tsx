@@ -6,12 +6,12 @@
  */
 import {
   EuiAccordion,
-  EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSpacer,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React from 'react';
@@ -27,11 +27,11 @@ export interface LandingLinksImagesProps {
 }
 
 const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
   return {
-    cardsContainer: css`
-      padding-top: 16px;
-      gap: ${euiTheme.size.s};
+    accordion: css`
+      .euiAccordion__childWrapper {
+        overflow: visible;
+      }
     `,
   };
 };
@@ -45,6 +45,8 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
       <EuiPanel hasShadow={false} color="subdued" borderRadius="m" paddingSize="m">
         <EuiAccordion
           id={landingLinksAccordionId}
+          initialIsOpen
+          css={styles.accordion}
           data-test-subj="LandingImageCards-accordion"
           buttonContent={
             <EuiFlexGroup
@@ -53,14 +55,20 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
               justifyContent="flexStart"
               alignItems="center"
             >
-              <EuiIcon type="logoSecurity" />
-              <EuiTitle size="xxs">
-                <h2>{i18n.LANDING_LINKS_ACCORDION_HEADER}</h2>
-              </EuiTitle>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="logoSecurity" />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h2>{i18n.LANDING_LINKS_ACCORDION_HEADER}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
             </EuiFlexGroup>
           }
         >
-          <EuiFlexGrid css={styles.cardsContainer} columns={3}>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" wrap>
             {items.map((item) => {
               const { id } = item;
               return (
@@ -72,7 +80,7 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
                 />
               );
             })}
-          </EuiFlexGrid>
+          </EuiFlexGroup>
         </EuiAccordion>
       </EuiPanel>
     );

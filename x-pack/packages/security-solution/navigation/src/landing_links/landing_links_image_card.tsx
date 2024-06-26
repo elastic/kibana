@@ -27,13 +27,15 @@ export interface LandingLinksImageCardProps {
 }
 
 const CARD_HEIGHT = 116;
-const CARD_HEIGHT_IMAGE = 106;
+const CARD_WIDTH = 370;
+const CARD_HEIGHT_IMAGE = 98;
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   return {
     card: css`
       height: ${CARD_HEIGHT}px;
+      max-width: ${CARD_WIDTH}px;
     `,
     cardWrapper: css`
       height: 100%;
@@ -45,24 +47,21 @@ const useStyles = () => {
       color: ${euiTheme.colors.primaryText};
       font-weight: ${euiTheme.font.weight.semiBold};
     `,
-    description: css`
-      padding-top: ${euiTheme.size.xs};
-      max-width: 550px;
-      font-size: ${euiTheme.size.m};
-    `,
     imageContainer: css`
       overflow: hidden;
-      height: 100%;
+      height: ${CARD_HEIGHT_IMAGE}px;
       width: ${CARD_HEIGHT_IMAGE}px;
       flex-grow: 0;
-    `,
-    cardInfoContainer: css`
-      width: min-content;
+      position: relative;
     `,
     image: css`
       max-inline-size: none;
       overflow: hidden;
       height: ${CARD_HEIGHT_IMAGE}px;
+      position: absolute;
+      top: 0;
+      transform: translateX(-21%);
+      left: 0;
     `,
   };
 };
@@ -77,7 +76,7 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
     const { landingImage, title, description, isBeta, betaOptions } = item;
     return (
       <EuiFlexItem data-test-subj="LandingImageCard-item" grow={false}>
-        <EuiPanelWithLink {...linkProps} hasBorder paddingSize="xs" css={styles.card}>
+        <EuiPanelWithLink {...linkProps} hasBorder paddingSize="s" css={styles.card}>
           <EuiFlexGroup
             gutterSize="s"
             direction="row"
