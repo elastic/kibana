@@ -25,7 +25,7 @@ export interface KibanaDeps {
   discover: DiscoverStart;
   features: FeaturesPluginStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
-  licensing?: LicensingPluginStart;
+  licensing: LicensingPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
   spaces: SpacesPluginStart;

@@ -115,7 +115,6 @@ export interface RouteDependencies {
   globalConfigService: GlobalConfigService;
   log: Logger;
   ml?: MlPluginSetup;
-  licensing: LicensingPluginStart;
   router: IRouter;
 }
 

@@ -100,7 +100,7 @@ export interface PluginsStart {
   guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
   lens?: LensPublicStart;
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart;
   ml?: MlPluginStart;
   navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
@@ -265,11 +265,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       return;
     }
     const { cloud, share, licensing } = plugins;
-
-    let isEnterpriseLicense: boolean = false;
-    this.licenseSubscription = licensing?.license$.subscribe((license: ILicense) => {
-      isEnterpriseLicense = license.isActive && license.hasAtLeast('enterprise');
-    });
 
     const useSearchHomepage =
       plugins.searchHomepage && plugins.searchHomepage.isHomepageFeatureEnabled();
@@ -454,32 +449,34 @@ export class EnterpriseSearchPlugin implements Plugin {
       title: ANALYTICS_PLUGIN.NAME,
     });
 
-    if (isEnterpriseLicense) {
-      core.application.register({
-        appRoute: INFERENCE_ENDPOINTS_PLUGIN.URL,
-        category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-        deepLinks: relevanceLinks,
-        euiIconType: INFERENCE_ENDPOINTS_PLUGIN.LOGO,
-        id: INFERENCE_ENDPOINTS_PLUGIN.ID,
-        mount: async (params: AppMountParameters) => {
-          const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-          const { chrome, http } = kibanaDeps.core;
-          chrome.docTitle.change(INFERENCE_ENDPOINTS_PLUGIN.NAME);
+    this.licenseSubscription = licensing?.license$.subscribe((license: ILicense) => {
+      if (license.isActive && license.hasAtLeast('enterprise')) {
+        core.application.register({
+          appRoute: INFERENCE_ENDPOINTS_PLUGIN.URL,
+          category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+          deepLinks: relevanceLinks,
+          euiIconType: INFERENCE_ENDPOINTS_PLUGIN.LOGO,
+          id: INFERENCE_ENDPOINTS_PLUGIN.ID,
+          mount: async (params: AppMountParameters) => {
+            const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+            const { chrome, http } = kibanaDeps.core;
+            chrome.docTitle.change(INFERENCE_ENDPOINTS_PLUGIN.NAME);
 
-          await this.getInitialData(http);
-          const pluginData = this.getPluginData();
+            await this.getInitialData(http);
+            const pluginData = this.getPluginData();
 
-          const { renderApp } = await import('./applications');
-          const { EnterpriseSearchRelevance } = await import(
-            './applications/enterprise_search_relevance'
-          );
+            const { renderApp } = await import('./applications');
+            const { EnterpriseSearchRelevance } = await import(
+              './applications/enterprise_search_relevance'
+            );
 
-          return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
-        },
-        title: INFERENCE_ENDPOINTS_PLUGIN.NAME,
-        visibleIn: [],
-      });
-    }
+            return renderApp(EnterpriseSearchRelevance, kibanaDeps, pluginData);
+          },
+          title: INFERENCE_ENDPOINTS_PLUGIN.NAME,
+          visibleIn: [],
+        });
+      }
+    });
 
     core.application.register({
       appRoute: SEARCH_EXPERIENCES_PLUGIN.URL,
