@@ -8,7 +8,7 @@
 import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { useCreateRule, useFetchDataViews } from '@kbn/observability-plugin/public';
+import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
@@ -23,6 +23,7 @@ import { useFetchApmSuggestions } from '../../hooks/use_fetch_apm_suggestions';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
 import { useFetchSloDetails } from '../../hooks/use_fetch_slo_details';
 import { usePermissions } from '../../hooks/use_permissions';
+import { useCreateRule } from '../../hooks/use_create_rule';
 import { useUpdateSlo } from '../../hooks/use_update_slo';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -44,6 +45,7 @@ jest.mock('../../hooks/use_create_slo');
 jest.mock('../../hooks/use_update_slo');
 jest.mock('../../hooks/use_fetch_apm_suggestions');
 jest.mock('../../hooks/use_permissions');
+jest.mock('../../hooks/use_create_rule');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
