@@ -30,6 +30,9 @@ export function clustersRoute(server: MonitoringCore) {
     validate: {
       body: validateBody,
     },
+    options: {
+      access: 'internal',
+    },
     handler: async (req) => {
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read

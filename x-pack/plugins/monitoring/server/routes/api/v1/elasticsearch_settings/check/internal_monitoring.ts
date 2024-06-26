@@ -83,6 +83,9 @@ export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: Ro
       validate: {
         body: validateBody,
       },
+      options: {
+        access: 'internal',
+      },
     },
     async (context, request, response) => {
       try {
