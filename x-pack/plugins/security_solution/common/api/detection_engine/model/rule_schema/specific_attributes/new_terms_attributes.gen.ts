@@ -21,5 +21,5 @@ import { NonEmptyString } from '../../../../model/primitives.gen';
 export type NewTermsFields = z.infer<typeof NewTermsFields>;
 export const NewTermsFields = z.array(z.string()).min(1).max(3);
 
-export type HistoryWindowStart = z.infer<typeof HistoryWindowStart>;
+export type HistoryWindowStartType = z.infer<typeof HistoryWindowStart>;
 export const HistoryWindowStart = NonEmptyString;
