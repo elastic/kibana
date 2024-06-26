@@ -52,9 +52,9 @@ export function EmptyPrompt() {
 }
 
 function NoResultsIllustration() {
-  const theme = useTheme();
+  const { isDarkColorMode } = useTheme();
 
-  const illustration = theme.darkMode ? noResultsIllustrationDark : noResultsIllustrationLight;
+  const illustration = isDarkColorMode ? noResultsIllustrationDark : noResultsIllustrationLight;
 
   return (
     <EuiImage alt={noResultsIllustrationAlternativeText} size="fullWidth" src={illustration} />

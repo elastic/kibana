@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import type { UseEuiThemeWithColorsVis } from '../public/hooks/use_theme';
 
 export enum ServiceHealthStatus {
   healthy = 'healthy',
@@ -34,29 +34,35 @@ export function getServiceHealthStatus({ severity }: { severity: ML_ANOMALY_SEVE
   }
 }
 
-export function getServiceHealthStatusColor(theme: EuiTheme, status: ServiceHealthStatus) {
+export function getServiceHealthStatusColor(
+  euiTheme: UseEuiThemeWithColorsVis,
+  status: ServiceHealthStatus
+) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return theme.eui.euiColorVis0;
+      return euiTheme.euiPaletteColorBlind.euiColorVis0;
     case ServiceHealthStatus.warning:
-      return theme.eui.euiColorVis5;
+      return euiTheme.euiPaletteColorBlind.euiColorVis5;
     case ServiceHealthStatus.critical:
-      return theme.eui.euiColorVis9;
+      return euiTheme.euiPaletteColorBlind.euiColorVis9;
     case ServiceHealthStatus.unknown:
-      return theme.eui.euiColorMediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 
-export function getServiceHealthStatusBadgeColor(theme: EuiTheme, status: ServiceHealthStatus) {
+export function getServiceHealthStatusBadgeColor(
+  euiTheme: UseEuiThemeWithColorsVis,
+  status: ServiceHealthStatus
+) {
   switch (status) {
     case ServiceHealthStatus.healthy:
-      return theme.eui.euiColorVis0_behindText;
+      return euiTheme.euiPaletteColorBlindBehindText.euiColorVis0BehindText;
     case ServiceHealthStatus.warning:
-      return theme.eui.euiColorVis5_behindText;
+      return euiTheme.euiPaletteColorBlindBehindText.euiColorVis5BehindText;
     case ServiceHealthStatus.critical:
-      return theme.eui.euiColorVis9_behindText;
+      return euiTheme.euiPaletteColorBlindBehindText.euiColorVis9BehindText;
     case ServiceHealthStatus.unknown:
-      return theme.eui.euiColorMediumShade;
+      return euiTheme.colors.mediumShade;
   }
 }
 

@@ -189,7 +189,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
     ?.filter((segment) => segment.self)
     .map((segment) => ({
       id: segment.item.id,
-      color: theme.eui.euiColorAccent,
+      color: theme.colors.accent,
       left: (segment.offset - node.item.offset - node.item.skew) / node.item.duration,
       width: segment.duration / node.item.duration,
     }));

@@ -205,7 +205,7 @@ export function FieldStatsPopover({
   const field = dataView?.getFieldByName(fieldName);
 
   const closePopover = useCallback(() => setInfoOpen(false), []);
-  const theme = useTheme();
+  const euiTheme = useTheme();
 
   const params = useFetchParams();
 
@@ -280,7 +280,7 @@ export function FieldStatsPopover({
           }
         )}
         data-test-subj={'apmCorrelationsContextPopoverButton'}
-        style={{ marginLeft: theme.eui.euiSizeXS }}
+        style={{ marginLeft: euiTheme.size.xs }}
       />
     </EuiToolTip>
   );

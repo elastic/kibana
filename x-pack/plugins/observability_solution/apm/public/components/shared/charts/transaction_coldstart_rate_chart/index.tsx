@@ -117,7 +117,7 @@ export function TransactionColdstartRateChart({
     {
       data: data?.currentPeriod?.transactionColdstartRate ?? [],
       type: 'linemark',
-      color: theme.eui.euiColorVis5,
+      color: theme.euiPaletteColorBlind.euiColorVis5,
       title: i18n.translate('xpack.apm.coldstartRate.chart.coldstartRate', {
         defaultMessage: 'Cold start rate (avg.)',
       }),
@@ -127,7 +127,7 @@ export function TransactionColdstartRateChart({
           {
             data: data?.previousPeriod?.transactionColdstartRate ?? [],
             type: 'area',
-            color: theme.eui.euiColorMediumShade,
+            color: theme.colors.mediumShade,
             title: previousPeriodLabel,
           },
         ]

@@ -127,10 +127,7 @@ function MultipleInstanceCustomTooltip({
               >
                 <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
-              <div
-                className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.euiSizeS }}
-              >
+              <div className="echTooltip__item--container" style={{ paddingLeft: theme.size.s }}>
                 <span className="echTooltip__label">{latencyLabel}</span>
                 <span className="echTooltip__value">{latencyFormatter(latency).formatted}</span>
               </div>
@@ -142,10 +139,7 @@ function MultipleInstanceCustomTooltip({
               >
                 <div className="echTooltip__item--color" style={{ backgroundColor: color }} />
               </div>
-              <div
-                className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.euiSizeS }}
-              >
+              <div className="echTooltip__item--container" style={{ paddingLeft: theme.size.s }}>
                 <span className="echTooltip__label">{throughputLabel}</span>
                 <span className="echTooltip__value">{asTransactionRate(throughput)}</span>
               </div>
@@ -175,7 +169,7 @@ export function CustomTooltip(props: TooltipInfo & { latencyFormatter: TimeForma
       ) : (
         <SingleInstanceCustomTooltip {...props} />
       )}
-      <div style={{ padding: theme.eui.euiSizeXS }}>
+      <div style={{ padding: theme.size.xs }}>
         <EuiIcon type="filter" /> {clickToFilterDescription}
       </div>
     </div>

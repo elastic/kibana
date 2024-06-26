@@ -122,7 +122,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'service',
       icon: {
-        type: getAgentIcon(icons?.agentName, theme.darkMode) || 'node',
+        type: getAgentIcon(icons?.agentName, theme.isDarkColorMode) || 'node',
       },
       isVisible: !!icons?.agentName,
       title: i18n.translate('xpack.apm.serviceIcons.service', {
@@ -133,7 +133,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'opentelemetry',
       icon: {
-        type: getAgentIcon('opentelemetry', theme.darkMode),
+        type: getAgentIcon('opentelemetry', theme.isDarkColorMode),
       },
       isVisible: !!icons?.agentName && isOpenTelemetryAgentName(icons.agentName),
       title: i18n.translate('xpack.apm.serviceIcons.opentelemetry', {

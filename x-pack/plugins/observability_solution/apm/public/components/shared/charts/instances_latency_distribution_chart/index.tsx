@@ -130,7 +130,7 @@ export function InstancesLatencyDistributionChart({
             locale={i18n.getLocale()}
           />
           <BubbleSeries
-            color={theme.eui.euiColorVis0}
+            color={theme.euiPaletteColorBlind.euiColorVis0}
             data={items}
             id={i18n.translate('xpack.apm.instancesLatencyDistributionChartLegend', {
               defaultMessage: 'Instances',
@@ -143,7 +143,7 @@ export function InstancesLatencyDistributionChart({
               point: {
                 strokeWidth: 0,
                 radius: 4,
-                fill: theme.eui.euiColorVis0,
+                fill: theme.euiPaletteColorBlind.euiColorVis0,
               },
             }}
           />
@@ -156,13 +156,13 @@ export function InstancesLatencyDistributionChart({
               xScaleType={ScaleType.Linear}
               yAccessors={[(item) => item.latency]}
               yScaleType={ScaleType.Linear}
-              color={theme.eui.euiColorMediumShade}
+              color={theme.colors.mediumShade}
               bubbleSeriesStyle={{
                 point: {
                   shape: 'square',
                   radius: 4,
-                  fill: theme.eui.euiColorLightestShade,
-                  stroke: theme.eui.euiColorMediumShade,
+                  fill: theme.colors.lightestShade,
+                  stroke: theme.colors.mediumShade,
                   strokeWidth: 2,
                 },
               }}

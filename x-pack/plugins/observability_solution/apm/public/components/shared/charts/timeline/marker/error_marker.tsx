@@ -61,7 +61,7 @@ export function ErrorMarker({ mark }: Props) {
     <Button
       data-test-subj="popover"
       clickable
-      color={theme.eui.euiColorDanger}
+      color={theme.colors.danger}
       shape={Shape.square}
       onClick={togglePopover}
     />
@@ -94,7 +94,7 @@ export function ErrorMarker({ mark }: Props) {
       <Popover>
         <TimeLegend
           text={asDuration(mark.offset)}
-          indicator={<div style={{ marginRight: theme.eui.euiSizeXS }}>@</div>}
+          indicator={<div style={{ marginRight: theme.size.xs }}>@</div>}
         />
         <Legend
           key={mark.serviceColor}

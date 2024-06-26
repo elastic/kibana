@@ -42,7 +42,7 @@ export function AgentMarker({ mark }: Props) {
           </div>
         }
       >
-        <Legend clickable color={theme.eui.euiColorMediumShade} />
+        <Legend clickable color={theme.colors.mediumShade} />
       </EuiToolTip>
     </>
   );

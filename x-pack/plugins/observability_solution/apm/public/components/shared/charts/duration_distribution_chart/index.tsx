@@ -188,7 +188,7 @@ export function DurationDistributionChart({
                   },
                   tickLabel: {
                     fontSize: 10,
-                    fill: euiTheme.eui.euiColorMediumShade,
+                    fill: euiTheme.colors.mediumShade,
                     padding: 0,
                   },
                 },
@@ -207,8 +207,8 @@ export function DurationDistributionChart({
               id="rect_annotation_1"
               style={{
                 strokeWidth: 1,
-                stroke: euiTheme.eui.euiColorLightShade,
-                fill: euiTheme.eui.euiColorLightShade,
+                stroke: euiTheme.colors.lightShade,
+                fill: euiTheme.colors.lightShade,
                 opacity: 0.9,
               }}
               hideTooltips={true}
