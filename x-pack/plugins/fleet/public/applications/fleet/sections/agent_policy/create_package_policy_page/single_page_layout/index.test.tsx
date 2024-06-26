@@ -788,6 +788,7 @@ describe('When on the package policy create page', () => {
           ...useStartServices(),
           cloud: {
             ...useStartServices().cloud,
+            isServerlessEnabled: false,
             isCloudEnabled: true,
           },
         });
@@ -815,8 +816,9 @@ describe('When on the package policy create page', () => {
           fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
         });
 
-        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalled();
-        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+        expect(sendGetOneAgentPolicy).not.toHaveBeenCalled();
+        expect(sendCreateAgentPolicy).toHaveBeenCalled();
+        expect(sendCreatePackagePolicy).toHaveBeenCalled();
 
         await waitFor(() => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
