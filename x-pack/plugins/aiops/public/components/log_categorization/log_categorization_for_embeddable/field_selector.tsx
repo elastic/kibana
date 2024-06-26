@@ -31,11 +31,6 @@ export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedFie
   const [showPopover, setShowPopover] = useState(false);
   const togglePopover = () => setShowPopover(!showPopover);
 
-  const fieldOptions = useMemo(
-    () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
-    [fields]
-  );
-
   const button = (
     <EuiDataGridToolbarControl
       data-test-subj="aiopsEmbeddableSelectFieldButton"
@@ -57,23 +52,35 @@ export const SelectedField: FC<Props> = ({ fields, selectedField, setSelectedFie
       button={button}
       className="unifiedDataTableToolbarControlButton"
     >
-      <EuiFormRow
-        data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow"
-        label={i18n.translate(
-          'xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel',
-          {
-            defaultMessage: 'Selected field',
-          }
-        )}
-      >
-        <EuiSuperSelect
-          aria-label="Select a field"
-          options={fieldOptions}
-          valueOfSelected={selectedField ?? undefined}
-          onChange={setSelectedField}
-          css={{ minWidth: '300px' }}
-        />
-      </EuiFormRow>
+      <FieldSelector
+        fields={fields}
+        selectedField={selectedField}
+        setSelectedField={setSelectedField}
+      />
     </EuiPopover>
+  );
+};
+
+export const FieldSelector: FC<Props> = ({ fields, selectedField, setSelectedField }) => {
+  const fieldOptions = useMemo(
+    () => fields.map((field) => ({ inputDisplay: field.name, value: field })),
+    [fields]
+  );
+
+  return (
+    <EuiFormRow
+      data-test-subj="aiopsEmbeddableMenuSelectedFieldFormRow"
+      label={i18n.translate('xpack.aiops.logCategorization.embeddableMenu.selectedFieldRowLabel', {
+        defaultMessage: 'Selected field',
+      })}
+    >
+      <EuiSuperSelect
+        aria-label="Select a field"
+        options={fieldOptions}
+        valueOfSelected={selectedField ?? undefined}
+        onChange={setSelectedField}
+        css={{ minWidth: '300px' }}
+      />
+    </EuiFormRow>
   );
 };

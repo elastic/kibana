@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { SamplingMenu } from './sampling_menu';
-export { RandomSampler } from './random_sampler';
-export { useRandomSamplerStorage, type RandomSamplerStorage } from './use_random_sampler_storage';
+export { getPatternAnalysisEmbeddableFactory } from './embeddable_pattern_analysis_factory';

@@ -91,59 +91,81 @@ export const EmbeddableMenu: FC<Props> = ({
         </EuiTitle>
         <EuiSpacer size="s" />
 
-        <EuiFormRow
-          data-test-subj="aiopsRandomSamplerOptionsFormRow"
-          label={
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem css={{ textWrap: 'nowrap' }}>
-                {i18n.translate(
-                  'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRangeOptionsRowLabel',
-                  {
-                    defaultMessage: 'Minimum time range',
-                  }
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRange.tooltip',
-                    {
-                      defaultMessage:
-                        'Adds a wider time range to the analysis to improve pattern accuracy.',
-                    }
-                  )}
-                >
-                  <EuiIcon type="questionInCircle" color="subdued" />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          helpText={
-            <>
-              {categoryCount !== undefined && minimumTimeRangeOption !== 'No minimum' ? (
-                <>
-                  <FormattedMessage
-                    id="xpack.aiops.logCategorization.embeddableMenu.totalPatternsMessage"
-                    defaultMessage="Total patterns in {minimumTimeRangeOption}: {categoryCount}"
-                    values={{ minimumTimeRangeOption, categoryCount }}
-                  />
-                </>
-              ) : null}
-            </>
-          }
-        >
-          <EuiSuperSelect
-            aria-label="Select a minimum time range"
-            options={minimumTimeRangeOptions}
-            valueOfSelected={minimumTimeRangeOption}
-            onChange={setMinimumTimeRangeOption}
-          />
-        </EuiFormRow>
+        <PatternAnalysisSettings
+          minimumTimeRangeOption={minimumTimeRangeOption}
+          setMinimumTimeRangeOption={setMinimumTimeRangeOption}
+          categoryCount={categoryCount}
+        />
 
         <EuiHorizontalRule margin="m" />
 
         <SamplingPanel randomSampler={randomSampler} reload={reload} calloutPosition="bottom" />
       </EuiPanel>
     </EuiPopover>
+  );
+};
+
+interface PatternAnalysisSettingsProps {
+  minimumTimeRangeOption: MinimumTimeRangeOption;
+  setMinimumTimeRangeOption: (w: MinimumTimeRangeOption) => void;
+  categoryCount: number | undefined;
+}
+
+export const PatternAnalysisSettings: FC<PatternAnalysisSettingsProps> = ({
+  minimumTimeRangeOption,
+  setMinimumTimeRangeOption,
+  categoryCount,
+}) => {
+  return (
+    <>
+      <EuiFormRow
+        data-test-subj="aiopsRandomSamplerOptionsFormRow"
+        label={
+          <EuiFlexGroup gutterSize="s" responsive={false}>
+            <EuiFlexItem css={{ textWrap: 'nowrap' }}>
+              {i18n.translate(
+                'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRangeOptionsRowLabel',
+                {
+                  defaultMessage: 'Minimum time range',
+                }
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiToolTip
+                content={i18n.translate(
+                  'xpack.aiops.logCategorization.embeddableMenu.minimumTimeRange.tooltip',
+                  {
+                    defaultMessage:
+                      'Adds a wider time range to the analysis to improve pattern accuracy.',
+                  }
+                )}
+              >
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        helpText={
+          <>
+            {categoryCount !== undefined && minimumTimeRangeOption !== 'No minimum' ? (
+              <>
+                <FormattedMessage
+                  id="xpack.aiops.logCategorization.embeddableMenu.totalPatternsMessage"
+                  defaultMessage="Total patterns in {minimumTimeRangeOption}: {categoryCount}"
+                  values={{ minimumTimeRangeOption, categoryCount }}
+                />
+              </>
+            ) : null}
+          </>
+        }
+      >
+        <EuiSuperSelect
+          aria-label="Select a minimum time range"
+          options={minimumTimeRangeOptions}
+          valueOfSelected={minimumTimeRangeOption}
+          onChange={setMinimumTimeRangeOption}
+        />
+      </EuiFormRow>
+    </>
   );
 };

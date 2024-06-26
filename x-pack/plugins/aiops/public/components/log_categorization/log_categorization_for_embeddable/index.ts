@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { LogCategorizationEmbeddable } from './log_categorization_for_embeddable';
+export { LogCategorizationEmbeddable } from './log_categorization_for_discover';
 export { LogCategorizationWrapper } from './log_categorization_wrapper';

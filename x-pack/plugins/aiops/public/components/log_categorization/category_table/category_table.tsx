@@ -37,29 +37,30 @@ import type { OpenInDiscover } from './use_open_in_discover';
 interface Props {
   categories: Category[];
   eventRate: EventRate;
-  pinnedCategory: Category | null;
-  setPinnedCategory: (category: Category | null) => void;
-  highlightedCategory: Category | null;
-  setHighlightedCategory: (category: Category | null) => void;
+  mouseOver?: {
+    pinnedCategory: Category | null;
+    setPinnedCategory: (category: Category | null) => void;
+    highlightedCategory: Category | null;
+    setHighlightedCategory: (category: Category | null) => void;
+  };
   setSelectedCategories: (category: Category[]) => void;
   openInDiscover: OpenInDiscover;
   tableState: UseTableState<Category>;
   enableRowActions?: boolean;
   displayExamples?: boolean;
+  selectable?: boolean;
 }
 
 export const CategoryTable: FC<Props> = ({
   categories,
   eventRate,
-  pinnedCategory,
-  setPinnedCategory,
-  highlightedCategory,
-  setHighlightedCategory,
+  mouseOver,
   setSelectedCategories,
   openInDiscover,
   tableState,
   enableRowActions = true,
   displayExamples = true,
+  selectable = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -214,23 +215,29 @@ export const CategoryTable: FC<Props> = ({
     });
   }
 
-  const selectionValue: EuiTableSelectionType<Category> | undefined = {
-    selectable: () => true,
-    onSelectionChange: (selectedItems) => setSelectedCategories(selectedItems),
-  };
+  const selectionValue: EuiTableSelectionType<Category> | undefined = selectable
+    ? {
+        selectable: () => true,
+        onSelectionChange: (selectedItems) => setSelectedCategories(selectedItems),
+      }
+    : undefined;
 
   const getRowStyle = (category: Category) => {
+    if (mouseOver === undefined) {
+      return {};
+    }
+
     if (
-      pinnedCategory &&
-      pinnedCategory.key === category.key &&
-      pinnedCategory.key === category.key
+      mouseOver.pinnedCategory &&
+      mouseOver.pinnedCategory.key === category.key &&
+      mouseOver.pinnedCategory.key === category.key
     ) {
       return {
         backgroundColor: primaryBackgroundColor,
       };
     }
 
-    if (highlightedCategory && highlightedCategory.key === category.key) {
+    if (mouseOver.highlightedCategory && mouseOver.highlightedCategory.key === category.key) {
       return {
         backgroundColor: euiTheme.euiColorLightestShade,
       };
@@ -265,20 +272,20 @@ export const CategoryTable: FC<Props> = ({
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       css={tableStyle}
       rowProps={(category) => {
-        return enableRowActions
+        return mouseOver
           ? {
               onClick: () => {
-                if (category.key === pinnedCategory?.key) {
-                  setPinnedCategory(null);
+                if (category.key === mouseOver.pinnedCategory?.key) {
+                  mouseOver.setPinnedCategory(null);
                 } else {
-                  setPinnedCategory(category);
+                  mouseOver.setPinnedCategory(category);
                 }
               },
               onMouseEnter: () => {
-                setHighlightedCategory(category);
+                mouseOver.setHighlightedCategory(category);
               },
               onMouseLeave: () => {
-                setHighlightedCategory(null);
+                mouseOver.setHighlightedCategory(null);
               },
               style: getRowStyle(category),
             }
