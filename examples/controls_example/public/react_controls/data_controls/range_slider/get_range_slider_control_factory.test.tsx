@@ -77,7 +77,7 @@ describe('RangesliderControlApi', () => {
       getFormatterForField: () => {
         return {
           getConverterFor: () => {
-            return (value: string) => `${value} units`;
+            return (value: string) => `${value} myUnits`;
           },
         };
       },
@@ -163,26 +163,47 @@ describe('RangesliderControlApi', () => {
         done();
       });
     });
+  });
 
-    describe('selected range has no results', () => {
-      test('should display invalid state', async () => {
-        totalResults = 0; // simulate no results by returning hits total of zero
-        min = null; // simulate no results by returning min aggregation value of null
-        max = null; // simulate no results by returning max aggregation value of null
-        const { Component } = factory.buildControl(
-          {
-            dataViewId: 'myDataViewId',
-            fieldName: 'myFieldName',
-            value: ['5', '10'],
-          },
-          buildApiMock,
-          uuid,
-          controlGroupApi
-        );
-        const { findByTestId } = render(<Component />);
-        await waitFor(async () => {
-          await findByTestId('range-slider-control-invalid-append-myControl1');
-        });
+  describe('selected range has no results', () => {
+    test('should display invalid state', async () => {
+      totalResults = 0; // simulate no results by returning hits total of zero
+      min = null; // simulate no results by returning min aggregation value of null
+      max = null; // simulate no results by returning max aggregation value of null
+      const { Component } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+          value: ['5', '10'],
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      const { findByTestId } = render(<Component />);
+      await waitFor(async () => {
+        await findByTestId('range-slider-control-invalid-append-myControl1');
+      });
+    });
+  });
+
+  describe('min max', () => {
+    test('bounds inputs should display min and max placeholders when there is no selected range', async () => {
+      const { Component } = factory.buildControl(
+        {
+          dataViewId: 'myDataViewId',
+          fieldName: 'myFieldName',
+        },
+        buildApiMock,
+        uuid,
+        controlGroupApi
+      );
+      const { findByTestId } = render(<Component />);
+      await waitFor(async () => {
+        const minInput = await findByTestId('rangeSlider__lowerBoundFieldNumber');
+        expect(minInput).toHaveAttribute('placeholder', String(DEFAULT_MIN));
+        const maxInput = await findByTestId('rangeSlider__upperBoundFieldNumber');
+        expect(maxInput).toHaveAttribute('placeholder', String(DEFAULT_MAX));
       });
     });
   });
