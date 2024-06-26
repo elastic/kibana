@@ -33,8 +33,9 @@ import {
 } from '../aggregations';
 import { getElasticsearchQueryOrThrow } from '../transform_generators';
 import { buildParamValues } from '../transform_generators/synthetics_availability';
+import { getGroupingsFilter } from './groupings_filter';
 
-interface Options {
+export interface Options {
   range: {
     start: number;
     end: number;
@@ -71,7 +72,7 @@ export class GetPreviewData {
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
 
-    const groupingFilters = this.getGroupingsFilter(options);
+    const groupingFilters = getGroupingsFilter(options);
     if (groupingFilters) {
       filter.push(...groupingFilters);
     }
@@ -175,7 +176,7 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    const groupingFilters = this.getGroupingsFilter(options);
+    const groupingFilters = getGroupingsFilter(options);
     if (groupingFilters) {
       filter.push(...groupingFilters);
     }
@@ -278,7 +279,7 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    const groupingFilters = this.getGroupingsFilter(options);
+    const groupingFilters = getGroupingsFilter(options);
     if (groupingFilters) {
       filter.push(...groupingFilters);
     }
@@ -349,7 +350,7 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-    const groupingFilters = this.getGroupingsFilter(options);
+    const groupingFilters = getGroupingsFilter(options);
     if (groupingFilters) {
       filter.push(...groupingFilters);
     }
@@ -422,7 +423,7 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-    const groupingFilters = this.getGroupingsFilter(options);
+    const groupingFilters = getGroupingsFilter(options);
     if (groupingFilters) {
       filter.push(...groupingFilters);
     }
@@ -477,7 +478,7 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-    const groupingFilters = this.getGroupingsFilter(options);
+    const groupingFilters = getGroupingsFilter(options);
     if (groupingFilters) {
       filter.push(...groupingFilters);
     }
@@ -528,21 +529,6 @@ export class GetPreviewData {
         total: bucket.total?.doc_count ?? 0,
       },
     }));
-  }
-
-  private getGroupingsFilter(options: Options): estypes.QueryDslQueryContainer[] | undefined {
-    const groupingsKeys = Object.keys(options.groupings ?? {});
-    if (groupingsKeys.length) {
-      return groupingsKeys.map((key) => ({
-        term: { [key]: options.groupings![key] },
-      }));
-    } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      return [
-        {
-          term: { [options.groupBy]: options.instanceId },
-        },
-      ];
-    }
   }
 
   private async getSyntheticsAvailabilityPreviewData(
