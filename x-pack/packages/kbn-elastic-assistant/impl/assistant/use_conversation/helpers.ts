@@ -141,16 +141,17 @@ export const getConversationApiConfig = ({
   const connector: AIConnector | undefined =
     connectors?.find((c) => c.id === conversation.apiConfig?.connectorId) ?? defaultConnector;
   const connectorModel = getGenAiConfig(connector)?.defaultModel;
+  const defaultSystemPrompt =
+    conversation.apiConfig?.defaultSystemPromptId == null
+      ? getInitialDefaultSystemPrompt({
+          allSystemPrompts,
+          conversation,
+        })
+      : getDefaultSystemPrompt({
+          allSystemPrompts,
+          conversation,
+        });
 
-  const defaultSystemPrompt = conversation.apiConfig?.defaultSystemPromptId
-    ? getDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation,
-      })
-    : getInitialDefaultSystemPrompt({
-        allSystemPrompts,
-        conversation,
-      });
   return connector
     ? {
         apiConfig: {

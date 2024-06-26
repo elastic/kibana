@@ -264,6 +264,7 @@ describe('getConversationApiConfig', () => {
       connectorId: '123',
       actionTypeId: '.gen-ai',
       defaultSystemPromptId: '2',
+      model: 'gpt-3',
     },
     category: 'assistant',
     id: '1',
@@ -305,6 +306,7 @@ describe('getConversationApiConfig', () => {
         actionTypeId: '.gen-ai',
         provider: OpenAiProviderType.OpenAi,
         defaultSystemPromptId: '2',
+        model: 'gpt-3',
       },
     });
   });
@@ -328,6 +330,7 @@ describe('getConversationApiConfig', () => {
         actionTypeId: '.gen-ai',
         provider: OpenAiProviderType.AzureAi,
         defaultSystemPromptId: '2',
+        model: 'gpt-3',
       },
     });
   });
@@ -362,7 +365,8 @@ describe('getConversationApiConfig', () => {
         connectorId: '123',
         actionTypeId: '.gen-ai',
         provider: OpenAiProviderType.OpenAi,
-        defaultSystemPromptId: '2',
+        defaultSystemPromptId: '2', // Returns the default system prompt for new conversations
+        model: 'gpt-3',
       },
     });
   });
@@ -380,6 +384,7 @@ describe('getConversationApiConfig', () => {
         actionTypeId: '.gen-ai',
         provider: OpenAiProviderType.AzureAi,
         defaultSystemPromptId: '2',
+        model: 'gpt-3',
       },
     });
   });
@@ -406,12 +411,13 @@ describe('getConversationApiConfig', () => {
         connectorId: '123',
         actionTypeId: '.gen-ai',
         provider: OpenAiProviderType.OpenAi,
-        defaultSystemPromptId: '1',
+        defaultSystemPromptId: '1', // Uses the first prompt in the list
+        model: undefined, // default connector's model
       },
     });
   });
 
-  test('should return undefined system prompt if conversation system prompt does not exist within all system prompts', () => {
+  test('should return the first system prompt if conversation system prompt does not exist within all system prompts', () => {
     const allSystemPromptsNoDefault: Prompt[] = allSystemPrompts.filter(
       ({ isNewConversationDefault }) => isNewConversationDefault !== true
     );
@@ -434,7 +440,35 @@ describe('getConversationApiConfig', () => {
         connectorId: '123',
         actionTypeId: '.gen-ai',
         provider: OpenAiProviderType.OpenAi,
+        defaultSystemPromptId: '1', // Uses the first prompt in the list
+        model: undefined, // default connector's model
+      },
+    });
+  });
+
+  test('should return the new default system prompt if defaultSystemPromptId is undefined', () => {
+    const conversationWithUndefinedPrompt: Conversation = {
+      ...conversation,
+      apiConfig: {
+        ...conversation.apiConfig,
+        defaultSystemPromptId: undefined,
+      } as Conversation['apiConfig'],
+    };
+
+    const result = getConversationApiConfig({
+      allSystemPrompts,
+      conversation: conversationWithUndefinedPrompt,
+      connectors,
+      defaultConnector,
+    });
+
+    expect(result).toEqual({
+      apiConfig: {
+        connectorId: '123',
+        actionTypeId: '.gen-ai',
+        provider: OpenAiProviderType.OpenAi,
         defaultSystemPromptId: '1',
+        model: 'gpt-3',
       },
     });
   });

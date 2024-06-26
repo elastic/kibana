@@ -53,6 +53,22 @@ describe('QuickPromptSelector', () => {
       title: 'A_CUSTOM_OPTION',
     });
   });
+  it('Reset settings every time before selecting an system prompt from the input if resetSettings is provided', () => {
+    const mockResetSettings = jest.fn();
+    const { getByTestId } = render(
+      <QuickPromptSelector {...testProps} resetSettings={mockResetSettings} />
+    );
+    // changing the selection
+    fireEvent.change(getByTestId('comboBoxSearchInput'), {
+      target: { value: MOCK_QUICK_PROMPTS[1].title },
+    });
+    fireEvent.keyDown(getByTestId('comboBoxSearchInput'), {
+      key: 'Enter',
+      code: 'Enter',
+      charCode: 13,
+    });
+    expect(mockResetSettings).toHaveBeenCalled();
+  });
   it('Creates a new quick prompt', () => {
     const { getByTestId } = render(<QuickPromptSelector {...testProps} />);
     const customOption = 'Cool new prompt';
