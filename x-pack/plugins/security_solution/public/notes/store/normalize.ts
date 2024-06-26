@@ -46,12 +46,9 @@ export const normalizeEntity = (res: Note): NormalizedEntity<Note> => ({
 /**
  * Normalizes an array of notes
  */
-export const normalizeEntities = (res: {
-  notes: Note[];
-  totalCount: number;
-}): NormalizedEntities<Note> => ({
+export const normalizeEntities = (res: Note[]): NormalizedEntities<Note> => ({
   entities: {
-    notes: res.notes.reduce((obj, item) => Object.assign(obj, { [item.noteId]: item }), {}),
+    notes: res.reduce((obj, item) => Object.assign(obj, { [item.noteId]: item }), {}),
   },
-  result: res.notes.map((note) => note.noteId),
+  result: res.map((note) => note.noteId),
 });

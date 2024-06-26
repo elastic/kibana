@@ -34,11 +34,3 @@ export const persistNote = async ({
   });
   return response;
 };
-
-export const getNotesByIds = async (documentIds: string[]) => {
-  const response = await KibanaServices.get().http.get<Note[]>(NOTE_URL, {
-    query: { alertIds: documentIds },
-    version: '2023-10-31',
-  });
-  return response;
-};

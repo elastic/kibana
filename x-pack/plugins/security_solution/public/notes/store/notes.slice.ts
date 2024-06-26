@@ -67,7 +67,7 @@ export const fetchNotesByDocumentId = createAsyncThunk<
 >('notes/fetchNotesByDocumentId', async (args) => {
   const { documentId } = args;
   const res = await fetchNotesByDocumentIdApi(documentId);
-  return normalizeEntities(res);
+  return normalizeEntities(res.notes);
 });
 
 export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareNote }, {}>(

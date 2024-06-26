@@ -24,7 +24,7 @@ export const getUseActionColumnHook =
   () => {
     const license = useLicense();
     const isEnterprisePlus = license.isEnterprise();
-    const ACTION_BUTTON_COUNT = tableId === TableId.alertsOnCasePage ? 4 : isEnterprisePlus ? 5 : 4;
+    const ACTION_BUTTON_COUNT = tableId === TableId.alertsOnCasePage ? 3 : isEnterprisePlus ? 5 : 4;
 
     const eventContext = useContext(StatefulEventContext);
 
