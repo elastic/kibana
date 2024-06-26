@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import type * as z from 'zod';
 
 import {
   concurrent_searches,
@@ -32,7 +33,6 @@ import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   RuleAuthorArray,
-  RuleDescription,
   RuleFalsePositiveArray,
   RuleLicense,
   RuleName,
@@ -54,14 +54,19 @@ import {
   InlineKqlQuery,
   RuleKqlQuery,
   RuleDataSource,
-  RuleNameOverrideObject,
   RuleSchedule,
   TimelineTemplateReference,
   TimestampOverrideObject,
 } from './diffable_field_types';
 
-import { buildSchema } from './build_schema';
+import { buildSchema, buildSchemaNew } from './build_schema';
 import { anomaly_threshold } from '../../../../model/schemas';
+import {
+  RuleSignatureId as RuleSignatureIdNew,
+  RuleVersion as RuleVersionNew,
+  RuleName as RuleNameNew,
+  RuleDescription,
+} from '../../../../model/rule_schema';
 
 export type DiffableCommonFields = t.TypeOf<typeof DiffableCommonFields>;
 export const DiffableCommonFields = buildSchema({
@@ -75,7 +80,6 @@ export const DiffableCommonFields = buildSchema({
     // Main domain fields
     name: RuleName,
     tags: RuleTagArray,
-    description: RuleDescription,
     severity: Severity,
     severity_mapping: SeverityMapping,
     risk_score: RiskScore,
@@ -98,10 +102,25 @@ export const DiffableCommonFields = buildSchema({
     max_signals: MaxSignals,
   },
   optional: {
-    rule_name_override: RuleNameOverrideObject, // NOTE: new field
     timestamp_override: TimestampOverrideObject, // NOTE: new field
     timeline_template: TimelineTemplateReference, // NOTE: new field
     building_block: BuildingBlockObject, // NOTE: new field
+  },
+});
+export type DiffableCommonFieldsNew = z.infer<typeof DiffableCommonFieldsNew>;
+export const DiffableCommonFieldsNew = buildSchemaNew({
+  required: {
+    // Technical fields
+    // NOTE: We might consider removing them from the schema and returning from the API
+    // not via the fields diff, but via dedicated properties in the response body.
+    rule_id: RuleSignatureIdNew,
+    version: RuleVersionNew,
+
+    // Main domain fields
+    name: RuleNameNew,
+  },
+  optional: {
+    rule_description: RuleDescription,
   },
 });
 
