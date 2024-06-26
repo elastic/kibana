@@ -7,7 +7,6 @@
 
 import { act } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
 
 import {
   httpServiceMock,
