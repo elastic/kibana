@@ -159,7 +159,9 @@ describe('useSetupTechnology', () => {
     act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
     });
+
     waitForNextUpdate();
+    expect(updateNewAgentPolicyMock).toHaveBeenCalledTimes(0);
   });
 
   it('should not fetch agentless policy if agentless is enabled but serverless is disabled', async () => {
