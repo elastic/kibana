@@ -106,52 +106,69 @@ export const getAlertDetailsContextHandler = (
       }),
     ]);
 
-    async function handleError<T>(cb: () => Promise<T>): Promise<T | undefined> {
-      try {
-        return await cb();
-      } catch (error) {
-        logger.error('Error while fetching observability alert details context');
-        logger.error(error);
-        return;
-      }
+    const downstreamDependenciesPromise = serviceName
+      ? getAssistantDownstreamDependencies({
+          apmEventClient,
+          arguments: {
+            'service.name': serviceName,
+            'service.environment': serviceEnvironment,
+            start: moment(alertStartedAt).subtract(24, 'hours').toISOString(),
+            end: alertStartedAt,
+          },
+          randomSampler,
+        })
+      : undefined;
+
+    const dataFetchers: Array<
+      () => Promise<{
+        key: string;
+        description: string;
+        data: unknown[] | object | undefined;
+      }>
+    > = [];
+
+    // service summary
+    if (serviceName) {
+      dataFetchers.push(async () => {
+        const serviceSummary = await getApmServiceSummary({
+          apmEventClient,
+          annotationsClient,
+          esClient,
+          apmAlertsClient,
+          mlClient,
+          logger,
+          arguments: {
+            'service.name': serviceName,
+            'service.environment': serviceEnvironment,
+            start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
+            end: alertStartedAt,
+          },
+        });
+
+        return {
+          key: 'serviceSummary',
+          description: `Metadata for the service "${serviceName}" that produced the alert. The alert might be caused by an issue in the service itself or one of its dependencies.`,
+          data: serviceSummary,
+        };
+      });
     }
 
-    const serviceSummaryPromise = serviceName
-      ? handleError(() =>
-          getApmServiceSummary({
-            apmEventClient,
-            annotationsClient,
-            esClient,
-            apmAlertsClient,
-            mlClient,
-            logger,
-            arguments: {
-              'service.name': serviceName,
-              'service.environment': serviceEnvironment,
-              start: moment(alertStartedAt).subtract(5, 'minute').toISOString(),
-              end: alertStartedAt,
-            },
-          })
-        )
-      : undefined;
+    // downstream dependencies
+    if (serviceName) {
+      dataFetchers.push(async () => {
+        const downstreamDependencies = await downstreamDependenciesPromise;
+        return {
+          key: 'downstreamDependencies',
+          description: `Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}"`,
+          data: downstreamDependencies,
+        };
+      });
+    }
 
-    const downstreamDependenciesPromise = serviceName
-      ? handleError(() =>
-          getAssistantDownstreamDependencies({
-            apmEventClient,
-            arguments: {
-              'service.name': serviceName,
-              'service.environment': serviceEnvironment,
-              start: moment(alertStartedAt).subtract(24, 'hours').toISOString(),
-              end: alertStartedAt,
-            },
-            randomSampler,
-          })
-        )
-      : undefined;
-
-    const logCategoriesPromise = handleError(() =>
-      getLogCategories({
+    // log categories
+    dataFetchers.push(async () => {
+      const downstreamDependencies = await downstreamDependenciesPromise;
+      const logCategories = await getLogCategories({
         apmEventClient,
         esClient,
         coreContext,
@@ -163,23 +180,60 @@ export const getAlertDetailsContextHandler = (
           'container.id': containerId,
           'kubernetes.pod.name': kubernetesPodName,
         },
-      })
-    );
+      });
 
-    const apmErrorsPromise = serviceName
-      ? handleError(() =>
-          getApmErrors({
-            apmEventClient,
-            start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
-            end: alertStartedAt,
-            serviceName,
-            serviceEnvironment,
-          })
-        )
-      : undefined;
+      return {
+        key: 'logCategories',
+        description: `Related log events occurring shortly before the alert was triggered.`,
+        data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
+      };
+    });
 
-    const serviceChangePointsPromise = handleError(() =>
-      getServiceChangePoints({
+    // apm errors
+    if (serviceName) {
+      dataFetchers.push(async () => {
+        const apmErrors = await getApmErrors({
+          apmEventClient,
+          start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
+          end: alertStartedAt,
+          serviceName,
+          serviceEnvironment,
+        });
+
+        const downstreamDependencies = await downstreamDependenciesPromise;
+        const errorsWithDownstreamServiceName = getApmErrorsWithDownstreamServiceName(
+          apmErrors,
+          downstreamDependencies
+        );
+
+        return {
+          key: 'apmErrors',
+          description: `Exceptions (errors) thrown by the service "${serviceName}". If an error contains a downstream service name this could be a possible root cause. If relevant please describe what the error means and what it could be caused by.`,
+          data: errorsWithDownstreamServiceName,
+        };
+      });
+    }
+
+    // exit span change points
+    dataFetchers.push(async () => {
+      const exitSpanChangePoints = await getExitSpanChangePoints({
+        apmEventClient,
+        start: moment(alertStartedAt).subtract(6, 'hours').toISOString(),
+        end: alertStartedAt,
+        serviceName,
+        serviceEnvironment,
+      });
+
+      return {
+        key: 'exitSpanChangePoints',
+        description: `Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies`,
+        data: exitSpanChangePoints,
+      };
+    });
+
+    // service change points
+    dataFetchers.push(async () => {
+      const serviceChangePoints = await getServiceChangePoints({
         apmEventClient,
         start: moment(alertStartedAt).subtract(6, 'hours').toISOString(),
         end: alertStartedAt,
@@ -187,88 +241,49 @@ export const getAlertDetailsContextHandler = (
         serviceEnvironment,
         transactionType: query['transaction.type'],
         transactionName: query['transaction.name'],
-      })
-    );
+      });
 
-    const exitSpanChangePointsPromise = handleError(() =>
-      getExitSpanChangePoints({
-        apmEventClient,
-        start: moment(alertStartedAt).subtract(6, 'hours').toISOString(),
-        end: alertStartedAt,
-        serviceName,
-        serviceEnvironment,
-      })
-    );
+      return {
+        key: 'serviceChangePoints',
+        description: `Significant change points for "${serviceName}". Use this to spot dips and spikes in throughput, latency and failure rate`,
+        data: serviceChangePoints,
+      };
+    });
 
-    const anomaliesPromise = handleError(() =>
-      getAnomalies({
+    // Anomalies
+    dataFetchers.push(async () => {
+      const anomalies = await getAnomalies({
         start: moment(alertStartedAt).subtract(1, 'hour').valueOf(),
         end: moment(alertStartedAt).valueOf(),
         environment: serviceEnvironment,
         mlClient,
         logger,
-      })
-    );
+      });
 
-    const [
-      serviceSummary,
-      downstreamDependencies,
-      logCategories,
-      apmErrors,
-      serviceChangePoints,
-      exitSpanChangePoints,
-      anomalies,
-    ] = await Promise.all([
-      serviceSummaryPromise,
-      downstreamDependenciesPromise,
-      logCategoriesPromise,
-      apmErrorsPromise,
-      serviceChangePointsPromise,
-      exitSpanChangePointsPromise,
-      anomaliesPromise,
-    ]);
-
-    return [
-      {
-        key: 'serviceSummary',
-        description: `Metadata for the service "${serviceName}" that produced the alert. The alert might be caused by an issue in the service itself or one of its dependencies.`,
-        data: serviceSummary,
-      },
-      {
-        key: 'downstreamDependencies',
-        description: `Downstream dependencies from the service "${serviceName}". Problems in these services can negatively affect the performance of "${serviceName}"`,
-        data: downstreamDependencies,
-      },
-      {
-        key: 'serviceChangePoints',
-        description: `Significant change points for "${serviceName}". Use this to spot dips and spikes in throughput, latency and failure rate`,
-        data: serviceChangePoints,
-      },
-      {
-        key: 'exitSpanChangePoints',
-        description: `Significant change points for the dependencies of "${serviceName}". Use this to spot dips or spikes in throughput, latency and failure rate for downstream dependencies`,
-        data: exitSpanChangePoints,
-      },
-      {
-        key: 'logCategories',
-        description: `Related log events occurring shortly before the alert was triggered.`,
-        data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
-      },
-      {
-        key: 'apmErrors',
-        description: `Exceptions for the service "${serviceName}". If a downstream service name is included this could be a possible root cause. If relevant please describe what the error means and what it could be caused by.`,
-        data: apmErrorsWithDownstreamServiceName(apmErrors, downstreamDependencies),
-      },
-      {
+      return {
         key: 'anomalies',
         description: `Anomalies for services running in the environment "${serviceEnvironment}". Anomalies are detected using machine learning and can help you spot unusual patterns in your data.`,
         data: anomalies,
-      },
-    ].filter(({ data }) => !isEmpty(data));
+      };
+    });
+
+    const items = await Promise.all(
+      dataFetchers.map(async (dataFetcher) => {
+        try {
+          return await dataFetcher();
+        } catch (error) {
+          logger.error('Error while fetching observability alert details context');
+          logger.error(error);
+          return;
+        }
+      })
+    );
+
+    return items.filter((item) => item && !isEmpty(item.data));
   };
 };
 
-function apmErrorsWithDownstreamServiceName(
+function getApmErrorsWithDownstreamServiceName(
   apmErrors?: Awaited<ReturnType<typeof getApmErrors>>,
   downstreamDependencies?: Awaited<ReturnType<typeof getAssistantDownstreamDependencies>>
 ) {
