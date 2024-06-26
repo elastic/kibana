@@ -29,6 +29,7 @@ import {
 import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
+import { previewPDFContents } from './preview_pdf_contents';
 
 function importData(
   client: IScopedClusterClient,
@@ -315,6 +316,51 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const { docs, pipeline, timeField } = request.body;
           const esClient = (await context.core).elasticsearch.client;
           const resp = await previewIndexTimeRange(esClient, timeField, pipeline, docs);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/preview_index_time_range Predict the time range for an index using example documents
+   * @apiName PreviewIndexTimeRange
+   * @apiDescription Predict the time range for an index using example documents
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_pdf_contents',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+        body: {
+          accepts: ['application/json'],
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              pdfBase64: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { pdfBase64 } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await previewPDFContents(esClient, pdfBase64);
 
           return response.ok({
             body: resp,

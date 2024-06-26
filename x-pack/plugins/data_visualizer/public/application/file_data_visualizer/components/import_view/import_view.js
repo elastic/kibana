@@ -35,6 +35,7 @@ import {
 } from '../../../common/components/combined_fields';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 import { importData } from './import';
+import { FILE_FORMATS } from '../../../../../common/constants';
 
 const DEFAULT_INDEX_SETTINGS = {};
 const CONFIG_MODE = { SIMPLE: 0, ADVANCED: 1 };
@@ -410,13 +411,15 @@ export class ImportView extends Component {
             <EuiPanel hasShadow={false} hasBorder>
               <ImportProgress statuses={statuses} />
 
-              {importer !== undefined && importer.initialized() && (
-                <DocCountChart
-                  statuses={statuses}
-                  dataStart={this.props.dataStart}
-                  importer={importer}
-                />
-              )}
+              {importer !== undefined &&
+                importer.initialized() &&
+                this.props.results.format !== FILE_FORMATS.PDF && (
+                  <DocCountChart
+                    statuses={statuses}
+                    dataStart={this.props.dataStart}
+                    importer={importer}
+                  />
+                )}
 
               {imported === true && (
                 <React.Fragment>

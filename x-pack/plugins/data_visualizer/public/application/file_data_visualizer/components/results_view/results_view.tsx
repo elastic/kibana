@@ -28,7 +28,8 @@ import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
 
 interface Props {
-  data: string;
+  fileContents: string;
+  data: ArrayBuffer;
   fileName: string;
   results: FindFileStructureResponse;
   showEditFlyout(): void;
@@ -40,7 +41,7 @@ interface Props {
 }
 
 export const ResultsView: FC<Props> = ({
-  data,
+  fileContents,
   fileName,
   results,
   showEditFlyout,
@@ -87,7 +88,7 @@ export const ResultsView: FC<Props> = ({
       <div>
         <EuiPanel data-test-subj="dataVisualizerFileFileContentPanel" hasShadow={false} hasBorder>
           <FileContents
-            data={data}
+            fileContents={fileContents}
             format={results.format}
             numberOfLines={results.num_lines_analyzed}
             semiStructureTextData={semiStructureTextData}
@@ -134,20 +135,24 @@ export const ResultsView: FC<Props> = ({
           </EuiFlexGroup>
         </EuiPanel>
 
-        <EuiSpacer size="m" />
+        {results.format !== FILE_FORMATS.PDF ? (
+          <>
+            <EuiSpacer size="m" />
 
-        <EuiPanel data-test-subj="dataVisualizerFileFileStatsPanel" hasShadow={false} hasBorder>
-          <EuiTitle size="s">
-            <h2 data-test-subj="dataVisualizerFileStatsTitle">
-              <FormattedMessage
-                id="xpack.dataVisualizer.file.resultsView.fileStatsName"
-                defaultMessage="File stats"
-              />
-            </h2>
-          </EuiTitle>
+            <EuiPanel data-test-subj="dataVisualizerFileFileStatsPanel" hasShadow={false} hasBorder>
+              <EuiTitle size="s">
+                <h2 data-test-subj="dataVisualizerFileStatsTitle">
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.resultsView.fileStatsName"
+                    defaultMessage="File stats"
+                  />
+                </h2>
+              </EuiTitle>
 
-          <FieldsStatsGrid results={results} />
-        </EuiPanel>
+              <FieldsStatsGrid results={results} />
+            </EuiPanel>
+          </>
+        ) : null}
       </div>
     </EuiPageBody>
   );

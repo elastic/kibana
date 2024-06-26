@@ -27,7 +27,9 @@ import {
   readFile,
   createUrlOverrides,
   processResults,
+  // processPDFResults,
 } from '../../../common/components/utils';
+import { analyzePdfFile } from './pdf_analyzer';
 
 import { MODE } from './constants';
 
@@ -40,6 +42,7 @@ export class FileDataVisualizerView extends Component {
       fileName: '',
       fileContents: '',
       data: [],
+      base64Data: '',
       fileSize: 0,
       fileTooLarge: false,
       fileCouldNotBeRead: false,
@@ -105,14 +108,29 @@ export class FileDataVisualizerView extends Component {
     if (file.size <= this.maxFileUploadBytes) {
       try {
         const { data, fileContents } = await readFile(file);
-        this.setState({
-          data,
-          fileContents,
-          fileName: file.name,
-          fileSize: file.size,
-        });
 
-        await this.analyzeFile(fileContents);
+        if (file.type === 'application/pdf') {
+          // const base64Data = await readPDFFile(file);
+          // this.setState({
+          //   base64Data,
+          // });
+
+          this.setState({
+            data,
+            fileName: file.name,
+            fileSize: file.size,
+          });
+
+          await this.analyzePDF(file, data);
+        } else {
+          this.setState({
+            data,
+            fileContents,
+            fileName: file.name,
+            fileSize: file.size,
+          });
+          await this.analyzeFile(fileContents);
+        }
       } catch (error) {
         this.setState({
           loaded: false,
@@ -204,6 +222,21 @@ export class FileDataVisualizerView extends Component {
         this.analyzeFile(fileContents, this.previousOverrides, true);
       }
     }
+  }
+
+  async analyzePDF(file, data, isRetry = false) {
+    const { pdfResults, standardResults } = await analyzePdfFile(data, this.props.fileUpload);
+    const serverSettings = processResults(standardResults);
+    this.originalSettings = serverSettings;
+
+    this.setState({
+      fileContents: pdfResults.content,
+      results: standardResults.results,
+      explanation: standardResults.explanation,
+      loaded: true,
+      loading: false,
+      fileCouldNotBeRead: isRetry,
+    });
   }
 
   closeEditFlyout = () => {
@@ -311,7 +344,7 @@ export class FileDataVisualizerView extends Component {
                 results={results}
                 explanation={explanation}
                 fileName={fileName}
-                data={fileContents}
+                fileContents={fileContents}
                 showEditFlyout={this.showEditFlyout}
                 showExplanationFlyout={this.showExplanationFlyout}
                 disableButtons={isEditFlyoutVisible || isExplanationFlyoutVisible}

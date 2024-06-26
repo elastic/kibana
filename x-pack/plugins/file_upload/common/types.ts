@@ -56,6 +56,7 @@ export interface FindFileStructureResponse {
       };
     };
   };
+  ingest_pipeline: IngestPipeline;
   quote: string;
   delimiter: string;
   need_client_timezone: boolean;
@@ -123,7 +124,11 @@ export interface ImportDocMessage {
   message: string;
 }
 
-export type ImportDoc = ImportDocMessage | string | object;
+export interface ImportDocPDF {
+  data: string;
+}
+
+export type ImportDoc = ImportDocMessage | ImportDocPDF | string | object;
 
 export interface IngestPipelineWrapper {
   id: string;
@@ -135,4 +140,16 @@ export interface IngestPipeline {
   processors: any[];
   isManaged?: boolean;
   name?: string;
+}
+
+export interface PreviewPDFResponse {
+  date?: string;
+  content_type: 'application/pdf';
+  author?: string;
+  format: 'application/pdf; version=1.5';
+  modified: string;
+  language: string;
+  creator_tool?: string;
+  content: 'This is a test PDF file';
+  content_length: 28;
 }
