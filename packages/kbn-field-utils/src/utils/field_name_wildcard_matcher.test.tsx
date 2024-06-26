@@ -59,7 +59,8 @@ describe('fieldNameWildcardMatcher', function () {
       test('only matches strings longer than 3 characters', () => {
         expect(fieldNameWildcardMatcher({ name: 'a' }, 'b')).toBe(false);
         expect(fieldNameWildcardMatcher({ name: 'ab' }, 'cb')).toBe(false);
-        expect(fieldNameWildcardMatcher({ name: 'abc' }, 'abb')).toBe(true);
+        expect(fieldNameWildcardMatcher({ name: 'abc' }, 'abb')).toBe(false);
+        expect(fieldNameWildcardMatcher({ name: 'abcd' }, 'abbd')).toBe(true);
       });
       test('is case insensitive', () => {
         expect(fieldNameWildcardMatcher({ name: 'abcdefg' }, 'AAbcdef')).toBe(true);

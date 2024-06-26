@@ -206,6 +206,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('relatedContent.og:image, relatedContent.twitter:image');
       });
 
+      it('should be able to search with fuzzy search (1 typo)', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('rel4tedContent');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            '2 available fields. 0 meta fields.'
+          );
+        });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be('relatedContent.og:image, relatedContent.twitter:image');
+      });
+
       it('should be able to search with spaces as wildcard', async function () {
         await PageObjects.unifiedFieldList.findFieldByName('relatedContent image');
 
