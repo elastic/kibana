@@ -3389,10 +3389,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/assetManager-plugin@link:x-pack/plugins/observability_solution/asset_manager":
-  version "0.0.0"
-  uid ""
-
 "@kbn/assets-data-access-plugin@link:x-pack/plugins/observability_solution/assets_data_access":
   version "0.0.0"
   uid ""
@@ -4762,6 +4758,10 @@
   uid ""
 
 "@kbn/entities-schema@link:x-pack/packages/kbn-entities-schema":
+  version "0.0.0"
+  uid ""
+
+"@kbn/entityManager-plugin@link:x-pack/plugins/observability_solution/entity_manager":
   version "0.0.0"
   uid ""
 
