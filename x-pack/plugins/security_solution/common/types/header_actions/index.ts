@@ -86,7 +86,7 @@ export interface ActionProps {
   columnId: string;
   columnValues: string;
   data: TimelineNonEcsData[];
-  disableExpandAction: boolean;
+  disableExpandAction?: boolean;
   disabled?: boolean;
   ecsData: Ecs;
   eventId: string;
