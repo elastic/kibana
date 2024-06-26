@@ -185,7 +185,8 @@ function getInputComponent({
   fieldTestSelector,
   setIsDirty,
 }: InputComponentProps) {
-  const { multi, type, options } = varDef;
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { multi, type, options, full_width } = varDef;
   if (multi) {
     return (
       <MultiTextInput
@@ -208,6 +209,7 @@ function getInputComponent({
           onBlur={() => setIsDirty(true)}
           disabled={frozen}
           resize="vertical"
+          fullWidth={full_width}
           data-test-subj={`textAreaInput-${fieldTestSelector}`}
         />
       );

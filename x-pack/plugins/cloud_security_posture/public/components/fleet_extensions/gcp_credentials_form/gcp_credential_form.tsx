@@ -609,6 +609,7 @@ export const GcpInputVarFields = ({
                   required: true,
                   type: 'textarea',
                   secret: true,
+                  full_width: true,
                 }}
                 value={credentialJSONFields.value || ''}
                 onChange={(value) => {
