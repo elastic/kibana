@@ -15,7 +15,7 @@ import { INVESTIGATION_SECTION_TEST_ID } from './test_ids';
 import { InvestigationGuide } from './investigation_guide';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 const KEY = 'investigation';
 
@@ -24,7 +24,7 @@ const KEY = 'investigation';
  * It contains investigation guide (alerts only) and highlighted fields
  */
 export const InvestigationSection = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+  const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
   const expanded = useExpandSection({ title: KEY, defaultValue: true });
