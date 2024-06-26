@@ -176,7 +176,7 @@ export async function fetchServicePathsFromTraceIds({
       
             def processAndReturnEvent(def context, def eventId) {
               def stack = new Stack();
-              def reprocessStack = new Stack();
+              def reprocessQueue = new LinkedList();
 
               // Avoid reprocessing the same event
               def visited = new HashSet();
@@ -202,15 +202,18 @@ export async function fetchServicePathsFromTraceIds({
 
                 if (parentId != null && !parentId.equals(currentEventId)) {
                   def parent = context.processedEvents.get(parentId);
-                  // Only adds the parentId to the stack if it hasn't visited to prevent infinite loop scenarios
-                  // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
-                  // doesn't have a parent, in which case we should skip it
+                  
                   if (parent == null) {
+                    
+                    // Only adds the parentId to the stack if it hasn't been visited to prevent infinite loop scenarios
+                    // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
+                    // doesn't have a parent, in which case we should skip it
                     if (!visited.contains(parentId)) {
-                      // Add currentEventId to be reprocessed once its parent is processed
-                      reprocessStack.push(currentEventId); 
                       stack.push(parentId);
+                      // Add currentEventId to be reprocessed once its parent is processed
+                      reprocessQueue.add(currentEventId); 
                     }
+
 
                     continue;
                   }
@@ -254,8 +257,8 @@ export async function fetchServicePathsFromTraceIds({
                 context.processedEvents[currentEventId] = event;
 
                 // reprocess events which were waiting for their parents to be processed
-                while (!reprocessStack.isEmpty()) {
-                  stack.push(reprocessStack.pop());
+                while (!reprocessQueue.isEmpty()) {
+                  stack.push(reprocessQueue.remove());
                 }
               }
 
