@@ -27,9 +27,6 @@ export const OverviewGridItem = ({
   onClick: (params: FlyoutParamProps) => void;
   style?: React.CSSProperties;
 }) => {
-  const d = useSelector(selectOverviewTrends);
-  const trendData = d[monitor.configId + monitor.location.id];
-  console.log('trend data for monitor', monitor.name, trendData);
   // const { timestamp } = useStatusByLocationOverview({
   //   configId: monitor.configId,
   //   locationId: monitor.location.id,

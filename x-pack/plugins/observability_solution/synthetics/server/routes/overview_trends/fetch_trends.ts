@@ -110,6 +110,7 @@ export function fetchTrends(configId: string, locationIds: string[], esClient: U
                       },
                     },
                   ],
+                  _source: ['monitor.duration.us'],
                 },
               },
               stats: {
