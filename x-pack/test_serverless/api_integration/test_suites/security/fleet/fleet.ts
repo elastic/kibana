@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
+import { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   expectDefaultElasticsearchOutput,
@@ -18,7 +18,6 @@ export default function (ctx: FtrProviderContext) {
   const supertestWithoutAuth = ctx.getService('supertestWithoutAuth');
   const svlUserManager = ctx.getService('svlUserManager');
   let roleAuthc: RoleCredentials;
-  let internalRequestHeader: InternalRequestHeader;
 
   describe('fleet', function () {
     let defaultFleetServerHostUrl: string = '';
@@ -26,7 +25,6 @@ export default function (ctx: FtrProviderContext) {
 
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
       defaultFleetServerHostUrl = await expectDefaultFleetServer(ctx);
       expect(defaultFleetServerHostUrl).not.toBe('');
 
@@ -42,6 +40,7 @@ export default function (ctx: FtrProviderContext) {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'test',
           host_urls: ['https://localhost:8221'],
@@ -60,6 +59,7 @@ export default function (ctx: FtrProviderContext) {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/fleet_server_hosts')
         .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test Fleet server host',
           host_urls: [defaultFleetServerHostUrl],
@@ -78,6 +78,7 @@ export default function (ctx: FtrProviderContext) {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test output',
           type: 'elasticsearch',
@@ -96,6 +97,7 @@ export default function (ctx: FtrProviderContext) {
       const { body, status } = await supertestWithoutAuth
         .post('/api/fleet/outputs')
         .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send({
           name: 'Test output',
           type: 'elasticsearch',
