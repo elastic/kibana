@@ -22,11 +22,7 @@ import {
 import { Error } from '../../../../../components';
 
 import type { AgentPolicy, PackageInfo } from '../../../../../types';
-import {
-  isPackageLimited,
-  doesAgentPolicyAlreadyIncludePackage,
-  ExperimentalFeaturesService,
-} from '../../../../../services';
+import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
 import { useFleetStatus, sendBulkGetAgentPolicies } from '../../../../../hooks';
 
 import { useMultipleAgentPolicies } from '../../../../../hooks';

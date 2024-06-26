@@ -31,6 +31,7 @@ import {
   AgentPolicyRefreshContext,
   useIsPackagePolicyUpgradable,
   useAuthz,
+  useMultipleAgentPolicies,
 } from '../../../../../hooks';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
@@ -43,7 +44,6 @@ import {
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
-import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 interface PackagePoliciesPanelProps {
   name: string;
