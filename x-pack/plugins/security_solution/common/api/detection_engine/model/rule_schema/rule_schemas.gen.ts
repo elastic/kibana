@@ -609,6 +609,11 @@ export const TypeSpecificCreateProps = z.discriminatedUnion('type', [
   EsqlRuleCreateFields,
 ]);
 
+type TypeSpecificCreatePropsKeys = Exclude<
+  keyof Omit<z.infer<typeof TypeSpecificCreateProps['_def']['options'][number]>, 'type'>,
+  'type'
+>;
+
 export type TypeSpecificPatchProps = z.infer<typeof TypeSpecificPatchProps>;
 export const TypeSpecificPatchProps = z.union([
   EqlRulePatchFields,

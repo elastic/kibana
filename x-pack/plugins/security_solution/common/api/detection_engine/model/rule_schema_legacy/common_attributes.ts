@@ -39,13 +39,6 @@ export const IsRuleEnabled = t.boolean;
 export type RuleTagArray = t.TypeOf<typeof RuleTagArray>;
 export const RuleTagArray = t.array(t.string); // should be non-empty strings?
 
-/**
- * Note that this is a non-exact io-ts type as we allow extra meta information
- * to be added to the meta object
- */
-export type RuleMetadata = t.TypeOf<typeof RuleMetadata>;
-export const RuleMetadata = t.UnknownRecord; // should be a more specific type?
-
 export type RuleLicense = t.TypeOf<typeof RuleLicense>;
 export const RuleLicense = t.string;
 

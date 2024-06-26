@@ -13,8 +13,6 @@ import {
   machine_learning_job_id,
   RiskScore,
   RiskScoreMapping,
-  RuleActionArray,
-  RuleActionThrottle,
   Severity,
   SeverityMapping,
   threat_index,
@@ -25,7 +23,6 @@ import {
 // TODO https://github.com/elastic/security-team/issues/7491
 // eslint-disable-next-line no-restricted-imports
 import {
-  AlertSuppression,
   EventCategoryOverride,
   ExceptionListArray,
   HistoryWindowStart,
@@ -38,7 +35,6 @@ import {
   RuleDescription,
   RuleFalsePositiveArray,
   RuleLicense,
-  RuleMetadata,
   RuleName,
   RuleReferenceArray,
   RuleSignatureId,
@@ -75,7 +71,6 @@ export const DiffableCommonFields = buildSchema({
     // not via the fields diff, but via dedicated properties in the response body.
     rule_id: RuleSignatureId,
     version: RuleVersion,
-    meta: RuleMetadata,
 
     // Main domain fields
     name: RuleName,
@@ -99,8 +94,6 @@ export const DiffableCommonFields = buildSchema({
 
     // Other domain fields
     rule_schedule: RuleSchedule, // NOTE: new field
-    actions: RuleActionArray,
-    throttle: RuleActionThrottle,
     exceptions_list: ExceptionListArray,
     max_signals: MaxSignals,
   },
@@ -120,7 +113,6 @@ export const DiffableCustomQueryFields = buildSchema({
   },
   optional: {
     data_source: RuleDataSource, // NOTE: new field
-    alert_suppression: AlertSuppression,
   },
 });
 
@@ -132,7 +124,6 @@ export const DiffableSavedQueryFields = buildSchema({
   },
   optional: {
     data_source: RuleDataSource, // NOTE: new field
-    alert_suppression: AlertSuppression,
   },
 });
 
