@@ -15,7 +15,7 @@ import { AgentTypeVendorLogo } from '../agents/agent_type_vendor_logo';
 import { getAgentTypeName } from '../../../translations';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 
-const INTEGRATION_SECTION_LABEL = i18n.translate(
+export const INTEGRATION_SECTION_LABEL = i18n.translate(
   'xpack.securitySolution.agentTypeIntegration.integrationSectionLabel',
   { defaultMessage: 'Integration' }
 );
@@ -26,6 +26,10 @@ const INTEGRATION_SECTION_LABEL = i18n.translate(
 export interface AgentTypeIntegrationProps {
   agentType: ResponseActionAgentType;
   textSize?: EuiTextProps['size'];
+  /**
+   * If content should be shown vertically (label and integration name on separate lines) or horizontally (next to each other).
+   * Defaults to `vertical`
+   */
   layout?: 'vertical' | 'horizontal';
   'data-test-subj'?: string;
 }
@@ -47,13 +51,14 @@ export const AgentTypeIntegration = memo<AgentTypeIntegrationProps>(
                 />
               }
               position={layout === 'horizontal' ? 'bottom' : 'right'}
+              anchorProps={{ 'data-test-subj': testId('tooltipAnchor') }}
             />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup responsive={false} wrap={false} gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AgentTypeVendorLogo agentType={agentType} />
+              <AgentTypeVendorLogo agentType={agentType} data-test-subj={testId('vendorLogo')} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size={textSize} data-test-subj={testId('name')}>
