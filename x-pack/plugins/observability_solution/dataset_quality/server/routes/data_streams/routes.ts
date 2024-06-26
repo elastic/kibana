@@ -8,13 +8,13 @@
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
 import {
+  DatasetUserPrivileges,
   DataStreamDetails,
   DataStreamSettings,
   DataStreamStat,
   DegradedDocs,
-  NonAggregatableDatasets,
   DegradedFieldResponse,
-  DatasetUserPrivileges,
+  NonAggregatableDatasets,
 } from '../../../common/api_types';
 import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -25,6 +25,7 @@ import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { getDegradedFields } from './get_degraded_fields';
+import { getIgnoredMetadata, IgnoredMetadataResponse } from './get_ignored_metadata';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -226,6 +227,33 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const ignoredFieldMetadataRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/ignored_metadata/{field}',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+      field: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<IgnoredMetadataResponse> {
+    const { context, params } = resources;
+    const { dataStream, field } = params.path;
+    const coreContext = await context.core;
+
+    // Query data streams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    return await getIgnoredMetadata({
+      esClient,
+      dataStream,
+      field,
+    });
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
@@ -233,4 +261,5 @@ export const dataStreamsRouteRepository = {
   ...degradedFieldsRoute,
   ...dataStreamDetailsRoute,
   ...dataStreamSettingsRoute,
+  ...ignoredFieldMetadataRoute,
 };
