@@ -19,11 +19,7 @@ import { useAssistantContext } from '../../assistant_context';
 
 import * as i18n from './translations';
 
-interface Props {
-  navigateToApp: (appId: string, options?: Record<string, unknown>) => Promise<void>;
-}
-
-const ConnectorsSettingsManagementComponent: React.FC<Props> = () => {
+const ConnectorsSettingsManagementComponent: React.FC = () => {
   const { navigateToApp } = useAssistantContext();
 
   const onClick = useCallback(

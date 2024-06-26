@@ -65,7 +65,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
       basePromptContexts,
       http,
-      navigateToApp,
       selectedSettingsTab,
       setSelectedSettingsTab,
       toasts,
@@ -251,9 +250,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
             padding-bottom: ${euiTheme.base * 0.75}px;
           `}
         >
-          {selectedSettingsTab === CONNECTORS_TAB && (
-            <ConnectorsSettingsManagement navigateToApp={navigateToApp} />
-          )}
+          {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               actionTypeRegistry={actionTypeRegistry}
