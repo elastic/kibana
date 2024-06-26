@@ -11,7 +11,7 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { Observable, Subscription } from 'rxjs';
 import { Config } from '@kbn/config';
-import { isFipsEnabled } from './fips/fips';
+import { isFipsEnabled, checkFipsConfig } from './fips/fips';
 import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
@@ -49,6 +49,8 @@ export class SecurityService
   public setup(): InternalSecurityServiceSetup {
     const config = this.getConfig();
     const securityConfig: SecurityServiceConfigType = config.get(['xpack', 'security']);
+
+    checkFipsConfig(securityConfig, this.log);
 
     return {
       registerSecurityDelegate: (api) => {
