@@ -29,7 +29,7 @@ export const getActionListMock = async ({
   isCompleted = true,
   isExpired = false,
   wasSuccessful = true,
-  errors = [],
+  errors,
   status = 'successful',
   outputs = {},
 }: {
