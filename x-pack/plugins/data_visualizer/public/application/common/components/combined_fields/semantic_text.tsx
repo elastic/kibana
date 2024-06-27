@@ -18,9 +18,7 @@ import {
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { error } from 'jquery';
 import { FormattedMessage } from '@kbn/i18n-react';
-// import type { CombinedField } from './types';
 import { cloneDeep } from 'lodash';
 import { getFieldNames } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
@@ -153,8 +151,6 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       </EuiFormRow>
 
       <EuiSpacer size="s" />
-
-      {error}
 
       <EuiTextAlign textAlign="right">
         <EuiButton size="s" fill disabled={false} onClick={onSubmit}>

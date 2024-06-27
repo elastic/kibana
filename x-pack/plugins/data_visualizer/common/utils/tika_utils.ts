@@ -28,10 +28,12 @@ export const TIKA_MIME_TYPES = [
   'application/vnd.oasis.opendocument.text',
 
   'text/rtf',
+  'application/rtf',
 
   'application/pdf',
 
   'text/plain',
+  'text/plain; charset=UTF-8',
 ];
 
 export function isTikaType(type: string) {
@@ -66,12 +68,14 @@ export const getTikaDisplayType = (type: string) => {
       return 'Open Document Format';
 
     case 'text/rtf':
+    case 'application/rtf':
       return 'Rich Text Format';
 
     case 'application/pdf':
       return 'PDF';
 
     case 'text/plain':
+    case 'text/plain; charset=UTF-8':
       return 'Plain text';
 
     default:
