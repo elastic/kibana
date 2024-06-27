@@ -11,7 +11,7 @@ import moment from 'moment';
 
 import {
   UsageCountersSavedObject,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPES,
 } from '@kbn/usage-collection-plugin/server';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 
@@ -49,7 +49,8 @@ export async function rollUsageCountersIndices(
   try {
     const { saved_objects: rawUiCounterDocs } =
       await savedObjectsClient.find<UsageCountersSavedObject>({
-        type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+        type: USAGE_COUNTERS_SAVED_OBJECT_TYPES,
+        namespaces: ['*'],
         perPage: 1000, // Process 1000 at a time as a compromise of speed and overload
       });
 
@@ -62,7 +63,7 @@ export async function rollUsageCountersIndices(
     );
 
     return await Promise.all(
-      docsToDelete.map(({ id }) => savedObjectsClient.delete(USAGE_COUNTERS_SAVED_OBJECT_TYPE, id))
+      docsToDelete.map(({ id, type }) => savedObjectsClient.delete(type, id))
     );
   } catch (err) {
     logger.warn(`Failed to rollup Usage Counters saved objects.`);

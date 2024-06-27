@@ -8,20 +8,22 @@
 
 import * as Rx from 'rxjs';
 import * as rxOp from 'rxjs';
-import {
+import moment from 'moment';
+import type {
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { Logger, LogMeta } from '@kbn/core/server';
 
-import moment from 'moment';
-import { UsageCounter } from './usage_counter';
-import { UsageCounters } from '../../common/types';
+import { type IUsageCounter, UsageCounter } from './usage_counter';
+import type { UsageCounters } from '../../common/types';
 import {
-  registerUsageCountersSavedObjectType,
+  registerUsageCountersSavedObjectTypes,
   storeCounter,
   serializeCounterKey,
+  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
+  type UsageCounterSavedObjectType,
 } from './saved_objects';
 
 interface UsageCountersLogMeta extends LogMeta {
@@ -35,8 +37,8 @@ export interface UsageCountersServiceDeps {
 }
 
 export interface UsageCountersServiceSetup {
-  createUsageCounter: (type: string) => UsageCounter;
-  getUsageCounterByType: (type: string) => UsageCounter | undefined;
+  createUsageCounter: (domainId: string, soType?: UsageCounterSavedObjectType) => IUsageCounter;
+  getUsageCounterByDomainId: (domainId: string) => IUsageCounter | undefined;
 }
 
 /* internal */
@@ -66,7 +68,7 @@ export class UsageCountersService {
   constructor({ logger, retryCount, bufferDurationMs }: UsageCountersServiceDeps) {
     this.logger = logger;
     this.retryCount = retryCount;
-    this.bufferDurationMs = bufferDurationMs;
+    this.bufferDurationMs = 500;
   }
 
   public setup = (core: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
@@ -95,11 +97,11 @@ export class UsageCountersService {
         storingCache$.next(false);
       });
 
-    registerUsageCountersSavedObjectType(core.savedObjects);
+    registerUsageCountersSavedObjectTypes(core.savedObjects);
 
     return {
       createUsageCounter: this.createUsageCounter,
-      getUsageCounterByType: this.getUsageCounterByType,
+      getUsageCounterByDomainId: this.getUsageCounterByDomainId,
     };
   };
 
@@ -137,11 +139,13 @@ export class UsageCountersService {
 
   private storeDate$(
     counters: UsageCounters.v1.CounterMetric[],
-    internalRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
+    soRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
   ) {
     return Rx.forkJoin(
-      counters.map((counter) =>
-        Rx.defer(() => storeCounter(counter, internalRepository)).pipe(
+      counters.map((metric) =>
+        Rx.defer(() =>
+          storeCounter({ metric, soRepository, soType: this.getSavedObjectType(metric.domainId) })
+        ).pipe(
           rxOp.retry(this.retryCount),
           rxOp.catchError((error) => {
             this.logger.warn(error);
@@ -152,23 +156,31 @@ export class UsageCountersService {
     );
   }
 
-  private createUsageCounter = (type: string): UsageCounter => {
-    if (this.counterSets.get(type)) {
-      throw new Error(`Usage counter set "${type}" already exists.`);
+  private createUsageCounter = (
+    domainId: string,
+    soType: UsageCounterSavedObjectType = SERVER_COUNTERS_SAVED_OBJECT_TYPE
+  ): IUsageCounter => {
+    if (this.counterSets.get(domainId)) {
+      throw new Error(`Usage counter set "${domainId}" already exists.`);
     }
 
     const counterSet = new UsageCounter({
-      domainId: type,
+      domainId,
       counter$: this.source$,
+      soType,
     });
 
-    this.counterSets.set(type, counterSet);
+    this.counterSets.set(domainId, counterSet);
 
     return counterSet;
   };
 
-  private getUsageCounterByType = (type: string): UsageCounter | undefined => {
+  private getUsageCounterByDomainId = (type: string): IUsageCounter | undefined => {
     return this.counterSets.get(type);
+  };
+
+  private getSavedObjectType = (domainId: string) => {
+    return this.counterSets.get(domainId)!.type;
   };
 
   private mergeCounters = (
@@ -176,8 +188,14 @@ export class UsageCountersService {
   ): Record<string, UsageCounters.v1.CounterMetric> => {
     const date = moment.now();
     return counters.reduce((acc, counter) => {
-      const { counterName, domainId, counterType } = counter;
-      const key = serializeCounterKey({ domainId, counterName, counterType, date });
+      const { counterName, domainId, counterType, namespace } = counter;
+      const key = serializeCounterKey({
+        domainId,
+        counterName,
+        counterType,
+        date,
+        namespace,
+      });
       const existingCounter = acc[key];
       if (!existingCounter) {
         acc[key] = counter;

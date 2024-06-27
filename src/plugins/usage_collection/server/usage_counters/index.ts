@@ -14,4 +14,10 @@ export type { IUsageCounter as UsageCounter } from './usage_counter';
 
 export { UsageCountersService } from './usage_counters_service';
 export type { SerializeCounterParams } from './saved_objects';
-export { USAGE_COUNTERS_SAVED_OBJECT_TYPE, serializeCounterKey } from './saved_objects';
+export {
+  type UsageCounterSavedObjectType,
+  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
+  UI_COUNTERS_SAVED_OBJECT_TYPE,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPES,
+  serializeCounterKey,
+} from './saved_objects';

@@ -26,7 +26,13 @@ export type {
   SerializeCounterParams,
 } from './usage_counters';
 
-export { USAGE_COUNTERS_SAVED_OBJECT_TYPE, serializeCounterKey } from './usage_counters';
+export {
+  type UsageCounterSavedObjectType,
+  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
+  UI_COUNTERS_SAVED_OBJECT_TYPE,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPES,
+  serializeCounterKey,
+} from './usage_counters';
 
 export type { UsageCollectionSetup } from './plugin';
 export { config } from './config';

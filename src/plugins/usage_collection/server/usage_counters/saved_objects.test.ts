@@ -45,6 +45,7 @@ describe('storeCounter', () => {
       counterName: 'b',
       counterType: 'c',
       incrementBy: 13,
+      namespace: 'default',
     };
 
     await storeCounter(counterMetric, internalRepository);
@@ -52,7 +53,7 @@ describe('storeCounter', () => {
     expect(internalRepository.incrementCounter).toBeCalledTimes(1);
     expect(internalRepository.incrementCounter.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "usage-counters",
+        "server-counters",
         "a:09042021:c:b",
         Array [
           Object {
@@ -61,6 +62,7 @@ describe('storeCounter', () => {
           },
         ],
         Object {
+          "namespace": "default",
           "upsertAttributes": Object {
             "counterName": "b",
             "counterType": "c",

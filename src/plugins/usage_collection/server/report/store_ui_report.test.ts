@@ -6,22 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { storeApplicationUsageMock } from './store_report.test.mocks';
+import { storeApplicationUsageMock } from './store_ui_report.test.mocks';
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { storeReport } from './store_report';
-import { ReportSchemaType } from './schema';
 import { METRIC_TYPE } from '@kbn/analytics';
+import type { ReportSchemaType } from './schema';
+import { storeUiReport } from './store_ui_report';
 import { usageCountersServiceMock } from '../usage_counters/usage_counters_service.mock';
+import { UI_COUNTERS_SAVED_OBJECT_TYPE } from '../usage_counters';
 
-describe('store_report', () => {
-  const usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
-  const uiCountersUsageCounter = usageCountersServiceSetup.createUsageCounter('uiCounter');
-
+describe('store_ui_report', () => {
   let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+  let usageCountersServiceSetup: ReturnType<typeof usageCountersServiceMock.createSetupContract>;
+  let usageCounterMock: ReturnType<typeof usageCountersServiceSetup.createUsageCounter>;
 
   beforeEach(() => {
+    usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
     repository = savedObjectsRepositoryMock.create();
+    usageCounterMock = usageCountersServiceSetup.createUsageCounter(
+      'dashboards',
+      UI_COUNTERS_SAVED_OBJECT_TYPE
+    );
+    usageCountersServiceSetup.createUsageCounter.mockReturnValue(usageCounterMock);
   });
 
   afterEach(() => {
@@ -64,8 +70,25 @@ describe('store_report', () => {
         },
       },
     };
-    await storeReport(repository, uiCountersUsageCounter, report);
+    await storeUiReport(repository, usageCountersServiceSetup, report);
+    await new Promise((resolve) => setTimeout(resolve, 4000));
 
+    expect(usageCountersServiceSetup.createUsageCounter.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "dashboards",
+          "ui-counters",
+        ],
+        Array [
+          "test-app-name",
+          "ui-counters",
+        ],
+        Array [
+          "test-app-name",
+          "ui-counters",
+        ],
+      ]
+    `);
     expect(repository.create.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
@@ -96,19 +119,18 @@ describe('store_report', () => {
         ],
       ]
     `);
-    expect((uiCountersUsageCounter.incrementCounter as jest.Mock).mock.calls)
-      .toMatchInlineSnapshot(`
+    expect((usageCounterMock.incrementCounter as jest.Mock).mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
           Object {
-            "counterName": "test-app-name:test-event-name",
+            "counterName": "test-event-name",
             "counterType": "loaded",
             "incrementBy": 1,
           },
         ],
         Array [
           Object {
-            "counterName": "test-app-name:test-event-name",
+            "counterName": "test-event-name",
             "counterType": "click",
             "incrementBy": 2,
           },
@@ -131,7 +153,7 @@ describe('store_report', () => {
       uiCounter: void 0,
       application_usage: void 0,
     };
-    await storeReport(repository, uiCountersUsageCounter, report);
+    await storeUiReport(repository, usageCountersServiceSetup, report);
 
     expect(repository.bulkCreate).not.toHaveBeenCalled();
     expect(repository.incrementCounter).not.toHaveBeenCalled();

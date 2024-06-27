@@ -72,7 +72,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
     registerEbtCounters(coreSetup.analytics, usageCollection);
-    usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
     this.registerUsageCollectors(

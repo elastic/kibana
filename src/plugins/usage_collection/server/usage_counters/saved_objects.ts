@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { USAGE_COUNTERS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   SavedObjectsRepository,
@@ -34,19 +35,43 @@ export interface UsageCountersSavedObjectAttributes {
 export type UsageCountersSavedObject = SavedObject<UsageCountersSavedObjectAttributes>;
 
 /** The Saved Objects type for Usage Counters **/
-export const USAGE_COUNTERS_SAVED_OBJECT_TYPE = 'usage-counters';
+export const SERVER_COUNTERS_SAVED_OBJECT_TYPE = 'server-counters';
+export const UI_COUNTERS_SAVED_OBJECT_TYPE = 'ui-counters';
+export type UsageCounterSavedObjectType = 'server-counters' | 'ui-counters';
+export const USAGE_COUNTERS_SAVED_OBJECT_TYPES = [
+  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
+  UI_COUNTERS_SAVED_OBJECT_TYPE,
+];
 
-export const registerUsageCountersSavedObjectType = (
+export const registerUsageCountersSavedObjectTypes = (
   savedObjectsSetup: SavedObjectsServiceSetup
 ) => {
   savedObjectsSetup.registerType({
-    name: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+    indexPattern: USAGE_COUNTERS_SAVED_OBJECT_INDEX,
+    name: SERVER_COUNTERS_SAVED_OBJECT_TYPE,
     hidden: false,
-    namespaceType: 'agnostic',
+    namespaceType: 'single',
     mappings: {
       dynamic: false,
       properties: {
         domainId: { type: 'keyword' },
+        counterName: { type: 'keyword' },
+        counterType: { type: 'keyword' },
+      },
+    },
+  });
+
+  savedObjectsSetup.registerType({
+    indexPattern: USAGE_COUNTERS_SAVED_OBJECT_INDEX,
+    name: UI_COUNTERS_SAVED_OBJECT_TYPE,
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      dynamic: false,
+      properties: {
+        domainId: { type: 'keyword' },
+        counterName: { type: 'keyword' },
+        counterType: { type: 'keyword' },
       },
     },
   });
@@ -65,6 +90,8 @@ export interface SerializeCounterParams {
   counterType: string;
   /** The date to which serialize the key **/
   date: moment.MomentInput;
+  /** The namespace of this counter (optional) */
+  namespace?: string;
 }
 
 /**
@@ -77,16 +104,20 @@ export const serializeCounterKey = ({
   counterName,
   counterType,
   date,
+  namespace,
 }: SerializeCounterParams) => {
   const dayDate = moment(date).format('DDMMYYYY');
-  return `${domainId}:${dayDate}:${counterType}:${counterName}`;
+  return `${domainId}:${dayDate}:${counterType}:${counterName}${namespace ? `:${namespace}` : ''}`;
 };
 
-export const storeCounter = async (
-  counterMetric: UsageCounters.v1.CounterMetric,
-  internalRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
-) => {
-  const { counterName, counterType, domainId, incrementBy } = counterMetric;
+export interface StoreCounterParams {
+  metric: UsageCounters.v1.CounterMetric;
+  soRepository: Pick<SavedObjectsRepository, 'incrementCounter'>;
+  soType: UsageCounterSavedObjectType;
+}
+
+export const storeCounter = async ({ metric, soRepository, soType }: StoreCounterParams) => {
+  const { namespace, counterName, counterType, domainId, incrementBy } = metric;
   const key = serializeCounterKey({
     date: moment.now(),
     domainId,
@@ -94,16 +125,12 @@ export const storeCounter = async (
     counterType,
   });
 
-  return await internalRepository.incrementCounter(
-    USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-    key,
-    [{ fieldName: 'count', incrementBy }],
-    {
-      upsertAttributes: {
-        domainId,
-        counterName,
-        counterType,
-      },
-    }
-  );
+  return await soRepository.incrementCounter(soType, key, [{ fieldName: 'count', incrementBy }], {
+    namespace,
+    upsertAttributes: {
+      domainId,
+      counterName,
+      counterType,
+    },
+  });
 };
