@@ -26,6 +26,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { ExperimentalFeatures } from '../../../../common';
 import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
   InternalArtifactCompleteSchema,
@@ -80,10 +81,11 @@ export type ArtifactListId =
 
 export function convertExceptionsToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
-  schemaVersion: string
+  schemaVersion: string,
+  experimentalFeatures: ExperimentalFeatures
 ) {
   const translatedExceptions = {
-    entries: translateToEndpointExceptions(exceptions, schemaVersion),
+    entries: translateToEndpointExceptions(exceptions, schemaVersion, experimentalFeatures),
   };
   const [validated, errors] = validate(translatedExceptions, wrappedTranslatedExceptionList);
   if (errors != null) {
@@ -153,10 +155,12 @@ export async function getAllItemsFromEndpointExceptionList({
  * Translates Exception list items to Exceptions the endpoint can understand
  * @param exceptions
  * @param schemaVersion
+ * @param experimentalFeatures
  */
 export function translateToEndpointExceptions(
   exceptions: ExceptionListItemSchema[],
-  schemaVersion: string
+  schemaVersion: string,
+  experimentalFeatures: ExperimentalFeatures
 ): TranslatedExceptionListItem[] {
   const entrySet = new Set();
   const entriesFiltered: TranslatedExceptionListItem[] = [];
@@ -182,7 +186,11 @@ export function translateToEndpointExceptions(
             entrySet.add(entryHash);
           }
         });
-      } else if (isFilterProcessDescendantsEnabled(entry)) {
+      } else if (
+        experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
+        isFilterProcessDescendantsEnabled(entry)
+      ) {
         const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
           ...entry,
           entries: [
