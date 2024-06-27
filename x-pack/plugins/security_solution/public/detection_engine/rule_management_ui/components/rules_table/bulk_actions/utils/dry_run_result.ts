@@ -13,7 +13,7 @@ import type { DryRunResult } from '../types';
 
 /**
  * helper utility that transforms raw BulkActionResponse response to DryRunResult format
- * @param response - raw bulk_actions API response {@link BulkActionResponse}
+ * @param response - raw bulk_actions API response ({@link BulkActionResponse})
  * @returns dry run result ({@link DryRunResult})
  */
 export const processDryRunResult = (response: BulkActionResponse | undefined): DryRunResult => {
