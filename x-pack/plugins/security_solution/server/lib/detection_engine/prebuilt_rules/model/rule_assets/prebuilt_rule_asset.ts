@@ -84,8 +84,8 @@ export const RuleAssetTypeSpecificCreateProps = z.discriminatedUnion('type', [
   SavedQueryRuleAssetFields,
   ThresholdRuleAssetFields,
   ThreatMatchRuleAssetFields,
-  NewTermsRuleAssetFields,
   MachineLearningRuleAssetFields,
+  NewTermsRuleAssetFields,
   EsqlRuleAssetFields,
 ]);
 
