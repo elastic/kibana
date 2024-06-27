@@ -82,14 +82,15 @@ interface ExecutionParams {
   i18nStart: I18nStart;
 }
 
-type GetCsvActionApi = HasType & PublishesSavedSearch & CanAccessViewMode & HasTimeRange; // TODO: Fix this?
+type GetCsvActionApi = HasType & PublishesSavedSearch & CanAccessViewMode & HasTimeRange;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
     apiHasType(api) &&
     apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
     apiPublishesSavedSearch(api) &&
-    apiCanAccessViewMode(api)
+    apiCanAccessViewMode(api) &&
+    Boolean((api as unknown as HasTimeRange).hasTimeRange)
   );
 };
 
