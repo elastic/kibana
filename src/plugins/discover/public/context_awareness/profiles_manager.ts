@@ -12,6 +12,7 @@ import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
 import { addLog } from '../utils/add_log';
+import type { ProfilesAdapter } from './inspector';
 import type {
   RootProfileService,
   DataSourceProfileService,
@@ -24,6 +25,7 @@ import type {
   DocumentContext,
 } from './profiles';
 import type { ContextWithProfileId } from './profile_service';
+import { recordHasContext } from './record_has_context';
 
 interface SerializedRootProfileParams {
   solutionNavId: RootProfileProviderParams['solutionNavId'];
@@ -32,10 +34,6 @@ interface SerializedRootProfileParams {
 interface SerializedDataSourceProfileParams {
   dataViewId: string | undefined;
   esqlQuery: string | undefined;
-}
-
-interface DataTableRecordWithContext extends DataTableRecord {
-  context: ContextWithProfileId<DocumentContext>;
 }
 
 export interface GetProfilesOptions {
@@ -52,6 +50,7 @@ export class ProfilesManager {
   private dataSourceProfileAbortController?: AbortController;
 
   constructor(
+    private readonly profilesAdapter: ProfilesAdapter,
     private readonly rootProfileService: RootProfileService,
     private readonly dataSourceProfileService: DataSourceProfileService,
     private readonly documentProfileService: DocumentProfileService
@@ -83,6 +82,7 @@ export class ProfilesManager {
       return;
     }
 
+    this.profilesAdapter.setRootContext(context);
     this.rootContext$.next(context);
     this.prevRootProfileParams = serializedParams;
   }
@@ -110,6 +110,7 @@ export class ProfilesManager {
       return;
     }
 
+    this.profilesAdapter.setDataSourceContext(context);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
   }
@@ -176,12 +177,6 @@ const serializeDataSourceProfileParams = (
         ? params.query.esql
         : undefined,
   };
-};
-
-const recordHasContext = (
-  record: DataTableRecord | undefined
-): record is DataTableRecordWithContext => {
-  return Boolean(record && 'context' in record);
 };
 
 enum ContextType {

@@ -6,7 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  filter,
+  map,
+  mergeMap,
+  Observable,
+  share,
+  Subject,
+  tap,
+} from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -217,7 +227,7 @@ export function getDataStateContainer({
   let abortControllerFetchMore: AbortController;
 
   function subscribe() {
-    const subscription = fetch$
+    const fetchSubscription = fetch$
       .pipe(
         mergeMap(async ({ options, searchSessionId }) => {
           const commonFetchDeps = {
@@ -306,10 +316,21 @@ export function getDataStateContainer({
       )
       .subscribe();
 
+    const documentsSubscription = dataSubjects.documents$
+      .pipe(
+        distinctUntilChanged((a, b) => a.fetchStatus === b.fetchStatus),
+        filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
+        map(({ result }) => result ?? [])
+      )
+      .subscribe((records) => {
+        services.profilesAdapter.setDocumentContexts(records);
+      });
+
     return () => {
       abortController?.abort();
       abortControllerFetchMore?.abort();
-      subscription.unsubscribe();
+      fetchSubscription.unsubscribe();
+      documentsSubscription.unsubscribe();
     };
   }
 

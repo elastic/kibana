@@ -14,6 +14,7 @@ import {
 } from '@kbn/inspector-plugin/public';
 import { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
+import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export interface InspectorAdapters {
   requests: RequestAdapter;
@@ -27,6 +28,7 @@ export function useInspector({
   inspector: InspectorPublicPluginStart;
   stateContainer: DiscoverStateContainer;
 }) {
+  const { profilesAdapter } = useDiscoverServices();
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const onOpenInspector = useCallback(() => {
@@ -39,12 +41,12 @@ export function useInspector({
       : [inspectorAdapters.requests];
 
     const session = inspector.open(
-      { requests: new AggregateRequestAdapter(requestAdapters) },
+      { requests: new AggregateRequestAdapter(requestAdapters), profiles: profilesAdapter },
       { title: stateContainer.savedSearchState.getTitle() }
     );
 
     setInspectorSession(session);
-  }, [stateContainer, inspector]);
+  }, [stateContainer, inspector, profilesAdapter]);
 
   useEffect(() => {
     return () => {
