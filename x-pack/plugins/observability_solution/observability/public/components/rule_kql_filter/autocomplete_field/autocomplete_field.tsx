@@ -21,7 +21,7 @@ function composeStateUpdaters<State, Props>(...updaters: Array<StateUpdater<Stat
     updaters.reduce((currentState, updater) => updater(currentState, props) || currentState, state);
 }
 
-interface AutocompleteFieldProps {
+export interface AutocompleteFieldProps {
   isLoadingSuggestions: boolean;
   isValid: boolean;
   loadSuggestions: (value: string, cursorPosition: number, maxCount?: number) => void;
@@ -330,3 +330,6 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   ...state,
   isFocused: false,
 });
+
+// eslint-disable-next-line import/no-default-export
+export default AutocompleteField;
