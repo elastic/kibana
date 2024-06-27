@@ -5,16 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-plugin/public';
+import { Trigger } from '.';
 
 export const ADD_PANEL_TRIGGER = 'ADD_PANEL_TRIGGER';
+
 export const addPanelMenuTrigger: Trigger = {
   id: ADD_PANEL_TRIGGER,
-  title: i18n.translate('dashboard.addPanelMenuTrigger.title', {
+  title: i18n.translate('uiActions.triggers.dashboard.addPanelMenu.title', {
     defaultMessage: 'Add panel menu',
   }),
-  description: i18n.translate('dashboard.addPanelMenuTrigger.description', {
+  description: i18n.translate('uiActions.triggers.dashboard.addPanelMenu.description', {
     defaultMessage: "A new action will appear to the dashboard's add panel menu",
   }),
 };

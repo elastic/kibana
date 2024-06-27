@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { HostStatus } from '../../../../../common/endpoint/types';
+import type { HostStatus } from '../../../../../../common/endpoint/types';
 
 export const getAgentStatusText = (hostStatus: HostStatus) => {
   return i18n.translate('xpack.securitySolution.endpoint.list.hostStatusValue', {
@@ -15,3 +15,15 @@ export const getAgentStatusText = (hostStatus: HostStatus) => {
     values: { hostStatus },
   });
 };
+export const ISOLATING_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.agentAndActionsStatus.isIsolating',
+  { defaultMessage: 'Isolating' }
+);
+export const RELEASING_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.agentAndActionsStatus.isUnIsolating',
+  { defaultMessage: 'Releasing' }
+);
+export const ISOLATED_LABEL = i18n.translate(
+  'xpack.securitySolution.endpoint.agentAndActionsStatus.isolated',
+  { defaultMessage: 'Isolated' }
+);
