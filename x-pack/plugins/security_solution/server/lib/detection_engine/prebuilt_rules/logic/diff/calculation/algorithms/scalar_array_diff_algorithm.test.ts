@@ -16,9 +16,9 @@ import { scalarArrayDiffAlgorithm } from './scalar_array_diff_algorithm';
 describe('scalarArrayDiffAlgorithm', () => {
   it('returns current_version as merged output if there is no update - scenario AAA', () => {
     const mockVersions: ThreeVersionsOf<string[]> = {
-      base_version: ['A', 'B'],
-      current_version: ['B', 'A'],
-      target_version: ['A', 'B'],
+      base_version: ['A'],
+      current_version: ['A'],
+      target_version: ['A'],
     };
 
     const result = scalarArrayDiffAlgorithm(mockVersions);
@@ -144,6 +144,46 @@ describe('scalarArrayDiffAlgorithm', () => {
           merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
+          has_conflict: false,
+        })
+      );
+    });
+  });
+
+  describe('edge cases', () => {
+    it('compares arrays agnostic of order', () => {
+      const mockVersions: ThreeVersionsOf<string[]> = {
+        base_version: ['A', 'B'],
+        current_version: ['B', 'A'],
+        target_version: ['A', 'B'],
+      };
+
+      const result = scalarArrayDiffAlgorithm(mockVersions);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          merged_version: mockVersions.current_version,
+          diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
+          has_conflict: false,
+        })
+      );
+    });
+
+    it('compares arrays case insensitively', () => {
+      const mockVersions: ThreeVersionsOf<string[]> = {
+        base_version: ['a'],
+        current_version: ['A'],
+        target_version: ['A'],
+      };
+
+      const result = scalarArrayDiffAlgorithm(mockVersions);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          merged_version: mockVersions.current_version,
+          diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Current,
           has_conflict: false,
         })
       );
