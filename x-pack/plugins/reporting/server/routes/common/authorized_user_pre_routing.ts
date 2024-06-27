@@ -33,7 +33,7 @@ export const authorizedUserPreRouting = <P, Q, B>(
   const { logger, security: securitySetup, docLinks } = reporting.getPluginSetupDeps(); // ReportingInternalSetup.security?: SecurityPluginSetup | undefined
 
   return async (context, req, res) => {
-    const { security: securityService } = await reporting.getPluginStartDeps();
+    const { securityService } = await reporting.getPluginStartDeps();
     try {
       let user: ReportingRequestUser = false;
       if (securitySetup && securitySetup.license.isEnabled()) {

@@ -82,7 +82,7 @@ export const createMockPluginStart = async (
       ...licensingMock.createStart(),
       license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
     },
-    security: coreStartMock.security, // we need authc from core.security start
+    securityService: coreStartMock.security, // we need authc from core.security start
     logger,
     screenshotting: createMockScreenshottingStart(),
     ...startMock, // allows to override with test instances

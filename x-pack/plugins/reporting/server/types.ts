@@ -30,7 +30,6 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 /**
@@ -68,7 +67,6 @@ export interface ReportingStartDeps {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
-  security?: SecurityServiceStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
