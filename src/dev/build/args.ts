@@ -141,8 +141,7 @@ export function readCliArgs(argv: string[]) {
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
-    createDockerWolfi:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
+    createDockerWolfi: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-wolfi']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
     createDockerServerless:
       (isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless'])) ||
