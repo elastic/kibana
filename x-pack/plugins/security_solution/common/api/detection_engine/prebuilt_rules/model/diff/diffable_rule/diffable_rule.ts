@@ -17,6 +17,7 @@ import {
   RuleSchedule,
   TimelineTemplateReference,
   TimestampOverrideObject,
+  RuleNameOverrideObject,
 } from './diffable_field_types';
 
 import { buildSchema } from './build_schema';
@@ -91,6 +92,7 @@ export const DiffableCommonFields = buildSchema({
     max_signals: MaxSignals,
   },
   optional: {
+    rule_name_override: RuleNameOverrideObject, // NOTE: new field
     timestamp_override: TimestampOverrideObject, // NOTE: new field
     timeline_template: TimelineTemplateReference, // NOTE: new field
     building_block: BuildingBlockObject, // NOTE: new field
