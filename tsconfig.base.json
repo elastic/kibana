@@ -1362,6 +1362,8 @@
       "@kbn/response-stream-plugin/*": ["examples/response_stream/*"],
       "@kbn/rison": ["packages/kbn-rison"],
       "@kbn/rison/*": ["packages/kbn-rison/*"],
+      "@kbn/rollup": ["x-pack/packages/rollup"],
+      "@kbn/rollup/*": ["x-pack/packages/rollup/*"],
       "@kbn/rollup-plugin": ["x-pack/plugins/rollup"],
       "@kbn/rollup-plugin/*": ["x-pack/plugins/rollup/*"],
       "@kbn/router-to-openapispec": ["packages/kbn-router-to-openapispec"],
