@@ -7,12 +7,16 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type { RuleParams } from '../../../rule_schema';
 import { duplicateRule } from './duplicate_rule';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(),
 }));
+
+let actionsClient: jest.Mocked<ActionsClient>;
 
 describe('duplicateRule', () => {
   const createTestRule = (): SanitizedRule<RuleParams> => ({
@@ -97,6 +101,7 @@ describe('duplicateRule', () => {
     const rule = createTestRule();
     const result = await duplicateRule({
       rule,
+      actionsClient,
     });
 
     expect(result).toEqual({
@@ -113,6 +118,7 @@ describe('duplicateRule', () => {
       consumer: rule.consumer,
       schedule: rule.schedule,
       actions: rule.actions,
+      systemActions: rule.actions,
       enabled: false, // covered in a separate test
     });
   });
@@ -122,6 +128,7 @@ describe('duplicateRule', () => {
     rule.name = 'PowerShell Keylogging Script';
     const result = await duplicateRule({
       rule,
+      actionsClient,
     });
 
     expect(result).toEqual(
@@ -135,6 +142,7 @@ describe('duplicateRule', () => {
     const rule = createTestRule();
     const result = await duplicateRule({
       rule,
+      actionsClient,
     });
 
     expect(result).toEqual(
@@ -151,6 +159,7 @@ describe('duplicateRule', () => {
     rule.enabled = true;
     const result = await duplicateRule({
       rule,
+      actionsClient,
     });
 
     expect(result).toEqual(
@@ -171,6 +180,7 @@ describe('duplicateRule', () => {
       const rule = createPrebuiltRule();
       const result = await duplicateRule({
         rule,
+        actionsClient,
       });
 
       expect(result).toEqual(
@@ -194,6 +204,7 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
+        actionsClient,
       });
 
       expect(result).toEqual(
@@ -217,6 +228,7 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
+        actionsClient,
       });
 
       expect(result).toEqual(
@@ -240,6 +252,7 @@ describe('duplicateRule', () => {
       const rule = createCustomRule();
       const result = await duplicateRule({
         rule,
+        actionsClient,
       });
 
       expect(result).toEqual(
@@ -263,6 +276,7 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
+        actionsClient,
       });
 
       expect(result).toEqual(
@@ -286,6 +300,7 @@ describe('duplicateRule', () => {
 
       const result = await duplicateRule({
         rule,
+        actionsClient,
       });
 
       expect(result).toEqual(
@@ -302,6 +317,7 @@ describe('duplicateRule', () => {
       rule.params.setup = `## Config\n\nThe 'Audit Detailed File Share' audit policy must be configured...`;
       const result = await duplicateRule({
         rule,
+        actionsClient,
       });
 
       expect(result).toEqual(
