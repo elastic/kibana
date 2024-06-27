@@ -14,13 +14,20 @@ Status: `in progress`.
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
 
-  - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
-  - [Rule field doesn't have an update but has a custom value - `ABA`](#rule-field-doesnt-have-an-update-but-has-a-custom-value---aba)
+  - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa) -[**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
+  - [Rule field doesn't have an update but has a custom value - `ABA`](#rule-field-doesnt-have-an-update-but-has-a-custom-value---aba) -[**Scenario: `ABA` - Rule field is any type**](#scenario-aba---rule-field-is-any-type)
   - [Rule field has an update and doesn't have a custom value - `AAB`](#rule-field-has-an-update-and-doesnt-have-a-custom-value---aab)
+    - [**Scenario: `AAB` - Rule field is any type**](#scenario-aab---rule-field-is-any-type)
   - [Rule field has an update and a custom value that are the same - `ABB`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same---abb)
+    - [**Scenario: `ABB` - Rule field is any type**](#scenario-abb---rule-field-is-any-type)
   - [Rule field has an update and a custom value that are NOT the same - `ABC`](#rule-field-has-an-update-and-a-custom-value-that-are-not-the-same---abc)
+    - [**Scenario: `ABC` - Rule field is a number or single line string**](#scenario-abc---rule-field-is-a-number-or-single-line-string)
+    - [**Scenario: `ABC` - Rule field is an array of scalar values**](#scenario-abc---rule-field-is-an-array-of-scalar-values)
   - [Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same-and-the-rule-base-version-doesnt-exist----aa)
+    - [**Scenario: `-AA` - Rule field is any type**](#scenario--aa---rule-field-is-any-type)
   - [Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`](#rule-field-has-an-update-and-a-custom-value-that-are-not-the-same-and-the-rule-base-version-doesnt-exist----bc)
+    - [**Scenario: `-BC` - Rule field is a number or single line string**](#scenario--bc---rule-field-is-a-number-or-single-line-string)
+    - [**Scenario: `-BC` - Rule field is an array of scalar values**](#scenario--bc---rule-field-is-an-array-of-scalar-values)
 
 ## Useful information
 
@@ -50,7 +57,7 @@ Status: `in progress`.
 
 ### Rule field doesn't have an update and has no custom value - `AAA`
 
-#### **Scenario: Rule field is any type**
+#### **Scenario: `AAA` - Rule field is any type**
 
 **Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
 
@@ -72,7 +79,7 @@ Examples:
 
 ### Rule field doesn't have an update but has a custom value - `ABA`
 
-#### **Scenario: Rule field is any type**
+#### **Scenario: `ABA` - Rule field is any type**
 
 **Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
 
@@ -94,7 +101,7 @@ Examples:
 
 ### Rule field has an update and doesn't have a custom value - `AAB`
 
-#### **Scenario: Rule field is any type**
+#### **Scenario: `AAB` - Rule field is any type**
 
 **Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
 
@@ -116,7 +123,7 @@ Examples:
 
 ### Rule field has an update and a custom value that are the same - `ABB`
 
-#### **Scenario: Rule field is any type**
+#### **Scenario: `ABB` - Rule field is any type**
 
 **Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
 
@@ -139,7 +146,7 @@ Examples:
 
 ### Rule field has an update and a custom value that are NOT the same - `ABC`
 
-#### **Scenario: Rule field is a number or single line string**
+#### **Scenario: `ABC` - Rule field is a number or single line string**
 
 **Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithms
 
@@ -147,7 +154,7 @@ Examples:
 Given <field_name> field is customized by the user (current version != base version)
 And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
-Then for <field_name> field the diff algorithm should output the current version as the merged one with a conflict
+Then for <field_name> field the diff algorithm should output the current version as the merged one with a non-solvable conflict
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
@@ -157,7 +164,7 @@ Examples:
 | number             | risk_score | 1            | 2               | 3               |
 ```
 
-#### **Scenario: Rule field is an array of scalar values**
+#### **Scenario: `ABC` - Rule field is an array of scalar values**
 
 **Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
 
@@ -165,7 +172,7 @@ Examples:
 Given <field_name> field is customized by the user (current version != base version)
 And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
-Then for <field_name> field the diff algorithm should output a custom merged version with a solveable conflict
+Then for <field_name> field the diff algorithm should output a custom merged version with a solvable conflict
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
@@ -178,12 +185,12 @@ Examples:
 
 ### Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`
 
-#### **Scenario: Rule field is any type**
+#### **Scenario: `-AA` - Rule field is any type**
 
 **Automation**: 3 integration tests with mock rules + a set of unit tests for each algorithm
 
 ```Gherkin
-Given at least 1 installed prebuilt rule is has a new version available
+Given at least 1 installed prebuilt rule has a new version available
 And the base version of the rule cannot be determined
 And customized <field_name> field is the same as the Elastic update in this upgrade (current version == target version)
 Then for <field_name> field the diff algorithm should output the current version as the merged one without a conflict
@@ -201,15 +208,15 @@ Examples:
 
 ### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`
 
-#### **Scenario: Rule field is a number or single line string**
+#### **Scenario: `-BC` - Rule field is a number or single line string**
 
 **Automation**: 2 integration tests with mock rules + a set of unit tests for the algorithms
 
 ```Gherkin
-Given at least 1 installed prebuilt rule is has a new version available
+Given at least 1 installed prebuilt rule has a new version available
 And the base version of the rule cannot be determined
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
-Then for <field_name> field the diff algorithm should output the target version as the merged one with a conflict
+Then for <field_name> field the diff algorithm should output the target version as the merged one with a solvable conflict
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
@@ -219,7 +226,7 @@ Examples:
 | number             | risk_score | N/A          | 2               | 3               |
 ```
 
-#### **Scenario: Rule field is an array of scalar values**
+#### **Scenario: `-BC` - Rule field is an array of scalar values**
 
 **Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
 
@@ -227,7 +234,7 @@ Examples:
 Given <field_name> field is customized by the user (current version != base version)
 And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
-Then for <field_name> field the diff algorithm should output a custom merged version with a solveable conflict
+Then for <field_name> field the diff algorithm should output a custom merged version with a solvable conflict
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
