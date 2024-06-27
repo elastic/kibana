@@ -1806,12 +1806,23 @@ describe('EPM template', () => {
       );
     });
 
-    it('should rollover on expected error mapper_exception', async () => {
+    it('should rollover on expected error when field subobjects in mappings changed', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
         data_streams: [{ name: 'test.prefix1-default' }],
       } as any);
-      esClient.indices.simulateTemplate.mockImplementation(() => {
+      esClient.indices.get.mockResponse({
+        'test.prefix1-default': {
+          mappings: {},
+        },
+      } as any);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { subobjects: false },
+        },
+      } as any);
+      esClient.indices.putMapping.mockImplementation(() => {
         throw new errors.ResponseError({
           body: {
             error: {
@@ -1823,6 +1834,7 @@ describe('EPM template', () => {
           },
         } as any);
       });
+
       const logger = loggerMock.create();
       await updateCurrentWriteIndices(esClient, logger, [
         {
@@ -1831,7 +1843,7 @@ describe('EPM template', () => {
             index_patterns: ['test.*-*'],
             template: {
               settings: { index: {} },
-              mappings: { properties: {} },
+              mappings: {},
             },
           } as any,
         },
