@@ -51,7 +51,8 @@ export function ServiceDashboards() {
     query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
   } = useAnyOfApmParams(
     '/services/{serviceName}/dashboards',
-    '/mobile-services/{serviceName}/dashboards'
+    '/mobile-services/{serviceName}/dashboards',
+    '/logs-services/{serviceName}/dashboards'
   );
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [serviceDashboards, setServiceDashboards] = useState<MergedServiceDashboard[]>([]);

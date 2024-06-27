@@ -15,6 +15,7 @@ import { isMobileAgentName } from '../../../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
+import { isLogsSignal } from '../../../../../utils/get_signal_type';
 import { truncate, unit } from '../../../../../utils/style';
 import { ApmRoutes } from '../../../../routing/apm_route_config';
 import { PopoverTooltip } from '../../../popover_tooltip';
@@ -33,12 +34,20 @@ interface ServiceLinkProps {
   serviceName: string;
   serviceOverflowCount?: number;
 }
-export function ServiceLink({ agentName, query, serviceName }: ServiceLinkProps) {
+export function ServiceLink({ agentName, query, serviceName, signalTypes }: ServiceLinkProps) {
   const { link } = useApmRouter();
 
-  const serviceLink = isMobileAgentName(agentName)
-    ? '/mobile-services/{serviceName}/overview'
-    : '/services/{serviceName}/overview';
+  let serviceLinkBase;
+
+  if (isMobileAgentName(agentName)) {
+    serviceLinkBase = '/mobile-services';
+  } else if (isLogsSignal(signalTypes)) {
+    serviceLinkBase = '/logs-services';
+  } else {
+    serviceLinkBase = '/services';
+  }
+
+  const serviceLink = `${serviceLinkBase}/{serviceName}/overview`;
 
   if (serviceName === OTHER_SERVICE_NAME) {
     return (
