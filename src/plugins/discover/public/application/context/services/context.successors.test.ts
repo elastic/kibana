@@ -39,18 +39,20 @@ describe('context successors', function () {
   let dataPluginMock: DataPublicPluginStart;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
-  const dataView = {
-    id: 'DATA_VIEW_ID',
-    timeFieldName: '@timestamp',
-    isTimeNanosBased: () => false,
-    popularizeField: () => {},
-    fields: {
-      getByName: jest.fn(),
-    },
-  } as unknown as DataView;
+  let dataView: DataView;
 
   describe('function fetchSuccessors', function () {
     beforeEach(() => {
+      dataView = {
+        id: 'DATA_VIEW_ID',
+        timeFieldName: '@timestamp',
+        isTimeNanosBased: () => false,
+        popularizeField: () => {},
+        fields: {
+          getByName: jest.fn(),
+        },
+      } as unknown as DataView;
+
       mockSearchSource = createContextSearchSourceStub('@timestamp');
 
       dataPluginMock = {
