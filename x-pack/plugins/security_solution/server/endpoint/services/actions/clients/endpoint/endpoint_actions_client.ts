@@ -43,7 +43,7 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   UploadedFileInfo,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
   ResponseActionScanOutputContent,
 } from '../../../../../../common/endpoint/types';
 import type {
@@ -292,10 +292,10 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   async scan(
     actionRequest: ScanActionRequestBody,
     options: CommonResponseActionMethodOptions = {}
-  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
     return this.handleResponseAction<
       ScanActionRequestBody,
-      ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>
+      ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>
     >('scan', actionRequest, options);
   }
 

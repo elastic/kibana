@@ -26,6 +26,7 @@ import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_
 import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
 import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
+import { registerRoutes as registerDebugRoutes } from './debug';
 
 export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
@@ -47,6 +48,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerHealthCheckRoutes(fleetAuthzRouter);
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
+  registerDebugRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

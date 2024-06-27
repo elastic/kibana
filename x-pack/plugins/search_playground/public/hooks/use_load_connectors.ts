@@ -39,7 +39,7 @@ const connectorTypeToLLM: Array<{
     actionProvider: OpenAiProviderType.AzureAi,
     match: (connector) =>
       connector.actionTypeId === OPENAI_CONNECTOR_ID &&
-      (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.AzureAi,
+      (connector as OpenAIConnector)?.config?.apiProvider === OpenAiProviderType.AzureAi,
     transform: (connector) => ({
       ...connector,
       title: i18n.translate('xpack.searchPlayground.openAIAzureConnectorTitle', {
@@ -52,7 +52,8 @@ const connectorTypeToLLM: Array<{
     actionId: OPENAI_CONNECTOR_ID,
     match: (connector) =>
       connector.actionTypeId === OPENAI_CONNECTOR_ID &&
-      (connector as OpenAIConnector).config.apiProvider === OpenAiProviderType.OpenAi,
+      ((connector as OpenAIConnector)?.config?.apiProvider === OpenAiProviderType.OpenAi ||
+        !!connector.isPreconfigured),
     transform: (connector) => ({
       ...connector,
       title: i18n.translate('xpack.searchPlayground.openAIConnectorTitle', {

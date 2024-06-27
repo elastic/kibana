@@ -7,7 +7,8 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { Suspense } from 'react';
-import type { CreateIntegrationServices } from './types';
+import type { Services } from '../../services';
+import type { CreateIntegrationComponent } from './types';
 
 const CreateIntegration = React.lazy(() =>
   import('./create_integration').then((module) => ({
@@ -15,7 +16,7 @@ const CreateIntegration = React.lazy(() =>
   }))
 );
 
-export const getCreateIntegrationLazy = (services: CreateIntegrationServices) =>
+export const getCreateIntegrationLazy = (services: Services): CreateIntegrationComponent =>
   React.memo(function CreateIntegrationLazy() {
     return (
       <Suspense fallback={<EuiLoadingSpinner size="l" />}>

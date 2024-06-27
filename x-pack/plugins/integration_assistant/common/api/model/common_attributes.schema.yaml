@@ -70,6 +70,7 @@ components:
         - aws_s3
         - azure_blob_storage
         - azure_eventhub
+        - cel
         - cloudfoundry
         - filestream
         - gcp_pubsub
@@ -142,15 +143,3 @@ components:
         logo:
           type: string
           description: The logo of the integration.
-
-    PipelineResults:
-      type: array
-      description: An array of pipeline results.
-      items:
-        type: object
-
-    Errors:
-      type: array
-      description: An array of errors.
-      items:
-        type: object

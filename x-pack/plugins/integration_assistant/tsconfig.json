@@ -27,9 +27,10 @@
     "@kbn/kibana-react-plugin",
     "@kbn/code-editor",
     "@kbn/monaco",
-    "@kbn/spaces-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/core-analytics-browser"
   ]
 }

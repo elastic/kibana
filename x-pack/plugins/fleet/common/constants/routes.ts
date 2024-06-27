@@ -212,6 +212,14 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
 
+// Fleet debug routes
+
+export const FLEET_DEBUG_ROUTES = {
+  INDEX_PATTERN: `${INTERNAL_ROOT}/debug/index`,
+  SAVED_OBJECTS_PATTERN: `${INTERNAL_ROOT}/debug/saved_objects`,
+  SAVED_OBJECT_NAMES_PATTERN: `${INTERNAL_ROOT}/debug/saved_object_names`,
+};
+
 // API versioning constants
 export const API_VERSIONS = {
   public: {

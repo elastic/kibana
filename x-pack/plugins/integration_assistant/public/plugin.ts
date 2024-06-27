@@ -13,11 +13,15 @@ import type {
 } from './types';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
+import { Telemetry, type Services } from './services';
 
 export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
 {
-  public setup(_: CoreSetup): IntegrationAssistantPluginSetup {
+  private telemetry = new Telemetry();
+
+  public setup(core: CoreSetup): IntegrationAssistantPluginSetup {
+    this.telemetry.setup(core.analytics);
     return {};
   }
 
@@ -25,7 +29,12 @@ export class IntegrationAssistantPlugin
     core: CoreStart,
     dependencies: IntegrationAssistantPluginStartDependencies
   ): IntegrationAssistantPluginStart {
-    const services = { ...core, ...dependencies };
+    const services: Services = {
+      ...core,
+      ...dependencies,
+      telemetry: this.telemetry.start(),
+    };
+
     return {
       CreateIntegration: getCreateIntegrationLazy(services),
       CreateIntegrationCardButton: getCreateIntegrationCardButtonLazy(),

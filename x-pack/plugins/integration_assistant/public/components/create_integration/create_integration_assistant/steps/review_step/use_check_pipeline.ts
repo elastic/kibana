@@ -14,15 +14,10 @@ import { runCheckPipelineResults } from '../../../../../common/lib/api';
 
 interface CheckPipelineProps {
   integrationSettings: State['integrationSettings'];
-  connectorId: State['connectorId'];
   customPipeline: Pipeline | undefined;
 }
 
-export const useCheckPipeline = ({
-  integrationSettings,
-  connectorId,
-  customPipeline,
-}: CheckPipelineProps) => {
+export const useCheckPipeline = ({ integrationSettings, customPipeline }: CheckPipelineProps) => {
   const { http, notifications } = useKibana().services;
   const { setIsGenerating, setResult } = useActions();
   const [error, setError] = useState<null | string>(null);
@@ -49,17 +44,17 @@ export const useCheckPipeline = ({
 
         const ecsGraphResult = await runCheckPipelineResults(parameters, deps);
         if (abortController.signal.aborted) return;
-        if (isEmpty(ecsGraphResult?.pipelineResults) || ecsGraphResult?.errors?.length) {
+        if (isEmpty(ecsGraphResult?.results.docs)) {
           setError('No results for the pipeline');
           return;
         }
         setResult({
           pipeline: customPipeline,
-          docs: ecsGraphResult.pipelineResults,
+          docs: ecsGraphResult.results.docs,
         });
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body.message}`);
+        setError(`Error: ${e.body.message ?? e.message}`);
       } finally {
         setIsGenerating(false);
       }
@@ -70,7 +65,6 @@ export const useCheckPipeline = ({
     };
   }, [
     setIsGenerating,
-    connectorId,
     http,
     integrationSettings,
     notifications?.toasts,

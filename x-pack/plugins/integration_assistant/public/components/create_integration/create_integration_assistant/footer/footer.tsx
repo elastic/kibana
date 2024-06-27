@@ -9,6 +9,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { ButtonsFooter } from '../../../../common/components/buttons_footer';
 import { useNavigate, Page } from '../../../../common/hooks/use_navigate';
+import { useTelemetry } from '../../telemetry';
 import { useActions, type State } from '../state';
 import * as i18n from './translations';
 
@@ -35,6 +36,7 @@ interface FooterProps {
 
 export const Footer = React.memo<FooterProps>(
   ({ currentStep, onGenerate, isGenerating, isNextStepEnabled = false }) => {
+    const telemetry = useTelemetry();
     const { setStep } = useActions();
     const navigate = useNavigate();
 
@@ -47,12 +49,13 @@ export const Footer = React.memo<FooterProps>(
     }, [currentStep, navigate, setStep]);
 
     const onNext = useCallback(() => {
+      telemetry.reportAssistantStepComplete({ step: currentStep });
       if (currentStep === 3) {
         onGenerate();
       } else {
         setStep(currentStep + 1);
       }
-    }, [currentStep, onGenerate, setStep]);
+    }, [currentStep, onGenerate, setStep, telemetry]);
 
     const nextButtonText = useMemo(() => {
       if (currentStep === 3) {

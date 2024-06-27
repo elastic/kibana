@@ -35,6 +35,7 @@ import {
 import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { State } from '../../state';
 import * as i18n from './translations';
+import { useTelemetry } from '../../../telemetry';
 
 export type OnComplete = (result: State['result']) => void;
 
@@ -49,22 +50,29 @@ const progressText: Record<ProgressItem, string> = {
 
 interface UseGenerationProps {
   integrationSettings: State['integrationSettings'];
-  connectorId: State['connectorId'];
+  connector: State['connector'];
   onComplete: OnComplete;
 }
 export const useGeneration = ({
   integrationSettings,
-  connectorId,
+  connector,
   onComplete,
 }: UseGenerationProps) => {
+  const { reportGenerationComplete } = useTelemetry();
   const { http, notifications } = useKibana().services;
   const [progress, setProgress] = useState<ProgressItem>();
   const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
-    if (http == null || integrationSettings == null || notifications?.toasts == null) {
+    if (
+      http == null ||
+      connector == null ||
+      integrationSettings == null ||
+      notifications?.toasts == null
+    ) {
       return;
     }
+    const generationStartedAt = Date.now();
     const abortController = new AbortController();
     const deps = { http, abortSignal: abortController.signal };
 
@@ -74,7 +82,7 @@ export const useGeneration = ({
           packageName: integrationSettings.name ?? '',
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: integrationSettings.logsSampleParsed ?? [],
-          connectorId: connectorId ?? '',
+          connectorId: connector.id,
         };
 
         setProgress('ecs');
@@ -100,18 +108,44 @@ export const useGeneration = ({
         setProgress('related');
         const relatedGraphResult = await runRelatedGraph(relatedRequest, deps);
         if (abortController.signal.aborted) return;
-        if (!isEmpty(relatedGraphResult?.results)) {
-          onComplete(relatedGraphResult.results);
+
+        if (isEmpty(relatedGraphResult?.results)) {
+          throw new Error('Results not found in response');
         }
+
+        reportGenerationComplete({
+          connector,
+          integrationSettings,
+          durationMs: Date.now() - generationStartedAt,
+        });
+
+        onComplete(relatedGraphResult.results);
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body.message}`);
+        const errorMessage = e.body?.message ?? e.message;
+
+        reportGenerationComplete({
+          connector,
+          integrationSettings,
+          durationMs: Date.now() - generationStartedAt,
+          error: errorMessage,
+        });
+
+        setError(`Error: ${errorMessage}`);
       }
     })();
     return () => {
       abortController.abort();
     };
-  }, [onComplete, setProgress, connectorId, http, integrationSettings, notifications?.toasts]);
+  }, [
+    onComplete,
+    setProgress,
+    connector,
+    http,
+    integrationSettings,
+    reportGenerationComplete,
+    notifications?.toasts,
+  ]);
 
   return {
     progress,
@@ -135,16 +169,16 @@ const useModalCss = () => {
 
 interface GenerationModalProps {
   integrationSettings: State['integrationSettings'];
-  connectorId: State['connectorId'];
+  connector: State['connector'];
   onComplete: OnComplete;
   onClose: () => void;
 }
 export const GenerationModal = React.memo<GenerationModalProps>(
-  ({ integrationSettings, connectorId, onComplete, onClose }) => {
+  ({ integrationSettings, connector, onComplete, onClose }) => {
     const { headerCss, bodyCss } = useModalCss();
     const { progress, error } = useGeneration({
       integrationSettings,
-      connectorId,
+      connector,
       onComplete,
     });
 
