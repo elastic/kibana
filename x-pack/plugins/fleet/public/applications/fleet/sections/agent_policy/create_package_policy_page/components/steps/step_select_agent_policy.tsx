@@ -47,13 +47,13 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
   updateAgentPolicies: (agentPolicies: AgentPolicy[]) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
-  selectedAgentPolicyIds: string[];
+  initialSelectedAgentPolicyIds: string[];
 }> = ({
   packageInfo,
   agentPolicies,
   updateAgentPolicies: updateSelectedAgentPolicies,
   setHasAgentPolicyError,
-  selectedAgentPolicyIds,
+  initialSelectedAgentPolicyIds,
 }) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
@@ -126,15 +126,15 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         const enabledOptions = agentPolicyMultiOptions.filter((option) => !option.disabled);
         if (enabledOptions.length === 1) {
           setSelectedPolicyIds([enabledOptions[0].key!]);
-        } else if (selectedAgentPolicyIds.length > 0) {
-          setSelectedPolicyIds(selectedAgentPolicyIds);
+        } else if (initialSelectedAgentPolicyIds.length > 0) {
+          setSelectedPolicyIds(initialSelectedAgentPolicyIds);
         }
       } else {
         const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
         if (enabledOptions.length === 1) {
           setSelectedPolicyIds([enabledOptions[0].value]);
-        } else if (selectedAgentPolicyIds.length > 0) {
-          setSelectedPolicyIds(selectedAgentPolicyIds);
+        } else if (initialSelectedAgentPolicyIds.length > 0) {
+          setSelectedPolicyIds(initialSelectedAgentPolicyIds);
         }
       }
     }
@@ -142,7 +142,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     agentPolicyOptions,
     agentPolicyMultiOptions,
     canUseMultipleAgentPolicies,
-    selectedAgentPolicyIds,
+    initialSelectedAgentPolicyIds,
     selectedPolicyIds,
     existingAgentPolicies,
     isFirstLoad,
@@ -178,10 +178,17 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   const someNewAgentPoliciesHaveLimitedPackage =
     !packageInfo ||
     selectedAgentPolicies
-      .filter((policy) => !selectedAgentPolicyIds.find((id) => policy.id === id))
+      .filter((policy) => !initialSelectedAgentPolicyIds.find((id) => policy.id === id))
       .some((selectedAgentPolicy) =>
         doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
       );
+
+  // managed policies cannot be removed
+  const updateSelectedPolicyIds = (ids: string[]) =>
+    setSelectedPolicyIds([
+      ...agentPolicies.filter((policy) => policy.is_managed).map((policy) => policy.id),
+      ...ids,
+    ]);
 
   return (
     <>
@@ -256,7 +263,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 <AgentPolicyMultiSelect
                   isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicies}
                   selectedPolicyIds={selectedPolicyIds}
-                  setSelectedPolicyIds={setSelectedPolicyIds}
+                  setSelectedPolicyIds={updateSelectedPolicyIds}
                   agentPolicyMultiOptions={agentPolicyMultiOptions}
                 />
               ) : (
