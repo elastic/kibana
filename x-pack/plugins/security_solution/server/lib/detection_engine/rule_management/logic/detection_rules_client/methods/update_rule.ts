@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { partition } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';

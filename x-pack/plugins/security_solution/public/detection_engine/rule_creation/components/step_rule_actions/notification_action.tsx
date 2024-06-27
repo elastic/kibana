@@ -9,7 +9,11 @@ import React from 'react';
 import { EuiToolTip, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
-import type { RuleActionFrequency, RuleAction } from '@kbn/alerting-plugin/common';
+import type {
+  RuleActionFrequency,
+  RuleAction,
+  RuleSystemAction,
+} from '@kbn/alerting-plugin/common';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeTypeValue } from '../../../rule_creation_ui/pages/rule_creation/helpers';
@@ -79,7 +83,7 @@ export const FrequencyDescription: React.FC<{ frequency?: RuleActionFrequency }>
 };
 
 interface NotificationActionProps {
-  action: RuleAction;
+  action: RuleAction | RuleSystemAction;
   connectorTypes: ActionType[];
   connectors: Array<AsApiContract<ActionResult>>;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -99,6 +103,10 @@ export function NotificationAction({
 
   const iconType = actionTypeRegistry.get(action.actionTypeId)?.iconClass ?? 'apps';
 
+  // system actions do not have a frequency property
+  const isRuleAction = (actionObject: unknown): actionObject is RuleAction =>
+    (actionObject as RuleAction).frequency != null;
+
   return (
     <EuiFlexItem>
       <EuiFlexGroup alignItems="center" gutterSize="s" component="span" responsive={false}>
@@ -114,7 +122,7 @@ export function NotificationAction({
             <EuiFlexItem grow={false}>
               <EuiIcon size="s" type="bell" color="subdued" />
             </EuiFlexItem>
-            <FrequencyDescription frequency={action.frequency} />
+            {isRuleAction(action) && <FrequencyDescription frequency={action.frequency} />}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

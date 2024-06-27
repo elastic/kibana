@@ -25,10 +25,16 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import type {
+  RuleAction as AlertingRuleAction,
+  RuleSystemAction as AlertingRuleSystemAction,
+} from '@kbn/alerting-plugin/common';
+
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
+  transformAlertToRuleSystemAction,
 } from '../../../../../common/detection_engine/transform_actions';
 
 import type {
@@ -639,8 +645,18 @@ export const formatAboutStepData = (
 export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
   const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
+  const isRuleAction = (
+    action: AlertingRuleAction | AlertingRuleSystemAction
+  ): action is AlertingRuleAction =>
+    (action as AlertingRuleAction).group != null &&
+    (action as AlertingRuleAction).frequency != null;
+
   return {
-    actions: actions.map((action) => transformAlertToRuleAction(action)),
+    actions: actions.map((action) =>
+      isRuleAction(action)
+        ? transformAlertToRuleAction(action)
+        : transformAlertToRuleSystemAction(action)
+    ),
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     meta: {
