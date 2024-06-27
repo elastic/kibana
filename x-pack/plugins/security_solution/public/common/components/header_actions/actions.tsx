@@ -255,15 +255,26 @@ const ActionsComponent: React.FC<ActionProps> = ({
           )}
         </>
         {securitySolutionNotesEnabled && !expandableFlyoutDisabled && toggleShowNotes && (
-          <AddEventNoteAction
-            ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
-            key="add-event-note"
-            showNotes={false}
-            toggleShowNotes={toggleShowNotes}
-            timelineType={timelineType}
-            eventId={eventId}
-            notesCount={notes.length}
-          />
+          <>
+            <AddEventNoteAction
+              ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
+              key="add-event-note"
+              showNotes={false}
+              toggleShowNotes={toggleShowNotes}
+              timelineType={timelineType}
+              eventId={eventId}
+              notesCount={notes.length}
+            />
+            <PinEventAction
+              ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+              isAlert={isAlert(eventType)}
+              key="pin-event"
+              onPinClicked={handlePinClicked}
+              noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
+              eventIsPinned={isEventPinned}
+              timelineType={timelineType}
+            />
+          </>
         )}
         {(!securitySolutionNotesEnabled || expandableFlyoutDisabled) &&
           !isEventViewer &&
