@@ -5475,10 +5475,6 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
-              "plugin": "files",
-              "path": "src/plugins/files/server/routes/file_kind/create.ts"
-            },
-            {
               "plugin": "cases",
               "path": "x-pack/plugins/cases/server/client/factory.ts"
             },
@@ -5675,24 +5671,24 @@
               "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
             },
             {
-              "plugin": "assetManager",
-              "path": "x-pack/plugins/observability_solution/asset_manager/server/lib/auth/api_key/api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "assetManager",
-              "path": "x-pack/plugins/observability_solution/asset_manager/server/lib/auth/api_key/api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "assetManager",
-              "path": "x-pack/plugins/observability_solution/asset_manager/server/lib/auth/api_key/api_key.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
             },
             {
-              "plugin": "assetManager",
-              "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/enable.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
             },
             {
-              "plugin": "assetManager",
-              "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/enablement/disable.ts"
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
             },
             {
               "plugin": "observabilityOnboarding",
