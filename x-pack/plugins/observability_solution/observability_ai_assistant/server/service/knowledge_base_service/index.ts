@@ -11,18 +11,18 @@ import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { isEmpty, map, orderBy } from 'lodash';
+import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
-import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
+import { recallFromConnectors } from './recall_from_connectors';
 
 interface Dependencies {
-  esClient: ElasticsearchClient;
+  esClient: { asInternalUser: ElasticsearchClient };
   resources: ObservabilityAIAssistantResourceNames;
   logger: Logger;
   taskManagerStart: TaskManagerStartContract;
@@ -85,7 +85,7 @@ export class KnowledgeBaseService {
 
     const installModel = async () => {
       this.dependencies.logger.info('Installing ELSER model');
-      await this.dependencies.esClient.ml.putTrainedModel(
+      await this.dependencies.esClient.asInternalUser.ml.putTrainedModel(
         {
           model_id: elserModelId,
           input: {
@@ -99,7 +99,7 @@ export class KnowledgeBaseService {
     };
 
     const getIsModelInstalled = async () => {
-      const getResponse = await this.dependencies.esClient.ml.getTrainedModels({
+      const getResponse = await this.dependencies.esClient.asInternalUser.ml.getTrainedModels({
         model_id: elserModelId,
         include: 'definition_status',
       });
@@ -130,7 +130,7 @@ export class KnowledgeBaseService {
     }, retryOptions);
 
     try {
-      await this.dependencies.esClient.ml.startTrainedModelDeployment({
+      await this.dependencies.esClient.asInternalUser.ml.startTrainedModelDeployment({
         model_id: elserModelId,
         wait_for: 'fully_allocated',
       });
@@ -143,7 +143,7 @@ export class KnowledgeBaseService {
     }
 
     await pRetry(async () => {
-      const response = await this.dependencies.esClient.ml.getTrainedModelsStats({
+      const response = await this.dependencies.esClient.asInternalUser.ml.getTrainedModelsStats({
         model_id: elserModelId,
       });
 
@@ -193,7 +193,7 @@ export class KnowledgeBaseService {
 
   private async processOperation(operation: KnowledgeBaseEntryOperation) {
     if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
-      await this.dependencies.esClient.deleteByQuery({
+      await this.dependencies.esClient.asInternalUser.deleteByQuery({
         index: this.dependencies.resources.aliases.kb,
         query: {
           bool: {
@@ -274,7 +274,7 @@ export class KnowledgeBaseService {
     const elserModelId = await this.dependencies.getModelId();
 
     try {
-      const modelStats = await this.dependencies.esClient.ml.getTrainedModelsStats({
+      const modelStats = await this.dependencies.esClient.asInternalUser.ml.getTrainedModelsStats({
         model_id: elserModelId,
       });
       const elserModelStats = modelStats.trained_model_stats[0];
@@ -309,7 +309,7 @@ export class KnowledgeBaseService {
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    const query = {
+    const esQuery = {
       bool: {
         should: queries.map(({ text, boost = 1 }) => ({
           text_expansion: {
@@ -330,11 +330,11 @@ export class KnowledgeBaseService {
       },
     };
 
-    const response = await this.dependencies.esClient.search<
+    const response = await this.dependencies.esClient.asInternalUser.search<
       Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
     >({
       index: [this.dependencies.resources.aliases.kb],
-      query,
+      query: esQuery,
       size: 20,
       _source: {
         includes: ['text', 'is_correction', 'labels'],
@@ -344,124 +344,8 @@ export class KnowledgeBaseService {
     return response.hits.hits.map((hit) => ({
       ...hit._source!,
       score: hit._score!,
-      id: hit._id,
+      id: hit._id!,
     }));
-  }
-
-  private async getConnectorIndices(
-    client: ElasticsearchClient,
-    uiSettingsClient: IUiSettingsClient
-  ) {
-    // improve performance by running this in parallel with the `uiSettingsClient` request
-    const responsePromise = client.transport.request({
-      method: 'GET',
-      path: '_connector',
-      querystring: {
-        filter_path: 'results.index_name',
-      },
-    });
-
-    const customSearchConnectorIndex = await uiSettingsClient.get<string>(
-      aiAssistantSearchConnectorIndexPattern
-    );
-
-    if (customSearchConnectorIndex) {
-      return customSearchConnectorIndex.split(',');
-    }
-
-    const response = (await responsePromise) as { results?: Array<{ index_name: string }> };
-    const connectorIndices = response.results?.map((result) => result.index_name);
-
-    // preserve backwards compatibility with 8.14 (may not be needed in the future)
-    if (isEmpty(connectorIndices)) {
-      return ['search-*'];
-    }
-
-    return connectorIndices;
-  }
-
-  private async recallFromConnectors({
-    queries,
-    asCurrentUser,
-    uiSettingsClient,
-    modelId,
-  }: {
-    queries: Array<{ text: string; boost?: number }>;
-    asCurrentUser: ElasticsearchClient;
-    uiSettingsClient: IUiSettingsClient;
-    modelId: string;
-  }): Promise<RecalledEntry[]> {
-    const ML_INFERENCE_PREFIX = 'ml.inference.';
-
-    const connectorIndices = await this.getConnectorIndices(asCurrentUser, uiSettingsClient);
-
-    const fieldCaps = await asCurrentUser.fieldCaps({
-      index: connectorIndices,
-      fields: `${ML_INFERENCE_PREFIX}*`,
-      allow_no_indices: true,
-      types: ['sparse_vector'],
-      filters: '-metadata,-parent',
-    });
-
-    const fieldsWithVectors = Object.keys(fieldCaps.fields).map((field) =>
-      field.replace('_expanded.predicted_value', '').replace(ML_INFERENCE_PREFIX, '')
-    );
-
-    if (!fieldsWithVectors.length) {
-      return [];
-    }
-
-    const esQueries = fieldsWithVectors.flatMap((field) => {
-      const vectorField = `${ML_INFERENCE_PREFIX}${field}_expanded.predicted_value`;
-      const modelField = `${ML_INFERENCE_PREFIX}${field}_expanded.model_id`;
-
-      return queries.map(({ text, boost = 1 }) => {
-        return {
-          bool: {
-            should: [
-              {
-                text_expansion: {
-                  [vectorField]: {
-                    model_text: text,
-                    model_id: modelId,
-                    boost,
-                  },
-                },
-              },
-            ],
-            filter: [
-              {
-                term: {
-                  [modelField]: modelId,
-                },
-              },
-            ],
-          },
-        };
-      });
-    });
-
-    const response = await asCurrentUser.search<unknown>({
-      index: connectorIndices,
-      query: {
-        bool: {
-          should: esQueries,
-        },
-      },
-      size: 20,
-      _source: {
-        exclude: ['_*', 'ml*'],
-      },
-    });
-
-    const results = response.hits.hits.map((hit) => ({
-      text: JSON.stringify(hit._source),
-      score: hit._score!,
-      is_correction: false,
-      id: hit._id,
-    }));
-
-    return results;
   }
 
   recall = async ({
@@ -469,19 +353,21 @@ export class KnowledgeBaseService {
     queries,
     categories,
     namespace,
-    asCurrentUser,
+    esClient,
     uiSettingsClient,
   }: {
     queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
     user?: { name: string };
     namespace: string;
-    asCurrentUser: ElasticsearchClient;
+    esClient: { asCurrentUser: ElasticsearchClient };
     uiSettingsClient: IUiSettingsClient;
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
-    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
+    this.dependencies.logger.debug(
+      `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
+    );
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
@@ -497,8 +383,8 @@ export class KnowledgeBaseService {
         }
         throw error;
       }),
-      this.recallFromConnectors({
-        asCurrentUser,
+      recallFromConnectors({
+        esClient,
         uiSettingsClient,
         queries,
         modelId,
@@ -544,7 +430,7 @@ export class KnowledgeBaseService {
     user?: { name: string }
   ): Promise<UserInstruction[]> => {
     try {
-      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+      const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: this.dependencies.resources.aliases.kb,
         query: {
           bool: {
@@ -588,7 +474,7 @@ export class KnowledgeBaseService {
     sortDirection?: 'asc' | 'desc';
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
     try {
-      const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+      const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: this.dependencies.resources.aliases.kb,
         ...(query
           ? {
@@ -629,7 +515,7 @@ export class KnowledgeBaseService {
           ...hit._source!,
           role: hit._source!.role ?? KnowledgeBaseEntryRole.UserEntry,
           score: hit._score,
-          id: hit._id,
+          id: hit._id!,
         })),
       };
     } catch (error) {
@@ -650,7 +536,7 @@ export class KnowledgeBaseService {
     namespace?: string;
   }): Promise<void> => {
     try {
-      await this.dependencies.esClient.index({
+      await this.dependencies.esClient.asInternalUser.index({
         index: this.dependencies.resources.aliases.kb,
         id,
         document: {
@@ -692,7 +578,7 @@ export class KnowledgeBaseService {
 
   deleteEntry = async ({ id }: { id: string }): Promise<void> => {
     try {
-      await this.dependencies.esClient.delete({
+      await this.dependencies.esClient.asInternalUser.delete({
         index: this.dependencies.resources.aliases.kb,
         id,
         refresh: 'wait_for',

@@ -32,6 +32,6 @@ The API returns the following:
   "initials": "MK",
   "disabledFeatures": [],
   "imageUrl": "",
-  "solution": "search"
+  "solution": "es"
 }
 --------------------------------------------------

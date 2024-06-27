@@ -9,7 +9,7 @@ import React from 'react';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css, cx } from '@emotion/css';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import { useDockerContainerPageViewMetricsCharts } from '../hooks/use_container_metrics_charts';
 import { Section } from '../components/section';
 import { ChartsGrid } from '../charts_grid/charts_grid';
@@ -26,7 +26,7 @@ interface Props extends MetricsChartsFields {
 const FRAGMENT_BASE = 'key-metrics';
 
 export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
-  ({ assetId, dataView, dateRange, metric }, ref) => {
+  ({ assetId, dataView, dateRange, metric, onShowAll }, ref) => {
     const { charts } = useDockerContainerPageViewMetricsCharts({
       metric,
       metricsDataViewId: dataView?.id,
@@ -67,8 +67,25 @@ export const DockerCharts = React.forwardRef<HTMLDivElement, Props>(
           />
         }
         data-test-subj={`infraAssetDetailsDockerChartsSection${metric}`}
-        id="dockerContainerCharts"
+        id={metric}
         ref={ref}
+        extraAction={
+          onShowAll ? (
+            <EuiButtonEmpty
+              data-test-subj="infraAssetDetailsHostChartsShowAllButton"
+              onClick={() => onShowAll(metric)}
+              size="xs"
+              flush="both"
+              iconSide="right"
+              iconType="sortRight"
+            >
+              <FormattedMessage
+                id="xpack.infra.assetDetails.charts.host.showAllButton"
+                defaultMessage="Show all"
+              />
+            </EuiButtonEmpty>
+          ) : null
+        }
       >
         <ChartsGrid columns={2}>
           {charts.map((chart) => (

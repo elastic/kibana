@@ -23,3 +23,14 @@ import { NonEmptyString } from './primitives.gen';
  */
 export type AlertIds = z.infer<typeof AlertIds>;
 export const AlertIds = z.array(NonEmptyString).min(1);
+
+export type AlertTag = z.infer<typeof AlertTag>;
+export const AlertTag = NonEmptyString;
+
+export type AlertTags = z.infer<typeof AlertTags>;
+export const AlertTags = z.array(AlertTag);
+
+export type AlertStatus = z.infer<typeof AlertStatus>;
+export const AlertStatus = z.enum(['open', 'closed', 'acknowledged', 'in-progress']);
+export type AlertStatusEnum = typeof AlertStatus.enum;
+export const AlertStatusEnum = AlertStatus.enum;

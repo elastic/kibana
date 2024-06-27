@@ -115,7 +115,11 @@ export const usePresentationPanelHeaderActions = <
   const badgeElements = useMemo(() => {
     if (!showBadges) return [];
     return badges?.map((badge) => {
-      return (
+      const tooltipText = badge.getDisplayNameTooltip?.({
+        embeddable: api,
+        trigger: panelBadgeTrigger,
+      });
+      const badgeElement = (
         <EuiBadge
           key={badge.id}
           className="embPanel__headerBadge"
@@ -123,6 +127,7 @@ export const usePresentationPanelHeaderActions = <
           onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
           onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
           data-test-subj={`embeddablePanelBadge-${badge.id}`}
+          {...(tooltipText ? { 'aria-label': tooltipText } : {})}
         >
           {badge.MenuItem
             ? React.createElement(badge.MenuItem, {
@@ -133,6 +138,12 @@ export const usePresentationPanelHeaderActions = <
               })
             : badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}
         </EuiBadge>
+      );
+
+      return tooltipText ? (
+        <EuiToolTip content={tooltipText}>{badgeElement}</EuiToolTip>
+      ) : (
+        badgeElement
       );
     });
   }, [api, badges, showBadges]);

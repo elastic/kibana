@@ -36,8 +36,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     SingleMetricViewerEmbeddableState,
-    SingleMetricViewerEmbeddableApi,
-    SingleMetricViewerRuntimeState
+    SingleMetricViewerRuntimeState,
+    SingleMetricViewerEmbeddableApi
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,

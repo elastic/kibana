@@ -33,7 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const actualFullname = await pageObjects.userProfiles.getProfileFullname();
         const actualEmail = await pageObjects.userProfiles.getProfileEmail();
 
-        expect(actualFullname).to.be(userData.fullname);
+        expect(actualFullname).to.be(userData.full_name);
         expect(actualEmail).to.be(userData.email);
       });
 

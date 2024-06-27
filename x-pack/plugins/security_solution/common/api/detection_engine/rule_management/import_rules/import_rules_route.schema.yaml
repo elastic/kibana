@@ -6,8 +6,9 @@ paths:
   /api/detection_engine/rules/_import:
     summary: Imports rules from an `.ndjson` file
     post:
-      operationId: ImportRules
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
+      operationId: ImportRules
       summary: Import rules
       description: Imports rules from an `.ndjson` file, including actions and exception lists.
       tags:

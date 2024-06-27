@@ -27,6 +27,7 @@ export interface ActionsClientChatOpenAIParams {
   streaming?: boolean;
   traceId?: string;
   maxRetries?: number;
+  maxTokens?: number;
   model?: string;
   temperature?: number;
   signal?: AbortSignal;
@@ -75,9 +76,11 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     streaming = true,
     temperature,
     timeout,
+    maxTokens,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
+      maxTokens,
       streaming,
       // matters only for the LangSmith logs (Metadata > Invocation Params), which are misleading if this is not set
       modelName: model ?? DEFAULT_OPEN_AI_MODEL,

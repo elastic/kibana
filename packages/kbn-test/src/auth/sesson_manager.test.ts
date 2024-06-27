@@ -12,7 +12,7 @@ import { Session } from './saml_auth';
 import { SamlSessionManager } from './session_manager';
 import * as samlAuth from './saml_auth';
 import * as helper from './helper';
-import { Role, User } from './types';
+import { Role, User, UserProfile } from './types';
 import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 
 const log = new ToolingLog();
@@ -23,6 +23,7 @@ const roleEditor = 'editor';
 
 const createLocalSAMLSessionMock = jest.spyOn(samlAuth, 'createLocalSAMLSession');
 const createCloudSAMLSessionMock = jest.spyOn(samlAuth, 'createCloudSAMLSession');
+const getSecurityProfileMock = jest.spyOn(samlAuth, 'getSecurityProfile');
 const readCloudUsersFromFileMock = jest.spyOn(helper, 'readCloudUsersFromFile');
 const isValidHostnameMock = jest.spyOn(helper, 'isValidHostname');
 
@@ -42,7 +43,7 @@ describe('SamlSessionManager', () => {
         .KbnClient.mockImplementation(() => ({ version: { get } }));
       get.mockImplementation(() => Promise.resolve('8.12.0'));
 
-      createLocalSAMLSessionMock.mockResolvedValue(new Session(cookieInstance, email, fullname));
+      createLocalSAMLSessionMock.mockResolvedValue(new Session(cookieInstance, testEmail));
     });
 
     const hostOptions = {
@@ -59,8 +60,8 @@ describe('SamlSessionManager', () => {
       log,
       supportedRoles,
     };
-    const email = 'testuser@elastic.com';
-    const fullname = 'Test User';
+    const testEmail = 'testuser@elastic.com';
+    const testFullname = 'Test User';
     const cookieInstance = Cookie.parse(
       'sid=kbn_cookie_value; Path=/; Expires=Wed, 01 Oct 2023 07:00:00 GMT'
     )!;
@@ -91,10 +92,26 @@ describe('SamlSessionManager', () => {
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
     });
 
-    test(`'getUserData' should return the correct email & fullname`, async () => {
+    test(`'getEmail' return the correct email`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      const data = await samlSessionManager.getUserData(roleViewer);
-      expect(data).toEqual({ email, fullname });
+      const email = await samlSessionManager.getEmail(roleEditor);
+      expect(email).toBe(testEmail);
+    });
+
+    test(`'getUserData' should call security API and return user profile data`, async () => {
+      const testData: UserProfile = {
+        username: '6ta90xc',
+        roles: [roleEditor],
+        full_name: testFullname,
+        email: testEmail,
+        enabled: true,
+        elastic_cloud_user: false,
+      };
+      getSecurityProfileMock.mockResolvedValueOnce(testData);
+      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
+      const userData = await samlSessionManager.getUserData(roleViewer);
+
+      expect(userData).toEqual(testData);
     });
 
     test(`throws error when role is not in 'supportedRoles'`, async () => {
@@ -117,6 +134,15 @@ describe('SamlSessionManager', () => {
 
     test(`doesn't throw error when supportedRoles is not defined`, async () => {
       const nonExistingRole = 'tester';
+      const testData: UserProfile = {
+        username: '6ta90xc',
+        roles: [nonExistingRole],
+        full_name: testFullname,
+        email: testEmail,
+        enabled: true,
+        elastic_cloud_user: false,
+      };
+      getSecurityProfileMock.mockResolvedValueOnce(testData);
       const samlSessionManager = new SamlSessionManager({
         hostOptions,
         log,
@@ -127,6 +153,7 @@ describe('SamlSessionManager', () => {
       await samlSessionManager.getUserData(nonExistingRole);
       expect(createLocalSAMLSessionMock.mock.calls).toHaveLength(1);
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(0);
+      expect(getSecurityProfileMock.mock.calls).toHaveLength(1);
     });
   });
 
@@ -184,9 +211,7 @@ describe('SamlSessionManager', () => {
         .KbnClient.mockImplementation(() => ({ version: { get } }));
       get.mockImplementationOnce(() => Promise.resolve('8.12.0'));
 
-      createCloudSAMLSessionMock.mockResolvedValue(
-        new Session(cloudCookieInstance, cloudEmail, cloudFullname)
-      );
+      createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
       readCloudUsersFromFileMock.mockReturnValue(cloudUsers);
     });
 
@@ -201,9 +226,7 @@ describe('SamlSessionManager', () => {
 
     test(`'getSessionCookieForRole' should return the actual cookie value`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      createCloudSAMLSessionMock.mockResolvedValue(
-        new Session(cloudCookieInstance, cloudEmail, cloudFullname)
-      );
+      createCloudSAMLSessionMock.mockResolvedValue(new Session(cloudCookieInstance, cloudEmail));
       const cookie = await samlSessionManager.getSessionCookieForRole(roleViewer);
       expect(cookie).toBe(cloudCookieInstance.value);
     });
@@ -223,10 +246,26 @@ describe('SamlSessionManager', () => {
       expect(createCloudSAMLSessionMock.mock.calls).toHaveLength(2);
     });
 
-    test(`'getUserData' should return the correct email & fullname`, async () => {
+    test(`'getEmail' return the correct email`, async () => {
       const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
-      const data = await samlSessionManager.getUserData(roleViewer);
-      expect(data).toEqual({ email: cloudEmail, fullname: cloudFullname });
+      const email = await samlSessionManager.getEmail(roleViewer);
+      expect(email).toBe(cloudEmail);
+    });
+
+    test(`'getUserData' should call security API and return user profile data`, async () => {
+      const testData: UserProfile = {
+        username: '92qab123',
+        roles: [roleViewer],
+        full_name: cloudFullname,
+        email: cloudEmail,
+        enabled: true,
+        elastic_cloud_user: true,
+      };
+      getSecurityProfileMock.mockResolvedValueOnce(testData);
+      const samlSessionManager = new SamlSessionManager(samlSessionManagerOptions);
+      const userData = await samlSessionManager.getUserData(roleViewer);
+
+      expect(userData).toEqual(testData);
     });
 
     test(`throws error for non-existing role when 'supportedRoles' is defined`, async () => {

@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 import {
   eventHasNotes,
   getEventType,
@@ -18,7 +19,7 @@ import {
 } from '../../../timelines/components/timeline/body/helpers';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
+import { timelineActions } from '../../../timelines/store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -31,7 +32,6 @@ import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
 import { setActiveTabTimeline } from '../../../timelines/store/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
@@ -49,6 +49,7 @@ const ActionsContainer = styled.div`
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
   columnValues,
+  disableExpandAction = false,
   ecsData,
   eventId,
   eventIdToNoteIds,
@@ -62,15 +63,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
   refetch,
 }) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
-  );
   const emptyNotes: string[] = [];
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const timelineType = useShallowEqualSelector(
-    (state) =>
-      (isTimelineScope(timelineId) ? getTimeline(state, timelineId) : timelineDefaults).timelineType
+  const { timelineType } = useShallowEqualSelector((state) =>
+    isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
   );
+
   const { startTransaction } = useStartTransaction();
 
   const isEnterprisePlus = useLicense().isEnterprise();
@@ -212,15 +209,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
-  const showExpandEvent = useMemo(
-    () => !unifiedComponentsInTimelineEnabled || isEventViewer || timelineId !== TimelineId.active,
-    [isEventViewer, timelineId, unifiedComponentsInTimelineEnabled]
-  );
 
   return (
     <ActionsContainer>
       <>
-        {showExpandEvent && (
+        {!disableExpandAction && (
           <GuidedOnboardingTourStep
             isTourAnchor={isTourAnchor}
             onClick={onExpandEvent}
