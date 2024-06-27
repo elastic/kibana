@@ -10,6 +10,7 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import { AirdropPluginSetup, AirdropPluginStart, AppPluginStartDependencies } from './types';
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
 import { AirdropService } from './airdrop_service';
+import { mountOverlay } from './mount_overlay';
 
 export class AirdropPlugin
   implements Plugin<AirdropPluginSetup, AirdropPluginStart, object, AppPluginStartDependencies>
@@ -37,9 +38,15 @@ export class AirdropPlugin
   }
 
   public start(core: CoreStart): AirdropPluginStart {
-    this.airdropService.start();
+    AirdropService.createDropElement().then((element) => {
+      if (!element) return;
 
-    return {};
+      mountOverlay({ airdropService: this.airdropService }, { element });
+    });
+
+    return {
+      ...this.airdropService.start(),
+    };
   }
 
   public stop() {}

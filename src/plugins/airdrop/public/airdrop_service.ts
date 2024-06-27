@@ -6,66 +6,70 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, mergeMap } from 'rxjs';
 import { TRANSFER_DATA_TYPE } from './constants';
 
 export class AirdropService {
-  private isDraggingOver$ = new BehaviorSubject<boolean>(false);
-  private isDragging$ = new BehaviorSubject<boolean>(false);
+  private documentEventListenersAdded = false;
+  private _isDraggingOver$ = new BehaviorSubject<boolean>(false);
+  private _isDragging$ = new BehaviorSubject<boolean>(false);
   private dropDiv: HTMLElement | null = null;
   private timeRef = 0;
 
+  constructor() {}
+
   setup() {
+    // this.addEventListeners();
+    // return {
+    //   setIsDragging: (isDragging: boolean) => {
+    //     this.isDragging$.next(isDragging);
+    //   },
+    // };
+  }
+
+  start() {
+    // if (!dropDiv) return;
+
+    this.addEventListeners();
+
+    // this.createDropDiv().then((dropDiv) => {
+    //   if (dropDiv) {
+    //   }
+    // });
+
+    this._isDraggingOver$.subscribe((isDraggingOver) => {
+      console.log('isDraggingOver', isDraggingOver);
+      if (isDraggingOver) {
+        document.body.style.setProperty('pointer-events', 'none');
+
+        // this.dropDiv?.style.setProperty('background-color', 'rgba(0, 0, 0, 0.5)');
+      } else {
+        // this.dropDiv?.style.setProperty('background-color', 'transparent');
+        document.body.style.setProperty('pointer-events', 'auto');
+      }
+    });
+
     return {
+      isDraggingOver$: this.isDraggingOver$,
       setIsDragging: (isDragging: boolean) => {
-        this.isDragging$.next(isDragging);
+        this._isDragging$.next(isDragging);
       },
     };
   }
 
-  start() {
-    this.createDropDiv().then((dropDiv) => {
-      if (dropDiv) {
-        this.addEventListeners();
-      }
-    });
-
-    this.isDraggingOver$.subscribe((isDraggingOver) => {
-      if (isDraggingOver) {
-        document.body.style.setProperty('pointer-events', 'none');
-        this.dropDiv?.style.setProperty('background-color', 'rgba(0, 0, 0, 0.5)');
-      } else {
-        this.dropDiv?.style.setProperty('background-color', 'transparent');
-        document.body.style.setProperty('pointer-events', 'auto');
-      }
-    });
+  public get isDraggingOver$() {
+    return this._isDragging$.pipe(
+      mergeMap((isDragging) => (isDragging ? of(false) : this._isDraggingOver$.asObservable()))
+    );
   }
 
-  private async createDropDiv() {
-    const kibanaBody = await this.getKibanaBody();
-    if (!kibanaBody) {
-      // probably debug something here
-      console.log('Kibana body not found');
-      return null;
-    }
-    this.dropDiv = document.createElement('div');
-
-    this.dropDiv.style.cssText = `
-      width: 100%;
-      height: 100vh;
-      position: relative;
-      pointer-events: none;
-      top: 0;
-      left: 0;
-      z-index: 1000;
-      transform: translateY(-100%);
-    `;
-    kibanaBody.parentNode?.insertBefore(this.dropDiv, kibanaBody.nextSibling);
-
-    return this.dropDiv;
+  public get isDragging$() {
+    return this._isDragging$.asObservable();
   }
 
   private addEventListeners() {
+    if (this.documentEventListenersAdded) return;
+
     document.addEventListener('dragover', (e) => {
       if (e.dataTransfer?.types.includes(TRANSFER_DATA_TYPE)) {
         e.preventDefault();
@@ -75,9 +79,9 @@ export class AirdropService {
     document.addEventListener('dragenter', (e) => {
       if (e.dataTransfer?.types.includes(TRANSFER_DATA_TYPE)) {
         e.preventDefault();
-        if (this.isDragging$.getValue() || this.isDraggingOver$.getValue()) return;
+        if (this._isDragging$.getValue() || this._isDraggingOver$.getValue()) return;
         this.timeRef = Date.now();
-        this.isDraggingOver$.next(true);
+        this._isDraggingOver$.next(true);
       }
     });
 
@@ -85,26 +89,52 @@ export class AirdropService {
       if (e.dataTransfer?.types.includes(TRANSFER_DATA_TYPE)) {
         e.preventDefault();
         const diff = Date.now() - this.timeRef; // Needed to prevent flickering
-        if (this.isDragging$.getValue()) return;
+        if (this._isDragging$.getValue()) return;
         if (diff < 100) return;
-        this.isDraggingOver$.next(false);
+        this._isDraggingOver$.next(false);
       }
     });
 
     document.addEventListener('drop', (e) => {
       if (e.dataTransfer?.types.includes(TRANSFER_DATA_TYPE)) {
         e.preventDefault();
-        this.isDraggingOver$.next(false);
-        if (this.isDragging$.getValue()) return;
+        this._isDraggingOver$.next(false);
+        if (this._isDragging$.getValue()) return;
         const data = e.dataTransfer.getData(TRANSFER_DATA_TYPE);
         const jsonObject = JSON.parse(data);
         // setFormState(jsonObject);
         console.log(jsonObject);
       }
     });
+
+    this.documentEventListenersAdded = true;
   }
 
-  private async getKibanaBody(attempt = 0): Promise<HTMLElement | null> {
+  static async createDropElement() {
+    const kibanaBody = await this.getKibanaBody();
+    if (!kibanaBody) {
+      // probably debug something here
+      console.log('Kibana body not found');
+      return null;
+    }
+    const dropElement = document.createElement('div');
+
+    // width: 100%;
+    // pointer-events: none;
+    // height: 100vh;
+    // top: 0;
+    // left: 0;
+    // transform: translateY(-100%);
+    dropElement.style.cssText = `
+      position: relative;
+      z-index: 1000;
+    `;
+    kibanaBody.parentNode?.insertBefore(dropElement, kibanaBody.nextSibling);
+
+    return dropElement;
+  }
+
+  static async getKibanaBody(attempt = 0): Promise<HTMLElement | null> {
     if (attempt > 50) {
       return null;
     }

@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { Observable } from 'rxjs';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface AirdropPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface AirdropPluginStart {}
+
+export interface AirdropPluginStart {
+  isDraggingOver$: Observable<boolean>;
+  setIsDragging: (isDragging: boolean) => void;
+}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
