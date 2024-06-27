@@ -65,6 +65,7 @@ import {
   getCompatibleFunctionDefinition,
   buildMatchingFieldsDefinition,
   getCompatibleLiterals,
+  getDateLiterals,
   buildConstantsDefinitions,
   buildVariablesDefinitions,
   buildOptionDefinition,
@@ -1075,7 +1076,11 @@ async function getFieldsOrFunctionsSuggestions(
     }
   }
 
+  // could also be in stats (bucket) but our autocomplete is not great yet
+  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+
   const suggestions = filteredFieldsByType.concat(
+    displayDateSuggestions ? getDateLiterals() : [],
     functions ? getCompatibleFunctionDefinition(commandName, optionName, types, ignoreFn) : [],
     variables
       ? pushItUpInTheList(buildVariablesDefinitions(filteredVariablesByType), functions)
@@ -1315,7 +1320,7 @@ async function getFunctionArgsSuggestions(
 
   return suggestions.map(({ text, ...rest }) => ({
     ...rest,
-    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin', text),
+    text: addCommaIf(hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && text !== '', text),
   }));
 }
 
