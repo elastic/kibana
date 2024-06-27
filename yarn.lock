@@ -1636,20 +1636,29 @@
     opentracing "^0.14.3"
     promise-polyfill "^8.1.3"
 
-"@elastic/apm-rum-react@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.2.tgz#5f73d41d462941f4d073ffaa118723987379548b"
-  integrity sha512-m0l982fLiImSxtuy8kKVXTnNl5wSMG3/TD3QokFQiYnVap+wjEULVm1HbS+dE4hjh9eVqCkuBiPu450a8lUs8g==
+"@elastic/apm-rum-core@^5.21.1":
+  version "5.21.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-core/-/apm-rum-core-5.21.1.tgz#ea6f2268629193962c194ae1d29971e2c5b2e531"
+  integrity sha512-/LyLhVdJ+zcsKogwq2AEYARc//RDXOoTHWPERLay4sCsvvxc4/GkkhhOC40CqI0oMu4kUAoJInQWZuCM7zCZRQ==
   dependencies:
-    "@elastic/apm-rum" "^5.16.0"
+    error-stack-parser "^1.3.5"
+    opentracing "^0.14.3"
+    promise-polyfill "^8.1.3"
+
+"@elastic/apm-rum-react@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum-react/-/apm-rum-react-2.0.3.tgz#6193464943ea80a74682373de2242490623111f6"
+  integrity sha512-oDdNz1GEZvy7R1CPOJWkXFRRHY5yNO3vRhUttDXqvXvRBEd1m7HosskHs/R/LjtoYghpAVrG+yzJGvDI9TSuxQ==
+  dependencies:
+    "@elastic/apm-rum" "^5.16.1"
     hoist-non-react-statics "^3.3.0"
 
-"@elastic/apm-rum@^5.16.0":
-  version "5.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.16.0.tgz#bb9b00a866a48ec40c07ea742d241f835e8b5f9d"
-  integrity sha512-vNwRWDIccdu6iPDpCyrC3myRnpBzRH6wlAoOZjgSFJilQJMsymb8NzR1rkQmNEBca+frRuDCZabd+ylEZ47YBA==
+"@elastic/apm-rum@^5.16.1":
+  version "5.16.1"
+  resolved "https://registry.yarnpkg.com/@elastic/apm-rum/-/apm-rum-5.16.1.tgz#59767f587a31293c17497ff86e05754627182be4"
+  integrity sha512-hxmhjLqF4EqEl2wVwxKU5p88jiwHPF//zqk97bm09vj5CQQ6HBtWkwIxQ5dvEEOnRwJinFEf9V2JibpamgzUWA==
   dependencies:
-    "@elastic/apm-rum-core" "^5.21.0"
+    "@elastic/apm-rum-core" "^5.21.1"
 
 "@elastic/app-search-javascript@^8.1.2":
   version "8.1.2"
