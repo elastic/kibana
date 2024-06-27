@@ -25,12 +25,18 @@ export const useConversationDeleted = ({
 }: Props) => {
   const onConversationDeleted = useCallback(
     (conversationTitle: string) => {
-      const conversationId =
-        Object.values(conversationSettings).find((c) => c.title === conversationTitle)?.id ?? '';
+      const conversationId = Object.values(conversationSettings).find(
+        (c) => c.title === conversationTitle
+      )?.id;
+      // If matching conversation is not found, do nothing
+      if (!conversationId) {
+        return;
+      }
+
       const updatedConversationSettings = { ...conversationSettings };
       delete updatedConversationSettings[conversationId];
-      setConversationSettings(updatedConversationSettings);
 
+      setConversationSettings(updatedConversationSettings);
       setConversationsSettingsBulkActions({
         ...conversationsSettingsBulkActions,
         delete: {

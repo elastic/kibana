@@ -189,7 +189,7 @@ export function AiAssistantSelectionPage() {
             isDisabled={!securityAIAssistantEnabled}
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',
-              { defaultMessage: 'Elastic AI for Security' }
+              { defaultMessage: 'Elastic AI Assistant for Security' }
             )}
             titleSize="xs"
           />

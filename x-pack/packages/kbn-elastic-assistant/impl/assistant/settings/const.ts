@@ -13,4 +13,3 @@ export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
 export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
 
 export const DEFAULT_PAGE_SIZE = 25;
-export const DEFAULT_PAGE_INDEX = 0;

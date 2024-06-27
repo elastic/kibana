@@ -24,7 +24,7 @@ import { Flyout } from '../../common/components/assistant_settings_management/fl
 import { CANCEL, DELETE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
 import { useConversationChanged } from '../conversation_settings/use_conversation_changed';
-import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from '../../settings/const';
+import { DEFAULT_PAGE_SIZE } from '../../settings/const';
 
 interface Props {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -189,12 +189,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const pagination = useMemo(
     () => ({
-      pageIndex: DEFAULT_PAGE_INDEX,
-      pageSize: DEFAULT_PAGE_SIZE,
-      pageSizeOptions: [DEFAULT_PAGE_SIZE],
-      totalItemCount: conversationOptions.length,
+      initialPageSize: DEFAULT_PAGE_SIZE,
+      pageSizeOptions: [10, DEFAULT_PAGE_SIZE, 50],
     }),
-    [conversationOptions.length]
+    []
   );
 
   if (!conversationsLoaded) {
@@ -223,7 +221,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           onClose={onSaveCancelled}
           onSaveConfirmed={onSaveConfirmed}
           onSaveCancelled={onSaveCancelled}
-          title={selectedConversation?.title ?? i18n.CONVERSATIONS_TABLE_COLUMN_CONVERSATIONS}
+          title={selectedConversation?.title ?? i18n.CONVERSATIONS_FLYOUT_DEFAULT_TITLE}
         >
           <ConversationSettingsEditor
             allSystemPrompts={allSystemPrompts}

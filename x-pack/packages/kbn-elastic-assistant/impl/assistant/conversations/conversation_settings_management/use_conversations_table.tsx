@@ -14,10 +14,12 @@ import { Conversation } from '../../../assistant_context/types';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
 import { Prompt } from '../../../..';
-import { getConversationApiConfig } from '../../use_conversation/helpers';
+import {
+  getConversationApiConfig,
+  getInitialDefaultSystemPrompt,
+} from '../../use_conversation/helpers';
 import * as i18n from './translations';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
-import { SystemPromptColumn } from './system_prompt_column';
 
 const emptyConversations = {};
 
@@ -31,6 +33,7 @@ export interface GetConversationsListParams {
 
 export type ConversationTableItem = Conversation & {
   actionType?: string | null;
+  systemPromptTitle?: string | null;
 };
 
 export const useConversationsTable = () => {
@@ -42,19 +45,21 @@ export const useConversationsTable = () => {
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
-          name: i18n.CONVERSATIONS_TABLE_COLUMN_CONVERSATIONS,
+          name: i18n.CONVERSATIONS_TABLE_COLUMN_NAME,
           render: (conversation: ConversationTableItem) => (
             <EuiLink onClick={() => onEditActionClicked(conversation)}>
               {conversation.title}
             </EuiLink>
           ),
+          sortable: ({ title }: ConversationTableItem) => title,
         },
         {
+          field: 'systemPromptTitle',
           name: i18n.CONVERSATIONS_TABLE_COLUMN_SYSTEM_PROMPT,
           align: 'left',
-          render: (conversation: ConversationTableItem) => (
-            <SystemPromptColumn allSystemPrompts={allSystemPrompts} conversation={conversation} />
-          ),
+          render: (systemPromptTitle: ConversationTableItem['systemPromptTitle']) =>
+            systemPromptTitle ? <EuiBadge color="hollow">{systemPromptTitle}</EuiBadge> : null,
+          sortable: true,
         },
         {
           field: 'actionType',
@@ -62,6 +67,7 @@ export const useConversationsTable = () => {
           align: 'left',
           render: (actionType: ConversationTableItem['actionType']) =>
             actionType ? <EuiBadge color="hollow">{actionType}</EuiBadge> : null,
+          sortable: true,
         },
         {
           field: 'updatedAt',
@@ -78,6 +84,7 @@ export const useConversationsTable = () => {
                 />
               </EuiBadge>
             ) : null,
+          sortable: true,
         },
         {
           name: i18n.CONVERSATIONS_TABLE_COLUMN_ACTIONS,
@@ -120,9 +127,25 @@ export const useConversationsTable = () => {
 
         const actionType = getConnectorTypeTitle(connector, actionTypeRegistry);
 
+        const systemPrompt: Prompt | undefined = allSystemPrompts.find(
+          ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
+        );
+
+        const defaultSystemPrompt = getInitialDefaultSystemPrompt({
+          allSystemPrompts,
+          conversation,
+        });
+
+        const systemPromptTitle =
+          systemPrompt?.label ||
+          systemPrompt?.name ||
+          defaultSystemPrompt?.label ||
+          defaultSystemPrompt?.name;
+
         return {
           ...conversation,
           actionType,
+          systemPromptTitle,
           ...conversationApiConfig,
         };
       });

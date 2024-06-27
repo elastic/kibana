@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';
@@ -27,62 +27,66 @@ type ConversationsWithSystemPrompt = Record<
 type SystemPromptTableItem = Prompt & { defaultConversations: string[] };
 
 export const useSystemPromptTable = () => {
-  const getColumns = ({
-    onEditActionClicked,
-    onDeleteActionClicked,
-  }: {
-    onEditActionClicked: (prompt: SystemPromptTableItem) => void;
-    onDeleteActionClicked: (prompt: SystemPromptTableItem) => void;
-  }): Array<EuiBasicTableColumn<SystemPromptTableItem>> => [
-    {
-      align: 'left',
-      name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_NAME,
-      truncateText: { lines: 3 },
-      render: (prompt: SystemPromptTableItem) =>
-        prompt?.name ? (
-          <EuiLink onClick={() => onEditActionClicked(prompt)}>
-            {prompt?.name}
-            {prompt.isNewConversationDefault && (
-              <EuiIcon
-                type="starFilled"
-                aria-label={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}
-                className="eui-alignTop"
-              />
-            )}
-          </EuiLink>
-        ) : null,
-    },
-    {
-      align: 'left',
-      name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
-      render: ({ defaultConversations, id }: SystemPromptTableItem) => (
-        <BadgesColumn items={defaultConversations} prefix={id} />
-      ),
-    },
-    /* TODO: enable when createdAt is added
+  const getColumns = useCallback(
+    ({
+      onEditActionClicked,
+      onDeleteActionClicked,
+    }: {
+      onEditActionClicked: (prompt: SystemPromptTableItem) => void;
+      onDeleteActionClicked: (prompt: SystemPromptTableItem) => void;
+    }): Array<EuiBasicTableColumn<SystemPromptTableItem>> => [
+      {
+        align: 'left',
+        name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_NAME,
+        truncateText: { lines: 3 },
+        render: (prompt: SystemPromptTableItem) =>
+          prompt?.name ? (
+            <EuiLink onClick={() => onEditActionClicked(prompt)}>
+              {prompt?.name}
+              {prompt.isNewConversationDefault && (
+                <EuiIcon
+                  type="starFilled"
+                  aria-label={SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}
+                  className="eui-alignTop"
+                />
+              )}
+            </EuiLink>
+          ) : null,
+        sortable: ({ name }: SystemPromptTableItem) => name,
+      },
+      {
+        align: 'left',
+        name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
+        render: ({ defaultConversations, id }: SystemPromptTableItem) => (
+          <BadgesColumn items={defaultConversations} prefix={id} />
+        ),
+      },
+      /* TODO: enable when createdAt is added
       {
         align: 'left',
         field: 'createdAt',
         name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_CREATED_ON,
       },
       */
-    {
-      align: 'center',
-      name: 'Actions',
-      width: '120px',
-      render: (prompt: SystemPromptTableItem) => {
-        const isDeletable = !prompt.isDefault;
-        return (
-          <RowActions<SystemPromptTableItem>
-            rowItem={prompt}
-            onEdit={onEditActionClicked}
-            onDelete={isDeletable ? onDeleteActionClicked : undefined}
-            isDeletable={isDeletable}
-          />
-        );
+      {
+        align: 'center',
+        name: 'Actions',
+        width: '120px',
+        render: (prompt: SystemPromptTableItem) => {
+          const isDeletable = !prompt.isDefault;
+          return (
+            <RowActions<SystemPromptTableItem>
+              rowItem={prompt}
+              onEdit={onEditActionClicked}
+              onDelete={isDeletable ? onDeleteActionClicked : undefined}
+              isDeletable={isDeletable}
+            />
+          );
+        },
       },
-    },
-  ];
+    ],
+    []
+  );
 
   const getSystemPromptsList = ({
     connectors,

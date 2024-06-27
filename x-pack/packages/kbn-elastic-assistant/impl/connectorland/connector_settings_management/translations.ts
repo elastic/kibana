@@ -18,7 +18,7 @@ export const CONNECTOR_SETTINGS_MANAGEMENT_DESCRIPTION = i18n.translate(
   'xpack.elasticAssistant.connectors.connectorSettingsManagement.description',
   {
     defaultMessage:
-      'Using the Elastic AI Assistant requires setting up a connector with API access to OpenIA or Bedrock large language models. ',
+      'Using the Elastic AI Assistant requires setting up a connector with API access to OpenAI or Bedrock large language models. ',
   }
 );
 

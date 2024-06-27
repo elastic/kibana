@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CONVERSATIONS_TABLE_COLUMN_CONVERSATIONS = i18n.translate(
-  'xpack.elasticAssistant.assistant.conversationSettings.column.conversations',
+export const CONVERSATIONS_TABLE_COLUMN_NAME = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.column.name',
   {
-    defaultMessage: 'Conversations',
+    defaultMessage: 'Name',
   }
 );
 
@@ -39,6 +39,13 @@ export const CONVERSATIONS_TABLE_COLUMN_ACTIONS = i18n.translate(
   'xpack.elasticAssistant.assistant.conversationSettings.column.actions',
   {
     defaultMessage: 'Actions',
+  }
+);
+
+export const CONVERSATIONS_FLYOUT_DEFAULT_TITLE = i18n.translate(
+  'xpack.elasticAssistant.assistant.conversationSettings.flyout.defaultTitle',
+  {
+    defaultMessage: 'Conversation',
   }
 );
 

@@ -31,6 +31,7 @@ export const useQuickPromptTable = () => {
           prompt?.title ? (
             <EuiLink onClick={() => onEditActionClicked(prompt)}>{prompt?.title}</EuiLink>
           ) : null,
+        sortable: ({ title }: QuickPrompt) => title,
       },
       {
         align: 'left',
