@@ -5,19 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { css } from '@emotion/react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import AnnotationEditorControls from '@kbn/event-annotation-components/components/annotation_editor_controls/annotation_editor_controls';
-import { EventAnnotationConfig } from '@kbn/event-annotation-common/types';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { PLUGIN_ID } from '../../../../common';
+import { useDocViewerAnnotationContext } from './doc_viewer_annotation_context';
 
-export const DocViewerAnnotation = ({ dataView, hit }: DocViewRenderProps) => {
+export const DocViewerAnnotation: React.FC<DocViewRenderProps> = ({ dataView }) => {
+  const { docVisAnnotation, onDocVisAnnotationChanged } = useDocViewerAnnotationContext();
   // const timeFieldName = dataView.getTimeField()?.name;
   // const timeFieldValue = timeFieldName
   //   ? Array.isArray(hit.flattened[timeFieldName])
@@ -25,18 +26,17 @@ export const DocViewerAnnotation = ({ dataView, hit }: DocViewRenderProps) => {
   //     : hit.flattened[timeFieldName]
   //   : undefined;
   // const timestamp = timeFieldValue ? timeFieldValue : undefined;
-  const [currentAnnotation, setCurrentAnnotation] = useState<EventAnnotationConfig>();
   const services = useDiscoverServices();
 
   const createAnnotation = useCallback(() => {
-    setCurrentAnnotation(getDefaultManualAnnotation(uuidv4(), new Date().toISOString()));
-  }, [setCurrentAnnotation]);
+    onDocVisAnnotationChanged?.(getDefaultManualAnnotation(uuidv4(), new Date().toISOString()));
+  }, [onDocVisAnnotationChanged]);
 
   const deleteAnnotation = useCallback(() => {
-    setCurrentAnnotation(undefined);
-  }, [setCurrentAnnotation]);
+    onDocVisAnnotationChanged?.(undefined);
+  }, [onDocVisAnnotationChanged]);
 
-  if (!currentAnnotation) {
+  if (!docVisAnnotation) {
     return (
       <>
         <EuiSpacer />
@@ -62,7 +62,7 @@ export const DocViewerAnnotation = ({ dataView, hit }: DocViewRenderProps) => {
       `}
     >
       <AnnotationEditorControls
-        annotation={currentAnnotation}
+        annotation={docVisAnnotation}
         onAnnotationChange={(annotation) => {
           // console.log(annotation);
         }}

@@ -16,6 +16,10 @@ import { DiscoverStateContainer } from './discover_state';
 function createStateHelpers() {
   const context = React.createContext<DiscoverStateContainer | null>(null);
   const useContainer = () => useContext(context);
+  const useSavedSearchContainer = () => {
+    const container = useContainer();
+    return container!.savedSearchState;
+  };
   const useSavedSearch = () => {
     const container = useContainer();
     return useObservable<SavedSearch>(
@@ -40,6 +44,7 @@ function createStateHelpers() {
 
   return {
     Provider: context.Provider,
+    useSavedSearchContainer,
     useSavedSearch,
     useSavedSearchInitial,
     useSavedSearchHasChanged,
@@ -48,6 +53,7 @@ function createStateHelpers() {
 
 export const {
   Provider: DiscoverStateProvider,
+  useSavedSearchContainer,
   useSavedSearchInitial,
   useSavedSearch,
   useSavedSearchHasChanged,
