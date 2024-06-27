@@ -15,6 +15,7 @@ export * from './get';
 export * from './get_burn_rates';
 export * from './get_instances';
 export * from './get_preview_data';
+export * from './get_preview_sli';
 export * from './reset';
 export * from './manage';
 export * from './delete_instance';

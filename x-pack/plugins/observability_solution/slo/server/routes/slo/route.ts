@@ -18,6 +18,7 @@ import {
   findSLOGroupsParamsSchema,
   findSLOParamsSchema,
   getPreviewDataParamsSchema,
+  getPreviewSLIParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLOInstancesParamsSchema,
   getSLOParamsSchema,
@@ -29,7 +30,6 @@ import {
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -41,6 +41,7 @@ import {
   DeleteSLOInstances,
   FindSLO,
   FindSLOGroups,
+  GetPreviewSLI,
   GetSLO,
   GetSLOHealth,
   KibanaSavedObjectsSLORepository,
@@ -50,6 +51,7 @@ import { FindSLODefinitions } from '../../services/find_slo_definitions';
 import { getBurnRates } from '../../services/get_burn_rates';
 import { getGlobalDiagnosis } from '../../services/get_diagnosis';
 import { GetPreviewData } from '../../services/get_preview_data';
+import { GetSLOsOverview } from '../../services/get_slos_overview';
 import { GetSLOInstances } from '../../services/get_slo_instances';
 import { GetSLOSuggestions } from '../../services/get_slo_suggestions';
 import { DefaultHistoricalSummaryClient } from '../../services/historical_summary_client';
@@ -661,6 +663,28 @@ const getPreviewData = createSloServerRoute({
   },
 });
 
+const getPreviewSLIRoute = createSloServerRoute({
+  endpoint: 'POST /internal/observability/slos/_preview_sli',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  params: getPreviewSLIParamsSchema,
+  handler: async ({ request, context, params, dependencies }) => {
+    await assertPlatinumLicense(context);
+
+    const spaces = await dependencies.getSpacesStart();
+    const spaceId = (await spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+    const dataViews = await dependencies.getDataViewsStart();
+
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+    const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
+    const service = new GetPreviewSLI(esClient, spaceId, dataViewsService);
+    return await service.execute(params.body);
+  },
+});
+
 const getSloSettingsRoute = createSloServerRoute({
   endpoint: 'GET /internal/slo/settings',
   options: {
@@ -746,5 +770,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOGroupsRoute,
     ...getSLOSuggestionsRoute,
     ...getSLOsOverview,
+    ...getPreviewSLIRoute,
   };
 };

@@ -34,7 +34,7 @@ import {
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 import { buildParamValues } from './transform_generators/synthetics_availability';
 
-export interface Options {
+interface Options {
   range: {
     start: number;
     end: number;
