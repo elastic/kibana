@@ -455,11 +455,19 @@ export const convertUpdateAPIToInternalSchema = ({
     actionsClient.isSystemAction(action.action_type_id)
   );
 
+  const [existingRuleUpdateActions, existingRuleUpdateSystemActions] = partition(
+    existingRule.actions,
+    (action) => actionsClient.isSystemAction(action.actionTypeId)
+  );
+
   const systemActions =
-    (ruleUpdateSystemActions ?? existingRule.systemActions).map((action) =>
+    (ruleUpdateSystemActions ?? existingRuleUpdateSystemActions).map((action) =>
       transformRuleToAlertAction(action)
     ) ?? [];
-  const alertActions = ruleUpdateActions?.map((action) => transformRuleToAlertAction(action)) ?? [];
+  const alertActions =
+    (ruleUpdateActions ?? existingRuleUpdateActions).map((action) =>
+      transformRuleToAlertAction(action)
+    ) ?? [];
   const actions = transformToActionFrequency<RuleActionCamel>(
     alertActions as RuleActionCamel[],
     ruleUpdate.throttle

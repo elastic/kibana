@@ -233,14 +233,14 @@ export const migrateLegacyActionsIds = async (
     rules,
     async (rule) => {
       if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
-        const [systemActions, oldActions] = partition<RuleAction>(
+        const [systemActions, extActions] = partition<RuleAction>(
           (action) =>
             action.action_type_id != null && actionsClient.isSystemAction(action.action_type_id)
         )(rule.actions);
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<RuleAction | Error> = await pMap(
-          (oldActions as RuleAction[]) ?? [],
+          (extActions as RuleAction[]) ?? [],
           (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );

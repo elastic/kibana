@@ -42,13 +42,8 @@ export const updateRule = async (
     throw new ClientError(error.message, error.statusCode);
   }
 
-  // partition existing rule actions within convertUpdate function, like the others
-  const [oldActions, systemActions] = partition(existingRule.actions, (action) =>
-    actionsClient.isSystemAction(action.actionTypeId)
-  );
-
   const newInternalRule = convertUpdateAPIToInternalSchema({
-    existingRule: { ...existingRule, actions: oldActions, systemActions },
+    existingRule,
     ruleUpdate,
     actionsClient,
   });

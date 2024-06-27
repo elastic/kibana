@@ -43,9 +43,8 @@ export const duplicateRule = async ({
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
 
   // actions stuff
-  const [externalActions, systemActions] = partition(
-    rule.actions,
-    (action) => !actionsClient.isSystemAction(action.actionTypeId)
+  const [externalActions, systemActions] = partition(rule.actions, (action) =>
+    actionsClient.isSystemAction(action.actionTypeId)
   );
   const actions = transformToActionFrequency(externalActions, rule.throttle);
 
