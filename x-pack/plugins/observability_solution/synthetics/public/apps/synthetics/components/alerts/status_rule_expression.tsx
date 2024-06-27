@@ -19,7 +19,7 @@ import { ValueExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { GroupByExpression } from './common/group_by_field';
 import { WindowValueExpression } from './common/condition_window_value';
-import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for _the_last_expression';
+import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for_the_last_expression';
 import { StatusRuleParamsProps } from './status_rule_ui';
 
 interface Props {
