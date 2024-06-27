@@ -66,7 +66,7 @@ export const useTableData = (
           deploymentStatusValue =
             modelId && deploymentStatus[modelId] !== undefined
               ? deploymentStatus[modelId]
-              : DeploymentStatusEnum.notDeployed;
+              : DeploymentStatusEnum.notDeployable;
         }
 
         return {

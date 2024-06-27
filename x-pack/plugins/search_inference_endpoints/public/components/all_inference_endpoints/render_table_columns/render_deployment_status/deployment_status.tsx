@@ -34,7 +34,7 @@ export const DeploymentStatus: React.FC<DeploymentStatusProps> = ({ status }) =>
       type = 'warning';
       tooltip = i18n.MODEL_NOT_DEPLOYED;
       break;
-    default:
+    case DeploymentStatusEnum.notDeployable:
       statusColor = 'danger';
       type = 'dot';
       tooltip = i18n.MODEL_FAILED_TO_BE_DEPLOYED;
