@@ -246,7 +246,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const search = ((request, options = {}) => {
       const now = performance.now();
       window.DATA_REQUESTED_TIME = now;
-      console.log(`EVENT: data requested (took ${now}ms)`);
+      console.log(
+        `EVENT: data requested (took ${
+          // if we're coming from the listing page, we use that as the start time
+          // otherwise, we use the browser's navigation start time
+          window.NAVIGATION_START_TIME ? now - window.NAVIGATION_START_TIME : now
+        }ms)`
+      );
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
