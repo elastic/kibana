@@ -203,13 +203,13 @@ export interface AIAssistantPrompts {
  * Interfaces for registering tools to be used by the elastic assistant
  */
 
-export interface AssistantTool<T extends z.AnyZodObject = z.AnyZodObject> {
+export interface AssistantTool {
   id: string;
   name: string;
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool<T> | null;
+  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
 }
 
 export interface AssistantToolParams {

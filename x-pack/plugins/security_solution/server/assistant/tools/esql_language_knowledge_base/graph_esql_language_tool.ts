@@ -25,6 +25,7 @@ import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { APP_UI_ID } from '../../../../common';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
+import type { LangchainZodAny } from '..';
 
 export const INLINE_ESQL_QUERY_REGEX = /```esql\s*(.*?)\s*```/gms;
 
@@ -368,11 +369,7 @@ const shouldRegenerate = (state: IState) => {
   return END;
 };
 
-const schema = z.object({
-  question: z.string().describe(`The user's exact question about ESQL`),
-});
-
-export const GRAPH_ESQL_TOOL: AssistantTool<typeof schema> = {
+export const GRAPH_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: () => true,
@@ -385,7 +382,9 @@ export const GRAPH_ESQL_TOOL: AssistantTool<typeof schema> = {
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
-      schema,
+      schema: z.object({
+        question: z.string().describe(`The user's exact question about ESQL`),
+      }) as unknown as LangchainZodAny,
       func: async (input, _, cbManager) => {
         const workflow = new StateGraph<IState>({
           channels: graphState,

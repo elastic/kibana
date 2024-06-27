@@ -12,6 +12,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen';
 import { loggerMock } from '@kbn/logging-mocks';
+import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
 
 describe('EsqlLanguageKnowledgeBaseTool', () => {
   const chain = {} as RetrievalQAChain;
@@ -28,12 +29,14 @@ describe('EsqlLanguageKnowledgeBaseTool', () => {
       size: 20,
     },
   } as unknown as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  const search = createSearchRequestHandlerContext();
   const logger = loggerMock.create();
   const rest = {
     chain,
     esClient,
     logger,
     request,
+    search,
   };
 
   describe('isSupported', () => {

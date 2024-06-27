@@ -49,6 +49,7 @@ export interface EsqlCodeBlockProps {
 const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeBlockProps) => {
   const theme = useEuiTheme();
   const { lens, dataViews: dataViewService, data } = useKibana().services;
+  const [showVisualization, setShowVisualization] = useState(false);
 
   const { value: lensHelpersAsync } = useAsync(() => {
     return lens.stateHelperApi();
@@ -56,7 +57,7 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
 
   const { data: queryResults, error: queryResultsError } = useQuery({
     queryKey: ['getESQLResults', value, timestamp],
-    enabled: true,
+    enabled: showVisualization,
     queryFn: async () => {
       return getESQLResults({
         esqlQuery: value,
@@ -104,7 +105,6 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [isTableVisible, setIsTableVisible] = useState(false);
   const [lensInput, setLensInput] = useState<TypedLensByValueInput | undefined>(undefined);
-  const [showVisualization, setShowVisualization] = useState(false);
 
   const preferredChartType = undefined; // 'XY';
 
