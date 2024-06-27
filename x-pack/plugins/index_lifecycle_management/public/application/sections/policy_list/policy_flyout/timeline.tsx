@@ -18,6 +18,7 @@ export const Timeline = ({ policy }: { policy: PolicyFromES }) => {
   const deletePhaseMinAge = policy.policy.phases.delete?.min_age;
   return (
     <ViewComponent
+      showTitle={false}
       hasDeletePhase={hasDeletePhase}
       isUsingRollover={isUsingRollover}
       hotPhaseMinAge={undefined}

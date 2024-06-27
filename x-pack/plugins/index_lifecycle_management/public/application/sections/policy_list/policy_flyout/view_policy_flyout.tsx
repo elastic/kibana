@@ -25,6 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { HotPhase } from './hot_phase';
 import { PolicyFromES } from '../../../../../common/types';
 import { trackUiMetric } from '../../../services/ui_metric';
 import { hasLinkedIndices } from '../../../lib/policies';
@@ -107,7 +108,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
 
   return (
     <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiTitle data-test-subj="policyFlyoutTitle">
@@ -134,28 +135,8 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
         <Timeline policy={policy} />
 
         <EuiSpacer />
-        <EuiTitle size="s">
-          <h2>
-            <FormattedMessage
-              id="xpack.indexLifecycleMgmt.policyFlyout.phasesTitle"
-              defaultMessage="Phases"
-            />
-          </h2>
-        </EuiTitle>
-
-        <EuiSpacer size="m" />
         {/* Hot phase */}
-        {policy.policy.phases.hot && (
-          <PhaseDescription
-            phase={policy.policy.phases.hot}
-            title={
-              <FormattedMessage
-                id="xpack.indexLifecycleMgmt.policyFlyout.hotPhaseTitle"
-                defaultMessage="Hot phase"
-              />
-            }
-          />
-        )}
+        {policy.policy.phases.hot && <HotPhase phase={policy.policy.phases.hot} />}
 
         {/* Warm phase */}
         {policy.policy.phases.warm && (
