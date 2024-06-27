@@ -60,7 +60,7 @@ export const LogsDeprecationCallout = () => {
         {...getLogsExplorerLinkProps(share)}
       >
         {i18n.translate('xpack.infra.logsDeprecationCallout.tryLogsExplorerButtonLabel', {
-          defaultMessage: 'Try Logs Explorer!',
+          defaultMessage: 'Try Logs Explorer',
         })}
       </EuiButton>
     </EuiCallOut>
