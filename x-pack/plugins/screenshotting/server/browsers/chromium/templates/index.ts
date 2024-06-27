@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import fs from 'fs/promises';
 import path from 'path';
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { assetPath } from '../../../constants';
 
 async function compileTemplate<T>(pathToTemplate: string): Promise<Handlebars.TemplateDelegate<T>> {
   const contentsBuffer = await fs.readFile(pathToTemplate);
-  return Handlebars.compile(contentsBuffer.toString());
+  return Handlebars.compileAST(contentsBuffer.toString()) as Handlebars.TemplateDelegate<T>;
 }
 
 interface HeaderTemplateInput {

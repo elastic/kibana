@@ -27,6 +27,7 @@
     "@kbn/core-http-server",
     "@kbn/core-plugins-server",
     "@kbn/task-manager-plugin",
+    "@kbn/handlebars",
   ],
   "exclude": [
     "target/**/*",

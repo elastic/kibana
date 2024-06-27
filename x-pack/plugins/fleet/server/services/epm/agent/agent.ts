@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { safeLoad, safeDump } from 'js-yaml';
 import type { Logger } from '@kbn/core/server';
 
@@ -14,15 +14,22 @@ import { toCompiledSecretRef } from '../../secrets';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { appContextService } from '../..';
 
-const handlebars = Handlebars.create();
+// const handlebars = Handlebars.create();
 
 export function compileTemplate(variables: PackagePolicyConfigRecord, templateStr: string) {
   const logger = appContextService.getLogger();
   const { vars, yamlValues } = buildTemplateVariables(logger, variables);
   let compiledTemplate: string;
   try {
-    const template = handlebars.compile(templateStr, { noEscape: true });
-    compiledTemplate = template(vars);
+    const template = Handlebars.compileAST(templateStr, { noEscape: true });
+    compiledTemplate = template(vars, {
+      helpers: {
+        contains: containsHelper,
+        escape_string: escapeStringHelper,
+        to_json: toJsonHelper,
+        url_encode: urlEncodeHelper,
+      },
+    });
   } catch (err) {
     throw new PackageInvalidArchiveError(`Error while compiling agent template: ${err.message}`);
   }
@@ -119,7 +126,7 @@ function containsHelper(this: any, item: string, check: string | string[], optio
   }
   return '';
 }
-handlebars.registerHelper('contains', containsHelper);
+// handlebars.registerHelper('contains', containsHelper);
 
 // escapeStringHelper will wrap the provided string with single quotes.
 // Single quoted strings in yaml need to escape single quotes by doubling them
@@ -129,7 +136,7 @@ function escapeStringHelper(str: string) {
   if (!str) return undefined;
   return "'" + str.replace(/\'/g, "''").replace(/\n/g, '\n\n') + "'";
 }
-handlebars.registerHelper('escape_string', escapeStringHelper);
+// handlebars.registerHelper('escape_string', escapeStringHelper);
 
 // toJsonHelper will convert any object to a Json string.
 function toJsonHelper(value: any) {
@@ -139,7 +146,7 @@ function toJsonHelper(value: any) {
   }
   return JSON.stringify(value);
 }
-handlebars.registerHelper('to_json', toJsonHelper);
+// handlebars.registerHelper('to_json', toJsonHelper);
 
 // urlEncodeHelper returns a string encoded as a URI component.
 function urlEncodeHelper(input: string) {
@@ -155,7 +162,7 @@ function urlEncodeHelper(input: string) {
 
   return encodedString;
 }
-handlebars.registerHelper('url_encode', urlEncodeHelper);
+// handlebars.registerHelper('url_encode', urlEncodeHelper);
 
 function replaceRootLevelYamlVariables(yamlVariables: { [k: string]: any }, yamlTemplate: string) {
   if (Object.keys(yamlVariables).length === 0 || !yamlTemplate) {
