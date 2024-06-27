@@ -35,6 +35,7 @@ import {
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
   AgentEnrollmentFlyout,
+  MultipleAgentPoliciesSummaryLine,
   AgentPolicySummaryLine,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
@@ -42,6 +43,7 @@ import {
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
+import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 interface PackagePoliciesPanelProps {
   name: string;
@@ -101,6 +103,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const {
     data,
@@ -114,8 +117,10 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
   const canAddAgents = useAuthz().fleet.addAgents;
   const canAddFleetServers = useAuthz().fleet.addFleetServers;
+  const canReadAgentPolicies = useAuthz().fleet.readAgentPolicies;
 
   const packageAndAgentPolicies = useMemo((): Array<{
     agentPolicies: GetAgentPoliciesResponseItem[];
@@ -167,7 +172,8 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     },
     [setPagination]
   );
-
+  const canShowMultiplePoliciesCell =
+    canUseMultipleAgentPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
   const columns: Array<EuiTableFieldDataColumnType<InMemoryPackagePolicyAndAgentPolicy>> = useMemo(
     () => [
       {
@@ -228,8 +234,11 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
         truncateText: true,
         render(id, { agentPolicies }) {
           return agentPolicies.length > 0 ? (
-            // TODO: handle multiple agent policies
-            <AgentPolicySummaryLine policy={agentPolicies[0]} />
+            canShowMultiplePoliciesCell && agentPolicies.length > 1 ? (
+              <MultipleAgentPoliciesSummaryLine policies={agentPolicies} />
+            ) : (
+              <AgentPolicySummaryLine policy={agentPolicies[0]} />
+            )
           ) : (
             <AgentPolicyNotFound />
           );
@@ -294,7 +303,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
           return (
             <PackagePolicyActionsMenu
-              agentPolicy={agentPolicy}
+              agentPolicies={agentPolicies}
               packagePolicy={packagePolicy}
               showAddAgent={true}
               upgradePackagePolicyHref={
@@ -313,8 +322,9 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     [
       getHref,
       canWriteIntegrationPolicies,
-      canAddAgents,
+      canShowMultiplePoliciesCell,
       canAddFleetServers,
+      canAddAgents,
       showAddAgentHelpForPackagePolicyId,
     ]
   );
@@ -355,7 +365,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={6}>
+        <EuiFlexItem grow={7}>
           <EuiBasicTable
             items={packageAndAgentPolicies || []}
             columns={columns}

@@ -96,8 +96,13 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       .keys(schemaKeys)
       .default()
       .optional()
-      .unknown(unknowns === 'allow')
       .options({ stripUnknown: { objects: unknowns === 'ignore' } });
+
+    // We need to specify the `.unknown` property only when we want to override the default `forbid`
+    // or it will break `stripUnknown` functionality.
+    if (unknowns === 'allow') {
+      schema = schema.unknown(unknowns === 'allow');
+    }
 
     if (options.meta?.id) {
       schema = schema.id(options.meta.id);
@@ -221,6 +226,15 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       case 'object.child':
         return reason[0];
     }
+  }
+
+  /**
+   * Return the schema for this object's underlying properties
+   *
+   * @internal should only be used internal for type reflection
+   */
+  public getPropSchemas(): P {
+    return this.props;
   }
 
   validateKey(key: string, value: any) {

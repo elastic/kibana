@@ -121,6 +121,9 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asCurrentUser: createPackagePolicyServiceMock(),
       asInternalUser: createPackagePolicyServiceMock(),
     },
+    uninstallTokenService: {
+      asCurrentUser: createUninstallTokenServiceMock(),
+    },
     internalSoClient: savedObjectsClientMock.create(),
     spaceId: 'default',
     limitedToPackages: undefined,
@@ -182,7 +185,6 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
 /**
  * Create mock AgentPolicyService
  */
-
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
     get: jest.fn(),
@@ -238,5 +240,6 @@ export function createUninstallTokenServiceMock(): UninstallTokenServiceInterfac
     encryptTokens: jest.fn(),
     checkTokenValidityForAllPolicies: jest.fn(),
     checkTokenValidityForPolicy: jest.fn(),
+    scoped: jest.fn().mockImplementation(() => createUninstallTokenServiceMock()),
   };
 }

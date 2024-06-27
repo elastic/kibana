@@ -256,7 +256,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
     <>
       <EuiFlexGroup alignItems="flexStart">
         <EuiFlexItem grow={1} />
-        <EuiFlexItem grow={6}>
+        <EuiFlexItem grow={7}>
           <EuiText>
             <EuiTitle>
               <h3>

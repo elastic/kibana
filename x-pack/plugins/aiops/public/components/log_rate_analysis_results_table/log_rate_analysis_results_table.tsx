@@ -12,12 +12,18 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { EuiTableSortingType } from '@elastic/eui';
 import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
-import { type SignificantItem } from '@kbn/ml-agg-utils';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
+import {
+  setPinnedSignificantItem,
+  setSelectedSignificantItem,
+  useAppDispatch,
+  useAppSelector,
+} from '@kbn/aiops-log-rate-analysis/state';
+
+import type { GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
-import { useColumns, SIG_ITEMS_TABLE } from './use_columns';
+import { useColumns, LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE } from './use_columns';
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
@@ -26,41 +32,59 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK = 'desc';
 
 interface LogRateAnalysisResultsTableProps {
-  significantItems: SignificantItem[];
-  loading: boolean;
-  isExpandedRow?: boolean;
+  groupFilter?: GroupTableItemGroup[];
   searchQuery: estypes.QueryDslQueryContainer;
-  timeRangeMs: TimeRangeMs;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
   skippedColumns: string[];
-  zeroDocsFallback?: boolean;
 }
 
 export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
-  significantItems,
-  loading,
-  isExpandedRow,
+  groupFilter,
   searchQuery,
-  timeRangeMs,
   barColorOverride,
   barHighlightColorOverride,
   skippedColumns,
-  zeroDocsFallback = false,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const {
-    pinnedGroup,
-    pinnedSignificantItem,
-    selectedGroup,
-    selectedSignificantItem,
-    setPinnedSignificantItem,
-    setSelectedSignificantItem,
-  } = useLogRateAnalysisStateContext();
+  const allSignificantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+
+  const significantItems = useMemo(() => {
+    if (!groupFilter) {
+      return allSignificantItems;
+    }
+
+    return groupFilter.reduce<SignificantItem[]>((p, groupItem) => {
+      const st = allSignificantItems.find(
+        (d) => d.fieldName === groupItem.fieldName && d.fieldValue === groupItem.fieldValue
+      );
+
+      if (st !== undefined) {
+        p.push({
+          ...st,
+          unique: (groupItem.duplicate ?? 0) <= 1,
+        });
+      }
+
+      return p;
+    }, []);
+  }, [allSignificantItems, groupFilter]);
+
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
+  const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
+  const selectedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.selectedGroup);
+  const pinnedSignificantItem = useAppSelector(
+    (s) => s.logRateAnalysisTableRow.pinnedSignificantItem
+  );
+  const selectedSignificantItem = useAppSelector(
+    (s) => s.logRateAnalysisTableRow.selectedSignificantItem
+  );
+
+  const dispatch = useAppDispatch();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -72,15 +96,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   );
 
   const columns = useColumns(
-    SIG_ITEMS_TABLE,
+    LOG_RATE_ANALYSIS_RESULTS_TABLE_TYPE.SIGNIFICANT_ITEMS,
     skippedColumns,
     searchQuery,
-    timeRangeMs,
-    loading,
-    zeroDocsFallback,
     barColorOverride,
     barHighlightColorOverride,
-    isExpandedRow
+    groupFilter !== undefined
   );
 
   const onChange = useCallback((tableSettings) => {
@@ -151,7 +172,7 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       selectedGroup === null &&
       pinnedGroup === null
     ) {
-      setSelectedSignificantItem(pageOfItems[0]);
+      dispatch(setSelectedSignificantItem(pageOfItems[0]));
     }
 
     // If a user switched pages and a pinned row is no longer visible
@@ -162,13 +183,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
       selectedGroup === null &&
       pinnedGroup === null
     ) {
-      setPinnedSignificantItem(null);
+      dispatch(setPinnedSignificantItem(null));
     }
   }, [
+    dispatch,
     selectedGroup,
     selectedSignificantItem,
-    setSelectedSignificantItem,
-    setPinnedSignificantItem,
     pageOfItems,
     pinnedGroup,
     pinnedSignificantItem,
@@ -178,8 +198,8 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
   // make sure to reset any hovered or pinned rows.
   useEffect(
     () => () => {
-      setSelectedSignificantItem(null);
-      setPinnedSignificantItem(null);
+      dispatch(setSelectedSignificantItem(null));
+      dispatch(setPinnedSignificantItem(null));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -236,18 +256,18 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
               significantItem.fieldName === pinnedSignificantItem?.fieldName &&
               significantItem.fieldValue === pinnedSignificantItem?.fieldValue
             ) {
-              setPinnedSignificantItem(null);
+              dispatch(setPinnedSignificantItem(null));
             } else {
-              setPinnedSignificantItem(significantItem);
+              dispatch(setPinnedSignificantItem(significantItem));
             }
           },
           onMouseEnter: () => {
             if (pinnedSignificantItem === null) {
-              setSelectedSignificantItem(significantItem);
+              dispatch(setSelectedSignificantItem(significantItem));
             }
           },
           onMouseLeave: () => {
-            setSelectedSignificantItem(null);
+            dispatch(setSelectedSignificantItem(null));
           },
           style: getRowStyle(significantItem),
         };

@@ -10,16 +10,26 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
-import { FunctionArgSignature } from '../definitions/types';
+import { FunctionParameter } from '../definitions/types';
 import { getParamAtPosition } from './helper';
 import { nonNullable } from '../shared/helpers';
 import { METADATA_FIELDS } from '../shared/constants';
+
+interface Integration {
+  name: string;
+  hidden: boolean;
+  title?: string;
+  dataStreams: Array<{
+    name: string;
+    title?: string;
+  }>;
+}
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -42,13 +52,10 @@ const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   { name: 'kubernetes.something.something', type: 'number' },
 ];
 
-const indexes = (
-  [] as Array<{ name: string; hidden: boolean; suggestedAs: string | undefined }>
-).concat(
+const indexes = ([] as Array<{ name: string; hidden: boolean; suggestedAs?: string }>).concat(
   ['a', 'index', 'otherIndex', '.secretIndex', 'my-index'].map((name) => ({
     name,
     hidden: name.startsWith('.'),
-    suggestedAs: undefined,
   })),
   ['my-index[quoted]', 'my-index$', 'my_index{}'].map((name) => ({
     name,
@@ -56,6 +63,18 @@ const indexes = (
     suggestedAs: `\`${name}\``,
   }))
 );
+
+const integrations: Integration[] = ['nginx', 'k8s'].map((name) => ({
+  name,
+  hidden: false,
+  title: `integration-${name}`,
+  dataStreams: [
+    {
+      name: `${name}-1`,
+      title: `integration-${name}-1`,
+    },
+  ],
+}));
 const policies = [
   {
     name: 'policy',
@@ -184,7 +203,7 @@ function getLiteralsByType(_type: string | string[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_literal')) {
     // return only singular
-    return timeLiterals.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
+    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
   if (type.includes('chrono_literal')) {
     return chronoLiterals.map(({ name }) => name);
@@ -347,9 +366,8 @@ describe('autocomplete', () => {
   });
 
   describe('from', () => {
-    const suggestedIndexes = indexes
-      .filter(({ hidden }) => !hidden)
-      .map(({ name, suggestedAs }) => suggestedAs || name);
+    const suggestedIndexes = indexes.filter(({ hidden }) => !hidden).map(({ name }) => name);
+
     // Monaco will filter further down here
     testSuggestions(
       'f',
@@ -372,6 +390,16 @@ describe('autocomplete', () => {
       METADATA_FIELDS.filter((field) => field !== '_index'),
       ' '
     );
+
+    // with integrations support
+    const dataSources = indexes.concat(integrations);
+    const suggestedDataSources = dataSources
+      .filter(({ hidden }) => !hidden)
+      .map(({ name }) => name);
+
+    testSuggestions('from ', suggestedDataSources, '', [undefined, dataSources, undefined]);
+    testSuggestions('from a,', suggestedDataSources, '', [undefined, dataSources, undefined]);
+    testSuggestions('from *,', suggestedDataSources, '', [undefined, dataSources, undefined]);
   });
 
   describe('show', () => {
@@ -1154,7 +1182,7 @@ describe('autocomplete', () => {
                 (p) => p.constantOnly || /_literal/.test(p.type)
               );
 
-              const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
+              const getTypesFromParamDefs = (paramDefs: FunctionParameter[]) =>
                 Array.from(new Set(paramDefs.map((p) => p.type)));
 
               const suggestedConstants = param.literalSuggestions || param.literalOptions;
@@ -1210,7 +1238,7 @@ describe('autocomplete', () => {
     testSuggestions('from a | eval var0 = bucket(@timestamp,', getUnitDuration(1));
 
     describe('date math', () => {
-      const dateSuggestions = timeLiterals.map(({ name }) => name);
+      const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
       // If a literal number is detected then suggest also date period keywords
       testSuggestions('from a | eval a = 1 ', [
         ...dateSuggestions,

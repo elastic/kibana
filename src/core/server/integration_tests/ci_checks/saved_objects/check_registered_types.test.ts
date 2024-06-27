@@ -55,8 +55,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
 
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
-        "action": "cc93fe2c0c76e57c2568c63170e05daea897c136",
-        "action_task_params": "96e27e7f4e8273ffcd87060221e2b75e81912dd5",
+        "action": "0e6fc0b74c7312a8c11ff6b14437b93a997358b8",
+        "action_task_params": "b50cb5c8a493881474918e8d4985e61374ca4c30",
         "ad_hoc_run_params": "d4e3c5c794151d0a4f5c71e886b2aa638da73ad2",
         "alert": "3a67d3f1db80af36bd57aaea47ecfef87e43c58f",
         "api_key_pending_invalidation": "1399e87ca37b3d3a65d269c924eda70726cfe886",
@@ -88,7 +88,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "endpoint:unified-user-artifact-manifest": "71c7fcb52c658b21ea2800a6b6a76972ae1c776e",
         "endpoint:user-artifact-manifest": "1c3533161811a58772e30cdc77bac4631da3ef2b",
         "enterprise_search_telemetry": "9ac912e1417fc8681e0cd383775382117c9e3d3d",
-        "epm-packages": "f8ee125b57df31fd035dc04ad81aef475fd2f5bd",
+        "entity-definition": "33fe0194bd896f0bfe479d55f6de20f8ba1d7713",
+        "entity-discovery-api-key": "c267a65c69171d1804362155c1378365f5acef88",
+        "epm-packages": "8042d4a1522f6c4e6f5486e791b3ffe3a22f88fd",
         "epm-packages-assets": "7a3e58efd9a14191d0d1a00b8aaed30a145fd0b1",
         "event-annotation-group": "715ba867d8c68f3c9438052210ea1c30a9362582",
         "event_loop_delays_daily": "01b967e8e043801357503de09199dfa3853bab88",

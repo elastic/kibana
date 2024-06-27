@@ -31,11 +31,19 @@ export async function getESQLAdHocDataview(
   indexPattern: string,
   dataViewsService: DataViewsPublicPluginStart
 ) {
-  return await dataViewsService.create({
+  const dataView = await dataViewsService.create({
     title: indexPattern,
     type: ESQL_TYPE,
     id: await sha256(`esql-${indexPattern}`),
   });
+
+  // If the indexPattern is empty string means that the user used either the ROW or META FUNCTIONS / SHOW INFO commands
+  // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
+  if (indexPattern && dataView?.fields?.getByName?.('@timestamp')?.type === 'date') {
+    dataView.timeFieldName = '@timestamp';
+  }
+
+  return dataView;
 }
 
 /**
