@@ -80,7 +80,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "unifiedDocViewer"
     ],
     "extraPublicDirs": [
       "common"

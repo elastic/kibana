@@ -7,8 +7,8 @@
 
 import { flattenHit } from '@kbn/data-service';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { TimelineItem } from '../../../../../common/search_strategy';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
+import type { SearchHit, TimelineItem } from '../../../../../common/search_strategy';
 
 interface TransformTimelineItemToUnifiedRows {
   events: TimelineItem[];
@@ -41,4 +41,23 @@ export function transformTimelineItemToUnifiedRows(
   });
 
   return unifiedDataTableRows;
+}
+
+// TODO: Type should be simplified to use the same data type as the table ideally..
+interface TransformTimelineDetailItemToUnifiedItem {
+  hit: SearchHit;
+  dataView: DataView;
+}
+export function transformTimelineDetailItemToUnifiedRows(
+  args: TransformTimelineDetailItemToUnifiedItem
+): DataTableRecord {
+  const { hit, dataView } = args;
+
+  return {
+    id: hit._id as string,
+    raw: hit as EsHitRecord,
+    flattened: flattenHit(hit, dataView, {
+      includeIgnoredValues: true,
+    }),
+  };
 }

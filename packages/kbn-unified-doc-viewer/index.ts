@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { DocViewer, DocViewsRegistry, ElasticRequestState, FieldName } from './src';
+export {
+  DocViewer,
+  getDocViewerTabs,
+  DocViewsRegistry,
+  ElasticRequestState,
+  FieldName,
+} from './src';

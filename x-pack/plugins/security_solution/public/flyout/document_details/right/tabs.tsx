@@ -8,6 +8,8 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getUnifiedDocViewerTabs } from '@kbn/unified-doc-viewer-plugin/public';
+import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
 import {
   JSON_TAB_TEST_ID,
   OVERVIEW_TAB_LABEL_TEST_ID,
@@ -18,6 +20,9 @@ import type { RightPanelPaths } from '.';
 import { JsonTab } from './tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { transformTimelineDetailItemToUnifiedRows } from '../../../timelines/components/timeline/unified_components/utils';
+import { useDocumentDetailsContext } from '../shared/context';
 
 export interface RightPanelTabType {
   id: RightPanelPaths;
@@ -62,4 +67,13 @@ export const jsonTab: RightPanelTabType = {
     />
   ),
   content: <JsonTab />,
+};
+
+export const useDefaultTabs = () => {
+  const dataView = useGetScopedSourcererDataView({ sourcererScope: SourcererScopeName.timeline });
+  const { searchHit } = useDocumentDetailsContext();
+  if (!dataView) return [];
+  const hit = transformTimelineDetailItemToUnifiedRows({ hit: searchHit, dataView });
+  if (!hit) return [];
+  return getUnifiedDocViewerTabs({ hit, dataView }) ?? [];
 };

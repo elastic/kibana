@@ -43,12 +43,12 @@ export interface UseTabsResult {
  */
 export const useTabs = ({ flyoutIsExpandable, path }: UseTabsParams): UseTabsResult => {
   const { storage } = useKibana().services;
-
+  const defaultTabs = tabs.useDefaultTabs();
   // if the flyout is expandable we render all 3 tabs (overview, table and json)
   // if the flyout is not, we render only table and json
   const tabsDisplayed = useMemo(
-    () => (flyoutIsExpandable ? allThreeTabs : twoTabs),
-    [flyoutIsExpandable]
+    () => (flyoutIsExpandable ? [tabs.overviewTab, ...defaultTabs] : defaultTabs),
+    [defaultTabs, flyoutIsExpandable]
   );
 
   const selectedTabId = useMemo(() => {

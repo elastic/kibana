@@ -6,3 +6,4 @@
  * Side Public License, v 1.
  */
 export { DocViewer } from './doc_viewer';
+export { getDocViewerTabs } from './get_doc_viewer_tabs';
