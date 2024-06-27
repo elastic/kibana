@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import { css } from '@emotion/react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import AnnotationEditorControls from '@kbn/event-annotation-components/components/annotation_editor_controls/annotation_editor_controls';
@@ -17,20 +16,14 @@ import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { PLUGIN_ID } from '../../../../common';
 import { useDocViewerAnnotationContext } from './doc_viewer_annotation_context';
 
-export const DocViewerAnnotation: React.FC<DocViewRenderProps> = ({ dataView }) => {
+export const DocViewerAnnotation: React.FC<DocViewRenderProps> = ({ dataView, hit }) => {
   const { docVisAnnotation, onDocVisAnnotationChanged } = useDocViewerAnnotationContext();
-  // const timeFieldName = dataView.getTimeField()?.name;
-  // const timeFieldValue = timeFieldName
-  //   ? Array.isArray(hit.flattened[timeFieldName])
-  //     ? hit.flattened[timeFieldName][0]
-  //     : hit.flattened[timeFieldName]
-  //   : undefined;
-  // const timestamp = timeFieldValue ? timeFieldValue : undefined;
   const services = useDiscoverServices();
 
+  const timestamp = String(hit.flattened['@timestamp']); // TODO: This is a temporary logic to get the timestamp from the hit
   const createAnnotation = useCallback(() => {
-    onDocVisAnnotationChanged?.(getDefaultManualAnnotation(uuidv4(), new Date().toISOString()));
-  }, [onDocVisAnnotationChanged]);
+    onDocVisAnnotationChanged?.(getDefaultManualAnnotation(timestamp, timestamp));
+  }, [onDocVisAnnotationChanged, timestamp]);
 
   const deleteAnnotation = useCallback(() => {
     onDocVisAnnotationChanged?.(undefined);
@@ -64,7 +57,7 @@ export const DocViewerAnnotation: React.FC<DocViewRenderProps> = ({ dataView }) 
       <AnnotationEditorControls
         annotation={docVisAnnotation}
         onAnnotationChange={(annotation) => {
-          // console.log(annotation);
+          onDocVisAnnotationChanged?.(annotation);
         }}
         getDefaultRangeEnd={(rangeStart) => rangeStart}
         dataView={dataView}

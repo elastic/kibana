@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -81,18 +81,27 @@ export function DiscoverGridFlyout({
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
-  const [docVisAnnotation, setDocVisAnnotation] = useState<EventAnnotationConfig>();
   const savedSearchState = useSavedSearch();
   const savedSearchContainer = useSavedSearchContainer();
 
-  const updateVisAnnotation = useCallback(
-    (annotation: EventAnnotationConfig | undefined) => {
-      setDocVisAnnotation(annotation);
+  const annotationLayerId = actualHit.flattened['@timestamp'];
+  const visContext =
+    isESQLQuery && canImportVisContext(savedSearchState?.visContext)
+      ? savedSearchState?.visContext
+      : undefined;
+  const docVisAnnotation = useMemo(() => {
+    if (!visContext) {
+      return undefined;
+    }
+    const layers = visContext.attributes.state.visualization.layers || [];
+    const annotationsLayer = layers.find((layer) => layer.layerType === 'annotations');
+    return annotationsLayer?.annotations.find(
+      (annotation: EventAnnotationConfig) => annotation.id === annotationLayerId
+    );
+  }, [visContext, annotationLayerId]);
 
-      const visContext =
-        isESQLQuery && canImportVisContext(savedSearchState?.visContext)
-          ? savedSearchState?.visContext
-          : undefined;
+  const updateVisAnnotation = useCallback(
+    (nextDocVisAnnotation: EventAnnotationConfig | undefined) => {
       if (visContext) {
         let layers = visContext.attributes.state.visualization.layers || [];
         let annotationsLayer = layers.find((layer) => layer.layerType === 'annotations');
@@ -125,9 +134,9 @@ export function DiscoverGridFlyout({
                     indexPatternId: dataView.id,
                     annotations: [
                       ...(annotationsLayer.annotations || []).filter(
-                        (a: EventAnnotationConfig) => a.id !== annotation?.id
+                        (a: EventAnnotationConfig) => a.id !== annotationLayerId
                       ),
-                      ...(annotation ? [annotation] : []),
+                      ...(nextDocVisAnnotation ? [nextDocVisAnnotation] : []),
                     ],
                   },
                 ],
@@ -141,13 +150,7 @@ export function DiscoverGridFlyout({
         });
       }
     },
-    [
-      setDocVisAnnotation,
-      isESQLQuery,
-      savedSearchState?.visContext,
-      savedSearchContainer,
-      dataView.id,
-    ]
+    [annotationLayerId, savedSearchContainer, dataView.id, visContext]
   );
 
   const { flyoutActions } = useFlyoutActions({
@@ -172,23 +175,25 @@ export function DiscoverGridFlyout({
             ? flyoutCustomization.docViewsRegistry(registry)
             : registry;
 
-        derivedRegistry.add({
-          id: 'doc_view_annotation',
-          title: i18n.translate('unifiedDocViewer.docViews.docVisAnnotation.title', {
-            defaultMessage: 'Annotation',
-          }),
-          order: 100,
-          component: (props) => {
-            return <LazyDocViewerAnnotation {...props} />;
-          },
-        });
+        if (isESQLQuery) {
+          derivedRegistry.add({
+            id: 'doc_view_annotation',
+            title: i18n.translate('unifiedDocViewer.docViews.docVisAnnotation.title', {
+              defaultMessage: 'Annotation',
+            }),
+            order: 100,
+            component: (props) => {
+              return <LazyDocViewerAnnotation {...props} />;
+            },
+          });
+        }
 
         return derivedRegistry;
       },
     }));
 
     return getDocViewer({ record: actualHit });
-  }, [flyoutCustomization, getDocViewerAccessor, actualHit]);
+  }, [flyoutCustomization, getDocViewerAccessor, actualHit, isESQLQuery]);
 
   const docViewerAnnotationContextValue = useMemo(() => {
     return {
