@@ -94,7 +94,8 @@ export const useTimelineControlColumn = ({
 
           return (
             <TimelineControlColumnCellRender
-              {...props}
+              rowIndex={props.rowIndex}
+              columnId={props.columnId}
               timelineId={timelineId}
               ariaRowindex={props.rowIndex}
               checked={false}

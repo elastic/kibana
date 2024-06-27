@@ -31,11 +31,7 @@ describe('AddEventNoteAction', () => {
 
       render(
         <TestProviders>
-          <AddEventNoteAction
-            showNotes={false}
-            timelineType={TimelineType.default}
-            toggleShowNotes={jest.fn}
-          />
+          <AddEventNoteAction timelineType={TimelineType.default} />
         </TestProviders>
       );
 
@@ -50,11 +46,7 @@ describe('AddEventNoteAction', () => {
 
       render(
         <TestProviders>
-          <AddEventNoteAction
-            showNotes={false}
-            timelineType={TimelineType.default}
-            toggleShowNotes={jest.fn}
-          />
+          <AddEventNoteAction timelineType={TimelineType.default} />
         </TestProviders>
       );
 

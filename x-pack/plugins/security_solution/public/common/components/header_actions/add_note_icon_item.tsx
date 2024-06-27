@@ -6,16 +6,21 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import { TimelineId } from '../../../../common/types';
 import { NotesFlyout } from '../../../timelines/components/timeline/properties/notes_flyout';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
 import * as i18n from './translations';
 import { ActionIconItem } from './action_icon_item';
+import { appSelectors, inputsSelectors } from '../../store';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+import type { Refetch } from '../../types';
+import { timelineActions } from '../../../timelines/store';
 
 interface AddEventNoteActionProps {
   ariaLabel?: string;
-  showNotes: boolean;
   timelineType: TimelineType;
   eventId?: string;
   refetch?: () => void;
@@ -24,9 +29,12 @@ interface AddEventNoteActionProps {
 
 const EMPTY_STRING_ARRAY: string[] = [];
 
+function isNoteNotNull<T>(note: T | null): note is T {
+  return note !== null;
+}
+
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   ariaLabel,
-  showNotes,
   timelineType,
   eventId,
   refetch,
@@ -42,9 +50,67 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
     setAreNotesVisible(false);
   }, []);
 
-  const noteIds = useMemo(
-    () => (eventId && eventIdToNoteIds?.[eventId]) ?? EMPTY_STRING_ARRAY,
+  const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
+
+  const notesById = useDeepEqualSelector(getNotesByIds);
+
+  const dispatch = useDispatch();
+
+  const timelineSelector = useMemo(() => inputsSelectors.getTimelineSelector(), []);
+
+  const { queries } = useDeepEqualSelector(timelineSelector);
+
+  const localRefetch = useCallback(() => {
+    queries.forEach((query) => {
+      if (query.refetch) {
+        (query.refetch as Refetch)();
+      }
+    });
+  }, [queries]);
+
+  const associateNote = useCallback(
+    (currentNoteId: string) => {
+      if (!eventId) return;
+      dispatch(
+        timelineActions.addNoteToEvent({
+          eventId,
+          id: TimelineId.active,
+          noteId: currentNoteId,
+        })
+      );
+      if (refetch) {
+        refetch();
+      }
+
+      localRefetch();
+    },
+    [dispatch, eventId, refetch, localRefetch]
+  );
+
+  const noteIds: string[] = useMemo(
+    () => (eventIdToNoteIds && eventId && eventIdToNoteIds[eventId]) || EMPTY_STRING_ARRAY,
     [eventIdToNoteIds, eventId]
+  );
+
+  const notes = useMemo(
+    () =>
+      noteIds
+        .map((currentNoteId) => {
+          const note = notesById[currentNoteId];
+          if (note) {
+            return {
+              savedObjectId: note.saveObjectId,
+              note: note.note,
+              noteId: note.id,
+              updated: (note.lastEdit ?? note.created).getTime(),
+              updatedBy: note.user,
+            };
+          } else {
+            return null;
+          }
+        })
+        .filter(isNoteNotNull),
+    [noteIds, notesById]
   );
 
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
@@ -53,11 +119,11 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
     <>
       <NotesFlyout
         eventId={eventId}
-        onToggleShowNotes={toggleNotes}
-        refetch={refetch}
+        toggleShowAddNote={toggleNotes}
+        associateNote={associateNote}
+        notes={notes}
         show={areNotesVisible}
         onClose={handleNotesFlyoutClose}
-        eventIdToNoteIds={eventIdToNoteIds}
       />
 
       <ActionIconItem>
@@ -65,7 +131,6 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
           ariaLabel={ariaLabel}
           data-test-subj="add-note"
           isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
-          showNotes={showNotes}
           timelineType={timelineType}
           toggleShowNotes={toggleNotes}
           toolTip={

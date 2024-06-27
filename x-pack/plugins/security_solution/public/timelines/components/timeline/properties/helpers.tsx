@@ -17,7 +17,6 @@ import * as i18n from './translations';
 interface NotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
-  showNotes: boolean;
   toggleShowNotes: () => void | ((eventId: string) => void);
   toolTip?: string;
   timelineType: TimelineTypeLiteral;
@@ -84,17 +83,8 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
 SmallNotesButton.displayName = 'SmallNotesButton';
 
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({
-    ariaLabel,
-    isDisabled,
-    showNotes,
-    timelineType,
-    toggleShowNotes,
-    toolTip,
-    eventId,
-    notesCount,
-  }) =>
-    showNotes ? (
+  ({ ariaLabel, isDisabled, timelineType, toggleShowNotes, toolTip, eventId, notesCount }) => (
+    <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
       <SmallNotesButton
         ariaLabel={ariaLabel}
         isDisabled={isDisabled}
@@ -103,18 +93,8 @@ export const NotesButton = React.memo<NotesButtonProps>(
         eventId={eventId}
         notesCount={notesCount ?? 0}
       />
-    ) : (
-      <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
-        <SmallNotesButton
-          ariaLabel={ariaLabel}
-          isDisabled={isDisabled}
-          toggleShowNotes={toggleShowNotes}
-          timelineType={timelineType}
-          eventId={eventId}
-          notesCount={notesCount ?? 0}
-        />
-      </EuiToolTip>
-    )
+    </EuiToolTip>
+  )
 );
 
 NotesButton.displayName = 'NotesButton';
