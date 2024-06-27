@@ -45,19 +45,20 @@ describe('links', () => {
     links: links.links?.filter((link) => !excludedLinks.includes(link.id)),
   });
 
-  const getPlugins = (noUserAuthz: boolean = false): StartPlugins => {
+  const getPlugins = (): StartPlugins => {
     return {
-      security: {
-        authc: {
-          getCurrentUser: noUserAuthz
-            ? jest.fn().mockReturnValue(undefined)
-            : jest.fn().mockReturnValue([]),
-        },
-      },
       fleet: {
         authz: createFleetAuthzMock(),
       },
     } as unknown as StartPlugins;
+  };
+
+  const getCoreStart = (noUserAuthz: boolean = false) => {
+    const coreStart = coreMock.createStart();
+    coreStart.security.authc.getCurrentUser = noUserAuthz
+      ? jest.fn().mockReturnValue(undefined)
+      : jest.fn().mockReturnValue([]);
+    return coreStart;
   };
 
   beforeAll(() => {
@@ -67,7 +68,7 @@ describe('links', () => {
   });
 
   beforeEach(() => {
-    coreMockStarted = coreMock.createStart();
+    coreMockStarted = getCoreStart();
     fakeHttpServices = coreMockStarted.http as jest.Mocked<HttpSetup>;
   });
 
@@ -84,7 +85,7 @@ describe('links', () => {
   });
 
   it('should not return any endpoint management link for user with all sub-feature privileges when no user authz', async () => {
-    const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(true));
+    const filteredLinks = await getManagementFilteredLinks(getCoreStart(true), getPlugins());
     expect(filteredLinks).toEqual(
       getLinksWithout(
         SecurityPageName.blocklist,

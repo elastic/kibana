@@ -88,32 +88,17 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
 
   const [, dispatchToaster] = useStateToaster();
 
-  const { security } = useKibana().services;
+  const { securityService: security } = useKibana().services;
 
   const fetchUser = useCallback(
     () => {
       let didCancel = false;
       const fetchData = async () => {
         try {
-          if (security != null) {
-            const response = await security.authc.getCurrentUser();
-            if (!isMounted.current) return;
-            if (!didCancel) {
-              setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
-            }
-          } else {
-            setUser({
-              username: i18n.translate('xpack.securitySolution.getCurrentUser.unknownUser', {
-                defaultMessage: 'Unknown',
-              }),
-              email: '',
-              fullName: '',
-              roles: [],
-              enabled: false,
-              authenticationRealm: { name: '', type: '' },
-              lookupRealm: { name: '', type: '' },
-              authenticationProvider: '',
-            });
+          const response = await security.authc.getCurrentUser();
+          if (!isMounted.current) return;
+          if (!didCancel) {
+            setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
           }
         } catch (error) {
           if (!didCancel) {

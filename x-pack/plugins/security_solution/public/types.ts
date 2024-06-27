@@ -60,6 +60,7 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginStartContract } from '@kbn/alerting-plugin/public/plugin';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -188,6 +189,11 @@ export type StartServices = CoreStart &
     customDataService: DataPublicPluginStart;
     topValuesPopover: TopValuesPopoverService;
     timelineDataService: DataPublicPluginStart;
+    /**
+     * The "security" field name is used for both CoreStart['security'] and StartPlugins['security'] (deprecated).
+     * Use this field to ensure you are using the non-deprecated Security-In-Core APIs.
+     */
+    securityService: SecurityServiceStart;
   };
 
 export type StartRenderServices = Pick<
