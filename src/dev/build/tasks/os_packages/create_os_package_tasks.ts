@@ -28,7 +28,7 @@ export const CreateDebPackage: Task = {
       'amd64',
       '--deb-priority',
       'optional',
-      '--dependency',
+      '--depends',
       ' adduser',
     ]);
 
@@ -37,7 +37,7 @@ export const CreateDebPackage: Task = {
       'arm64',
       '--deb-priority',
       'optional',
-      '--dependency',
+      '--depends',
       ' adduser',
     ]);
   },
