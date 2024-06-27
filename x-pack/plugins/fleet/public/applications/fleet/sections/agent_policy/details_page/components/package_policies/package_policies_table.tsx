@@ -64,6 +64,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { application } = useStartServices();
   const authz = useAuthz();
   const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const canReadAgentPolicies = authz.fleet.readAgentPolicies;
   const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
@@ -141,32 +142,35 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
-            {canUseMultipleAgentPolicies && getSharedPoliciesNumber(packagePolicy) > 1 && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.agentPolicyList.agentsColumn.sharedTooltip"
-                      defaultMessage="This integration is shared by {numberShared} agent policies"
-                      values={{ numberShared: getSharedPoliciesNumber(packagePolicy) }}
-                    />
-                  }
-                >
-                  <EuiText
-                    data-test-subj="PackagePoliciesTableSharedLabel"
-                    color="subdued"
-                    size="xs"
-                    className="eui-textNoWrap"
+            {canUseMultipleAgentPolicies &&
+              canReadAgentPolicies &&
+              canWriteIntegrationPolicies &&
+              getSharedPoliciesNumber(packagePolicy) > 1 && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.agentPolicyList.agentsColumn.sharedTooltip"
+                        defaultMessage="This integration is shared by {numberShared} agent policies"
+                        values={{ numberShared: getSharedPoliciesNumber(packagePolicy) }}
+                      />
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.fleet.fleetServerSetup.sharedText"
-                      defaultMessage="Shared"
-                    />
-                    <EuiIcon type="iInCircle" />
-                  </EuiText>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+                    <EuiText
+                      data-test-subj="PackagePoliciesTableSharedLabel"
+                      color="subdued"
+                      size="xs"
+                      className="eui-textNoWrap"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.fleetServerSetup.sharedText"
+                        defaultMessage="Shared"
+                      />
+                      <EuiIcon type="iInCircle" />
+                    </EuiText>
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
           </EuiFlexGroup>
         ),
       },
@@ -306,8 +310,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       getHref,
       agentPolicy,
       canUseMultipleAgentPolicies,
-      getSharedPoliciesNumber,
+      canReadAgentPolicies,
       canWriteIntegrationPolicies,
+      getSharedPoliciesNumber,
     ]
   );
 
