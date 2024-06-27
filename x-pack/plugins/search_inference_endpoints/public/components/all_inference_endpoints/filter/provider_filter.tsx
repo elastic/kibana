@@ -19,7 +19,7 @@ interface Props {
 }
 
 const options = mapToMultiSelectOption(
-  Object.keys(SERVICE_PROVIDERS) as ServiceProviderKeys[],
+  Object.keys(SERVICE_PROVIDERS),
   Object.fromEntries(Object.entries(SERVICE_PROVIDERS).map(([key, { name }]) => [key, name]))
 );
 

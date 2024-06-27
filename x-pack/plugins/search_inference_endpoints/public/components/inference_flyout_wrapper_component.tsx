@@ -93,15 +93,17 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsCreateInferenceApiLoading(true);
-      try {
-        createInferenceEndpointMutation.mutateAsync({ inferenceId, taskType, modelConfig });
-        setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-      } catch (error) {
-        const errorObj = extractErrorProperties(error);
-        setInferenceAddError(errorObj.message);
-      } finally {
-        setIsCreateInferenceApiLoading(false);
-      }
+
+      createInferenceEndpointMutation
+        .mutateAsync({ inferenceId, taskType, modelConfig })
+        .catch((error) => {
+          const errorObj = extractErrorProperties(error);
+          setInferenceAddError(errorObj.message);
+        })
+        .finally(() => {
+          setIsCreateInferenceApiLoading(false);
+        });
+      setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
     },
     [createInferenceEndpointMutation, isInferenceFlyoutVisible, setIsInferenceFlyoutVisible]
   );
