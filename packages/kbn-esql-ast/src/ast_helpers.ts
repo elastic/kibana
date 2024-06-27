@@ -163,6 +163,8 @@ export function createLiteral(
       literalType: type,
       value: Number(text),
     };
+  } else if (type === 'param') {
+    throw new Error('Should never happen');
   }
   return {
     ...partialLiteral,

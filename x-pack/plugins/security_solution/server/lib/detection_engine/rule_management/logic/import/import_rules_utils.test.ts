@@ -6,28 +6,21 @@
  */
 
 import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
-
+import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 import { requestContextMock } from '../../../routes/__mocks__';
-import { getRuleMock, getEmptyFindResult } from '../../../routes/__mocks__/request_responses';
 
 import { importRules } from './import_rules_utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 
 describe('importRules', () => {
   const { clients, context } = requestContextMock.createTools();
-  const importedRule = getRuleMock(getQueryRuleParams());
+  const ruleToImport = getImportRulesSchemaMock();
 
   beforeEach(() => {
-    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-    clients.rulesClient.update.mockResolvedValue(importedRule);
-    clients.detectionRulesClient.importRule.mockResolvedValue(importedRule);
-    clients.actionsClient.getAll.mockResolvedValue([]);
-
     jest.clearAllMocks();
   });
 
-  it('returns rules response if no rules to import', async () => {
+  it('returns an empty rules response if no rules to import', async () => {
     const result = await importRules({
       ruleChunks: [],
       rulesResponseAcc: [],
@@ -62,12 +55,13 @@ describe('importRules', () => {
   it('returns 409 error if DetectionRulesClient throws with 409 - existing rule', async () => {
     clients.detectionRulesClient.importRule.mockImplementationOnce(async () => {
       throw createBulkErrorObject({
-        ruleId: importedRule.params.ruleId,
+        ruleId: ruleToImport.rule_id,
         statusCode: 409,
-        message: `rule_id: "${importedRule.params.ruleId}" already exists`,
+        message: `rule_id: "${ruleToImport.rule_id}" already exists`,
       });
     });
-    const ruleChunk = [getImportRulesSchemaMock({ rule_id: importedRule.params.ruleId })];
+
+    const ruleChunk = [ruleToImport];
     const result = await importRules({
       ruleChunks: [ruleChunk],
       rulesResponseAcc: [],
@@ -79,15 +73,21 @@ describe('importRules', () => {
     expect(result).toEqual([
       {
         error: {
-          message: `rule_id: "${importedRule.params.ruleId}" already exists`,
+          message: `rule_id: "${ruleToImport.rule_id}" already exists`,
           status_code: 409,
         },
-        rule_id: importedRule.params.ruleId,
+        rule_id: ruleToImport.rule_id,
       },
     ]);
   });
+
   it('creates rule if no matching existing rule found', async () => {
-    const ruleChunk = [getImportRulesSchemaMock({ rule_id: importedRule.params.ruleId })];
+    clients.detectionRulesClient.importRule.mockResolvedValue({
+      ...getRulesSchemaMock(),
+      rule_id: ruleToImport.rule_id,
+    });
+
+    const ruleChunk = [ruleToImport];
     const result = await importRules({
       ruleChunks: [ruleChunk],
       rulesResponseAcc: [],
@@ -96,6 +96,6 @@ describe('importRules', () => {
       existingLists: {},
     });
 
-    expect(result).toEqual([{ rule_id: importedRule.params.ruleId, status_code: 200 }]);
+    expect(result).toEqual([{ rule_id: ruleToImport.rule_id, status_code: 200 }]);
   });
 });

@@ -135,7 +135,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
       messages.push(
         getMessageFromId({
           messageId: 'wrongDissectOptionArgumentType',
-          values: { value },
+          values: { value: value ?? '' },
           locations: firstArg.location,
         })
       );

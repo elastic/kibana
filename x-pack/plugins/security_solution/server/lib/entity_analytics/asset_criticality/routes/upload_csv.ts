@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import Papa from 'papaparse';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type internal from 'stream';
-import type { AssetCriticalityCsvUploadResponse } from '../../../../../common/api/entity_analytics';
+import type { AssetCriticalityBulkUploadResponse } from '../../../../../common/api/entity_analytics';
 import { CRITICALITY_CSV_MAX_SIZE_BYTES_WITH_TOLERANCE } from '../../../../../common/entity_analytics/asset_criticality';
 import type { ConfigType } from '../../../../config';
 import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../../types';
@@ -88,7 +88,7 @@ const handler: (
     logger.debug(`Asset criticality CSV upload completed in ${tookMs}ms ${JSON.stringify(stats)}`);
 
     // type assignment here to ensure that the response body stays in sync with the API schema
-    const resBody: AssetCriticalityCsvUploadResponse = { errors, stats };
+    const resBody: AssetCriticalityBulkUploadResponse = { errors, stats };
 
     const [eventType, event] = createAssetCriticalityProcessedFileEvent({
       startTime: start,

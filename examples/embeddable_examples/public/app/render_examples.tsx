@@ -98,7 +98,7 @@ export const RenderExamples = () => {
 
           <EuiSpacer size="s" />
 
-          <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
+          <ReactEmbeddableRenderer<SearchSerializedState, SearchSerializedState, SearchApi>
             key={hidePanelChrome ? 'hideChrome' : 'showChrome'}
             type={SEARCH_EMBEDDABLE_ID}
             getParentApi={() => parentApi}
