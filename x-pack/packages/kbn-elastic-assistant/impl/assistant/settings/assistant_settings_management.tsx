@@ -7,11 +7,14 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
+  EuiTitle,
+  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -79,6 +82,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const { euiTheme } = useEuiTheme();
+    const headerIconShadow = useEuiShadow('s');
+
     const {
       conversationSettings,
       setConversationSettings,
@@ -237,7 +242,23 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     return (
       <>
         <EuiPageTemplate.Header
-          pageTitle={i18n.SECURITY_AI_SETTINGS}
+          pageTitle={
+            <>
+              <EuiAvatar
+                iconType="logoSecurity"
+                iconSize="m"
+                color="plain"
+                name={i18n.SECURITY_AI_SETTINGS}
+                css={css`
+                  ${headerIconShadow};
+                  margin-right: ${euiTheme.base * 0.75}px;
+                `}
+              />
+              <EuiTitle size="m" className="eui-displayInlineBlock">
+                <h2>{i18n.SECURITY_AI_SETTINGS}</h2>
+              </EuiTitle>
+            </>
+          }
           tabs={tabs}
           paddingSize="none"
         />

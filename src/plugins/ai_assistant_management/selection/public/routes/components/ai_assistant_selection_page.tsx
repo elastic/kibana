@@ -100,7 +100,7 @@ export function AiAssistantSelectionPage() {
                   >
                     {i18n.translate(
                       'aiAssistantManagementSelection.aiAssistantSettingsPage.obsAssistant.documentationLinkLabel',
-                      { defaultMessage: 'Documentation' }
+                      { defaultMessage: 'documentation' }
                     )}
                   </EuiLink>
                 </p>
@@ -165,7 +165,7 @@ export function AiAssistantSelectionPage() {
                   >
                     {i18n.translate(
                       'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
-                      { defaultMessage: 'Documentation' }
+                      { defaultMessage: 'documentation' }
                     )}
                   </EuiLink>
                 </p>
