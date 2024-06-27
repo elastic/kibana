@@ -50,7 +50,6 @@
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Security", "Team:Core", "backport:prev-minor"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -68,7 +67,6 @@
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -78,7 +76,6 @@
       "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "Team:Core", "backport:all-open"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -89,7 +86,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -99,7 +95,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -109,7 +104,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -120,7 +114,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -130,7 +123,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "backport:all-open", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -140,7 +132,6 @@
       "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
       "labels": ["Feature:Vega", "Team:Visualizations"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -150,7 +141,6 @@
       "reviewers": ["Team:apm", "Team: SecuritySolution"],
       "matchBaseBranches": ["main"],
       "labels": ["buildkite-ci", "ci:all-cypress-suites"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -160,7 +150,6 @@
       "reviewers": ["Team: SecuritySolution"],
       "matchBaseBranches": ["main"],
       "labels": ["Team: SecuritySolution"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -181,7 +170,6 @@
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Security", "release_note:skip", "backport:all-open"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -198,7 +186,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -208,7 +195,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip", "backport:all-open"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -218,7 +204,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -235,7 +220,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -260,7 +244,6 @@
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Operations", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -271,7 +254,6 @@
       "matchDepPatterns": ["^@storybook"],
       "excludeDepNames": ["@storybook/testing-react"],
       "labels": ["Team:Operations", "release_note:skip", "ci:build-storybooks", "backport:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "allowedVersions": "<7.0",
       "enabled": true
@@ -282,7 +264,6 @@
       "matchBaseBranches": ["main"],
       "matchDepNames": ["@storybook/testing-react"],
       "labels": ["Team:Operations", "release_note:skip", "ci:build-storybooks", "backport:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "allowedVersions": "<2.0",
       "enabled": true
@@ -300,7 +281,6 @@
       ],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -310,7 +290,6 @@
       "reviewers": ["team:security-asset-management", "team:uptime"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -327,7 +306,6 @@
       ],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:all-cypress-suites"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -364,7 +342,6 @@
       "reviewers": ["team:response-ops", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:all-open"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -384,7 +361,6 @@
       "reviewers": ["team:monitoring"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:Monitoring"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -394,7 +370,6 @@
       "reviewers": ["team:kibana-security", "team:kibana-core"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "ci:serverless-test-all"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -404,7 +379,6 @@
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:prev-minor"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -414,7 +388,6 @@
       "reviewers": ["team:ml-ui"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:ML", "release_note:skip", "backport:all-open"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -424,7 +397,6 @@
       "reviewers": ["team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "labels": ["Team:ESQL", "release_note:skip"],
-      "prCreation": "not-pending",
       "minimumReleaseAge": "7 days",
       "enabled": true
     },

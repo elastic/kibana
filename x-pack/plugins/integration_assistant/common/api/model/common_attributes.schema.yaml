@@ -11,10 +11,10 @@ components:
       minLength: 1
       description: Package name for the integration to be built.
 
-    DatastreamName:
+    DataStreamName:
       type: string
       minLength: 1
-      description: Datastream name for the integration to be built.
+      description: DataStream name for the integration to be built.
 
     RawSamples:
       type: array
@@ -64,7 +64,7 @@ components:
 
     InputType:
       type: string
-      description: The input type for the datastream to pull logs from.
+      description: The input type for the dataStream to pull logs from.
       enum:
         - aws_cloudwatch
         - aws_s3
@@ -80,9 +80,9 @@ components:
         - tcp
         - udp
 
-    Datastream:
+    DataStream:
       type: object
-      description: The datastream object.
+      description: The dataStream object.
       required:
         - name
         - title
@@ -94,27 +94,27 @@ components:
       properties:
         name:
           type: string
-          description: The name of the datastream.
+          description: The name of the dataStream.
         title:
           type: string
-          description: The title of the datastream.
+          description: The title of the dataStream.
         description:
           type: string
-          description: The description of the datastream.
+          description: The description of the dataStream.
         inputTypes:
           type: array
           items:
             $ref: "#/components/schemas/InputType"
-          description: The input types of the datastream.
+          description: The input types of the dataStream.
         rawSamples:
           $ref: "#/components/schemas/RawSamples"
-          description: The raw samples of the datastream.
+          description: The raw samples of the dataStream.
         pipeline:
           $ref: "#/components/schemas/Pipeline"
-          description: The pipeline of the datastream.
+          description: The pipeline of the dataStream.
         docs:
           $ref: "#/components/schemas/Docs"
-          description: The documents of the datastream.
+          description: The documents of the dataStream.
 
     Integration:
       type: object
@@ -137,20 +137,8 @@ components:
         dataStreams:
           type: array
           items:
-            $ref: "#/components/schemas/Datastream"
-          description: The datastreams of the integration.
+            $ref: "#/components/schemas/DataStream"
+          description: The dataStreams of the integration.
         logo:
           type: string
           description: The logo of the integration.
-
-    PipelineResults:
-      type: array
-      description: An array of pipeline results.
-      items:
-        type: object
-
-    Errors:
-      type: array
-      description: An array of errors.
-      items:
-        type: object

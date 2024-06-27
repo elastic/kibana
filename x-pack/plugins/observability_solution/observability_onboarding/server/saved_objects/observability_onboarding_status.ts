@@ -23,7 +23,7 @@ export interface SystemLogsState {
   namespace: string;
 }
 
-export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs';
+export type ObservabilityOnboardingType = 'logFiles' | 'systemLogs' | 'autoDetect';
 
 type ObservabilityOnboardingFlowState = LogFilesState | SystemLogsState | undefined;
 
@@ -64,8 +64,21 @@ const ElasticAgentStepPayloadSchema = schema.object({
 export const InstallIntegrationsStepPayloadSchema = schema.arrayOf(
   schema.object({
     pkgName: schema.string(),
-    installSource: schema.string(),
-    logFilePaths: schema.maybe(schema.arrayOf(schema.string())),
+    pkgVersion: schema.string(),
+    installSource: schema.oneOf([schema.literal('registry'), schema.literal('custom')]),
+    inputs: schema.arrayOf(schema.any()),
+    dataStreams: schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        dataset: schema.string(),
+      })
+    ),
+    kibanaAssets: schema.arrayOf(
+      schema.object({
+        type: schema.string(),
+        id: schema.string(),
+      })
+    ),
   })
 );
 

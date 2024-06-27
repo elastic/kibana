@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+
 import { type SourcererScopeName, type SelectedDataView } from '../store/model';
 
-import { IS_EXPERIMENTAL_SOURCERER_ENABLED } from './is_enabled';
+import { isExperimentalSourcererEnabled } from './is_enabled';
+import { sourcererAdapterSelector } from './redux/selectors';
 
 /**
- * FOR INTERNAL USE ONLY
+ * WARN: FOR INTERNAL USE ONLY
  * This hook provides data for experimental Sourcerer replacement in Security Solution.
  * Do not use in client code as the API will change frequently.
  * It will be extended in the future, covering more and more functionality from the current sourcerer.
@@ -19,6 +23,16 @@ export const useUnstableSecuritySolutionDataView = (
   _scopeId: SourcererScopeName,
   fallbackDataView: SelectedDataView
 ): SelectedDataView => {
-  // TODO: extend the fallback state with values computed using new logic
-  return IS_EXPERIMENTAL_SOURCERER_ENABLED ? fallbackDataView : fallbackDataView;
+  const dataView: SelectedDataView = useSelector(sourcererAdapterSelector);
+
+  const dataViewWithFallbacks: SelectedDataView = useMemo(() => {
+    return {
+      ...dataView,
+      // NOTE: temporary values sourced from the fallback. Will be replaced in the near future.
+      browserFields: fallbackDataView.browserFields,
+      sourcererDataView: fallbackDataView.sourcererDataView,
+    };
+  }, [dataView, fallbackDataView.browserFields, fallbackDataView.sourcererDataView]);
+
+  return isExperimentalSourcererEnabled() ? dataViewWithFallbacks : fallbackDataView;
 };

@@ -1,0 +1,50 @@
+openapi: 3.0.0
+info:
+  title: Get alerts index name API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/index:
+    get:
+      x-labels: [ess]
+      operationId: GetAlertsIndex
+      x-codegen-enabled: true
+      summary: Gets the alert index name if it exists
+      tags:
+        - Alert index API
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  index_mapping_outdated:
+                    type: boolean
+                    nullable: true
+                required: [name, index_mapping_outdated]
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        403:
+          description: Not enough permissions response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        404:
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'

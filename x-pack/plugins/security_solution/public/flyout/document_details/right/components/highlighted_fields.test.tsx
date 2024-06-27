@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { HighlightedFields } from './highlighted_fields';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
@@ -18,12 +18,12 @@ import { useRuleWithFallback } from '../../../../detection_engine/rule_managemen
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
-const renderHighlightedFields = (contextValue: RightPanelContext) =>
+const renderHighlightedFields = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <HighlightedFields />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -38,7 +38,7 @@ describe('<HighlightedFields />', () => {
     const contextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({
       field: {
         values: ['value'],
@@ -55,7 +55,7 @@ describe('<HighlightedFields />', () => {
     const contextValue = {
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       scopeId: 'scopeId',
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({});
 
     const { getByText } = renderHighlightedFields(contextValue);

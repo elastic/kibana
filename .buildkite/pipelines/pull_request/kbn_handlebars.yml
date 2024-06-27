@@ -2,9 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/test/kbn_handlebars.sh
     label: 'Check @kbn/handlebars for upstream differences'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-2
       preemptible: true
     depends_on:

@@ -1,7 +1,9 @@
 - input: azure-eventhub
   template_path: azure-eventhub.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: eventhub
       type: text

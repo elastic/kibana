@@ -15,13 +15,14 @@ import { euiFlyoutClassname } from './constants';
 import type { ApiService } from './lib/api';
 import type {
   DataPublicPluginStart,
-  DataView,
   UsageCollectionStart,
   RuntimeType,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   DataViewField,
+  DataViewLazy,
 } from './shared_imports';
+import { DataView } from './shared_imports';
 import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
@@ -34,7 +35,7 @@ export interface OpenFieldEditorOptions {
    * context containing the data view the field belongs to
    */
   ctx: {
-    dataView: DataView;
+    dataView: DataView | DataViewLazy;
   };
   /**
    * action to take after field is saved
@@ -72,7 +73,7 @@ export const getFieldEditorOpener =
     usageCollection,
     apiService,
   }: Dependencies) =>
-  (options: OpenFieldEditorOptions): CloseEditor => {
+  async (options: OpenFieldEditorOptions): Promise<CloseEditor> => {
     const { uiSettings, overlays, docLinks, notifications, settings, theme } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
@@ -91,12 +92,12 @@ export const getFieldEditorOpener =
       canCloseValidator.current = args.canCloseValidator;
     };
 
-    const openEditor = ({
+    const openEditor = async ({
       onSave,
       fieldName: fieldNameToEdit,
       fieldToCreate,
-      ctx: { dataView },
-    }: OpenFieldEditorOptions): CloseEditor => {
+      ctx: { dataView: dataViewLazyOrNot },
+    }: OpenFieldEditorOptions): Promise<CloseEditor> => {
       const closeEditor = () => {
         if (overlayRef) {
           overlayRef.close();
@@ -113,7 +114,7 @@ export const getFieldEditorOpener =
       };
 
       const getRuntimeField = (name: string) => {
-        const fld = dataView.getAllRuntimeFields()[name];
+        const fld = dataViewLazyOrNot.getAllRuntimeFields()[name];
         return {
           name,
           runtimeField: fld,
@@ -128,6 +129,11 @@ export const getFieldEditorOpener =
           },
         };
       };
+
+      const dataView =
+        dataViewLazyOrNot instanceof DataView
+          ? dataViewLazyOrNot
+          : await dataViews.toDataView(dataViewLazyOrNot);
 
       const dataViewField = fieldNameToEdit
         ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)

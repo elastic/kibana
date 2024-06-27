@@ -25,9 +25,10 @@ exports[`UrlFormatEditor should render normally 1`] = `
       >
         <div
           class="euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlRightIconsCount: 1;"
         >
           <select
-            class="euiSelect euiFormControlLayout--1icons"
+            class="euiSelect emotion-euiSelect"
             data-test-subj="urlEditorType"
             id="generated-id"
           >
@@ -149,7 +150,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         >
           <input
             aria-describedby="generated-id-help-0"
-            class="euiFieldText"
+            class="euiFieldText emotion-euiFieldText"
             data-test-subj="urlEditorUrlTemplate"
             id="generated-id"
             type="text"
@@ -210,7 +211,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
         >
           <input
             aria-describedby="generated-id-help-0"
-            class="euiFieldText"
+            class="euiFieldText emotion-euiFieldText"
             data-test-subj="urlEditorLabelTemplate"
             id="generated-id"
             type="text"

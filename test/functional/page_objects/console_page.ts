@@ -77,7 +77,11 @@ export class ConsolePageObject extends FtrService {
     getAutocompleteSuggestion: async (index: number) => {
       const suggestionsWidget = await this.find.byClassName('suggest-widget');
       const suggestions = await suggestionsWidget.findAllByClassName('monaco-list-row');
-      const label = await suggestions[index].findByClassName('label-name');
+      const suggestion = suggestions[index];
+      if (!suggestion) {
+        return undefined;
+      }
+      const label = await suggestion.findByClassName('label-name');
       return label.getVisibleText();
     },
     pressUp: async (shift: boolean = false) => {

@@ -11,6 +11,11 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { IndexedEndpointHeartbeats } from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
+import {
+  deleteIndexedEndpointHeartbeats,
+  indexEndpointHeartbeats,
+} from '../../../../common/endpoint/data_loaders/index_endpoint_hearbeats';
 import {
   getHostVmClient,
   createVm,
@@ -224,6 +229,19 @@ export const dataLoaders = (
     deleteIndexedEndpointHosts: async (indexedData: IndexedHostsAndAlertsResponse) => {
       const { kbnClient, esClient } = await stackServicesPromise;
       return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
+    },
+
+    indexEndpointHeartbeats: async (options: { count?: number }) => {
+      const { esClient, log } = await setupStackServicesUsingCypressConfig(config);
+      return (await indexEndpointHeartbeats(esClient, log, options.count || 1)).data;
+    },
+
+    deleteIndexedEndpointHeartbeats: async (
+      data: IndexedEndpointHeartbeats['data']
+    ): Promise<null> => {
+      const { esClient } = await stackServicesPromise;
+      await deleteIndexedEndpointHeartbeats(esClient, data);
+      return null;
     },
 
     indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {

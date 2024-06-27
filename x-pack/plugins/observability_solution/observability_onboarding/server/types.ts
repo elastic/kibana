@@ -12,6 +12,7 @@ import {
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
@@ -21,6 +22,7 @@ export interface ObservabilityOnboardingPluginSetupDependencies {
   cloud: CloudSetup;
   usageCollection: UsageCollectionSetup;
   fleet: FleetSetupContract;
+  security: SecurityPluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDependencies {
@@ -29,6 +31,7 @@ export interface ObservabilityOnboardingPluginStartDependencies {
   cloud: CloudStart;
   usageCollection: undefined;
   fleet: FleetStartContract;
+  security: SecurityPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

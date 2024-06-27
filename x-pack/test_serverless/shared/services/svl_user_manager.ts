@@ -55,19 +55,23 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     }
   };
 
+  const customRolesFileName: string | undefined = process.env.ROLES_FILENAME_OVERRIDE;
   // Sharing the instance within FTR config run means cookies are persistent for each role between tests.
-  const sessionManager = new SamlSessionManager({
-    hostOptions: {
-      protocol: config.get('servers.kibana.protocol'),
-      hostname: config.get('servers.kibana.hostname'),
-      port: isCloud ? undefined : config.get('servers.kibana.port'),
-      username: config.get('servers.kibana.username'),
-      password: config.get('servers.kibana.password'),
+  const sessionManager = new SamlSessionManager(
+    {
+      hostOptions: {
+        protocol: config.get('servers.kibana.protocol'),
+        hostname: config.get('servers.kibana.hostname'),
+        port: isCloud ? undefined : config.get('servers.kibana.port'),
+        username: config.get('servers.kibana.username'),
+        password: config.get('servers.kibana.password'),
+      },
+      log,
+      isCloud,
+      supportedRoles,
     },
-    log,
-    isCloud,
-    supportedRoles,
-  });
+    customRolesFileName
+  );
 
   const DEFAULT_ROLE = getDefaultRole();
 

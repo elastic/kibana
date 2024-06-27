@@ -107,9 +107,9 @@ export const getSignalsWithES = async ({
   return signals.body.hits.hits.reduce((acc, hit) => {
     let indexMap = acc.get(hit._index);
     if (indexMap === undefined) {
-      indexMap = new Map<string, estypes.SearchHit<SignalHit>>([[hit._id, hit]]);
+      indexMap = new Map<string, estypes.SearchHit<SignalHit>>([[hit._id!, hit]]);
     } else {
-      indexMap.set(hit._id, hit);
+      indexMap.set(hit._id!, hit);
     }
     acc.set(hit._index, indexMap);
     return acc;

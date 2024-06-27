@@ -15,7 +15,7 @@ import {
 import { getField } from '../../shared/utils';
 import { SESSION_VIEW_TEST_ID } from './test_ids';
 import { useKibana } from '../../../../common/lib/kibana';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 export const SESSION_VIEW_ID = 'session-view';
 
@@ -24,7 +24,7 @@ export const SESSION_VIEW_ID = 'session-view';
  */
 export const SessionView: FC = () => {
   const { sessionView } = useKibana().services;
-  const { getFieldsData, indexName } = useLeftPanelContext();
+  const { getFieldsData, indexName } = useDocumentDetailsContext();
 
   const ancestorIndex = getField(getFieldsData(ANCESTOR_INDEX)); // e.g in case of alert, we want to grab it's origin index
   const sessionEntityId = getField(getFieldsData(ENTRY_LEADER_ENTITY_ID)) || '';

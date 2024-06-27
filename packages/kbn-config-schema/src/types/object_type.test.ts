@@ -354,6 +354,125 @@ test('unknowns = `ignore` affects only own keys', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
 });
 
+describe('nested unknows', () => {
+  test('allow unknown keys when unknowns = `allow`', () => {
+    const type = schema.object({
+      myObj: schema.object({ foo: schema.string({ defaultValue: 'test' }) }, { unknowns: 'allow' }),
+    });
+
+    expect(
+      type.validate({
+        myObj: {
+          bar: 'baz',
+        },
+      })
+    ).toEqual({
+      myObj: {
+        foo: 'test',
+        bar: 'baz',
+      },
+    });
+  });
+
+  test('unknowns = `allow` affects only own keys', () => {
+    const type = schema.object({
+      myObj: schema.object({ foo: schema.object({ bar: schema.string() }) }, { unknowns: 'allow' }),
+    });
+
+    expect(() =>
+      type.validate({
+        myObj: {
+          foo: {
+            bar: 'bar',
+            baz: 'baz',
+          },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`"[myObj.foo.baz]: definition for this key is missing"`);
+  });
+
+  test('does not allow unknown keys when unknowns = `forbid`', () => {
+    const type = schema.object({
+      myObj: schema.object(
+        { foo: schema.string({ defaultValue: 'test' }) },
+        { unknowns: 'forbid' }
+      ),
+    });
+    expect(() =>
+      type.validate({
+        myObj: {
+          bar: 'baz',
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`"[myObj.bar]: definition for this key is missing"`);
+  });
+
+  test('allow and remove unknown keys when unknowns = `ignore`', () => {
+    const type = schema.object({
+      myObj: schema.object(
+        { foo: schema.string({ defaultValue: 'test' }) },
+        { unknowns: 'ignore' }
+      ),
+    });
+
+    expect(
+      type.validate({
+        myObj: {
+          bar: 'baz',
+        },
+      })
+    ).toEqual({
+      myObj: {
+        foo: 'test',
+      },
+    });
+  });
+
+  test('unknowns = `ignore` affects only own keys', () => {
+    const type = schema.object({
+      myObj: schema.object(
+        { foo: schema.object({ bar: schema.string() }) },
+        { unknowns: 'ignore' }
+      ),
+    });
+
+    expect(() =>
+      type.validate({
+        myObj: {
+          foo: {
+            bar: 'bar',
+            baz: 'baz',
+          },
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(`"[myObj.foo.baz]: definition for this key is missing"`);
+  });
+
+  test('parent `allow`, child `ignore` should be honored', () => {
+    const type = schema.object(
+      {
+        myObj: schema.object(
+          { foo: schema.string({ defaultValue: 'test' }) },
+          { unknowns: 'ignore' }
+        ),
+      },
+      { unknowns: 'allow' }
+    );
+
+    expect(
+      type.validate({
+        myObj: {
+          bar: 'baz',
+        },
+      })
+    ).toEqual({
+      myObj: {
+        foo: 'test',
+      },
+    });
+  });
+});
+
 test('handles optional properties', () => {
   const type = schema.object({
     required: schema.string(),

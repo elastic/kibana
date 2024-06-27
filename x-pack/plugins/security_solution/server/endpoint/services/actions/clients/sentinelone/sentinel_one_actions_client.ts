@@ -792,7 +792,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         if (isolateActivityResponseDoc && isolateActivityResponseDoc._source) {
           const s1ActivityData = isolateActivityResponseDoc._source.sentinel_one.activity;
 
-          const elasticDocId = isolateActivityResponseDoc._id;
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          const elasticDocId = isolateActivityResponseDoc._id!;
           const s1AgentId = s1ActivityData.agent.id;
           const activityLogEntryId = s1ActivityData.id;
           const activityLogEntryType = s1ActivityData.type;
@@ -987,7 +988,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
                 error,
                 meta: {
                   activityLogEntryId,
-                  elasticDocId: s1Hit._id,
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  elasticDocId: s1Hit._id!,
                   downloadUrl,
                   createdAt: s1ActivityDoc?.sentinel_one.activity.updated_at ?? '',
                   filename: s1ActivityDoc?.sentinel_one.activity.data.flattened.filename ?? '',

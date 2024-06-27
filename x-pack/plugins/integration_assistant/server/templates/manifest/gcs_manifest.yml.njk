@@ -1,7 +1,9 @@
 - input: gcs
   template_path: gcs.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: project_id
       type: text

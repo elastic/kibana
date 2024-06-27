@@ -94,7 +94,11 @@ const convertObjectMembersToParameterObjects = (
     const anyOf = (result as OpenAPIV3.SchemaObject).anyOf as OpenAPIV3.SchemaObject[];
     properties = anyOf.find((s) => s.type === 'object')!.properties!;
   } else if (isObjectType(schema)) {
-    const { result } = parse({ schema, ctx }) as { result: OpenAPIV3.SchemaObject };
+    const { result } = parse({ schema, ctx });
+    if ('$ref' in result)
+      throw new Error(
+        `Found a reference to "${result.$ref}". Runtime types with IDs are not supported in path or query parameters.`
+      );
     properties = (result as OpenAPIV3.SchemaObject).properties!;
     (result.required ?? []).forEach((key) => required.set(key, true));
   } else if (isRecordType(schema)) {

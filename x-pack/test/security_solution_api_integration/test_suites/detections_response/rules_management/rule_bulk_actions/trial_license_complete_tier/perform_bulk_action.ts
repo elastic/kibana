@@ -48,9 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   const postBulkAction = () =>
     supertest
@@ -218,7 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const [ruleJson, connectorsJson, exportDetailsJson] = body.toString().split(/\n/);
 
       const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       expect(rule).toEqual({
         ...expectedRule,

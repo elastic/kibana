@@ -414,11 +414,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           ])
-          .complete();
+          .waitAndComplete();
 
         proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good morning, sir!')
-          .complete();
+          .waitAndComplete();
 
         const createResponse = await observabilityAIAssistantAPIClient
           .editorUser({
@@ -450,7 +450,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good night, sir!')
-          .complete();
+          .waitAndComplete();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
           .editorUser({

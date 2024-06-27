@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { defaultDataViewFindHandler } from './dataview.handlers.mock';
+import { defaultFleetCspPackageHandler } from './fleet.handlers.mock';
 import { defaultApiLicensingInfo } from './licensing.handlers.mock';
 
 /**
@@ -12,4 +14,8 @@ import { defaultApiLicensingInfo } from './licensing.handlers.mock';
  * when the mock server is started, but can be overridden by specific tests when needed.
  * Recommended to use these handlers for common endpoints.
  */
-export const defaultHandlers = [defaultApiLicensingInfo];
+export const defaultHandlers = [
+  defaultApiLicensingInfo,
+  defaultDataViewFindHandler,
+  defaultFleetCspPackageHandler,
+];

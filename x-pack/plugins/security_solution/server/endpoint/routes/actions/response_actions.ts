@@ -50,7 +50,7 @@ import type {
   KillOrSuspendProcessRequestBody,
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -301,7 +301,7 @@ export function registerResponseActionRoutes(
         withEndpointAuthz(
           { all: ['canWriteScanOperations'] },
           logger,
-          responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
+          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
         )
       );
   }

@@ -277,10 +277,14 @@ export const initializeDashboard = async ({
   };
 
   // --------------------------------------------------------------------------------------
-  // Set latest runtime state for react embeddables.
+  // Set restored runtime state for react embeddables.
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboardContainer) => {
-    dashboardContainer.restoredRuntimeState = runtimePanelsToRestore;
+    for (const idWithRuntimeState of Object.keys(runtimePanelsToRestore)) {
+      const restoredRuntimeStateForChild = runtimePanelsToRestore[idWithRuntimeState];
+      if (!restoredRuntimeStateForChild) continue;
+      dashboardContainer.setRuntimeStateForChild(idWithRuntimeState, restoredRuntimeStateForChild);
+    }
   });
 
   // --------------------------------------------------------------------------------------

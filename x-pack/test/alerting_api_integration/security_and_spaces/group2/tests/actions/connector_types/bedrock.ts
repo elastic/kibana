@@ -31,7 +31,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'anthropic.claude-3-sonnet-20240229-v1:0',
+  defaultModel: 'anthropic.claude-3-5-sonnet-20240620-v1:0',
 };
 
 // eslint-disable-next-line import/no-default-export

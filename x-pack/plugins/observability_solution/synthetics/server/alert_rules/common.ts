@@ -8,13 +8,22 @@ import moment, { Moment } from 'moment';
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
 import { IBasePath } from '@kbn/core/server';
-import { IRuleTypeAlerts, RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import {
+  IRuleTypeAlerts,
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+} from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
-import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
+import {
+  MonitorStatusActionGroup,
+  SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
+} from '../../common/constants/synthetics_alerts';
 import { uptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
 import {
   getUptimeIndexPattern,
@@ -26,7 +35,6 @@ import { getMonitorSummary } from './status_rule/message_utils';
 import {
   SyntheticsCommonState,
   SyntheticsCommonStateCodec,
-  SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
@@ -154,30 +162,33 @@ export const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
 };
 
 export const setRecoveredAlertsContext = ({
-  alertFactory,
+  alertsClient,
   basePath,
-  getAlertUuid,
   spaceId,
   staleDownConfigs,
   upConfigs,
   dateFormat,
   tz,
 }: {
-  alertFactory: RuleExecutorServices['alertFactory'];
+  alertsClient: PublicAlertsClient<
+    ObservabilityUptimeAlert,
+    AlertState,
+    AlertContext,
+    ActionGroupIdsOf<MonitorStatusActionGroup>
+  >;
   basePath?: IBasePath;
-  getAlertUuid?: (alertId: string) => string | null;
   spaceId?: string;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
 }) => {
-  const { getRecoveredAlerts } = alertFactory.done();
-  for (const alert of getRecoveredAlerts()) {
-    const recoveredAlertId = alert.getId();
-    const alertUuid = getAlertUuid?.(recoveredAlertId) || undefined;
+  const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+  for (const recoveredAlert of recoveredAlerts) {
+    const recoveredAlertId = recoveredAlert.alert.getId();
+    const alertUuid = recoveredAlert.alert.getUuid();
 
-    const state = alert.getState() as SyntheticsCommonState & SyntheticsMonitorStatusAlertState;
+    const state = recoveredAlert.alert.getState();
 
     let recoveryReason = '';
     let recoveryStatus = i18n.translate(
@@ -279,7 +290,7 @@ export const setRecoveredAlertsContext = ({
       }
     }
 
-    alert.setContext({
+    const context = {
       ...state,
       ...(monitorSummary ? monitorSummary : {}),
       lastErrorMessage,
@@ -290,7 +301,8 @@ export const setRecoveredAlertsContext = ({
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),
-    });
+    };
+    alertsClient.setAlertData({ id: recoveredAlertId, context });
   }
 };
 

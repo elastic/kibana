@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
@@ -76,13 +76,13 @@ const panelContextValue = {
   browserFields: {},
   getFieldsData: () => {},
   scopeId: 'scopeId',
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderCorrelationsOverview = (contextValue: RightPanelContext) => (
+const renderCorrelationsOverview = (contextValue: DocumentDetailsContext) => (
   <TestProviders>
-    <RightPanelContext.Provider value={contextValue}>
+    <DocumentDetailsContext.Provider value={contextValue}>
       <CorrelationsOverview />
-    </RightPanelContext.Provider>
+    </DocumentDetailsContext.Provider>
   </TestProviders>
 );
 
@@ -209,9 +209,9 @@ describe('<CorrelationsOverview />', () => {
   it('should navigate to the left section Insights tab when clicking on button', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <CorrelationsOverview />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 
@@ -230,9 +230,9 @@ describe('<CorrelationsOverview />', () => {
   it('should navigate to the left section Insights tab automatically when active step is "view case"', () => {
     render(
       <TestProviders>
-        <RightPanelContext.Provider value={panelContextValue}>
+        <DocumentDetailsContext.Provider value={panelContextValue}>
           <CorrelationsOverview />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProviders>
     );
 

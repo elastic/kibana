@@ -24,7 +24,7 @@ import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_
 import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
@@ -43,7 +43,7 @@ import {
  */
 export const CorrelationsOverview: React.FC = () => {
   const { dataAsNestedObject, eventId, indexName, getFieldsData, scopeId, isPreview } =
-    useRightPanelContext();
+    useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { isTourShown, activeStep } = useTourContext();
 

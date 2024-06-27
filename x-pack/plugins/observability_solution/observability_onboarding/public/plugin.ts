@@ -10,7 +10,10 @@ import {
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
 import {
-  HttpStart,
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
+import {
   AppMountParameters,
   CoreSetup,
   CoreStart,
@@ -20,7 +23,12 @@ import {
 } from '@kbn/core/public';
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
+import { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
@@ -34,23 +42,30 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
+  discover: DiscoverSetup;
   share: SharePluginSetup;
+  fleet: FleetSetup;
+  security: SecurityPluginSetup;
+  cloud?: CloudSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
-  cloudExperiments?: CloudExperimentsPluginStart;
-  http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
+  discover: DiscoverStart;
+  share: SharePluginStart;
+  fleet: FleetStart;
+  security: SecurityPluginStart;
+  cloud?: CloudStart;
+  usageCollection?: UsageCollectionStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
-export interface ObservabilityOnboardingPluginContextValue {
-  core: CoreStart;
-  plugins: ObservabilityOnboardingPluginSetupDeps;
-  data: DataPublicPluginStart;
-  observability: ObservabilityPublicStart;
-  config: ConfigSchema;
-}
+export type ObservabilityOnboardingContextValue = CoreStart &
+  ObservabilityOnboardingPluginStartDeps & { config: ConfigSchema };
 
 export class ObservabilityOnboardingPlugin
   implements Plugin<ObservabilityOnboardingPluginSetup, ObservabilityOnboardingPluginStart>

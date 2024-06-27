@@ -39,7 +39,7 @@ import {
   PREVALENCE_DETAILS_UPSELL_TEST_ID,
   PREVALENCE_DETAILS_TABLE_UPSELL_CELL_TEST_ID,
 } from './test_ids';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import {
   getDataProvider,
   getDataProviderAnd,
@@ -296,7 +296,7 @@ const columns: Array<EuiBasicTableColumn<PrevalenceDetailsRow>> = [
  * Prevalence table displayed in the document details expandable flyout left section under the Insights tab
  */
 export const PrevalenceDetails: React.FC = () => {
-  const { dataFormattedForFieldBrowser, investigationFields } = useLeftPanelContext();
+  const { dataFormattedForFieldBrowser, investigationFields } = useDocumentDetailsContext();
 
   const isPlatinumPlus = useLicense().isPlatinumPlus();
 

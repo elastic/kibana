@@ -1,7 +1,9 @@
 - input: gcp-pubsub
   template_path: gcp-pubsub.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: project_id
       type: text

@@ -983,7 +983,7 @@ describe('Response actions history', () => {
     });
   });
 
-  describe('Action status ', () => {
+  describe('Action status', () => {
     beforeEach(() => {
       apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
     });
@@ -1001,8 +1001,51 @@ describe('Response actions history', () => {
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
-          data: await getActionListMock({ actionCount: 2, commands: [command] }),
+          data: await getActionListMock({
+            actionCount: 2,
+            agentIds: ['agent-a', 'agent-b'],
+            hosts: {
+              'agent-a': { name: 'Host-agent-a' },
+              'agent-b': { name: 'Host-agent-b' },
+            },
+            commands: [command],
+            agentState: {
+              'agent-a': {
+                errors: undefined,
+                wasSuccessful: true,
+                isCompleted: true,
+                completedAt: '2023-05-10T20:09:25.824Z',
+              },
+              'agent-b': {
+                errors: undefined,
+                wasSuccessful: true,
+                isCompleted: true,
+                completedAt: '2023-05-10T20:09:25.824Z',
+              },
+            } as unknown as Pick<ActionDetails, 'agentState'>,
+            outputs: (command === 'upload'
+              ? {
+                  'agent-a': {
+                    type: 'json',
+                    content: {
+                      code: 'ra_upload_file-success',
+                      path: 'some/path/to/file',
+                      disk_free_space: 123445,
+                    },
+                  },
+                  'agent-b': {
+                    type: 'json',
+                    content: {
+                      code: 'ra_upload_file-success',
+                      path: 'some/path/to/file',
+                      disk_free_space: 123445,
+                    },
+                  },
+                }
+              : {}) as Pick<ActionDetails, 'outputs'>,
+          }),
         });
+
         if (command === 'get-file' || command === 'execute') {
           mockUseGetFileInfo = {
             isFetching: false,
@@ -1027,15 +1070,31 @@ describe('Response actions history', () => {
     );
 
     it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
-      'shows Failed status badge for failed %s actions',
+      'shows Failed status badge for failed %s action',
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({
+            agentIds: ['agent-a', 'agent-b'],
             actionCount: 2,
             commands: [command],
             wasSuccessful: false,
             status: 'failed',
+            errors: [],
+            outputs: {
+              'agent-a': {
+                type: 'json',
+                content: {
+                  code: 'non_existing_code_for_test',
+                },
+              },
+              'agent-b': {
+                type: 'json',
+                content: {
+                  code: 'non_existing_code_for_test',
+                },
+              },
+            } as ActionDetails['outputs'],
           }),
         });
         render();
@@ -1043,8 +1102,8 @@ describe('Response actions history', () => {
         const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${outputCommand} failed`,
-          `${outputCommand} failed`,
+          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
+          `${outputCommand} failedThe following errors were encountered:An unknown error occurred`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1053,7 +1112,7 @@ describe('Response actions history', () => {
     );
 
     it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
-      'shows Failed status badge for expired %s actions',
+      'shows Failed status badge for expired %s action',
       async (command) => {
         useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
@@ -1094,6 +1153,339 @@ describe('Response actions history', () => {
       expect(
         renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
       ).toEqual(['Pending', 'Pending']);
+    });
+  });
+
+  describe('Action Outputs', () => {
+    beforeEach(() => {
+      apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    });
+
+    const expandRows = () => {
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      expandButtons.map((button) => userEvent.click(button));
+      return getAllByTestId(`${testPrefix}-details-tray-output`);
+    };
+
+    describe('Single agents', () => {
+      it('should show hostname as - when no hostname is available', async () => {
+        const data = await getActionListMock({
+          agentIds: ['agent-a'],
+          hosts: { 'agent-a': { name: '' } },
+          actionCount: 1,
+          commands: ['isolate'],
+          wasSuccessful: true,
+          status: 'failed',
+          errors: [],
+          agentState: {
+            'agent-a': {
+              errors: [],
+              wasSuccessful: true,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+          } as unknown as Pick<ActionDetails, 'agentState'>,
+          outputs: {},
+        });
+
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data,
+        });
+        render();
+
+        const { getAllByTestId, getByTestId } = renderResult;
+        const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+        expandButtons.map((button) => userEvent.click(button));
+
+        const hostnameInfo = getByTestId(`${testPrefix}-action-details-info-Hostname`);
+        expect(hostnameInfo.textContent).toEqual('—');
+      });
+
+      describe('with `outputs` and `errors`', () => {
+        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+          'shows failed outputs and errors for %s action',
+          async (command) => {
+            const data = await getActionListMock({
+              agentIds: ['agent-a'],
+              actionCount: 1,
+              commands: [command],
+              wasSuccessful: false,
+              status: 'failed',
+              errors: ['Error here!'],
+              agentState: {
+                'agent-a': {
+                  errors: ['Error here!'],
+                  wasSuccessful: false,
+                  isCompleted: true,
+                  completedAt: '2023-05-10T20:09:25.824Z',
+                },
+              } as unknown as Pick<ActionDetails, 'agentState'>,
+              // just adding three commands for tests with respective error response codes
+              outputs: ['get-file', 'scan'].includes(command)
+                ? ({
+                    'agent-a': {
+                      type: 'json',
+                      content: {
+                        code:
+                          command === 'get-file'
+                            ? 'ra_get-file_error_not-found'
+                            : command === 'scan'
+                            ? 'ra_scan_error_scan_invalid-input'
+                            : 'non_existing_code_for_test',
+                      },
+                    },
+                  } as Pick<ActionDetails, 'outputs'>)
+                : undefined,
+            });
+
+            useGetEndpointActionListMock.mockReturnValue({
+              ...getBaseMockedActionList(),
+              data,
+            });
+            render();
+
+            const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+            const outputs = expandRows();
+            if (command === 'get-file') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:The file specified was not found | Error here!`,
+              ]);
+            } else if (command === 'scan') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:Invalid absolute file path provided | Error here!`,
+              ]);
+            } else {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following error was encountered:Error here!`,
+              ]);
+            }
+          }
+        );
+      });
+
+      describe('with `errors`', () => {
+        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+          'shows failed errors for %s action when no outputs',
+          async (command) => {
+            useGetEndpointActionListMock.mockReturnValue({
+              ...getBaseMockedActionList(),
+              data: await getActionListMock({
+                agentIds: ['agent-a'],
+                actionCount: 1,
+                commands: [command],
+                wasSuccessful: false,
+                status: 'failed',
+                errors: ['Error message w/o output'],
+                outputs: undefined,
+                agentState: {
+                  'agent-a': {
+                    errors: ['Error message w/o output'],
+                    wasSuccessful: false,
+                    isCompleted: true,
+                    completedAt: '2023-05-10T20:09:25.824Z',
+                  },
+                } as unknown as Pick<ActionDetails, 'agentState'>,
+              }),
+            });
+            render();
+
+            const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+            const outputs = expandRows();
+            expect(outputs.map((n) => n.textContent)).toEqual([
+              `${outputCommand} failedThe following error was encountered:Error message w/o output`,
+            ]);
+          }
+        );
+      });
+    });
+
+    describe('Multiple agents', () => {
+      it('should show `—` concatenated hostnames when no hostname is available for an agent', async () => {
+        const data = await getActionListMock({
+          agentIds: ['agent-a', 'agent-b'],
+          hosts: {
+            'agent-a': { name: '' },
+            'agent-b': { name: 'Agent-B' },
+            'agent-c': { name: '' },
+          },
+          actionCount: 1,
+          commands: ['isolate'],
+          wasSuccessful: true,
+          status: 'failed',
+          errors: [''],
+          agentState: {
+            'agent-a': {
+              errors: [''],
+              wasSuccessful: true,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+            'agent-b': {
+              errors: [''],
+              wasSuccessful: false,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+            'agent-c': {
+              errors: [''],
+              isExpired: true,
+              wasSuccessful: false,
+              isCompleted: true,
+              completedAt: '2023-05-10T20:09:25.824Z',
+            },
+          } as unknown as Pick<ActionDetails, 'agentState'>,
+          outputs: {},
+        });
+
+        useGetEndpointActionListMock.mockReturnValue({
+          ...getBaseMockedActionList(),
+          data,
+        });
+        render();
+
+        const { getAllByTestId } = renderResult;
+        const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+        expandButtons.map((button) => userEvent.click(button));
+
+        const hostnameInfo = getAllByTestId(`${testPrefix}-action-details-info-Hostname`);
+        expect(hostnameInfo.map((element) => element.textContent)).toEqual(['—, Agent-B, —']);
+      });
+
+      describe('with `outputs` and `errors`', () => {
+        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+          'shows failed outputs and errors for %s action on multiple agents',
+          async (command) => {
+            const data = await getActionListMock({
+              agentIds: ['agent-a', 'agent-b'],
+              hosts: { 'agent-a': { name: 'Host-agent-a' }, 'agent-b': { name: 'Host-agent-b' } },
+              actionCount: 1,
+              commands: [command],
+              wasSuccessful: false,
+              status: 'failed',
+              errors: ['Error with agent-a!', 'Error with agent-b!'],
+              agentState: {
+                'agent-a': {
+                  errors: ['Error with agent-a!'],
+                  wasSuccessful: false,
+                  isCompleted: true,
+                  completedAt: '2023-05-10T20:09:25.824Z',
+                },
+                'agent-b': {
+                  errors: ['Error with agent-b!'],
+                  wasSuccessful: false,
+                  isCompleted: true,
+                  completedAt: '2023-05-10T20:09:25.824Z',
+                },
+              } as unknown as Pick<ActionDetails, 'agentState'>,
+              outputs: {
+                'agent-a': {
+                  type: 'json',
+                  content: {
+                    code:
+                      command === 'get-file'
+                        ? 'ra_get-file_error_not-found'
+                        : command === 'scan'
+                        ? 'ra_scan_error_scan_invalid-input'
+                        : 'non_existing_code_for_test',
+                    content: undefined,
+                  },
+                },
+                'agent-b': {
+                  type: 'json',
+                  content: {
+                    code:
+                      command === 'get-file'
+                        ? 'ra_get-file_error_invalid-input'
+                        : command === 'scan'
+                        ? 'ra_scan_error_scan_invalid-input'
+                        : 'non_existing_code_for_test',
+                    content: undefined,
+                  },
+                },
+              } as Pick<ActionDetails, 'outputs'>,
+            });
+
+            useGetEndpointActionListMock.mockReturnValue({
+              ...getBaseMockedActionList(),
+              data,
+            });
+            render();
+
+            const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+            const outputs = expandRows();
+            if (command === 'get-file') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: The file specified was not found | Error with agent-a!Host: Host-agent-bErrors: The path defined is not valid | Error with agent-b!`,
+              ]);
+            } else if (command === 'scan') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Invalid absolute file path provided | Error with agent-a!Host: Host-agent-bErrors: Invalid absolute file path provided | Error with agent-b!`,
+              ]);
+            } else {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+              ]);
+            }
+          }
+        );
+      });
+
+      describe('with `errors`', () => {
+        it.each(RESPONSE_ACTION_API_COMMANDS_NAMES)(
+          'shows failed errors for %s action on multiple agents',
+          async (command) => {
+            const data = await getActionListMock({
+              agentIds: ['agent-a', 'agent-b'],
+              hosts: { 'agent-a': { name: 'Host-agent-a' }, 'agent-b': { name: 'Host-agent-b' } },
+              actionCount: 1,
+              commands: [command],
+              wasSuccessful: false,
+              status: 'failed',
+              errors: ['Error with agent-a!', 'Error with agent-b!'],
+              agentState: {
+                'agent-a': {
+                  errors: ['Error with agent-a!'],
+                  wasSuccessful: false,
+                  isCompleted: true,
+                  completedAt: '2023-05-10T20:09:25.824Z',
+                },
+                'agent-b': {
+                  errors: ['Error with agent-b!'],
+                  wasSuccessful: false,
+                  isCompleted: true,
+                  completedAt: '2023-05-10T20:09:25.824Z',
+                },
+              } as unknown as Pick<ActionDetails, 'agentState'>,
+              outputs: {},
+            });
+
+            useGetEndpointActionListMock.mockReturnValue({
+              ...getBaseMockedActionList(),
+              data,
+            });
+            render();
+
+            const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+            const outputs = expandRows();
+            if (command === 'get-file') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+              ]);
+            } else if (command === 'scan') {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+              ]);
+            } else {
+              expect(outputs.map((n) => n.textContent)).toEqual([
+                `${outputCommand} failedThe following errors were encountered:Host: Host-agent-aErrors: Error with agent-a!Host: Host-agent-bErrors: Error with agent-b!`,
+              ]);
+            }
+          }
+        );
+      });
     });
   });
 
@@ -1435,7 +1827,7 @@ describe('Response actions history', () => {
     });
   });
 
-  describe('Types  filter', () => {
+  describe('Types filter', () => {
     const filterPrefix = 'types-filter';
     it('should show a list of action types when opened', () => {
       render();

@@ -6,13 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { URL } from 'url';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { DATES } from '../constants';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
-  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const logsUi = getService('logsUi');
   const find = getService('find');
@@ -61,15 +59,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       expect(entryTimestamp).to.be('19:43:22.111');
-    });
-
-    it('should properly sync logPosition in url', async () => {
-      const currentUrl = await browser.getCurrentUrl();
-      const parsedUrl = new URL(currentUrl);
-
-      expect(parsedUrl.searchParams.get('logPosition')).to.contain(
-        `time:\'2018-10-17T19:46:22.333333333Z\'`
-      );
     });
 
     it('should properly render timestamp in flyout with nano precision', async () => {

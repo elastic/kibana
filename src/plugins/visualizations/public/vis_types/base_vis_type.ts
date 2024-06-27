@@ -24,6 +24,7 @@ const defaultOptions: VisTypeOptions = {
 export class BaseVisType<TVisParams extends VisParams = VisParams> {
   public readonly name;
   public readonly title;
+  public readonly order;
   public readonly description;
   public readonly note;
   public readonly getSupportedTriggers;
@@ -67,6 +68,7 @@ export class BaseVisType<TVisParams extends VisParams = VisParams> {
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
+    this.order = opts.order ?? 0;
     this.suppressWarnings = opts.suppressWarnings;
     this.visConfig = defaultsDeep({}, opts.visConfig, { defaults: {} });
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });

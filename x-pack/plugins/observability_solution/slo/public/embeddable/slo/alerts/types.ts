@@ -24,7 +24,9 @@ import {
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
   EmbeddableApiContext,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
+import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 
 export interface SloItem {
   id: string;
@@ -45,7 +47,8 @@ export type SloAlertsEmbeddableState = SerializedTitles & EmbeddableSloProps;
 export type SloAlertsApi = DefaultEmbeddableApi<SloAlertsEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
-  HasSloAlertsConfig;
+  HasSloAlertsConfig &
+  HasEditCapabilities;
 
 export interface HasSloAlertsConfig {
   getSloAlertsConfig: () => EmbeddableSloProps;
@@ -69,6 +72,7 @@ export interface SloEmbeddableDeps {
   http: CoreStart['http'];
   i18n: CoreStart['i18n'];
   application: ApplicationStart;
+  observability: ObservabilityPublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
   notifications: NotificationsStart;

@@ -95,6 +95,11 @@ describe('correctCommonEsqlMistakes', () => {
     );
 
     expectQuery(
+      `FROM logs-*\n| STATS COUNT(*) BY BUCKET(@timestamp, 1m)\n| SORT \`BUCKET(@timestamp, 1m)\` DESC`,
+      `FROM logs-*\n| STATS COUNT(*) BY BUCKET(@timestamp, 1m)\n| SORT \`BUCKET(@timestamp, 1m)\` DESC`
+    );
+
+    expectQuery(
       `FROM logs-* | KEEP date, whatever | RENAME whatever AS forever | SORT forever DESC`,
       `FROM logs-*\n| KEEP date, whatever\n| RENAME whatever AS forever\n| SORT forever DESC`
     );

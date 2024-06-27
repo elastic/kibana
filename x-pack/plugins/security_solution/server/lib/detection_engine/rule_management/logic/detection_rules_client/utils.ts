@@ -20,12 +20,18 @@ export const toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
   existingRule: RuleAlertType,
   updatedRuleEnabled?: boolean
-) => {
+): Promise<{ enabled: boolean }> => {
   if (existingRule.enabled && updatedRuleEnabled === false) {
     await rulesClient.disable({ id: existingRule.id });
-  } else if (!existingRule.enabled && updatedRuleEnabled === true) {
-    await rulesClient.enable({ id: existingRule.id });
+    return { enabled: false };
   }
+
+  if (!existingRule.enabled && updatedRuleEnabled === true) {
+    await rulesClient.enable({ id: existingRule.id });
+    return { enabled: true };
+  }
+
+  return { enabled: existingRule.enabled };
 };
 
 export const validateMlAuth = async (mlAuthz: MlAuthz, ruleType: Type) => {

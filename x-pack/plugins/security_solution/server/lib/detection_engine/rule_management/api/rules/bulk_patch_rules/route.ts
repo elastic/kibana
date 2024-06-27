@@ -17,7 +17,6 @@ import {
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { transformBulkError, buildSiemResponse } from '../../../../routes/utils';
 import { getIdBulkError } from '../../../utils/utils';
-import { transformValidateBulkError } from '../../../utils/validate';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
@@ -86,11 +85,11 @@ export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await detectionRulesClient.patchRule({
+                const patchedRule = await detectionRulesClient.patchRule({
                   nextParams: payloadRule,
                 });
 
-                return transformValidateBulkError(rule.id, rule);
+                return patchedRule;
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }

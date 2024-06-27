@@ -49,14 +49,13 @@ describe('APMSection', () => {
       from: '2020-10-08T06:00:00.000Z',
       to: '2020-10-08T07:00:00.000Z',
     });
-    const config = {
+    const config: ConfigSchema = {
       unsafe: {
         alertDetails: {
-          metrics: { enabled: false },
           uptime: { enabled: false },
         },
       },
-    } as ConfigSchema;
+    };
 
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       appMountParameters: {} as AppMountParameters,

@@ -17,6 +17,7 @@ import {
   Embeddable,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
+  COMMON_EMBEDDABLE_GROUPING,
 } from '@kbn/embeddable-plugin/public';
 
 import { CONTENT_ID } from '../../common';
@@ -43,6 +44,8 @@ export class LinksEmbeddable
 
   public attributes?: LinksAttributes;
   public attributes$ = new Subject<LinksAttributes>();
+
+  public grouping = [COMMON_EMBEDDABLE_GROUPING.annotation];
 
   constructor(
     config: LinksConfig,

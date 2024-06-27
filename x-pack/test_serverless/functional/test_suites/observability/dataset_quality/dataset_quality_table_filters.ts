@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { datasetNames, defaultNamespace, getInitialTestLogs, getLogsForDataset } from './data';
+import { datasetNames, getInitialTestLogs, getLogsForDataset, productionNamespace } from './data';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -20,58 +20,73 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('svlLogsSynthtraceClient');
   const testSubjects = getService('testSubjects');
   const to = '2024-01-01T12:00:00.000Z';
+  const apacheAccessDatasetName = 'apache.access';
+  const apacheAccessDatasetHumanName = 'Apache access logs';
+  const apacheIntegrationName = 'Apache HTTP Server';
+  const pkg = {
+    name: 'apache',
+    version: '1.14.0',
+  };
+  const allDatasetNames = [apacheAccessDatasetHumanName, ...datasetNames];
 
   describe('Dataset quality table filters', function () {
-    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
-
     before(async () => {
-      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+      // Install Integration and ingest logs for it
+      await PageObjects.observabilityLogsExplorer.installPackage(pkg);
+      // Ingest basic logs
+      await synthtrace.index([
+        // Ingest basic logs
+        getInitialTestLogs({ to, count: 4 }),
+        // Ingest Degraded Logs
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 1,
+          dataset: datasetNames[2],
+          isMalformed: true,
+        }),
+        // Index 10 logs for `logs-apache.access` dataset
+        getLogsForDataset({
+          to,
+          count: 10,
+          dataset: apacheAccessDatasetName,
+          namespace: productionNamespace,
+        }),
+      ]);
       await PageObjects.svlCommonPage.loginWithRole('admin');
       await PageObjects.datasetQuality.navigateTo();
     });
 
     after(async () => {
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(pkg);
       await synthtrace.clean();
-      await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
-    });
-
-    it('hides inactive datasets when toggled', async () => {
-      const initialRows = await PageObjects.datasetQuality.getDatasetTableRows();
-      expect(initialRows.length).to.eql(3);
-
-      await PageObjects.datasetQuality.toggleShowInactiveDatasets();
-
-      const afterToggleRows = await PageObjects.datasetQuality.getDatasetTableRows();
-      expect(afterToggleRows.length).to.eql(1);
-
-      await PageObjects.datasetQuality.toggleShowInactiveDatasets();
-
-      const afterReToggleRows = await PageObjects.datasetQuality.getDatasetTableRows();
-      expect(afterReToggleRows.length).to.eql(3);
     });
 
     it('shows full dataset names when toggled', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql(datasetNames);
+      expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
       await PageObjects.datasetQuality.toggleShowFullDatasetNames();
 
       const datasetNameColCellTextsAfterToggle = await datasetNameCol.getCellTexts();
-      const duplicateNames = datasetNames.map((name) => `${name}\n${name}`);
+      const duplicateNames = [
+        `${apacheAccessDatasetHumanName}\n${apacheAccessDatasetName}`,
+        ...datasetNames.map((name) => `${name}\n${name}`),
+      ];
       expect(datasetNameColCellTextsAfterToggle).to.eql(duplicateNames);
 
+      // resetting the toggle
       await PageObjects.datasetQuality.toggleShowFullDatasetNames();
       const datasetNameColCellTextsAfterReToggle = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTextsAfterReToggle).to.eql(datasetNames);
+      expect(datasetNameColCellTextsAfterReToggle).to.eql(allDatasetNames);
     });
 
     it('searches the datasets', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql(datasetNames);
+      expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
       // Search for a dataset
       await testSubjects.setValue(
@@ -83,33 +98,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetNameColAfterSearch = colsAfterSearch['Data Set Name'];
       const datasetNameColCellTextsAfterSearch = await datasetNameColAfterSearch.getCellTexts();
       expect(datasetNameColCellTextsAfterSearch).to.eql([datasetNames[2]]);
-      await testSubjects.setValue(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFilterBarFieldSearch,
-        ''
-      );
+      // Reset the search field
+      await testSubjects.click('clearSearchButton');
     });
 
     it('filters for integration', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      const apacheIntegrationName = 'Apache HTTP Server';
-
-      await PageObjects.observabilityLogsExplorer.navigateTo();
-
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
-
-      // Index 10 logs for `logs-apache.access` dataset
-      await synthtrace.index(
-        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
-      );
-
-      await PageObjects.datasetQuality.navigateTo();
-
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Data Set Name'];
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql([apacheAccessDatasetHumanName, ...datasetNames]);
+      expect(datasetNameColCellTexts).to.eql(allDatasetNames);
 
       // Filter for integration
       await PageObjects.datasetQuality.filterForIntegrations([apacheIntegrationName]);
@@ -118,64 +115,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetNameColAfterFilter = colsAfterFilter['Data Set Name'];
       const datasetNameColCellTextsAfterFilter = await datasetNameColAfterFilter.getCellTexts();
       expect(datasetNameColCellTextsAfterFilter).to.eql([apacheAccessDatasetHumanName]);
+      // Reset the filter by selecting from the dropdown again
+      await PageObjects.datasetQuality.filterForIntegrations([apacheIntegrationName]);
     });
 
     it('filters for namespace', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const datasetNamespace = 'prod';
-
-      await PageObjects.observabilityLogsExplorer.navigateTo();
-
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
-
-      // Index 10 logs for `logs-apache.access` dataset
-      await synthtrace.index(
-        getLogsForDataset({
-          to,
-          count: 10,
-          dataset: apacheAccessDatasetName,
-          namespace: datasetNamespace,
-        })
-      );
-
-      await PageObjects.datasetQuality.navigateTo();
-
       // Get default namespaces
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const namespaceCol = cols.Namespace;
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
-      expect(namespaceColCellTexts).to.contain(defaultNamespace);
+      expect(namespaceColCellTexts).to.contain(productionNamespace);
 
       // Filter for prod namespace
-      await PageObjects.datasetQuality.filterForNamespaces([datasetNamespace]);
+      await PageObjects.datasetQuality.filterForNamespaces([productionNamespace]);
 
       const colsAfterFilter = await PageObjects.datasetQuality.parseDatasetTable();
       const namespaceColAfterFilter = colsAfterFilter.Namespace;
       const namespaceColCellTextsAfterFilter = await namespaceColAfterFilter.getCellTexts();
 
-      expect(namespaceColCellTextsAfterFilter).to.eql([datasetNamespace]);
+      expect(namespaceColCellTextsAfterFilter).to.eql([productionNamespace]);
+      // Reset the namespace by selecting from the dropdown again
+      await PageObjects.datasetQuality.filterForNamespaces([productionNamespace]);
     });
 
     it('filters for quality', async () => {
-      const apacheAccessDatasetName = 'apache.access';
       const expectedQuality = 'Poor';
-
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
-
-      // Index 10 logs for `logs-apache.access` dataset
-      await synthtrace.index(
-        getLogsForDataset({
-          to: new Date().toISOString(),
-          count: 10,
-          dataset: apacheAccessDatasetName,
-          isMalformed: true,
-        })
-      );
-
-      await PageObjects.datasetQuality.navigateTo();
-
       // Get default quality
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetQuality = cols['Data Set Quality'];
@@ -190,6 +154,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const datasetQualityCellTextsAfterFilter = await datasetQualityAfterFilter.getCellTexts();
 
       expect(datasetQualityCellTextsAfterFilter).to.eql([expectedQuality]);
+
+      // Reset the namespace by selecting from the dropdown again
+      await PageObjects.datasetQuality.filterForQualities([expectedQuality]);
     });
   });
 }

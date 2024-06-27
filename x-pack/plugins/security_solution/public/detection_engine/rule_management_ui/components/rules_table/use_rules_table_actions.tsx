@@ -122,7 +122,8 @@ export const useRulesTableActions = ({
           {
             type: 'icon',
             'data-test-subj': 'manualRuleRunAction',
-            description: i18n.MANUAL_RULE_RUN,
+            description: (rule) =>
+              !rule.enabled ? i18n.MANUAL_RULE_RUN_TOOLTIP : i18n.MANUAL_RULE_RUN,
             icon: 'play',
             name: i18n.MANUAL_RULE_RUN,
             onClick: async (rule: Rule) => {

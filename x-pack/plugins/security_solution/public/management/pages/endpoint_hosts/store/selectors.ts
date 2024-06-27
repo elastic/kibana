@@ -11,11 +11,7 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type {
-  EndpointPendingActions,
-  EndpointSortableField,
-  Immutable,
-} from '../../../../../common/endpoint/types';
+import type { EndpointSortableField, Immutable } from '../../../../../common/endpoint/types';
 import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
@@ -31,7 +27,6 @@ import {
 } from '../../../state';
 
 import type { ServerApiError } from '../../../../common/types';
-import { EndpointDetailsTabsTypes } from '../view/details/components/endpoint_details_tabs';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -234,17 +229,6 @@ export const getIsolationRequestError: (
   }
 });
 
-export const getIsOnEndpointDetailsActivityLog: (state: Immutable<EndpointState>) => boolean =
-  createSelector(uiQueryParams, (searchParams) => {
-    return searchParams.show === EndpointDetailsTabsTypes.activityLog;
-  });
-
-export const getEndpointPendingActionsState = (
-  state: Immutable<EndpointState>
-): Immutable<EndpointState['endpointPendingActions']> => {
-  return state.endpointPendingActions;
-};
-
 export const getMetadataTransformStats = (state: Immutable<EndpointState>) =>
   state.metadataTransformStats;
 
@@ -253,24 +237,3 @@ export const metadataTransformStats = (state: Immutable<EndpointState>) =>
 
 export const isMetadataTransformStatsLoading = (state: Immutable<EndpointState>) =>
   isLoadingResourceState(state.metadataTransformStats);
-
-/**
- * Returns a function (callback) that can be used to retrieve the list of pending actions against
- * an endpoint currently displayed in the endpoint list
- */
-export const getEndpointPendingActionsCallback: (
-  state: Immutable<EndpointState>
-) => (endpointId: string) => EndpointPendingActions['pending_actions'] = createSelector(
-  getEndpointPendingActionsState,
-  (pendingActionsState) => {
-    return (endpointId: string) => {
-      let response: EndpointPendingActions['pending_actions'] = {};
-
-      if (isLoadedResourceState(pendingActionsState)) {
-        response = pendingActionsState.data.get(endpointId) ?? {};
-      }
-
-      return response;
-    };
-  }
-);

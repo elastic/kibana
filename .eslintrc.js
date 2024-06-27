@@ -1017,6 +1017,7 @@ module.exports = {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
         '@typescript-eslint/no-duplicate-imports': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
         'no-restricted-imports': [
           'error',
           {

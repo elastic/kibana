@@ -92,7 +92,7 @@ export async function getShapeFilters(
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
   for (let i = 0; i < hits.length; i++) {
-    const boundaryHit: BoundaryHit = hits[i];
+    const boundaryHit = hits[i] as BoundaryHit;
     filters[boundaryHit._id] = {
       geo_shape: {
         [geoField]: {
