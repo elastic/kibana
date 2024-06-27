@@ -3269,10 +3269,6 @@
                 "path": "x-pack/plugins/alerting/server/plugin.ts"
               },
               {
-                "plugin": "files",
-                "path": "src/plugins/files/server/routes/file_kind/create.ts"
-              },
-              {
                 "plugin": "cases",
                 "path": "x-pack/plugins/cases/server/client/factory.ts"
               },
