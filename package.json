@@ -1232,7 +1232,7 @@
     "@babel/preset-typescript": "^7.24.7",
     "@babel/register": "^7.24.6",
     "@babel/traverse": "^7.24.7",
-    "@babel/types": "7.21.2",
+    "@babel/types": "7.24.7",
     "@bazel/ibazel": "^0.16.2",
     "@bazel/typescript": "4.6.2",
     "@cypress/debugging-proxy": "2.0.1",
