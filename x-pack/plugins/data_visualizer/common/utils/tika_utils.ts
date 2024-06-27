@@ -11,6 +11,9 @@ export const TIKA_TYPES = [
   'application/vnd.ms-excel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   'application/vnd.ms-powerpoint',
+  'application/vnd.oasis.opendocument.presentation',
+  'application/vnd.oasis.opendocument.spreadsheet',
+  'application/vnd.oasis.opendocument.text',
   'text/rtf',
   'application/pdf',
   'text/plain',
@@ -32,6 +35,11 @@ export const getTikaDisplayType = (type: string) => {
 
     case 'application/vnd.ms-powerpoint':
       return 'Microsoft Office Power Point document';
+
+    case 'application/vnd.oasis.opendocument.presentation':
+    case 'application/vnd.oasis.opendocument.spreadsheet':
+    case 'application/vnd.oasis.opendocument.text':
+      return 'Open Document Format';
 
     case 'text/rtf':
       return 'Rich Text Format';
