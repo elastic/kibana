@@ -145,26 +145,28 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
               </>
             }
           >
-            {blockingError ? (
-              <ControlError
-                error={
-                  blockingError ??
-                  i18n.translate('controls.blockingError', {
-                    defaultMessage: 'There was an error loading this control.',
-                  })
-                }
-              />
-            ) : (
+            <>
+              {blockingError && (
+                <ControlError
+                  error={
+                    blockingError ??
+                    i18n.translate('controls.blockingError', {
+                      defaultMessage: 'There was an error loading this control.',
+                    })
+                  }
+                />
+              )}
               <Component
                 className={classNames('controlPanel', {
                   'controlPanel--roundedBorders':
                     !api?.CustomPrependComponent && !isEditable && usingTwoLineLayout,
+                  'controlPanel--hideComponent': Boolean(blockingError), // don't want to unmount component on error; just hide it
                 })}
                 ref={(newApi) => {
                   if (newApi && !api) setApi(newApi);
                 }}
               />
-            )}
+            </>
           </EuiFormControlLayout>
         </EuiFormRow>
       </FloatingActions>

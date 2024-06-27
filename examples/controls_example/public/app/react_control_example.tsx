@@ -9,40 +9,33 @@
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiCallOut,
   EuiCodeBlock,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiSuperDatePicker,
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { CoreStart } from '@kbn/core/public';
-import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { combineCompatibleChildrenApis, PresentationContainer } from '@kbn/presentation-containers';
+import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataLoading,
   HasUniqueId,
   PublishesDataLoading,
-  PublishesUnifiedSearch,
-  PublishesViewMode,
   useBatchedPublishingSubjects,
-  useStateFromPublishingSubject,
   ViewMode as ViewModeType,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
-import { DefaultControlApi } from '../react_controls/types';
 
 const toggleViewButtons = [
   {
@@ -88,18 +81,7 @@ const controlGroupPanels = {
   },
 };
 
-/**
- * I am mocking the dashboard API so that the data table embeddble responds to changes to the
- * data view publishing subject from the control group
- */
-type MockedDashboardApi = PresentationContainer &
-  PublishesDataLoading &
-  PublishesViewMode &
-  PublishesUnifiedSearch & {
-    publishFilters: (newFilters: Filter[] | undefined) => void;
-    setViewMode: (newViewMode: ViewMode) => void;
-    setChild: (child: HasUniqueId) => void;
-  };
+const WEB_LOGS_DATA_VIEW_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
 
 export const ReactControlExample = ({
   core,
@@ -120,32 +102,34 @@ export const ReactControlExample = ({
   const timeslice$ = useMemo(() => {
     return new BehaviorSubject<[number, number] | undefined>(undefined);
   }, []);
-  const [dataLoading, timeRange] = useBatchedPublishingSubjects(dataLoading$, timeRange$);
+  const viewMode$ = useMemo(() => {
+    return new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
+  }, []);
+  const [dataLoading, timeRange, viewMode] = useBatchedPublishingSubjects(
+    dataLoading$,
+    timeRange$,
+    viewMode$
+  );
 
-  const [dashboardApi, setDashboardApi] = useState<MockedDashboardApi | undefined>(undefined);
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
-  const viewModeSelected = useStateFromPublishingSubject(dashboardApi?.viewMode);
-  const [simulateErrorState, setSimulateErrorState] = useState(false);
-  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
-  const [loadingDataView, setLoadingDataView] = useState<boolean>(true);
+  const [dataViewNotFound, setDataViewNotFound] = useState(false);
 
-  useMount(() => {
-    const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
+  const dashboardApi = useMemo(() => {
     const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
-    setDashboardApi({
+    return {
       dataLoading: dataLoading$,
-      viewMode,
+      viewMode: viewMode$,
       filters$,
       query$,
       timeRange$,
       timeslice$,
       children$,
-      publishFilters: (newFilters) => filters$.next(newFilters),
-      setViewMode: (newViewMode) => viewMode.next(newViewMode),
-      setChild: (child) => children$.next({ ...children$.getValue(), [child.uuid]: child }),
+      publishFilters: (newFilters: Filter[] | undefined) => filters$.next(newFilters),
+      setChild: (child: HasUniqueId) =>
+        children$.next({ ...children$.getValue(), [child.uuid]: child }),
       removePanel: () => {},
       replacePanel: () => {
         return Promise.resolve('');
@@ -156,8 +140,9 @@ export const ReactControlExample = ({
       addNewPanel: () => {
         return Promise.resolve(undefined);
       },
-    });
-  });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const subscription = combineCompatibleChildrenApis<PublishesDataLoading, boolean | undefined>(
@@ -179,19 +164,18 @@ export const ReactControlExample = ({
   }, [dashboardApi, dataLoading$]);
 
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoadingDataView(true);
-      const loadedDataView = await dataViewsService.find('kibana_sample_data_logs');
-      if (mounted) {
-        setDataView(loadedDataView[0]);
-        setLoadingDataView(false);
+    let ignore = false;
+    dataViewsService.get(WEB_LOGS_DATA_VIEW_ID).catch(() => {
+      if (!ignore) {
+        setDataViewNotFound(true);
       }
-    })();
+    });
+
     return () => {
-      mounted = false;
+      ignore = true;
     };
-  }, [dataViewsService]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!controlGroupApi) return;
@@ -217,17 +201,16 @@ export const ReactControlExample = ({
     };
   }, [controlGroupApi, timeslice$]);
 
-  return loadingDataView ? (
-    <EuiLoadingSpinner />
-  ) : !dataView ? (
-    <EuiEmptyPrompt
-      iconType="error"
-      color="danger"
-      title={<h2>There was an error!</h2>}
-      body={<p>{'Please add at least one data view.'}</p>}
-    />
-  ) : (
+  return (
     <>
+      {dataViewNotFound && (
+        <>
+          <EuiCallOut color="warning" iconType="warning">
+            <p>{`Install "Sample web logs" to run example`}</p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -264,33 +247,11 @@ export const ReactControlExample = ({
           <EuiButtonGroup
             legend="Change the view mode"
             options={toggleViewButtons}
-            idSelected={`viewModeToggle_${viewModeSelected}`}
+            idSelected={`viewModeToggle_${viewMode}`}
             onChange={(_, value) => {
-              dashboardApi?.setViewMode(value);
+              viewMode$.next(value);
             }}
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            color="danger"
-            isSelected={simulateErrorState}
-            fill={simulateErrorState}
-            iconType={simulateErrorState ? 'errorFilled' : 'error'}
-            onClick={() => {
-              setSimulateErrorState((isOn) => !isOn);
-              Object.keys(controlGroupApi?.children$.getValue() ?? {}).forEach((controlId) => {
-                const control = controlGroupApi?.children$.getValue()[controlId];
-                if (control && (control as DefaultControlApi).setBlockingError) {
-                  (control as DefaultControlApi).setBlockingError(
-                    !simulateErrorState ? new Error('This is a simulated error') : undefined
-                  );
-                }
-              });
-            }}
-          >
-            Simulate blocking error
-          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -326,9 +287,9 @@ export const ReactControlExample = ({
             } as object,
             references: [
               {
-                name: `controlGroup_${searchControlId}:searchControlDataView`,
+                name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
-                id: dataView.id!,
+                id: WEB_LOGS_DATA_VIEW_ID,
               },
             ],
           }),
