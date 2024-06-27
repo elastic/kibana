@@ -41,7 +41,6 @@ import { dynamic } from '@kbn/shared-ux-utility';
 import { isDefined } from '@kbn/ml-is-defined';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -157,22 +156,17 @@ export const getFieldStatsChartEmbeddableFactory = (
           : defaultDataViewId ?? '';
       let initialDataView: DataView[] | undefined;
       try {
-        const dataView = await deps.data.dataViews.get(validDataViewId);
+        const dataView = isESQLQuery(state.query)
+          ? await getESQLAdHocDataview(
+              getIndexPatternFromESQLQuery(state.query.esql),
+              deps.data.dataViews
+            )
+          : await deps.data.dataViews.get(validDataViewId);
         initialDataView = [dataView];
       } catch (error) {
         // Only need to publish blocking error if viewtype is data view, and no data view found
         if (state.viewType === FieldStatsInitializerViewType.DATA_VIEW) {
           onError(error);
-        }
-
-        if (isESQLQuery(state.query)) {
-          const indexPatternFromQuery = getIndexPatternFromESQLQuery(state.query.esql);
-
-          const adHocDataView = await getESQLAdHocDataview(
-            indexPatternFromQuery,
-            deps.data.dataViews
-          );
-          initialDataView = [adHocDataView];
         }
       }
 
@@ -276,7 +270,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       };
 
-      const addFilters = (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+      const addFilters = (filters: Filter[], actionId: string = 'ACTION_GLOBAL_APPLY_FILTER') => {
         if (!pluginStart.uiActions) {
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
