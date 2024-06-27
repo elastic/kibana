@@ -9,7 +9,7 @@
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 import { AuditLogger } from './audit_logging/audit_logger';
-import type { APIKeys } from './authentication/api_keys/api_keys';
+import type { APIKeysService } from './authentication/api_keys';
 
 export interface SecurityRequestHandlerContext {
   authc: AuthcRequestHandlerContext;
@@ -18,7 +18,7 @@ export interface SecurityRequestHandlerContext {
 
 export interface AuthcRequestHandlerContext {
   getCurrentUser(): AuthenticatedUser | null;
-  apiKeys: APIKeys | null;
+  apiKeys: APIKeysService | null;
 }
 
 export interface AuditRequestHandlerContext {
