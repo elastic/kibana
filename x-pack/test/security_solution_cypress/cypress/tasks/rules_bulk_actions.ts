@@ -434,15 +434,18 @@ export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
   );
 };
 
-// SCHEDULE BACKFILL
-export const scheduleBackfillForSelectedRules = (enabledCount: number, disabledCount: number) => {
-  cy.log('Bulk schedule backfill for selected rules');
+// SCHEDULE MANUAL RULE RUN
+export const scheduleManualRuleRunForSelectedRules = (
+  enabledCount: number,
+  disabledCount: number
+) => {
+  cy.log('Bulk schedule manual rule run for selected rules');
   cy.get(BULK_ACTIONS_BTN).click();
   cy.get(SCHEDULE_BACKFILL_RULE_BULK_BTN).click();
   if (disabledCount > 0) {
     cy.get(SCHEDULE_BACKFILL_RULE_BULK_WARNING_MODAL).should(
       'have.text',
-      `This action can only be applied to ${enabledCount} custom rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule backfill for disabled rules)CancelSchedule ${enabledCount} custom rules`
+      `This action can only be applied to ${enabledCount} custom rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} custom rules`
     );
     cy.get(CONFIRM_SCHEDULE_BACKFILL_RULE_WARNING_BTN).click();
   }

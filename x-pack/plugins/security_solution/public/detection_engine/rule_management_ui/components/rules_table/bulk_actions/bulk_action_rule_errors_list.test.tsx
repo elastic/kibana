@@ -100,7 +100,7 @@ describe('Component BulkEditRuleErrorsList', () => {
     ],
     [
       BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE,
-      '2 rules (Cannot schedule manual rule run for a disabled rules)',
+      '2 rules (Cannot schedule manual rule run for disabled rules)',
     ],
   ])('should render correct message for "%s" errorCode', (errorCode, value) => {
     const ruleErrors: DryRunResult['ruleErrors'] = [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { scheduleBackfillForSelectedRules } from '../../../../tasks/rules_bulk_actions';
+import { scheduleManualRuleRunForSelectedRules } from '../../../../tasks/rules_bulk_actions';
 import { MODAL_ERROR_BODY, TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
@@ -43,7 +43,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
 
     const enabledCount = enabledRules.length;
     const disabledCount = 0;
-    scheduleBackfillForSelectedRules(enabledCount, disabledCount);
+    scheduleManualRuleRunForSelectedRules(enabledCount, disabledCount);
 
     cy.contains(TOASTER_BODY, `Successfully scheduled backfill for ${enabledCount} rule`);
   });
@@ -55,7 +55,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
 
     const enabledCount = enabledRules.length;
     const disabledCount = disabledRules.length;
-    scheduleBackfillForSelectedRules(enabledCount, disabledCount);
+    scheduleManualRuleRunForSelectedRules(enabledCount, disabledCount);
 
     cy.contains(TOASTER_BODY, `Successfully scheduled backfill for ${enabledCount} rule`);
   });
@@ -65,15 +65,15 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
 
     const enabledCount = 3;
     const disabledCount = 2;
-    scheduleBackfillForSelectedRules(enabledCount, disabledCount);
+    scheduleManualRuleRunForSelectedRules(enabledCount, disabledCount);
 
     cy.contains(
       TOASTER_BODY,
       `${disabledCount} rules failed to schedule backfill.See the full error`
     );
 
-    // on error toast button click display error that it is not possible to schedule backfill for a disabled rules
+    // on error toast button click display error that it is not possible to schedule manual rule run for disabled rules
     clickErrorToastBtn();
-    cy.contains(MODAL_ERROR_BODY, 'Cannot schedule backfill for a disabled rule');
+    cy.contains(MODAL_ERROR_BODY, 'Cannot schedule manual rule run for a disabled rule');
   });
 });

@@ -129,7 +129,7 @@ const BulkManualRuleRunErrorItem = ({
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleDisabledRuleDescription"
-            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Cannot schedule manual rule run for a disabled rules)"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Cannot schedule manual rule run for disabled rules)"
             values={{ rulesCount }}
           />
         </li>
