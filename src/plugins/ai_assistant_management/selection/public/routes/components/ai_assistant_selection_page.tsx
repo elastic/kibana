@@ -99,7 +99,7 @@ export function AiAssistantSelectionPage() {
                     href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
                   >
                     {i18n.translate(
-                      'aiAssistantManagementSelection.aiAssistantSettingsPage.obsAssistant.documentationLinkLabel',
+                      'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkLabel',
                       { defaultMessage: 'documentation' }
                     )}
                   </EuiLink>
