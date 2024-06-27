@@ -43,15 +43,35 @@ export interface ChromeHelpMenuLink {
 export interface ChromeNavControls {
   /** Register a nav control to be presented on the bottom-left side of the chrome header. */
   registerLeft(navControl: ChromeNavControl): void;
+  /**
+   * Unregister a nav control to be presented on the bottom-left side of the chrome header.
+   * @remark Noop if control is not present
+   */
+  unregisterLeft(navControl: ChromeNavControl): void;
 
   /** Register a nav control to be presented on the top-right side of the chrome header. */
   registerRight(navControl: ChromeNavControl): void;
+  /**
+   * Unregister a nav control to be presented on the top-right side of the chrome header.
+   * @remark Noop if control is not present
+   */
+  unregisterRight(navControl: ChromeNavControl): void;
 
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
+  /**
+   * Unregister a nav control to be presented on the top-center side of the chrome header.
+   * @remark Noop if control is not present
+   */
+  unregisterCenter(navControl: ChromeNavControl): void;
 
   /** Register an extension to be presented to the left of the top-right side of the chrome header. */
   registerExtension(navControl: ChromeNavControl): void;
+  /**
+   * Unregister an extension to be presented to the left of the top-right side of the chrome header.
+   * @remark Noop if control is not present
+   */
+  unregisterExtension(navControl: ChromeNavControl): void;
 
   /** Set the help menu links */
   setHelpMenuLinks(links: ChromeHelpMenuLink[]): void;

@@ -26,20 +26,34 @@ export class NavControlsService {
     const navControlsExtension$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const helpMenuLinks$ = new BehaviorSubject<ChromeHelpMenuLink[]>([]);
 
+    function register(control$: BehaviorSubject<ReadonlySet<ChromeNavControl>>) {
+      return (toAdd: ChromeNavControl) => {
+        control$.next(new Set([...control$.getValue().values(), toAdd]));
+      };
+    }
+
+    function unregister(control$: BehaviorSubject<ReadonlySet<ChromeNavControl>>) {
+      return (toDelete: ChromeNavControl) => {
+        const set = control$.getValue();
+        if (!set.has(toDelete)) return;
+        const clone = new Set(set);
+        clone.delete(toDelete);
+        control$.next(clone);
+      };
+    }
+
     return {
-      // In the future, registration should be moved to the setup phase. This
-      // is not possible until the legacy nav controls are no longer supported.
-      registerLeft: (navControl: ChromeNavControl) =>
-        navControlsLeft$.next(new Set([...navControlsLeft$.value.values(), navControl])),
+      registerLeft: register(navControlsLeft$),
+      unregisterLeft: unregister(navControlsLeft$),
 
-      registerRight: (navControl: ChromeNavControl) =>
-        navControlsRight$.next(new Set([...navControlsRight$.value.values(), navControl])),
+      registerRight: register(navControlsRight$),
+      unregisterRight: unregister(navControlsRight$),
 
-      registerCenter: (navControl: ChromeNavControl) =>
-        navControlsCenter$.next(new Set([...navControlsCenter$.value.values(), navControl])),
+      registerCenter: register(navControlsCenter$),
+      unregisterCenter: unregister(navControlsCenter$),
 
-      registerExtension: (navControl: ChromeNavControl) =>
-        navControlsExtension$.next(new Set([...navControlsExtension$.value.values(), navControl])),
+      registerExtension: register(navControlsExtension$),
+      unregisterExtension: unregister(navControlsExtension$),
 
       setHelpMenuLinks: (links: ChromeHelpMenuLink[]) => {
         // This extension point is only intended to be used once by the cloud integration > cloud_links plugin
