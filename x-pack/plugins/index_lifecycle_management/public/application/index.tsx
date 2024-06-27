@@ -34,7 +34,7 @@ export const renderApp = (
   executionContext: ExecutionContextStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
-  const { getUrlForApp } = application;
+  const { getUrlForApp, capabilities } = application;
   render(
     <KibanaRenderContextProvider {...startServices}>
       <div className={APP_WRAPPER_CLASS}>
@@ -51,6 +51,7 @@ export const renderApp = (
               getUrlForApp,
               docLinks,
               executionContext,
+              capabilities,
             }}
           >
             <App history={history} />

@@ -42,4 +42,5 @@ export interface AppServicesContext {
   cloud?: CloudSetup;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   docLinks: DocLinksStart;
+  capabilities: ApplicationStart['capabilities'];
 }

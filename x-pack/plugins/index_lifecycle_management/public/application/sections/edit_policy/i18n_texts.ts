@@ -134,6 +134,15 @@ export const i18nTexts = {
         defaultMessage: 'Maximum shard size units',
       }
     ),
+    maxAgeLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumAgeLabel', {
+      defaultMessage: 'Maximum age',
+    }),
+    maxDocsLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumDocumentsLabel', {
+      defaultMessage: 'Maximum documents',
+    }),
+    maxSizeLabel: i18n.translate('xpack.indexLifecycleMgmt.hotPhase.maximumIndexSizeLabel', {
+      defaultMessage: 'Maximum index size',
+    }),
     errors: {
       numberRequired: i18n.translate(
         'xpack.indexLifecycleMgmt.editPolicy.errors.numberRequiredErrorMessage',

@@ -21,6 +21,7 @@ import { init as initHttp } from '../public/application/services/http';
 import { init as initUiMetric } from '../public/application/services/ui_metric';
 import { KibanaContextProvider } from '../public/shared_imports';
 import { PolicyListContextProvider } from '../public/application/sections/policy_list/policy_list_context';
+import * as hooks from '../public/application/lib/use_is_read_only';
 
 initHttp(httpServiceMock.createSetupContract());
 initUiMetric(usageCollectionPluginMock.createSetupContract());
@@ -72,6 +73,9 @@ jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useHistory: () => ({
     createHref: jest.fn(),
+    location: {
+      search: '',
+    },
   }),
 }));
 
@@ -128,6 +132,7 @@ const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
   );
 };
 describe('policy table', () => {
+  jest.spyOn(hooks, 'useIsReadOnly').mockReturnValue(false);
   beforeEach(() => {
     component = <TestComponent testPolicies={policies} />;
     window.localStorage.removeItem('ILM_SHOW_MANAGED_POLICIES_BY_DEFAULT');
@@ -296,7 +301,9 @@ describe('policy table', () => {
   test('add index template modal shows when add policy to index template button is pressed', () => {
     const rendered = mountWithIntl(component);
     const policyRow = findTestSubject(rendered, `policyTableRow-${testPolicy.name}`);
-    const addPolicyToTemplateButton = findTestSubject(policyRow, 'addPolicyToTemplate');
+    const actionsButton = findTestSubject(policyRow, 'euiCollapsedItemActionsButton');
+    actionsButton.simulate('click');
+    const addPolicyToTemplateButton = findTestSubject(rendered, 'addPolicyToTemplate');
     addPolicyToTemplateButton.simulate('click');
     rendered.update();
     expect(findTestSubject(rendered, 'addPolicyToTemplateModal').exists()).toBeTruthy();
