@@ -28,8 +28,6 @@ import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { useBaseConversations } from './use_conversation_store';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
-import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
-import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
@@ -165,8 +163,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-      baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
-      baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}

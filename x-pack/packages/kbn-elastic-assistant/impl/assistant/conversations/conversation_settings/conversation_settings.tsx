@@ -21,7 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { noop } from 'lodash/fp';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { Conversation, Prompt } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
@@ -36,7 +37,7 @@ import { ConversationsBulkActions } from '../../api';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultConnector?: AIConnector;
@@ -390,7 +391,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           helpText={i18n.SETTINGS_PROMPT_HELP_TEXT_TITLE}
         >
           <SelectSystemPrompt
-            allSystemPrompts={allSystemPrompts}
+            allPrompts={allSystemPrompts}
             compressed
             conversation={selectedConversation}
             isEditing={true}

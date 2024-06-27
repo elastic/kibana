@@ -13,7 +13,7 @@ import { Props, SelectSystemPrompt } from '.';
 import { TEST_IDS } from '../../../constants';
 
 const props: Props = {
-  allSystemPrompts: [
+  allPrompts: [
     {
       id: 'default-system-prompt',
       content: 'default',

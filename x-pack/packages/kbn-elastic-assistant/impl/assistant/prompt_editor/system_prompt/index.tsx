@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { useAssistantContext } from '../../../assistant_context';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import { SelectSystemPrompt } from './select_system_prompt';
@@ -22,6 +22,7 @@ interface Props {
   onSystemPromptSelectionChange: (systemPromptId: string | undefined) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   isFlyoutMode: boolean;
+  allSystemPrompts: PromptResponse[];
 }
 
 const SystemPromptComponent: React.FC<Props> = ({
@@ -31,9 +32,8 @@ const SystemPromptComponent: React.FC<Props> = ({
   onSystemPromptSelectionChange,
   setIsSettingsModalVisible,
   isFlyoutMode,
+  allSystemPrompts,
 }) => {
-  const { allSystemPrompts } = useAssistantContext();
-
   const selectedPrompt = useMemo(() => {
     if (editingSystemPromptId !== undefined) {
       return (
@@ -58,7 +58,7 @@ const SystemPromptComponent: React.FC<Props> = ({
   if (isFlyoutMode) {
     return (
       <SelectSystemPrompt
-        allSystemPrompts={allSystemPrompts}
+        allPrompts={allSystemPrompts}
         clearSelectedSystemPrompt={handleClearSystemPrompt}
         conversation={conversation}
         data-test-subj="systemPrompt"
@@ -78,7 +78,7 @@ const SystemPromptComponent: React.FC<Props> = ({
     <div>
       {selectedPrompt == null || isEditing ? (
         <SelectSystemPrompt
-          allSystemPrompts={allSystemPrompts}
+          allPrompts={allSystemPrompts}
           clearSelectedSystemPrompt={handleClearSystemPrompt}
           conversation={conversation}
           data-test-subj="systemPrompt"

@@ -9,13 +9,13 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { DEFAULT_LATEST_ALERTS } from '../../../assistant_context/constants';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
 import { useSettingsUpdater } from './use_settings_updater';
-import { Prompt } from '../../../..';
 import {
   defaultSystemPrompt,
   mockSuperheroSystemPrompt,
   mockSystemPrompt,
 } from '../../../mock/system_prompt';
 import { HttpSetup } from '@kbn/core/public';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,
@@ -26,8 +26,8 @@ const mockHttp = {
   fetch: jest.fn(),
 } as unknown as HttpSetup;
 
-const mockSystemPrompts: Prompt[] = [mockSystemPrompt];
-const mockQuickPrompts: Prompt[] = [defaultSystemPrompt];
+const mockSystemPrompts: PromptResponse[] = [mockSystemPrompt];
+const mockQuickPrompts: PromptResponse[] = [defaultSystemPrompt];
 
 const anonymizationFields = {
   total: 2,
@@ -66,7 +66,7 @@ const mockValues = {
 
 const updatedValues = {
   conversations: { [customConvo.title]: customConvo },
-  allSystemPrompts: [mockSuperheroSystemPrompt],
+  allSystemPrompts: { update: [mockSuperheroSystemPrompt] },
   allQuickPrompts: [{ title: 'Prompt 2', prompt: 'Prompt 2', color: 'red' }],
   updatedAnonymizationData: {
     total: 2,
@@ -100,7 +100,7 @@ describe('useSettingsUpdater', () => {
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, anonymizationFields)
+        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
       );
       await waitForNextUpdate();
       const {
@@ -111,12 +111,12 @@ describe('useSettingsUpdater', () => {
         setUpdatedKnowledgeBaseSettings,
         setUpdatedAssistantStreamingEnabled,
         resetSettings,
+        setPromptsBulkActions,
       } = result.current;
 
       setConversationSettings(updatedValues.conversations);
       setConversationsSettingsBulkActions({});
-      setUpdatedQuickPromptSettings(updatedValues.allQuickPrompts);
-      setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
+      setPromptsBulkActions(updatedValues.allSystemPrompts);
       setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
       setUpdatedAssistantStreamingEnabled(updatedValues.assistantStreamingEnabled);
@@ -148,23 +148,21 @@ describe('useSettingsUpdater', () => {
   it('should update all state variables to their updated values when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, anonymizationFields)
+        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
       );
       await waitForNextUpdate();
       const {
         setConversationSettings,
         setConversationsSettingsBulkActions,
-        setUpdatedQuickPromptSettings,
-        setUpdatedSystemPromptSettings,
         setAnonymizationFieldsBulkActions,
         setUpdatedKnowledgeBaseSettings,
+        setPromptsBulkActions,
       } = result.current;
 
       setConversationSettings(updatedValues.conversations);
       setConversationsSettingsBulkActions({ delete: { ids: ['1'] } });
       setAnonymizationFieldsBulkActions({ delete: { ids: ['1'] } });
-      setUpdatedQuickPromptSettings(updatedValues.allQuickPrompts);
-      setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
+      setPromptsBulkActions(updatedValues.allSystemPrompts);
       setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
 
@@ -189,7 +187,7 @@ describe('useSettingsUpdater', () => {
   it('should track which toggles have been updated when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, anonymizationFields)
+        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
@@ -206,7 +204,7 @@ describe('useSettingsUpdater', () => {
   it('should track only toggles that updated', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, anonymizationFields)
+        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
@@ -224,7 +222,7 @@ describe('useSettingsUpdater', () => {
   it('if no toggles update, do not track anything', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, anonymizationFields)
+        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;

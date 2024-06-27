@@ -114,9 +114,6 @@ export type {
   ClientMessage,
 } from './impl/assistant_context/types';
 
-/** Interface for defining system/user prompts */
-export type { Prompt } from './impl/assistant/types';
-
 /**
  * This interface is used to pass context to the assistant,
  * for the purpose of building prompts. Examples of context include:

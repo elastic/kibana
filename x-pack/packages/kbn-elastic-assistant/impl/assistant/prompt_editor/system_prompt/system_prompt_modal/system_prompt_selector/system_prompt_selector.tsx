@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { TEST_IDS } from '../../../../constants';
-import { Prompt } from '../../../../../..';
 import * as i18n from './translations';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
 
@@ -27,10 +27,10 @@ export const SYSTEM_PROMPT_SELECTOR_CLASSNAME = 'systemPromptSelector';
 
 interface Props {
   onSystemPromptDeleted: (systemPromptTitle: string) => void;
-  onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
-  systemPrompts: Prompt[];
+  onSystemPromptSelectionChange: (systemPrompt?: PromptResponse | string) => void;
+  systemPrompts: PromptResponse[];
   autoFocus?: boolean;
-  selectedSystemPrompt?: Prompt;
+  selectedSystemPrompt?: PromptResponse;
 }
 
 export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{

@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
@@ -39,6 +40,7 @@ interface OwnProps {
   title: string;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;
+  allPrompts: PromptResponse[];
 }
 
 type Props = OwnProps;
@@ -62,6 +64,7 @@ export const AssistantHeader: React.FC<Props> = ({
   title,
   conversations,
   refetchConversationsState,
+  allPrompts,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -120,6 +123,7 @@ export const AssistantHeader: React.FC<Props> = ({
             isDisabled={isDisabled}
             conversations={conversations}
             onConversationDeleted={onConversationDeleted}
+            allPrompts={allPrompts}
           />
 
           <>

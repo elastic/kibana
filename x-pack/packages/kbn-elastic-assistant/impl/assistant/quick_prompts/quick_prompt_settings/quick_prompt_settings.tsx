@@ -18,20 +18,22 @@ import {
 
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
-import { PromptContextTemplate } from '../../../..';
+import {
+  PromptResponse,
+  PromptTypeEnum,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptContextTemplate, useAssistantContext } from '../../../..';
 import * as i18n from './translations';
-import { QuickPrompt } from '../types';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
 import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
-import { useAssistantContext } from '../../../assistant_context';
 
 const DEFAULT_COLOR = '#D36086';
 
 interface Props {
-  onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
-  quickPromptSettings: QuickPrompt[];
-  selectedQuickPrompt: QuickPrompt | undefined;
-  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
+  onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
+  quickPromptSettings: PromptResponse[];
+  selectedQuickPrompt: PromptResponse | undefined;
+  setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
 }
 
 /**
@@ -45,19 +47,21 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     setUpdatedQuickPromptSettings,
   }) => {
     const { basePromptContexts } = useAssistantContext();
-
     // Prompt
-    const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
+    const prompt = useMemo(
+      () => selectedQuickPrompt?.content ?? '',
+      [selectedQuickPrompt?.content]
+    );
 
     const handlePromptChange = useCallback(
       (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         if (selectedQuickPrompt != null) {
           setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+            const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
 
             if (alreadyExists) {
               return prev.map((qp) => {
-                if (qp.title === selectedQuickPrompt.title) {
+                if (qp.name === selectedQuickPrompt.name) {
                   return {
                     ...qp,
                     prompt: e.target.value,
@@ -84,11 +88,11 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
       (color, { hex, isValid }) => {
         if (selectedQuickPrompt != null) {
           setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+            const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
 
             if (alreadyExists) {
               return prev.map((qp) => {
-                if (qp.title === selectedQuickPrompt.title) {
+                if (qp.name === selectedQuickPrompt.name) {
                   return {
                     ...qp,
                     color,
@@ -107,7 +111,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     // Prompt Contexts
     const selectedPromptContexts = useMemo(
       () =>
-        basePromptContexts.filter((bpc) =>
+        basePromptContexts?.filter((bpc) =>
           selectedQuickPrompt?.categories?.some((cat) => bpc?.category === cat)
         ) ?? [],
       [basePromptContexts, selectedQuickPrompt?.categories]
@@ -117,11 +121,11 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
       (pc: PromptContextTemplate[]) => {
         if (selectedQuickPrompt != null) {
           setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === selectedQuickPrompt.title);
+            const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
 
             if (alreadyExists) {
               return prev.map((qp) => {
-                if (qp.title === selectedQuickPrompt.title) {
+                if (qp.name === selectedQuickPrompt.name) {
                   return {
                     ...qp,
                     categories: pc.map((p) => p.category),
@@ -139,20 +143,22 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
 
     // When top level quick prompt selection changes
     const onQuickPromptSelectionChange = useCallback(
-      (quickPrompt?: QuickPrompt | string) => {
+      (quickPrompt?: PromptResponse | string) => {
         const isNew = typeof quickPrompt === 'string';
-        const newSelectedQuickPrompt: QuickPrompt | undefined = isNew
+        const newSelectedQuickPrompt: PromptResponse | undefined = isNew
           ? {
-              title: quickPrompt ?? '',
-              prompt: '',
+              name: quickPrompt ?? '',
+              content: '',
+              id: '',
               color: DEFAULT_COLOR,
               categories: [],
+              promptType: PromptTypeEnum.quick,
             }
           : quickPrompt;
 
         if (newSelectedQuickPrompt != null) {
           setUpdatedQuickPromptSettings((prev) => {
-            const alreadyExists = prev.some((qp) => qp.title === newSelectedQuickPrompt.title);
+            const alreadyExists = prev.some((qp) => qp.name === newSelectedQuickPrompt.name);
 
             if (!alreadyExists) {
               return [...prev, newSelectedQuickPrompt];
@@ -168,8 +174,8 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     );
 
     const onQuickPromptDeleted = useCallback(
-      (title: string) => {
-        setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.title !== title));
+      (name: string) => {
+        setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.name !== name));
       },
       [setUpdatedQuickPromptSettings]
     );

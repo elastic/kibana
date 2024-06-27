@@ -23,8 +23,9 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { Conversation, Prompt, QuickPrompt } from '../../..';
+import { Conversation } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { TEST_IDS } from '../constants';
@@ -38,6 +39,7 @@ import {
   SystemPromptSettings,
 } from '.';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -95,6 +97,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();
+    const { data: allPrompts } = useFetchPrompts();
 
     const {
       conversationSettings,
@@ -106,7 +109,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setUpdatedAssistantStreamingEnabled,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
-      setUpdatedSystemPromptSettings,
+      promptsBulkActions,
       saveSettings,
       conversationsSettingsBulkActions,
       updatedAnonymizationData,
@@ -114,7 +117,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       anonymizationFieldsBulkActions,
       setAnonymizationFieldsBulkActions,
       setUpdatedAnonymizationData,
-    } = useSettingsUpdater(conversations, anonymizationFields);
+      setPromptsBulkActions,
+      setUpdatedSystemPromptSettings,
+    } = useSettingsUpdater(conversations, anonymizationFields, allPrompts);
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -131,21 +136,21 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     );
 
     // Quick Prompt Selection State
-    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
-    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: QuickPrompt) => {
+    const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedQuickPromptChange = useCallback((quickPrompt?: PromptResponse) => {
       setSelectedQuickPrompt(quickPrompt);
     }, []);
     useEffect(() => {
       if (selectedQuickPrompt != null) {
         setSelectedQuickPrompt(
-          quickPromptSettings.find((q) => q.title === selectedQuickPrompt.title)
+          quickPromptSettings.find((q) => q.name === selectedQuickPrompt.name)
         );
       }
     }, [quickPromptSettings, selectedQuickPrompt]);
 
     // System Prompt Selection State
-    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<Prompt | undefined>();
-    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: Prompt) => {
+    const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
+    const onHandleSelectedSystemPromptChange = useCallback((systemPrompt?: PromptResponse) => {
       setSelectedSystemPrompt(systemPrompt);
     }, []);
     useEffect(() => {
@@ -347,6 +352,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
                     conversationsSettingsBulkActions={conversationsSettingsBulkActions}
                     setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
+                    setPromptsBulkActions={setPromptsBulkActions}
+                    promptsBulkActions={promptsBulkActions}
                   />
                 )}
                 {selectedSettingsTab === ANONYMIZATION_TAB && (

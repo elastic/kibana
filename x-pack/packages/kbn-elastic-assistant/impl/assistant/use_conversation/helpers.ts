@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Prompt } from '../types';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { Conversation } from '../../assistant_context/types';
 
 export interface CodeBlockDetails {
@@ -78,9 +78,9 @@ export const getDefaultSystemPrompt = ({
   allSystemPrompts,
   conversation,
 }: {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   conversation: Conversation | undefined;
-}): Prompt | undefined => {
+}): PromptResponse | undefined => {
   const conversationSystemPrompt = allSystemPrompts.find(
     (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
   );

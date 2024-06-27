@@ -18,15 +18,15 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import * as i18n from './translations';
-import { QuickPrompt } from '../types';
 
 interface Props {
   isDisabled?: boolean;
   onQuickPromptDeleted: (quickPromptTitle: string) => void;
-  onQuickPromptSelectionChange: (quickPrompt?: QuickPrompt | string) => void;
-  quickPrompts: QuickPrompt[];
-  selectedQuickPrompt?: QuickPrompt;
+  onQuickPromptSelectionChange: (quickPrompt?: PromptResponse | string) => void;
+  quickPrompts: PromptResponse[];
+  selectedQuickPrompt?: PromptResponse;
 }
 
 export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boolean }>;
@@ -48,8 +48,8 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         value: {
           isDefault: qp.isDefault ?? false,
         },
-        label: qp.title,
-        'data-test-subj': qp.title,
+        label: qp.name,
+        'data-test-subj': qp.name,
         color: qp.color,
       }))
     );
@@ -60,7 +60,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
               value: {
                 isDefault: true,
               },
-              label: selectedQuickPrompt.title,
+              label: selectedQuickPrompt.name,
               color: selectedQuickPrompt.color,
             },
           ]
@@ -72,7 +72,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         const newQuickPrompt =
           quickPromptSelectorOption.length === 0
             ? undefined
-            : quickPrompts.find((qp) => qp.title === quickPromptSelectorOption[0]?.label) ??
+            : quickPrompts.find((qp) => qp.name === quickPromptSelectorOption[0]?.label) ??
               quickPromptSelectorOption[0]?.label;
         onQuickPromptSelectionChange(newQuickPrompt);
       },
