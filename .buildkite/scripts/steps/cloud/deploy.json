@@ -201,12 +201,7 @@
           ],
           "kibana": {
             "version": null,
-            "docker_image": null,
-            "user_settings_override_json": {
-              "server.securityResponseHeaders.permissionsPolicy": "microphone=()",
-              "server.securityResponseHeaders.permissionsPolicyReportOnly": "camera=()",
-              "permissionsPolicy.report_to": "[violations-endpoint]"
-            }
+            "docker_image": null
           }
         },
         "ref_id": "main-kibana"
