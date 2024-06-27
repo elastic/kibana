@@ -48,6 +48,7 @@ export function MochaReporterProvider({ getService }) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
           metadata: config.get('junit.metadata'),
+          testConfig: config.path,
         });
       }
 

@@ -26,6 +26,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     rootDirectory = REPO_ROOT,
     getTestMetadata = () => ({}),
     metadata,
+    testConfig,
   } = options;
 
   const stats = {};
@@ -112,7 +113,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
       'metadata-json': JSON.stringify(metadata ?? {}),
     });
 
-    function addTestcaseEl(node, failed) {
+    function addTestcaseEl(node, failed, failedTestConfig) {
       const attrs = {
         name: getFullTitle(node),
         classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,
@@ -125,13 +126,14 @@ export function setupJUnitReportGeneration(runner, options = {}) {
         const testCaseRelativePath = getPath(node);
         const owners = getCodeOwnersForFile(testCaseRelativePath, reversedCodeowners);
         attrs.owners = owners || ''; // empty string when no codeowners are defined
+        attrs.failedTestConfig = getPath({ file: failedTestConfig }) || '';
       }
 
       return testsuitesEl.ele('testcase', attrs);
     }
 
     [...results, ...skippedResults].forEach((result) => {
-      const el = addTestcaseEl(result.node, result.failed);
+      const el = addTestcaseEl(result.node, result.failed, testConfig);
 
       if (result.failed) {
         el.ele('system-out').dat(escapeCdata(getSnapshotOfRunnableLogs(result.node) || ''));
