@@ -102,11 +102,12 @@ export const postActionsConnectorExecuteRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
-          const enableKnowledgeBaseByDefault =
-            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const isGraphAvailable =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault &&
+            request.body.isEnabledKnowledgeBase;
 
           // TODO: remove non-graph persistance when KB will be enabled by default
-          if (!enableKnowledgeBaseByDefault && conversationId && conversationsDataClient) {
+          if (!isGraphAvailable && conversationId && conversationsDataClient) {
             const updatedConversation = await updateConversationWithUserInput({
               actionsClient,
               actionTypeId,
@@ -147,7 +148,7 @@ export const postActionsConnectorExecuteRoute = (
             }
           };
 
-          if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
+          if (!isGraphAvailable && !request.body.isEnabledRAGAlerts) {
             // if not langchain, call execute action directly and return the response:
             return await nonLangChainExecute({
               abortSignal,
@@ -174,7 +175,7 @@ export const postActionsConnectorExecuteRoute = (
             context,
             getElser,
             logger,
-            messages: (enableKnowledgeBaseByDefault && newMessage ? [newMessage] : messages) ?? [],
+            messages: (isGraphAvailable && newMessage ? [newMessage] : messages) ?? [],
             onLlmResponse,
             onNewReplacements,
             replacements: latestReplacements,

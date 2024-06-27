@@ -5,140 +5,761 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { requestContextMock } from '../../__mocks__/request_context';
-import { serverMock } from '../../__mocks__/server';
-import { getBasicEmptySearchResponse, getEmptyFindResult } from '../../__mocks__/response';
-import { getCreateConversationRequest, requestMock } from '../../__mocks__/request';
+import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { BaseMessage } from '@langchain/core/messages';
+import { NEVER } from 'rxjs';
+import { mockActionResponse } from '../../__mocks__/action_result_data';
+import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import {
-  getCreateConversationSchemaMock,
-  getConversationMock,
-  getQueryConversationParams,
-} from '../../__mocks__/conversations_schema.mock';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import { ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL } from '@kbn/elastic-assistant-common';
+  INVOKE_ASSISTANT_ERROR_EVENT,
+  INVOKE_ASSISTANT_SUCCESS_EVENT,
+} from '../../lib/telemetry/event_based_telemetry';
+import { PassThrough } from 'stream';
+import { getConversationResponseMock } from '../../ai_assistant_data_clients/conversations/update_conversation.test';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { chatCompleteRoute } from './chat_complete_route';
 
-describe('Chat complete route', () => {
-  let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
-  const mockUser1 = {
-    username: 'my_username',
-    authentication_realm: {
-      type: 'my_realm_type',
-      name: 'my_realm_name',
+const actionsClient = actionsClientMock.create();
+jest.mock('../../lib/build_response', () => ({
+  buildResponse: jest.fn().mockImplementation((x) => x),
+}));
+jest.mock('../../lib/executor', () => ({
+  executeAction: jest.fn().mockImplementation(async ({ connectorId }) => {
+    if (connectorId === 'mock-connector-id') {
+      return {
+        connector_id: 'mock-connector-id',
+        data: mockActionResponse,
+        status: 'ok',
+      };
+    } else {
+      throw new Error('simulated error');
+    }
+  }),
+}));
+const mockStream = jest.fn().mockImplementation(() => new PassThrough());
+jest.mock('../../lib/langchain/execute_custom_llm_chain', () => ({
+  callAgentExecutor: jest.fn().mockImplementation(
+    async ({
+      connectorId,
+      isStream,
+    }: {
+      actions: ActionsPluginStart;
+      connectorId: string;
+      esClient: ElasticsearchClient;
+      langChainMessages: BaseMessage[];
+      logger: Logger;
+      isStream: boolean;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      request: KibanaRequest<unknown, unknown, any, any>;
+    }) => {
+      if (!isStream && connectorId === 'mock-connector-id') {
+        return {
+          body: {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            status: 'ok',
+          },
+          headers: { 'content-type': 'application/json' },
+        };
+      } else if (isStream && connectorId === 'mock-connector-id') {
+        return {
+          body: mockStream,
+          headers: {
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'Transfer-Encoding': 'chunked',
+            'X-Accel-Buffering': 'no',
+            'X-Content-Type-Options': 'nosniff',
+          },
+        };
+      } else {
+        throw new Error('simulated error');
+      }
+    }
+  ),
+}));
+const existingConversation = getConversationResponseMock();
+const reportEvent = jest.fn();
+const appendConversationMessages = jest.fn();
+const mockContext = {
+  elasticAssistant: {
+    actions: {
+      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
     },
-  } as AuthenticatedUser;
+    getRegisteredTools: jest.fn(() => []),
+    getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
+    logger: loggingSystemMock.createLogger(),
+    telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+    getCurrentUser: () => ({
+      username: 'user',
+      email: 'email',
+      fullName: 'full name',
+      roles: ['user-role'],
+      enabled: true,
+      authentication_realm: { name: 'native1', type: 'native' },
+      lookup_realm: { name: 'native1', type: 'native' },
+      authentication_provider: { type: 'basic', name: 'basic1' },
+      authentication_type: 'realm',
+      elastic_cloud_user: false,
+      metadata: { _reserved: false },
+    }),
+    getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
+      getConversation: jest.fn().mockResolvedValue(existingConversation),
+      updateConversation: jest.fn().mockResolvedValue(existingConversation),
+      appendConversationMessages:
+        appendConversationMessages.mockResolvedValue(existingConversation),
+    }),
+    getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+      findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+    }),
+  },
+  core: {
+    elasticsearch: {
+      client: elasticsearchServiceMock.createScopedClusterClient(),
+    },
+    savedObjects: coreMock.createRequestHandlerContext().savedObjects,
+  },
+};
+
+const mockRequest = {
+  params: { connectorId: 'mock-connector-id' },
+  body: {
+    connectorId: 'my-gen-ai',
+    persist: true,
+    messages: [
+      {
+        role: 'user',
+        content:
+          "Evaluate the event from the context and format your output neatly in markdown syntax for my Elastic Security case.\nAdd your description, recommended actions and bulleted triage steps. Use the MITRE ATT&CK data provided to add more context and recommendations from MITRE, and hyperlink to the relevant pages on MITRE's website. Be sure to include the user and host risk score data from the context. Your response should include steps that point to Elastic Security specific features, including endpoint response actions, the Elastic Agent OSQuery manager integration (with example osquery queries), timelines and entity analytics and link to all the relevant Elastic Security documentation.",
+        data: {
+          'event.category': 'process',
+          'process.pid': 69516,
+          'host.os.version': 14.5,
+          'host.os.name': 'macOS',
+          'host.name': 'Yuliias-MBP',
+          'process.name': 'biomesyncd',
+          'user.name': 'yuliianaumenko',
+          'process.working_directory': '/',
+          'event.module': 'system',
+          'process.executable': '/usr/libexec/biomesyncd',
+          'process.args': '/usr/libexec/biomesyncd',
+          message: 'Process biomesyncd (PID: 69516) by user yuliianaumenko STOPPED',
+        },
+      },
+    ],
+  },
+  events: {
+    aborted$: NEVER,
+  },
+};
+
+const mockResponse = {
+  ok: jest.fn().mockImplementation((x) => x),
+  error: jest.fn().mockImplementation((x) => x),
+};
+
+describe('chatCompleteRoute', () => {
+  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
 
   beforeEach(() => {
-    server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    jest.clearAllMocks();
+    actionsClient.getBulk.mockResolvedValue([
+      {
+        id: '1',
+        isPreconfigured: false,
+        isSystemAction: false,
+        isDeprecated: false,
+        name: 'my name',
+        actionTypeId: '.gen-ai',
+        isMissingSecrets: false,
+        config: {
+          a: true,
+          b: true,
+          c: true,
+        },
+      },
+    ]);
+  });
 
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
-      Promise.resolve(getEmptyFindResult())
-    ); // no current conversations
-    clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockResolvedValue(
-      getConversationMock(getQueryConversationParams())
-    ); // creation succeeds
+  it('returns the expected response when isEnabledKnowledgeBase=false', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    isEnabledKnowledgeBase: false,
+                  },
+                },
+                mockResponse
+              );
 
-    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
+              expect(result).toEqual({
+                body: {
+                  connector_id: 'mock-connector-id',
+                  data: mockActionResponse,
+                  status: 'ok',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
-    const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
-    chatCompleteRoute(server.router, mockGetElser);
   });
 
-  describe('status codes', () => {
-    test('returns 200 with a conversation created via AIAssistantConversationsDataClient', async () => {
-      const response = await server.inject(
-        getCreateConversationRequest(),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(200);
-    });
+  it('returns the expected response when isEnabledKnowledgeBase=true', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(mockContext, mockRequest, mockResponse);
 
-    test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {
-      context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
-      const response = await server.inject(
-        getCreateConversationRequest(),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(401);
-    });
+              expect(result).toEqual({
+                body: {
+                  connector_id: 'mock-connector-id',
+                  data: mockActionResponse,
+                  status: 'ok',
+                },
+                headers: { 'content-type': 'application/json' },
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
   });
 
-  describe('unhappy paths', () => {
-    test('catches error if creation throws', async () => {
-      clients.elasticAssistant.getAIAssistantConversationsDataClient.createConversation.mockImplementation(
-        async () => {
-          throw new Error('Test error');
-        }
-      );
-      const response = await server.inject(
-        getCreateConversationRequest(),
-        requestContextMock.convertContext(context)
-      );
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        message: 'Test error',
-        status_code: 500,
-      });
-    });
+  it('returns the expected error when executeCustomLlmChain fails', async () => {
+    const requestWithBadConnectorId = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(mockContext, requestWithBadConnectorId, mockResponse);
+
+              expect(result).toEqual({
+                body: 'simulated error',
+                statusCode: 500,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
   });
 
-  describe('request validation', () => {
-    test('disallows unknown title', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
-        body: {
-          ...getCreateConversationSchemaMock(),
-          title: true,
-        },
-      });
-      const result = server.validate(request);
+  it('reports success events to telemetry - kb on, RAG alerts off', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, mockRequest, mockResponse);
 
-      expect(result.badRequest).toHaveBeenCalled();
-    });
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
   });
-  describe('conversation containing messages', () => {
-    const getMessage = (role: string = 'user') => ({
-      role,
-      content: 'test content',
-      timestamp: '2019-12-13T16:40:33.400Z',
-    });
-    const defaultMessage = getMessage();
 
-    test('is successful', async () => {
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
-        body: {
-          ...getCreateConversationSchemaMock(),
-          messages: [defaultMessage],
-        },
-      });
+  it('reports success events to telemetry - kb on, RAG alerts on', async () => {
+    const ragRequest = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
+        replacements: [],
+        isEnabledRAGAlerts: true,
+      },
+    };
 
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-      expect(response.status).toEqual(200);
-    });
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, ragRequest, mockResponse);
 
-    test('fails when provided with an unsupported message role', async () => {
-      const wrongMessage = getMessage('test_thing');
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
 
-      const request = requestMock.create({
-        method: 'post',
-        path: ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
-        body: {
-          ...getCreateConversationSchemaMock(),
-          messages: [wrongMessage],
-        },
-      });
-      const result = await server.validate(request);
-      expect(result.badRequest).toHaveBeenCalledWith(
-        `messages.0.role: Invalid enum value. Expected 'system' | 'user' | 'assistant', received 'test_thing'`
-      );
-    });
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports success events to telemetry - kb off, RAG alerts on', async () => {
+    const req = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
+        replacements: [],
+        isEnabledRAGAlerts: true,
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, req, mockResponse);
+
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: true,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports success events to telemetry - kb off, RAG alerts off', async () => {
+    const req = {
+      ...mockRequest,
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, req, mockResponse);
+
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb on, RAG alerts off', async () => {
+    const requestWithBadConnectorId = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, requestWithBadConnectorId, mockResponse);
+
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb on, RAG alerts on', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        isEnabledRAGAlerts: true,
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
+
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: true,
+                isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb off, RAG alerts on', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+        anonymizationFields: [
+          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
+          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
+        ],
+        replacements: [],
+        isEnabledRAGAlerts: true,
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
+
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: true,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('Adds error to conversation history', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        conversationId: '99999',
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
+              expect(appendConversationMessages.mock.calls[1][0].messages[0]).toEqual(
+                expect.objectContaining({
+                  content: 'simulated error',
+                  isError: true,
+                  role: 'assistant',
+                })
+              );
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('reports error events to telemetry - kb off, RAG alerts off', async () => {
+    const badRequest = {
+      ...mockRequest,
+      params: { connectorId: 'bad-connector-id' },
+      body: {
+        ...mockRequest.body,
+        isEnabledKnowledgeBase: false,
+      },
+    };
+
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              await handler(mockContext, badRequest, mockResponse);
+
+              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+                errorMessage: 'simulated error',
+                isEnabledKnowledgeBase: false,
+                isEnabledRAGAlerts: false,
+                actionTypeId: '.gen-ai',
+                model: 'gpt-4',
+                assistantStreamingEnabled: false,
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeStream and actionTypeId=.gen-ai', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeStream',
+                    actionTypeId: '.gen-ai',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: mockStream,
+                headers: {
+                  'Cache-Control': 'no-cache',
+                  Connection: 'keep-alive',
+                  'Transfer-Encoding': 'chunked',
+                  'X-Accel-Buffering': 'no',
+                  'X-Content-Type-Options': 'nosniff',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeStream and actionTypeId=.bedrock', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeStream',
+                    actionTypeId: '.bedrock',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: mockStream,
+                headers: {
+                  'Cache-Control': 'no-cache',
+                  Connection: 'keep-alive',
+                  'Transfer-Encoding': 'chunked',
+                  'X-Accel-Buffering': 'no',
+                  'X-Content-Type-Options': 'nosniff',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeAI and actionTypeId=.gen-ai', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeAI',
+                    actionTypeId: '.gen-ai',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: { connector_id: 'mock-connector-id', data: mockActionResponse, status: 'ok' },
+                headers: {
+                  'content-type': 'application/json',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
+
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeAI and actionTypeId=.bedrock', async () => {
+    const mockRouter = {
+      versioned: {
+        post: jest.fn().mockImplementation(() => {
+          return {
+            addVersion: jest.fn().mockImplementation(async (_, handler) => {
+              const result = await handler(
+                mockContext,
+                {
+                  ...mockRequest,
+                  body: {
+                    ...mockRequest.body,
+                    subAction: 'invokeAI',
+                    actionTypeId: '.bedrock',
+                  },
+                },
+                mockResponse
+              );
+
+              expect(result).toEqual({
+                body: { connector_id: 'mock-connector-id', data: mockActionResponse, status: 'ok' },
+                headers: {
+                  'content-type': 'application/json',
+                },
+              });
+            }),
+          };
+        }),
+      },
+    };
+    await chatCompleteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
   });
 });

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
 import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from './mocks';
 
 const connectorId = 'mock-connector-id';
 
+const actionsClient = actionsClientMock.create();
 const mockExecute = jest.fn().mockImplementation(() => ({
   data: mockActionResponse,
   status: 'ok',
@@ -21,22 +21,7 @@ const mockExecute = jest.fn().mockImplementation(() => ({
 
 const mockLogger = loggerMock.create();
 
-const mockActions = {
-  getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-    execute: mockExecute,
-  })),
-} as unknown as ActionsPluginStart;
-
 const prompt = 'Do you know my name?';
-
-const mockRequest: KibanaRequest = {
-  params: { connectorId },
-  body: {
-    message: prompt,
-    subAction: 'invokeAI',
-    isEnabledKnowledgeBase: true,
-  },
-} as KibanaRequest;
 
 describe('ActionsClientLlm', () => {
   beforeEach(() => {
@@ -46,7 +31,7 @@ describe('ActionsClientLlm', () => {
   describe('getActionResultData', () => {
     it('returns the expected data', async () => {
       const actionsClientLlm = new ActionsClientLlm({
-        actionsClient: mockActions,
+        actionsClient,
         connectorId,
         logger: mockLogger,
       });
@@ -60,10 +45,9 @@ describe('ActionsClientLlm', () => {
   describe('_llmType', () => {
     it('returns the expected LLM type', () => {
       const actionsClientLlm = new ActionsClientLlm({
-        actions: mockActions,
+        actionsClient,
         connectorId,
         logger: mockLogger,
-        request: mockRequest,
       });
 
       expect(actionsClientLlm._llmType()).toEqual('ActionsClientLlm');
@@ -71,11 +55,10 @@ describe('ActionsClientLlm', () => {
 
     it('returns the expected LLM type when overridden', () => {
       const actionsClientLlm = new ActionsClientLlm({
-        actions: mockActions,
+        actionsClient,
         connectorId,
         llmType: 'special-llm-type',
         logger: mockLogger,
-        request: mockRequest,
       });
 
       expect(actionsClientLlm._llmType()).toEqual('special-llm-type');
@@ -85,10 +68,9 @@ describe('ActionsClientLlm', () => {
   describe('_call', () => {
     it('returns the expected content when _call is invoked', async () => {
       const actionsClientLlm = new ActionsClientLlm({
-        actions: mockActions,
+        actionsClient,
         connectorId,
         logger: mockLogger,
-        request: mockRequest,
       });
 
       const result = await actionsClientLlm._call(prompt);
@@ -103,17 +85,11 @@ describe('ActionsClientLlm', () => {
         status: 'error', // <-- error status
       }));
 
-      const badActions = {
-        getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-          execute: hasErrorStatus,
-        })),
-      } as unknown as ActionsPluginStart;
-
+      actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
       const actionsClientLlm = new ActionsClientLlm({
-        actions: badActions,
+        actionsClient,
         connectorId,
         logger: mockLogger,
-        request: mockRequest,
       });
 
       await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
@@ -130,10 +106,9 @@ describe('ActionsClientLlm', () => {
       }));
 
       const actionsClientLlm = new ActionsClientLlm({
-        actions: mockActions,
+        actionsClient,
         connectorId,
         logger: mockLogger,
-        request: mockRequest,
       });
 
       await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(

@@ -30,6 +30,7 @@ export const getPersistedConversation = async ({
       conversation: undefined,
       messages: [],
       chatTitle: '',
+      input: state.input,
     };
   }
 
@@ -40,6 +41,7 @@ export const getPersistedConversation = async ({
       conversation: undefined,
       messages: [],
       chatTitle: '',
+      input: state.input,
     };
   }
 
@@ -50,5 +52,6 @@ export const getPersistedConversation = async ({
     conversation,
     messages,
     chatTitle: conversation.title,
+    input: !state.input ? conversation.messages?.slice(-1)[0].content : state.input,
   };
 };
