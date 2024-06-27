@@ -183,10 +183,18 @@ export function translateToEndpointExceptions(
           }
         });
       } else if (isFilterProcessDescendantsEnabled(entry)) {
-        const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(
-          schemaVersion,
-          entry
-        ) as TranslatedEntriesOfDescendantOf;
+        const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+          ...entry,
+          entries: [
+            ...entry.entries,
+            {
+              field: 'event.category',
+              operator: 'included',
+              type: 'match',
+              value: 'process',
+            },
+          ],
+        }) as TranslatedEntriesOfDescendantOf;
 
         const translatedItem: TranslatedExceptionListItem = {
           type: entry.type,

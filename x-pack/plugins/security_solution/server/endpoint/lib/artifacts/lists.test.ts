@@ -529,8 +529,6 @@ describe('artifacts lists', () => {
       ])('when %s, it should not convert `descendant_of`', () => {});
 
       test('it should convert `descendant_of` to the expected format', async () => {
-        // todo: event.category is process
-
         const expectedEndpointExceptions: TranslatedExceptionListItem = {
           type: 'simple',
           entries: [
@@ -546,6 +544,12 @@ describe('artifacts lists', () => {
                         operator: 'included',
                         type: 'exact_caseless',
                         value: 'C:\\Windows\\System32\\ping.exe',
+                      },
+                      {
+                        field: 'event.category',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'process',
                       },
                     ],
                   },
@@ -579,7 +583,6 @@ describe('artifacts lists', () => {
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
 
-      test('it should overwrite user added `event.category` entry', () => {});
       test('it should handle nested entries properly', () => {});
       test('it should handle file name artifacts properly', () => {});
     });
