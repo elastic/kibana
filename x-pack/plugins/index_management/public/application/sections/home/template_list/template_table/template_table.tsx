@@ -9,14 +9,7 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  EuiInMemoryTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiLink,
-  EuiIcon,
-  Criteria,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
 import {
@@ -199,19 +192,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('indexTemplates');
-  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({
+    tableId: 'indexTemplates',
+  });
 
   const pagination = {
     pageSize,
     pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
-  };
-
-  const onTableChange = ({ page }: Criteria<any>) => {
-    if (page) {
-      setPageSize(page.size);
-      setPersistingPageSize(page.size);
-    }
   };
 
   const sorting = {

@@ -6,23 +6,34 @@
  * Side Public License, v 1.
  */
 
+import { Criteria } from '@elastic/eui';
 import { INITIAL_DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PREFIX } from './constants';
 import { createStorage } from './storage';
 
-export const useEuiTablePersistingPageSize = (tableId: string) => {
+interface EuiTablePersistingPageSizeProps {
+  tableId: string;
+  customOnTableChange?: (change: Criteria<any>) => void;
+}
+
+export const useEuiTablePersistingPageSize = ({
+  tableId,
+  customOnTableChange,
+}: EuiTablePersistingPageSizeProps) => {
   const storage = createStorage({
     engine: window.localStorage,
     prefix: LOCAL_STORAGE_PREFIX,
   });
 
-  const getPersistingPageSize = () => {
-    const storedPageSize = storage.get(tableId);
-    return storedPageSize || INITIAL_DEFAULT_PAGE_SIZE;
+  const pageSize = storage.get(tableId) || INITIAL_DEFAULT_PAGE_SIZE;
+
+  const onTableChange = ({ page, sort }: Criteria<any>) => {
+    if (customOnTableChange) {
+      customOnTableChange({ page, sort });
+    }
+    if (page?.size) {
+      storage.set(tableId, page.size);
+    }
   };
 
-  const setPersistingPageSize = (pageSize: number) => {
-    storage.set(tableId, pageSize);
-  };
-
-  return { getPersistingPageSize, setPersistingPageSize };
+  return { pageSize, onTableChange };
 };

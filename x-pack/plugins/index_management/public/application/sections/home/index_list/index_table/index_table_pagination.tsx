@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiTablePagination } from '@elastic/eui';
 import {
   DEFAULT_PAGE_SIZE_OPTIONS,
@@ -27,8 +27,13 @@ export const IndexTablePagination = ({
   readURLParams,
   setURLParam,
 }: IndexTablePaginationProps) => {
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('indices');
-  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({
+    tableId: 'componentTemplates',
+    customOnTableChange: ({ page }) => {
+      setURLParam('pageSize', page?.size);
+      pageSizeChanged(page?.size);
+    },
+  });
 
   if (pager.itemsPerPage !== pageSize) {
     pageSizeChanged(pageSize);
@@ -41,8 +46,8 @@ export const IndexTablePagination = ({
     urlParamPageSize !== pageSize &&
     DEFAULT_PAGE_SIZE_OPTIONS.includes(urlParamPageSize)
   ) {
-    setPersistingPageSize(urlParamPageSize);
-    setPageSize(urlParamPageSize);
+    pageSizeChanged(urlParamPageSize);
+    onTableChange({ page: { size: urlParamPageSize, index: pager.getCurrentPageIndex() } });
   }
 
   return (
@@ -51,12 +56,9 @@ export const IndexTablePagination = ({
       itemsPerPage={pageSize}
       itemsPerPageOptions={DEFAULT_PAGE_SIZE_OPTIONS}
       pageCount={pager.getTotalPages()}
-      onChangeItemsPerPage={(newPageSize) => {
-        setPersistingPageSize(newPageSize);
-        setURLParam('pageSize', pageSize);
-        pageSizeChanged(newPageSize);
-        setPageSize(newPageSize);
-      }}
+      onChangeItemsPerPage={(size) =>
+        onTableChange({ page: { size, index: pager.getCurrentPageIndex() } })
+      }
       onChangePage={(pageIndex) => {
         setURLParam('pageIndex', pageIndex);
         pageChanged(pageIndex);

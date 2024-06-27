@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiSearchBarProps,
   EuiButton,
   EuiLink,
-  Criteria,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -160,19 +159,13 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
   ];
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('enrichPolicies');
-  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({
+    tableId: 'enrichPolicies',
+  });
 
   const pagination = {
     pageSize,
     pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
-  };
-
-  const onTableChange = ({ page }: Criteria<any>) => {
-    if (page) {
-      setPageSize(page.size);
-      setPersistingPageSize(page.size);
-    }
   };
 
   return (

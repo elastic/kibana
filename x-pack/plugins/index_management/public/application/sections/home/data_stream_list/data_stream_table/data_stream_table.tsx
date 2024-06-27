@@ -16,7 +16,6 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiTextColor,
-  Criteria,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 import {
@@ -282,19 +281,13 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ],
   };
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('dataStreams');
-  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({
+    tableId: 'dataStreams',
+  });
 
   const pagination = {
     pageSize,
     pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
-  };
-
-  const onTableChange = ({ page }: Criteria<any>) => {
-    if (page) {
-      setPageSize(page.size);
-      setPersistingPageSize(page.size);
-    }
   };
 
   return (

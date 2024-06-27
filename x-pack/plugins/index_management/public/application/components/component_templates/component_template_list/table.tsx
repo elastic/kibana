@@ -22,7 +22,6 @@ import {
   EuiSelectable,
   EuiFilterButton,
   EuiSelectableOption,
-  Criteria,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
@@ -93,15 +92,9 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('componentTemplates');
-  const [pageSize, setPageSize] = useState(getPersistingPageSize());
-
-  const onTableChange = ({ page }: Criteria<any>) => {
-    if (page) {
-      setPageSize(page.size);
-      setPersistingPageSize(page.size);
-    }
-  };
+  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({
+    tableId: 'componentTemplates',
+  });
 
   const filteredComponentTemplates = useMemo(() => {
     const inUseFilter = filterOptions.find(({ key }) => key === 'inUse')?.checked;

@@ -17,7 +17,6 @@ import {
   EuiSwitch,
   EuiSearchBarProps,
   EuiInMemoryTableProps,
-  Criteria,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -108,15 +107,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   );
   const { setListAction } = usePolicyListContext();
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('ilmPolicies');
-  const [pageSize, setPageSize] = useState(getPersistingPageSize());
-
-  const onTableChange = ({ page }: Criteria<any>) => {
-    if (page) {
-      setPageSize(page.size);
-      setPersistingPageSize(page.size);
-    }
-  };
+  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({ tableId: 'ilmPolicies' });
 
   const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
     if (!error) {
