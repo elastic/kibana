@@ -24,23 +24,13 @@ export const NOTES_DISABLE_TOOLTIP = i18n.translate(
 export const NOTES_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
   i18n.translate('xpack.securitySolution.timeline.body.notes.addNoteTooltip', {
     values: { notesCount },
-    defaultMessage:
+    defaultMessage: `${
       notesCount > 0
         ? notesCount === 1
           ? '1 note available. Add more'
           : '{notesCount} notes available. Add more'
-        : 'Add Note',
-  });
-
-export const NOTES_COUNT_AVAILABLE = ({ notesCount }: { notesCount: number }) =>
-  i18n.translate('xpack.securitySolution.timeline.body.notes.notesCountAvailableLabel', {
-    values: { notesCount },
-    defaultMessage:
-      notesCount > 0
-        ? notesCount === 1
-          ? '1 note available.'
-          : '{notesCount} notes available.'
-        : '',
+        : 'Add Note'
+    }`,
   });
 
 export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
