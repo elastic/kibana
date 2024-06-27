@@ -97,4 +97,7 @@ export const NOTES_COMMENT_TEST_ID = `${PREFIX}NotesComment` as const;
 export const ADD_NOTE_LOADING_TEST_ID = `${PREFIX}AddNotesLoading` as const;
 export const ADD_NOTE_MARKDOWN_TEST_ID = `${PREFIX}AddNotesMarkdown` as const;
 export const ADD_NOTE_BUTTON_TEST_ID = `${PREFIX}AddNotesButton` as const;
+export const NOTE_AVATAR_TEST_ID = `${PREFIX}NoteAvatar` as const;
 export const DELETE_NOTE_BUTTON_TEST_ID = `${PREFIX}DeleteNotesButton` as const;
+export const ATTACH_TO_TIMELINE_CHECKBOX_TEST_ID = `${PREFIX}AttachToTimelineCheckbox` as const;
+export const OPEN_TIMELINE_BUTTON_TEST_ID = `${PREFIX}OpenTimelineButton` as const;

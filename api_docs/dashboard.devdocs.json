@@ -2559,7 +2559,7 @@
           "\nFor BWC reasons, dashboard state is stored with panels as an array instead of a map"
         ],
         "signature": [
-          "{ id?: string | undefined; tags?: string[] | undefined; title?: string | undefined; query?: ",
+          "{ id?: string | undefined; version?: string | undefined; tags?: string[] | undefined; title?: string | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2575,7 +2575,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; description?: string | undefined; version?: string | undefined; refreshInterval?: ",
+          "[] | undefined; description?: string | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
             "scope": "common",
