@@ -10,6 +10,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Services } from '../../services';
 import { TelemetryContextProvider } from './telemetry';
+import { AvailabilityWrapper } from '../../common/components/availability_wrapper';
 import { CreateIntegrationLanding } from './create_integration_landing';
 import { CreateIntegrationUpload } from './create_integration_upload';
 import { CreateIntegrationAssistant } from './create_integration_assistant';
@@ -22,16 +23,16 @@ interface CreateIntegrationProps {
 export const CreateIntegration = React.memo<CreateIntegrationProps>(({ services }) => (
   <KibanaContextProvider services={services}>
     <TelemetryContextProvider>
-      <CreateIntegrationRouter />
+      <AvailabilityWrapper>
+        <CreateIntegrationRouter />
+      </AvailabilityWrapper>
     </TelemetryContextProvider>
   </KibanaContextProvider>
 ));
-
 CreateIntegration.displayName = 'CreateIntegration';
 
 const CreateIntegrationRouter = React.memo(() => {
   const { canUseIntegrationAssistant, canUseIntegrationUpload } = useRoutesAuthorization();
-
   return (
     <Switch>
       {canUseIntegrationAssistant && (

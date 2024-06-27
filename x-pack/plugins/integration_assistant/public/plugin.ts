@@ -13,16 +13,21 @@ import type {
 } from './types';
 import { getCreateIntegrationLazy } from './components/create_integration';
 import { getCreateIntegrationCardButtonLazy } from './components/create_integration_card_button';
-import { Telemetry, type Services } from './services';
+import { Telemetry, type Services, type UpsellingPage } from './services';
 
 export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
 {
   private telemetry = new Telemetry();
+  private UpsellingPage?: UpsellingPage;
 
   public setup(core: CoreSetup): IntegrationAssistantPluginSetup {
     this.telemetry.setup(core.analytics);
-    return {};
+    return {
+      renderUpsellingComponent: (UpsellingPage) => {
+        this.UpsellingPage = UpsellingPage;
+      },
+    };
   }
 
   public start(
@@ -33,6 +38,7 @@ export class IntegrationAssistantPlugin
       ...core,
       ...dependencies,
       telemetry: this.telemetry.start(),
+      UpsellingPage: this.UpsellingPage,
     };
 
     return {

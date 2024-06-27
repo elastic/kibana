@@ -14,6 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { getProductProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -73,6 +74,10 @@ export class SecuritySolutionServerlessPlugin
       );
       pluginsSetup.securitySolution.setProductFeaturesConfigurator(productFeaturesConfigurator);
     }
+
+    pluginsSetup.integrationAssistant?.setIsAvailable(
+      enabledProductFeatures.includes(ProductFeatureKey.integrationAssistant)
+    );
 
     // Register telemetry events
     telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));

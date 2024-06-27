@@ -4,12 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ComponentType } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { IntegrationAssistantPluginStartDependencies } from '../types';
 import type { TelemetryService } from './telemetry/service';
 
 export { Telemetry } from './telemetry/service';
 
+export type UpsellingPage = ComponentType;
+
 export type Services = CoreStart &
-  IntegrationAssistantPluginStartDependencies & { telemetry: TelemetryService };
+  IntegrationAssistantPluginStartDependencies & {
+    telemetry: TelemetryService;
+    UpsellingPage?: UpsellingPage;
+  };
