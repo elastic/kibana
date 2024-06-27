@@ -46,10 +46,11 @@ const fromRawOptionsToEuiSelectableOptions = <T extends string, K extends string
   selectedOptionKeys: string[]
 ): Array<FilterOption<T, K>> => {
   return options.map(({ key, label }) => {
-    const selectableOption: FilterOption<T, K> = { label, key };
-    if (selectedOptionKeys.includes(key)) {
-      selectableOption.checked = 'on';
-    }
+    const selectableOption: FilterOption<T, K> = {
+      label,
+      key,
+      checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
+    };
     return selectableOption;
   });
 };
