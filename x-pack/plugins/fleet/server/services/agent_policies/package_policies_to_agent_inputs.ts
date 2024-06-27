@@ -146,7 +146,10 @@ export const storedPackagePoliciesToAgentInputs = async (
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
-  const addFields = globalDataTags ? globalDataTagsToAddFields(globalDataTags) : undefined;
+  const addFields =
+    globalDataTags && globalDataTags.length > 0
+      ? globalDataTagsToAddFields(globalDataTags)
+      : undefined;
 
   for (const packagePolicy of packagePolicies) {
     if (!isPolicyEnabled(packagePolicy)) {

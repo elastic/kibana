@@ -7,3 +7,14 @@
  */
 
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
+
+export const COMMON_VISUALIZATION_GROUPING = [
+  {
+    id: 'visualizations',
+    getDisplayName: () => 'Visualizations',
+    getIconType: () => {
+      return 'visGauge';
+    },
+    order: 1000,
+  },
+];
