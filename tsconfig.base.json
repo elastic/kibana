@@ -1026,6 +1026,8 @@
       "@kbn/kbn-tp-custom-visualizations-plugin/*": ["test/plugin_functional/plugins/kbn_tp_custom_visualizations/*"],
       "@kbn/kbn-tp-run-pipeline-plugin": ["test/interpreter_functional/plugins/kbn_tp_run_pipeline"],
       "@kbn/kbn-tp-run-pipeline-plugin/*": ["test/interpreter_functional/plugins/kbn_tp_run_pipeline/*"],
+      "@kbn/keyboard-shortcut-utils": ["packages/kbn-keyboard-shortcut-utils"],
+      "@kbn/keyboard-shortcut-utils/*": ["packages/kbn-keyboard-shortcut-utils/*"],
       "@kbn/kibana-cors-test-plugin": ["x-pack/test/functional_cors/plugins/kibana_cors_test"],
       "@kbn/kibana-cors-test-plugin/*": ["x-pack/test/functional_cors/plugins/kibana_cors_test/*"],
       "@kbn/kibana-manifest-schema": ["packages/kbn-kibana-manifest-schema"],
