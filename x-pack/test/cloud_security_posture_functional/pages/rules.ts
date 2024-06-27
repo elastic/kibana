@@ -20,6 +20,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
   const pageObjects = getPageObjects([
     'common',
     'cloudPostureDashboard',
@@ -28,8 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/178413
-  describe.skip('Cloud Posture Rules Page', function () {
+  describe('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
     let findings: typeof pageObjects.findings;
@@ -91,9 +91,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect((await integrationsCounter.getVisibleText()).includes('1')).to.be(true);
       });
 
-      it('Clicking the integrations counter button leads to the integration page', async () => {
-        await rule.rulePage.clickIntegrationsEvaluatedButton();
-        await pageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+      it('Integrations counter button has URL to add integration page', async () => {
+        await retry.waitFor('Wait until url includes', async () =>
+          rule.rulePage.doesElementContainsUrl(
+            'rules-counters-integrations-evaluated-button',
+            'add-integration/kspm'
+          )
+        );
       });
 
       it('Shows the failed findings counter when there are findings', async () => {

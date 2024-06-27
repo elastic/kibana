@@ -140,7 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {
@@ -173,7 +173,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         for (const [columnName, dir, sortingMethod] of testCases) {
           await latestFindingsTable.toggleColumnSort(columnName, dir);
           /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-          pageObjects.header.waitUntilLoadingHasFinished();
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
           expect(values).to.not.be.empty();
           const sorted = values
@@ -311,7 +311,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Findings table to be loaded',
           async () => (await latestFindingsTable.getRowsCount()) === data.length + 1
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await distributionBar.filterBy('passed');
 
@@ -342,7 +342,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Findings table to be loaded',
           async () => (await latestFindingsTable.getRowsCount()) === data.length
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
 
         await distributionBar.filterBy('passed');
 
@@ -360,7 +360,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cspSecurity.logout();
         await cspSecurity.login('csp_read_user');
         await findings.navigateToLatestFindingsPage();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await latestFindingsTable.getRowsCount()).to.be.greaterThan(0);
       });
 
@@ -370,7 +370,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await findings.navigateToLatestFindingsPage();
 
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.getUnprivilegedPrompt());
       });
     });
