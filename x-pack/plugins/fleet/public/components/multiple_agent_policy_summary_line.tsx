@@ -27,7 +27,7 @@ import React, { memo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../common/types';
-import { useLink } from '../hooks';
+import { useAuthz, useLink } from '../hooks';
 
 import { ManageAgentPoliciesModal } from './manage_agent_policies_modal';
 const MIN_WIDTH: CSSProperties = { minWidth: 0 };
@@ -42,6 +42,9 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
   const [policiesModalEnabled, setPoliciesModalEnabled] = useState(false);
+  const authz = useAuthz();
+  const canManageAgentPolicies =
+    authz.integrations.writeIntegrationPolicies && authz.fleet.allAgentPolicies;
 
   // as default, show only the first policy
   const policy = policies[0];
@@ -162,6 +165,7 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                           size="s"
                           data-test-subj="agentPoliciesPopoverButton"
                           onClick={() => setPoliciesModalEnabled(true)}
+                          isDisabled={!canManageAgentPolicies}
                         >
                           {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.button', {
                             defaultMessage: 'Manage agent policies',
