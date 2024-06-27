@@ -98,7 +98,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
           ...licensingMock.createStart(),
           license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
         },
-        security: {
+        securityServiceStart: {
           authc: {
             getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
           },
@@ -175,7 +175,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
             ...licensingMock.createStart(),
             license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
           },
-          security: { authc: { getCurrentUser: () => undefined } },
+          securityServiceStart: { authc: { getCurrentUser: () => undefined } },
         },
         mockConfigSchema
       );
@@ -389,7 +389,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
             ...licensingMock.createStart(),
             license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
           },
-          security: {
+          securityServiceStart: {
             authc: {
               getCurrentUser: () => ({ id: '123', roles: ['peasant'], username: 'Tom Riddle' }),
             },

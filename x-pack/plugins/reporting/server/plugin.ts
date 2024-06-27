@@ -97,7 +97,7 @@ export class ReportingPlugin
   }
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
-    const { elasticsearch, savedObjects, uiSettings, security: securityServiceStart } = core;
+    const { elasticsearch, savedObjects, uiSettings } = core;
 
     // use fieldFormats plugin for csv formats
     setFieldFormats(plugins.fieldFormats);
@@ -117,7 +117,7 @@ export class ReportingPlugin
         savedObjects,
         uiSettings,
         store,
-        securityServiceStart,
+        security: core.security,
         ...plugins,
       });
 

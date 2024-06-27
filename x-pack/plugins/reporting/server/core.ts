@@ -83,7 +83,7 @@ export interface ReportingInternalStart {
   licensing: LicensingPluginStart;
   logger: Logger;
   screenshotting?: ScreenshottingStart;
-  securityServiceStart: SecurityServiceStart;
+  security: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -215,7 +215,7 @@ export class ReportingCore {
    */
   private getExportTypes(): ExportType[] {
     const { csv, pdf, png } = this.config.export_types;
-    const exportTypes = [];
+    const exportTypes: any[] = []; // hack around type error: Argument of type 'CsvSearchSourceExportType|CsvV2ExportType|PdfV1ExportType|PdfExportType|PngExportType' is not assignable to parameter of type 'never'
 
     if (csv.enabled) {
       // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
