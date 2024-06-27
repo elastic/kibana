@@ -199,6 +199,7 @@ export interface InsightProps {
   messages: Message[] | (() => Promise<Message[] | undefined>);
   title: string;
   dataTestSubj?: string;
+  openedByDefault?: boolean;
 }
 
 enum FETCH_STATUS {
@@ -212,6 +213,7 @@ export function Insight({
   messages: initialMessagesOrCallback,
   title,
   dataTestSubj,
+  openedByDefault,
 }: InsightProps) {
   const [messages, setMessages] = useState<{ messages: Message[]; status: FETCH_STATUS }>({
     messages: [],
@@ -273,6 +275,23 @@ export function Insight({
     },
     [service]
   );
+
+  const toggle = useCallback(
+    (isOpen) => {
+      setHasOpened((prevHasOpened) => {
+        if (isEditingPrompt) return false;
+        return prevHasOpened || isOpen;
+      });
+      setInsightOpen(isOpen);
+    },
+    [isEditingPrompt]
+  );
+
+  useEffect(() => {
+    if (openedByDefault) {
+      toggle(true);
+    }
+  }, [openedByDefault, toggle]);
 
   const onEditPrompt = (newPrompt: string) => {
     const clonedMessages = cloneDeep(messages.messages);
@@ -390,13 +409,7 @@ export function Insight({
   return (
     <InsightBase
       title={title}
-      onToggle={(isOpen) => {
-        setHasOpened((prevHasOpened) => {
-          if (isEditingPrompt) return false;
-          return prevHasOpened || isOpen;
-        });
-        setInsightOpen(isOpen);
-      }}
+      onToggle={toggle}
       controls={
         <ActionsMenu
           connectors={connectors}

@@ -27,7 +27,7 @@
     "optionalPlugins": [
       "observabilityAIAssistant",
     ],
-    "requiredBundles": ["unifiedHistogram", "discover"],
+    "requiredBundles": ["unifiedHistogram", "discover", "triggersActionsUi", "stackConnectors", "actions"],
     "extraPublicDirs": [
       "common"
     ]
