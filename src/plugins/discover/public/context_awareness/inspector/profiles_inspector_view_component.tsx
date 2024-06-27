@@ -249,6 +249,7 @@ const DocumentProfileDisplay = ({
           name: i18n.translate('discover.inspector.profilesInspectorView.documentProfileIdColumn', {
             defaultMessage: 'Record ID',
           }),
+          render: (id: string, record) => id ?? record.id,
         },
         {
           field: 'context.type',
