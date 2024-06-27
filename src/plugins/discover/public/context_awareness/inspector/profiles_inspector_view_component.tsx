@@ -7,6 +7,7 @@
  */
 
 import {
+  EuiBasicTableColumn,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiDescriptionList,
@@ -146,7 +147,6 @@ const DocumentProfilesDisplay = ({
       )}
       items={sortedDocumentProfiles}
       itemId="profileId"
-      rowHeader="profileId"
       columns={[
         {
           field: 'profileId',
@@ -166,47 +166,12 @@ const DocumentProfilesDisplay = ({
             }
           ),
         },
-        {
-          align: 'right',
-          width: '40px',
-          isExpander: true,
-          name: (
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate(
-                  'discover.inspector.profilesInspectorView.documentProfilesExpandColumn',
-                  {
-                    defaultMessage: 'Expand row',
-                  }
-                )}
-              </span>
-            </EuiScreenReaderOnly>
-          ),
-          mobileOptions: { header: false },
-          render: ({ profileId }: { profileId: string }) => (
-            <EuiButtonIcon
-              onClick={() => {
-                setExpandedProfileId(expandedProfileId === profileId ? undefined : profileId);
-              }}
-              aria-label={
-                expandedProfileId === profileId
-                  ? i18n.translate(
-                      'discover.inspector.profilesInspectorView.documentProfilesCollapseRowAriaLabel',
-                      {
-                        defaultMessage: 'Collapse',
-                      }
-                    )
-                  : i18n.translate(
-                      'discover.inspector.profilesInspectorView.documentProfilesExpandRowAriaLabel',
-                      {
-                        defaultMessage: 'Expand',
-                      }
-                    )
-              }
-              iconType={expandedProfileId === profileId ? 'arrowDown' : 'arrowRight'}
-            />
-          ),
-        },
+        getExpandColumn<{ profileId: string }>({
+          isExpanded: ({ profileId }) => expandedProfileId === profileId,
+          onClick: ({ profileId }) => {
+            setExpandedProfileId(expandedProfileId === profileId ? undefined : profileId);
+          },
+        }),
       ]}
       itemIdToExpandedRowMap={
         expandedProfileId
@@ -247,15 +212,13 @@ const DocumentProfileDisplay = ({
       )}
       items={records}
       itemId="id"
-      rowHeader="raw._id"
       pagination={true}
       columns={[
         {
-          field: 'raw._id',
           name: i18n.translate('discover.inspector.profilesInspectorView.documentProfileIdColumn', {
             defaultMessage: 'Record ID',
           }),
-          render: (rawId: string, record) => rawId ?? record.id,
+          render: (record: DataTableRecordWithContext) => record.raw._id ?? record.id,
         },
         {
           field: 'context.type',
@@ -266,53 +229,16 @@ const DocumentProfileDisplay = ({
             }
           ),
         },
-        {
-          align: 'right',
-          width: '40px',
-          isExpander: true,
-          name: (
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate(
-                  'discover.inspector.profilesInspectorView.documentProfileExpandColumn',
-                  {
-                    defaultMessage: 'Expand row',
-                  }
-                )}
-              </span>
-            </EuiScreenReaderOnly>
-          ),
-          mobileOptions: { header: false },
-          render: (record: DataTableRecordWithContext) => (
-            <EuiButtonIcon
-              onClick={() => {
-                setExpandedRecord(expandedRecord?.id === record.id ? undefined : record);
-              }}
-              aria-label={
-                expandedRecord?.id === record.id
-                  ? i18n.translate(
-                      'discover.inspector.profilesInspectorView.documentProfileCollapseRowAriaLabel',
-                      {
-                        defaultMessage: 'Collapse',
-                      }
-                    )
-                  : i18n.translate(
-                      'discover.inspector.profilesInspectorView.documentProfileExpandRowAriaLabel',
-                      {
-                        defaultMessage: 'Expand',
-                      }
-                    )
-              }
-              iconType={expandedRecord?.id === record.id ? 'arrowDown' : 'arrowRight'}
-            />
-          ),
-        },
+        getExpandColumn<DataTableRecordWithContext>({
+          isExpanded: (record) => expandedRecord?.id === record.id,
+          onClick: (record) => {
+            setExpandedRecord(expandedRecord?.id === record.id ? undefined : record);
+          },
+        }),
       ]}
       itemIdToExpandedRowMap={
         expandedRecord
-          ? {
-              [expandedRecord.id]: <DocumentJsonDisplay record={expandedRecord} />,
-            }
+          ? { [expandedRecord.id]: <DocumentJsonDisplay record={expandedRecord} /> }
           : undefined
       }
       css={{
@@ -339,6 +265,47 @@ const DocumentJsonDisplay = ({ record }: { record: DataTableRecordWithContext })
     </EuiCodeBlock>
   );
 };
+
+const getExpandColumn = <T extends object>({
+  isExpanded,
+  onClick,
+}: {
+  isExpanded: (value: T) => boolean;
+  onClick: (value: T) => void;
+}): EuiBasicTableColumn<T> => ({
+  align: 'right',
+  width: '40px',
+  isExpander: true,
+  mobileOptions: { header: false },
+  name: (
+    <EuiScreenReaderOnly>
+      <span>
+        {i18n.translate('discover.inspector.profilesInspectorView.expandColumn', {
+          defaultMessage: 'Expand row',
+        })}
+      </span>
+    </EuiScreenReaderOnly>
+  ),
+  render: (value: T) => {
+    const isRowExpanded = isExpanded(value);
+
+    return (
+      <EuiButtonIcon
+        onClick={() => onClick(value)}
+        aria-label={
+          isRowExpanded
+            ? i18n.translate('discover.inspector.profilesInspectorView.collapseRowAriaLabel', {
+                defaultMessage: 'Collapse',
+              })
+            : i18n.translate('discover.inspector.profilesInspectorView.expandRowAriaLabel', {
+                defaultMessage: 'Expand',
+              })
+        }
+        iconType={isRowExpanded ? 'arrowDown' : 'arrowRight'}
+      />
+    );
+  },
+});
 
 const defaultIfEmpty = (value: string | undefined) => value ?? '-';
 
