@@ -787,7 +787,7 @@
             "label": "error",
             "description": [],
             "signature": [
-              "({ message, type, culprit }: { message: string; type?: string | undefined; culprit?: string | undefined; }) => ",
+              "({ message, type, culprit, groupingKey, }: { message: string; type?: string | undefined; culprit?: string | undefined; groupingKey?: string | undefined; }) => ",
               "ApmError"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
@@ -799,7 +799,7 @@
                 "id": "def-common.Instance.error.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ message, type, culprit }",
+                "label": "{\n    message,\n    type,\n    culprit,\n    groupingKey,\n  }",
                 "description": [],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
@@ -836,6 +836,20 @@
                     "type": "string",
                     "tags": [],
                     "label": "culprit",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.Instance.error.$1.groupingKey",
+                    "type": "string",
+                    "tags": [],
+                    "label": "groupingKey",
                     "description": [],
                     "signature": [
                       "string | undefined"
