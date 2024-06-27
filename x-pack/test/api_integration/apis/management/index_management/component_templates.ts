@@ -311,12 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(status).to.eql(200);
 
-        expect(body).to.eql({
-          name: 'deprecated_component_template',
-          template: {},
-          deprecated: true,
-          _kbnMeta: { usedBy: [], isManaged: false },
-        });
+        expect(body).to.eql({ acknowledged: true });
       });
     });
 

@@ -37,6 +37,7 @@ export function SvlTemplatesApi({ getService }: FtrProviderContext) {
   ) =>
     await supertestWithoutAuth
       .post(`${API_BASE_PATH}/delete_index_templates`)
+      .set(svlCommonApi.getInternalRequestHeader())
       .set(roleAuthc.apiKeyHeader)
       .send({ templates });
 
