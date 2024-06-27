@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core-security-server",
     "@kbn/core-security-server-internal",
-    "@kbn/core-http-server",
-    "@kbn/utility-types",
+    "@kbn/core-http-server"
   ]
 }
