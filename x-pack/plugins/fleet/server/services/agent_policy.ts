@@ -38,8 +38,6 @@ import {
   policyHasSyntheticsIntegration,
 } from '../../common/services';
 
-import { populateAssignedAgentsCount } from '../routes/agent_policy/handlers';
-
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
 import {
@@ -349,7 +347,10 @@ class AgentPolicyService {
       options
     );
 
-    await appContextService.getUninstallTokenService()?.generateTokenForPolicyId(newSo.id);
+    await appContextService
+      .getUninstallTokenService()
+      ?.scoped(soClient.getCurrentNamespace())
+      ?.generateTokenForPolicyId(newSo.id);
     await this.triggerAgentPolicyUpdatedEvent(esClient, 'created', newSo.id, {
       skipDeploy: options.skipDeploy,
       spaceId: soClient.getCurrentNamespace(),
@@ -413,10 +414,20 @@ class AgentPolicyService {
 
   public async getByIDs(
     soClient: SavedObjectsClientContract,
-    ids: string[],
+    ids: Array<string | { id: string; spaceId?: string }>,
     options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
   ): Promise<AgentPolicy[]> {
-    const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
+    const objects = ids.map((id) => {
+      if (typeof id === 'string') {
+        return { ...options, id, type: SAVED_OBJECT_TYPE };
+      }
+      return {
+        ...options,
+        id: id.id,
+        namespaces: id.spaceId ? [id.spaceId] : undefined,
+        type: SAVED_OBJECT_TYPE,
+      };
+    });
     const bulkGetResponse = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
 
     const agentPolicies = await pMap(
@@ -431,7 +442,6 @@ class AgentPolicyService {
             throw new FleetError(agentPolicySO.error.message);
           }
         }
-
         const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
         if (options.withPackagePolicies) {
           const agentPolicyWithPackagePolicies = await this.get(
@@ -485,8 +495,6 @@ class AgentPolicyService {
       kuery,
       withPackagePolicies = false,
       fields,
-      esClient,
-      withAgentCount = false,
     } = options;
 
     const baseFindParams = {
@@ -526,6 +534,21 @@ class AgentPolicyService {
           agentPolicy.package_policies =
             (await packagePolicyService.findAllForAgentPolicy(soClient, agentPolicySO.id)) || [];
         }
+        if (options.withAgentCount) {
+          await getAgentsByKuery(
+            appContextService.getInternalUserESClient(),
+            appContextService.getInternalUserSOClientForSpaceId(agentPolicy.space_id),
+            {
+              showInactive: true,
+              perPage: 0,
+              page: 1,
+              kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
+            }
+          ).then(({ total }) => (agentPolicy.agents = total));
+        } else {
+          agentPolicy.agents = 0;
+        }
+
         return agentPolicy;
       },
       { concurrency: 50 }
@@ -537,11 +560,6 @@ class AgentPolicyService {
         id: agentPolicy.id,
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
-    }
-    if (esClient && withAgentCount) {
-      await populateAssignedAgentsCount(esClient, soClient, agentPolicies);
-    } else {
-      agentPolicies.forEach((item) => (item.agents = 0));
     }
 
     return {
@@ -990,15 +1008,21 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
+      const packagePoliciesToDelete = this.packagePoliciesWithoutMultiplePolicies(packagePolicies);
 
       await packagePolicyService.delete(
         soClient,
         esClient,
-        packagePolicies.map((p) => p.id),
+        packagePoliciesToDelete.map((p) => p.id),
         {
           force: options?.force,
           skipUnassignFromAgentPolicies: true,
         }
+      );
+      logger.debug(
+        `Deleted package policies with ids ${packagePoliciesToDelete
+          .map((policy) => policy.id)
+          .join(', ')}`
       );
     }
 
@@ -1531,6 +1555,16 @@ class AgentPolicyService {
         'supports_agentless is only allowed in serverless environments that support the agentless feature'
       );
     }
+  }
+
+  private packagePoliciesWithoutMultiplePolicies(packagePolicies: PackagePolicy[]) {
+    // Find package policies that don't have multiple agent policies and mark them for deletion
+    if (appContextService.getExperimentalFeatures().enableReusableIntegrationPolicies) {
+      return packagePolicies.filter(
+        (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
+      );
+    }
+    return packagePolicies;
   }
 }
 

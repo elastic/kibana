@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { difference } from 'lodash';
 import React, { Component } from 'react';
+import type { Observable, Subscription } from 'rxjs';
 
 import type { Capabilities, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
@@ -29,6 +30,7 @@ import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal
 import { CustomizeSpace } from './customize_space';
 import { DeleteSpacesButton } from './delete_spaces_button';
 import { EnabledFeatures } from './enabled_features';
+import { SolutionView } from './solution_view';
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -54,6 +56,7 @@ interface Props {
   capabilities: Capabilities;
   history: ScopedHistory;
   allowFeatureVisibility: boolean;
+  isSolutionNavEnabled$?: Observable<boolean>;
 }
 
 interface State {
@@ -67,10 +70,13 @@ interface State {
     isInvalid: boolean;
     error?: string;
   };
+  isSolutionNavEnabled: boolean;
 }
 
 export class ManageSpacePage extends Component<Props, State> {
   private readonly validator: SpaceValidator;
+  private initialSpaceState: State['space'] | null = null;
+  private subscription: Subscription | null = null;
 
   constructor(props: Props) {
     super(props);
@@ -83,6 +89,7 @@ export class ManageSpacePage extends Component<Props, State> {
         color: getSpaceColor({}),
       },
       features: [],
+      isSolutionNavEnabled: false,
     };
   }
 
@@ -107,11 +114,23 @@ export class ManageSpacePage extends Component<Props, State> {
         }),
       });
     }
+
+    if (this.props.isSolutionNavEnabled$) {
+      this.subscription = this.props.isSolutionNavEnabled$.subscribe((isEnabled) => {
+        this.setState({ isSolutionNavEnabled: isEnabled });
+      });
+    }
   }
 
   public async componentDidUpdate(previousProps: Props) {
     if (this.props.spaceId !== previousProps.spaceId && this.props.spaceId) {
       await this.loadSpace(this.props.spaceId, Promise.resolve(this.state.features));
+    }
+  }
+
+  public componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
     }
   }
 
@@ -160,6 +179,13 @@ export class ManageSpacePage extends Component<Props, State> {
           editingExistingSpace={this.editingExistingSpace()}
           validator={this.validator}
         />
+
+        {this.state.isSolutionNavEnabled && (
+          <>
+            <EuiSpacer size="l" />
+            <SolutionView space={this.state.space} onChange={this.onSpaceChange} />
+          </>
+        )}
 
         {this.props.allowFeatureVisibility && (
           <>
@@ -298,8 +324,10 @@ export class ManageSpacePage extends Component<Props, State> {
         const haveDisabledFeaturesChanged =
           space.disabledFeatures.length !== originalSpace.disabledFeatures.length ||
           difference(space.disabledFeatures, originalSpace.disabledFeatures).length > 0;
+        const hasSolutionViewChanged =
+          this.state.space.solution !== this.initialSpaceState?.solution;
 
-        if (editingActiveSpace && haveDisabledFeaturesChanged) {
+        if (editingActiveSpace && (haveDisabledFeaturesChanged || hasSolutionViewChanged)) {
           this.setState({
             showAlteringActiveSpaceDialog: true,
           });
@@ -326,17 +354,19 @@ export class ManageSpacePage extends Component<Props, State> {
           onLoadSpace(space);
         }
 
+        this.initialSpaceState = {
+          ...space,
+          avatarType: space.imageUrl ? 'image' : 'initials',
+          initials: space.initials || getSpaceInitials(space),
+          color: space.color || getSpaceColor(space),
+          customIdentifier: false,
+          customAvatarInitials:
+            !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
+          customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
+        };
+
         this.setState({
-          space: {
-            ...space,
-            avatarType: space.imageUrl ? 'image' : 'initials',
-            initials: space.initials || getSpaceInitials(space),
-            color: space.color || getSpaceColor(space),
-            customIdentifier: false,
-            customAvatarInitials:
-              !!space.initials && getSpaceInitials({ name: space.name }) !== space.initials,
-            customAvatarColor: !!space.color && getSpaceColor({ name: space.name }) !== space.color,
-          },
+          space: { ...this.initialSpaceState },
           features,
           originalSpace: space,
           isLoading: false,
@@ -369,6 +399,7 @@ export class ManageSpacePage extends Component<Props, State> {
       disabledFeatures = [],
       imageUrl,
       avatarType,
+      solution,
     } = this.state.space;
 
     const params = {
@@ -379,6 +410,7 @@ export class ManageSpacePage extends Component<Props, State> {
       color: color ? hsvToHex(hexToHsv(color)).toUpperCase() : color, // Convert 3 digit hex codes to 6 digits since Spaces API requires 6 digits
       disabledFeatures,
       imageUrl: avatarType === 'image' ? imageUrl : '',
+      solution,
     };
 
     let action;

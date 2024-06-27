@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   version: '1'
-  title: Asset Criticality Create Record Schema
+  title: Asset Criticality CSV Upload Schema
 servers:
   - url: 'http://{kibana_host}:{port}'
     variables:
@@ -11,6 +11,32 @@ servers:
         default: '5601'
 paths:
   /internal/asset_criticality/upload_csv:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      summary: Deprecated internal API which Uploads a CSV file containing asset criticality data
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The CSV file to upload.
+              required:
+                - file
+      responses:
+        '200':
+          description: Bulk upload successful
+          content:
+            application/json:
+              schema:
+                $ref: '#./common/components/schemas/AssetCriticalityBulkUploadResponse'
+        '413':
+          description: File too large
+  /api/asset_criticality/upload_csv:
     post:
       x-labels: [ess, serverless]
       x-internal: true
@@ -29,47 +55,10 @@ paths:
                 - file
       responses:
         '200':
-          description: CSV upload successful
+          description: Bulk upload successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AssetCriticalityCsvUploadResponse'
+                $ref: '#./common/components/schemas/AssetCriticalityBulkUploadResponse'
         '413':
           description: File too large
-components:
-  schemas:
-    ErrorItem:
-      type: object
-      properties:
-        message:
-          type: string
-        index:
-          type: integer
-      required:
-        - message
-        - index
-    Stats:
-      type: object
-      properties:
-        successful:
-          type: integer
-        failed:
-          type: integer
-        total:
-          type: integer
-      required:
-        - successful
-        - failed
-        - total
-    AssetCriticalityCsvUploadResponse:
-      type: object
-      properties:
-        errors:
-          type: array
-          items:
-            $ref: '#/components/schemas/ErrorItem'
-        stats:
-          $ref: '#/components/schemas/Stats'
-      required:
-        - errors
-        - stats

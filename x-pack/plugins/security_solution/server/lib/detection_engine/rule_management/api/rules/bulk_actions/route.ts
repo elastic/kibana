@@ -8,6 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { ConfigType } from '../../../../../../config';
 import type { PerformBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
@@ -22,7 +23,6 @@ import {
 } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';

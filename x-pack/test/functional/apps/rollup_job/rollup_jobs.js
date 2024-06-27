@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const testSubjects = getService('testSubjects');
   const isRunningCcs = config.get('esTestCluster.ccs') ? true : false;
   let remoteEs;
   if (isRunningCcs) {
@@ -51,6 +52,10 @@ export default function ({ getService, getPageObjects }) {
       // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
       // We will simulate rollup usage by creating a mock-up rollup index
       await createMockRollupIndex(es);
+    });
+
+    it('shows deprecation prompt when there are no existing rollup jobs', async () => {
+      expect(await testSubjects.exists('jobListDeprecatedPrompt')).to.be(true);
     });
 
     it('create new rollup job', async () => {
