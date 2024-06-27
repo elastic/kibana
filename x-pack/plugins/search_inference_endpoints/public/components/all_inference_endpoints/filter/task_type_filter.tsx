@@ -31,7 +31,7 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
       [filterId]: selectedOptionKeys,
     });
   };
-  const renderOption = (option: MultiSelectFilterOption<TaskTypes>) => {
+  const renderOption = (option: MultiSelectFilterOption) => {
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
@@ -40,7 +40,7 @@ export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
   };
 
   return (
-    <MultiSelectFilter<TaskTypes>
+    <MultiSelectFilter
       buttonLabel={i18n.TASK_TYPE}
       id={'type'}
       onChange={onSystemFilterChange}
