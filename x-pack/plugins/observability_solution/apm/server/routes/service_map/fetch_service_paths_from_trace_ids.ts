@@ -46,7 +46,7 @@ export async function fetchServicePathsFromTraceIds({
   start,
   end,
   terminateAfter,
-  serverlessServiceMapMaxAvailableBytes,
+  serviceMapMaxAllowableBytes,
   numOfRequests,
 }: {
   apmEventClient: APMEventClient;
@@ -54,7 +54,7 @@ export async function fetchServicePathsFromTraceIds({
   start: number;
   end: number;
   terminateAfter: number;
-  serverlessServiceMapMaxAvailableBytes: number;
+  serviceMapMaxAllowableBytes: number;
   numOfRequests: number;
 }) {
   // make sure there's a range so ES can skip shards
@@ -94,7 +94,7 @@ export async function fetchServicePathsFromTraceIds({
    * Used in both terminate_after and tracking in the map script of the scripted_metric agg
    * to ensure we don't fetch more than we can handle.
    *
-   * 1. Use serverlessServiceMapMaxAvailableBytes setting, which represents our baseline request circuit breaker limit.
+   * 1. Use serviceMapMaxAllowableBytes setting, which represents our baseline request circuit breaker limit.
    * 2. Divide by numOfRequests we fire off simultaneously to calculate bytesPerRequest.
    * 3. Divide bytesPerRequest by the average doc size to get totalNumDocsAllowed.
    * 4. Divide totalNumDocsAllowed by totalShards to get numDocsPerShardAllowed.
@@ -105,7 +105,7 @@ export async function fetchServicePathsFromTraceIds({
   const totalShards = serviceMapQueryDataResponse._shards.total;
 
   const calculatedDocs = calculateDocsPerShard({
-    serverlessServiceMapMaxAvailableBytes,
+    serviceMapMaxAllowableBytes,
     avgDocSizeInBytes,
     totalShards,
     numOfRequests,

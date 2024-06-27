@@ -6,27 +6,27 @@
  */
 
 interface Params {
-  serverlessServiceMapMaxAvailableBytes: number;
+  serviceMapMaxAllowableBytes: number;
   avgDocSizeInBytes: number;
   totalShards: number;
   numOfRequests: number;
 }
 
 export const calculateDocsPerShard = ({
-  serverlessServiceMapMaxAvailableBytes,
+  serviceMapMaxAllowableBytes,
   avgDocSizeInBytes,
   totalShards,
   numOfRequests,
 }: Params): number => {
   if (
-    serverlessServiceMapMaxAvailableBytes <= 0 ||
+    serviceMapMaxAllowableBytes <= 0 ||
     avgDocSizeInBytes <= 0 ||
     totalShards <= 0 ||
     numOfRequests <= 0
   ) {
     throw new Error('all parameters must be > 0');
   }
-  const bytesPerRequest = Math.floor(serverlessServiceMapMaxAvailableBytes / numOfRequests);
+  const bytesPerRequest = Math.floor(serviceMapMaxAllowableBytes / numOfRequests);
   const totalNumDocsAllowed = Math.floor(bytesPerRequest / avgDocSizeInBytes);
   const numDocsPerShardAllowed = Math.floor(totalNumDocsAllowed / totalShards);
 

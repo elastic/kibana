@@ -11,7 +11,7 @@ describe('calculateDocsPerShard', () => {
   it('calculates correct docs per shard', () => {
     expect(
       calculateDocsPerShard({
-        serverlessServiceMapMaxAvailableBytes: 2_576_980_377,
+        serviceMapMaxAllowableBytes: 2_576_980_377,
         avgDocSizeInBytes: 495,
         totalShards: 3,
         numOfRequests: 10,
@@ -21,7 +21,7 @@ describe('calculateDocsPerShard', () => {
   it('handles zeros', () => {
     expect(() =>
       calculateDocsPerShard({
-        serverlessServiceMapMaxAvailableBytes: 0,
+        serviceMapMaxAllowableBytes: 0,
         avgDocSizeInBytes: 0,
         totalShards: 0,
         numOfRequests: 0,

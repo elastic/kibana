@@ -46,7 +46,7 @@ export async function getServiceMapFromTraceIds({
   start,
   end,
   terminateAfter,
-  serverlessServiceMapMaxAvailableBytes,
+  serviceMapMaxAllowableBytes,
   numOfRequests,
   logger,
 }: {
@@ -55,7 +55,7 @@ export async function getServiceMapFromTraceIds({
   start: number;
   end: number;
   terminateAfter: number;
-  serverlessServiceMapMaxAvailableBytes: number;
+  serviceMapMaxAllowableBytes: number;
   numOfRequests: number;
   logger: Logger;
 }) {
@@ -65,7 +65,7 @@ export async function getServiceMapFromTraceIds({
     start,
     end,
     terminateAfter,
-    serverlessServiceMapMaxAvailableBytes,
+    serviceMapMaxAllowableBytes,
     numOfRequests,
   });
 
