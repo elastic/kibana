@@ -50,7 +50,7 @@ export const LogsDeprecationCallout = () => {
       <p>
         {i18n.translate('xpack.infra.logsDeprecationCallout.p.weRecommendUsingTheLabel', {
           defaultMessage:
-            'We recommend using the new Logs Explorer, as the Logs Stream will no longer be supported.',
+            'We recommend switching to Logs Explorer. As we focus on and continue to improve Logs Explorer, we'll no longer support Logs Stream.',
         })}
       </p>
       <EuiButton
