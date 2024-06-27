@@ -54,3 +54,14 @@ export const generateNoteMock = (documentId: string) => ({
   updated: new Date().getTime(),
   updatedBy: 'elastic',
 });
+
+/**
+ * Deletes a note
+ */
+export const deleteNote = async (noteId: string) => {
+  const response = await KibanaServices.get().http.delete<{ data: unknown }>(NOTE_URL, {
+    body: JSON.stringify({ noteId }),
+    version: '2023-10-31',
+  });
+  return response;
+};
