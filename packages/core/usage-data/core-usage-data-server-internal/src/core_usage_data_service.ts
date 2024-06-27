@@ -178,7 +178,6 @@ export class CoreUsageDataService
     // See packages/core/saved-objects/core-saved-objects-api-server-internal/src/lib/search/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
 
     // Applying this workaround because the types mismatch
-    // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
     const resp = await (
       elasticsearch.client.asInternalUser as ElasticsearchTraditionalClient
     ).search<unknown, { aliases: UsageDataAggs }>({

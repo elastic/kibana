@@ -185,7 +185,6 @@ async function getObjectsAndReferences({
       );
     }
     // Applying this workaround because the types mismatch
-    // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
     const bulkGetResponse = await (client as ElasticsearchTraditionalClient).mget(
       { docs: makeBulkGetDocs(bulkGetObjects) },
       { ignore: [404], meta: true }

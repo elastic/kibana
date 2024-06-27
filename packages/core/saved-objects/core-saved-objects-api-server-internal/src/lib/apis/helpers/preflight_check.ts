@@ -36,7 +36,6 @@ export class PreflightCheckHelper {
   private readonly registry: ISavedObjectTypeRegistry;
   private readonly serializer: ISavedObjectsSerializer;
   // Applying this workaround because the types mismatch
-  // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
   private readonly client: ElasticsearchTraditionalClient; // RepositoryEsClient;
   private readonly getIndexForType: (type: string) => string;
   private createPointInTimeFinder: CreatePointInTimeFinderFn;

@@ -37,7 +37,6 @@ export const performGet = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
   // Applying this workaround because the types mismatch
-  // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
   const { body, statusCode, headers } = await (
     client as ElasticsearchTraditionalClient
   ).get<SavedObjectsRawDocSource>(

@@ -90,7 +90,6 @@ export async function getAggregatedTypesDocuments(
   };
 
   // Applying this workaround because the types mismatch
-  // (hopefully https://github.com/elastic/kibana/pull/186848 will get them closer)
   const body = await (esClient as ElasticsearchTraditionalClient).search<SavedObjectsRawDocSource>(
     params
   );
