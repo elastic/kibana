@@ -1140,9 +1140,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               onChange={(date) => {
                 if (date) {
                   setTimePickerDate(date);
-                  // const currentEditorQuery = editor1.current?.getValue();
-                  const qs = `${code}to_datetime("${date.toISOString()}")`;
-                  onQueryUpdate(qs);
+                  const currentCursorPosition = editor1.current?.getPosition();
+                  const lineContent = editorModel.current?.getLineContent(
+                    currentCursorPosition?.lineNumber ?? 0
+                  );
+                  const contentAfterCursor = lineContent?.substring(
+                    (currentCursorPosition?.column ?? 0) - 1,
+                    lineContent.length + 1
+                  );
+
+                  const addition = `to_datetime("${date.toISOString()}")${contentAfterCursor}`;
+                  editor1.current?.executeEdits('time', [
+                    {
+                      range: {
+                        startLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        startColumn: currentCursorPosition?.column ?? 0,
+                        endLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        endColumn: (currentCursorPosition?.column ?? 0) + addition.length + 1,
+                      },
+                      text: addition,
+                      forceMoveMarkers: true,
+                    },
+                  ]);
                   setPopoverPosition({});
                 }
               }}
