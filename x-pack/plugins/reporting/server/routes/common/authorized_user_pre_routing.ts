@@ -37,7 +37,7 @@ export const authorizedUserPreRouting = <P, Q, B>(
     try {
       let user: ReportingRequestUser = false;
       if (securitySetup && securitySetup.license.isEnabled()) {
-        // find the authenticated user, or null if security is not enabled
+        // find the authenticated user, only if license is enabled
         user = getUser(req, securityService);
         if (!user) {
           // security is enabled but the user is null

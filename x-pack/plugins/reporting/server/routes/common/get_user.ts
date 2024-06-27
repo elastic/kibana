@@ -8,5 +8,6 @@
 import { KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
 
 export function getUser(request: KibanaRequest, securityService: SecurityServiceStart) {
+  // securityService from core start will always be present
   return securityService.authc.getCurrentUser(request) ?? false;
 }

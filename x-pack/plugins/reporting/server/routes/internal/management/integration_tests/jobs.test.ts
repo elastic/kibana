@@ -175,7 +175,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
             ...licensingMock.createStart(),
             license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
           },
-          security: { authc: { getCurrentUser: () => undefined } },
+          security: { authc: { getCurrentUser: () => undefined } }, // security comes from core here
         },
         mockConfigSchema
       );
