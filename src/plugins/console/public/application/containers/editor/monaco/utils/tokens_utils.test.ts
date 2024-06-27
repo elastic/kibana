@@ -25,6 +25,11 @@ describe('tokens_utils', () => {
       const result = removeTrailingWhitespaces(url);
       expect(result).toBe('_search');
     });
+    it(`doesn't split a query parameter with whitespaces`, () => {
+      const url = '_search?q="with whitespace"';
+      const result = removeTrailingWhitespaces(url);
+      expect(result).toBe(url);
+    });
   });
 
   describe('parseBody', () => {
