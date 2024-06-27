@@ -124,9 +124,9 @@ export function MachineLearningDashboardEmbeddablesProvider(
       };
       await retry.tryForTime(60 * 1000, async () => {
         await dashboardAddPanel.clickEditorMenuButton();
-        await testSubjects.existOrFail('dashboardEditorContextMenu', { timeout: 2000 });
+        await testSubjects.existOrFail('dashboardPanelSelectionFlyout', { timeout: 2000 });
 
-        await dashboardAddPanel.clickEmbeddableFactoryGroupButton('ml');
+        await dashboardAddPanel.verifyEmbeddableFactoryGroupExists('ml');
 
         await dashboardAddPanel.clickAddNewPanelFromUIActionLink(name[mlEmbeddableType]);
         await testSubjects.existOrFail('mlAnomalyJobSelectionControls', { timeout: 2000 });

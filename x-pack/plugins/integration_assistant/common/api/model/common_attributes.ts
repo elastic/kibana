@@ -155,15 +155,3 @@ export const Integration = z.object({
    */
   logo: z.string().optional(),
 });
-
-/**
- * An array of pipeline results.
- */
-export type PipelineResults = z.infer<typeof PipelineResults>;
-export const PipelineResults = z.array(z.object({}));
-
-/**
- * An array of errors.
- */
-export type Errors = z.infer<typeof Errors>;
-export const Errors = z.array(z.object({}));
