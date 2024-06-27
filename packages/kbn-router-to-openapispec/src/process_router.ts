@@ -61,8 +61,9 @@ export const processRouter = (
 
       const operation: OpenAPIV3.OperationObject = {
         summary: route.options.summary ?? '',
-        description: route.options.description,
         tags: route.options.tags ? extractTags(route.options.tags) : [],
+        ...(route.options.description ? { description: route.options.description } : {}),
+        ...(route.options.deprecated ? { deprecated: route.options.deprecated } : {}),
         requestBody: !!validationSchemas?.body
           ? {
               content: {

@@ -11,23 +11,21 @@ import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-typ
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getAlertDetailsFieldValue } from '../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { GuidedOnboardingTourStep } from '../../../common/components/guided_onboarding_tour/tour_step';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../../common/components/guided_onboarding_tour/tour_config';
 import { isActiveTimeline } from '../../../helpers';
-import { useResponderActionItem } from '../endpoint_responder';
 import { TAKE_ACTION } from '../alerts_table/additional_filters_action/translations';
 import { useAlertExceptionActions } from '../alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../alerts_table/timeline_actions/use_investigate_in_timeline';
-
 import { useEventFilterAction } from '../alerts_table/timeline_actions/use_event_filter_action';
-import { useHostIsolationAction } from '../host_isolation/use_host_isolation_action';
-import { getFieldValue } from '../host_isolation/helpers';
+import { useResponderActionItem } from '../../../common/components/endpoint/responder';
+import { useHostIsolationAction } from '../../../common/components/endpoint/host_isolation';
 import type { Status } from '../../../../common/api/detection_engine';
-import { isAlertFromEndpointAlert } from '../../../common/utils/endpoint_alert_check';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useAddToCaseActions } from '../alerts_table/timeline_actions/use_add_to_case_actions';
 import { useKibana } from '../../../common/lib/kibana';
@@ -97,7 +95,10 @@ export const TakeActionDropdown = React.memo(
         ].reduce<ActionsData>(
           (acc, curr) => ({
             ...acc,
-            [curr.name]: getFieldValue({ category: curr.category, field: curr.field }, detailsData),
+            [curr.name]: getAlertDetailsFieldValue(
+              { category: curr.category, field: curr.field },
+              detailsData
+            ),
           }),
           {} as ActionsData
         ),
@@ -107,11 +108,10 @@ export const TakeActionDropdown = React.memo(
     const isEvent = actionsData.eventKind === 'event';
 
     const isAgentEndpoint = useMemo(() => ecsData?.agent?.type?.includes('endpoint'), [ecsData]);
-
     const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
 
-    const agentId = useMemo(
-      () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
+    const osqueryAgentId = useMemo(
+      () => getAlertDetailsFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
       [detailsData]
     );
 
@@ -157,7 +157,7 @@ export const TakeActionDropdown = React.memo(
     );
 
     const { exceptionActionItems } = useAlertExceptionActions({
-      isEndpointAlert: isAlertFromEndpointAlert({ ecsData }),
+      isEndpointAlert: Boolean(isAgentEndpoint),
       onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 
@@ -208,13 +208,13 @@ export const TakeActionDropdown = React.memo(
     });
 
     const osqueryAvailable = osquery?.isOsqueryAvailable({
-      agentId,
+      agentId: osqueryAgentId,
     });
 
     const handleOnOsqueryClick = useCallback(() => {
-      onOsqueryClick(agentId);
+      onOsqueryClick(osqueryAgentId);
       setIsPopoverOpen(false);
-    }, [onOsqueryClick, setIsPopoverOpen, agentId]);
+    }, [onOsqueryClick, setIsPopoverOpen, osqueryAgentId]);
 
     const osqueryActionItem = useMemo(
       () =>

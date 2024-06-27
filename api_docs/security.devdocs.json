@@ -1255,16 +1255,7 @@
           "path": "x-pack/packages/security/plugin_types_public/src/plugin.ts",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/common/components/filebeat_config_flyout/filebeat_config_flyout.tsx"
-            },
-            {
-              "plugin": "dataVisualizer",
-              "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
-            }
-          ]
+          "references": []
         },
         {
           "parentPluginId": "security",
@@ -1952,7 +1943,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, createParams: Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>) => Promise<",
+              "<unknown, unknown, unknown, any>, createParams: Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>) => Promise<",
               {
                 "pluginId": "@kbn/security-plugin-types-server",
                 "scope": "server",
@@ -2000,7 +1991,7 @@
                   "Create operation parameters."
                 ],
                 "signature": [
-                  "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>"
+                  "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }>"
                 ],
                 "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
                 "deprecated": false,
@@ -5072,7 +5063,7 @@
         "label": "CreateAPIKeyParams",
         "description": [],
         "signature": [
-          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
+          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -5134,7 +5125,7 @@
         "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
         "description": [],
         "signature": [
-          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }"
+          "{ readonly type?: \"rest\" | undefined; readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly name: string; readonly kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -5149,7 +5140,7 @@
         "label": "ElasticsearchPrivilegesType",
         "description": [],
         "signature": [
-          "{ readonly cluster?: string[] | undefined; readonly indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; readonly remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; readonly remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; readonly run_as?: string[] | undefined; }"
+          "{ readonly cluster?: string[] | undefined; readonly indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; readonly remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; readonly remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"except\" | \"grant\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; readonly run_as?: string[] | undefined; }"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authorization/role_schema.ts",
         "deprecated": false,
@@ -5484,16 +5475,16 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
-              "plugin": "files",
-              "path": "src/plugins/files/server/routes/file_kind/create.ts"
-            },
-            {
               "plugin": "cases",
               "path": "x-pack/plugins/cases/server/client/factory.ts"
             },
             {
               "plugin": "observabilityAIAssistant",
               "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/index.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/services/api_keys/security.ts"
             },
             {
               "plugin": "fleet",
@@ -5505,7 +5496,39 @@
             },
             {
               "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/services/api_keys/security.ts"
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
+            },
+            {
+              "plugin": "fleet",
+              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
             },
             {
               "plugin": "fleet",
@@ -5526,26 +5549,6 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
             },
             {
               "plugin": "fleet",
@@ -5558,22 +5561,6 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/routes/settings/index.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
             },
             {
               "plugin": "cloudDefend",
@@ -5590,10 +5577,6 @@
             {
               "plugin": "enterpriseSearch",
               "path": "x-pack/plugins/enterprise_search/server/lib/indices/create_api_key.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
             },
             {
               "plugin": "enterpriseSearch",
@@ -5660,14 +5643,6 @@
               "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
             },
             {
-              "plugin": "serverlessSearch",
-              "path": "x-pack/plugins/serverless_search/server/routes/api_key_routes.ts"
-            },
-            {
-              "plugin": "serverlessSearch",
-              "path": "x-pack/plugins/serverless_search/server/routes/indices_routes.ts"
-            },
-            {
               "plugin": "transform",
               "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
             },
@@ -5694,6 +5669,30 @@
             {
               "plugin": "apm",
               "path": "x-pack/plugins/observability_solution/apm/server/routes/fleet/is_superuser.ts"
+            },
+            {
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
+            },
+            {
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
+            },
+            {
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/lib/auth/api_key/api_key.ts"
+            },
+            {
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/enable.ts"
+            },
+            {
+              "plugin": "entityManager",
+              "path": "x-pack/plugins/observability_solution/entity_manager/server/routes/enablement/disable.ts"
+            },
+            {
+              "plugin": "observabilityOnboarding",
+              "path": "x-pack/plugins/observability_solution/observability_onboarding/server/routes/flow/route.ts"
             },
             {
               "plugin": "synthetics",
@@ -6605,47 +6604,6 @@
               "{ [x: string]: string[]; }"
             ],
             "path": "x-pack/plugins/security/common/model/raw_kibana_privileges.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "security",
-        "id": "def-common.RestApiKey",
-        "type": "Interface",
-        "tags": [],
-        "label": "RestApiKey",
-        "description": [
-          "\nInterface representing a REST API key the way it is returned by Elasticsearch GET endpoint.\n\nTODO: Remove this type when `@elastic/elasticsearch` has been updated."
-        ],
-        "signature": [
-          {
-            "pluginId": "security",
-            "scope": "common",
-            "docId": "kibSecurityPluginApi",
-            "section": "def-common.RestApiKey",
-            "text": "RestApiKey"
-          },
-          " extends ",
-          "BaseApiKey"
-        ],
-        "path": "x-pack/plugins/security/common/model/api_key.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "security",
-            "id": "def-common.RestApiKey.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"rest\""
-            ],
-            "path": "x-pack/plugins/security/common/model/api_key.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -7968,31 +7926,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "security",
-        "id": "def-common.ApiKey",
-        "type": "Type",
-        "tags": [],
-        "label": "ApiKey",
-        "description": [
-          "\nInterface representing an API key the way it is returned by Elasticsearch GET endpoint."
-        ],
-        "signature": [
-          {
-            "pluginId": "security",
-            "scope": "common",
-            "docId": "kibSecurityPluginApi",
-            "section": "def-common.RestApiKey",
-            "text": "RestApiKey"
-          },
-          " | ",
-          "CrossClusterApiKey"
-        ],
-        "path": "x-pack/plugins/security/common/model/api_key.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "security",
         "id": "def-common.LoginLayout",

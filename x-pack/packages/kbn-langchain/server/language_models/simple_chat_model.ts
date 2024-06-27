@@ -17,6 +17,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { parseGeminiStream } from '../utils/gemini';
 import { parseBedrockStream } from '../utils/bedrock';
 import { getDefaultArguments } from './constants';
 
@@ -35,6 +36,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   temperature?: number;
   request: KibanaRequest;
   streaming: boolean;
+  maxTokens?: number;
 }
 
 export class ActionsClientSimpleChatModel extends SimpleChatModel {
@@ -44,6 +46,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   #request: KibanaRequest;
   #traceId: string;
   #signal?: AbortSignal;
+  #maxTokens?: number;
   llmType: string;
   streaming: boolean;
   model?: string;
@@ -59,6 +62,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     temperature,
     signal,
     streaming,
+    maxTokens,
   }: CustomChatModelInput) {
     super({});
 
@@ -68,11 +72,11 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.#logger = logger;
     this.#signal = signal;
     this.#request = request;
+    this.#maxTokens = maxTokens;
     this.llmType = llmType ?? 'ActionsClientSimpleChatModel';
     this.model = model;
     this.temperature = temperature;
-    // only enable streaming for bedrock
-    this.streaming = streaming && llmType === 'bedrock';
+    this.streaming = streaming;
   }
 
   _llmType() {
@@ -94,20 +98,13 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     if (!messages.length) {
       throw new Error('No messages provided.');
     }
-    const formattedMessages = [];
-    if (messages.length === 2) {
-      messages.forEach((message, i) => {
-        if (typeof message.content !== 'string') {
-          throw new Error('Multimodal messages are not supported.');
-        }
-        formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
-      });
-    } else {
-      if (typeof messages[0].content !== 'string') {
+    const formattedMessages: Array<{ content: string; role: string }> = [];
+    messages.forEach((message, i) => {
+      if (typeof message.content !== 'string') {
         throw new Error('Multimodal messages are not supported.');
       }
-      formattedMessages.push(getMessageContentAndRole(messages[0].content));
-    }
+      formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
+    });
     this.#logger.debug(
       `ActionsClientSimpleChatModel#_call\ntraceId: ${
         this.#traceId
@@ -121,11 +118,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
-          ...getDefaultArguments(this.llmType, this.temperature, options.stop),
+          ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },
     };
-
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
 
@@ -149,7 +145,6 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       return content; // per the contact of _call, return a string
     }
 
-    // Bedrock streaming
     const readable = get('data', actionResult) as Readable;
 
     if (typeof readable?.read !== 'function') {
@@ -177,13 +172,9 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         }
       }
     };
+    const streamParser = this.llmType === 'bedrock' ? parseBedrockStream : parseGeminiStream;
 
-    const parsed = await parseBedrockStream(
-      readable,
-      this.#logger,
-      this.#signal,
-      handleLLMNewToken
-    );
+    const parsed = await streamParser(readable, this.#logger, this.#signal, handleLLMNewToken);
 
     return parsed; // per the contact of _call, return a string
   }

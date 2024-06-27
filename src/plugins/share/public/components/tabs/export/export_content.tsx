@@ -133,6 +133,7 @@ const ExportContentUi = ({
                   iconType="copyClipboard"
                   onClick={copy}
                   data-test-subj="shareReportingCopyURL"
+                  data-share-url={absoluteUrl}
                 >
                   <FormattedMessage
                     id="share.modalContent.copyUrlButtonLabel"

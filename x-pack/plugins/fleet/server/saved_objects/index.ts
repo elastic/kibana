@@ -87,7 +87,10 @@ import {
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
 import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
-import { migratePackagePolicySetRequiresRootToV8150 } from './migrations/to_v8_15_0';
+import {
+  migratePackagePolicyIdsToV8150,
+  migratePackagePolicySetRequiresRootToV8150,
+} from './migrations/to_v8_15_0';
 
 /*
  * Saved object types and mappings
@@ -457,6 +460,7 @@ export const getSavedObjectTypes = (
           enabled: { type: 'boolean' },
           is_managed: { type: 'boolean' },
           policy_id: { type: 'keyword' },
+          policy_ids: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },
@@ -584,12 +588,26 @@ export const getSavedObjectTypes = (
             {
               type: 'mappings_addition',
               addedMappings: {
-                package: { properties: { requires_root: { type: 'boolean' } } },
+                policy_ids: { type: 'keyword' },
               },
             },
             {
               type: 'data_backfill',
               backfillFn: migratePackagePolicySetRequiresRootToV8150,
+            },
+          ],
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package: { properties: { requires_root: { type: 'boolean' } } },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: migratePackagePolicyIdsToV8150,
             },
           ],
         },
@@ -651,6 +669,10 @@ export const getSavedObjectTypes = (
             dynamic: false,
             properties: {},
           },
+          additional_spaces_installed_kibana: {
+            type: 'flattened',
+            index: false,
+          },
           install_started_at: { type: 'date' },
           install_version: { type: 'keyword' },
           install_status: { type: 'keyword' },
@@ -689,6 +711,16 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 latest_executed_state: { type: 'object', enabled: false },
+              },
+            },
+          ],
+        },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                additional_spaces_installed_kibana: { type: 'flattened', index: false },
               },
             },
           ],

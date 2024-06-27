@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DockerContainerMetrics, KubernetesContainerMetrics } from './charts/types';
 import { INTEGRATION_NAME, ASSET_DETAILS_ASSET_TYPE } from './types';
 
 export const ASSET_DETAILS_FLYOUT_COMPONENT_NAME = 'infraAssetDetailsFlyout';
@@ -25,3 +26,6 @@ export const INTEGRATIONS = {
   [INTEGRATION_NAME.kubernetesContainer]: 'kubernetes.container',
   [INTEGRATION_NAME.docker]: 'docker',
 };
+
+export const DOCKER_METRIC_TYPES: DockerContainerMetrics[] = ['cpu', 'memory', 'network', 'disk'];
+export const KUBERNETES_METRIC_TYPES: KubernetesContainerMetrics[] = ['cpu', 'memory'];

@@ -45,7 +45,7 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  UserInstruction,
+  UserInstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -153,7 +153,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     await this.dependencies.esClient.asInternalUser.delete({
-      id: conversation._id,
+      id: conversation._id!,
       index: conversation._index,
       refresh: true,
     });
@@ -170,9 +170,13 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: Array<string | UserInstruction>;
+    instructions?: UserInstructionOrPlainText[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?: boolean;
+    disableFunctions?:
+      | boolean
+      | {
+          except: string[];
+        };
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
@@ -630,7 +634,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: persistedConversation._id,
+      id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
       refresh: true,
@@ -659,7 +663,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: document._id,
+      id: document._id!,
       index: document._index,
       doc: { conversation: { title } },
       refresh: true,
@@ -694,7 +698,7 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
@@ -702,7 +706,7 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       queries,
       categories,
-      asCurrentUser: this.dependencies.esClient.asCurrentUser,
+      esClient: this.dependencies.esClient,
       uiSettingsClient: this.dependencies.uiSettingsClient,
     });
   };
@@ -757,11 +761,9 @@ export class ObservabilityAIAssistantClient {
   };
 
   fetchUserInstructions = async () => {
-    const userInstructions = await this.dependencies.knowledgeBaseService.getUserInstructions(
+    return this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user
     );
-
-    return userInstructions;
   };
 }

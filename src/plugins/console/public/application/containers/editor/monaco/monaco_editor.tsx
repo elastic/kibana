@@ -115,6 +115,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         width: 100%;
       `}
       ref={divRef}
+      data-test-subj="consoleMonacoEditorContainer"
     >
       <EuiFlexGroup
         className="conApp__editorActions"
@@ -125,7 +126,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
       >
         <EuiFlexItem>
           <EuiToolTip
-            content={i18n.translate('console.sendRequestButtonTooltip', {
+            content={i18n.translate('console.sendRequestButtonTooltipContent', {
               defaultMessage: 'Click to send request',
             })}
           >
@@ -133,7 +134,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
               color="primary"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
-              aria-label={i18n.translate('console.sendRequestButtonTooltip', {
+              aria-label={i18n.translate('console.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
             >
@@ -151,6 +152,7 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <CodeEditor
+        dataTestSubj={'consoleMonacoEditor'}
         languageId={CONSOLE_LANG_ID}
         value={value}
         onChange={setValue}

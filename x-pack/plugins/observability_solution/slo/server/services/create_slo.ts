@@ -20,6 +20,7 @@ import {
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
+import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -97,6 +98,10 @@ export class CreateSLO {
           this.logger.error('Rollback operation failed', rollbackErr);
         }
       });
+
+      if (err.meta?.body?.error?.type === 'security_exception') {
+        throw new SecurityException(err.meta.body.error.reason);
+      }
 
       throw err;
     }

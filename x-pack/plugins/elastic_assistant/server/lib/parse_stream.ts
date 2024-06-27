@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 import { Logger } from '@kbn/core/server';
-import { parseBedrockStream } from '@kbn/langchain/server';
+import { parseBedrockStream, parseGeminiResponse } from '@kbn/langchain/server';
 
 type StreamParser = (
   responseStream: Readable,
@@ -30,7 +30,12 @@ export const handleStreamStorage = async ({
   logger: Logger;
 }): Promise<void> => {
   try {
-    const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
+    const parser =
+      actionTypeId === '.bedrock'
+        ? parseBedrockStream
+        : actionTypeId === '.gemini'
+        ? parseGeminiStream
+        : parseOpenAIStream;
     const parsedResponse = await parser(responseStream, logger, abortSignal);
     if (onMessageSent) {
       onMessageSent(parsedResponse);
@@ -87,3 +92,25 @@ const parseOpenAIResponse = (responseBody: string) =>
       const msg = line.choices[0].delta;
       return prev + (msg.content || '');
     }, '');
+
+export const parseGeminiStream: StreamParser = async (stream, logger, abortSignal) => {
+  let responseBody = '';
+  stream.on('data', (chunk) => {
+    responseBody += chunk.toString();
+  });
+  return new Promise((resolve, reject) => {
+    stream.on('end', () => {
+      resolve(parseGeminiResponse(responseBody));
+    });
+    stream.on('error', (err) => {
+      reject(err);
+    });
+    if (abortSignal) {
+      abortSignal.addEventListener('abort', () => {
+        stream.destroy();
+        logger.info('Gemini stream parsing was aborted.');
+        resolve(parseGeminiResponse(responseBody));
+      });
+    }
+  });
+};

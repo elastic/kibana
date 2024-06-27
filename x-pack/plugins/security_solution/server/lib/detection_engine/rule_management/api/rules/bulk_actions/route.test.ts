@@ -30,10 +30,10 @@ import {
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 
 jest.mock('../../../../../machine_learning/authz');
-jest.mock('../../../logic/rule_management/read_rules', () => ({ readRules: jest.fn() }));
+jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;

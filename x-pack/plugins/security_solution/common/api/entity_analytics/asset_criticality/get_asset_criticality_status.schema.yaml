@@ -12,6 +12,8 @@ servers:
 paths:
   /internal/asset_criticality/status:
     get:
+      x-labels: [ess, serverless]
+      x-internal: true
       operationId: AssetCriticalityGetStatus
       summary: Get Asset Criticality Status
       responses:

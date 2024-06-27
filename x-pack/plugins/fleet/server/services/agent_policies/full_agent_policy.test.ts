@@ -561,6 +561,7 @@ describe('getFullAgentPolicy', () => {
           updated_by: '',
           revision: 1,
           policy_id: '',
+          policy_ids: [''],
         },
         {
           id: 'package-policy-uuid-test-123',
@@ -598,6 +599,7 @@ describe('getFullAgentPolicy', () => {
           updated_by: '',
           revision: 1,
           policy_id: '',
+          policy_ids: [''],
         },
       ],
       is_managed: false,
