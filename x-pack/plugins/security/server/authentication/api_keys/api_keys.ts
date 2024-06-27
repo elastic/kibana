@@ -60,30 +60,6 @@ type GrantAPIKeyParams =
       access_token: string;
     };
 
-function isCreateRestAPIKeyParams(params: any): params is CreateRestAPIKeyParams {
-  return params && typeof params.name === 'string' && typeof params.role_descriptors === 'object';
-}
-
-function isCreateRestAPIKeyWithKibanaPrivilegesParams(
-  params: any
-): params is CreateRestAPIKeyWithKibanaPrivilegesParams {
-  return (
-    params &&
-    typeof params.name === 'string' &&
-    params.role_descriptors === null &&
-    typeof params.kibana_role_descriptors === 'object'
-  );
-}
-
-function isCreateCrossClusterAPIKeyParams(params: any): params is CreateCrossClusterAPIKeyParams {
-  return (
-    params &&
-    typeof params.name === 'string' &&
-    params.role_descriptors === null &&
-    typeof params.access === 'object'
-  );
-}
-
 /**
  * Class responsible for managing Elasticsearch API keys.
  */
