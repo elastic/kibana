@@ -45,7 +45,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
     const disabledCount = 0;
     scheduleManualRuleRunForSelectedRules(enabledCount, disabledCount);
 
-    cy.contains(TOASTER_BODY, `Successfully scheduled backfill for ${enabledCount} rule`);
+    cy.contains(TOASTER_BODY, `Successfully scheduled manual rule run for ${enabledCount} rule`);
   });
 
   it('schedule enable rules and show warning about disabled rules', () => {
@@ -57,7 +57,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
     const disabledCount = disabledRules.length;
     scheduleManualRuleRunForSelectedRules(enabledCount, disabledCount);
 
-    cy.contains(TOASTER_BODY, `Successfully scheduled backfill for ${enabledCount} rule`);
+    cy.contains(TOASTER_BODY, `Successfully scheduled manual rule run for ${enabledCount} rule`);
   });
 
   it('schedule enable rules and show partial error for siabled rules when all rules are selected', () => {
@@ -69,7 +69,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
 
     cy.contains(
       TOASTER_BODY,
-      `${disabledCount} rules failed to schedule backfill.See the full error`
+      `${disabledCount} rules failed to schedule manual rule run.See the full error`
     );
 
     // on error toast button click display error that it is not possible to schedule manual rule run for disabled rules
