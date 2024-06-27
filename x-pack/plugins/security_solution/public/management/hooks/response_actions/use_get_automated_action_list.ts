@@ -146,10 +146,11 @@ const combineResponse = (
   action: LogsEndpointActionWithHosts,
   responseData: GetAutomatedActionResponseListResponse
 ): ActionDetails => {
-  const { rule } = action;
+  const { rule, error } = action;
   const { parameters, alert_id: alertId, comment, command, hosts } = action.EndpointActions.data;
 
-  return {
+  const agentId = Array.isArray(action.agent.id) ? action.agent.id[0] : action.agent.id;
+  const completedInfo: ActionDetails = {
     id: action.EndpointActions.action_id,
     agents: Array.isArray(action.agent.id) ? action.agent.id : [action.agent.id],
     agentType: 'endpoint',
@@ -171,7 +172,28 @@ const combineResponse = (
     isExpired: !!responseData?.isExpired,
     wasSuccessful: responseData.status === 'successful',
     status: responseData.status,
-    agentState: {},
+    agentState: {
+      [agentId]: {
+        completedAt: undefined,
+        errors: undefined,
+        isCompleted: false,
+        wasSuccessful: false,
+      },
+    },
     errors: action.error ? [action.error.message as string] : undefined,
   };
+
+  if (error?.message) {
+    completedInfo.completedAt = action['@timestamp'];
+    completedInfo.isCompleted = true;
+    completedInfo.wasSuccessful = false;
+    completedInfo.errors = [error.message];
+
+    completedInfo.agentState[agentId].completedAt = action['@timestamp'];
+    completedInfo.agentState[agentId].isCompleted = true;
+    completedInfo.agentState[agentId].wasSuccessful = false;
+    completedInfo.agentState[agentId].errors = [error.message as string];
+  }
+
+  return completedInfo;
 };
