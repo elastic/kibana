@@ -7,15 +7,6 @@
 
 import { z } from 'zod';
 
-// import {
-//   concurrent_searches,
-//   items_per_search,
-//   machine_learning_job_id,
-//   threat_index,
-//   threat_indicator_path,
-//   threat_mapping,
-// } from '@kbn/securitysolution-io-ts-alerting-types';
-
 import {
   BuildingBlockObject,
   RuleEqlQuery,
@@ -29,11 +20,13 @@ import {
 } from './diffable_field_types';
 
 import { buildSchema } from './build_schema';
-// import { anomaly_threshold } from '../../../../model/schemas';
 import {
+  AnomalyThreshold,
+  ConcurrentSearches,
   EventCategoryOverride,
   HistoryWindowStart,
   InvestigationGuide,
+  ItemsPerSearch,
   MaxSignals,
   NewTermsFields,
   RelatedIntegrationArray,
@@ -54,9 +47,13 @@ import {
   Severity,
   SeverityMapping,
   ThreatArray,
+  ThreatIndex,
+  ThreatMapping,
+  ThreatIndicatorPath,
   Threshold,
   TiebreakerField,
   TimestampField,
+  MachineLearningJobId,
 } from '../../../../model/rule_schema';
 
 export type DiffableCommonFields = z.infer<typeof DiffableCommonFields>;
@@ -155,14 +152,14 @@ export const DiffableThreatMatchFields = buildSchema({
     type: z.literal('threat_match'),
     kql_query: RuleKqlQuery, // NOTE: new field
     threat_query: InlineKqlQuery, // NOTE: new field
-    // threat_index,
-    // threat_mapping,
+    threat_index: ThreatIndex,
+    threat_mapping: ThreatMapping,
   },
   optional: {
     data_source: RuleDataSource, // NOTE: new field
-    // threat_indicator_path,
-    // concurrent_searches, // Should combine concurrent_searches and items_per_search?
-    // items_per_search,
+    threat_indicator_path: ThreatIndicatorPath,
+    concurrent_searches: ConcurrentSearches,
+    items_per_search: ItemsPerSearch,
   },
 });
 
@@ -182,8 +179,8 @@ export type DiffableMachineLearningFields = z.infer<typeof DiffableMachineLearni
 export const DiffableMachineLearningFields = buildSchema({
   required: {
     type: z.literal('machine_learning'),
-    // machine_learning_job_id,
-    // anomaly_threshold,
+    machine_learning_job_id: MachineLearningJobId,
+    anomaly_threshold: AnomalyThreshold,
   },
   optional: {},
 });
