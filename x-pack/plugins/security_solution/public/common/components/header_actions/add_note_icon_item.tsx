@@ -117,6 +117,16 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
 
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 
+  const NOTES_TOOLTIP = useMemo(
+    () =>
+      noteIds.length > 0
+        ? noteIds.length === 1
+          ? i18n.NOTES_TOOLTIP_ADD_NOTE_SINGLE_NOTE_AVAILABLE
+          : i18n.NOTES_TOOLTIP_ADD_NOTE_MULTIPLE_NOTES_AVAILABLE({ notesCount: noteIds.length })
+        : i18n.NOTES_TOOLTIP_ADD_NOTE,
+    [noteIds.length]
+  );
+
   return (
     <>
       <NotesFlyout
@@ -137,9 +147,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
           timelineType={timelineType}
           toggleShowNotes={toggleNotes}
           toolTip={
-            timelineType === TimelineType.template
-              ? i18n.NOTES_DISABLE_TOOLTIP
-              : i18n.NOTES_TOOLTIP({ notesCount: noteIds.length })
+            timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : NOTES_TOOLTIP
           }
           eventId={eventId}
           notesCount={noteIds.length}
