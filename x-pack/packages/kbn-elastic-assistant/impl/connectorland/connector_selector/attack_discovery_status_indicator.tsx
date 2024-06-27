@@ -28,7 +28,7 @@ export const AttackDiscoveryStatusIndicator: FunctionComponent<Props> = ({
 }) => {
   if (status === 'running') {
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="status-running">
         <EuiToolTip
           aria-label={i18n.IN_PROGRESS_MESSAGE}
           content={i18n.IN_PROGRESS_MESSAGE}
@@ -42,7 +42,7 @@ export const AttackDiscoveryStatusIndicator: FunctionComponent<Props> = ({
   if (hasViewed) return null;
   if (status === 'succeeded' && count != null) {
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="status-succeeded">
         <EuiToolTip
           aria-label={i18n.SUCCESS_MESSAGE(count)}
           content={i18n.SUCCESS_MESSAGE(count)}
@@ -55,7 +55,7 @@ export const AttackDiscoveryStatusIndicator: FunctionComponent<Props> = ({
   }
   if (status === 'failed') {
     return (
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} data-test-subj="status-failed">
         <EuiIconTip
           aria-label={i18n.FAILURE_MESSAGE}
           color="warning"
