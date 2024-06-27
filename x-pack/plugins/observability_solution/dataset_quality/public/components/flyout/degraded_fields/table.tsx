@@ -18,53 +18,18 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { DegradedField } from '../../../../common/api_types';
-import { useKibanaContextForPlugin } from '../../../utils';
 import { useDatasetQualityDegradedField, useDatasetQualityFlyout } from '../../../hooks';
 import { getDegradedFieldsColumns } from './columns';
 import {
   flyoutDegradedFieldsTableLoadingText,
   flyoutDegradedFieldsTableNoData,
 } from '../../../../common/translations';
-
-const ignoredAnalysisTitle = i18n.translate(
-  'xpack.datasetQuality.flyout.degradedFields.ignoredAnalysis',
-  {
-    defaultMessage: 'Possible causes and remediations',
-  }
-);
+import { Insights } from './insights';
 
 export const DegradedFieldTable = () => {
   const { isLoading, pagination, renderedItems, onTableChange, sort, fieldFormats } =
     useDatasetQualityDegradedField();
   const { dataStreamStat } = useDatasetQualityFlyout();
-  const {
-    services: {
-      observabilityAIAssistant: {
-        ObservabilityAIAssistantContextualInsight,
-        getContextualInsightMessages,
-      } = {},
-    },
-  } = useKibanaContextForPlugin();
-
-  const messages = useCallback(
-    (fieldName: string) => {
-      const content = `You are an expert using Elastic Stack on call being consulted about data set quality and incorrect ingested documents in log datasets. Your job is to take immediate action and proceed with both urgency and precision.
-        "Data Set quality" is a concept based on the percentage of degraded documents in each data set. A degraded document in a data set contains the _ignored property because one or more of its fields were ignored during indexing. Fields are ignored for a variety of reasons. For example, when the ignore_malformed parameter is set to true, if a document field contains the wrong data type, the malformed field is ignored and the rest of the document is indexed.
-        You are using "Data set quality" and got the degradedDocs percentage on ${dataStreamStat?.rawName} dataset. Determine what was the cause for ${fieldName} field getting ignored.
-       
-        Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
-
-      return (
-        getContextualInsightMessages &&
-        getContextualInsightMessages({
-          message:
-            'Can you identify possible causes and remediations for these log rate analysis results',
-          instructions: content,
-        })
-      );
-    },
-    [dataStreamStat?.rawName, getContextualInsightMessages]
-  );
 
   const dateFormatter = fieldFormats.getDefaultInstance(KBN_FIELD_TYPES.DATE, [
     ES_FIELD_TYPES.DATE,
@@ -76,22 +41,19 @@ export const DegradedFieldTable = () => {
 
   const toggleDetails = useCallback(
     (row: DegradedField) => {
-      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+      let itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
       if (itemIdToExpandedRowMapValues[row.name]) {
         delete itemIdToExpandedRowMapValues[row.name];
       } else {
-        itemIdToExpandedRowMapValues[row.name] = ObservabilityAIAssistantContextualInsight && (
-          <ObservabilityAIAssistantContextualInsight
-            title={ignoredAnalysisTitle}
-            messages={messages(row.name)!}
-            openedByDefault={true}
-          />
+        itemIdToExpandedRowMapValues = {};
+        itemIdToExpandedRowMapValues[row.name] = (
+          <Insights dataStream={dataStreamStat!.rawName} field={row.name} />
         );
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [ObservabilityAIAssistantContextualInsight, itemIdToExpandedRowMap, messages]
+    [dataStreamStat, itemIdToExpandedRowMap]
   );
 
   const columns = getDegradedFieldsColumns({ dateFormatter, isLoading });
