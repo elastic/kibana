@@ -176,8 +176,8 @@ const combineResponse = (
       [agentId]: {
         completedAt: undefined,
         errors: undefined,
-        isCompleted: false,
-        wasSuccessful: false,
+        isCompleted: !!responseData?.isCompleted,
+        wasSuccessful: responseData.status === 'successful',
       },
     },
     errors: action.error ? [action.error.message as string] : undefined,
