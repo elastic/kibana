@@ -16,7 +16,7 @@ import { NonEmptyString, UUID } from '@kbn/securitysolution-io-ts-types';
  * (found in x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts)
  *
  * The remaining types here couldn't easily be deleted/replaced because they are dependencies in
- * complex derived schema in two files:
+ * complex derived schemas in two files:
  *
  * - x-pack/plugins/security_solution/common/api/detection_engine/rule_exceptions/find_exception_references/find_exception_references_route.ts
  * - x-pack/plugins/security_solution/common/api/timeline/model/api.ts
