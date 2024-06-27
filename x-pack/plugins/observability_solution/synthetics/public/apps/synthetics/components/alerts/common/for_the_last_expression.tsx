@@ -44,6 +44,7 @@ interface Option {
   label: string;
   key: 'checksWindow' | 'timeWindow' | 'locations';
 }
+
 const OPTIONS: Option[] = [
   {
     label: FROM_LAST_CHECKS,
