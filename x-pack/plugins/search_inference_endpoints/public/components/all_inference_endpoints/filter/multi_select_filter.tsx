@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -22,31 +21,27 @@ import { isEqual } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 import * as i18n from './translations';
 
-type FilterOption<T extends string, K extends string = string> = EuiSelectableOption<{
-  key: K;
-  label: T;
-}>;
+export interface MultiSelectFilterOption {
+  key: string;
+  label: string;
+  checked?: 'on' | 'off';
+}
 
-export type { FilterOption as MultiSelectFilterOption };
-
-export const mapToMultiSelectOption = <T extends string>(
-  options: T[],
-  labelsMap?: Record<string, string>
-) => {
+export const mapToMultiSelectOption = (options: string[], labelsMap?: Record<string, string>) => {
   return options.map((option) => {
     return {
       key: option,
-      label: labelsMap ? (labelsMap[option] as T) : option,
+      label: labelsMap ? labelsMap[option] : option,
     };
   });
 };
 
-const fromRawOptionsToEuiSelectableOptions = <T extends string, K extends string>(
-  options: Array<FilterOption<T, K>>,
+const fromRawOptionsToEuiSelectableOptions = (
+  options: MultiSelectFilterOption[],
   selectedOptionKeys: string[]
-): Array<FilterOption<T, K>> => {
+): MultiSelectFilterOption[] => {
   return options.map(({ key, label }) => {
-    const selectableOption: FilterOption<T, K> = {
+    const selectableOption: MultiSelectFilterOption = {
       label,
       key,
       checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
@@ -55,32 +50,29 @@ const fromRawOptionsToEuiSelectableOptions = <T extends string, K extends string
   });
 };
 
-const fromEuiSelectableOptionToRawOption = <T extends string, K extends string>(
-  options: Array<FilterOption<T, K>>
-): string[] => {
+const fromEuiSelectableOptionToRawOption = (options: MultiSelectFilterOption[]): string[] => {
   return options.map((option) => option.key);
 };
 
-const getEuiSelectableCheckedOptions = <T extends string, K extends string>(
-  options: Array<FilterOption<T, K>>
-) => options.filter((option) => option.checked === 'on') as Array<FilterOption<T, K>>;
+const getEuiSelectableCheckedOptions = (options: MultiSelectFilterOption[]) =>
+  options.filter((option) => option.checked === 'on');
 
-interface UseFilterParams<T extends string, K extends string = string> {
+interface UseFilterParams {
   buttonLabel?: string;
   id: string;
   onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
-  options: Array<FilterOption<T, K>>;
-  renderOption?: (option: FilterOption<T, K>) => React.ReactNode;
+  options: MultiSelectFilterOption[];
+  renderOption?: (option: MultiSelectFilterOption) => React.ReactNode;
   selectedOptionKeys?: string[];
 }
-export const MultiSelectFilter = <T extends string, K extends string = string>({
+export const MultiSelectFilter = ({
   buttonLabel,
   id,
   onChange,
   options: rawOptions,
   selectedOptionKeys = [],
   renderOption,
-}: UseFilterParams<T, K>) => {
+}: UseFilterParams) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
@@ -99,7 +91,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
     }
   }, [selectedOptionKeys, rawOptions, id, onChange]);
 
-  const _onChange = (newOptions: Array<FilterOption<T, K>>) => {
+  const _onChange = (newOptions: MultiSelectFilterOption[]) => {
     const newSelectedOptions = getEuiSelectableCheckedOptions(newOptions);
 
     onChange({
@@ -132,7 +124,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <EuiSelectable<FilterOption<T, K>>
+        <EuiSelectable<MultiSelectFilterOption>
           options={options}
           searchable
           searchProps={{

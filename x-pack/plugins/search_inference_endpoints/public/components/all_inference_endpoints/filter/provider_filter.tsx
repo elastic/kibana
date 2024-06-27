@@ -35,7 +35,7 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
       [filterId]: selectedOptionKeys,
     });
   };
-  const renderOption = (option: MultiSelectFilterOption<ServiceProviderKeys>) => {
+  const renderOption = (option: MultiSelectFilterOption) => {
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
         <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
@@ -44,7 +44,7 @@ export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
   };
 
   return (
-    <MultiSelectFilter<ServiceProviderKeys>
+    <MultiSelectFilter
       buttonLabel={i18n.SERVICE_PROVIDER}
       id={'provider'}
       onChange={onSystemFilterChange}
