@@ -35,5 +35,5 @@ export {
   type HasTimeRange,
   type SearchEmbeddableSerializedState,
 } from './embeddable';
-export { loadSharingDataHelpers, getSortForEmbeddable } from './utils';
+export { loadSharingDataHelpers } from './utils';
 export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';
