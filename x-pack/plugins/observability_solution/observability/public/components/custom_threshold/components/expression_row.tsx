@@ -320,6 +320,6 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: false,
     value: Aggregators.LAST_VALUE,
-    validNormalizedTypes: ['number', 'date', 'string', 'boolean'],
+    validNormalizedTypes: ['number'],
   },
 };
