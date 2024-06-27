@@ -17,10 +17,9 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { DragWrapper, useOnDrop } from '@kbn/airdrops';
+import { AirdropDragButton, useOnDrop } from '@kbn/airdrops';
 
 import { Form, FormState } from './form';
 
@@ -73,37 +72,29 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
             </EuiTitle>
           </EuiPageTemplate.Header>
           <EuiPageTemplate.Section>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
                 <EuiTitle>
                   <h2>My form</h2>
                 </EuiTitle>
-                <EuiText>
-                  <p>
-                    <FormattedMessage
-                      id="airdrop.content"
-                      defaultMessage="Some cool form to fill out"
-                    />
-                  </p>
-                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <DragWrapper
-                  data={{
+                <AirdropDragButton
+                  content={{
                     id: DROP_ID,
                     get: () => formState,
                   }}
-                >
-                  <EuiButtonIcon
-                    display="base"
-                    iconSize="m"
-                    size="m"
-                    iconType="watchesApp"
-                    aria-label="Next"
-                  />
-                </DragWrapper>
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="airdrop.content"
+                  defaultMessage="Some cool form to fill out"
+                />
+              </p>
+            </EuiText>
 
             <EuiHorizontalRule />
 

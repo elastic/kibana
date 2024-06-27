@@ -8,6 +8,7 @@
 
 export {
   DragWrapper,
+  AirdropDragButton,
   TRANSFER_DATA_TYPE,
   AirdropKibanaProvider,
   AirdropProvider,

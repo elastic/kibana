@@ -12,8 +12,8 @@ import { TRANSFER_DATA_TYPE } from '../constants';
 import { useAirdrop } from '../services';
 import { Airdrop } from '../types';
 
-interface Props<T = Record<string, unknown>> {
-  data: {
+export interface Props<T = Record<string, unknown>> {
+  content: {
     id: string;
     app?: string;
     get: () => T;
@@ -21,15 +21,15 @@ interface Props<T = Record<string, unknown>> {
   children: React.ReactNode;
 }
 
-export function DragWrapper<T>({ data, children }: Props<T>) {
+export function DragWrapper<T>({ content, children }: Props<T>) {
   const { setIsDragging } = useAirdrop();
 
   const onDragStart = (e: DragEvent) => {
     setIsDragging(true);
     const airdrop: Airdrop<T> = {
-      id: data.id,
-      app: data.app,
-      content: data.get(),
+      id: content.id,
+      app: content.app,
+      content: content.get(),
     };
     const serializedData = JSON.stringify(airdrop);
     e.dataTransfer.setData(TRANSFER_DATA_TYPE, serializedData);
