@@ -110,7 +110,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="policyFlyoutTitle">
               <h1>{policy.name}</h1>
             </EuiTitle>
           </EuiFlexItem>

@@ -15,5 +15,5 @@ export const useIsReadOnly = () => {
   const ilmCaps = capabilities[PLUGIN.ID];
   const savePermission = Boolean(ilmCaps.save);
   const showPermission = Boolean(ilmCaps.show);
-  return showPermission && !savePermission;
+  return !savePermission && showPermission;
 };
