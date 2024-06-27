@@ -141,7 +141,9 @@ export const usePresentationPanelHeaderActions = <
       );
 
       return tooltipText ? (
-        <EuiToolTip key={badge.id} content={tooltipText}>{badgeElement}</EuiToolTip>
+        <EuiToolTip key={badge.id} content={tooltipText}>
+          {badgeElement}
+        </EuiToolTip>
       ) : (
         badgeElement
       );
