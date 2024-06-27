@@ -34,7 +34,7 @@ export const LogsDeprecationCallout = () => {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.infra.logsDeprecationCallout.euiCallOut.discoverANewLogLabel', {
-        defaultMessage: 'There's a new, better way to explore your logs!',
+        defaultMessage: "There's a new, better way to explore your logs!",
       })}
       color="warning"
       iconType="iInCircle"
@@ -50,7 +50,7 @@ export const LogsDeprecationCallout = () => {
       <p>
         {i18n.translate('xpack.infra.logsDeprecationCallout.p.weRecommendUsingTheLabel', {
           defaultMessage:
-            'We recommend switching to Logs Explorer. As we focus on and continue to improve Logs Explorer, we'll no longer support Logs Stream.',
+            "We recommend switching to Logs Explorer. As we focus on and continue to improve Logs Explorer, we'll no longer support Logs Stream.",
         })}
       </p>
       <EuiButton
