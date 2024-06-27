@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-export const apiKeysServiceMock = {
-  areAPIKeysEnabled: jest.fn(),
-  areCrossClusterAPIKeysEnabled: jest.fn(),
-  validate: jest.fn(),
-  invalidate: jest.fn(),
-  invalidateAsInternalUser: jest.fn(),
-  grantAsInternalUser: jest.fn(),
-  create: jest.fn(),
+import type { APIKeysService } from '@kbn/core-security-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+
+export const apiKeysMock = {
+  create: (): jest.Mocked<PublicMethodsOf<APIKeysService>> => ({
+    areAPIKeysEnabled: jest.fn(),
+    areCrossClusterAPIKeysEnabled: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    grantAsInternalUser: jest.fn(),
+    validate: jest.fn(),
+    invalidate: jest.fn(),
+    invalidateAsInternalUser: jest.fn(),
+  }),
 };

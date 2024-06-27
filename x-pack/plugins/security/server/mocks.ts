@@ -29,6 +29,7 @@ function createSetupMock() {
         invalidateAsInternalUser: jest.fn(),
         grantAsInternalUser: jest.fn(),
         create: jest.fn(),
+        update: jest.fn(),
       },
     },
     authz: {

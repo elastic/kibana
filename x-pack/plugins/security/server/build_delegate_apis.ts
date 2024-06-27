@@ -30,6 +30,7 @@ export const buildSecurityApi = ({
         grantAsInternalUser: (request, createParams) =>
           getAuthc().apiKeys.grantAsInternalUser(request, createParams),
         create: (request, createParams) => getAuthc().apiKeys.create(request, createParams),
+        update: (request, updateParams) => getAuthc().apiKeys.update(request, updateParams),
         validate: (apiKeyParams) => getAuthc().apiKeys.validate(apiKeyParams),
         invalidate: (request, params) => getAuthc().apiKeys.invalidate(request, params),
         invalidateAsInternalUser: (params) => getAuthc().apiKeys.invalidateAsInternalUser(params),

@@ -17,5 +17,6 @@
     "@kbn/core-security-common",
     "@kbn/core-http-server",
     "@kbn/logging",
+    "@kbn/config-schema",
   ]
 }

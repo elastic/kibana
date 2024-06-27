@@ -10,7 +10,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../roles';
+import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../../roles';
 
 /**
  * Interface for managing API keys in Elasticsearch, including creation,
@@ -42,6 +42,21 @@ export interface APIKeys {
     request: KibanaRequest,
     createParams: CreateAPIKeyParams
   ): Promise<CreateAPIKeyResult | null>;
+
+  /**
+   * Attempts update an API key with the provided 'role_descriptors' and 'metadata'
+   *
+   * Returns `updated`, `true` if the update was successful, `false` if there was nothing to update
+   *
+   * User needs `manage_api_key` privilege to update REST API keys and `manage_security` for cross-cluster API keys.
+   *
+   * @param request Request instance.
+   * @param updateParams The params to edit an API key
+   */
+  update(
+    request: KibanaRequest,
+    updateParams: UpdateAPIKeyParams
+  ): Promise<UpdateAPIKeyResult | null>;
 
   /**
    * Tries to grant an API key for the current user.
@@ -212,3 +227,48 @@ export const crossClusterApiKeySchema = restApiKeySchema.extends({
     { unknowns: 'allow' }
   ),
 });
+
+/**
+ * Response of Kibana Update API key endpoint.
+ */
+export type UpdateAPIKeyResult = estypes.SecurityUpdateApiKeyResponse;
+
+/**
+ * Request body of Kibana Update API key endpoint.
+ */
+export type UpdateAPIKeyParams =
+  | UpdateRestAPIKeyParams
+  | UpdateCrossClusterAPIKeyParams
+  | UpdateRestAPIKeyWithKibanaPrivilegesParams;
+
+export const updateRestApiKeySchema = restApiKeySchema.extends({
+  name: null,
+  id: schema.string(),
+});
+
+export const updateCrossClusterApiKeySchema = crossClusterApiKeySchema.extends({
+  name: null,
+  id: schema.string(),
+});
+
+export type UpdateRestAPIKeyParams = TypeOf<typeof updateRestApiKeySchema>;
+export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof updateCrossClusterApiKeySchema>;
+export type UpdateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
+  ReturnType<typeof getUpdateRestApiKeyWithKibanaPrivilegesSchema>
+>;
+
+export const getUpdateRestApiKeyWithKibanaPrivilegesSchema = (
+  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
+) =>
+  restApiKeySchema.extends({
+    role_descriptors: null,
+    name: null,
+    id: schema.string(),
+    kibana_role_descriptors: schema.recordOf(
+      schema.string(),
+      schema.object({
+        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
+        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
+      })
+    ),
+  });

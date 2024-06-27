@@ -26,3 +26,32 @@ export type {
   AuditRequest,
 } from './src/audit_logging/audit_events';
 export type { AuditLogger } from './src/audit_logging/audit_logger';
+
+export type {
+  APIKeysService,
+  CreateAPIKeyParams,
+  CreateAPIKeyResult,
+  InvalidateAPIKeyResult,
+  InvalidateAPIKeysParams,
+  ValidateAPIKeyParams,
+  CreateRestAPIKeyParams,
+  CreateRestAPIKeyWithKibanaPrivilegesParams,
+  CreateCrossClusterAPIKeyParams,
+  GrantAPIKeyResult,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
+} from './src/authentication/api_keys';
+export {
+  restApiKeySchema,
+  crossClusterApiKeySchema,
+  getRestApiKeyWithKibanaPrivilegesSchema,
+  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
+  updateRestApiKeySchema,
+  updateCrossClusterApiKeySchema,
+} from './src/authentication/api_keys';
+
+export { elasticsearchRoleSchema, getKibanaRoleSchema, GLOBAL_RESOURCE } from './src/roles';
+export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';

@@ -12,24 +12,3 @@ export type {
   AuthenticatedUser,
   AuthenticationProvider,
 } from './src/authentication';
-
-export type {
-  APIKeysService,
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  InvalidateAPIKeyResult,
-  InvalidateAPIKeysParams,
-  ValidateAPIKeyParams,
-  CreateRestAPIKeyParams,
-  CreateRestAPIKeyWithKibanaPrivilegesParams,
-  CreateCrossClusterAPIKeyParams,
-  GrantAPIKeyResult,
-} from './src/api_keys';
-export {
-  restApiKeySchema,
-  crossClusterApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
-} from './src/api_keys';
-
-export { elasticsearchRoleSchema, getKibanaRoleSchema, GLOBAL_RESOURCE } from './src/roles';
-export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';

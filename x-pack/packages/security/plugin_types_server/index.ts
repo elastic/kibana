@@ -67,9 +67,9 @@ export {
 } from './src/authentication';
 
 export type {
-  APIKeysService,
   ElasticsearchPrivilegesType,
   KibanaPrivilegesType,
+  APIKeysService,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   InvalidateAPIKeyResult,
@@ -79,12 +79,12 @@ export type {
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
-} from '@kbn/core-security-common';
+} from '@kbn/core-security-server';
 export {
-  getKibanaRoleSchema,
-  elasticsearchRoleSchema,
-  GLOBAL_RESOURCE,
   restApiKeySchema,
   crossClusterApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
-} from '@kbn/core-security-common';
+  getKibanaRoleSchema,
+  elasticsearchRoleSchema,
+  GLOBAL_RESOURCE,
+} from '@kbn/core-security-server';
