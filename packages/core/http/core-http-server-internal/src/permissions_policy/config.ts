@@ -21,6 +21,6 @@ const configSchema = schema.object({
 export type PermissionsPolicyConfigType = TypeOf<typeof configSchema>;
 
 export const permissionsPolicyConfig: ServiceConfigDescriptor<PermissionsPolicyConfigType> = {
-  path: 'permissions_policy',
+  path: 'permissionsPolicy',
   schema: configSchema,
 };
