@@ -34,6 +34,7 @@ import {
   skip,
   switchMap,
   distinctUntilChanged,
+  of,
 } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -184,13 +185,23 @@ export const getFieldStatsChartEmbeddableFactory = (
             .pipe(
               skip(1),
               skipWhile((dataViewId) => !dataViewId && !defaultDataViewId),
-              switchMap((dataViewId) => deps.data.dataViews.get(dataViewId ?? defaultDataViewId))
+              switchMap((dataViewId) => {
+                try {
+                  return deps.data.dataViews.get(dataViewId ?? defaultDataViewId);
+                } catch (error) {
+                  return of(undefined);
+                }
+              })
             )
             .subscribe((nextSelectedDataView) => {
-              dataViews$.next([nextSelectedDataView]);
+              if (nextSelectedDataView) {
+                dataViews$.next([nextSelectedDataView]);
+              }
             })
         );
       }
+
+      const { toasts } = deps.notifications;
 
       const api = buildApi(
         {
@@ -267,12 +278,13 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const addFilters = (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
         if (!pluginStart.uiActions) {
-          onError(new Error(ERROR_MSG.APPLY_FILTER_ERR));
+          toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
         }
         const trigger = pluginStart.uiActions.getTrigger(APPLY_FILTER_TRIGGER);
         if (!trigger) {
-          onError(new Error(ERROR_MSG.APPLY_FILTER_ERR));
+          toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
+          return;
           // eslint-disable-next-line no-console
           console.error(`${ERROR_MSG.APPLY_FILTER_ERR}: APPLY_FILTER_TRIGGER is undefined`);
         }
@@ -289,7 +301,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           const action = pluginStart.uiActions.getAction(actionId);
           action.execute(executeContext);
         } catch (error) {
-          onError(error);
+          toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
         }
       };
 
@@ -326,7 +338,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             operator: '+' | '-'
           ) => {
             if (!dataView || !pluginStart.data) {
-              onError(new Error(ERROR_MSG.APPLY_FILTER_ERR));
+              toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
               return;
             }
 

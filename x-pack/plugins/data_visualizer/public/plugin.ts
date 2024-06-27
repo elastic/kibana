@@ -53,10 +53,12 @@ export class DataVisualizerPlugin
   }
 
   public async setup(core: DataVisualizerCoreSetup, plugins: DataVisualizerSetupDependencies) {
-    const [coreStart, pluginStart] = await core.getStartServices();
     if (plugins.embeddable) {
       registerEmbeddables(plugins.embeddable, core);
     }
+
+    const [coreStart, pluginStart] = await core.getStartServices();
+
     if (plugins.uiActions) {
       registerDataVisualizerUiActions(plugins.uiActions, coreStart, pluginStart);
     }
