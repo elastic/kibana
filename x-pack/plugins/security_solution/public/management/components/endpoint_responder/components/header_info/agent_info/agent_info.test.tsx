@@ -10,10 +10,7 @@ import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { AgentInfo } from './agent_info';
-import {
-  useAgentStatusHook,
-  useGetAgentStatus,
-} from '../../../../../hooks/agents/use_get_agent_status';
+import { useGetAgentStatus } from '../../../../../hooks/agents/use_get_agent_status';
 import type { ResponseActionAgentType } from '../../../../../../../common/endpoint/service/response_actions/constants';
 import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../../../common/endpoint/service/response_actions/constants';
 import type { Platform } from '../platforms';
@@ -22,7 +19,6 @@ import { HostStatus } from '../../../../../../../common/endpoint/types';
 jest.mock('../../../../../hooks/agents/use_get_agent_status');
 
 const getAgentStatusMock = useGetAgentStatus as jest.Mock;
-const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
 describe('Responder header Agent Info', () => {
   let render: (
@@ -54,7 +50,6 @@ describe('Responder header Agent Info', () => {
       ));
 
     getAgentStatusMock.mockReturnValue({ data: {} });
-    useAgentStatusHookMock.mockImplementation(() => useGetAgentStatus);
   });
 
   afterEach(() => {
