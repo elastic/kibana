@@ -18,6 +18,8 @@ const baseAllowlistFields: AllowlistFields = {
   env_vars: true,
   hash: true,
   pid: true,
+  origin_referrer_url: true,
+  origin_url: true,
   pe: true,
   uptime: true,
   Ext: {
