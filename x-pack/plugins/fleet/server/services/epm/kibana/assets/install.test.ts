@@ -10,10 +10,9 @@ import type {
   SavedObjectsImportSuccess,
   SavedObjectsImportResponse,
 } from '@kbn/core/server';
-
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import type { ArchiveAsset } from './install';
+import { type ArchiveAsset } from './install';
 
 jest.mock('timers/promises', () => ({
   async setTimeout() {},
