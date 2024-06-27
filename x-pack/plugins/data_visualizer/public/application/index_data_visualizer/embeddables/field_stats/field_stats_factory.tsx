@@ -12,6 +12,7 @@ import {
   type DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -44,6 +45,7 @@ import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerPluginStart } from '../../../../plugin';
 import type { FieldStatisticsTableEmbeddableState } from '../grid_embeddable/types';
@@ -234,7 +236,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             const references: Reference[] = dataViewId
               ? [
                   {
-                    type: 'index-pattern',
+                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
                     name: FIELD_STATS_DATA_VIEW_REF_NAME,
                     id: dataViewId,
                   },
@@ -269,7 +271,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         }
       };
 
-      const addFilters = (filters: Filter[], actionId: string = 'ACTION_GLOBAL_APPLY_FILTER') => {
+      const addFilters = (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
         if (!pluginStart.uiActions) {
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;

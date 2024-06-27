@@ -8,14 +8,14 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
-import { createAddFieldStatsTableAction } from './create_field_stats_table';
 
 export function registerDataVisualizerUiActions(
   uiActions: UiActionsSetup,
   coreStart: CoreStart,
   pluginStart: DataVisualizerStartDependencies
 ) {
-  const addFieldStatsAction = createAddFieldStatsTableAction(coreStart, pluginStart);
-
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addFieldStatsAction);
+  import('./create_field_stats_table').then(({ createAddFieldStatsTableAction }) => {
+    const addFieldStatsAction = createAddFieldStatsTableAction(coreStart, pluginStart);
+    uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addFieldStatsAction);
+  });
 }
