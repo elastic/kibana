@@ -431,7 +431,7 @@ describe('Actions', () => {
   });
 
   describe('Expand action', () => {
-    test('if disableExpandAction is true, the expand action should not be visible', () => {
+    test('should not be visible if disableExpandAction is true', () => {
       const wrapper = mount(
         <TestProviders>
           <Actions {...defaultProps} disableExpandAction />
