@@ -31,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       memoryStatus: 'ok',
       jobState: 'closed',
       datafeedState: 'stopped',
-      latestTimestamp: '2023-07-12 23:45:36',
+      latestTimestamp: '2016-02-11 23:59:54',
     };
   }
 
