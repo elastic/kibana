@@ -14,8 +14,6 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
 
-import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
-
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import type { PackageInstallContext } from '../../../../common/types';
 import { getNormalizedDataStreams } from '../../../../common/services';
