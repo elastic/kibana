@@ -135,6 +135,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
         isSubmitting ||
         isEqual(initialPolicyIds, selectedPolicyIds)
       }
+      data-test-subj="manageAgentPoliciesModal"
     >
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
