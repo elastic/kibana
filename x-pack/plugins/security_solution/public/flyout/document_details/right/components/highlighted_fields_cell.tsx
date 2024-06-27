@@ -6,15 +6,11 @@
  */
 
 import type { VFC } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import {
-  AgentStatus,
-  EndpointAgentStatusById,
-} from '../../../../common/components/endpoint/agents/agent_status';
+import { AgentStatus } from '../../../../common/components/endpoint/agents/agent_status';
 import { useDocumentDetailsContext } from '../../shared/context';
 import {
   AGENT_STATUS_FIELD_NAME,
@@ -81,33 +77,7 @@ export interface HighlightedFieldsCellProps {
   values: string[] | null | undefined;
 }
 
-const FieldsAgentStatus = memo(
-  ({ value, agentType }: { value: string | undefined; agentType: ResponseActionAgentType }) => {
-    const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
-    if (agentType !== 'endpoint' || agentStatusClientEnabled) {
-      return (
-        <AgentStatus
-          agentId={String(value ?? '')}
-          agentType={agentType}
-          data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-        />
-      );
-    } else {
-      // TODO: remove usage of `EndpointAgentStatusById` when `agentStatusClientEnabled` FF is enabled and removed
-      return (
-        <EndpointAgentStatusById
-          endpointAgentId={String(value ?? '')}
-          data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
-        />
-      );
-    }
-  }
-);
-
-FieldsAgentStatus.displayName = 'FieldsAgentStatus';
-
 /**
- * console.log('c::*, values != null
  * Renders a component in the highlighted fields table cell based on the field name
  */
 export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
@@ -146,7 +116,11 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
               {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
                 <LinkFieldCell value={value} />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
-                <FieldsAgentStatus value={value} agentType={agentType} />
+                <AgentStatus
+                  agentId={String(value ?? '')}
+                  agentType={agentType}
+                  data-test-subj={HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID}
+                />
               ) : (
                 <span data-test-subj={HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID}>{value}</span>
               )}

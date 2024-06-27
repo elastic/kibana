@@ -20,7 +20,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./advanced_settings'));
     loadTestFile(require.resolve('./rules/rule_details'));
     loadTestFile(require.resolve('./console_notebooks'));
-    loadTestFile(require.resolve('./playground_overview'));
+    loadTestFile(require.resolve('./search_playground/playground_overview'));
 
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./search_homepage'));
