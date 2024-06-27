@@ -28,11 +28,11 @@ import {
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { AlertsLocatorDefinition } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SLOClient } from './services/slo_client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
@@ -54,7 +54,7 @@ export interface PluginSetup {
   taskManager: TaskManagerSetupContract;
   spaces?: SpacesPluginSetup;
   cloud?: CloudSetup;
-  usageCollection?: UsageCollectionSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface PluginStart {
@@ -90,6 +90,8 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
+
+    console.log(core);
 
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
@@ -153,6 +155,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     registerSloUsageCollector(plugins.usageCollection);
 
     const dependencies: RegisterRoutesDependencies = {
+      licensing: plugins.licensing,
       logger: this.logger,
       pluginsSetup: {
         ...plugins,
