@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import { map, take } from 'rxjs';
 
-import {
+import type {
   AnalyticsServiceStart,
   CoreSetup,
   DocLinksServiceSetup,

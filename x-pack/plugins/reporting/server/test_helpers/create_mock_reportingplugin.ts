@@ -31,7 +31,7 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ReportingCore } from '..';
 
-import { ReportingInternalSetup, ReportingInternalStart } from '../core';
+import type { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 
 export const createMockPluginSetup = (
