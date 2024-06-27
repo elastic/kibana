@@ -32,7 +32,6 @@ import type { OnRowSelected } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
 import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '../../styles';
 import { getEventType, isEvenEqlSequence } from '../helpers';
-import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
 import type { inputsModel } from '../../../../../common/store';
@@ -348,22 +347,6 @@ const StatefulEventComponent: React.FC<Props> = ({
         />
 
         <EventsTrSupplementContainerWrapper>
-          <EventsTrSupplement
-            className="siemEventsTable__trSupplement--notes"
-            data-test-subj="event-notes-flex-item"
-            $display="block"
-          >
-            <NoteCards
-              ariaRowindex={ariaRowindex}
-              associateNote={associateNote}
-              data-test-subj="note-cards"
-              notes={notes}
-              showAddNote={!!showNotes[eventId]}
-              toggleShowAddNote={onToggleShowNotes}
-              timelineId={timelineId}
-            />
-          </EventsTrSupplement>
-
           <EuiFlexGroup gutterSize="none" justifyContent="center">
             <EuiFlexItem grow={false}>
               <EventsTrSupplement>
