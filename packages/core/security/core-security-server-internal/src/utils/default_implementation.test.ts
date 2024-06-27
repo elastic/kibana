@@ -24,9 +24,11 @@ describe('getDefaultSecurityImplementation', () => {
   });
 
   describe('authc.apiKeys', () => {
-    it('returns null', async () => {
+    it('returns stub object', async () => {
       const { apiKeys } = implementation.authc;
-      expect(apiKeys).toBeNull();
+      const areAPIKeysEnabled = await apiKeys.areAPIKeysEnabled();
+
+      expect(areAPIKeysEnabled).toBe(false);
     });
   });
 

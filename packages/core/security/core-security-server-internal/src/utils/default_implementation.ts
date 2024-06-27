@@ -8,11 +8,22 @@
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 
+const API_KEYS_DISABLED_ERROR = new Error('API keys are disabled');
+
 export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract => {
   return {
     authc: {
       getCurrentUser: () => null,
-      apiKeys: null,
+      apiKeys: {
+        areAPIKeysEnabled: () => Promise.resolve(false),
+        areCrossClusterAPIKeysEnabled: () => Promise.resolve(false),
+        create: () => Promise.reject(API_KEYS_DISABLED_ERROR),
+        update: () => Promise.reject(API_KEYS_DISABLED_ERROR),
+        grantAsInternalUser: () => Promise.reject(API_KEYS_DISABLED_ERROR),
+        validate: () => Promise.reject(API_KEYS_DISABLED_ERROR),
+        invalidate: () => Promise.reject(API_KEYS_DISABLED_ERROR),
+        invalidateAsInternalUser: () => Promise.reject(API_KEYS_DISABLED_ERROR),
+      },
     },
     audit: {
       asScoped: () => {

@@ -18,7 +18,7 @@ export interface SecurityRequestHandlerContext {
 
 export interface AuthcRequestHandlerContext {
   getCurrentUser(): AuthenticatedUser | null;
-  apiKeys: APIKeysService | null;
+  apiKeys: APIKeysService;
 }
 
 export interface AuditRequestHandlerContext {

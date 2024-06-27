@@ -23,5 +23,5 @@ export interface CoreAuthenticationService {
    * @param request The request to retrieve the authenticated user for.
    */
   getCurrentUser(request: KibanaRequest): AuthenticatedUser | null;
-  apiKeys: APIKeysService | null;
+  apiKeys: APIKeysService;
 }
