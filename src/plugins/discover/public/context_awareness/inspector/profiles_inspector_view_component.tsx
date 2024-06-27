@@ -8,6 +8,7 @@
 
 import {
   EuiButtonIcon,
+  EuiCodeBlock,
   EuiDescriptionList,
   EuiInMemoryTable,
   EuiPanel,
@@ -231,6 +232,9 @@ const DocumentProfileDisplay = ({
   records: DataTableRecordWithContext[];
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [expandedRecord, setExpandedRecord] = useState<DataTableRecordWithContext | undefined>(
+    undefined
+  );
 
   return (
     <EuiInMemoryTable
@@ -242,14 +246,16 @@ const DocumentProfileDisplay = ({
         }
       )}
       items={records}
+      itemId="id"
       rowHeader="raw._id"
+      pagination={true}
       columns={[
         {
           field: 'raw._id',
           name: i18n.translate('discover.inspector.profilesInspectorView.documentProfileIdColumn', {
             defaultMessage: 'Record ID',
           }),
-          render: (id: string, record) => id ?? record.id,
+          render: (rawId: string, record) => rawId ?? record.id,
         },
         {
           field: 'context.type',
@@ -260,14 +266,77 @@ const DocumentProfileDisplay = ({
             }
           ),
         },
+        {
+          align: 'right',
+          width: '40px',
+          isExpander: true,
+          name: (
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate(
+                  'discover.inspector.profilesInspectorView.documentProfileExpandColumn',
+                  {
+                    defaultMessage: 'Expand row',
+                  }
+                )}
+              </span>
+            </EuiScreenReaderOnly>
+          ),
+          mobileOptions: { header: false },
+          render: (record: DataTableRecordWithContext) => (
+            <EuiButtonIcon
+              onClick={() => {
+                setExpandedRecord(expandedRecord?.id === record.id ? undefined : record);
+              }}
+              aria-label={
+                expandedRecord?.id === record.id
+                  ? i18n.translate(
+                      'discover.inspector.profilesInspectorView.documentProfileCollapseRowAriaLabel',
+                      {
+                        defaultMessage: 'Collapse',
+                      }
+                    )
+                  : i18n.translate(
+                      'discover.inspector.profilesInspectorView.documentProfileExpandRowAriaLabel',
+                      {
+                        defaultMessage: 'Expand',
+                      }
+                    )
+              }
+              iconType={expandedRecord?.id === record.id ? 'arrowDown' : 'arrowRight'}
+            />
+          ),
+        },
       ]}
-      pagination={true}
+      itemIdToExpandedRowMap={
+        expandedRecord
+          ? {
+              [expandedRecord.id]: <DocumentJsonDisplay record={expandedRecord} />,
+            }
+          : undefined
+      }
       css={{
         table: {
           border: euiTheme.border.thin,
         },
       }}
     />
+  );
+};
+
+const DocumentJsonDisplay = ({ record }: { record: DataTableRecordWithContext }) => {
+  return (
+    <EuiCodeBlock
+      language="json"
+      overflowHeight={300}
+      isVirtualized
+      isCopyable
+      transparentBackground
+      paddingSize="none"
+      css={{ width: '100%' }}
+    >
+      {JSON.stringify(record.raw, null, 2)}
+    </EuiCodeBlock>
   );
 };
 
