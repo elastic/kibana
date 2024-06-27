@@ -208,6 +208,8 @@ describe('split .kibana index into multiple system indices', () => {
             "endpoint:unified-user-artifact-manifest",
             "endpoint:user-artifact-manifest",
             "enterprise_search_telemetry",
+            "entity-definition",
+            "entity-discovery-api-key",
             "epm-packages",
             "epm-packages-assets",
             "event-annotation-group",

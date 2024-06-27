@@ -14,6 +14,8 @@ import {
   EuiForm,
   EuiFormRow,
   useGeneratedHtmlId,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -118,6 +120,18 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
           />
         </EuiFormRow>
       </EuiForm>
+
+      <EuiSpacer size="m" />
+
+      <EuiCallOut
+        size="s"
+        iconType="warning"
+        title={i18n.MANUAL_RULE_RUN_NOTIFIACTIONS_LIMITATIONS}
+      />
+
+      <EuiSpacer size="m" />
+
+      <EuiCallOut size="s" title={i18n.MANUAL_RULE_RUN_ALERT_LIMITATIONS} iconType="iInCircle" />
     </EuiConfirmModal>
   );
 };
