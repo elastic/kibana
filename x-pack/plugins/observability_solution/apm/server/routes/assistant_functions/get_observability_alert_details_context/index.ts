@@ -18,8 +18,11 @@ import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../../lib/helpers/get_ml_client';
 import { getRandomSampler } from '../../../lib/helpers/get_random_sampler';
 import { getApmServiceSummary } from '../get_apm_service_summary';
-import { getAssistantDownstreamDependencies } from '../get_apm_downstream_dependencies';
-import { getLogCategories } from '../get_log_categories';
+import {
+  APMDownstreamDependency,
+  getAssistantDownstreamDependencies,
+} from '../get_apm_downstream_dependencies';
+import { getLogCategories, LogCategory } from '../get_log_categories';
 import { getAnomalies } from '../get_apm_service_summary/get_anomalies';
 import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
@@ -88,6 +91,7 @@ export const getAlertDetailsContextHandler = (
     const serviceEnvironment = query['service.environment'];
     const hostName = query['host.name'];
     const kubernetesPodName = query['kubernetes.pod.name'];
+
     const [serviceName, containerId] = await Promise.all([
       getServiceNameFromSignals({
         query,
@@ -159,23 +163,27 @@ export const getAlertDetailsContextHandler = (
     // log categories
     dataFetchers.push(async () => {
       const downstreamDependencies = await downstreamDependenciesPromise;
-      const logCategories = await getLogCategories({
+      const { logCategories, entities } = await getLogCategories({
         apmEventClient,
         esClient,
         coreContext,
         arguments: {
           start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
           end: alertStartedAt,
-          'service.name': serviceName,
-          'host.name': hostName,
-          'container.id': containerId,
-          'kubernetes.pod.name': kubernetesPodName,
+          entities: {
+            'service.name': serviceName,
+            'host.name': hostName,
+            'container.id': containerId,
+            'kubernetes.pod.name': kubernetesPodName,
+          },
         },
       });
 
+      const entitiesAsString = entities.map(({ key, value }) => `${key}:${value}`).join(', ');
+
       return {
         key: 'logCategories',
-        description: `Related log events occurring shortly before the alert was triggered.`,
+        description: `Log events occurring up to 15 minutes before the alert was triggered. Filtered by the entities: ${entitiesAsString}`,
         data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
       };
     });
@@ -296,8 +304,8 @@ function getApmErrorsWithDownstreamServiceName(
 }
 
 function logCategoriesWithDownstreamServiceName(
-  logCategories?: Awaited<ReturnType<typeof getLogCategories>>,
-  downstreamDependencies?: Awaited<ReturnType<typeof getAssistantDownstreamDependencies>>
+  logCategories?: LogCategory[],
+  downstreamDependencies?: APMDownstreamDependency[]
 ) {
   return logCategories?.map(
     ({ errorCategory, docCount, sampleMessage, downstreamServiceResource }) => {
