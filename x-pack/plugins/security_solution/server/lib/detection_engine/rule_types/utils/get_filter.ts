@@ -31,10 +31,9 @@ import { getQueryFilterLoadFields } from './get_query_filter_load_fields';
 import { getDataTierFilter } from './get_data_tier_filter';
 
 /**
- * EQL rule support tier filtering too, but it is implemented in rule itself
+ * EQL and threat_match rules support tier filtering too, but it is implemented inside rule executors
  */
 const ruleTypesSupportingTierFilters = new Set<Type>([
-  'threat_match',
   'threshold',
   'new_terms',
   'query',
