@@ -367,6 +367,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
       force,
       authorizationHeader,
       kibanaVersion,
+      sloClient: appContextService.getSloStart()?.sloClient,
     });
 
     if (!res.error) {

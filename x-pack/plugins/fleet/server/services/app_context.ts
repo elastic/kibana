@@ -33,6 +33,8 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
+import type { SLOPluginStart } from '@kbn/slo-plugin/server/plugin';
+
 import type { FleetConfigType } from '../../common/types';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 import type {
@@ -79,6 +81,7 @@ class AppContextService {
   private bulkActionsResolver: BulkActionsResolver | undefined;
   private messageSigningService: MessageSigningServiceInterface | undefined;
   private uninstallTokenService: UninstallTokenServiceInterface | undefined;
+  private sloStart: SLOPluginStart | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -102,6 +105,7 @@ class AppContextService {
     this.bulkActionsResolver = appContext.bulkActionsResolver;
     this.messageSigningService = appContext.messageSigningService;
     this.uninstallTokenService = appContext.uninstallTokenService;
+    this.sloStart = appContext.sloStart;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -143,6 +147,10 @@ class AppContextService {
 
   public getCloud() {
     return this.cloud;
+  }
+
+  public getSloStart() {
+    return this.sloStart;
   }
 
   public getLogger() {
