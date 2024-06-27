@@ -117,6 +117,7 @@ kibana_vars=(
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.kibana.collection.enabled
     monitoring.kibana.collection.interval
+    monitoring.ui.ccs.enabled
     monitoring.ui.container.elasticsearch.enabled
     monitoring.ui.container.logstash.enabled
     monitoring.ui.elasticsearch.hosts
@@ -362,6 +363,7 @@ kibana_vars=(
     xpack.reporting.roles.allow
     xpack.reporting.roles.enabled
     xpack.ruleRegistry.write.enabled
+    xpack.screenshotting.browser.chromium.disableSandbox
     xpack.security.accessAgreement.message
     xpack.security.audit.appender.fileName
     xpack.security.audit.appender.layout.highlight
