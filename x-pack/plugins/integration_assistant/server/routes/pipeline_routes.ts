@@ -37,11 +37,13 @@ export function registerPipelineRoutes(router: IRouter<IntegrationAssistantRoute
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         try {
-          const results = await testPipeline(rawSamples, pipeline, client);
-          if (results?.errors && results.errors.length > 0) {
-            return res.badRequest({ body: JSON.stringify(results.errors) });
+          const { errors, pipelineResults } = await testPipeline(rawSamples, pipeline, client);
+          if (errors?.length) {
+            return res.badRequest({ body: JSON.stringify(errors) });
           }
-          return res.ok({ body: CheckPipelineResponse.parse(results) });
+          return res.ok({
+            body: CheckPipelineResponse.parse({ results: { docs: pipelineResults } }),
+          });
         } catch (e) {
           return res.badRequest({ body: e });
         }

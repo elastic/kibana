@@ -515,7 +515,7 @@ describe('validateKuery validates real kueries', () => {
   beforeEach(() => {
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({
       enableStrictKQLValidation: true,
-    });
+    } as any);
   });
   afterEach(() => {
     mockedAppContextService.getExperimentalFeatures.mockReset();
@@ -849,7 +849,7 @@ describe('validateKuery validates real kueries', () => {
     beforeEach(() => {
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         enableStrictKQLValidation: false,
-      });
+      } as any);
     });
 
     it('Allows to skip validation for a free text query', async () => {
