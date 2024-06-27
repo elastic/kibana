@@ -23,6 +23,8 @@ interface EndpointResponseActionResultsProps {
   ruleName?: string;
 }
 
+// FIXME:PT move this to `/endpoint/`
+
 export const EndpointResponseActionResults = ({
   action,
   ruleName,
@@ -67,6 +69,7 @@ export const EndpointResponseActionResults = ({
         expandedAction ? (
           <ActionsLogExpandedTray
             action={expandedAction}
+            fromAlertWorkaround
             data-test-subj={`response-results-${hostName}`}
           />
         ) : (
