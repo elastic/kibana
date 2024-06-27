@@ -556,6 +556,9 @@ export interface DocLinks {
     proxiesSettings: string;
     unprivilegedMode: string;
   }>;
+  readonly integrationDeveloper: {
+    upload: string;
+  };
   readonly ecs: {
     readonly guide: string;
     readonly dataStreams: string;
