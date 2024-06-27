@@ -98,7 +98,7 @@
     "xpack.searchPlayground": "plugins/search_playground",
     "xpack.searchInferenceEndpoints": "plugins/search_inference_endpoints",
     "xpack.searchProfiler": "plugins/searchprofiler",
-    "xpack.security": "plugins/security",
+    "xpack.security": ["plugins/security", "packages/security"],
     "xpack.server": "legacy/server",
     "xpack.serverless": "plugins/serverless",
     "xpack.serverlessSearch": "plugins/serverless_search",
