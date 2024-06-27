@@ -45,6 +45,12 @@ jest.mock(
   })
 );
 
+jest.mock('./add_note_icon_item', () => {
+  return {
+    AddEventNoteAction: jest.fn(() => <div data-test-subj="add-note-mock-action" />),
+  };
+});
+
 jest.mock('../../lib/kibana', () => {
   const originalKibanaLib = jest.requireActual('../../lib/kibana');
 
@@ -426,6 +432,28 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('Show notes action', () => {
+    test('should show notes action if showNotes is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} showNotes={true} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="add-note-mock-action"]').exists()).toBeTruthy();
+    });
+
+    test('should show notes action if showNotes is false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} showNotes={false} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="add-note-mock-action"]').exists()).toBeFalsy();
     });
   });
 });
