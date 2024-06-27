@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
