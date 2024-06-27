@@ -143,6 +143,11 @@ const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
     ...policy.windows.ransomware,
     mode: ProtectionModes.off,
   },
+  antivirus_registration: {
+    ...policy.windows.antivirus_registration,
+    mode: AntivirusRegistrationModes.disabled,
+    enabled: false,
+  },
   attack_surface_reduction: {
     ...policy.windows.attack_surface_reduction,
     credential_hardening: {

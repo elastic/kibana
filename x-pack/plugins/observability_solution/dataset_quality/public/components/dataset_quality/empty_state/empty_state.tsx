@@ -10,7 +10,7 @@ import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DEFAULT_DATASET_TYPE, DEFAULT_LOGS_DATA_VIEW } from '../../../../common/constants';
+import { DEFAULT_LOGS_DATA_VIEW } from '../../../../common/constants';
 import { useEmptyState } from '../../../hooks/use_empty_state';
 
 // Allow for lazy loading
@@ -36,7 +36,7 @@ export default function EmptyStateWrapper({ children }: { children: React.ReactN
               id="xpack.datasetQuality.emptyState.noPrivileges.message"
               defaultMessage="You don't have the required privileges to view logs data. Make sure you have sufficient privileges to view {datasetPattern}."
               values={{
-                datasetPattern: <EuiCode>{`${DEFAULT_DATASET_TYPE}-*`}</EuiCode>,
+                datasetPattern: <EuiCode>{DEFAULT_LOGS_DATA_VIEW}</EuiCode>,
               }}
             />
             {/* TODO: Learn more link to docs */}

@@ -220,11 +220,19 @@ describe('When using `upload` response action', () => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
     }) as ActionDetailsApiResponse<ResponseActionUploadOutputContent>;
-    pendingDetailResponse.data.agents = ['a.b.c'];
+    pendingDetailResponse.data.command = 'upload';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['not found'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['not found'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     pendingDetailResponse.data.outputs = {
-      'a.b.c': {
+      'agent-a': {
         type: 'json',
         content: {
           code: outputCode,
