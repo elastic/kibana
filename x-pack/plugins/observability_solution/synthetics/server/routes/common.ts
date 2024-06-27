@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsFindResponse } from '@kbn/core/server';
+import { isEmpty } from 'lodash';
 import { RouteContext } from './types';
 import { MonitorSortFieldSchema } from '../../common/runtime_types/monitor_management/sort_field';
 import { getAllLocations } from '../synthetics_service/get_all_locations';
@@ -108,16 +109,7 @@ export const getMonitors = async (
   return context.savedObjectsClient.find(findParams);
 };
 
-export const getMonitorFilters = async ({
-  tags,
-  filter,
-  locations,
-  projects,
-  monitorTypes,
-  schedules,
-  monitorQueryIds,
-  context,
-}: {
+interface Filters {
   filter?: string;
   tags?: string | string[];
   monitorTypes?: string | string[];
@@ -125,10 +117,33 @@ export const getMonitorFilters = async ({
   projects?: string | string[];
   schedules?: string | string[];
   monitorQueryIds?: string | string[];
-  context: RouteContext;
-}) => {
+}
+
+export const getMonitorFilters = async (
+  data: {
+    context: RouteContext;
+  } & Filters
+) => {
+  const { context, locations } = data;
   const locationFilter = await parseLocationFilter(context, locations);
 
+  return parseArrayFilters({
+    ...data,
+    locationFilter,
+  });
+};
+
+export const parseArrayFilters = ({
+  tags,
+  filter,
+  projects,
+  monitorTypes,
+  schedules,
+  monitorQueryIds,
+  locationFilter,
+}: Filters & {
+  locationFilter?: string | string[];
+}) => {
   const filtersStr = [
     filter,
     getKqlFilter({ field: 'tags', values: tags }),
@@ -154,7 +169,7 @@ export const getKqlFilter = ({
   operator?: string;
   searchAtRoot?: boolean;
 }) => {
-  if (!values) {
+  if (isEmpty(values)) {
     return '';
   }
   let fieldKey = '';

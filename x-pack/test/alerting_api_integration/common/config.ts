@@ -352,6 +352,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--xpack.task_manager.allow_reading_invalid_state=false',
           '--xpack.actions.queued.max=500',
           `--xpack.stack_connectors.enableExperimental=${JSON.stringify(experimentalFeatures)}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
     };

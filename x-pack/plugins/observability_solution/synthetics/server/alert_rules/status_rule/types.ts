@@ -5,6 +5,31 @@
  * 2.0.
  */
 
+import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
+import { ActionGroupIdsOf } from '@kbn/alerting-types';
+import { StatusRuleParams } from '../../../common/rules/status_rule';
+import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
+import {
+  SyntheticsCommonState,
+  SyntheticsMonitorStatusAlertState,
+} from '../../../common/runtime_types/alert_rules/common';
+
+type MonitorStatusRuleTypeParams = StatusRuleParams;
+type MonitorStatusActionGroups = ActionGroupIdsOf<typeof MONITOR_STATUS>;
+type MonitorStatusRuleTypeState = SyntheticsCommonState;
+type MonitorStatusAlertState = SyntheticsMonitorStatusAlertState;
+type MonitorStatusAlertContext = AlertContext;
+type MonitorStatusAlert = ObservabilityUptimeAlert;
+
+export type StatusRuleExecutorOptions = RuleExecutorOptions<
+  MonitorStatusRuleTypeParams,
+  MonitorStatusRuleTypeState,
+  MonitorStatusAlertState,
+  MonitorStatusAlertContext,
+  MonitorStatusActionGroups,
+  MonitorStatusAlert
+>;
+
 export interface MonitorSummaryStatusRule {
   reason: string;
   status: string;
@@ -20,4 +45,11 @@ export interface MonitorSummaryStatusRule {
   lastErrorMessage: string;
   stateId: string | null;
   monitorUrlLabel: string;
+  downThreshold?: number;
+  checks?: {
+    total: number;
+    down: number;
+  };
+  timestamp: string;
+  pendingLastRunAt?: string;
 }

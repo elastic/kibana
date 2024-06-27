@@ -7,6 +7,7 @@
 import moment from 'moment';
 import { loggerMock } from '@kbn/logging-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -59,16 +60,28 @@ describe('StatusRuleExecutor', () => {
 
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
+  const mock = coreMock.createSetup();
+  const mockStart = coreMock.createStart();
+  const uiSettingsClient = mockStart.uiSettings.asScopedToClient(soClient);
+
+  const statusRule = new StatusRuleExecutor(
+    moment().toDate(),
+    {},
+    soClient,
+    mockEsClient,
+    serverMock,
+    monitorClient,
+    {
+      uiSettingsClient,
+    } as any,
+    'default',
+    mock.http.basePath,
+    {} as any
+  );
+
   it('should only query enabled monitors', async () => {
     const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
-    const statusRule = new StatusRuleExecutor(
-      moment().toDate(),
-      {},
-      soClient,
-      mockEsClient,
-      serverMock,
-      monitorClient
-    );
+
     const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks({});
 
     expect(downConfigs).toEqual({});
@@ -82,64 +95,76 @@ describe('StatusRuleExecutor', () => {
 
   it('marks deleted configs as expected', async () => {
     jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue(testMonitors);
-    const statusRule = new StatusRuleExecutor(
-      moment().toDate(),
-      {},
-      soClient,
-      mockEsClient,
-      serverMock,
-      monitorClient
-    );
 
     const { downConfigs } = await statusRule.getDownChecks({});
 
     expect(downConfigs).toEqual({});
 
     const staleDownConfigs = await statusRule.markDeletedConfigs({
-      id1: {
+      id2: {
         locationId: 'us-east-1',
+        configId: 'id2',
+        status: 'down',
+        timestamp: '2021-06-01T00:00:00.000Z',
+        monitorQueryId: 'test',
+        ping: {} as any,
+        checks: {
+          total: 1,
+          down: 1,
+        },
+      },
+      'id1-us_central_dev': {
+        locationId: 'us_central_dev',
         configId: 'id1',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         monitorQueryId: 'test',
         ping: {} as any,
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
-      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
-        locationId: 'us_central_dev',
-        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-      },
-      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_qa': {
+      'id1-us_central_qa': {
         locationId: 'us_central_qa',
-        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+        configId: 'id1',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         monitorQueryId: 'test',
         ping: {} as any,
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
     });
 
     expect(staleDownConfigs).toEqual({
-      id1: {
-        configId: 'id1',
+      id2: {
+        configId: 'id2',
         isDeleted: true,
         locationId: 'us-east-1',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
-      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
-        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+      'id1-us_central_dev': {
+        configId: 'id1',
         isLocationRemoved: true,
         locationId: 'us_central_dev',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
     });
   });
@@ -160,65 +185,171 @@ describe('StatusRuleExecutor', () => {
         },
       },
     ]);
-    const statusRule = new StatusRuleExecutor(
-      moment().toDate(),
-      {},
-      soClient,
-      mockEsClient,
-      serverMock,
-      monitorClient
-    );
 
     const { downConfigs } = await statusRule.getDownChecks({});
 
     expect(downConfigs).toEqual({});
 
     const staleDownConfigs = await statusRule.markDeletedConfigs({
-      id1: {
+      id2: {
         locationId: 'us-east-1',
+        configId: 'id2',
+        status: 'down',
+        timestamp: '2021-06-01T00:00:00.000Z',
+        monitorQueryId: 'test',
+        ping: {} as any,
+        checks: {
+          total: 1,
+          down: 1,
+        },
+      },
+      'id1-us_central_dev': {
+        locationId: 'us_central_dev',
         configId: 'id1',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         monitorQueryId: 'test',
         ping: {} as any,
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
-      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
-        locationId: 'us_central_dev',
-        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
-        status: 'down',
-        timestamp: '2021-06-01T00:00:00.000Z',
-        monitorQueryId: 'test',
-        ping: {} as any,
-      },
-      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_qa': {
+      'id1-us_central_qa': {
         locationId: 'us_central_qa',
-        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+        configId: 'id1',
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
         monitorQueryId: 'test',
         ping: {} as any,
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
     });
 
     expect(staleDownConfigs).toEqual({
-      id1: {
-        configId: 'id1',
+      id2: {
+        configId: 'id2',
         isDeleted: true,
         locationId: 'us-east-1',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
-      '2548dab3-4752-4b4d-89a2-ae3402b6fb04-us_central_dev': {
-        configId: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+      'id1-us_central_dev': {
+        configId: 'id1',
         isLocationRemoved: true,
         locationId: 'us_central_dev',
         monitorQueryId: 'test',
         ping: {},
         status: 'down',
         timestamp: '2021-06-01T00:00:00.000Z',
+        checks: {
+          total: 1,
+          down: 1,
+        },
       },
+    });
+  });
+
+  describe('CustomRule', () => {
+    it('tests getLastRunForPendingMonitors', async () => {
+      await statusRule.getDownChecks();
+      const { pendingConfigs } = await statusRule.getLastRunForPendingMonitors({
+        id1: {
+          locationId: 'us-east-1',
+          configId: 'id1',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          monitorQueryId: 'test',
+        },
+      });
+      expect(pendingConfigs).toEqual({
+        id1: {
+          locationId: 'us-east-1',
+          configId: 'id1',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          monitorQueryId: 'test',
+        },
+      });
+    });
+
+    it('tests getLastRunForPendingMonitors filters out recently created', async () => {
+      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
+        {
+          ...testMonitors[0],
+          attributes: {
+            ...testMonitors[0].attributes,
+            locations: [
+              {
+                geo: { lon: -95.86, lat: 41.25 },
+                isServiceManaged: true,
+                id: 'us_central_qa',
+              },
+            ],
+          },
+          created_at: moment().subtract(5, 'minutes').toISOString(),
+        },
+      ]);
+
+      await statusRule.getDownChecks();
+      const { pendingConfigs } = await statusRule.getLastRunForPendingMonitors({
+        id1: {
+          locationId: 'us-east-1',
+          configId: 'id1',
+          status: 'down',
+          timestamp: '2021-06-01T00:00:00.000Z',
+          monitorQueryId: 'test',
+        },
+      });
+      expect(pendingConfigs).toEqual({});
+    });
+
+    it('tests findEarliestMonitorCreatedAt', async () => {
+      const fiveMinutesAgo = moment().subtract(5, 'minutes').toISOString();
+      const tenMinutesAgo = moment().subtract(10, 'minutes').toISOString();
+      const fifteenMinutesAgo = moment().subtract(15, 'minutes').toISOString();
+      jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([
+        {
+          ...testMonitors[0],
+          created_at: fiveMinutesAgo,
+        },
+        {
+          ...testMonitors[0],
+          id: 'id2',
+          attributes: {
+            ...testMonitors[0].attributes,
+            config_id: 'id2',
+          },
+          created_at: tenMinutesAgo,
+        },
+        {
+          ...testMonitors[0],
+          id: 'id4',
+          attributes: {
+            ...testMonitors[0].attributes,
+            config_id: 'id4',
+          },
+          created_at: fifteenMinutesAgo,
+        },
+      ]);
+
+      await statusRule.getDownChecks();
+
+      const earliestMonitorCreatedAt = await statusRule.findEarliestMonitorCreatedAt([
+        'id1',
+        'id2',
+        'id3',
+      ]);
+      expect(earliestMonitorCreatedAt.toISOString()).toEqual(tenMinutesAgo);
     });
   });
 });
@@ -226,7 +357,7 @@ describe('StatusRuleExecutor', () => {
 const testMonitors = [
   {
     type: 'synthetics-monitor',
-    id: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+    id: 'id1',
     attributes: {
       type: 'browser',
       form_monitor_type: 'multistep',
@@ -234,7 +365,7 @@ const testMonitors = [
       alert: { status: { enabled: false } },
       schedule: { unit: 'm', number: '10' },
       'service.name': '',
-      config_id: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+      config_id: 'id1',
       tags: [],
       timeout: null,
       name: 'https://www.google.com',
@@ -250,7 +381,7 @@ const testMonitors = [
       origin: 'ui',
       journey_id: '',
       hash: '',
-      id: '2548dab3-4752-4b4d-89a2-ae3402b6fb04',
+      id: 'id1',
       project_id: '',
       playwright_options: '',
       __ui: {

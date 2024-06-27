@@ -15,6 +15,10 @@ export const selectAlertFlyoutVisibility = createSelector(
   ({ alertFlyoutVisible }) => alertFlyoutVisible
 );
 
+export const selectIsNewrule = createSelector(
+  uiStateSelector,
+  ({ isAlertFlyoutNew }) => isAlertFlyoutNew
+);
 export const selectRefreshPaused = createSelector(
   uiStateSelector,
   ({ refreshPaused }) => refreshPaused

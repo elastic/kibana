@@ -5692,6 +5692,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-synthetics-test-data@link:x-pack/packages/observability/synthetics_test_data":
+  version "0.0.0"
+  uid ""
+
 "@kbn/oidc-provider-plugin@link:x-pack/test/security_api_integration/plugins/oidc_provider":
   version "0.0.0"
   uid ""

@@ -27,6 +27,7 @@ const { AUTOREFRESH_INTERVAL_SECONDS, AUTOREFRESH_IS_PAUSED } = CLIENT_DEFAULTS_
 
 export interface UiState {
   alertFlyoutVisible: typeof SYNTHETICS_TLS_RULE | typeof SYNTHETICS_STATUS_RULE | null;
+  isAlertFlyoutNew?: boolean | null;
   basePath: string;
   esKuery: string;
   searchText: string;
@@ -37,6 +38,7 @@ export interface UiState {
 }
 
 const initialState: UiState = {
+  isAlertFlyoutNew: false,
   alertFlyoutVisible: null,
   basePath: '',
   esKuery: '',
@@ -53,7 +55,8 @@ export const uiReducer = createReducer(initialState, (builder) => {
       state.integrationsPopoverOpen = action.payload;
     })
     .addCase(setAlertFlyoutVisible, (state, action) => {
-      state.alertFlyoutVisible = action.payload;
+      state.alertFlyoutVisible = action.payload?.id ?? null;
+      state.isAlertFlyoutNew = action.payload?.isNew ?? null;
     })
     .addCase(setBasePath, (state, action) => {
       state.basePath = action.payload;

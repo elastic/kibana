@@ -40,7 +40,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: true,
+  requiresAppContext: false,
   format: ({ fields }) => {
     return {
       reason: fields[ALERT_REASON] || '',

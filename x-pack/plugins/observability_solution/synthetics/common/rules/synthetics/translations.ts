@@ -12,7 +12,7 @@ export const SyntheticsMonitorStatusTranslations = {
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultActionMessage',
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
-      defaultMessage: `"{monitorName}" is {status} from {locationName}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationName}  \n- Error received: {lastErrorMessage}  \n{linkMessage}`,
+      defaultMessage: `Monitor "{monitorName}" is {status} from {locationName}.{pendingLastRunAt} - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- Checked at: {checkedAt}  \n- From: {locationName}  \n- Error received: {lastErrorMessage}  \n{linkMessage}`,
       values: {
         monitorName: '{{context.monitorName}}',
         monitorType: '{{context.monitorType}}',
@@ -23,13 +23,14 @@ export const SyntheticsMonitorStatusTranslations = {
         locationName: '{{context.locationName}}',
         checkedAt: '{{context.checkedAt}}',
         linkMessage: '{{{context.linkMessage}}}',
+        pendingLastRunAt: '{{{context.pendingLastRunAt}}}',
       },
     }
   ),
   defaultSubjectMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultSubjectMessage',
     {
-      defaultMessage: '"{monitorName}" ({locationName}) is down - Elastic Synthetics',
+      defaultMessage: 'Monitor "{monitorName}" ({locationName}) is down - Elastic Synthetics',
       values: {
         monitorName: '{{context.monitorName}}',
         locationName: '{{context.locationName}}',
@@ -39,7 +40,8 @@ export const SyntheticsMonitorStatusTranslations = {
   defaultRecoverySubjectMessage: i18n.translate(
     'xpack.synthetics.alerts.syntheticsMonitorStatus.defaultRecoverySubjectMessage',
     {
-      defaultMessage: '"{monitorName}" ({locationName}) {recoveryStatus} - Elastic Synthetics',
+      defaultMessage:
+        'Monitor "{monitorName}" ({locationName}) {recoveryStatus} - Elastic Synthetics',
       values: {
         recoveryStatus: '{{context.recoveryStatus}}',
         locationName: '{{context.locationName}}',
@@ -52,7 +54,7 @@ export const SyntheticsMonitorStatusTranslations = {
     {
       // the extra spaces before `\n` are needed to properly convert this from markdown to an HTML email
       defaultMessage:
-        'The alert for "{monitorName}" from {locationName} is no longer active: {recoveryReason}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}  \n- Last error received: {lastErrorMessage}  \n{linkMessage}',
+        'The alert for monitor "{monitorName}" from {locationName} is no longer active: {recoveryReason}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {monitorName}  \n- {monitorUrlLabel}: {monitorUrl}  \n- Monitor type: {monitorType}  \n- From: {locationName}  \n- Last error received: {lastErrorMessage}  \n{linkMessage}',
       values: {
         monitorName: '{{context.monitorName}}',
         monitorUrlLabel: '{{context.monitorUrlLabel}}',

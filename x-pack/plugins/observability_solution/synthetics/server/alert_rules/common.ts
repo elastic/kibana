@@ -17,14 +17,16 @@ import {
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
+import { TimeWindow } from '../../common/rules/status_rule';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
+import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import {
   MonitorStatusActionGroup,
   SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
 } from '../../common/constants/synthetics_alerts';
-import { uptimeRuleFieldMap } from '../../common/rules/uptime_rule_field_map';
 import {
   getUptimeIndexPattern,
   IndexPatternTitleAndFields,
@@ -38,7 +40,7 @@ import {
 } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
-import { AlertOverviewStatus } from './status_rule/status_rule_executor';
+import { AlertOverviewStatus, PendingConfigs } from './status_rule/status_rule_executor';
 import type { MonitorSummaryStatusRule } from './status_rule/types';
 
 export const updateState = (
@@ -166,6 +168,7 @@ export const setRecoveredAlertsContext = ({
   basePath,
   spaceId,
   staleDownConfigs,
+  pendingConfigs,
   upConfigs,
   dateFormat,
   tz,
@@ -182,6 +185,7 @@ export const setRecoveredAlertsContext = ({
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
+  pendingConfigs: PendingConfigs;
 }) => {
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
   for (const recoveredAlert of recoveredAlerts) {
@@ -203,7 +207,7 @@ export const setRecoveredAlertsContext = ({
     let lastErrorMessage;
 
     if (state?.idWithLocation && staleDownConfigs[state.idWithLocation]) {
-      const { idWithLocation, locationId } = state;
+      const { idWithLocation, locationId, checks, downThreshold } = state;
       const downConfig = staleDownConfigs[idWithLocation];
       const { ping, configId } = downConfig;
       monitorSummary = getMonitorSummary(
@@ -212,7 +216,9 @@ export const setRecoveredAlertsContext = ({
         locationId,
         configId,
         dateFormat,
-        tz
+        tz,
+        checks,
+        downThreshold
       );
       lastErrorMessage = monitorSummary.lastErrorMessage;
 
@@ -246,7 +252,7 @@ export const setRecoveredAlertsContext = ({
     }
 
     if (state?.idWithLocation && upConfigs[state.idWithLocation]) {
-      const { idWithLocation, configId, locationId } = state;
+      const { idWithLocation, configId, locationId, checks, downThreshold } = state;
       // pull the last error from state, since it is not available on the up ping
       lastErrorMessage = state.lastErrorMessage;
 
@@ -260,7 +266,9 @@ export const setRecoveredAlertsContext = ({
         locationId,
         configId,
         dateFormat,
-        tz
+        tz,
+        checks,
+        downThreshold
       );
 
       // When alert is flapping, the stateId is not available on ping.state.ends.id, use state instead
@@ -298,6 +306,7 @@ export const setRecoveredAlertsContext = ({
       linkMessage,
       ...(isUp ? { status: 'up' } : {}),
       ...(recoveryReason ? { [RECOVERY_REASON]: recoveryReason } : {}),
+      ...(recoveryReason ? { [ALERT_REASON]: recoveryReason } : {}),
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),
@@ -352,10 +361,35 @@ export const generateFilterDSL = async (
   return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
-export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+export const uptimeRuleTypeFieldMap = { ...syntheticsRuleFieldMap, ...legacyExperimentalFieldMap };
 
 export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
   mappings: { fieldMap: uptimeRuleTypeFieldMap },
   useLegacyAlerts: true,
 };
+
+export function getTimeUnitLabel(timeUnit: TimeWindow['unit'], timeValue: TimeWindow['size'] = 1) {
+  switch (timeUnit) {
+    case 's':
+      return i18n.translate('xpack.synthetics.timeUnits.secondLabel', {
+        defaultMessage: '{timeValue, plural, one {second} other {seconds}}',
+        values: { timeValue },
+      });
+    case 'm':
+      return i18n.translate('xpack.synthetics.timeUnits.minuteLabel', {
+        defaultMessage: '{timeValue, plural, one {minute} other {minutes}}',
+        values: { timeValue },
+      });
+    case 'h':
+      return i18n.translate('xpack.synthetics.timeUnits.hourLabel', {
+        defaultMessage: '{timeValue, plural, one {hour} other {hours}}',
+        values: { timeValue },
+      });
+    case 'd':
+      return i18n.translate('xpack.synthetics.timeUnits.dayLabel', {
+        defaultMessage: '{timeValue, plural, one {day} other {days}}',
+        values: { timeValue },
+      });
+  }
+}

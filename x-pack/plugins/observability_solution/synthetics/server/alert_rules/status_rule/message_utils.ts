@@ -35,6 +35,9 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   [STATE_ID]: monitorSummary.stateId,
   'location.id': monitorSummary.locationId,
   configId: monitorSummary.configId,
+  'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
+  'kibana.alert.evaluation.value': monitorSummary.checks?.down ?? 1,
+  pendingLastRunAt: monitorSummary.pendingLastRunAt,
 });
 
 export const getMonitorSummary = (
@@ -43,7 +46,12 @@ export const getMonitorSummary = (
   locationId: string,
   configId: string,
   dateFormat: string,
-  tz: string
+  tz: string,
+  checks?: {
+    total: number;
+    down: number;
+  },
+  downThreshold?: number
 ): MonitorSummaryStatusRule => {
   const monitorName = monitorInfo.monitor?.name ?? monitorInfo.monitor?.id;
   const observerLocation = monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION;
@@ -84,7 +92,11 @@ export const getMonitorSummary = (
       location: observerLocation,
       status: statusMessage,
       timestamp: monitorInfo['@timestamp'],
+      checks,
     }),
+    checks,
+    downThreshold,
+    timestamp: monitorInfo['@timestamp'],
   };
 };
 
@@ -93,27 +105,38 @@ export const getReasonMessage = ({
   status,
   location,
   timestamp,
+  checks,
 }: {
   name: string;
   location: string;
   status: string;
   timestamp: string;
+  checks?: {
+    total: number;
+    down: number;
+  };
 }) => {
   const checkedAt = moment(timestamp).format('LLL');
 
-  return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage', {
-    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}.`,
+  return i18n.translate('xpack.synthetics.alertRules.monitorStatus.reasonMessage.new', {
+    defaultMessage: `Monitor "{name}" from {location} is {status}. Checked at {checkedAt}. Alert when {downCheck} out of last {total} checks are down.`,
     values: {
       name,
       status,
       location,
       checkedAt,
+      downCheck: checks?.down ?? 1,
+      total: checks?.total ?? 1,
     },
   });
 };
 
 export const DOWN_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.downLabel', {
   defaultMessage: `down`,
+});
+
+export const PENDING_LABEL = i18n.translate('xpack.synthetics.alerts.monitorStatus.pendingLabel', {
+  defaultMessage: `pending`,
 });
 
 export const UNAVAILABLE_LABEL = i18n.translate(

@@ -7,6 +7,7 @@
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { FindActionResult } from '@kbn/actions-plugin/server';
+import { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { savedObjectsAdapter } from '../../saved_objects';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
 import {
@@ -25,6 +26,7 @@ export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
+  settings?: DynamicSettingsAttributes;
 
   constructor(
     context: UptimeRequestHandlerContext,
@@ -37,6 +39,12 @@ export class DefaultAlertService {
   }
 
   async setupDefaultAlerts() {
+    this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    if ((this.settings?.defaultConnectors ?? []).length === 0) {
+      // we skip created default rules if user hasn't configured it
+      return;
+    }
+
     const [statusRule, tlsRule] = await Promise.allSettled([
       this.setupStatusRule(),
       this.setupTlsRule(),
@@ -195,14 +203,15 @@ export class DefaultAlertService {
 
   async getActionConnectors() {
     const actionsClient = (await this.context.actions)?.getActionsClient();
-
-    const settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    if (!this.settings) {
+      this.settings = await savedObjectsAdapter.getSyntheticsDynamicSettings(this.soClient);
+    }
     let actionConnectors: FindActionResult[] = [];
     try {
       actionConnectors = await actionsClient.getAll();
     } catch (e) {
       this.server.logger.error(e);
     }
-    return { actionConnectors, settings };
+    return { actionConnectors, settings: this.settings };
   }
 }

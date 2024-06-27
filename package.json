@@ -646,6 +646,7 @@
     "@kbn/observability-onboarding-plugin": "link:x-pack/plugins/observability_solution/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/plugins/observability_solution/observability",
     "@kbn/observability-shared-plugin": "link:x-pack/plugins/observability_solution/observability_shared",
+    "@kbn/observability-synthetics-test-data": "link:x-pack/packages/observability/synthetics_test_data",
     "@kbn/oidc-provider-plugin": "link:x-pack/test/security_api_integration/plugins/oidc_provider",
     "@kbn/open-telemetry-instrumented-plugin": "link:test/common/plugins/otel_metrics",
     "@kbn/openapi-common": "link:packages/kbn-openapi-common",

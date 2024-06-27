@@ -14,6 +14,7 @@ import type {
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { retry } from '../../common/retry';
 
 const TIMEOUT = 70_000;
@@ -93,12 +94,16 @@ export async function waitForAlertInIndex<T>({
   ruleId,
   retryService,
   logger,
+  filters = [],
+  retryDelay,
 }: {
   esClient: Client;
   indexName: string;
   ruleId: string;
   retryService: RetryService;
   logger: ToolingLog;
+  filters?: QueryDslQueryContainer[];
+  retryDelay?: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return await retry<SearchResponse<T, Record<string, AggregationsAggregate>>>({
     test: async () => {
@@ -106,8 +111,15 @@ export async function waitForAlertInIndex<T>({
         index: indexName,
         body: {
           query: {
-            term: {
-              'kibana.alert.rule.uuid': ruleId,
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'kibana.alert.rule.uuid': ruleId,
+                  },
+                },
+                ...filters,
+              ],
             },
           },
         },
@@ -122,6 +134,6 @@ export async function waitForAlertInIndex<T>({
     retryService,
     timeout: TIMEOUT,
     retries: RETRIES,
-    retryDelay: RETRY_DELAY,
+    retryDelay: retryDelay ?? RETRY_DELAY,
   });
 }

@@ -90,7 +90,8 @@ export const processMonitors = (
 
     const monitorLocations = attrs[ConfigKey.LOCATIONS].map((location) => location.id);
 
-    if (attrs[ConfigKey.ENABLED] === false) {
+    // if (attrs[ConfigKey.ENABLED] === true) {
+    if (!true) {
       const queriedLocations = Array.isArray(queryLocations) ? queryLocations : [queryLocations];
       const intersectingLocations = intersection(
         monitorLocations,

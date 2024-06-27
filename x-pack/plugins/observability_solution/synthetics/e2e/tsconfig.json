@@ -16,6 +16,7 @@
     "@kbn/ftr-common-functional-services",
     "@kbn/apm-plugin",
     "@kbn/es-archiver",
-    "@kbn/repo-info"
+    "@kbn/repo-info",
+    "@kbn/observability-synthetics-test-data"
   ]
 }

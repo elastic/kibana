@@ -1234,6 +1234,8 @@
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability_solution/observability/*"],
       "@kbn/observability-shared-plugin": ["x-pack/plugins/observability_solution/observability_shared"],
       "@kbn/observability-shared-plugin/*": ["x-pack/plugins/observability_solution/observability_shared/*"],
+      "@kbn/observability-synthetics-test-data": ["x-pack/packages/observability/synthetics_test_data"],
+      "@kbn/observability-synthetics-test-data/*": ["x-pack/packages/observability/synthetics_test_data/*"],
       "@kbn/oidc-provider-plugin": ["x-pack/test/security_api_integration/plugins/oidc_provider"],
       "@kbn/oidc-provider-plugin/*": ["x-pack/test/security_api_integration/plugins/oidc_provider/*"],
       "@kbn/open-telemetry-instrumented-plugin": ["test/common/plugins/otel_metrics"],
