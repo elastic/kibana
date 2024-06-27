@@ -168,8 +168,12 @@ describe('addToControls', () => {
       mockDataService.query.filterManager.getFilters = () => [];
       addToControls(mockControlGroupApi as unknown as ControlGroupApi, vis, mockDataService);
       expect(mockControlGroupApi.addOptionsListControl.mock.calls).toHaveLength(2);
-      expect(mockControlGroupApi.addOptionsListControl.mock.calls[0][0].controlId).toBe(PARENT_CONTROL_ID);
-      expect(mockControlGroupApi.addOptionsListControl.mock.calls[1][0].controlId).toBe(CHILD_CONTROL_ID);
+      expect(mockControlGroupApi.addOptionsListControl.mock.calls[0][0].controlId).toBe(
+        PARENT_CONTROL_ID
+      );
+      expect(mockControlGroupApi.addOptionsListControl.mock.calls[1][0].controlId).toBe(
+        CHILD_CONTROL_ID
+      );
     });
   });
 });

@@ -22,7 +22,10 @@ import {
 } from '../../../common/control_group/control_group_constants';
 import { ControlGroupInput } from '../types';
 import { ControlInput, DataControlInput } from '../../types';
-import { RangeSliderEmbeddableInput, RANGE_SLIDER_CONTROL } from '../../../common/range_slider/types';
+import {
+  RangeSliderEmbeddableInput,
+  RANGE_SLIDER_CONTROL,
+} from '../../../common/range_slider/types';
 import { getCompatibleControlType, getNextPanelOrder } from '../embeddable/control_group_helpers';
 
 export interface AddDataControlProps {

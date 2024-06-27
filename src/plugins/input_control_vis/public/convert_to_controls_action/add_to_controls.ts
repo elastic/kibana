@@ -35,15 +35,17 @@ export function addToControls(
     }
     // add root controls
     vis.params?.controls
-      .filter(controlParams => isRootControl(controlParams))
-      .forEach(controlParams => {
+      .filter((controlParams) => isRootControl(controlParams))
+      .forEach((controlParams) => {
         orderedControls.push(controlParams);
       });
     // add child controls to right of parent control
     vis.params?.controls
-      .filter(controlParams => !isRootControl(controlParams))
-      .forEach(controlParams => {
-        const parentIndex = orderedControls.findIndex(({ parent }) => parent === controlParams.parent);
+      .filter((controlParams) => !isRootControl(controlParams))
+      .forEach((controlParams) => {
+        const parentIndex = orderedControls.findIndex(
+          ({ parent }) => parent === controlParams.parent
+        );
         if (parentIndex > 0) {
           orderedControls.splice(parentIndex, 0, controlParams);
         } else {

@@ -372,7 +372,7 @@ export class ControlGroupContainer extends Container<
 
   public setAutoApplySelections(autoApplySeletions: boolean) {
     this.updateInput({
-      showApplySelections: !autoApplySeletions
+      showApplySelections: !autoApplySeletions,
     });
   }
 
@@ -380,8 +380,8 @@ export class ControlGroupContainer extends Container<
     this.updateInput({
       ignoreParentSettings: {
         ...(this.getInput().ignoreParentSettings ?? {}),
-        ignoreTimerange: !applyGlobalTime
-      }
+        ignoreTimerange: !applyGlobalTime,
+      },
     });
   }
 
