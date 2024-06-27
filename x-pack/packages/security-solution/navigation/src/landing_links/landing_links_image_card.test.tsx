@@ -51,7 +51,9 @@ describe('LandingLinksImageCard', () => {
       />
     );
 
-    expect(getByTestId('LandingImageCard-image')).toHaveAttribute('src', landingImage);
+    expect(getByTestId('LandingImageCard-image')).toHaveStyle({
+      backgroundImage: `url(${landingImage})`,
+    });
   });
 
   it('should render beta tag when isBeta is true', () => {

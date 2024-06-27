@@ -79,6 +79,7 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
             <EuiFlexItem grow={false}>
               {landingImage && (
                 <EuiPanel
+                  data-test-subj="LandingImageCard-image"
                   paddingSize="none"
                   hasShadow={false}
                   hasBorder
