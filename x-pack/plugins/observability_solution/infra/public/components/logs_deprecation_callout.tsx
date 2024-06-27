@@ -43,14 +43,9 @@ export const LogsDeprecationCallout = () => {
       className={calloutStyle}
     >
       <p>
-        {i18n.translate('xpack.infra.logsDeprecationCallout.p.wereExcitedToIntroduceLabel', {
-          defaultMessage: `The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation.`,
-        })}
-      </p>
-      <p>
-        {i18n.translate('xpack.infra.logsDeprecationCallout.p.weRecommendUsingTheLabel', {
+        {i18n.translate('xpack.infra.logsDeprecationCallout.p.theNewLogsExplorerLabel', {
           defaultMessage:
-            "We recommend switching to Logs Explorer. As we focus on and continue to improve Logs Explorer, we'll no longer support Logs Stream.",
+            'The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation. We recommend switching to Logs Explorer, as it will replace Logs Stream in a future version.',
         })}
       </p>
       <EuiButton
