@@ -109,6 +109,11 @@ export const streamGraph = async ({
             }
           }
         }
+      } else if (event.event === 'on_llm_end') {
+        const generations = event.data.output?.generations[0];
+        if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
+          handleStreamEnd(finalMessage);
+        }
       }
 
       await processEvent();
@@ -129,7 +134,7 @@ export const streamGraph = async ({
   };
 
   // Start processing events, do not await! Return `responseWithHeaders` immediately
-  await processEvent();
+  processEvent();
 
   return responseWithHeaders;
 };
