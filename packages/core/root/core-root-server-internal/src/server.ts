@@ -256,19 +256,7 @@ export class Server {
     const environmentSetup = this.environment.setup();
 
     // Configuration could have changed after preboot.
-    try {
-      await ensureValidConfiguration(this.configService);
-    } catch (validationError) {
-      if (this.env.packageInfo.buildFlavor !== 'serverless') {
-        throw validationError;
-      }
-      // When running on serverless, we may allow unknown keys, but stripping them from the final config object.
-      this.configService.setGlobalStripUnknownKeys(true);
-      await ensureValidConfiguration(this.configService, void 0, true);
-      this.log.error(
-        `Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error: ${validationError}`
-      );
-    }
+    await this.ensureValidConfiguration();
 
     const { uiPlugins, pluginPaths, pluginTree } = this.discoveredPlugins!.standard;
     const contextServiceSetup = this.context.setup({
@@ -496,6 +484,27 @@ export class Server {
     this.deprecations.stop();
     this.security.stop();
     this.userProfile.stop();
+  }
+
+  private async ensureValidConfiguration() {
+    try {
+      await ensureValidConfiguration(this.configService);
+    } catch (validationError) {
+      if (this.env.packageInfo.buildFlavor !== 'serverless') {
+        throw validationError;
+      }
+      // When running on serverless, we may allow unknown keys, but stripping them from the final config object.
+      this.configService.setGlobalStripUnknownKeys(true);
+      await ensureValidConfiguration(this.configService, {
+        logDeprecations: true,
+        stripUnknownKeys: true,
+      });
+      this.log
+        .get('config-validation')
+        .error(
+          `Strict config validation failed! Extra unknown keys removed in Serverless-compatible mode. Original error: ${validationError}`
+        );
+    }
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
