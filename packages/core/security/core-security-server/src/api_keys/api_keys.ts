@@ -186,7 +186,6 @@ export const restApiKeySchema = schema.object({
   metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-/** */
 export const getRestApiKeyWithKibanaPrivilegesSchema = (
   getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
 ) =>
