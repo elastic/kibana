@@ -7,6 +7,8 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 
+import { apiKeysMock } from '@kbn/core-security-server-mocks';
+
 import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
@@ -21,16 +23,7 @@ function createSetupMock() {
     audit: auditServiceMock.create(),
     authc: {
       getCurrentUser: jest.fn(),
-      apiKeys: {
-        areAPIKeysEnabled: jest.fn(),
-        areCrossClusterAPIKeysEnabled: jest.fn(),
-        validate: jest.fn(),
-        invalidate: jest.fn(),
-        invalidateAsInternalUser: jest.fn(),
-        grantAsInternalUser: jest.fn(),
-        create: jest.fn(),
-        update: jest.fn(),
-      },
+      apiKeys: apiKeysMock.create(),
     },
     authz: {
       actions: mockAuthz.actions,
