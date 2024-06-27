@@ -49,17 +49,17 @@ export const useCheckPipeline = ({
 
         const ecsGraphResult = await runCheckPipelineResults(parameters, deps);
         if (abortController.signal.aborted) return;
-        if (isEmpty(ecsGraphResult?.pipelineResults) || ecsGraphResult?.errors?.length) {
+        if (isEmpty(ecsGraphResult?.results.docs)) {
           setError('No results for the pipeline');
           return;
         }
         setResult({
           pipeline: customPipeline,
-          docs: ecsGraphResult.pipelineResults,
+          docs: ecsGraphResult.results.docs,
         });
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`Error: ${e.body.message}`);
+        setError(`Error: ${e.body.message ?? e.message}`);
       } finally {
         setIsGenerating(false);
       }
