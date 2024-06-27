@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('has embedded dev console', async () => {
-      testHasEmbeddedConsole(pageObjects);
+      await testHasEmbeddedConsole(pageObjects);
     });
   });
 }
