@@ -281,6 +281,41 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.createLogsContextService",
+        "type": "Function",
+        "tags": [],
+        "label": "createLogsContextService",
+        "description": [],
+        "signature": [
+          "(_deps?: ",
+          "LogsContextServiceDeps",
+          ") => { isLogsIndexPattern: (indexPattern: unknown) => boolean; }"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.createLogsContextService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "_deps",
+            "description": [],
+            "signature": [
+              "LogsContextServiceDeps"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.formatFieldValue",
         "type": "Function",
         "tags": [],
@@ -1803,6 +1838,52 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.LogsContextService",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogsContextService",
+        "description": [],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.LogsContextService.isLogsIndexPattern",
+            "type": "Function",
+            "tags": [],
+            "label": "isLogsIndexPattern",
+            "description": [],
+            "signature": [
+              "(indexPattern: unknown) => boolean"
+            ],
+            "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.LogsContextService.isLogsIndexPattern.$1",
+                "type": "Unknown",
+                "tags": [],
+                "label": "indexPattern",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.LogStackTraceFields",
         "type": "Interface",
         "tags": [],
@@ -1914,6 +1995,21 @@
           "\"context:tieBreakerFields\""
         ],
         "path": "packages/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DEFAULT_ALLOWED_LOGS_BASE_PATTERNS",
+        "type": "Array",
+        "tags": [],
+        "label": "DEFAULT_ALLOWED_LOGS_BASE_PATTERNS",
+        "description": [],
+        "signature": [
+          "string[]"
+        ],
+        "path": "packages/kbn-discover-utils/src/data_types/logs/logs_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -726,7 +726,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
@@ -737,6 +737,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+      namespaces: options.spaceId ? [options.spaceId] : undefined,
     });
 
     for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
@@ -752,6 +753,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
+        spaceId: packagePolicySO.namespaces?.[0],
       })),
       total: packagePolicies?.total,
       page,

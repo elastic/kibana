@@ -11,7 +11,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { DEFAULT_LATEST_ALERTS } from '../assistant_context/constants';
 import { KnowledgeBaseSettings } from './knowledge_base_settings';
 import { TestProviders } from '../mock/test_providers/test_providers';
-import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
+import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { mockSystemPrompts } from '../mock/system_prompt';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
@@ -47,7 +47,7 @@ const defaultProps = {
   setUpdatedKnowledgeBaseSettings,
 };
 const mockDelete = jest.fn();
-jest.mock('./use_delete_knowledge_base', () => ({
+jest.mock('../assistant/api/knowledge_base/use_delete_knowledge_base', () => ({
   useDeleteKnowledgeBase: jest.fn(() => {
     return {
       mutate: mockDelete,
@@ -57,7 +57,7 @@ jest.mock('./use_delete_knowledge_base', () => ({
 }));
 
 const mockSetup = jest.fn();
-jest.mock('./use_setup_knowledge_base', () => ({
+jest.mock('../assistant/api/knowledge_base/use_setup_knowledge_base', () => ({
   useSetupKnowledgeBase: jest.fn(() => {
     return {
       mutate: mockSetup,
@@ -66,7 +66,7 @@ jest.mock('./use_setup_knowledge_base', () => ({
   }),
 }));
 
-jest.mock('./use_knowledge_base_status', () => ({
+jest.mock('../assistant/api/knowledge_base/use_knowledge_base_status', () => ({
   useKnowledgeBaseStatus: jest.fn(() => {
     return {
       data: {

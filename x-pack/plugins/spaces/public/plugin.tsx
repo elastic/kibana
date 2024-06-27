@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -23,11 +25,14 @@ import { getUiApi } from './ui_api';
 export interface PluginsSetup {
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
+  cloud?: CloudStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
 }
 
 /**

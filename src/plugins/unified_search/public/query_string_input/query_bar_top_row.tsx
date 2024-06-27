@@ -566,7 +566,7 @@ export const QueryBarTopRow = React.memo(
         : strings.getRefreshQueryLabel();
       const buttonLabelRun = textBasedRunShortcut;
 
-      const iconDirty = Boolean(isQueryLangSelected) ? 'play' : 'kqlFunction';
+      const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
       const tooltipDirty = Boolean(isQueryLangSelected) ? buttonLabelRun : buttonLabelUpdate;
 
       const isDirtyButtonLabel = Boolean(isQueryLangSelected)
@@ -588,7 +588,7 @@ export const QueryBarTopRow = React.memo(
               onClick={onClickSubmitButton}
               size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
               color={props.isDirty ? 'success' : 'primary'}
-              fill={props.isDirty}
+              fill={false}
               needsUpdate={props.isDirty}
               data-test-subj="querySubmitButton"
               toolTipProps={{

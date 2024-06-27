@@ -84,7 +84,7 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 jest.mock('../../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
-jest.mock(`@kbn/analytics-client`);
+jest.mock(`@kbn/ebt/client`);
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {

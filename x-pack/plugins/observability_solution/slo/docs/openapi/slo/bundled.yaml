@@ -20,7 +20,7 @@ tags:
 paths:
   /s/{spaceId}/api/observability/slos:
     post:
-      summary: Creates an SLO.
+      summary: Create an SLO
       operationId: createSloOp
       description: |
         You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -69,7 +69,7 @@ paths:
       servers:
         - url: https://localhost:5601
     get:
-      summary: Retrieves a paginated list of SLOs
+      summary: Get a paginated list of SLOs
       operationId: findSlosOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -159,7 +159,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}:
     get:
-      summary: Retrieves a SLO
+      summary: Get an SLO
       operationId: getSloOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -207,7 +207,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     put:
-      summary: Updates an SLO
+      summary: Update an SLO
       operationId: updateSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -255,7 +255,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/404_response'
     delete:
-      summary: Deletes an SLO
+      summary: Delete an SLO
       operationId: deleteSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -294,7 +294,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
-      summary: Enables an SLO
+      summary: Enable an SLO
       operationId: enableSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -333,7 +333,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
-      summary: Disables an SLO
+      summary: Disable an SLO
       operationId: disableSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -372,7 +372,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/api/observability/slos/{sloId}/_reset:
     post:
-      summary: Resets an SLO.
+      summary: Reset an SLO
       operationId: resetSloOp
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -415,7 +415,7 @@ paths:
                 $ref: '#/components/schemas/404_response'
   /s/{spaceId}/internal/observability/slos/_historical_summary:
     post:
-      summary: Retrieves the historical summary for a list of SLOs
+      summary: Get a historical summary for SLOs
       operationId: historicalSummaryOp
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -519,10 +519,10 @@ paths:
                 $ref: '#/components/schemas/403_response'
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
-      summary: Batch delete rollup and summary data for the matching list of sloId and instanceId
+      summary: Batch delete rollup and summary data
       operationId: deleteSloInstancesOp
       description: |
-        You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+        The deletion occurs for the specified list of `sloId` and `instanceId`. You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
       tags:
         - slo
       parameters:
@@ -667,6 +667,8 @@ components:
           type: object
         value:
           type: string
+        field:
+          type: string
     filter:
       title: Filter
       description: Defines properties for a filter
@@ -679,6 +681,36 @@ components:
     kql_with_filters:
       title: KQL with filters
       description: Defines properties for a filter
+      oneOf:
+        - description: the KQL query to filter the documents with.
+          type: string
+          example: 'field.environment : "production" and service.name : "my-service"'
+        - type: object
+          properties:
+            kqlQuery:
+              type: string
+            filters:
+              type: array
+              items:
+                $ref: '#/components/schemas/filter'
+    kql_with_filters_good:
+      title: KQL query for good events
+      description: The KQL query used to define the good events.
+      oneOf:
+        - description: the KQL query to filter the documents with.
+          type: string
+          example: 'request.latency <= 150 and request.status_code : "2xx"'
+        - type: object
+          properties:
+            kqlQuery:
+              type: string
+            filters:
+              type: array
+              items:
+                $ref: '#/components/schemas/filter'
+    kql_with_filters_total:
+      title: KQL query for all events
+      description: The KQL query used to define all events.
       oneOf:
         - description: the KQL query to filter the documents with.
           type: string
@@ -713,17 +745,16 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
-              description: the KQL query to filter the documents with.
               $ref: '#/components/schemas/kql_with_filters'
             good:
-              description: the KQL query used to define the good events.
-              $ref: '#/components/schemas/kql_with_filters'
-              example: 'request.latency <= 150 and request.status_code : "2xx"'
+              $ref: '#/components/schemas/kql_with_filters_good'
             total:
-              description: the KQL query used to define all events.
-              $ref: '#/components/schemas/kql_with_filters'
-              example: ''
+              $ref: '#/components/schemas/kql_with_filters_total'
             timestampField:
               description: |
                 The timestamp field used in the source indice.
@@ -807,6 +838,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
@@ -924,6 +959,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
@@ -1107,6 +1146,10 @@ components:
               description: The index or index pattern to use
               type: string
               example: my-service-*
+            dataViewId:
+              description: The kibana data view id to use, primarily used to include data view runtime mappings. Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+              type: string
+              example: 03b80ab3-003d-498b-881c-3beedbaf1162
             filter:
               description: the KQL query to filter the documents with.
               type: string
