@@ -19,21 +19,15 @@ import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 
 import type { CasePostRequest } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
-import { Title } from '../case_form_fields/title';
-import { Description } from '../case_form_fields/description';
-import { Tags } from '../case_form_fields/tags';
 import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
 import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../containers/types';
 import { removeEmptyFields } from '../utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { Severity } from '../case_form_fields/severity';
-import { Assignees } from '../case_form_fields/assignees';
-import { Category } from '../case_form_fields/category';
 import { TemplateSelector } from './templates';
-import { CustomFields } from '../case_form_fields/custom_fields';
 import { getInitialCaseValue } from './utils';
+import { CaseFormFields } from '../case_form_fields';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -54,7 +48,7 @@ const transformTemplateCaseFieldsToCaseFormFields = (
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ configuration, connectors, isLoading, withSteps, draftStorageKey }) => {
     const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
-    const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
+    const { isSyncAlertsEnabled } = useCasesFeatures();
     const configurationOwner = configuration.owner;
 
     /**
@@ -101,27 +95,15 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       () => ({
         title: i18n.STEP_TWO_TITLE,
         children: (
-          <>
-            <Title isLoading={isSubmitting} autoFocus={true} />
-            {caseAssignmentAuthorized ? <Assignees isLoading={isSubmitting} /> : null}
-            <Tags isLoading={isSubmitting} />
-            <Category isLoading={isSubmitting} />
-            <Severity isLoading={isSubmitting} />
-            <Description isLoading={isSubmitting} draftStorageKey={draftStorageKey} />
-            <CustomFields
-              isLoading={isSubmitting || isLoading}
-              configurationCustomFields={configuration.customFields}
-            />
-          </>
+          <CaseFormFields
+            configurationCustomFields={configuration.customFields}
+            isLoading={isSubmitting}
+            setCustomFieldsOptional={true}
+            isEditMode={false}
+          />
         ),
       }),
-      [
-        isSubmitting,
-        caseAssignmentAuthorized,
-        isLoading,
-        draftStorageKey,
-        configuration.customFields,
-      ]
+      [configuration.customFields, isSubmitting]
     );
 
     const thirdStep = useMemo(
