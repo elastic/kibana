@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
-import { MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
 import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
 
 import * as i18n from './translations';
@@ -42,7 +42,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
 
   const isStartDateOutOfRange = now
     .clone()
-    .subtract(MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS, 'd')
+    .subtract(MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS, 'd')
     .isAfter(startDate);
   const isEndDateInFuture = endDate.isAfter(now);
   const isInvalidTimeRange = startDate.isSameOrAfter(endDate);
@@ -50,7 +50,7 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
   const errorMessage = useMemo(() => {
     if (isStartDateOutOfRange) {
       return i18n.MANUAL_RULE_RUN_START_DATE_OUT_OF_RANGE_ERROR(
-        MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS
+        MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS
       );
     }
     if (isEndDateInFuture) {

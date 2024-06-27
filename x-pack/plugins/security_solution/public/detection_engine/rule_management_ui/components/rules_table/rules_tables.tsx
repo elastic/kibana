@@ -37,8 +37,7 @@ import type { FindRulesSortField } from '../../../../../common/api/detection_eng
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
-import { BulkScheduleLimitErrorModal } from './bulk_actions/bulk_schedule_limit_error_modal';
-import { useBulkScheduleBackfillActionDryRun } from './bulk_actions/use_bulk_schedule_backfill_action_dry_run';
+import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -120,9 +119,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   } = useManualRuleRunConfirmation();
 
   const [
-    isScheduleBackfillLimitErrorVisible,
-    showScheduleBackfillLimitError,
-    hideScheduleBackfillLimitError,
+    isManualRuleRunLimitErrorVisible,
+    showManualRuleRunLimitError,
+    hideManualRuleRunLimitError,
   ] = useBoolState();
 
   const {
@@ -134,10 +133,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   } = useBulkEditFormFlyout();
 
   const { isBulkActionsDryRunLoading, executeBulkActionsDryRun } = useBulkActionsDryRun();
-  const {
-    isBulkScheduleBackfillActionsDryRunLoading,
-    executeBulkBulkScheduleBackfillActionsDryRun,
-  } = useBulkScheduleBackfillActionDryRun();
 
   const getBulkItemsPopoverContent = useBulkActions({
     filterOptions,
@@ -145,10 +140,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     showBulkActionConfirmation,
     showBulkDuplicateConfirmation,
     showManualRuleRunConfirmation,
-    showScheduleBackfillLimitError,
+    showManualRuleRunLimitError,
     completeBulkEditForm,
     executeBulkActionsDryRun,
-    executeBulkBulkScheduleBackfillActionsDryRun,
   });
 
   const paginationMemo = useMemo(() => {
@@ -291,8 +285,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       {isManualRuleRunConfirmationVisible && (
         <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
       )}
-      {isScheduleBackfillLimitErrorVisible && (
-        <BulkScheduleLimitErrorModal onClose={hideScheduleBackfillLimitError} />
+      {isManualRuleRunLimitErrorVisible && (
+        <BulkManualRuleRunLimitErrorModal onClose={hideManualRuleRunLimitError} />
       )}
       {isBulkActionConfirmationVisible && bulkAction && (
         <BulkActionDryRunConfirmation
@@ -324,11 +318,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
             canBulkEdit={hasPermissions}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
             onToggleSelectAll={toggleSelectAll}
-            isBulkActionInProgress={
-              isBulkActionsDryRunLoading ||
-              isBulkScheduleBackfillActionsDryRunLoading ||
-              loadingRulesAction != null
-            }
+            isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}
           />
           <EuiBasicTable
             itemId="id"

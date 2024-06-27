@@ -38,7 +38,7 @@ import {
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import type { BulkActionError } from './bulk_actions_response';
-import { buildBulkResponse, buildBulkScheduleBackfillResponse } from './bulk_actions_response';
+import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
 import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
@@ -150,6 +150,7 @@ export const performBulkActionRoute = (
             });
 
             return buildBulkResponse(response, {
+              bulkAction: BulkActionTypeEnum.edit,
               updated: rules,
               skipped,
               errors,
@@ -324,21 +325,17 @@ export const performBulkActionRoute = (
               break;
             }
 
-            case BulkActionTypeEnum.backfill: {
+            case BulkActionTypeEnum.run: {
               const { backfilled, errors: bulkActionErrors } = await bulkScheduleBackfill({
                 rules,
                 isDryRun,
                 rulesClient,
                 mlAuthz,
-                backfillPayload: body.backfill,
+                runPayload: body.run,
                 experimentalFeatures: config.experimentalFeatures,
               });
               errors.push(...bulkActionErrors);
-              return buildBulkScheduleBackfillResponse(response, {
-                errors,
-                isDryRun,
-                backfilled,
-              });
+              updated = backfilled.filter((rule): rule is RuleAlertType => rule !== null);
             }
           }
 
@@ -347,6 +344,7 @@ export const performBulkActionRoute = (
           }
 
           return buildBulkResponse(response, {
+            bulkAction: body.action,
             updated,
             deleted,
             created,

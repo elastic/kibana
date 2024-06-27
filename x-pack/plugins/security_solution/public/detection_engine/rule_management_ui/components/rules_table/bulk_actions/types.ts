@@ -12,12 +12,12 @@ import type { BulkActionTypeEnum } from '../../../../../../common/api/detection_
  * Only 3 bulk actions are supported for for confirmation dry run modal:
  * * export
  * * edit
- * * schedule backfill
+ * * manual rule run
  */
 export type BulkActionForConfirmation =
   | BulkActionTypeEnum['export']
-  | BulkActionTypeEnum['backfill']
-  | BulkActionTypeEnum['edit'];
+  | BulkActionTypeEnum['edit']
+  | BulkActionTypeEnum['run'];
 
 /**
  * transformed results of dry run

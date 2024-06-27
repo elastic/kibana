@@ -34,8 +34,8 @@ export function summarizeBulkSuccess(action: BulkActionType): string {
     case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_SUCCESS;
 
-    case BulkActionTypeEnum.backfill:
-      return i18n.RULES_BULK_SCHEDULE_BACKFILL_SUCCESS;
+    case BulkActionTypeEnum.run:
+      return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS;
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_SUCCESS;
@@ -62,8 +62,8 @@ export function explainBulkSuccess(
     case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_SUCCESS_DESCRIPTION(summary.succeeded);
 
-    case BulkActionTypeEnum.backfill:
-      return i18n.RULES_BULK_SCHEDULE_BACKFILL_SUCCESS_DESCRIPTION(summary.succeeded);
+    case BulkActionTypeEnum.run:
+      return i18n.RULES_BULK_MANUAL_RULE_RUN_SUCCESS_DESCRIPTION(summary.succeeded);
   }
 }
 
@@ -107,8 +107,8 @@ export function summarizeBulkError(action: BulkActionType): string {
     case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_FAILURE;
 
-    case BulkActionTypeEnum.backfill:
-      return i18n.RULES_BULK_SCHEDULE_BACKFILL_FAILURE;
+    case BulkActionTypeEnum.run:
+      return i18n.RULES_BULK_MANUAL_RULE_RUN_FAILURE;
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE;
@@ -139,8 +139,8 @@ export function explainBulkError(action: BulkActionType, error: HTTPError): stri
     case BulkActionTypeEnum.disable:
       return i18n.RULES_BULK_DISABLE_FAILURE_DESCRIPTION(summary.failed);
 
-    case BulkActionTypeEnum.backfill:
-      return i18n.RULES_BULK_SCHEDULE_BACKFILL_FAILURE_DESCRIPTION(summary.failed);
+    case BulkActionTypeEnum.run:
+      return i18n.RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION(summary.failed);
 
     case BulkActionTypeEnum.edit:
       return i18n.RULES_BULK_EDIT_FAILURE_DESCRIPTION(summary.failed, summary.skipped);

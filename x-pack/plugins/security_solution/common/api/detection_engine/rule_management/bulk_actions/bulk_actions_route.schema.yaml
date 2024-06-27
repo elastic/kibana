@@ -29,7 +29,7 @@ paths:
                 - $ref: '#/components/schemas/BulkEnableRules'
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
-                - $ref: '#/components/schemas/BulkScheduleBackfill'
+                - $ref: '#/components/schemas/BulkManualRuleRun'
                 - $ref: '#/components/schemas/BulkEditRules'
       responses:
         200:
@@ -40,7 +40,6 @@ paths:
                 oneOf:
                   - $ref: '#/components/schemas/BulkEditActionResponse'
                   - $ref: '#/components/schemas/BulkExportActionResponse'
-                  - $ref: '#/components/schemas/BulkScheduleBackfillActionResponse'
 
 components:
   schemas:
@@ -81,10 +80,7 @@ components:
         - ESQL_INDEX_PATTERN
         - INVESTIGATION_FIELDS_FEATURE
         - MANUAL_RULE_RUN_FEATURE
-        - BACKFILL_DISABLED_RULE
-        - BACKFILL_IN_THE_FUTURE
-        - BACKFILL_START_FAR_IN_THE_PAST
-        - BACKFILL_START_GREATER_THAN_END
+        - MANUAL_RULE_RUN_DISABLED_RULE
 
     NormalizedRuleError:
       type: object
@@ -177,31 +173,6 @@ components:
     BulkExportActionResponse:
       type: string
 
-    BulkScheduleBackfillActionResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-        status_code:
-          type: integer
-        message:
-          type: string
-        rules_count:
-          type: integer
-        attributes:
-          type: object
-          properties:
-            summary:
-              $ref: '#/components/schemas/BulkEditActionSummary'
-            errors:
-              type: array
-              items:
-                $ref: '#/components/schemas/NormalizedRuleError'
-          required:
-            - summary
-      required:
-        - attributes
-
     BulkActionBase:
       x-inline: true
       type: object
@@ -283,28 +254,28 @@ components:
           required:
             - action
 
-    BulkScheduleBackfill:
+    BulkManualRuleRun:
       allOf:
         - $ref: '#/components/schemas/BulkActionBase'
         - type: object
           properties:
             action:
               type: string
-              enum: [backfill]
-            backfill:
+              enum: [run]
+            run:
               type: object
               properties:
                 start_date:
                   type: string
-                  description: Start date of the backfill
+                  description: Start date of the manual rule run
                 end_date:
                   type: string
-                  description: End date of the backfill
+                  description: End date of the manual rule run
               required:
                 - start_date
           required:
             - action
-            - backfill
+            - run
 
     ThrottleForBulkActions:
       type: string
@@ -323,8 +294,8 @@ components:
         - export
         - delete
         - duplicate
-        - backfill
         - edit
+        - run
 
     BulkActionEditType:
       type: string

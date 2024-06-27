@@ -17,9 +17,10 @@ import type {
   RuleDetailsInError,
 } from '../../../../../../../common/api/detection_engine';
 import type {
+  BulkActionType,
   BulkEditActionResponse,
-  BulkScheduleBackfillActionResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
@@ -36,6 +37,7 @@ export type BulkActionError =
 export const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
+    bulkAction,
     isDryRun = false,
     errors = [],
     updated = [],
@@ -43,6 +45,7 @@ export const buildBulkResponse = (
     deleted = [],
     skipped = [],
   }: {
+    bulkAction: BulkActionType;
     isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
@@ -79,10 +82,17 @@ export const buildBulkResponse = (
       };
 
   if (numFailed > 0) {
+    let message = summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed';
+    if (bulkAction === BulkActionTypeEnum.run) {
+      message =
+        summary.succeeded > 0
+          ? 'Bulk manual rule run partially failed'
+          : 'Bulk manual rule run failed';
+    }
     return response.custom<BulkEditActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
-        message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+        message,
         status_code: 500,
         attributes: {
           errors: normalizeErrorResponse(errors),
@@ -98,55 +108,6 @@ export const buildBulkResponse = (
     success: true,
     rules_count: summary.total,
     attributes: { results, summary },
-  };
-
-  return response.ok({ body: responseBody });
-};
-
-export const buildBulkScheduleBackfillResponse = (
-  response: KibanaResponseFactory,
-  {
-    isDryRun = false,
-    errors = [],
-    backfilled = [],
-  }: {
-    isDryRun?: boolean;
-    errors?: BulkActionError[];
-    backfilled?: RuleAlertType[];
-  }
-): IKibanaResponse<BulkScheduleBackfillActionResponse> => {
-  const numSucceeded = backfilled.length;
-  const numFailed = errors.length;
-
-  const summary: BulkEditActionSummary = {
-    failed: numFailed,
-    succeeded: numSucceeded,
-    skipped: 0,
-    total: numSucceeded + numFailed,
-  };
-
-  if (numFailed > 0) {
-    return response.custom<BulkScheduleBackfillActionResponse>({
-      headers: { 'content-type': 'application/json' },
-      body: {
-        message:
-          summary.succeeded > 0
-            ? 'Bulk schedule backfill partially failed'
-            : 'Bulk schedule backfill failed',
-        status_code: 500,
-        attributes: {
-          errors: normalizeErrorResponse(errors),
-          summary,
-        },
-      },
-      statusCode: 500,
-    });
-  }
-
-  const responseBody: BulkScheduleBackfillActionResponse = {
-    success: true,
-    rules_count: summary.total,
-    attributes: { summary },
   };
 
   return response.ok({ body: responseBody });

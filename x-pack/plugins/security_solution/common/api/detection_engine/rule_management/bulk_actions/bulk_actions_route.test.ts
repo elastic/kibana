@@ -143,11 +143,11 @@ describe('Perform bulk action request schema', () => {
     });
   });
 
-  describe('bulk backfill', () => {
-    test('invalid request: missing backfill payload', () => {
+  describe('bulk manual rule run', () => {
+    test('invalid request: missing manual rule run payload', () => {
       const payload = {
         query: 'name: test',
-        action: BulkActionTypeEnum.backfill,
+        action: BulkActionTypeEnum.run,
       };
 
       const result = PerformBulkActionRequestBody.safeParse(payload);
@@ -161,8 +161,8 @@ describe('Perform bulk action request schema', () => {
     test('valid request', () => {
       const payload: PerformBulkActionRequestBody = {
         query: 'name: test',
-        action: BulkActionTypeEnum.backfill,
-        [BulkActionTypeEnum.backfill]: {
+        action: BulkActionTypeEnum.run,
+        [BulkActionTypeEnum.run]: {
           start_date: new Date().toISOString(),
           end_date: new Date().toISOString(),
         },

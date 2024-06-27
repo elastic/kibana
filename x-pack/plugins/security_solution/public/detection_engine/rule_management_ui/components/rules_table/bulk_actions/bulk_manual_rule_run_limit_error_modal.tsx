@@ -15,34 +15,36 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 
-import { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from '../../../../../../common/constants';
+import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 
-interface BulkActionScheduleRulesLimitErrorModalProps {
+interface BulkManualRuleRunRulesLimitErrorModalProps {
   onClose: () => void;
 }
 
-const BulkScheduleLimitErrorModalComponent = ({
+const BulkManualRuleRunLimitErrorModalComponent = ({
   onClose,
-}: BulkActionScheduleRulesLimitErrorModalProps) => {
+}: BulkManualRuleRunRulesLimitErrorModalProps) => {
   // if the amount of selected rules is more than the limit, modal window the appropriate error will be displayed
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{i18n.BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_TITLE}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {i18n.BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_MESSAGE(MAX_SCHEDULE_BACKFILL_BULK_SIZE)}
+        {i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE(MAX_MANUAL_RULE_RUN_BULK_SIZE)}
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton onClick={onClose} fill>
-          {i18n.BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_CLOSE_BUTTON}
+          {i18n.BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
   );
 };
 
-export const BulkScheduleLimitErrorModal = React.memo(BulkScheduleLimitErrorModalComponent);
+export const BulkManualRuleRunLimitErrorModal = React.memo(
+  BulkManualRuleRunLimitErrorModalComponent
+);
 
-BulkScheduleLimitErrorModal.displayName = 'BulkScheduleLimitErrorModal';
+BulkManualRuleRunLimitErrorModal.displayName = 'BulkManualRuleRunLimitErrorModal';

@@ -35,7 +35,6 @@ import {
   findRuleExceptionReferences,
   performBulkAction,
   fetchRulesSnoozeSettings,
-  performBulkScheduleBackfillAction,
 } from './api';
 
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -768,14 +767,14 @@ describe('Detections Rules API', () => {
       );
     });
 
-    test('passes backfill payload', async () => {
+    test('passes manual rule run payload', async () => {
       const startDate = new Date().toISOString();
       const endDate = new Date().toISOString();
-      await performBulkScheduleBackfillAction({
+      await performBulkAction({
         bulkAction: {
-          type: BulkActionTypeEnum.backfill,
+          type: BulkActionTypeEnum.run,
           ids: ['ruleId1'],
-          backfillPayload: { start_date: startDate, end_date: endDate },
+          runPayload: { start_date: startDate, end_date: endDate },
         },
       });
 
@@ -784,9 +783,9 @@ describe('Detections Rules API', () => {
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
-            action: 'backfill',
+            action: 'run',
             ids: ['ruleId1'],
-            backfill: { start_date: startDate, end_date: endDate },
+            run: { start_date: startDate, end_date: endDate },
           }),
           query: {
             dry_run: false,

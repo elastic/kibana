@@ -139,6 +139,7 @@ export type LoadingRuleAction =
   | 'backfill'
   | 'load'
   | 'edit'
+  | 'run'
   | null;
 
 export interface LoadingRules {

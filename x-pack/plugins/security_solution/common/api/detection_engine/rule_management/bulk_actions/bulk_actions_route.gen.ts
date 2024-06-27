@@ -55,10 +55,7 @@ export const BulkActionsDryRunErrCode = z.enum([
   'ESQL_INDEX_PATTERN',
   'INVESTIGATION_FIELDS_FEATURE',
   'MANUAL_RULE_RUN_FEATURE',
-  'BACKFILL_DISABLED_RULE',
-  'BACKFILL_IN_THE_FUTURE',
-  'BACKFILL_START_FAR_IN_THE_PAST',
-  'BACKFILL_START_GREATER_THAN_END',
+  'MANUAL_RULE_RUN_DISABLED_RULE',
 ]);
 export type BulkActionsDryRunErrCodeEnum = typeof BulkActionsDryRunErrCode.enum;
 export const BulkActionsDryRunErrCodeEnum = BulkActionsDryRunErrCode.enum;
@@ -102,18 +99,6 @@ export const BulkEditActionResponse = z.object({
 
 export type BulkExportActionResponse = z.infer<typeof BulkExportActionResponse>;
 export const BulkExportActionResponse = z.string();
-
-export type BulkScheduleBackfillActionResponse = z.infer<typeof BulkScheduleBackfillActionResponse>;
-export const BulkScheduleBackfillActionResponse = z.object({
-  success: z.boolean().optional(),
-  status_code: z.number().int().optional(),
-  message: z.string().optional(),
-  rules_count: z.number().int().optional(),
-  attributes: z.object({
-    summary: BulkEditActionSummary,
-    errors: z.array(NormalizedRuleError).optional(),
-  }),
-});
 
 export type BulkActionBase = z.infer<typeof BulkActionBase>;
 export const BulkActionBase = z.object({
@@ -174,17 +159,17 @@ export const BulkDuplicateRules = BulkActionBase.merge(
   })
 );
 
-export type BulkScheduleBackfill = z.infer<typeof BulkScheduleBackfill>;
-export const BulkScheduleBackfill = BulkActionBase.merge(
+export type BulkManualRuleRun = z.infer<typeof BulkManualRuleRun>;
+export const BulkManualRuleRun = BulkActionBase.merge(
   z.object({
-    action: z.literal('backfill'),
-    backfill: z.object({
+    action: z.literal('run'),
+    run: z.object({
       /**
-       * Start date of the backfill
+       * Start date of the manual rule run
        */
       start_date: z.string(),
       /**
-       * End date of the backfill
+       * End date of the manual rule run
        */
       end_date: z.string().optional(),
     }),
@@ -206,8 +191,8 @@ export const BulkActionType = z.enum([
   'export',
   'delete',
   'duplicate',
-  'backfill',
   'edit',
+  'run',
 ]);
 export type BulkActionTypeEnum = typeof BulkActionType.enum;
 export const BulkActionTypeEnum = BulkActionType.enum;
@@ -337,7 +322,7 @@ export const PerformBulkActionRequestBody = z.union([
   BulkEnableRules,
   BulkExportRules,
   BulkDuplicateRules,
-  BulkScheduleBackfill,
+  BulkManualRuleRun,
   BulkEditRules,
 ]);
 export type PerformBulkActionRequestBodyInput = z.input<typeof PerformBulkActionRequestBody>;
@@ -346,5 +331,4 @@ export type PerformBulkActionResponse = z.infer<typeof PerformBulkActionResponse
 export const PerformBulkActionResponse = z.union([
   BulkEditActionResponse,
   BulkExportActionResponse,
-  BulkScheduleBackfillActionResponse,
 ]);

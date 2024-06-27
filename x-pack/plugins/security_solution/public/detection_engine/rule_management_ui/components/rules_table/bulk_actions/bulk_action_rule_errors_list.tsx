@@ -9,10 +9,7 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  BulkActionsDryRunErrCode,
-  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS,
-} from '../../../../../../common/constants';
+import { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
 import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { DryRunResult, BulkActionForConfirmation } from './types';
@@ -111,7 +108,7 @@ const BulkExportRuleErrorItem = ({
   }
 };
 
-const BulkScheduleBackfillErrorItem = ({
+const BulkManualRuleRunErrorItem = ({
   errorCode,
   message,
   rulesCount,
@@ -127,42 +124,12 @@ const BulkScheduleBackfillErrorItem = ({
           />
         </li>
       );
-    case BulkActionsDryRunErrCode.BACKFILL_DISABLED_RULE:
+    case BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE:
       return (
         <li key={message}>
           <FormattedMessage
             id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleDisabledRuleDescription"
-            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Cannot schedule backfill for disabled rules)"
-            values={{ rulesCount }}
-          />
-        </li>
-      );
-    case BulkActionsDryRunErrCode.BACKFILL_IN_THE_FUTURE:
-      return (
-        <li key={message}>
-          <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleInFutureRuleDescription"
-            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Backfill cannot be scheduled for the future)"
-            values={{ rulesCount }}
-          />
-        </li>
-      );
-    case BulkActionsDryRunErrCode.BACKFILL_START_FAR_IN_THE_PAST:
-      return (
-        <li key={message}>
-          <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleFarInPastRuleDescription"
-            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Backfill cannot look back more than {daysCount, plural, =1 {# day} other {# days}})"
-            values={{ rulesCount, daysCount: MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS }}
-          />
-        </li>
-      );
-    case BulkActionsDryRunErrCode.BACKFILL_START_GREATER_THAN_END:
-      return (
-        <li key={message}>
-          <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleInvalidTimeRangeRuleDescription"
-            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Backfill end must be greater than backfill start)"
+            defaultMessage="{rulesCount, plural, =1 {# rule} other {# rules}} (Cannot schedule manual rule run for a disabled rules)"
             values={{ rulesCount }}
           />
         </li>
@@ -222,9 +189,9 @@ const BulkActionRuleErrorsListComponent = ({
                 />
               );
 
-            case BulkActionTypeEnum.backfill:
+            case BulkActionTypeEnum.run:
               return (
-                <BulkScheduleBackfillErrorItem
+                <BulkManualRuleRunErrorItem
                   message={message}
                   errorCode={errorCode}
                   rulesCount={rulesCount}

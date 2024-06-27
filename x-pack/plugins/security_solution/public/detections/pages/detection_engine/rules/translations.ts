@@ -103,8 +103,8 @@ export const BULK_ACTION_EXPORT = i18n.translate(
   }
 );
 
-export const BULK_ACTION_SCHEDULE_BACKFILL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.scheduleBackfillTitle',
+export const BULK_ACTION_MANUAL_RULE_RUN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRunTitle',
   {
     defaultMessage: 'Manual run',
   }
@@ -247,9 +247,9 @@ export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
     }
   );
 
-export const BULK_SCHEDULE_BACKFILL_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleBackfillConfirmationDeniedTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunConfirmationDeniedTitle',
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
@@ -308,9 +308,9 @@ export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
     }
   );
 
-export const BULK_SCHEDULE_BACKFILL_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkScheduleBackfillConfirmation.confirmButtonLabel',
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkManualRuleRunConfirmation.confirmButtonLabel',
     {
       values: { customRulesCount },
       defaultMessage:
@@ -318,25 +318,25 @@ export const BULK_SCHEDULE_BACKFILL_CONFIRMATION_CONFIRM = (customRulesCount: nu
     }
   );
 
-export const BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleBackfillLimitErrorMessage',
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage',
   {
     defaultMessage: 'This action can only be applied',
   }
 );
 
-export const BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleBackfillLimitErrorTitle',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorTitle',
     {
       values: { rulesCount },
       defaultMessage:
-        'Backfill cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}',
+        'Manual rule run cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}',
     }
   );
 
-export const BULK_SCHEDULE_BACKFILL_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkScheduleLimitErrorCloseButton',
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton',
   {
     defaultMessage: 'Close',
   }
@@ -1252,40 +1252,40 @@ export const RULES_BULK_DISABLE_FAILURE_DESCRIPTION = (rulesCount: number) =>
   );
 
 /**
- * Bulk Schedule
+ * Bulk Manual Rule Run
  */
 
-export const RULES_BULK_SCHEDULE_BACKFILL_SUCCESS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.successToastTitle',
+export const RULES_BULK_MANUAL_RULE_RUN_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.successToastTitle',
   {
     defaultMessage: 'Rules scheduled',
   }
 );
 
-export const RULES_BULK_SCHEDULE_BACKFILL_FAILURE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.errorToastTitle',
+export const RULES_BULK_MANUAL_RULE_RUN_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.errorToastTitle',
   {
-    defaultMessage: 'Error scheduling backfill',
+    defaultMessage: 'Error scheduling manual rule run',
   }
 );
 
-export const RULES_BULK_SCHEDULE_BACKFILL_SUCCESS_DESCRIPTION = (totalRules: number) =>
+export const RULES_BULK_MANUAL_RULE_RUN_SUCCESS_DESCRIPTION = (totalRules: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.successToastDescription',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.successToastDescription',
     {
       values: { totalRules },
       defaultMessage:
-        'Successfully scheduled backfill for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+        'Successfully scheduled manual rule run for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
     }
   );
 
-export const RULES_BULK_SCHEDULE_BACKFILL_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
   i18n.translate(
-    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.backfill.errorToastDescription',
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.errorToastDescription',
     {
       values: { failedRulesCount },
       defaultMessage:
-        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to schedule backfill.',
+        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to schedule manual rule run.',
     }
   );
 

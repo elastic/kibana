@@ -10,7 +10,6 @@ import {
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import moment from 'moment';
-import { MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS } from '@kbn/security-solution-plugin/common/constants';
 import {
   getCustomQueryRuleParams,
   getSimpleMlRule,
@@ -297,7 +296,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    describe('schedule backfill action', () => {
+    describe('schedule manual rule run action', () => {
       it('should return all existing and enabled rules as succeeded', async () => {
         const intervalInMinutes = 25;
         const interval = `${intervalInMinutes}m`;
@@ -328,8 +327,8 @@ export default ({ getService }: FtrProviderContext): void => {
             query: { dry_run: true },
             body: {
               ids: [createdRule1.id, createdRule2.id],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: {
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
               },
@@ -344,322 +343,6 @@ export default ({ getService }: FtrProviderContext): void => {
           total: 2,
         });
         expect(body.attributes.errors).toBeUndefined();
-      });
-
-      it('should return 500 error when start date > end date', async () => {
-        const intervalInMinutes = 25;
-        const interval = `${intervalInMinutes}m`;
-        const createdRule1 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            enabled: true,
-            interval,
-          })
-        );
-        const createdRule2 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-2',
-            enabled: true,
-            interval,
-          })
-        );
-
-        const endDate = moment();
-        const startDate = endDate.clone().subtract(1, 'h');
-
-        const { body } = await securitySolutionApi
-          .performBulkAction({
-            query: { dry_run: true },
-            body: {
-              ids: [createdRule1.id, createdRule2.id],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: {
-                start_date: endDate.toISOString(),
-                end_date: startDate.toISOString(),
-              },
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({
-          failed: 2,
-          skipped: 0,
-          succeeded: 0,
-          total: 2,
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          err_code: 'BACKFILL_START_GREATER_THAN_END',
-          message: 'Backfill end must be greater than backfill start',
-          status_code: 500,
-          rules: expect.arrayContaining([
-            {
-              id: createdRule1.id,
-              name: createdRule1.name,
-            },
-            {
-              id: createdRule2.id,
-              name: createdRule2.name,
-            },
-          ]),
-        });
-      });
-
-      it('should return 500 error when start date = end date', async () => {
-        const intervalInMinutes = 25;
-        const interval = `${intervalInMinutes}m`;
-        const createdRule1 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            enabled: true,
-            interval,
-          })
-        );
-        const createdRule2 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-2',
-            enabled: true,
-            interval,
-          })
-        );
-
-        const endDate = moment().subtract(1, 'h');
-        const startDate = endDate.clone();
-
-        const { body } = await securitySolutionApi
-          .performBulkAction({
-            query: { dry_run: true },
-            body: {
-              ids: [createdRule1.id, createdRule2.id],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: {
-                start_date: startDate.toISOString(),
-                end_date: endDate.toISOString(),
-              },
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({
-          failed: 2,
-          skipped: 0,
-          succeeded: 0,
-          total: 2,
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          err_code: 'BACKFILL_START_GREATER_THAN_END',
-          message: 'Backfill end must be greater than backfill start',
-          status_code: 500,
-          rules: expect.arrayContaining([
-            {
-              id: createdRule1.id,
-              name: createdRule1.name,
-            },
-            {
-              id: createdRule2.id,
-              name: createdRule2.name,
-            },
-          ]),
-        });
-      });
-
-      it('should return 500 error when start date is in the future', async () => {
-        const intervalInMinutes = 25;
-        const interval = `${intervalInMinutes}m`;
-        const createdRule1 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            enabled: true,
-            interval,
-          })
-        );
-        const createdRule2 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-2',
-            enabled: true,
-            interval,
-          })
-        );
-
-        const startDate = moment().add(1, 'd');
-
-        const { body } = await securitySolutionApi
-          .performBulkAction({
-            query: { dry_run: true },
-            body: {
-              ids: [createdRule1.id, createdRule2.id],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: { start_date: startDate.toISOString() },
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({
-          failed: 2,
-          skipped: 0,
-          succeeded: 0,
-          total: 2,
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          err_code: 'BACKFILL_IN_THE_FUTURE',
-          message: 'Backfill cannot be scheduled for the future',
-          status_code: 500,
-          rules: expect.arrayContaining([
-            {
-              id: createdRule1.id,
-              name: createdRule1.name,
-            },
-            {
-              id: createdRule2.id,
-              name: createdRule2.name,
-            },
-          ]),
-        });
-      });
-
-      it('should return 500 error when end date is in the future', async () => {
-        const intervalInMinutes = 25;
-        const interval = `${intervalInMinutes}m`;
-        const createdRule1 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            enabled: true,
-            interval,
-          })
-        );
-        const createdRule2 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-2',
-            enabled: true,
-            interval,
-          })
-        );
-
-        const endDate = moment().add(1, 'd');
-        const startDate = moment().subtract(1, 'd');
-
-        const { body } = await securitySolutionApi
-          .performBulkAction({
-            query: { dry_run: true },
-            body: {
-              ids: [createdRule1.id, createdRule2.id],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: {
-                start_date: startDate.toISOString(),
-                end_date: endDate.toISOString(),
-              },
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({
-          failed: 2,
-          skipped: 0,
-          succeeded: 0,
-          total: 2,
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          err_code: 'BACKFILL_IN_THE_FUTURE',
-          message: 'Backfill cannot be scheduled for the future',
-          status_code: 500,
-          rules: expect.arrayContaining([
-            {
-              id: createdRule1.id,
-              name: createdRule1.name,
-            },
-            {
-              id: createdRule2.id,
-              name: createdRule2.name,
-            },
-          ]),
-        });
-      });
-
-      it('should return 500 error when start date is far in the past', async () => {
-        const intervalInMinutes = 25;
-        const interval = `${intervalInMinutes}m`;
-        const createdRule1 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-1',
-            enabled: true,
-            interval,
-          })
-        );
-        const createdRule2 = await createRule(
-          supertest,
-          log,
-          getCustomQueryRuleParams({
-            rule_id: 'rule-2',
-            enabled: true,
-            interval,
-          })
-        );
-
-        const endDate = moment();
-        const startDate = moment().subtract(MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS + 1, 'd');
-
-        const { body } = await securitySolutionApi
-          .performBulkAction({
-            query: { dry_run: true },
-            body: {
-              ids: [createdRule1.id, createdRule2.id],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: {
-                start_date: startDate.toISOString(),
-                end_date: endDate.toISOString(),
-              },
-            },
-          })
-          .expect(500);
-
-        expect(body.attributes.summary).toEqual({
-          failed: 2,
-          skipped: 0,
-          succeeded: 0,
-          total: 2,
-        });
-
-        expect(body.attributes.errors).toHaveLength(1);
-        expect(body.attributes.errors[0]).toEqual({
-          err_code: 'BACKFILL_START_FAR_IN_THE_PAST',
-          message: `Backfill cannot look back more than ${MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS} days`,
-          status_code: 500,
-          rules: expect.arrayContaining([
-            {
-              id: createdRule1.id,
-              name: createdRule1.name,
-            },
-            {
-              id: createdRule2.id,
-              name: createdRule2.name,
-            },
-          ]),
-        });
       });
 
       it('should return 500 error if some rules do not exist', async () => {
@@ -683,8 +366,8 @@ export default ({ getService }: FtrProviderContext): void => {
             query: { dry_run: true },
             body: {
               ids: [createdRule1.id, 'rule-2'],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: {
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
               },
@@ -741,8 +424,8 @@ export default ({ getService }: FtrProviderContext): void => {
             query: { dry_run: true },
             body: {
               ids: [createdRule1.id, createdRule2.id],
-              action: BulkActionTypeEnum.backfill,
-              [BulkActionTypeEnum.backfill]: {
+              action: BulkActionTypeEnum.run,
+              [BulkActionTypeEnum.run]: {
                 start_date: startDate.toISOString(),
                 end_date: endDate.toISOString(),
               },
@@ -759,8 +442,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(body.attributes.errors).toHaveLength(1);
         expect(body.attributes.errors[0]).toEqual({
-          err_code: 'BACKFILL_DISABLED_RULE',
-          message: 'Cannot schedule backfill for a disabled rule',
+          err_code: 'MANUAL_RULE_RUN_DISABLED_RULE',
+          message: 'Cannot schedule manual rule run for a disabled rule',
           status_code: 500,
           rules: [
             {
