@@ -10,7 +10,7 @@ import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import {
@@ -67,5 +67,5 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
         defaultMessage: 'Book',
       }),
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_SAVED_BOOK_ACTION_ID);
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID);
 };
