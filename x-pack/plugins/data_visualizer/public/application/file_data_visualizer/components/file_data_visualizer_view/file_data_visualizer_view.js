@@ -27,7 +27,6 @@ import {
   readFile,
   createUrlOverrides,
   processResults,
-  // processPDFResults,
 } from '../../../common/components/utils';
 import { analyzeTikaFile } from './tika_analyzer';
 
@@ -111,11 +110,6 @@ export class FileDataVisualizerView extends Component {
         const { data, fileContents } = await readFile(file);
         console.log(file.type);
         if (isTikaType(file.type)) {
-          // const base64Data = await readPDFFile(file);
-          // this.setState({
-          //   base64Data,
-          // });
-
           this.setState({
             data,
             fileName: file.name,

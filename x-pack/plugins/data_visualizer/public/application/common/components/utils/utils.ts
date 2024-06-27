@@ -55,33 +55,6 @@ export function readFile(file: File): Promise<{ fileContents: string; data: Arra
   });
 }
 
-export function readPDFFile(file: File): Promise<{ base64Data: string }> {
-  return new Promise((resolve, reject) => {
-    if (file && file.size) {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = (() => {
-        return () => {
-          const data = reader.result;
-          if (data === null || typeof data !== 'string') {
-            return reject();
-          }
-          const base64Data = data.split(',')[1];
-
-          if (base64Data === '') {
-            reject();
-          } else {
-            resolve({ base64Data });
-          }
-        };
-      })();
-    } else {
-      reject();
-    }
-  });
-}
-
 export function createUrlOverrides(overrides: InputOverrides, originalSettings: InputOverrides) {
   const formattedOverrides: InputOverrides = {};
   for (const o in overrideDefaults) {
