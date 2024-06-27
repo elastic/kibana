@@ -31,7 +31,7 @@ describe('AgentTypeIntegration component', () => {
     it('should display agent type vendor name', () => {
       const { getByTestId } = render();
 
-      expect(getByTestId('test-name')).toEqual(getAgentTypeName(agentType));
+      expect(getByTestId('test-name')).toHaveTextContent(getAgentTypeName(agentType));
     });
 
     it('should display agent type vendor icon', () => {
