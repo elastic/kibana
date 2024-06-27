@@ -370,6 +370,21 @@ export class ControlGroupContainer extends Container<
     return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
+  public setAutoApplySelections(autoApplySeletions: boolean) {
+    this.updateInput({
+      showApplySelections: !autoApplySeletions
+    });
+  }
+
+  public setApplyGlobalTime(applyGlobalTime: boolean) {
+    this.updateInput({
+      ignoreParentSettings: {
+        ...(this.getInput().ignoreParentSettings ?? {}),
+        ignoreTimerange: !applyGlobalTime
+      }
+    });
+  }
+
   public openAddDataControlFlyout = openAddDataControlFlyout;
 
   public openEditControlGroupFlyout = openEditControlGroupFlyout;

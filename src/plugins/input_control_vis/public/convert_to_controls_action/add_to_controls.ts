@@ -24,6 +24,9 @@ export function addToControls(
   vis: Vis<InputControlVisParams>,
   dataService: DataPublicPluginStart
 ) {
+  controlGroup.setAutoApplySelections(vis.params?.updateFiltersOnChange ?? true);
+  controlGroup.setApplyGlobalTime(vis.params?.useTimeFilter ?? true);
+
   const orderedControls: ControlParams[] = [];
   if (vis.params?.controls) {
     function isRootControl(controlParams: ControlParams) {

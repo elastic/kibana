@@ -16,6 +16,8 @@ import { AddOptionsListControlProps, AddRangeSliderControlProps } from './extern
 export type ControlGroupApi = HasType<'control_group'> & {
   addOptionsListControl: (controlProps: AddOptionsListControlProps) => void;
   addRangeSliderControl: (controlProps: AddRangeSliderControlProps) => void;
+  setAutoApplySelections: (autoApplySelections: boolean) => void;
+  setApplyGlobalTime: (applyGlobalTime: boolean) => void;
 }
 
 export const isControlGroupApi = (api: unknown): api is ControlGroupApi => {
@@ -23,6 +25,8 @@ export const isControlGroupApi = (api: unknown): api is ControlGroupApi => {
     api &&
       apiIsOfType(api, 'control_group') &&
       typeof (api as ControlGroupApi).addOptionsListControl === 'function' &&
-      typeof (api as ControlGroupApi).addRangeSliderControl === 'function'
+      typeof (api as ControlGroupApi).addRangeSliderControl === 'function' &&
+      typeof (api as ControlGroupApi).setAutoApplySelections === 'function' &&
+      typeof (api as ControlGroupApi).setApplyGlobalTime === 'function'
   );
 };
