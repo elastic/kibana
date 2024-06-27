@@ -34,7 +34,7 @@ export const LogsDeprecationCallout = () => {
   return (
     <EuiCallOut
       title={i18n.translate('xpack.infra.logsDeprecationCallout.euiCallOut.discoverANewLogLabel', {
-        defaultMessage: 'Discover a new Logs Exploration experience!',
+        defaultMessage: 'There's a new, better way to explore your logs!',
       })}
       color="warning"
       iconType="iInCircle"
