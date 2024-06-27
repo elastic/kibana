@@ -54,8 +54,8 @@ export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
             'licensing',
             'alerting',
             'lists',
-            'actions',
           ]);
+
           const rulesClient = ctx.alerting.getRulesClient();
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();

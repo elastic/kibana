@@ -40,13 +40,6 @@ export const importRule = async (
   });
 
   if (!existingRule) {
-    const [oldActions, systemActions] = partition(ruleToImport.actions, (action) =>
-      actionsClient.isSystemAction(action.action_type_id)
-    );
-
-    console.error('OLD ACTIONS', oldActions);
-    console.error('sys actions 1', systemActions);
-
     const internalRule = convertCreateAPIToInternalSchema(ruleToImport, actionsClient, {
       immutable: false,
     });

@@ -42,8 +42,7 @@ export const updateRule = async (
     throw new ClientError(error.message, error.statusCode);
   }
 
-  // split system action updates?
-
+  // partition existing rule actions within convertUpdate function, like the others
   const [oldActions, systemActions] = partition(existingRule.actions, (action) =>
     actionsClient.isSystemAction(action.actionTypeId)
   );

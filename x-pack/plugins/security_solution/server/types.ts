@@ -11,7 +11,7 @@ import type {
   IRouter,
   KibanaRequest,
 } from '@kbn/core/server';
-import type { ActionsApiRequestHandlerContext, ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
@@ -45,7 +45,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAppClient: () => AppClient;
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
-  getDetectionRulesClient: (actionsClient?: ActionsClient) => IDetectionRulesClient;
+  getDetectionRulesClient: () => IDetectionRulesClient;
   getDetectionEngineHealthClient: () => IDetectionEngineHealthClient;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
