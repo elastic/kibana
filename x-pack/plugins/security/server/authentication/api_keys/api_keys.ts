@@ -13,6 +13,7 @@ import type {
   APIKeys as APIKeysType,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
+  CreateCrossClusterAPIKeyParams,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   GrantAPIKeyResult,
@@ -58,6 +59,30 @@ type GrantAPIKeyParams =
       grant_type: 'access_token';
       access_token: string;
     };
+
+function isCreateRestAPIKeyParams(params: any): params is CreateRestAPIKeyParams {
+  return params && typeof params.name === 'string' && typeof params.role_descriptors === 'object';
+}
+
+function isCreateRestAPIKeyWithKibanaPrivilegesParams(
+  params: any
+): params is CreateRestAPIKeyWithKibanaPrivilegesParams {
+  return (
+    params &&
+    typeof params.name === 'string' &&
+    params.role_descriptors === null &&
+    typeof params.kibana_role_descriptors === 'object'
+  );
+}
+
+function isCreateCrossClusterAPIKeyParams(params: any): params is CreateCrossClusterAPIKeyParams {
+  return (
+    params &&
+    typeof params.name === 'string' &&
+    params.role_descriptors === null &&
+    typeof params.access === 'object'
+  );
+}
 
 /**
  * Class responsible for managing Elasticsearch API keys.
@@ -162,6 +187,7 @@ export class APIKeys implements APIKeysType {
     this.logger.debug('Trying to create an API key');
 
     let result: CreateAPIKeyResult;
+
     try {
       if (type === 'cross_cluster') {
         result = await scopedClusterClient.asCurrentUser.transport.request<CreateAPIKeyResult>({

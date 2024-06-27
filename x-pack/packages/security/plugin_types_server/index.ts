@@ -80,11 +80,10 @@ export type {
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
 } from '@kbn/core-security-server';
+
 export {
   restApiKeySchema,
   crossClusterApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
-  getKibanaRoleSchema,
-  elasticsearchRoleSchema,
-  GLOBAL_RESOURCE,
-} from '@kbn/core-security-server';
+} from './src/authentication';
+export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './src/authorization';

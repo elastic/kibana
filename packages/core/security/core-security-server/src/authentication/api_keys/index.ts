@@ -23,12 +23,3 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './api_keys';
-
-export {
-  restApiKeySchema,
-  crossClusterApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
-  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
-  updateRestApiKeySchema,
-  updateCrossClusterApiKeySchema,
-} from './api_keys';

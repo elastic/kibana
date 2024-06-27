@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getKibanaRoleSchema, elasticsearchRoleSchema, GLOBAL_RESOURCE } from './schema';
 export type { ElasticsearchPrivilegesType, KibanaPrivilegesType } from './schema';

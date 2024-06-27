@@ -44,14 +44,5 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './src/authentication/api_keys';
-export {
-  restApiKeySchema,
-  crossClusterApiKeySchema,
-  getRestApiKeyWithKibanaPrivilegesSchema,
-  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
-  updateRestApiKeySchema,
-  updateCrossClusterApiKeySchema,
-} from './src/authentication/api_keys';
 
-export { elasticsearchRoleSchema, getKibanaRoleSchema, GLOBAL_RESOURCE } from './src/roles';
 export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';

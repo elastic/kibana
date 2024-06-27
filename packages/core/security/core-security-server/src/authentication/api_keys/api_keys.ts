@@ -9,8 +9,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { getKibanaRoleSchema, elasticsearchRoleSchema } from '../../roles';
+
+import { ElasticsearchPrivilegesType, KibanaPrivilegesType } from '../../roles';
 
 /**
  * Interface for managing API keys in Elasticsearch, including creation,
@@ -101,11 +101,45 @@ export type CreateAPIKeyParams =
  */
 export type CreateAPIKeyResult = estypes.SecurityCreateApiKeyResponse;
 
-export type CreateRestAPIKeyParams = TypeOf<typeof restApiKeySchema>;
-export type CreateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
-  ReturnType<typeof getRestApiKeyWithKibanaPrivilegesSchema>
->;
-export type CreateCrossClusterAPIKeyParams = TypeOf<typeof crossClusterApiKeySchema>;
+export interface CreateRestAPIKeyParams {
+  type?: 'rest';
+  expiration?: string;
+  name: string;
+  role_descriptors: Record<string, { [key: string]: unknown }>;
+  metadata?: { [key: string]: unknown };
+}
+
+export type CreateRestAPIKeyWithKibanaPrivilegesParams = Omit<
+  CreateRestAPIKeyParams,
+  'role_descriptors'
+> & {
+  role_descriptors: null;
+  kibana_role_descriptors: Record<
+    string,
+    {
+      elasticsearch: ElasticsearchPrivilegesType & { [key: string]: unknown };
+      kibana: KibanaPrivilegesType;
+    }
+  >;
+};
+export type CreateCrossClusterAPIKeyParams = Omit<
+  CreateRestAPIKeyParams,
+  'type' | 'role_descriptors'
+> & {
+  type?: 'cross_cluster';
+  role_descriptors: null;
+  access: {
+    search: Array<{
+      names: string[];
+      query?: unknown;
+      field_security?: unknown;
+      allow_restricted_indices?: boolean;
+    }>;
+    replication?: Array<{
+      names: string[];
+    }>;
+  };
+};
 
 export interface GrantAPIKeyResult {
   /**
@@ -176,58 +210,6 @@ export interface InvalidateAPIKeyResult {
   }>;
 }
 
-export const restApiKeySchema = schema.object({
-  type: schema.maybe(schema.literal('rest')),
-  name: schema.string(),
-  expiration: schema.maybe(schema.string()),
-  role_descriptors: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }), {
-    defaultValue: {},
-  }),
-  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-});
-
-/** */
-export const getRestApiKeyWithKibanaPrivilegesSchema = (
-  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
-) =>
-  restApiKeySchema.extends({
-    role_descriptors: null,
-    kibana_role_descriptors: schema.recordOf(
-      schema.string(),
-      schema.object({
-        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
-        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
-      })
-    ),
-  });
-
-export const crossClusterApiKeySchema = restApiKeySchema.extends({
-  type: schema.literal('cross_cluster'),
-  role_descriptors: null,
-  access: schema.object(
-    {
-      search: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            names: schema.arrayOf(schema.string()),
-            query: schema.maybe(schema.any()),
-            field_security: schema.maybe(schema.any()),
-            allow_restricted_indices: schema.maybe(schema.boolean()),
-          })
-        )
-      ),
-      replication: schema.maybe(
-        schema.arrayOf(
-          schema.object({
-            names: schema.arrayOf(schema.string()),
-          })
-        )
-      ),
-    },
-    { unknowns: 'allow' }
-  ),
-});
-
 /**
  * Response of Kibana Update API key endpoint.
  */
@@ -241,34 +223,26 @@ export type UpdateAPIKeyParams =
   | UpdateCrossClusterAPIKeyParams
   | UpdateRestAPIKeyWithKibanaPrivilegesParams;
 
-export const updateRestApiKeySchema = restApiKeySchema.extends({
-  name: null,
-  id: schema.string(),
-});
+export type UpdateRestAPIKeyParams = Omit<CreateRestAPIKeyParams, 'name'> & {
+  name: null;
+  id: string;
+};
 
-export const updateCrossClusterApiKeySchema = crossClusterApiKeySchema.extends({
-  name: null,
-  id: schema.string(),
-});
+export type UpdateCrossClusterAPIKeyParams = Omit<CreateCrossClusterAPIKeyParams, 'name'> & {
+  name: null;
+  id: string;
+};
 
-export type UpdateRestAPIKeyParams = TypeOf<typeof updateRestApiKeySchema>;
-export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof updateCrossClusterApiKeySchema>;
-export type UpdateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
-  ReturnType<typeof getUpdateRestApiKeyWithKibanaPrivilegesSchema>
->;
-
-export const getUpdateRestApiKeyWithKibanaPrivilegesSchema = (
-  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
-) =>
-  restApiKeySchema.extends({
-    role_descriptors: null,
-    name: null,
-    id: schema.string(),
-    kibana_role_descriptors: schema.recordOf(
-      schema.string(),
-      schema.object({
-        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
-        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
-      })
-    ),
-  });
+export type UpdateRestAPIKeyWithKibanaPrivilegesParams = Omit<
+  CreateRestAPIKeyParams,
+  'name' | 'role_descriptors'
+> & {
+  id: string;
+  kibana_role_descriptors: Record<
+    string,
+    {
+      elasticsearch: ElasticsearchPrivilegesType & { [key: string]: unknown };
+      kibana: KibanaPrivilegesType;
+    }
+  >;
+};
