@@ -209,7 +209,7 @@ export const useBulkActions = ({
       };
 
       const handleScheduleRuleRunAction = async () => {
-        startTransaction({ name: BULK_RULE_ACTIONS.SCHEDULE_BACKFILL });
+        startTransaction({ name: BULK_RULE_ACTIONS.MANUAL_RULE_RUN });
         closePopover();
 
         setIsPreflightInProgress(true);

@@ -38,7 +38,7 @@ export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
 
 export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExceptions"] label';
 
-export const CONFIRM_SCHEDULE_BACKFILL_RULE_WARNING_BTN =
+export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
   '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';

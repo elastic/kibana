@@ -60,7 +60,7 @@ describe('Manual rule run', { tags: ['@ess', '@serverless', '@skipInServerlessMK
     cy.contains(TOASTER_BODY, `Successfully scheduled manual rule run for ${enabledCount} rule`);
   });
 
-  it('schedule enable rules and show partial error for siabled rules when all rules are selected', () => {
+  it('schedule enable rules and show partial error for disabled rules when all rules are selected', () => {
     selectAllRules();
 
     const enabledCount = 3;
