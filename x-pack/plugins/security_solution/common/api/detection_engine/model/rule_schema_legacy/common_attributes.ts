@@ -6,9 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { listArray } from '@kbn/securitysolution-io-ts-list-types';
-import { NonEmptyString, version, UUID, NonEmptyArray } from '@kbn/securitysolution-io-ts-types';
-import { max_signals, threat } from '@kbn/securitysolution-io-ts-alerting-types';
+import { NonEmptyString, UUID } from '@kbn/securitysolution-io-ts-types';
 
 export type RuleObjectId = t.TypeOf<typeof RuleObjectId>;
 export const RuleObjectId = UUID;
@@ -23,88 +21,6 @@ export const RuleSignatureId = t.string; // should be non-empty string?
 
 export type RuleName = t.TypeOf<typeof RuleName>;
 export const RuleName = NonEmptyString;
-
-export type RuleDescription = t.TypeOf<typeof RuleDescription>;
-export const RuleDescription = NonEmptyString;
-
-export type RuleVersion = t.TypeOf<typeof RuleVersion>;
-export const RuleVersion = version;
-
-export type IsRuleImmutable = t.TypeOf<typeof IsRuleImmutable>;
-export const IsRuleImmutable = t.boolean;
-
-export type IsRuleEnabled = t.TypeOf<typeof IsRuleEnabled>;
-export const IsRuleEnabled = t.boolean;
-
-export type RuleTagArray = t.TypeOf<typeof RuleTagArray>;
-export const RuleTagArray = t.array(t.string); // should be non-empty strings?
-
-export type RuleLicense = t.TypeOf<typeof RuleLicense>;
-export const RuleLicense = t.string;
-
-export type RuleAuthorArray = t.TypeOf<typeof RuleAuthorArray>;
-export const RuleAuthorArray = t.array(t.string); // should be non-empty strings?
-
-export type RuleFalsePositiveArray = t.TypeOf<typeof RuleFalsePositiveArray>;
-export const RuleFalsePositiveArray = t.array(t.string); // should be non-empty strings?
-
-export type RuleReferenceArray = t.TypeOf<typeof RuleReferenceArray>;
-export const RuleReferenceArray = t.array(t.string); // should be non-empty strings?
-
-export type InvestigationGuide = t.TypeOf<typeof InvestigationGuide>;
-export const InvestigationGuide = t.string;
-
-/**
- * Any instructions for the user for setting up their environment in order to start receiving
- * source events for a given rule.
- *
- * It's a multiline text. Markdown is supported.
- */
-export type SetupGuide = t.TypeOf<typeof SetupGuide>;
-export const SetupGuide = t.string;
-
-export type BuildingBlockType = t.TypeOf<typeof BuildingBlockType>;
-export const BuildingBlockType = t.string;
-
-export type AlertsIndex = t.TypeOf<typeof AlertsIndex>;
-export const AlertsIndex = t.string;
-
-export type AlertsIndexNamespace = t.TypeOf<typeof AlertsIndexNamespace>;
-export const AlertsIndexNamespace = t.string;
-
-export type ExceptionListArray = t.TypeOf<typeof ExceptionListArray>;
-export const ExceptionListArray = listArray;
-
-export type MaxSignals = t.TypeOf<typeof MaxSignals>;
-export const MaxSignals = max_signals;
-
-export type ThreatArray = t.TypeOf<typeof ThreatArray>;
-export const ThreatArray = t.array(threat);
-
-export type IndexPatternArray = t.TypeOf<typeof IndexPatternArray>;
-export const IndexPatternArray = t.array(t.string);
-
-export type DataViewId = t.TypeOf<typeof DataViewId>;
-export const DataViewId = t.string;
-
-export type RuleQuery = t.TypeOf<typeof RuleQuery>;
-export const RuleQuery = t.string;
-
-/**
- * TODO: Right now the filters is an "unknown", when it could more than likely
- * become the actual ESFilter as a type.
- */
-export type RuleFilterArray = t.TypeOf<typeof RuleFilterArray>; // Filters are not easily type-able yet
-export const RuleFilterArray = t.array(t.unknown); // Filters are not easily type-able yet
-
-export type RuleNameOverride = t.TypeOf<typeof RuleNameOverride>;
-export const RuleNameOverride = t.string; // should be non-empty string?
-
-export type TimestampOverride = t.TypeOf<typeof TimestampOverride>;
-export const TimestampOverride = t.string; // should be non-empty string?
-
-export type TimestampOverrideFallbackDisabled = t.TypeOf<typeof TimestampOverrideFallbackDisabled>;
-export const TimestampOverrideFallbackDisabled = t.boolean;
 
 /**
  * Almost all types of Security rules check source event documents for a match to some kind of
@@ -160,12 +76,6 @@ export const RequiredField = t.exact(
  */
 export type RequiredFieldArray = t.TypeOf<typeof RequiredFieldArray>;
 export const RequiredFieldArray = t.array(RequiredField);
-
-export type TimelineTemplateId = t.TypeOf<typeof TimelineTemplateId>;
-export const TimelineTemplateId = t.string; // should be non-empty string?
-
-export type TimelineTemplateTitle = t.TypeOf<typeof TimelineTemplateTitle>;
-export const TimelineTemplateTitle = t.string; // should be non-empty string?
 
 /**
  * Outcome is a property of the saved object resolve api
@@ -230,52 +140,4 @@ export const RelatedIntegration = t.exact(
       integration: NonEmptyString,
     }),
   ])
-);
-
-/**
- * Array of related integrations.
- *
- * @example
- * const x: RelatedIntegrationArray = [
- *   {
- *     package: 'windows',
- *     version: '1.5.x',
- *   },
- *   {
- *     package: 'azure',
- *     version: '~1.1.6',
- *     integration: 'activitylogs',
- *   },
- * ];
- */
-export type RelatedIntegrationArray = t.TypeOf<typeof RelatedIntegrationArray>;
-export const RelatedIntegrationArray = t.array(RelatedIntegration);
-
-/**
- * Schema for fields relating to investigation fields, these are user defined fields we use to highlight
- * in various features in the UI such as alert details flyout and exceptions auto-population from alert.
- * Added in PR #163235
- * Right now we only have a single field but anticipate adding more related fields to store various
- * configuration states such as `override` - where a user might say if they want only these fields to
- * display, or if they want these fields + the fields we select. When expanding this field, it may look
- * something like:
- * export const investigationFields = t.intersection([
- * t.exact(
- *   t.type({
- *     field_names: NonEmptyArray(NonEmptyString),
- *   })
- * ),
- * t.exact(
- *   t.partial({
- *     overide: t.boolean,
- *   })
- * ),
- * ]);
- *
- */
-export type InvestigationFields = t.TypeOf<typeof InvestigationFields>;
-export const InvestigationFields = t.exact(
-  t.type({
-    field_names: NonEmptyArray(NonEmptyString),
-  })
 );

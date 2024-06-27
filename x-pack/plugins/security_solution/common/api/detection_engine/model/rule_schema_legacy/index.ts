@@ -6,9 +6,3 @@
  */
 
 export * from './common_attributes';
-
-export * from './eql_attributes';
-export * from './new_terms_attributes';
-export * from './threshold_attributes';
-
-export * from './rule_schemas';
