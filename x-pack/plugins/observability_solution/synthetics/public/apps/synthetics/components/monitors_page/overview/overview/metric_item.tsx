@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
 import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   selectErrorPopoverState,
   selectOverviewTrends,
@@ -51,27 +51,14 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  // medianDuration,
-  // maxDuration,
-  // minDuration,
-  // avgDuration,
-  // data,
   onClick,
   style,
 }: {
   monitor: MonitorOverviewItem;
-  // data: Array<{ x: number; y: number }>;
-  // medianDuration: number;
-  // avgDuration: number;
-  // minDuration: number;
-  // maxDuration: number;
   style?: React.CSSProperties;
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
-  const d = useSelector(selectOverviewTrends);
-  console.log('trends', d);
-  const trendData = d[monitor.configId + monitor.location.id];
-  console.log('trend data for monitor', monitor.name, monitor.location.id, monitor, trendData);
+  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.location.id];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
@@ -85,12 +72,8 @@ export const MetricItem = ({
 
   const dispatch = useDispatch();
 
-  // return (
-  //   <div data-test-subj={`${monitor.name}-metric-item`} style={style ?? { height: '160px' }}>
-  //     {contents}
-  //   </div>
-  // );
   if (!trendData) return null;
+
   return (
     <div data-test-subj={`${monitor.name}-metric-item`} style={style ?? { height: '160px' }}>
       <EuiPanel
@@ -119,8 +102,7 @@ export const MetricItem = ({
             opacity: 1;
           }
         `}
-        title={monitor.name}
-        // title={moment(timestamp).format('LLL')}
+        title={moment(timestamp).format('LLL')}
       >
         <Chart>
           <Settings

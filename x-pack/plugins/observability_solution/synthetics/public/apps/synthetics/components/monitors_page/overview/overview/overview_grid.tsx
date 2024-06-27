@@ -30,11 +30,12 @@ import {
 } from '../../../../state/overview';
 import { OverviewLoader } from './overview_loader';
 import { OverviewPaginationInfo } from './overview_pagination_info';
-import { FlyoutParamProps, OverviewGridItem } from './overview_grid_item';
 import { SortFields } from './sort_fields';
 import { NoMonitorsFound } from '../../common/no_monitors_found';
 import { MonitorDetailFlyout } from './monitor_detail_flyout';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
+import { MetricItem } from './metric_item';
+import { FlyoutParamProps } from './types';
 
 const ITEM_HEIGHT = 172;
 
@@ -147,7 +148,7 @@ export const OverviewGrid = memo(({ monitorsSortedByStatus }: { monitorsSortedBy
                               .slice(props.index * 4, props.index * 4 + 4)
                               .map((item: any, idx: number) => (
                                 <EuiFlexItem key={props.index * 4 + idx}>
-                                  <OverviewGridItem
+                                  <MetricItem
                                     monitor={monitorsSortedByStatus[props.index * 4 + idx]}
                                     onClick={setFlyoutConfigCallback}
                                   />

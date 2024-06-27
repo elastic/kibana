@@ -17,13 +17,15 @@ import {
   EuiTablePagination,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { useKey } from 'react-use';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
 import { MonitorOverviewItem } from '../../types';
-import { FlyoutParamProps, OverviewGridItem } from '../overview_grid_item';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
+import { MetricItem } from '../metric_item';
+import { FlyoutParamProps } from '../types';
 
 const PER_ROW = 4;
 const DEFAULT_ROW_SIZE = 2;
@@ -103,7 +105,10 @@ export const GroupGridItem = ({
               isDisabled={groupMonitors.length === 0}
               className="fullScreenButton"
               iconType="fullScreen"
-              aria-label="Full screen"
+              aria-label={i18n.translate(
+                'xpack.synthetics.groupGridItem.euiButtonIcon.fullScreenLabel',
+                { defaultMessage: 'Full screen' }
+              )}
               onClick={() => {
                 if (fullScreenGroup) {
                   setFullScreenGroup('');
@@ -117,7 +122,12 @@ export const GroupGridItem = ({
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <EuiBadge color="subdued">{groupMonitors.length} Monitors</EuiBadge>
+            <EuiBadge color="subdued">
+              {groupMonitors.length}{' '}
+              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel', {
+                defaultMessage: 'Monitors',
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         </EuiFlexGroup>
       }
@@ -136,7 +146,7 @@ export const GroupGridItem = ({
               key={`${monitor.id}-${monitor.location?.id}`}
               data-test-subj="syntheticsOverviewGridItem"
             >
-              <OverviewGridItem monitor={monitor} onClick={setFlyoutConfigCallback} />
+              <MetricItem monitor={monitor} onClick={setFlyoutConfigCallback} />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
@@ -145,7 +155,10 @@ export const GroupGridItem = ({
       )}
       <EuiSpacer size="m" />
       <EuiTablePagination
-        aria-label="Monitor grid pagination"
+        aria-label={i18n.translate(
+          'xpack.synthetics.groupGridItem.euiTablePagination.monitorGridPaginationLabel',
+          { defaultMessage: 'Monitor grid pagination' }
+        )}
         pageCount={Math.ceil(totalEntries / rowSize)}
         activePage={activePage}
         onChangePage={goToPage}

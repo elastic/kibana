@@ -1542,6 +1542,7 @@
     "@types/react-test-renderer": "^17.0.2",
     "@types/react-virtualized": "^9.21.22",
     "@types/react-window": "^1.8.8",
+    "@types/react-window-infinite-loader": "^1.0.9",
     "@types/redux-actions": "^2.6.1",
     "@types/resolve": "^1.20.1",
     "@types/seedrandom": ">=2.0.0 <4.0.0",
@@ -1758,8 +1759,7 @@
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
     "yarn-deduplicate": "^6.0.2",
-    "zod-to-json-schema": "^3.22.3",
-    "@types/react-window-infinite-loader": "^1.0.9"
+    "zod-to-json-schema": "^3.22.3"
   },
   "packageManager": "yarn@1.22.21"
 }
