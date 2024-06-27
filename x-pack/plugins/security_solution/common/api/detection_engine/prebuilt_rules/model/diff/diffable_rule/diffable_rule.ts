@@ -26,7 +26,6 @@ import {
   RuleSchedule,
   TimelineTemplateReference,
   TimestampOverrideObject,
-  KqlQueryType,
 } from './diffable_field_types';
 
 import { buildSchema } from './build_schema';
