@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -36,7 +36,7 @@ export interface FlyoutProps<T extends FormData = FormData, I extends FormData =
   onCloseFlyout: () => void;
   onSaveField: (data: I) => void;
   renderHeader: () => React.ReactNode;
-  renderBody: ({ onChange }: FlyOutBodyProps<T, I>) => React.ReactNode;
+  children: ({ onChange }: FlyOutBodyProps<T, I>) => React.ReactNode;
 }
 
 export const CommonFlyout = <T extends FormData = FormData, I extends FormData = T>({
@@ -45,7 +45,7 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
   isLoading,
   disabled,
   renderHeader,
-  renderBody,
+  children,
 }: FlyoutProps<T, I>) => {
   const [formState, setFormState] = useState<FormState<T, I>>({
     isValid: undefined,
@@ -71,6 +71,19 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
     }
   }, [onSaveField, submit]);
 
+  /**
+   * The children will call setFormState which in turn will make the parent
+   * to rerender which in turn will rerender the children etc.
+   * To avoid an infinitive loop we need to memoize the children.
+   */
+  const memoizedChildren = useMemo(
+    () =>
+      children({
+        onChange: setFormState,
+      }),
+    [children]
+  );
+
   return (
     <EuiFlyout onClose={onCloseFlyout} data-test-subj="common-flyout">
       <EuiFlyoutHeader hasBorder data-test-subj="common-flyout-header">
@@ -78,11 +91,7 @@ export const CommonFlyout = <T extends FormData = FormData, I extends FormData =
           <h3 id="flyoutTitle">{renderHeader()}</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {renderBody({
-          onChange: setFormState,
-        })}
-      </EuiFlyoutBody>
+      <EuiFlyoutBody>{memoizedChildren}</EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj={'common-flyout-footer'}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
