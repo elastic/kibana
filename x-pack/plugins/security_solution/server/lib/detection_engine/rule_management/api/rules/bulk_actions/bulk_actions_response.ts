@@ -45,7 +45,7 @@ export const buildBulkResponse = (
     deleted = [],
     skipped = [],
   }: {
-    bulkAction: BulkActionType;
+    bulkAction?: BulkActionType;
     isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];

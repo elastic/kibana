@@ -150,7 +150,6 @@ export const performBulkActionRoute = (
             });
 
             return buildBulkResponse(response, {
-              bulkAction: BulkActionTypeEnum.edit,
               updated: rules,
               skipped,
               errors,
