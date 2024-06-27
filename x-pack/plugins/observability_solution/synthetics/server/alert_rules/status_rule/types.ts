@@ -20,5 +20,5 @@ export interface MonitorSummaryStatusRule {
   lastErrorMessage: string;
   stateId: string | null;
   monitorUrlLabel: string;
-  tags?: string[];
+  monitorTags?: string[];
 }

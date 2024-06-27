@@ -168,7 +168,7 @@ export const getMonitorSummary = (
     observerLocation: monitorInfo.observer?.geo?.name ?? UNNAMED_LOCATION,
     observerName: monitorInfo.observer?.name,
     observerHostname: monitorInfo.agent?.name,
-    tags: monitorInfo.tags,
+    monitorTags: monitorInfo.tags,
   };
 
   return {

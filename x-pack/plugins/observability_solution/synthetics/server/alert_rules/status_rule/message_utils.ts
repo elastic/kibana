@@ -36,7 +36,7 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   'location.id': monitorSummary.locationId,
   'location.name': monitorSummary.locationName,
   configId: monitorSummary.configId,
-  'monitor.tags': monitorSummary.tags ?? [],
+  'monitor.tags': monitorSummary.monitorTags ?? [],
 });
 
 export const getMonitorSummary = (
@@ -87,7 +87,7 @@ export const getMonitorSummary = (
       status: statusMessage,
       timestamp: monitorInfo['@timestamp'],
     }),
-    tags: monitorInfo.tags,
+    monitorTags: monitorInfo.tags,
   };
 };
 
