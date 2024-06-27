@@ -15,14 +15,7 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
-    body: schema.object({
-      body: schema.arrayOf(
-        schema.object({
-          configId: schema.string(),
-          locationId: schema.string(),
-        })
-      ),
-    }),
+    body: schema.any(),
   },
   handler: async (routeContext): Promise<any> => {
     return withSpan('fetch trends', async () => {
