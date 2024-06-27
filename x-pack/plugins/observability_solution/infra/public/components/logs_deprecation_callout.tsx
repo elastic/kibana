@@ -44,7 +44,7 @@ export const LogsDeprecationCallout = () => {
     >
       <p>
         {i18n.translate('xpack.infra.logsDeprecationCallout.p.wereExcitedToIntroduceLabel', {
-          defaultMessage: `We're excited to introduce a powerful new way to explore logs.\nThis enhanced experience offers better performance and more intuitive navigation.`,
+          defaultMessage: `The new Logs Explorer makes viewing and inspecting your logs easier with more features, better performance, and more intuitive navigation.`,
         })}
       </p>
       <p>
