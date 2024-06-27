@@ -7,10 +7,9 @@
  */
 
 import type { APIKeysService } from '@kbn/core-security-server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 export const apiKeysMock = {
-  create: (): jest.Mocked<PublicMethodsOf<APIKeysService>> => ({
+  create: (): jest.MockedObjectDeep<APIKeysService> => ({
     areAPIKeysEnabled: jest.fn(),
     areCrossClusterAPIKeysEnabled: jest.fn(),
     create: jest.fn(),
