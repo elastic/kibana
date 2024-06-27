@@ -89,8 +89,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     AnomalySwimLaneEmbeddableState,
-    AnomalySwimLaneEmbeddableApi,
-    AnomalySwimlaneRuntimeState
+    AnomalySwimlaneRuntimeState,
+    AnomalySwimLaneEmbeddableApi
   > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,

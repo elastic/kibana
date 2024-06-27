@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
-import { EndpointAgentStatus } from '../../../../../../common/components/agents/agent_status';
+import { AgentStatus } from '../../../../../../common/components/endpoint/agents/agent_status';
 import { HeaderAgentInfo } from '../header_agent_info';
 import { useGetEndpointDetails } from '../../../../../hooks';
 import type { Platform } from '../platforms';
@@ -35,8 +35,9 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
       hostName={endpointDetails.metadata.host.name}
       lastCheckin={endpointDetails.last_checkin}
     >
-      <EndpointAgentStatus
-        endpointHostInfo={endpointDetails}
+      <AgentStatus
+        agentId={endpointId}
+        agentType="endpoint"
         data-test-subj="responderHeaderEndpointAgentIsolationStatus"
       />
     </HeaderAgentInfo>

@@ -14,14 +14,20 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchModelDefaultOptions } from '@kbn/inference_integration_flyout/types';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, FormDataProvider, UseField, useForm, useFormData } from '../../../../shared_imports';
-import { Field, MainType, NormalizedFields } from '../../../../types';
+import {
+  CustomInferenceEndpointConfig,
+  Field,
+  MainType,
+  NormalizedFields,
+} from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
 import { ReferenceFieldSelects } from '../../field_parameters/reference_field_selects';
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
@@ -32,10 +38,9 @@ import { useSemanticText } from './semantic_text/use_semantic_text';
 const formWrapper = (props: any) => <form {...props} />;
 export interface InferenceToModelIdMap {
   [key: string]: {
-    trainedModelId?: string;
+    trainedModelId: ElasticsearchModelDefaultOptions | string;
     isDeployed: boolean;
     isDeployable: boolean;
-    defaultInferenceEndpoint: boolean;
   };
 }
 
@@ -88,7 +93,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
     return subscription.unsubscribe;
   }, [dispatch, subscribe]);
-
+  const [customInferenceEndpointConfig, setCustomInferenceEndpointConfig] = useState<
+    CustomInferenceEndpointConfig | undefined
+  >(undefined);
   const cancel = () => {
     if (isAddingFields && onCancelAddingNewFields) {
       onCancelAddingNewFields();
@@ -125,7 +132,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
       form.reset();
 
       if (data.type === 'semantic_text' && !clickOutside) {
-        handleSemanticText(data);
+        handleSemanticText(data, customInferenceEndpointConfig);
       } else {
         dispatch({ type: 'field.add', value: data });
       }
@@ -283,7 +290,10 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 }}
               </FormDataProvider>
               {/* Field inference_id for semantic_text field type */}
-              <InferenceIdCombo setValue={setInferenceValue} />
+              <InferenceIdCombo
+                setValue={setInferenceValue}
+                setCustomInferenceEndpointConfig={setCustomInferenceEndpointConfig}
+              />
               {renderFormActions()}
             </div>
           </div>
@@ -311,16 +321,20 @@ function ReferenceFieldCombo({ indexName }: { indexName?: string }) {
 
 interface InferenceProps {
   setValue: (value: string) => void;
+  setCustomInferenceEndpointConfig: (config: CustomInferenceEndpointConfig) => void;
 }
 
-function InferenceIdCombo({ setValue }: InferenceProps) {
+function InferenceIdCombo({ setValue, setCustomInferenceEndpointConfig }: InferenceProps) {
   const { inferenceToModelIdMap } = useMappingsState();
   const dispatch = useDispatch();
   const [{ type }] = useFormData({ watch: 'type' });
 
   // update new inferenceEndpoint
   const setNewInferenceEndpoint = useCallback(
-    (newInferenceEndpoint: InferenceToModelIdMap) => {
+    (
+      newInferenceEndpoint: InferenceToModelIdMap,
+      customInferenceEndpointConfig: CustomInferenceEndpointConfig
+    ) => {
       dispatch({
         type: 'inferenceToModelIdMap.update',
         value: {
@@ -330,8 +344,9 @@ function InferenceIdCombo({ setValue }: InferenceProps) {
           },
         },
       });
+      setCustomInferenceEndpointConfig(customInferenceEndpointConfig);
     },
-    [dispatch, inferenceToModelIdMap]
+    [dispatch, inferenceToModelIdMap, setCustomInferenceEndpointConfig]
   );
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {

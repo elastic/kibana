@@ -124,12 +124,7 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(indexPattern, dataViews).then((dataView) => {
-      if (dataView.fields.getByName('@timestamp')?.type === 'date') {
-        dataView.timeFieldName = '@timestamp';
-      }
-      return dataView;
-    });
+    return getESQLAdHocDataview(indexPattern, dataViews);
   }, [indexPattern, dataViews]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);

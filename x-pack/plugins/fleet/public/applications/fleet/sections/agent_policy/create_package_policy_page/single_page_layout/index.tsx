@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +35,7 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import {
+  getInheritedNamespace,
   getRootPrivilegedDataStreams,
   isRootPrivilegesRequired,
   splitPkgKey,
@@ -81,7 +82,7 @@ import { PostInstallGoogleCloudShellModal } from './components/cloud_security_po
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
 import { RootPrivilegesCallout } from './root_callout';
 
-const StepsWithLessPadding = styled(EuiSteps)`
+export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
     padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
@@ -293,7 +294,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicyTab}
-        selectedAgentPolicyId={queryParamsPolicyId}
+        selectedAgentPolicyIds={queryParamsPolicyId ? [queryParamsPolicyId] : []}
       />
     ),
     [
@@ -319,6 +320,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const replaceDefineStepView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
+  );
+
+  // PLI auth blocks are registered to UI Extension context and are used to display upselling components.
+  // Upselling components are rendered conditionally based on their availability from the PLI upselling service.
+  const pliAuthBlockView = useUIExtension(packageInfo?.name ?? '', 'pli-auth-block');
+
+  // If an auth block view is registered to the UI Extension context, we expect the registered component to return a React component when the PLI is not sufficient,
+  // or simply a wrapper returning the children if the PLI is sufficient.
+  const PliAuthBlockWrapper: React.FC = useMemo(
+    () =>
+      pliAuthBlockView?.Component && !isPackageInfoLoading
+        ? pliAuthBlockView.Component
+        : ({ children }) => <>{children}</>, // when no UI Extension is registered, render children
+    [isPackageInfoLoading, pliAuthBlockView?.Component]
   );
 
   if (replaceDefineStepView && extensionView) {
@@ -363,7 +378,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : packageInfo ? (
         <>
           <StepDefinePackagePolicy
-            agentPolicies={agentPolicies}
+            namespacePlaceholder={getInheritedNamespace(agentPolicies)}
             packageInfo={packageInfo}
             packagePolicy={packagePolicy}
             updatePackagePolicy={updatePackagePolicy}
@@ -448,179 +463,178 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   }
 
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
-  const unprivilegedAgentsCount = agentPolicies.reduce(
-    (acc, curr) => acc + (curr.unprivileged_agents ?? 0),
-    0
-  );
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
-      <EuiErrorBoundary>
-        {formState === 'CONFIRM' && agentPolicies.length > 0 && (
-          <ConfirmDeployAgentPolicyModal
-            agentCount={agentCount}
-            agentPolicies={agentPolicies}
-            onConfirm={onSubmit}
-            onCancel={() => setFormState('VALID')}
-            showUnprivilegedAgentsCallout={Boolean(
-              packageInfo && isRootPrivilegesRequired(packageInfo) && unprivilegedAgentsCount > 0
-            )}
-            unprivilegedAgentsCount={unprivilegedAgentsCount}
-            dataStreams={rootPrivilegedDataStreams}
-          />
-        )}
-        {formState === 'SUBMITTED_NO_AGENTS' &&
-          agentPolicies.length > 0 &&
-          packageInfo &&
-          savedPackagePolicy && (
-            <PostInstallAddAgentModal
-              packageInfo={packageInfo}
-              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-            />
-          )}
-        {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
-          agentPolicies.length > 0 &&
-          savedPackagePolicy && (
-            <PostInstallAzureArmTemplateModal
-              agentPolicy={agentPolicies[0]}
-              packagePolicy={savedPackagePolicy}
-              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-            />
-          )}
-        {formState === 'SUBMITTED_CLOUD_FORMATION' &&
-          agentPolicies.length > 0 &&
-          savedPackagePolicy && (
-            <PostInstallCloudFormationModal
-              agentPolicy={agentPolicies[0]}
-              packagePolicy={savedPackagePolicy}
-              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-            />
-          )}
-        {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
-          agentPolicies.length > 0 &&
-          savedPackagePolicy && (
-            <PostInstallGoogleCloudShellModal
-              agentPolicy={agentPolicies[0]}
-              packagePolicy={savedPackagePolicy}
-              onConfirm={() => navigateAddAgent(savedPackagePolicy)}
-              onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
-            />
-          )}
-        {packageInfo && (
-          <IntegrationBreadcrumb
-            pkgTitle={integrationInfo?.title || packageInfo.title}
-            pkgkey={pkgKeyFromPackageInfo(packageInfo)}
-            integration={integrationInfo?.name}
-          />
-        )}
-        {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
-          <>
-            <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
-            <EuiSpacer size="m" />
-          </>
-        ) : null}
-        {numTransformAssets > 0 ? (
-          <>
-            <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
-            <EuiSpacer size="xl" />
-          </>
-        ) : null}
-        {showSecretsDisabledCallout && (
-          <>
-            <EuiCallOut
-              size="m"
-              color="warning"
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
-                  defaultMessage="Policy secrets are disabled"
-                />
-              }
-            >
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
-                defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
-                values={{
-                  policySecretsLink: (
-                    <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
-                        defaultMessage="policy secrets"
-                      />
-                    </EuiLink>
-                  ),
-                  minimumSecretsVersion: <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>,
-                }}
+      <Suspense fallback={<Loading />}>
+        <PliAuthBlockWrapper>
+          <EuiErrorBoundary>
+            {formState === 'CONFIRM' && agentPolicies.length > 0 && (
+              <ConfirmDeployAgentPolicyModal
+                agentCount={agentCount}
+                agentPolicies={agentPolicies}
+                onConfirm={onSubmit}
+                onCancel={() => setFormState('VALID')}
               />
-            </EuiCallOut>
-
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <StepsWithLessPadding steps={steps} />
-        <EuiSpacer size="xl" />
-        <EuiSpacer size="xl" />
-        <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              {packageInfo && (formState === 'INVALID' || hasAgentPolicyError) ? (
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.errorOnSaveText"
-                  defaultMessage="Your integration policy has errors. Please fix them before saving."
+            )}
+            {formState === 'SUBMITTED_NO_AGENTS' &&
+              agentPolicies.length > 0 &&
+              packageInfo &&
+              savedPackagePolicy && (
+                <PostInstallAddAgentModal
+                  packageInfo={packageInfo}
+                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
                 />
-              ) : null}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                  <EuiButtonEmpty
-                    color="text"
-                    href={cancelUrl}
-                    onClick={cancelClickHandler}
-                    data-test-subj="createPackagePolicyCancelButton"
-                  >
+              )}
+            {formState === 'SUBMITTED_AZURE_ARM_TEMPLATE' &&
+              agentPolicies.length > 0 &&
+              savedPackagePolicy && (
+                <PostInstallAzureArmTemplateModal
+                  agentPolicy={agentPolicies[0]}
+                  packagePolicy={savedPackagePolicy}
+                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                />
+              )}
+            {formState === 'SUBMITTED_CLOUD_FORMATION' &&
+              agentPolicies.length > 0 &&
+              savedPackagePolicy && (
+                <PostInstallCloudFormationModal
+                  agentPolicy={agentPolicies[0]}
+                  packagePolicy={savedPackagePolicy}
+                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                />
+              )}
+            {formState === 'SUBMITTED_GOOGLE_CLOUD_SHELL' &&
+              agentPolicies.length > 0 &&
+              savedPackagePolicy && (
+                <PostInstallGoogleCloudShellModal
+                  agentPolicy={agentPolicies[0]}
+                  packagePolicy={savedPackagePolicy}
+                  onConfirm={() => navigateAddAgent(savedPackagePolicy)}
+                  onCancel={() => navigateAddAgentHelp(savedPackagePolicy)}
+                />
+              )}
+            {packageInfo && (
+              <IntegrationBreadcrumb
+                pkgTitle={integrationInfo?.title || packageInfo.title}
+                pkgkey={pkgKeyFromPackageInfo(packageInfo)}
+                integration={integrationInfo?.name}
+              />
+            )}
+            {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+              <>
+                <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
+            {numTransformAssets > 0 ? (
+              <>
+                <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />
+                <EuiSpacer size="xl" />
+              </>
+            ) : null}
+            {showSecretsDisabledCallout && (
+              <>
+                <EuiCallOut
+                  size="m"
+                  color="warning"
+                  title={
                     <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.cancelButton"
-                      defaultMessage="Cancel"
+                      id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutTitle"
+                      defaultMessage="Policy secrets are disabled"
                     />
-                  </EuiButtonEmpty>
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDescription"
+                    defaultMessage="This integration contains {policySecretsLink}, but you have a Fleet Server running on a version earlier than {minimumSecretsVersion}. Please upgrade your Fleet Server to enable policy secrets for all integrations."
+                    values={{
+                      policySecretsLink: (
+                        <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+                          <FormattedMessage
+                            id="xpack.fleet.createPackagePolicy.secretsDisabledCalloutDocsLink"
+                            defaultMessage="policy secrets"
+                          />
+                        </EuiLink>
+                      ),
+                      minimumSecretsVersion: (
+                        <EuiCode>{SECRETS_MINIMUM_FLEET_SERVER_VERSION}</EuiCode>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
+
+                <EuiSpacer size="m" />
+              </>
+            )}
+            <StepsWithLessPadding steps={steps} />
+            <EuiSpacer size="xl" />
+            <EuiSpacer size="xl" />
+            <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  {packageInfo && (formState === 'INVALID' || hasAgentPolicyError) ? (
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.errorOnSaveText"
+                      defaultMessage="Your integration policy has errors. Please fix them before saving."
+                    />
+                  ) : null}
                 </EuiFlexItem>
-                {showDevtoolsRequest ? (
-                  <EuiFlexItem grow={false}>
-                    <DevtoolsRequestFlyoutButton
-                      request={devtoolRequest}
-                      description={devtoolRequestDescription}
-                      btnProps={{
-                        color: 'text',
-                      }}
-                    />
-                  </EuiFlexItem>
-                ) : null}
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={() => onSubmit()}
-                    isLoading={formState === 'LOADING'}
-                    disabled={formState !== 'VALID' || hasAgentPolicyError || !validationResults}
-                    iconType="save"
-                    color="primary"
-                    fill
-                    data-test-subj="createPackagePolicySaveButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.createPackagePolicy.saveButton"
-                      defaultMessage="Save and continue"
-                    />
-                  </EuiButton>
+                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                      <EuiButtonEmpty
+                        color="text"
+                        href={cancelUrl}
+                        onClick={cancelClickHandler}
+                        data-test-subj="createPackagePolicyCancelButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.cancelButton"
+                          defaultMessage="Cancel"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    {showDevtoolsRequest ? (
+                      <EuiFlexItem grow={false}>
+                        <DevtoolsRequestFlyoutButton
+                          request={devtoolRequest}
+                          description={devtoolRequestDescription}
+                          btnProps={{
+                            color: 'text',
+                          }}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={() => onSubmit()}
+                        isLoading={formState === 'LOADING'}
+                        disabled={
+                          formState !== 'VALID' || hasAgentPolicyError || !validationResults
+                        }
+                        iconType="save"
+                        color="primary"
+                        fill
+                        data-test-subj="createPackagePolicySaveButton"
+                      >
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.saveButton"
+                          defaultMessage="Save and continue"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </CustomEuiBottomBar>
-      </EuiErrorBoundary>
+            </CustomEuiBottomBar>
+          </EuiErrorBoundary>
+        </PliAuthBlockWrapper>
+      </Suspense>
     </CreatePackagePolicySinglePageLayout>
   );
 };

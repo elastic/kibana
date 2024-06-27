@@ -63,7 +63,7 @@ describe('DataViewFieldEditorPlugin', () => {
     };
     const { openEditor } = plugin.start(coreStartMocked, pluginStart);
 
-    openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
+    await openEditor({ onSave: onSaveSpy, ctx: { dataView: {} as any } });
 
     expect(openFlyout).toHaveBeenCalled();
 
@@ -82,7 +82,7 @@ describe('DataViewFieldEditorPlugin', () => {
   test('should return a handler to close the flyout', async () => {
     const { openEditor } = plugin.start(coreStart, pluginStart);
 
-    const closeEditorHandler = openEditor({ onSave: noop, ctx: { dataView: {} as any } });
+    const closeEditorHandler = await openEditor({ onSave: noop, ctx: { dataView: {} as any } });
     expect(typeof closeEditorHandler).toBe('function');
   });
 

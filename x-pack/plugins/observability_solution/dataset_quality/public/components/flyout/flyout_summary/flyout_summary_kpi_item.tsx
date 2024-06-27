@@ -18,11 +18,15 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 
+import { PrivilegesWarningIconWrapper } from '../../common';
+import { notAvailableLabel } from '../../../../common/translations';
+
 export function FlyoutSummaryKpiItem({
   title,
   value,
   link,
   isLoading,
+  userHasPrivilege,
 }: {
   title: string;
   value: string;
@@ -31,6 +35,7 @@ export function FlyoutSummaryKpiItem({
     href: string;
   };
   isLoading: boolean;
+  userHasPrivilege: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -44,9 +49,20 @@ export function FlyoutSummaryKpiItem({
     >
       <EuiFlexGroup alignItems="stretch" direction="column" wrap={false}>
         <EuiFlexItem css={{ gap: euiTheme.size.xs }}>
-          <EuiTitle data-test-subj={`datasetQualityFlyoutKpiTitle-${title}`} size="xxxs">
-            <h6>{title}</h6>
-          </EuiTitle>
+          <EuiFlexGroup>
+            <EuiTitle data-test-subj={`datasetQualityFlyoutKpiTitle-${title}`} size="xxxs">
+              <h6>{title}</h6>
+            </EuiTitle>
+
+            <PrivilegesWarningIconWrapper
+              hasPrivileges={userHasPrivilege}
+              title={title}
+              mode="popover"
+              popoverCss={{ marginLeft: 'auto' }}
+            >
+              <></>
+            </PrivilegesWarningIconWrapper>
+          </EuiFlexGroup>
           {link ? (
             <EuiLink
               data-test-subj={`datasetQualityFlyoutKpiLink-${title}`}
@@ -79,7 +95,7 @@ export function FlyoutSummaryKpiItem({
             isLoading={isLoading}
           >
             <EuiTitle data-test-subj={`datasetQualityFlyoutKpiValue-${title}`} size="s">
-              <h3 className="eui-textNoWrap">{value}</h3>
+              <h3 className="eui-textNoWrap">{userHasPrivilege ? value : notAvailableLabel}</h3>
             </EuiTitle>
           </EuiSkeletonTitle>
         </EuiFlexItem>

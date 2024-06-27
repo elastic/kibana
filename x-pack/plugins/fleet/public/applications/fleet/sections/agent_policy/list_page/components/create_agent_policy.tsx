@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useAuthz, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 import { DevtoolsRequestFlyoutButton } from '../../../../components';
@@ -191,7 +192,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   );
 
   return (
-    <FlyoutWithHigherZIndex onClose={() => onClose()} size="l" maxWidth={400} {...restOfProps}>
+    <FlyoutWithHigherZIndex onClose={() => onClose()} {...restOfProps} maxWidth={MAX_FLYOUT_WIDTH}>
       {header}
       {body}
       {footer}

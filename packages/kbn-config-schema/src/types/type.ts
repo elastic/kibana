@@ -125,7 +125,11 @@ export abstract class Type<V> {
     return this;
   }
 
-  public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
+  /**
+   * Validates the provided value against this schema.
+   * If valid, the resulting output will be returned, otherwise an exception will be thrown.
+   */
+  public validate(value: unknown, context: Record<string, unknown> = {}, namespace?: string): V {
     const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',

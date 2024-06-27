@@ -470,10 +470,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/asset_manager/README.md[assetManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/assets_data_access[assetsDataAccess]
 |WARNING: Missing README.
 
@@ -573,6 +569,10 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
+|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
 |The event log plugin provides a persistent history of alerting and action
 activities.
@@ -636,6 +636,10 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/integration_assistant/README.md[integrationAssistant]
+|Team owner: Security Integrations Scalability
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/investigate/README.md[investigate]
@@ -783,6 +787,14 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_connectors/README.mdx[searchConnectors]
 |This plugin contains common assets and endpoints for the use of connectors in Kibana. Primarily used by the enterprise_search and serverless_search plugins.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_homepage/README.mdx[searchHomepage]
+|The Search Homepage is a shared homepage for elasticsearch users.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/search_inference_endpoints/README.md[searchInferenceEndpoints]
+|The Inference Endpoints is a tool used to manage inference endpoints
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/search_notebooks/README.mdx[searchNotebooks]

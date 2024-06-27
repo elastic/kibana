@@ -210,7 +210,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(alerts.hits.hits).toHaveLength(1);
       // Close the alert. Subsequent rule executions should ignore this closed alert
       // for suppression purposes.
-      const alertIds = alerts.hits.hits.map((alert) => alert._id);
+      const alertIds = alerts.hits.hits.map((alert) => alert._id!);
       await supertest
         .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
         .set('kbn-xsrf', 'true')
