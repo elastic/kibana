@@ -211,7 +211,7 @@ export const getNavigationTreeDefinition = ({
                   }),
                 },
                 {
-                  children: [{ link: 'searchInferenceEndpoints' }],
+                  children: [{ link: 'enterpriseSearchInferenceEndpoints:inferenceEndpoints' }],
                   id: 'relevance',
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.relevance', {
                     defaultMessage: 'Relevance',
