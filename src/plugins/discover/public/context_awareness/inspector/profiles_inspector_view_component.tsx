@@ -7,17 +7,17 @@
  */
 
 import {
-  CriteriaWithPagination,
-  EuiBasicTable,
   EuiButtonIcon,
   EuiDescriptionList,
+  EuiInMemoryTable,
   EuiPanel,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import type { DataTableRecordWithContext } from '../record_has_context';
 import type { ProfilesAdapter } from './profiles_adapter';
 
@@ -44,37 +44,66 @@ const ProfilesInspectorViewComponent = ({
 
   return (
     <div css={{ overflowY: 'auto' }}>
-      <ProfileSection title="Root profile">
+      <ProfileSection
+        title={i18n.translate('discover.inspector.profilesInspectorView.rootProfileTitle', {
+          defaultMessage: 'Root profile',
+        })}
+      >
         <EuiDescriptionList
           listItems={[
             {
-              title: 'Profile ID',
+              title: i18n.translate('discover.inspector.profilesInspectorView.rootProfileIdTitle', {
+                defaultMessage: 'Profile ID',
+              }),
               description: defaultIfEmpty(rootContext?.profileId),
             },
             {
-              title: 'Solution type',
+              title: i18n.translate(
+                'discover.inspector.profilesInspectorView.rootSolutionTypeTitle',
+                {
+                  defaultMessage: 'Solution type',
+                }
+              ),
               description: defaultIfEmpty(rootContext?.solutionType),
             },
           ]}
         />
       </ProfileSection>
       <EuiSpacer size="m" />
-      <ProfileSection title="Data source profile">
+      <ProfileSection
+        title={i18n.translate('discover.inspector.profilesInspectorView.dataSourceProfileTitle', {
+          defaultMessage: 'Data source profile',
+        })}
+      >
         <EuiDescriptionList
           listItems={[
             {
-              title: 'Profile ID',
+              title: i18n.translate(
+                'discover.inspector.profilesInspectorView.dataSourceProfileIdTitle',
+                {
+                  defaultMessage: 'Profile ID',
+                }
+              ),
               description: defaultIfEmpty(dataSourceContext?.profileId),
             },
             {
-              title: 'Category',
+              title: i18n.translate(
+                'discover.inspector.profilesInspectorView.dataSourceCategoryTitle',
+                {
+                  defaultMessage: 'Category',
+                }
+              ),
               description: defaultIfEmpty(dataSourceContext?.category),
             },
           ]}
         />
       </ProfileSection>
       <EuiSpacer size="m" />
-      <ProfileSection title="Document profiles">
+      <ProfileSection
+        title={i18n.translate('discover.inspector.profilesInspectorView.documentProfilesTitle', {
+          defaultMessage: 'Document profiles',
+        })}
+      >
         <DocumentProfilesDisplay documentContexts={documentContexts} />
       </ProfileSection>
     </div>
@@ -96,35 +125,45 @@ const DocumentProfilesDisplay = ({
 }: {
   documentContexts?: Record<string, DataTableRecordWithContext[]>;
 }) => {
-  const [expandedRowMap, setExpandedRowMap] = useState<Record<string, ReactNode>>({});
+  const [expandedProfileId, setExpandedProfileId] = useState<string | undefined>(undefined);
   const sortedDocumentProfiles = useMemo(() => {
     return Object.keys(documentContexts ?? {})
       .sort()
-      .map((profileId) => {
-        const records = documentContexts?.[profileId] ?? [];
-
-        return {
-          profileId,
-          records,
-          recordCount: records.length,
-        };
-      });
+      .map((profileId) => ({
+        profileId,
+        recordCount: documentContexts?.[profileId]?.length ?? 0,
+      }));
   }, [documentContexts]);
 
   return (
-    <EuiBasicTable
-      tableCaption="Document profiles"
+    <EuiInMemoryTable
+      tableCaption={i18n.translate(
+        'discover.inspector.profilesInspectorView.documentProfilesTableCaption',
+        {
+          defaultMessage: 'Document profiles',
+        }
+      )}
       items={sortedDocumentProfiles}
       itemId="profileId"
       rowHeader="profileId"
       columns={[
         {
           field: 'profileId',
-          name: 'Profile ID',
+          name: i18n.translate(
+            'discover.inspector.profilesInspectorView.documentProfilesProfileIdColumn',
+            {
+              defaultMessage: 'Profile ID',
+            }
+          ),
         },
         {
           field: 'recordCount',
-          name: 'Record count',
+          name: i18n.translate(
+            'discover.inspector.profilesInspectorView.documentProfilesRecordCountColumn',
+            {
+              defaultMessage: 'Record count',
+            }
+          ),
         },
         {
           align: 'right',
@@ -132,37 +171,54 @@ const DocumentProfilesDisplay = ({
           isExpander: true,
           name: (
             <EuiScreenReaderOnly>
-              <span>Expand row</span>
+              <span>
+                {i18n.translate(
+                  'discover.inspector.profilesInspectorView.documentProfilesExpandColumn',
+                  {
+                    defaultMessage: 'Expand row',
+                  }
+                )}
+              </span>
             </EuiScreenReaderOnly>
           ),
           mobileOptions: { header: false },
-          render: ({
-            profileId,
-            records,
-          }: {
-            profileId: string;
-            records: DataTableRecordWithContext[];
-          }) => (
+          render: ({ profileId }: { profileId: string }) => (
             <EuiButtonIcon
               onClick={() => {
-                if (expandedRowMap[profileId]) {
-                  const { [profileId]: _, ...updatedRowMap } = expandedRowMap;
-
-                  setExpandedRowMap(updatedRowMap);
-                } else {
-                  setExpandedRowMap({
-                    ...expandedRowMap,
-                    [profileId]: <DocumentProfileDisplay profileId={profileId} records={records} />,
-                  });
-                }
+                setExpandedProfileId(expandedProfileId === profileId ? undefined : profileId);
               }}
-              aria-label={expandedRowMap[profileId] ? 'Collapse' : 'Expand'}
-              iconType={expandedRowMap[profileId] ? 'arrowDown' : 'arrowRight'}
+              aria-label={
+                expandedProfileId === profileId
+                  ? i18n.translate(
+                      'discover.inspector.profilesInspectorView.documentProfilesCollapseRowAriaLabel',
+                      {
+                        defaultMessage: 'Collapse',
+                      }
+                    )
+                  : i18n.translate(
+                      'discover.inspector.profilesInspectorView.documentProfilesExpandRowAriaLabel',
+                      {
+                        defaultMessage: 'Expand',
+                      }
+                    )
+              }
+              iconType={expandedProfileId === profileId ? 'arrowDown' : 'arrowRight'}
             />
           ),
         },
       ]}
-      itemIdToExpandedRowMap={expandedRowMap}
+      itemIdToExpandedRowMap={
+        expandedProfileId
+          ? {
+              [expandedProfileId]: (
+                <DocumentProfileDisplay
+                  profileId={expandedProfileId}
+                  records={documentContexts?.[expandedProfileId] ?? []}
+                />
+              ),
+            }
+          : undefined
+      }
     />
   );
 };
@@ -175,39 +231,36 @@ const DocumentProfileDisplay = ({
   records: DataTableRecordWithContext[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-
-  const pageRecords = useMemo(() => {
-    const startIndex = pageIndex * pageSize;
-    return records.slice(startIndex, Math.min(startIndex + pageSize, records.length));
-  }, [pageIndex, pageSize, records]);
 
   return (
-    <EuiBasicTable
-      tableCaption={`Records with profile ID ${profileId}`}
-      items={pageRecords}
+    <EuiInMemoryTable
+      tableCaption={i18n.translate(
+        'discover.inspector.profilesInspectorView.documentProfileTableCaption',
+        {
+          defaultMessage: 'Records with document profile ID {profileId}',
+          values: { profileId },
+        }
+      )}
+      items={records}
       rowHeader="raw._id"
       columns={[
         {
           field: 'raw._id',
-          name: 'Record ID',
+          name: i18n.translate('discover.inspector.profilesInspectorView.documentProfileIdColumn', {
+            defaultMessage: 'Record ID',
+          }),
         },
         {
           field: 'context.type',
-          name: 'Type',
+          name: i18n.translate(
+            'discover.inspector.profilesInspectorView.documentProfileTypeColumn',
+            {
+              defaultMessage: 'Type',
+            }
+          ),
         },
       ]}
-      pagination={{
-        pageIndex,
-        pageSize,
-        totalItemCount: records.length,
-        pageSizeOptions: [10, 25, 50],
-      }}
-      onChange={({ page }: CriteriaWithPagination<DataTableRecordWithContext>) => {
-        setPageIndex(page.index);
-        setPageSize(page.size);
-      }}
+      pagination={true}
       css={{
         table: {
           border: euiTheme.border.thin,
