@@ -7,7 +7,5 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
-    "@kbn/config-schema",
-    "@kbn/core-http-server",
   ]
 }
