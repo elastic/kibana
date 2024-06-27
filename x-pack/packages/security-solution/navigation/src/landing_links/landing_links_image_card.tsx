@@ -4,16 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiPanel,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { withLink } from '../links';
 import type { NavigationLink } from '../types';
@@ -47,21 +39,15 @@ const useStyles = () => {
       color: ${euiTheme.colors.primaryText};
       font-weight: ${euiTheme.font.weight.semiBold};
     `,
-    imageContainer: css`
+    getImageContainer: (imageUrl: string | undefined) => css`
       overflow: hidden;
       height: ${CARD_HEIGHT_IMAGE}px;
       width: ${CARD_HEIGHT_IMAGE}px;
       flex-grow: 0;
-      position: relative;
-    `,
-    image: css`
-      max-inline-size: none;
-      overflow: hidden;
-      height: ${CARD_HEIGHT_IMAGE}px;
-      position: absolute;
-      top: 0;
-      transform: translateX(-21%);
-      left: 0;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-image: url(${imageUrl ?? ''});
+      background-size: auto 98px;
     `,
   };
 };
@@ -74,6 +60,12 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
 
     const linkProps = getKibanaLinkProps({ item, urlState, onLinkClick });
     const { landingImage, title, description, isBeta, betaOptions } = item;
+
+    const imageBackground = useMemo(
+      () => styles.getImageContainer(landingImage),
+      [landingImage, styles]
+    );
+
     return (
       <EuiFlexItem data-test-subj="LandingImageCard-item" grow={false}>
         <EuiPanelWithLink {...linkProps} hasBorder paddingSize="s" css={styles.card}>
@@ -91,15 +83,8 @@ export const LandingLinksImageCard: React.FC<LandingLinksImageCardProps> = React
                   hasShadow={false}
                   hasBorder
                   borderRadius="m"
-                  css={styles.imageContainer}
-                >
-                  <EuiImage
-                    data-test-subj="LandingImageCard-image"
-                    alt={title}
-                    src={landingImage}
-                    css={styles.image}
-                  />
-                </EuiPanel>
+                  css={imageBackground}
+                />
               )}
             </EuiFlexItem>
             <EuiFlexItem>
