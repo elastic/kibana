@@ -154,13 +154,14 @@ describe('context successors', function () {
       ];
 
       return fetchSuccessors(ANCHOR_TIMESTAMP_3000, '_doc', 0, 4).then(({ rows }) => {
+        expect(mockSearchSource.setField.args).toMatchSnapshot();
+
         const intervals: Timestamp[] = mockSearchSource.setField.args
           .filter(([property]: [string]) => property === 'query')
           .map(([, { query }]: [string, { query: Query }]) =>
             get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp'])
           );
 
-        expect(intervals).toMatchSnapshot();
         // should have started at the given time
         expect(intervals[0].lte).toEqual(moment(MS_PER_DAY * 3000).toISOString());
         // should have stopped before reaching MS_PER_DAY * 2200

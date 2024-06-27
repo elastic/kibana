@@ -152,13 +152,14 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_1000, '_doc', 0, 3).then(({ rows }) => {
+        expect(mockSearchSource.setField.args).toMatchSnapshot();
+
         const intervals: Timestamp[] = mockSearchSource.setField.args
           .filter(([property]: string) => property === 'query')
           .map(([, { query }]: [string, { query: Query }]) => {
             return get(query, ['bool', 'must', 'constant_score', 'filter', 'range', '@timestamp']);
           });
 
-        expect(intervals).toMatchSnapshot();
         // should have started at the given time
         expect(intervals[0].gte).toEqual(moment(MS_PER_DAY * 1000).toISOString());
         // should have stopped before reaching MS_PER_DAY * 1700
