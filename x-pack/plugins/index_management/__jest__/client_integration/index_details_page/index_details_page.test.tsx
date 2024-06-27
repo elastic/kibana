@@ -647,6 +647,10 @@ describe('<IndexDetailsPage />', () => {
       });
       describe('Add Semantic text field', () => {
         const customInferenceModel = 'my-elser-model';
+        const mockLicense = {
+          isActive: true,
+          hasAtLeast: jest.fn((type) => true),
+        };
         beforeEach(async () => {
           httpRequestsMockHelpers.setInferenceModels({
             data: [
@@ -674,7 +678,18 @@ describe('<IndexDetailsPage />', () => {
                     enterpriseSearch: '',
                   },
                 },
+                core: {
+                  application: { capabilities: { ml: { canGetTrainedModels: true } } },
+                },
                 plugins: {
+                  licensing: {
+                    license$: {
+                      subscribe: jest.fn((callback) => {
+                        callback(mockLicense);
+                        return { unsubscribe: jest.fn() };
+                      }),
+                    },
+                  },
                   ml: {
                     mlApi: {
                       trainedModels: {

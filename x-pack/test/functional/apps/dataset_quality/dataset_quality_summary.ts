@@ -49,6 +49,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   describe('Dataset quality summary', () => {
     before(async () => {
+      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.navigateTo();
     });
 
@@ -57,8 +58,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     it('shows poor, degraded and good count as 0 and all dataset as healthy', async () => {
-      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
-      await PageObjects.datasetQuality.refreshTable();
       const summary = await PageObjects.datasetQuality.parseSummaryPanel();
       expect(summary).to.eql({
         datasetHealthPoor: '0',

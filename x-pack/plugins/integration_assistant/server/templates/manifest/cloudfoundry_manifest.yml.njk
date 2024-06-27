@@ -1,7 +1,9 @@
 - input: cloudfoundry
   template_path: cloudfoundry.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: api_address
       type: text
@@ -30,31 +32,36 @@
       title: Shard ID
       required: false
       show_user: false
-      description: Shard ID for the connection with Cloud Foundry. Use the same ID across multiple filebeat to shard the load of events. Default: "(generated UUID)".
+      description: |
+        Shard ID for the connection with Cloud Foundry. Use the same ID across multiple filebeat to shard the load of events. Default: "(generated UUID)".
     - name: version
       type: text
       title: Cloud Foundry API Version
       required: false
       show_user: false
-      description: Consumer API version to connect with Cloud Foundry to collect events. Use v1 to collect events using Doppler/Traffic Control. Use v2 to collect events from the RLP Gateway. Default: "v1".
+      description: |
+        Consumer API version to connect with Cloud Foundry to collect events. Use v1 to collect events using Doppler/Traffic Control. Use v2 to collect events from the RLP Gateway. Default: "v1".
     - name: doppler_address
       type: text
       title: Doppler Address
       required: false
       show_user: false
-      description: The URL of the Cloud Foundry Doppler Websocket. Optional. Default: "(value from ${api_address}/v2/info)".
+      description: |
+        The URL of the Cloud Foundry Doppler Websocket. Optional. Default: "(value from ${api_address}/v2/info)".
     - name: uaa_address
       type: text
       title: UAA Address
       required: false
       show_user: false
-      description: The URL of the Cloud Foundry UAA API. Optional. Default: "(value from ${api_address}/v2/info)".
+      description: |
+        The URL of the Cloud Foundry UAA API. Optional. Default: "(value from ${api_address}/v2/info)".
     - name: rlp_address
       type: text
       title: RLP Address
       required: false
       show_user: false
-      description: The URL of the Cloud Foundry RLP Gateway. Optional. Default: "(log-stream subdomain under the same domain as api_server)".
+      description: |
+        The URL of the Cloud Foundry RLP Gateway. Optional. Default: "(log-stream subdomain under the same domain as api_server)".
     - name: custom
       type: yaml
       title: Additional Log Configuration Options

@@ -52,7 +52,6 @@
     "@kbn/logging",
     "@kbn/share-plugin",
     "@kbn/core-notifications-browser",
-    "@kbn/slo-schema",
     "@kbn/guided-onboarding",
     "@kbn/charts-plugin",
     "@kbn/securitysolution-ecs",
