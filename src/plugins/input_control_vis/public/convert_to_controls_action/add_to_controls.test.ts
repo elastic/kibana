@@ -75,7 +75,9 @@ describe('addToControls', () => {
       expect(mockControlGroupApi.addOptionsListControl.mock.calls[0][0].selectedOptions).toEqual([
         'ios',
       ]);
-      expect(mockDataService.query.filterManager.removeFilter.mock.calls).toHaveLength(1);
+      expect(
+        (mockDataService.query.filterManager.removeFilter as jest.Mock).mock.calls
+      ).toHaveLength(1);
     });
   });
 
@@ -135,7 +137,9 @@ describe('addToControls', () => {
         '7014',
         '13103',
       ]);
-      expect(mockDataService.query.filterManager.removeFilter.mock.calls).toHaveLength(1);
+      expect(
+        (mockDataService.query.filterManager.removeFilter as jest.Mock).mock.calls
+      ).toHaveLength(1);
     });
   });
 
