@@ -9,7 +9,6 @@ import { useSelector } from 'react-redux';
 import { OverviewStatusState } from '../../../../common/runtime_types';
 import { selectOverviewStatus } from '../state/overview_status';
 
-// switch this to a component that contains this logic? Unnecessary splintering
 export function useStatusByLocationOverview({
   configId,
   locationId,
