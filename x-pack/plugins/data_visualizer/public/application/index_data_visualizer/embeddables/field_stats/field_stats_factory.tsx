@@ -12,7 +12,6 @@ import {
   type DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -235,7 +234,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             const references: Reference[] = dataViewId
               ? [
                   {
-                    type: DATA_VIEW_SAVED_OBJECT_TYPE,
+                    type: 'index-pattern',
                     name: FIELD_STATS_DATA_VIEW_REF_NAME,
                     id: dataViewId,
                   },

@@ -29,7 +29,6 @@
       "cloud"
     ],
     "requiredBundles": [
-      "dataViews",
       "kibanaReact",
       "kibanaUtils",
       "maps",
