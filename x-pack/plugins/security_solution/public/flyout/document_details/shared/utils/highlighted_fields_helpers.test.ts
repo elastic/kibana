@@ -12,7 +12,6 @@ import {
 
 const scopeId = 'scopeId';
 const isPreview = false;
-const isPreviewMode = false;
 
 describe('convertHighlightedFieldsToTableRow', () => {
   it('should convert highlighted fields to a table row', () => {
@@ -21,9 +20,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(
-      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, isPreviewMode)
-    ).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
       {
         field: 'host.name',
         description: {
@@ -31,7 +28,6 @@ describe('convertHighlightedFieldsToTableRow', () => {
           values: ['host-1'],
           scopeId: 'scopeId',
           isPreview,
-          isPreviewMode,
         },
       },
     ]);
@@ -44,9 +40,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(
-      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, isPreviewMode)
-    ).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
       {
         field: 'host.name-override',
         description: {
@@ -55,7 +49,6 @@ describe('convertHighlightedFieldsToTableRow', () => {
           values: ['host-1'],
           scopeId: 'scopeId',
           isPreview,
-          isPreviewMode,
         },
       },
     ]);
@@ -68,9 +61,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
         values: ['host-1'],
       },
     };
-    expect(
-      convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview, isPreviewMode)
-    ).toEqual([
+    expect(convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview)).toEqual([
       {
         field: 'host.name-override',
         description: {
@@ -79,7 +70,6 @@ describe('convertHighlightedFieldsToTableRow', () => {
           values: ['value override!'],
           scopeId: 'scopeId',
           isPreview,
-          isPreviewMode,
         },
       },
     ]);

@@ -44,7 +44,7 @@ export const PreviewPanelFooter = () => {
             data-test-subj={PREVIEW_FOOTER_LINK_TEST_ID}
           >
             {i18n.translate('xpack.securitySolution.flyout.preview.openFlyoutLabel', {
-              defaultMessage: 'Open alert details flyout',
+              defaultMessage: 'Replace with this flyout',
             })}
           </EuiLink>
         </EuiFlexItem>

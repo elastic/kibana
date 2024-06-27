@@ -50,7 +50,7 @@ export const ResponseSection = memo(() => {
       ) : isPreviewMode ? (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.response.openFlyoutMessage"
-          defaultMessage="Open alert details flyout to access response actions."
+          defaultMessage="You are currently in preview mode. Switch to this flyout to access all expandable options."
         />
       ) : (
         <ResponseButton />

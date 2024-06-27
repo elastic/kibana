@@ -22,7 +22,8 @@ import { useExpandSection } from '../hooks/use_expand_section';
 jest.mock('../hooks/use_expand_section');
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
-const OPEN_FLYOUT_MESSAGE = 'Open alert details flyout to access response actions.';
+const OPEN_FLYOUT_MESSAGE =
+  'You are currently in preview mode. Switch to this flyout to access all expandable options.';
 
 const renderResponseSection = () =>
   render(

@@ -78,7 +78,7 @@ export const USER_PREVIEW_BANNER = {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { eventId, indexName, scopeId, isPreviewMode } = useDocumentDetailsContext();
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
 
   const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
@@ -217,20 +217,16 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
             <EuiIcon type={USER_ICON} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {!isPreviewMode ? (
-              <EuiLink
-                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-                css={css`
-                  font-size: ${xsFontSize};
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
-                onClick={isPreviewEnabled ? openUserPreview : goToEntitiesTab}
-              >
-                {userName}
-              </EuiLink>
-            ) : (
-              <>{userName}</>
-            )}
+            <EuiLink
+              data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+              css={css`
+                font-size: ${xsFontSize};
+                font-weight: ${euiTheme.font.weight.bold};
+              `}
+              onClick={isPreviewEnabled ? openUserPreview : goToEntitiesTab}
+            >
+              {userName}
+            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

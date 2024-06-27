@@ -117,10 +117,6 @@ export interface HighlightedFieldsCellProps {
    * Highlighted field's value to display
    */
   values: string[] | null | undefined;
-  /**
-   * Boolean indicating the preview panel is shown
-   */
-  isPreviewMode: boolean;
 }
 
 /**
@@ -130,7 +126,6 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
   values,
   field,
   originalField,
-  isPreviewMode,
 }) => {
   const isSentinelOneAgentIdField = useMemo(
     () => originalField === RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD.sentinel_one,
@@ -160,8 +155,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
               key={`${i}-${value}`}
               data-test-subj={`${value}-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`}
             >
-              {!isPreviewMode &&
-              (field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME) ? (
+              {field === HOST_NAME_FIELD_NAME || field === USER_NAME_FIELD_NAME ? (
                 <LinkFieldCell field={field} value={value} />
               ) : field === AGENT_STATUS_FIELD_NAME ? (
                 <AgentStatus

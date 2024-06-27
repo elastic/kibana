@@ -29,7 +29,8 @@ const mockFlyoutContextValue = { openLeftPanel: jest.fn() };
 
 const NO_DATA_MESSAGE = "Investigation guideThere's no investigation guide for this rule.";
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
-const OPEN_FLYOUT_MESSAGE = 'Open alert details flyout to view investigation guide.';
+const OPEN_FLYOUT_MESSAGE =
+  'You are currently in preview mode. Switch to this flyout to access all expandable options.';
 
 const renderInvestigationGuide = () =>
   render(

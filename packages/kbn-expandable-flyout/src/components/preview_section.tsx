@@ -129,8 +129,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
     <div
       css={css`
         position: absolute;
-        top: 4px;
-        bottom: 12px;
+        top: 8px;
+        bottom: 8px;
         right: 4px;
         left: ${left}px;
         z-index: 1000;
@@ -139,7 +139,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       <EuiSplitPanel.Outer
         css={css`
           margin: ${euiTheme.size.xs};
-          box-shadow: 0 0 4px 4px ${euiTheme.colors.darkShade};
+          box-shadow: 0 0 16px 0px rgb(105, 112, 125, 0.5);
         `}
         data-test-subj={PREVIEW_SECTION_TEST_ID}
         className="eui-fullHeight"
@@ -148,7 +148,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           <EuiSplitPanel.Inner
             grow={false}
             color={banner.backgroundColor}
-            paddingSize="none"
+            paddingSize="xs"
             data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerPanel`}
           >
             <EuiText
