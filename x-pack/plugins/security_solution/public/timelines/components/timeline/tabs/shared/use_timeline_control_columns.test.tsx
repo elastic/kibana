@@ -51,6 +51,9 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            events: [],
+            pinnedEventIds: {},
+            eventIdToNoteIds: {},
           }),
         {
           wrapper: TestProviders,
@@ -70,6 +73,9 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            events: [],
+            pinnedEventIds: {},
+            eventIdToNoteIds: {},
           }),
         {
           wrapper: TestProviders,
@@ -90,6 +96,9 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            events: [],
+            pinnedEventIds: {},
+            eventIdToNoteIds: {},
           }),
         {
           wrapper: TestProviders,

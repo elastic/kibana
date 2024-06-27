@@ -49,11 +49,21 @@ interface Props {
   showAddNote: boolean;
   toggleShowAddNote: (eventId?: string) => void;
   eventId?: string;
+  timelineId: string;
 }
 
 /** A view for entering and reviewing notes */
 export const NoteCards = React.memo<Props>(
-  ({ ariaRowindex, associateNote, className, notes, showAddNote, toggleShowAddNote, eventId }) => {
+  ({
+    ariaRowindex,
+    associateNote,
+    className,
+    notes,
+    showAddNote,
+    toggleShowAddNote,
+    eventId,
+    timelineId,
+  }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
@@ -94,7 +104,7 @@ export const NoteCards = React.memo<Props>(
               <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
                 <p>{i18n.YOU_ARE_VIEWING_NOTES(ariaRowindex)}</p>
               </EuiScreenReaderOnly>
-              <NotePreviews notes={notes} />
+              <NotePreviews timelineId={timelineId} notes={notes} />
             </NotesContainer>
           </NotePreviewsContainer>
         ) : null}

@@ -262,9 +262,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
-              timelineType={timelineType}
+              timelineId={timelineId}
               eventId={eventId}
-              eventIdToNoteIds={eventIdToNoteIds}
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}

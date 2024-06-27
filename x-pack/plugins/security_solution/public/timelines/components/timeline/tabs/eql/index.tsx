@@ -211,8 +211,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 isTextBasedQuery={false}
                 pageInfo={pageInfo}
                 leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-                pinnedEventIds={pinnedEventIds}
-                eventIdToNoteIds={eventIdToNoteIds}
               />
             </ScrollableFlexItem>
           </FullWidthFlexGroup>

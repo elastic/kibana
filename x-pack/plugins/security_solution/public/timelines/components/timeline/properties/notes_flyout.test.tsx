@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TimelineId } from '../../../../../common/types';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import React from 'react';
@@ -32,6 +33,7 @@ const renderTestComponent = (props?: Partial<ComponentProps<typeof NotesFlyout>>
       toggleShowAddNote={toggleShowAddNote}
       associateNote={associateNote}
       notes={notes}
+      timelineId={TimelineId.test}
       {...props}
     />,
     {

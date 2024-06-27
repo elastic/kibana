@@ -360,6 +360,7 @@ const StatefulEventComponent: React.FC<Props> = ({
               notes={notes}
               showAddNote={!!showNotes[eventId]}
               toggleShowAddNote={onToggleShowNotes}
+              timelineId={timelineId}
             />
           </EventsTrSupplement>
 

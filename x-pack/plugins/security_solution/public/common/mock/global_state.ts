@@ -323,6 +323,7 @@ export const mockGlobalState: State = {
     timelineById: {
       [TimelineId.test]: {
         activeTab: TimelineTabs.query,
+        createdBy: 'elastic',
         prevActiveTab: TimelineTabs.notes,
         dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],

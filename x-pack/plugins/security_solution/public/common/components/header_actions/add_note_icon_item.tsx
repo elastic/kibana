@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { TimelineId } from '../../../../common/types';
+import { selectTimelineById } from '../../../timelines/store/selectors';
 import { NotesFlyout } from '../../../timelines/components/timeline/properties/notes_flyout';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { TimelineType } from '../../../../common/api/timeline';
@@ -21,10 +21,9 @@ import { timelineActions } from '../../../timelines/store';
 
 interface AddEventNoteActionProps {
   ariaLabel?: string;
-  timelineType: TimelineType;
   eventId?: string;
   refetch?: () => void;
-  eventIdToNoteIds?: Record<string, string[]>;
+  timelineId: string;
 }
 
 const EMPTY_STRING_ARRAY: string[] = [];
@@ -35,10 +34,9 @@ function isNoteNotNull<T>(note: T | null): note is T {
 
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   ariaLabel,
-  timelineType,
   eventId,
   refetch,
-  eventIdToNoteIds,
+  timelineId,
 }) => {
   const [areNotesVisible, setAreNotesVisible] = React.useState(false);
 
@@ -60,6 +58,10 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
 
   const { queries } = useDeepEqualSelector(timelineSelector);
 
+  const { eventIdToNoteIds, timelineType } = useDeepEqualSelector((state) =>
+    selectTimelineById(state, timelineId)
+  );
+
   const localRefetch = useCallback(() => {
     queries.forEach((query) => {
       if (query.refetch) {
@@ -74,7 +76,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
       dispatch(
         timelineActions.addNoteToEvent({
           eventId,
-          id: TimelineId.active,
+          id: timelineId,
           noteId: currentNoteId,
         })
       );
@@ -84,7 +86,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
 
       localRefetch();
     },
-    [dispatch, eventId, refetch, localRefetch]
+    [dispatch, eventId, refetch, localRefetch, timelineId]
   );
 
   const noteIds: string[] = useMemo(
@@ -124,6 +126,7 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
         notes={notes}
         show={areNotesVisible}
         onClose={handleNotesFlyoutClose}
+        timelineId={timelineId}
       />
 
       <ActionIconItem>

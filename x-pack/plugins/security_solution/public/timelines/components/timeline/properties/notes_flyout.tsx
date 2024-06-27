@@ -24,7 +24,7 @@ export type NotesFlyoutProps = {
   onClose: () => void;
 } & Pick<
   ComponentProps<typeof NoteCards>,
-  'eventId' | 'notes' | 'associateNote' | 'toggleShowAddNote'
+  'eventId' | 'notes' | 'associateNote' | 'toggleShowAddNote' | 'timelineId'
 >;
 
 /*
@@ -37,7 +37,7 @@ export const NotesFlyoutContainer = styled(EuiFlyout)`
 `;
 
 export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutProps) {
-  const { eventId, toggleShowAddNote, show, onClose, associateNote, notes } = props;
+  const { eventId, toggleShowAddNote, show, onClose, associateNote, notes, timelineId } = props;
 
   const notesFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'notesFlyoutTitle',
@@ -51,6 +51,7 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
     <NotesFlyoutContainer
       ownFocus={false}
       className="timeline-notes-flyout"
+      data-test-subj="timeline-notes-flyout"
       onClose={onClose}
       aria-labelledby={notesFlyoutTitleId}
       maxWidth={750}
@@ -70,6 +71,7 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
           showAddNote={true}
           toggleShowAddNote={toggleShowAddNote}
           eventId={eventId}
+          timelineId={timelineId}
         />
       </EuiFlyoutBody>
     </NotesFlyoutContainer>
