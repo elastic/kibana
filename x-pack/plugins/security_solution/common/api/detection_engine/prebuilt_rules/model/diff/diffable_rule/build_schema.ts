@@ -6,6 +6,9 @@
  */
 import { z } from 'zod';
 
+// Utility type that helps infer the underlying type of a `z.ZodOptional` type. First,
+// checks if T is a ZodOptional type, and if it is, infers and returns the underlying type.
+// If it is not, simply return the type T itself.
 type InferredOptional<T extends z.ZodTypeAny> = T extends z.ZodOptional<infer U> ? U : T;
 
 interface RuleFields<TRequired extends z.ZodRawShape, TOptional extends z.ZodRawShape> {
