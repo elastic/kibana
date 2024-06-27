@@ -24,7 +24,7 @@ import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 import { useKibana } from '../../../lib/kibana';
 import type { OnboardingHubStepLinkClickedParams } from '../../../lib/telemetry/events/onboarding/types';
-import { AVCResultsBanner2024 } from '../../../../app/components/avc_banner/avc_results_banner_2024';
+import { AVCResultsBanner2024 } from '../../avc_banner/avc_results_banner_2024';
 
 interface OnboardingProps {
   indicesExist?: boolean;
@@ -56,7 +56,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       productTypes?.find((product) => product.product_line === ProductLine.security)?.product_tier,
     [productTypes]
   );
-  const { wrapperStyles, progressSectionStyles, stepsSectionStyles, bannerStyles, calloutStyles } =
+  const { wrapperStyles, progressSectionStyles, stepsSectionStyles, bannerStyles } =
     useOnboardingStyles();
   const { telemetry, storage } = useKibana().services;
   const onStepLinkClicked = useCallback(

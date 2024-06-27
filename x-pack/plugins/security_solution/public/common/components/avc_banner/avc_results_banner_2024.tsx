@@ -9,8 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../../common/lib/kibana';
-import { useOnboardingStyles } from '../../../common/components/landing_page/onboarding/styles/onboarding.styles';
+import { useKibana } from '../../lib/kibana';
+import { useOnboardingStyles } from '../landing_page/onboarding/styles/onboarding.styles';
 
 export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;

@@ -25,3 +25,5 @@ export {
   EnablePrebuiltRulesSteps,
   ViewAlertsSteps,
 } from './common/components/landing_page/onboarding/types';
+
+export { AVCResultsBanner2024 } from './common/components/avc_banner/avc_results_banner_2024';

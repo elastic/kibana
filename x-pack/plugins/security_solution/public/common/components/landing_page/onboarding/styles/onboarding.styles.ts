@@ -8,9 +8,8 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useMemo } from 'react';
-import launch from '../images/launch.png';
+import avcBannerBackground from '../images/avc_banner_background.svg';
 
-// change launch image to other image!
 export const useOnboardingStyles = () => {
   const { euiTheme } = useEuiTheme();
 
@@ -32,8 +31,7 @@ export const useOnboardingStyles = () => {
       }),
       calloutStyles: css({
         paddingLeft: `${euiTheme.size.xl}`,
-        backgroundImage: `url(${launch})`,
-        backgroundSize: '10%',
+        backgroundImage: `url(${avcBannerBackground})`,
         backgroundRepeat: 'no-repeat',
         backgroundPositionX: 'right',
         backgroundPositionY: 'bottom',
