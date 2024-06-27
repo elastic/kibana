@@ -135,7 +135,7 @@ export const ResultsView: FC<Props> = ({
           </EuiFlexGroup>
         </EuiPanel>
 
-        {results.format !== FILE_FORMATS.PDF ? (
+        {results.format !== FILE_FORMATS.TIKA ? (
           <>
             <EuiSpacer size="m" />
 

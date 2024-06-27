@@ -11,7 +11,7 @@ import type { IImporter, ImportFactoryOptions } from '../importer';
 import type {
   HasImportPermission,
   FindFileStructureResponse,
-  PreviewPDFResponse,
+  PreviewTikaResponse,
 } from '../../common/types';
 import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
 import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
@@ -27,7 +27,7 @@ export interface FileUploadStartApi {
   checkIndexExists: typeof checkIndexExists;
   getTimeFieldRange: typeof getTimeFieldRange;
   analyzeFile: typeof analyzeFile;
-  previewPDFFile: typeof previewPDFFile;
+  previewTikaFile: typeof previewTikaFile;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -68,17 +68,17 @@ export async function analyzeFile(
   });
 }
 
-export async function previewPDFFile(
+export async function previewTikaFile(
   data: ArrayBuffer,
   params: Record<string, string> = {}
-): Promise<PreviewPDFResponse> {
+): Promise<PreviewTikaResponse> {
   const { getHttp } = await lazyLoadModules();
-  const pdfBase64 = fromByteArray(new Uint8Array(data));
+  const base64File = fromByteArray(new Uint8Array(data));
   const body = JSON.stringify({
-    pdfBase64,
+    base64File,
   });
-  return await getHttp().fetch<PreviewPDFResponse>({
-    path: `/internal/file_upload/preview_pdf_contents`,
+  return await getHttp().fetch<PreviewTikaResponse>({
+    path: `/internal/file_upload/preview_tika_contents`,
     method: 'POST',
     version: '1',
     body,

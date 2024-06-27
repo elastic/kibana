@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import type { AnalysisResult, PreviewPDFResponse } from '@kbn/file-upload-plugin/common/types';
+import type { AnalysisResult, PreviewTikaResponse } from '@kbn/file-upload-plugin/common/types';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { FILE_FORMATS } from '../../../../../common/constants';
 
-export async function analyzePdfFile(
+export async function analyzeTikaFile(
   data: ArrayBuffer,
   fileUpload: FileUploadStartApi
-): Promise<{ standardResults: AnalysisResult; pdfResults: PreviewPDFResponse }> {
-  const resp = await fileUpload.previewPDFFile(data);
+): Promise<{ standardResults: AnalysisResult; tikaResults: PreviewTikaResponse }> {
+  const resp = await fileUpload.previewTikaFile(data);
   const numLinesAnalyzed = (resp.content.match(/\n/g) || '').length + 1;
 
   return {
-    pdfResults: resp,
+    tikaResults: resp,
     standardResults: {
       results: {
-        format: FILE_FORMATS.PDF,
+        format: FILE_FORMATS.TIKA,
+        document_type: resp.content_type,
         charset: 'utf-8',
         has_header_row: false,
         has_byte_order_marker: false,

@@ -6,11 +6,11 @@
  */
 
 import { fromByteArray } from 'base64-js';
-import { ImportDocPDF } from '../../common/types';
+import { ImportDocTika } from '../../common/types';
 import { Importer } from './importer';
 import { CreateDocsResponse } from './types';
 
-export class PDFImporter extends Importer {
+export class TikaImporter extends Importer {
   constructor() {
     super();
   }
@@ -27,7 +27,7 @@ export class PDFImporter extends Importer {
     return { success: true };
   }
 
-  protected _createDocs(base64String: string): CreateDocsResponse<ImportDocPDF> {
+  protected _createDocs(base64String: string): CreateDocsResponse<ImportDocTika> {
     const remainder = 0;
     try {
       const docs = [{ data: base64String }];

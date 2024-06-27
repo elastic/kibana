@@ -20,6 +20,6 @@ export const FILE_FORMATS = {
   DELIMITED: 'delimited',
   NDJSON: 'ndjson',
   SEMI_STRUCTURED_TEXT: 'semi_structured_text',
-  PDF: 'pdf',
+  TIKA: 'tika',
   // XML: 'xml',
 };

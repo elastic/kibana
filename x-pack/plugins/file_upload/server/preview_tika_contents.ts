@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { PreviewPDFResponse } from '../common/types';
+import type { PreviewTikaResponse } from '../common/types';
 
 /**
  * Returns the start and end time range in epoch milliseconds for a given set of documents
@@ -16,10 +16,10 @@ import type { PreviewPDFResponse } from '../common/types';
  * @param docs array of documents
  * @returns start and end time range in epoch milliseconds
  */
-export async function previewPDFContents(
+export async function previewTikaContents(
   client: IScopedClusterClient,
-  pdfBase64: string
-): Promise<PreviewPDFResponse> {
+  base64File: string
+): Promise<PreviewTikaResponse> {
   const pipeline = {
     description: 'Ingest pipeline created by text structure finder',
     processors: [
@@ -39,7 +39,7 @@ export async function previewPDFContents(
         _index: 'index',
         _id: 'id',
         _source: {
-          data: pdfBase64,
+          data: base64File,
         },
       },
     ],

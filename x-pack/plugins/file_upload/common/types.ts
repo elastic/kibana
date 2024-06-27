@@ -28,6 +28,7 @@ export interface FindFileStructureResponse {
   has_header_row: boolean;
   has_byte_order_marker: boolean;
   format: string;
+  document_type?: string;
   field_stats: {
     [fieldName: string]: {
       count: number;
@@ -124,11 +125,11 @@ export interface ImportDocMessage {
   message: string;
 }
 
-export interface ImportDocPDF {
+export interface ImportDocTika {
   data: string;
 }
 
-export type ImportDoc = ImportDocMessage | ImportDocPDF | string | object;
+export type ImportDoc = ImportDocMessage | ImportDocTika | string | object;
 
 export interface IngestPipelineWrapper {
   id: string;
@@ -142,14 +143,14 @@ export interface IngestPipeline {
   name?: string;
 }
 
-export interface PreviewPDFResponse {
+export interface PreviewTikaResponse {
   date?: string;
-  content_type: 'application/pdf';
+  content_type: string;
   author?: string;
-  format: 'application/pdf; version=1.5';
+  format: string;
   modified: string;
   language: string;
   creator_tool?: string;
-  content: 'This is a test PDF file';
-  content_length: 28;
+  content: string;
+  content_length: number;
 }

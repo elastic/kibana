@@ -29,7 +29,7 @@ import {
 import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
-import { previewPDFContents } from './preview_pdf_contents';
+import { previewTikaContents } from './preview_tika_contents';
 
 function importData(
   client: IScopedClusterClient,
@@ -335,7 +335,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    */
   router.versioned
     .post({
-      path: '/internal/file_upload/preview_pdf_contents',
+      path: '/internal/file_upload/preview_tika_contents',
       access: 'internal',
       options: {
         tags: ['access:fileUpload:analyzeFile'],
@@ -351,16 +351,16 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         validate: {
           request: {
             body: schema.object({
-              pdfBase64: schema.string(),
+              base64File: schema.string(),
             }),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { pdfBase64 } = request.body;
+          const { base64File } = request.body;
           const esClient = (await context.core).elasticsearch.client;
-          const resp = await previewPDFContents(esClient, pdfBase64);
+          const resp = await previewTikaContents(esClient, base64File);
 
           return response.ok({
             body: resp,

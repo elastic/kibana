@@ -413,7 +413,7 @@ export class ImportView extends Component {
 
               {importer !== undefined &&
                 importer.initialized() &&
-                this.props.results.format !== FILE_FORMATS.PDF && (
+                this.props.results.format !== FILE_FORMATS.TIKA && (
                   <DocCountChart
                     statuses={statuses}
                     dataStart={this.props.dataStart}
@@ -458,7 +458,7 @@ export class ImportView extends Component {
                   <EuiSpacer size="l" />
 
                   <ResultsLinks
-                    fieldStats={this.props.results?.field_stats}
+                    results={this.props.results}
                     index={index}
                     dataViewId={dataViewId}
                     timeFieldName={timeFieldName}

@@ -7,7 +7,7 @@
 
 import { MessageImporter } from './message_importer';
 import { NdjsonImporter } from './ndjson_importer';
-import { PDFImporter } from './pdf_importer';
+import { TikaImporter } from './tika_importer';
 import { ImportFactoryOptions } from './types';
 import { FILE_FORMATS } from '../../common/constants';
 
@@ -22,8 +22,8 @@ export function importerFactory(format: string, options: ImportFactoryOptions) {
       return new MessageImporter(options);
     case FILE_FORMATS.NDJSON:
       return new NdjsonImporter();
-    case FILE_FORMATS.PDF:
-      return new PDFImporter();
+    case FILE_FORMATS.TIKA:
+      return new TikaImporter();
     default:
       throw new Error('Importer not found for format');
   }

@@ -29,9 +29,10 @@ import {
   processResults,
   // processPDFResults,
 } from '../../../common/components/utils';
-import { analyzePdfFile } from './pdf_analyzer';
+import { analyzeTikaFile } from './tika_analyzer';
 
 import { MODE } from './constants';
+import { isTikaType } from '../../../../../common/utils/tika_utils';
 
 export class FileDataVisualizerView extends Component {
   constructor(props) {
@@ -108,8 +109,8 @@ export class FileDataVisualizerView extends Component {
     if (file.size <= this.maxFileUploadBytes) {
       try {
         const { data, fileContents } = await readFile(file);
-
-        if (file.type === 'application/pdf') {
+        console.log(file.type);
+        if (isTikaType(file.type)) {
           // const base64Data = await readPDFFile(file);
           // this.setState({
           //   base64Data,
@@ -121,7 +122,7 @@ export class FileDataVisualizerView extends Component {
             fileSize: file.size,
           });
 
-          await this.analyzePDF(file, data);
+          await this.analyzeTika(data);
         } else {
           this.setState({
             data,
@@ -224,13 +225,13 @@ export class FileDataVisualizerView extends Component {
     }
   }
 
-  async analyzePDF(file, data, isRetry = false) {
-    const { pdfResults, standardResults } = await analyzePdfFile(data, this.props.fileUpload);
+  async analyzeTika(data, isRetry = false) {
+    const { tikaResults, standardResults } = await analyzeTikaFile(data, this.props.fileUpload);
     const serverSettings = processResults(standardResults);
     this.originalSettings = serverSettings;
 
     this.setState({
-      fileContents: pdfResults.content,
+      fileContents: tikaResults.content,
       results: standardResults.results,
       explanation: standardResults.explanation,
       loaded: true,
