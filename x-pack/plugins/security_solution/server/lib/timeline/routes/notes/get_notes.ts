@@ -14,10 +14,10 @@ import type { SetupPlugins } from '../../../../plugin';
 
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 import { buildFrameworkRequest, getNotesPaginated } from '../../utils/common';
-import { getAllSavedNote } from '../../saved_object/notes';
+import { getAllSavedNote, MAX_UNASSOCIATED_NOTES } from '../../saved_object/notes';
 import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 
-export const getNotesByDocumentIdsRoute = (
+export const getNotesRoute = (
   router: SecuritySolutionPluginRouter,
   _: ConfigType,
   security: SetupPlugins['security']
@@ -48,6 +48,8 @@ export const getNotesByDocumentIdsRoute = (
               const options = {
                 type: noteSavedObjectType,
                 search: alertIdSearchString,
+                page: 1,
+                perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
 
@@ -56,6 +58,8 @@ export const getNotesByDocumentIdsRoute = (
               const options = {
                 type: noteSavedObjectType,
                 search: alertIds,
+                page: 1,
+                perPage: MAX_UNASSOCIATED_NOTES,
               };
               const res = await getAllSavedNote(frameworkRequest, options);
 

@@ -30,6 +30,8 @@ import { noteSavedObjectType } from '../../saved_object_mappings/notes';
 import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { noteFieldsMigrator } from './field_migrator';
 
+export const MAX_UNASSOCIATED_NOTES = 1000;
+
 export const deleteNotesByTimelineId = async (request: FrameworkRequest, timelineId: string) => {
   const options: SavedObjectsFindOptions = {
     type: noteSavedObjectType,
@@ -147,10 +149,10 @@ export const createNote = async ({
       type: noteSavedObjectType,
       hasReference: { type: timelineSavedObjectType, id: '' },
     });
-    if (notesCount.total >= 1000) {
+    if (notesCount.total >= MAX_UNASSOCIATED_NOTES) {
       return {
         code: 403,
-        message: 'Cannot create more than 1000 notes without associating them to a timeline',
+        message: `Cannot create more than ${MAX_UNASSOCIATED_NOTES} notes without associating them to a timeline`,
         note: {
           ...note,
           noteId: uuidv1(),
