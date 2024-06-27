@@ -1,5 +1,5 @@
 {
-  "connector.put": {
+  "query_rule.get": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,13 +7,12 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "PUT"
+      "GET"
     ],
     "patterns": [
-      "_connector/{connector_id}",
-      "_connector"
+      "_query_rules/{ruleset_id}/_rule/{rule_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/create-connector-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-query-rule.html",
     "availability": {
       "stack": true,
       "serverless": true
