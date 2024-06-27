@@ -1007,7 +1007,7 @@ export class Embeddable
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
-    console.log('EVENT: render complete');
+    console.log(`EVENT: chart drawn (took ${performance.now() - window.DATA_RECEIVED_TIME}ms)`);
     let datasourceEvents: string[] = [];
     let visualizationEvents: string[] = [];
 
