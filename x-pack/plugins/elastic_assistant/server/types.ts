@@ -36,7 +36,6 @@ import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server'
 import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
-import { z } from 'zod';
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
