@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash';
 
 import type {
   Logger,
+  LogMeta,
   CoreStart,
   IScopedClusterClient,
   ElasticsearchClient,
@@ -528,10 +529,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchDiagnosticAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.l('Searching diagnostic alerts', {
+    this.logger.debug('Searching diagnostic alerts', {
       from: executeFrom,
       to: executeTo,
-    });
+    } as LogMeta);
 
     let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
@@ -572,7 +573,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           fetchMore = false;
         }
 
-        this.logger.l('Diagnostic alerts to return', { numOfHits });
+        this.logger.debug('Diagnostic alerts to return', { numOfHits } as LogMeta);
         fetchMore = numOfHits > 0 && numOfHits < telemetryConfiguration.telemetry_max_buffer_size;
       } catch (e) {
         this.logger.l('Error fetching alerts', { error: JSON.stringify(e) });
@@ -744,10 +745,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public async *fetchPrebuiltRuleAlertsBatch(executeFrom: string, executeTo: string) {
-    this.logger.l('Searching prebuilt rule alerts from', {
+    this.logger.debug('Searching prebuilt rule alerts from', {
       executeFrom,
       executeTo,
-    });
+    } as LogMeta);
 
     let pitId = await this.openPointInTime(DEFAULT_DIAGNOSTIC_INDEX);
     let fetchMore = true;
@@ -882,7 +883,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
           pitId = response?.pit_id;
         }
 
-        this.logger.l('Prebuilt rule alerts to return', { alerts: alerts.length });
+        this.logger.debug('Prebuilt rule alerts to return', { alerts: alerts.length } as LogMeta);
 
         yield alerts;
       }

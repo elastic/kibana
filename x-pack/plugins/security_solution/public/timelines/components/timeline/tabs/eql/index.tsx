@@ -31,9 +31,9 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../../store/model';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
@@ -92,8 +92,6 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { augmentedColumnHeaders, timelineQueryFieldsFromColumns } = useTimelineColumns(columns);
 
-  const leadingControlColumns = useTimelineControlColumn(columns, TIMELINE_NO_SORTING);
-
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineEnabled'
   );
@@ -135,6 +133,14 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     skip: !canQueryTimeline(),
     startDate: start,
     timerangeKind,
+  });
+
+  const leadingControlColumns = useTimelineControlColumn({
+    columns,
+    sort: TIMELINE_NO_SORTING,
+    timelineId,
+    activeTab: TimelineTabs.eql,
+    refetch,
   });
 
   const isQueryLoading = useMemo(

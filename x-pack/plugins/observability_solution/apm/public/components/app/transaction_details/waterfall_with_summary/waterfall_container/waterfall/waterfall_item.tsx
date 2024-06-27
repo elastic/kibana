@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useRef, useState, useEffect } from 'react';
+import React, { ReactNode, useRef, useEffect, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
@@ -115,6 +115,7 @@ interface IWaterfallItemProps {
   errorCount: number;
   marginLeftLevel: number;
   segments?: Array<{
+    id: string;
     left: number;
     width: number;
     color: string;
@@ -267,6 +268,7 @@ export function WaterfallItem({
           <CriticalPathItemBar>
             {segments?.map((segment) => (
               <CriticalPathItemSegment
+                key={segment.id}
                 color={segment.color}
                 left={segment.left}
                 width={segment.width}

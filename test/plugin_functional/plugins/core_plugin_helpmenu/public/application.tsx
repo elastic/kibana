@@ -16,6 +16,16 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+
+interface StartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
 
 import { AppMountParameters } from '@kbn/core/public';
 
@@ -41,7 +51,16 @@ const App = ({ appName }: { appName: string }) => (
   </EuiPage>
 );
 
-export const renderApp = (appName: string, { element }: AppMountParameters) => {
-  render(<App appName={appName} />, element);
+export const renderApp = (
+  appName: string,
+  { element }: AppMountParameters,
+  startServices: StartServices
+) => {
+  render(
+    <KibanaRenderContextProvider {...startServices}>
+      <App appName={appName} />
+    </KibanaRenderContextProvider>,
+    element
+  );
   return () => unmountComponentAtNode(element);
 };

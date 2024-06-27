@@ -191,6 +191,8 @@ export default function (providerContext: FtrProviderContext) {
         unhealthy: 1,
         offline: 0,
         updating: 0,
+        unenrolled: 0,
+        inactive: 0,
         num_host_urls: 2,
       });
     });

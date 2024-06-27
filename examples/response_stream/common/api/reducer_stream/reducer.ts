@@ -6,23 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ReducerStreamApiAction, API_ACTION_NAME } from '.';
+import { getInitialState, type StreamState } from '../stream_state';
+import { type ReducerStreamApiAction, API_ACTION_NAME } from './reducer_actions';
 
 export const UI_ACTION_NAME = {
   RESET: 'reset',
 } as const;
 export type UiActionName = typeof UI_ACTION_NAME[keyof typeof UI_ACTION_NAME];
-
-export interface StreamState {
-  errors: string[];
-  progress: number;
-  entities: Record<string, number>;
-}
-export const initialState: StreamState = {
-  errors: [],
-  progress: 0,
-  entities: {},
-};
 
 interface UiActionResetStream {
   type: typeof UI_ACTION_NAME.RESET;
@@ -34,14 +24,7 @@ export function resetStream(): UiActionResetStream {
 
 type UiAction = UiActionResetStream;
 export type ReducerAction = ReducerStreamApiAction | UiAction;
-export function reducerStreamReducer(
-  state: StreamState,
-  action: ReducerAction | ReducerAction[]
-): StreamState {
-  if (Array.isArray(action)) {
-    return action.reduce(reducerStreamReducer, state);
-  }
-
+export function reducerStreamReducer(state: StreamState, action: ReducerAction): StreamState {
   switch (action.type) {
     case API_ACTION_NAME.UPDATE_PROGRESS:
       return {
@@ -72,7 +55,7 @@ export function reducerStreamReducer(
         errors: [...state.errors, action.payload],
       };
     case UI_ACTION_NAME.RESET:
-      return initialState;
+      return getInitialState();
     default:
       return state;
   }

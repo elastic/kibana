@@ -46,6 +46,7 @@ export interface FormLocation {
 export type FormConfig = MonitorFields & {
   isTLSEnabled: boolean;
   ['schedule.number']: string;
+  ['schedule.unit']: string;
   ['source.inline']: string;
   [AlertConfigKey.STATUS_ENABLED]: boolean;
   [AlertConfigKey.TLS_ENABLED]: boolean;

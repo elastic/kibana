@@ -90,6 +90,13 @@ const dashboardsTab: Tab = {
   ),
 };
 
+const linkToApmTab: Tab = {
+  id: ContentTabIds.LINK_TO_APM,
+  name: i18n.translate('xpack.infra.assetDetails.tabs.linkToApm', {
+    defaultMessage: 'APM',
+  }),
+};
+
 export const hostDetailsTabs: Tab[] = [
   overviewTab,
   metadataTab,
@@ -101,8 +108,17 @@ export const hostDetailsTabs: Tab[] = [
   osqueryTab,
   dashboardsTab,
 ];
-// Profiling and Logs tab would be added in next iteration
-export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab];
+export const hostDetailsFlyoutTabs: Tab[] = [...hostDetailsTabs, linkToApmTab];
+
+// The profiling tab would be added in next iteration
+export const containerDetailsTabs: Tab[] = [overviewTab, metadataTab, metricsTab, logsTab];
+export const containerDetailsFlyoutTabs: Tab[] = [
+  overviewTab,
+  metadataTab,
+  metricsTab,
+  logsTab,
+  linkToApmTab,
+];
 
 export const getAssetDetailsTabs = (type: string): Tab[] => {
   switch (type) {
@@ -110,6 +126,17 @@ export const getAssetDetailsTabs = (type: string): Tab[] => {
       return hostDetailsTabs;
     case 'container':
       return containerDetailsTabs;
+    default:
+      return [];
+  }
+};
+
+export const getAssetDetailsFlyoutTabs = (type: string): Tab[] => {
+  switch (type) {
+    case 'host':
+      return hostDetailsFlyoutTabs;
+    case 'container':
+      return containerDetailsFlyoutTabs;
     default:
       return [];
   }

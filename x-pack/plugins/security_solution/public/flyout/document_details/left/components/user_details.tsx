@@ -34,7 +34,7 @@ import { DefaultFieldRenderer } from '../../../../timelines/components/field_ren
 import { CellActions } from './cell_actions';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { setAbsoluteRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';

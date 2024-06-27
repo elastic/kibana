@@ -7,6 +7,7 @@
 
 import { RuleAction } from '@kbn/alerting-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { TriggersAndActionsUIPublicPluginStart } from './plugin';
 
@@ -14,7 +15,6 @@ import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
 import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
 import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
-import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
   RuleTypeModel,

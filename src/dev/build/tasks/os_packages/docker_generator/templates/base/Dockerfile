@@ -35,11 +35,6 @@ COPY {{artifactTarball}} /tmp/kibana.tar.gz
 RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
-{{#serverless}}
-# Exclude serverless.yml disabled assets
-  --exclude=screenshotting-plugin/chromium \
-  --exclude=screenshotting-plugin/server/assets \
-{{/serverless}}
   --strip-components=1 \
   -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
@@ -173,10 +168,6 @@ ENV PATH=/usr/share/kibana/bin:$PATH
 # Set some Kibana configuration defaults.
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
-COPY --chown=1000:0 config/serverless.yml /usr/share/kibana/config/serverless.yml
-COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless.es.yml
-COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
-COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
 {{^opensslLegacyProvider}}

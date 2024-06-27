@@ -18,7 +18,7 @@ import {
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { WebhookAuthType } from '@kbn/stack-connectors-plugin/common/webhook/constants';
+import { AuthType } from '@kbn/stack-connectors-plugin/common/auth/constants';
 import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   binaryToString,
@@ -48,9 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   const postBulkAction = () =>
     supertest
@@ -190,7 +188,7 @@ export default ({ getService }: FtrProviderContext): void => {
         attributes: {
           actionTypeId: '.webhook',
           config: {
-            authType: WebhookAuthType.Basic,
+            authType: AuthType.Basic,
             hasAuth: true,
             method: 'post',
             url: 'http://localhost',
@@ -218,7 +216,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const [ruleJson, connectorsJson, exportDetailsJson] = body.toString().split(/\n/);
 
       const rule = removeServerGeneratedProperties(JSON.parse(ruleJson));
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       expect(rule).toEqual({
         ...expectedRule,

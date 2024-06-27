@@ -21,6 +21,8 @@ import { ManualInstructions } from '../../../../../../../../../components/enroll
 
 import { KubernetesManifestApplyStep } from '../../../../../../../../../components/agent_enrollment_flyout/steps/run_k8s_apply_command_step';
 
+import { getRootIntegrations } from '../../../../../../../../../../common/services';
+
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps> = (props) => {
@@ -80,6 +82,7 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
       fullCopyButton: true,
       fleetServerHost,
       onCopy: () => setCommandCopied(true),
+      rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
     }),
   ];
 

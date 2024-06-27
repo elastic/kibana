@@ -268,7 +268,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
-    return await this.testSubjects.findAll('docTableDetailsFlyout');
+    return await this.testSubjects.findAll('docViewerFlyout');
   }
 
   public async closeFlyout() {
@@ -376,12 +376,12 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('dataGridDisplaySelectorButton');
   }
 
-  public async getCurrentRowHeightValue() {
+  public async getCurrentRowHeightValue(scope: 'row' | 'header' = 'row') {
     const buttonGroup = await this.testSubjects.find(
-      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+      `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
     );
     let value = '';
-    await this.retry.waitFor('row height value not to be empty', async () => {
+    await this.retry.waitFor(`${scope} height value not to be empty`, async () => {
       // to prevent flakiness
       const selectedButton = await buttonGroup.findByCssSelector(
         '.euiButtonGroupButton-isSelected'
@@ -401,12 +401,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getCurrentHeaderRowHeightValue() {
-    const buttonGroup = await this.testSubjects.find(
-      'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
-    );
-    return (
-      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
-    ).getVisibleText();
+    return await this.getCurrentRowHeightValue('header');
   }
 
   public async changeHeaderRowHeightValue(newValue: string) {
@@ -457,15 +452,28 @@ export class DataGridService extends FtrService {
     return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
   }
 
+  public async showFieldCellActionInFlyout(fieldName: string, actionName: string): Promise<void> {
+    const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
+      ? `tableDocViewRow-${fieldName}-value`
+      : `tableDocViewRow-${fieldName}-name`;
+    await this.testSubjects.click(cellSelector);
+    await this.retry.waitFor('grid cell actions to appear', async () => {
+      return this.testSubjects.exists(`${actionName}-${fieldName}`);
+    });
+  }
+
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
-    const openPopoverButtonSelector = `openFieldActionsButton-${fieldName}`;
-    const inlineButtonsGroupSelector = `fieldActionsGroup-${fieldName}`;
-    if (await this.testSubjects.exists(openPopoverButtonSelector)) {
-      await this.testSubjects.click(openPopoverButtonSelector);
-    } else {
-      await this.testSubjects.existOrFail(inlineButtonsGroupSelector);
-    }
+    await this.showFieldCellActionInFlyout(fieldName, actionName);
     await this.testSubjects.click(`${actionName}-${fieldName}`);
+  }
+
+  public async expandFieldNameCellInFlyout(fieldName: string): Promise<void> {
+    const buttonSelector = 'euiDataGridCellExpandButton';
+    await this.testSubjects.click(`tableDocViewRow-${fieldName}-name`);
+    await this.retry.waitFor('grid cell actions to appear', async () => {
+      return this.testSubjects.exists(buttonSelector);
+    });
+    await this.testSubjects.click(buttonSelector);
   }
 
   public async hasNoResults() {

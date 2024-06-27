@@ -7,7 +7,6 @@
 
 import type { SwimlaneType } from '@kbn/ml-plugin/public/application/explorer/explorer_constants';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
-import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlAnomalySwimLane } from './swim_lane';
 import type { MlAnomalyCharts } from './anomaly_charts';
@@ -71,7 +70,7 @@ export function MachineLearningCasesProvider(
 
     async assertCaseWithAnomalyChartsAttachment(
       params: CaseParams,
-      attachment: AnomalyChartsEmbeddableInput,
+      attachment: { id?: string; jobIds: string[]; maxSeriesToPlot: number },
       expectedChartsCount: number
     ) {
       await this.assertBasicCaseProps(params);

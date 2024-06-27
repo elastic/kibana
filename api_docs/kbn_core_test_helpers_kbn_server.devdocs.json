@@ -246,7 +246,9 @@
           "\nSee docs in {@link TestUtils}. This function provides the same utilities but\nconfigured for serverless.\n"
         ],
         "signature": [
-          "({\n  adjustTimeout,\n}: { adjustTimeout: (timeout: number) => void; }) => ",
+          "({\n  adjustTimeout,\n  kibana = {},\n}: { kibana?: { settings?: {} | undefined; cliArgs?: Partial<",
+          "CliArgs",
+          "> | undefined; } | undefined; adjustTimeout?: ((timeout: number) => void) | undefined; }) => ",
           "TestServerlessUtils"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
@@ -258,12 +260,28 @@
             "id": "def-common.createTestServerlessInstances.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  adjustTimeout,\n}",
+            "label": "{\n  adjustTimeout,\n  kibana = {},\n}",
             "description": [],
             "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-kbn-server",
+                "id": "def-common.createTestServerlessInstances.$1.kibana",
+                "type": "Object",
+                "tags": [],
+                "label": "kibana",
+                "description": [],
+                "signature": [
+                  "{ settings?: {} | undefined; cliArgs?: Partial<",
+                  "CliArgs",
+                  "> | undefined; } | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
               {
                 "parentPluginId": "@kbn/core-test-helpers-kbn-server",
                 "id": "def-common.createTestServerlessInstances.$1.adjustTimeout",
@@ -272,7 +290,7 @@
                 "label": "adjustTimeout",
                 "description": [],
                 "signature": [
-                  "(timeout: number) => void"
+                  "((timeout: number) => void) | undefined"
                 ],
                 "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_serverless_root.ts",
                 "deprecated": false,

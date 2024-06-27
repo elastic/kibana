@@ -309,7 +309,6 @@ function UnifiedFieldListItemComponent({
             contextualFields={workspaceSelectedFieldNames}
             originatingApp={stateService.creationOptions.originatingApp}
             uiActions={services.uiActions}
-            closePopover={() => closePopover()}
           />
         )}
       </>

@@ -297,6 +297,18 @@ describe('#rawToSavedObject', () => {
     expect(actual).toHaveProperty('updated_at', now);
   });
 
+  test('if specified it copies the _source.updated_by property to updated_by', () => {
+    const updatedBy = 'elastic';
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+        updated_by: updatedBy,
+      },
+    });
+    expect(actual).toHaveProperty('updated_by', updatedBy);
+  });
+
   test('if specified it copies the _source.created_at property to created_at', () => {
     const now = Date();
     const actual = singleNamespaceSerializer.rawToSavedObject({
@@ -339,6 +351,16 @@ describe('#rawToSavedObject', () => {
       },
     });
     expect(actual).not.toHaveProperty('created_at');
+  });
+
+  test(`if _source.updated_by is unspecified it doesn't set updated_by`, () => {
+    const actual = singleNamespaceSerializer.rawToSavedObject({
+      _id: 'foo:bar',
+      _source: {
+        type: 'foo',
+      },
+    });
+    expect(actual).not.toHaveProperty('updated_by');
   });
 
   test('if specified it copies the _source.originId property to originId', () => {

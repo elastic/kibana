@@ -25,7 +25,7 @@ import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -936,7 +936,7 @@ describe('Action Executor', () => {
         expect(e.message).toBe(
           'Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
         );
-        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+        expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
       }
     });
 
@@ -1199,6 +1199,35 @@ describe('Action Executor', () => {
       });
     });
 
+    test(`${label} logs warning captures source when executor throws error with error source`, async () => {
+      const err = createTaskRunError(
+        new Error('this action execution is intended to fail'),
+        TaskErrorSource.USER
+      );
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      connectorType.executor.mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
+      expect(loggerMock.warn).toBeCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
+      );
+      expect(loggerMock.error).toBeCalledWith(err, {
+        error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+        tags: ['test', '1', 'action-run-failed'],
+      });
+    });
+
     test(`${label} logs warning when executor returns invalid status`, async () => {
       connectorType.executor.mockResolvedValueOnce({
         actionId: '1',
@@ -1257,6 +1286,27 @@ describe('Action Executor', () => {
           params: { foo: true },
           logger: loggerMock,
         });
+      }
+    });
+
+    test(`${label} throws error when license is not valid for the type of action`, async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+      connectorTypeRegistry.isActionExecutable.mockReturnValue(false);
+      connectorTypeRegistry.ensureActionTypeEnabled.mockImplementation(() => {
+        throw new Error('nope');
+      });
+
+      if (executeUnsecure) {
+        await expect(() => actionExecutor.executeUnsecured(executeUnsecuredParams)).rejects.toThrow(
+          'nope'
+        );
+        expect(connectorType.executor).not.toHaveBeenCalled();
+      } else {
+        await expect(() => actionExecutor.execute(executeParams)).rejects.toThrow('nope');
+        expect(connectorType.executor).not.toHaveBeenCalled();
       }
     });
   }

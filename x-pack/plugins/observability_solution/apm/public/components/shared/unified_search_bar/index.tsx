@@ -6,7 +6,14 @@
  */
 import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Filter, fromKueryExpression, Query, TimeRange, toElasticsearchQuery } from '@kbn/es-query';
+import {
+  Filter,
+  fromKueryExpression,
+  getKqlFieldNamesFromExpression,
+  Query,
+  TimeRange,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
 import { useHistory, useLocation } from 'react-router-dom';
 import deepEqual from 'fast-deep-equal';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -27,7 +34,6 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { clearCache } from '../../../services/rest/call_api';
 import { useTimeRangeId } from '../../../context/time_range_id/use_time_range_id';
 import { toBoolean, toNumber } from '../../../context/url_params_context/helpers';
-import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
 import { SearchQueryActions } from '../../../services/telemetry';
 
 export const DEFAULT_REFRESH_INTERVAL = 60000;
@@ -228,7 +234,7 @@ export function UnifiedSearchBar({
       if (!res) {
         return;
       }
-      const kueryFields = getKueryFields([fromKueryExpression(query?.query as string)]);
+      const kueryFields = getKqlFieldNamesFromExpression(query?.query as string);
 
       const existingQueryParams = toQuery(location.search);
       const updatedQueryWithTime = {

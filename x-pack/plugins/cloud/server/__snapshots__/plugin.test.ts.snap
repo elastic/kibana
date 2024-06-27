@@ -17,6 +17,9 @@ Object {
   "isElasticStaffOwned": undefined,
   "isServerlessEnabled": false,
   "kibanaUrl": undefined,
+  "onboarding": Object {
+    "defaultSolution": undefined,
+  },
   "projectsUrl": "https://cloud.elastic.co/projects/",
   "serverless": Object {
     "projectId": undefined,

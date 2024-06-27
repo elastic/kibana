@@ -71,6 +71,7 @@ async function createPackagePolicy(
   if (!newPackagePolicy) return;
 
   newPackagePolicy.policy_id = agentPolicy.id;
+  newPackagePolicy.policy_ids = [agentPolicy.id];
   newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 

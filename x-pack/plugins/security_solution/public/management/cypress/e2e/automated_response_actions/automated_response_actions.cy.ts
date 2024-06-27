@@ -20,7 +20,10 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-describe(
+// 8.15.0
+// TODO: Re-enable when action requests history can be filtered by alert ids
+// security-team issue #9822
+describe.skip(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -47,7 +50,7 @@ describe(
 
           return enableAllPolicyProtections(policy.id).then(() => {
             // Create and enroll a new Endpoint host
-            return createEndpointHost(policy.policy_id).then((host) => {
+            return createEndpointHost(policy.policy_ids[0]).then((host) => {
               createdHost = host as CreateAndEnrollEndpointHostResponse;
             });
           });
@@ -100,7 +103,7 @@ describe(
         closeAllToasts();
 
         changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
-        cy.getByTestSubj('expand-event').eq(0).click();
+        cy.getByTestSubj('expand-event').first().click();
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 

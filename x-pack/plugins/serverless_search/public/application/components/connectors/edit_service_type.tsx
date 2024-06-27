@@ -76,6 +76,8 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) =
         })}
       </EuiFormLabel>
       <EuiSuperSelect
+        // We only want to allow people to set the service type once to avoid weird conflicts
+        disabled={Boolean(connector.service_type)}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
         isLoading={isLoading}
         onChange={(event) => mutate(event)}

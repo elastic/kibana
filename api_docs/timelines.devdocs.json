@@ -1510,11 +1510,7 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -1684,17 +1680,6 @@
             "type": "boolean",
             "tags": [],
             "label": "aggregatable",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.category",
-            "type": "string",
-            "tags": [],
-            "label": "category",
             "description": [],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
@@ -4060,14 +4045,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
           },
           {
@@ -4164,15 +4141,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts"
+            "path": "x-pack/plugins/security_solution/public/sourcerer/store/model.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
+            "path": "x-pack/plugins/security_solution/public/sourcerer/store/model.ts"
           },
           {
             "plugin": "securitySolution",
@@ -4180,7 +4153,7 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4197,6 +4170,34 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4205,30 +4206,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4300,23 +4277,23 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4444,19 +4421,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4822,7 +4791,7 @@
             "section": "def-common.Direction",
             "text": "Direction"
           },
-          "; esTypes?: string[] | undefined; type?: string | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; timestampField?: string | undefined; size?: number | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          "; esTypes?: string[] | undefined; type?: string | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; timestampField?: string | undefined; size?: number | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
         "deprecated": false,
@@ -4853,7 +4822,7 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".all; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; filterQuery?: any; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          ".all; params?: any; id?: string | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; filterQuery?: any; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
         "deprecated": false,
@@ -4876,7 +4845,7 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".details; eventId: string; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          ".details; eventId: string; params?: any; id?: string | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
         "deprecated": false,
@@ -4907,7 +4876,7 @@
             "section": "def-common.LastEventIndexKey",
             "text": "LastEventIndexKey"
           },
-          "; params?: any; id?: string | undefined; defaultIndex?: string[] | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+          "; params?: any; id?: string | undefined; indexType?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "deprecated": false,
@@ -4930,7 +4899,7 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".kpi; params?: any; id?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+          ".kpi; params?: any; id?: string | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
         "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
         "deprecated": false,

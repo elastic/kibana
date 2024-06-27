@@ -24,9 +24,12 @@ describe('actions telemetry', () => {
       {
         aggregations: {
           byActionTypeId: {
-            value: {
-              types: { '.index': 1, '.server-log': 1, 'some.type': 1, 'another.type.': 1 },
-            },
+            buckets: [
+              { key: '.index', doc_count: 1 },
+              { key: '.server-log', doc_count: 1 },
+              { key: 'some.type', doc_count: 1 },
+              { key: 'another.type.', doc_count: 1 },
+            ],
           },
         },
         hits: {
@@ -152,10 +155,18 @@ describe('actions telemetry', () => {
         aggregations: {
           refs: {
             actionRefIds: {
-              value: {
-                connectorIds: { '1': 'action-0', '123': 'action-0' },
-                total: 2,
-              },
+              buckets: [
+                {
+                  key: ['1', 'action-0'],
+                  key_as_string: '1|action-0',
+                  doc_count: 1,
+                },
+                {
+                  key: ['123', 'action-0'],
+                  key_as_string: '123|action-0',
+                  doc_count: 1,
+                },
+              ],
             },
           },
           hits: {
@@ -217,27 +228,34 @@ describe('actions telemetry', () => {
         aggregations: {
           refs: {
             actionRefIds: {
-              value: {
-                connectorIds: {
-                  '1': 'action_0',
-                  '123': 'action_1',
-                  'preconfigured-alert-history-es-index': 'action_2',
+              buckets: [
+                {
+                  key: ['1', 'action_0'],
+                  key_as_string: '1|action_0',
+                  doc_count: 1,
                 },
-                total: 3,
-              },
+                {
+                  key: ['123', 'action_1'],
+                  key_as_string: '123|action_1',
+                  doc_count: 1,
+                },
+                {
+                  key: ['preconfigured-alert-history-es-index', 'action_2'],
+                  key_as_string: 'preconfigured-alert-history-es-index|action_2',
+                  doc_count: 1,
+                },
+              ],
             },
           },
-          preconfigured_actions: {
-            preconfiguredActionRefIds: {
-              value: {
-                total: 1,
-                actionRefs: {
-                  'preconfigured:preconfigured-alert-history-es-index': {
-                    actionRef: 'preconfigured:preconfigured-alert-history-es-index',
-                    actionTypeId: '.index',
-                  },
+          actions: {
+            actionRefIds: {
+              buckets: [
+                {
+                  key: ['preconfigured:preconfigured-alert-history-es-index', '.index'],
+                  key_as_string: 'preconfigured:preconfigured-alert-history-es-index|.index',
+                  doc_count: 1,
                 },
-              },
+              ],
             },
           },
         },
@@ -344,9 +362,12 @@ describe('actions telemetry', () => {
       {
         aggregations: {
           byActionTypeId: {
-            value: {
-              types: { '.index': 1, '.server-log': 1, 'some.type': 1, 'another.type.': 1 },
-            },
+            buckets: [
+              { key: '.index', doc_count: 1 },
+              { key: '.server-log', doc_count: 1 },
+              { key: 'some.type', doc_count: 1 },
+              { key: 'another.type.', doc_count: 1 },
+            ],
           },
         },
         hits: {
@@ -472,9 +493,7 @@ describe('actions telemetry', () => {
       {
         aggregations: {
           byActionTypeId: {
-            value: {
-              types: {},
-            },
+            buckets: [],
           },
         },
         hits: {
@@ -517,35 +536,44 @@ describe('actions telemetry', () => {
         aggregations: {
           refs: {
             actionRefIds: {
-              value: {
-                connectorIds: {
-                  '1': 'action-0',
-                  '123': 'action-1',
-                  '456': 'action-2',
+              buckets: [
+                {
+                  key: ['1', 'action-0'],
+                  key_as_string: '1|action-0',
+                  doc_count: 1,
                 },
-                total: 3,
-              },
+                {
+                  key: ['123', 'action-1'],
+                  key_as_string: '123|action-1',
+                  doc_count: 1,
+                },
+                {
+                  key: ['456', 'action-2'],
+                  key_as_string: '456|action-2',
+                  doc_count: 1,
+                },
+              ],
             },
           },
-          preconfigured_actions: {
-            preconfiguredActionRefIds: {
-              value: {
-                total: 3,
-                actionRefs: {
-                  'preconfigured:preconfigured-alert-history-es-index': {
-                    actionRef: 'preconfigured:preconfigured-alert-history-es-index',
-                    actionTypeId: '.index',
-                  },
-                  'preconfigured:cloud_email': {
-                    actionRef: 'preconfigured:cloud_email',
-                    actionTypeId: '.email',
-                  },
-                  'preconfigured:cloud_email2': {
-                    actionRef: 'preconfigured:cloud_email2',
-                    actionTypeId: '.email',
-                  },
+          actions: {
+            actionRefIds: {
+              buckets: [
+                {
+                  key: ['preconfigured:preconfigured-alert-history-es-index', '.index'],
+                  key_as_string: 'preconfigured:preconfigured-alert-history-es-index|.index',
+                  doc_count: 1,
                 },
-              },
+                {
+                  key: ['preconfigured:cloud_email', '.email'],
+                  key_as_string: 'preconfigured:cloud_email|.email',
+                  doc_count: 1,
+                },
+                {
+                  key: ['preconfigured:cloud_email2', '.email'],
+                  key_as_string: 'preconfigured:cloud_email2|.email',
+                  doc_count: 1,
+                },
+              ],
             },
           },
         },
@@ -628,30 +656,39 @@ describe('actions telemetry', () => {
         aggregations: {
           refs: {
             actionRefIds: {
-              value: {
-                connectorIds: {
-                  '1': 'action-0',
-                  '2': 'action-1',
+              buckets: [
+                {
+                  key: ['1', 'action-0'],
+                  key_as_string: '1|action-0',
+                  doc_count: 1,
                 },
-                total: 3,
-              },
+                {
+                  key: ['2', 'action-1'],
+                  key_as_string: '2|action-1',
+                  doc_count: 2,
+                },
+              ],
             },
           },
-          system_actions: {
-            systemActionRefIds: {
-              value: {
-                total: 2,
-                actionRefs: {
-                  'system_action:system-connector-test.system-action': {
-                    actionRef: 'system_action:system-connector-test.system-action',
-                    actionTypeId: 'test.system-action',
-                  },
-                  'system_action:system-connector-test.system-action-2': {
-                    actionRef: 'system_action:system-connector-test.system-action-2',
-                    actionTypeId: 'test.system-action-2',
-                  },
+          actions: {
+            actionRefIds: {
+              buckets: [
+                {
+                  key: ['system_action:system-connector-test.system-action', 'test.system-action'],
+                  key_as_string:
+                    'system_action:system-connector-test.system-action|test.system-action',
+                  doc_count: 1,
                 },
-              },
+                {
+                  key: [
+                    'system_action:system-connector-test.system-action-2',
+                    'test.system-action-2',
+                  ],
+                  key_as_string:
+                    'system_action:system-connector-test.system-action-2|test.system-action-2',
+                  doc_count: 1,
+                },
+              ],
             },
           },
         },
@@ -697,7 +734,7 @@ describe('actions telemetry', () => {
         },
         "countEmailByService": Object {},
         "countNamespaces": 1,
-        "countTotal": 5,
+        "countTotal": 4,
         "hasErrors": false,
       }
     `);
@@ -711,35 +748,44 @@ describe('actions telemetry', () => {
         aggregations: {
           refs: {
             actionRefIds: {
-              value: {
-                connectorIds: {
-                  '1': 'action-0',
-                  '123': 'action-1',
-                  '456': 'action-2',
+              buckets: [
+                {
+                  key: ['1', 'action-0'],
+                  key_as_string: '1|action-0',
+                  doc_count: 1,
                 },
-                total: 3,
-              },
+                {
+                  key: ['123', 'action-1'],
+                  key_as_string: '123|action-1',
+                  doc_count: 1,
+                },
+                {
+                  key: ['456', 'action-2'],
+                  key_as_string: '456|action-2',
+                  doc_count: 1,
+                },
+              ],
             },
           },
-          preconfigured_actions: {
-            preconfiguredActionRefIds: {
-              value: {
-                total: 3,
-                actionRefs: {
-                  'preconfigured:preconfigured-alert-history-es-index': {
-                    actionRef: 'preconfigured:preconfigured-alert-history-es-index',
-                    actionTypeId: '.index',
-                  },
-                  'preconfigured:cloud_email': {
-                    actionRef: 'preconfigured:cloud_email',
-                    actionTypeId: '.email',
-                  },
-                  'preconfigured:cloud_email2': {
-                    actionRef: 'preconfigured:cloud_email2',
-                    actionTypeId: '.email',
-                  },
+          actions: {
+            actionRefIds: {
+              buckets: [
+                {
+                  key: ['preconfigured:preconfigured-alert-history-es-index', '.index'],
+                  key_as_string: 'preconfigured:preconfigured-alert-history-es-index|.index',
+                  doc_count: 1,
                 },
-              },
+                {
+                  key: ['preconfigured:cloud_email', '.email'],
+                  key_as_string: 'preconfigured:cloud_email|.email',
+                  doc_count: 1,
+                },
+                {
+                  key: ['preconfigured:cloud_email2', '.email'],
+                  key_as_string: 'preconfigured:cloud_email2|.email',
+                  doc_count: 1,
+                },
+              ],
             },
           },
         },
@@ -810,24 +856,31 @@ describe('actions telemetry', () => {
       {
         aggregations: {
           totalExecutions: {
-            byConnectorTypeId: {
-              value: {
-                connectorTypes: {
-                  '.slack': 100,
-                  '.server-log': 20,
-                },
-                total: 120,
+            refs: {
+              byConnectorTypeId: {
+                buckets: [
+                  {
+                    key: '.server-log',
+                    doc_count: 20,
+                  },
+                  {
+                    key: '.slack',
+                    doc_count: 100,
+                  },
+                ],
               },
             },
           },
           failedExecutions: {
-            refs: {
-              byConnectorTypeId: {
-                value: {
-                  connectorTypes: {
-                    '.slack': 7,
-                  },
-                  total: 7,
+            actionSavedObjects: {
+              refs: {
+                byConnectorTypeId: {
+                  buckets: [
+                    {
+                      key: '.slack',
+                      doc_count: 7,
+                    },
+                  ],
                 },
               },
             },

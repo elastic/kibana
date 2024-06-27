@@ -23,5 +23,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./playground_overview'));
 
     loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./search_homepage'));
   });
 }

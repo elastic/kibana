@@ -17,6 +17,7 @@ import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 import type { PackagePolicyClient } from '../services/package_policy_service';
 import type { AgentPolicyServiceInterface } from '../services';
@@ -55,7 +56,8 @@ export interface MockedFleetAppContext extends FleetAppContext {
 }
 
 export const createAppContextStartContractMock = (
-  configOverrides: Partial<FleetConfigType> = {}
+  configOverrides: Partial<FleetConfigType> = {},
+  isServerless: boolean = false
 ): MockedFleetAppContext => {
   const config = {
     agents: { enabled: true, elasticsearch: {} },
@@ -93,6 +95,16 @@ export const createAppContextStartContractMock = (
     bulkActionsResolver: {} as any,
     messageSigningService: createMessageSigningServiceMock(),
     uninstallTokenService: createUninstallTokenServiceMock(),
+    ...(isServerless
+      ? {
+          cloud: {
+            ...cloudMock.createSetup(),
+            apm: {},
+            isCloudEnabled: true,
+            isServerlessEnabled: true,
+          },
+        }
+      : {}),
   };
 };
 
@@ -108,6 +120,9 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
     packagePolicyService: {
       asCurrentUser: createPackagePolicyServiceMock(),
       asInternalUser: createPackagePolicyServiceMock(),
+    },
+    uninstallTokenService: {
+      asCurrentUser: createUninstallTokenServiceMock(),
     },
     internalSoClient: savedObjectsClientMock.create(),
     spaceId: 'default',
@@ -170,7 +185,6 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
 /**
  * Create mock AgentPolicyService
  */
-
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
     get: jest.fn(),
@@ -226,5 +240,6 @@ export function createUninstallTokenServiceMock(): UninstallTokenServiceInterfac
     encryptTokens: jest.fn(),
     checkTokenValidityForAllPolicies: jest.fn(),
     checkTokenValidityForPolicy: jest.fn(),
+    scoped: jest.fn().mockImplementation(() => createUninstallTokenServiceMock()),
   };
 }

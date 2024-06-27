@@ -98,8 +98,6 @@ export {
   ReactEmbeddableRenderer,
   type DefaultEmbeddableApi,
   type ReactEmbeddableFactory,
-  type ReactEmbeddableRegistration,
-  startTrackingEmbeddableUnsavedChanges,
 } from './react_embeddable_system';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -110,3 +108,5 @@ export {
   embeddableInputToSubject,
   embeddableOutputToSubject,
 } from './lib/embeddables/compatibility/embeddable_compatibility_utils';
+
+export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';

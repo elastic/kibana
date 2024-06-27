@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
-  describe('@ess @serverless Risk Scoring Task Execution', () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Task Execution', () => {
     context('with auditbeat data', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -111,7 +111,14 @@ export default ({ getService }: FtrProviderContext): void => {
               transform_id: 'risk_score_latest_transform_default',
             });
 
-            expect(transformStats.transforms[0].state).to.eql('started');
+            expect(transformStats.transforms.length).to.eql(1);
+            const latestTransform = transformStats.transforms[0];
+            if (latestTransform.state !== 'started') {
+              log.error('Transform state is not started, logging the transform');
+              log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
+            }
+
+            expect(latestTransform.state).to.eql('started');
           });
 
           describe('@skipInServerlessMKI disabling and re-enabling the risk engine', () => {
@@ -267,9 +274,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 criticality_modifier: 2,
                 calculated_level: 'Moderate',
                 calculated_score: 79.81345973382406,
-                calculated_score_norm: 46.809565696393314,
+                calculated_score_norm: 47.08016240063269,
                 category_1_count: 10,
-                category_1_score: 30.55645472198471,
+                category_1_score: 30.787478681462762,
               },
             ]);
           });

@@ -52,6 +52,21 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
 ConnectorFormTestProviderComponent.displayName = 'ConnectorFormTestProvider';
 export const ConnectorFormTestProvider = React.memo(ConnectorFormTestProviderComponent);
 
+const AuthFormTestProviderComponent: React.FC<FormTestProviderProps> = ({
+  children,
+  defaultValue,
+  onSubmit,
+}) => {
+  return (
+    <FormTestProviderComponent onSubmit={onSubmit} defaultValue={defaultValue}>
+      {children}
+    </FormTestProviderComponent>
+  );
+};
+
+AuthFormTestProviderComponent.displayName = 'AuthFormTestProvider';
+export const AuthFormTestProvider = React.memo(AuthFormTestProviderComponent);
+
 const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   children,
   defaultValue,

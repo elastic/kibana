@@ -22,7 +22,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getField } from '../../shared/utils';
 import { CellActions } from './cell_actions';
@@ -35,7 +35,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { DescriptionListStyled } from '../../../../common/components/page';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
@@ -68,7 +68,7 @@ export interface UserEntityOverviewProps {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({

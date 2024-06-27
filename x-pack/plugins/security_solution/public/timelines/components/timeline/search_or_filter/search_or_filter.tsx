@@ -11,6 +11,8 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { DataViewPicker } from '../../../../sourcerer/experimental/components/dataview_picker';
+import { isExperimentalSourcererEnabled } from '../../../../sourcerer/experimental/is_enabled';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/model';
@@ -21,8 +23,8 @@ import type { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { Sourcerer } from '../../../../common/components/sourcerer';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { Sourcerer } from '../../../../sourcerer/components';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,
@@ -103,6 +105,12 @@ export const SearchOrFilter = React.memo<Props>(
       [isDataProviderEmpty, isDataProviderVisible]
     );
 
+    const dataviewPicker = isExperimentalSourcererEnabled() ? (
+      <DataViewPicker />
+    ) : (
+      <Sourcerer scope={SourcererScopeName.timeline} />
+    );
+
     return (
       <>
         <SearchOrFilterContainer>
@@ -113,7 +121,7 @@ export const SearchOrFilter = React.memo<Props>(
             responsive={false}
           >
             <EuiFlexItem grow={false} id={TIMELINE_TOUR_CONFIG_ANCHORS.DATA_VIEW}>
-              <Sourcerer scope={SourcererScopeName.timeline} />
+              {dataviewPicker}
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>
               <QueryBarTimeline

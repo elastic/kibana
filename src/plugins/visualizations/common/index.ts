@@ -20,6 +20,7 @@ export {
   LegendSize,
   LegendSizeToPixels,
   DEFAULT_LEGEND_SIZE,
-  XYLegendValue,
-  PartitionLegendValue,
+  LegendLayout,
+  type XYLegendValue,
+  type PartitionLegendValue,
 } from './constants';

@@ -84,12 +84,14 @@
     "@kbn/shared-ux-markdown",
     "@kbn/data-view-utils",
     "@kbn/presentation-publishing",
+    "@kbn/aiops-log-pattern-analysis",
+    "@kbn/field-types",
     "@kbn/elastic-agent-utils",
     "@kbn/custom-icons",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/aiops-plugin",
     "@kbn/data-visualizer-plugin",
     "@kbn/search-types",
-    "@kbn/custom-icons",
     "@kbn/observability-ai-assistant-plugin"
   ],
   "exclude": ["target/**/*"]

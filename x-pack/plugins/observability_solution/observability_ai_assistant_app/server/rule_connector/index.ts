@@ -224,7 +224,7 @@ async function executor(
             content: getSystemMessageFromInstructions({
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
               registeredInstructions: functionClient.getInstructions(),
-              knowledgeBaseInstructions: [],
+              userInstructions: [],
               requestInstructions: [],
             }),
           },

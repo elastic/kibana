@@ -6,17 +6,17 @@
  */
 
 import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientLlm,
-} from '@kbn/elastic-assistant-common/impl/language_models';
 import { v4 as uuidv4 } from 'uuid';
 import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+  getDefaultArguments,
+} from '@kbn/langchain/server';
 import { Prompt } from '../../common/prompt';
 
 export const getChatParams = async (

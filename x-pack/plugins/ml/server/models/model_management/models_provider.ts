@@ -12,6 +12,7 @@ import { flatten } from 'lodash';
 import type {
   InferenceModelConfig,
   InferenceTaskType,
+  TasksTaskInfo,
   TransformGetTransformTransformSummary,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
@@ -28,7 +29,7 @@ import {
 } from '@kbn/ml-trained-models-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
-import type { PipelineDefinition } from '../../../common/types/trained_models';
+import type { ModelDownloadState, PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 
@@ -601,5 +602,29 @@ export class ModelsProvider {
       task_type: taskType,
       model_config: modelConfig,
     });
+  }
+
+  async getModelsDownloadStatus() {
+    const result = await this._client.asInternalUser.tasks.list({
+      actions: 'xpack/ml/model_import[n]',
+      detailed: true,
+      group_by: 'none',
+    });
+
+    if (!result.tasks?.length) {
+      return {};
+    }
+
+    // Groups results by model id
+    const byModelId = (result.tasks as TasksTaskInfo[]).reduce((acc, task) => {
+      const modelId = task.description!.replace(`model_id-`, '');
+      acc[modelId] = {
+        downloaded_parts: task.status.downloaded_parts,
+        total_parts: task.status.total_parts,
+      };
+      return acc;
+    }, {} as Record<string, ModelDownloadState>);
+
+    return byModelId;
   }
 }

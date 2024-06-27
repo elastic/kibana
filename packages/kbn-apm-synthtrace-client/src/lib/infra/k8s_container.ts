@@ -15,6 +15,14 @@ interface K8sContainerDocument extends Fields {
   'kubernetes.pod.uid': string;
   'kubernetes.node.name': string;
   'metricset.name'?: string;
+  'container.name'?: string;
+  'container.image.name'?: string;
+  'container.runtime'?: string;
+  'host.name'?: string;
+  'cloud.provider'?: string;
+  'cloud.instance.id'?: string;
+  'cloud.image.id'?: string;
+  'event.dataset'?: string;
 }
 
 export class K8sContainer extends Entity<K8sContainerDocument> {

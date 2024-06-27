@@ -37,7 +37,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // check side nav links
       await testSubjects.existOrFail(`svlSearchOverviewPage`);
-      await svlCommonNavigation.sidenav.expectSectionOpen('search_project_nav');
       await svlCommonNavigation.sidenav.expectLinkActive({
         deepLinkId: 'serverlessElasticsearch',
       });

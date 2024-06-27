@@ -16,13 +16,13 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiSearchBarProps,
   EuiTableFieldDataColumnType,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   IconType,
   PropertySort,
   Query,
@@ -255,14 +255,14 @@ export class SavedObjectFinderUi extends React.Component<
               ).getIconForSavedObject(item.simple);
 
               return (
-                <EuiToolTip position="top" content={currentSavedObjectMetaData.name}>
-                  <EuiIcon
-                    aria-label={currentSavedObjectMetaData.name}
-                    type={iconType}
-                    size="s"
-                    data-test-subj="objectType"
-                  />
-                </EuiToolTip>
+                <EuiIconTip
+                  position="top"
+                  content={currentSavedObjectMetaData.name}
+                  aria-label={currentSavedObjectMetaData.name}
+                  type={iconType}
+                  size="s"
+                  data-test-subj="objectType"
+                />
               );
             },
           }

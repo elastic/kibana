@@ -36,8 +36,10 @@ import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server'
 import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
-} from '@kbn/elastic-assistant-common/impl/language_models';
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 
+import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -113,6 +115,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantKnowledgeBaseDataClient: (
     initializeKnowledgeBase: boolean
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
+  getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
@@ -147,24 +150,28 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   indexTemplate: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   aliases: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   indexPatterns: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   pipelines: {
     knowledgeBase: string;
@@ -211,8 +218,10 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
+  kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientLlm | ActionsClientChatOpenAI;
+  llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;

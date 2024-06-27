@@ -65,6 +65,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
         width: panelToCopy.gridData.w,
         height: panelToCopy.gridData.h,
       },
+      references: panelToCopy.references,
     };
 
     const path =

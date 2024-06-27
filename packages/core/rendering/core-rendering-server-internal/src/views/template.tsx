@@ -110,7 +110,8 @@ export const Template: FunctionComponent<Props> = ({
         </div>
 
         <script>
-          {`
+          {`// kbnUnsafeInlineTest do not remove this comment:
+            //   it is used for filtering out expected CSP failures, and must be the first piece of content in this script block.
             // Since this is an unsafe inline script, this code will not run
             // in browsers that support content security policy(CSP). This is
             // intentional as we check for the existence of __kbnCspNotEnforced__ in

@@ -25,6 +25,38 @@ export const FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE = 'kspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE = 'cspm';
 export const FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE = 'vuln_mgmt';
 export const FLEET_CLOUD_DEFEND_PACKAGE = 'cloud_defend';
+export const FLEET_PF_HOST_AGENT_PACKAGE = 'pf-host-agent';
+export const FLEET_PF_ELASTIC_SYMBOLIZER_PACKAGE = 'pf-elastic-symbolizer';
+export const FLEET_PF_ELASTIC_COLLECTOR_PACKAGE = 'pf-elastic-collector';
+export const FLEET_CLOUD_BEAT_PACKAGE = 'cloudbeat';
+export const FLEET_CLOUD_BEAT_CIS_K8S_PACKAGE = `${FLEET_CLOUD_BEAT_PACKAGE}/cis_k8s`;
+export const FLEET_CLOUD_BEAT_CIS_EKS_PACKAGE = `${FLEET_CLOUD_BEAT_PACKAGE}/cis_eks`;
+export const FLEET_CLOUD_BEAT_CIS_AWS_PACKAGE = `${FLEET_CLOUD_BEAT_PACKAGE}/cis_aws`;
+export const FLEET_CLOUD_BEAT_CIS_GCP_PACKAGE = `${FLEET_CLOUD_BEAT_PACKAGE}/cis_gcp`;
+export const FLEET_CLOUD_BEAT_CIS_AZURE_PACKAGE = `${FLEET_CLOUD_BEAT_PACKAGE}/cis_azure`;
+export const FLEET_CLOUD_BEAT_VULN_MGMT_AWS_PACKAGE = `${FLEET_CLOUD_BEAT_PACKAGE}/vuln_mgmt_aws`;
+
+export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
+  FLEET_APM_PACKAGE,
+  FLEET_PF_HOST_AGENT_PACKAGE,
+  FLEET_PF_ELASTIC_SYMBOLIZER_PACKAGE,
+  FLEET_PF_ELASTIC_COLLECTOR_PACKAGE,
+  /* The package names and input types are not the same. For example package
+   * name for fleet server is "fleet_server" whereas the input type is "fleet-server".
+   * This is the same case for cloud defend. That's why we are replacing the
+   * underscores with dashes for the two of them. Global data tag functionality
+   * relies on input types.
+   */
+  FLEET_SERVER_PACKAGE.replace(/_/g, '-'),
+  FLEET_CLOUD_DEFEND_PACKAGE.replace(/_/g, '-'),
+  FLEET_CLOUD_BEAT_PACKAGE,
+  FLEET_CLOUD_BEAT_CIS_K8S_PACKAGE,
+  FLEET_CLOUD_BEAT_CIS_EKS_PACKAGE,
+  FLEET_CLOUD_BEAT_CIS_AWS_PACKAGE,
+  FLEET_CLOUD_BEAT_CIS_GCP_PACKAGE,
+  FLEET_CLOUD_BEAT_CIS_AZURE_PACKAGE,
+  FLEET_CLOUD_BEAT_VULN_MGMT_AWS_PACKAGE,
+]);
 
 export const PACKAGE_TEMPLATE_SUFFIX = '@package';
 export const USER_SETTINGS_TEMPLATE_SUFFIX = '@custom';

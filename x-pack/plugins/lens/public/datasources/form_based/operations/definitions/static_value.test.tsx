@@ -158,7 +158,7 @@ describe('static_value', () => {
           createMockedIndexPattern(),
           dateRange
         )
-      ).toBeUndefined();
+      ).toHaveLength(0);
       // test for potential falsy value
       expect(
         staticValueOperation.getErrorMessage!(
@@ -167,7 +167,7 @@ describe('static_value', () => {
           createMockedIndexPattern(),
           dateRange
         )
-      ).toBeUndefined();
+      ).toHaveLength(0);
     });
 
     it.each(['NaN', 'Infinity', 'string'])(
@@ -179,7 +179,7 @@ describe('static_value', () => {
             'col2',
             createMockedIndexPattern(),
             dateRange
-          )
+          ).map((e) => e.message)
         ).toEqual(expect.arrayContaining([expect.stringMatching('is not a valid number')]));
       }
     );
@@ -192,7 +192,7 @@ describe('static_value', () => {
           createMockedIndexPattern(),
           dateRange
         )
-      ).toBe(undefined);
+      ).toHaveLength(0);
     });
   });
 

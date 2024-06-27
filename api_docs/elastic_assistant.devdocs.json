@@ -1471,6 +1471,21 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.kbDataClient",
+            "type": "Object",
+            "tags": [],
+            "label": "kbDataClient",
+            "description": [],
+            "signature": [
+              "AIAssistantKnowledgeBaseDataClient",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.langChainTimeout",
             "type": "number",
             "tags": [],
@@ -1494,7 +1509,29 @@
               "ActionsClientLlm",
               " | ",
               "ActionsClientChatOpenAI",
+              " | ",
+              "ActionsClientSimpleChatModel",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1572,7 +1609,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { connectorId: string; actionTypeId: string; size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, any>"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

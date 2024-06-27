@@ -429,7 +429,6 @@ export class IndexTable extends Component {
         >
           <EuiTableRowCellCheckbox key={`checkbox-${name}`}>
             <EuiCheckbox
-              type="inList"
               id={`checkboxSelectIndex-${name}`}
               checked={this.isItemSelected(name)}
               onChange={() => {
@@ -696,7 +695,6 @@ export class IndexTable extends Component {
                         id="selectAllIndexes"
                         checked={this.areAllItemsSelected()}
                         onChange={this.toggleAll}
-                        type="inList"
                         aria-label={i18n.translate(
                           'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
                           {

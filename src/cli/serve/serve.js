@@ -101,6 +101,12 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
   const get = _.partial(_.get, rawConfig);
   const has = _.partial(_.has, rawConfig);
 
+  function ensureNotDefined(path, command = '--ssl') {
+    if (has(path)) {
+      throw new Error(`Can't use ${command} when "${path}" configuration is already defined.`);
+    }
+  }
+
   if (opts.oss) {
     delete rawConfig.xpack;
   }
@@ -152,47 +158,57 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
       }
     }
 
-    if (opts.ssl) {
+    if (opts.http2) {
+      set('server.protocol', 'http2');
+    }
+
+    // HTTP TLS configuration
+    if (opts.ssl || opts.http2) {
       // @kbn/dev-utils is part of devDependencies
       // eslint-disable-next-line import/no-extraneous-dependencies
       const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
-      const customElasticsearchHosts = opts.elasticsearch
-        ? opts.elasticsearch.split(',')
-        : [].concat(get('elasticsearch.hosts') || []);
-
-      function ensureNotDefined(path) {
-        if (has(path)) {
-          throw new Error(`Can't use --ssl when "${path}" configuration is already defined.`);
-        }
-      }
 
       ensureNotDefined('server.ssl.certificate');
       ensureNotDefined('server.ssl.key');
       ensureNotDefined('server.ssl.keystore.path');
       ensureNotDefined('server.ssl.truststore.path');
       ensureNotDefined('server.ssl.certificateAuthorities');
-      ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
-      const elasticsearchHosts = (
-        (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
-          'https://localhost:9200',
-        ]
-      ).map((hostUrl) => {
-        const parsedUrl = url.parse(hostUrl);
-        if (parsedUrl.hostname !== 'localhost') {
-          throw new Error(
-            `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
-          );
-        }
-        return `https://localhost:${parsedUrl.port}`;
-      });
 
       set('server.ssl.enabled', true);
       set('server.ssl.certificate', KBN_CERT_PATH);
       set('server.ssl.key', KBN_KEY_PATH);
       set('server.ssl.certificateAuthorities', CA_CERT_PATH);
-      set('elasticsearch.hosts', elasticsearchHosts);
-      set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
     }
+  }
+
+  // Kib/ES encryption
+  if (opts.ssl) {
+    // @kbn/dev-utils is part of devDependencies
+    // eslint-disable-next-line import/no-extraneous-dependencies
+    const { CA_CERT_PATH } = require('@kbn/dev-utils');
+
+    const customElasticsearchHosts = opts.elasticsearch
+      ? opts.elasticsearch.split(',')
+      : [].concat(get('elasticsearch.hosts') || []);
+
+    ensureNotDefined('elasticsearch.ssl.certificateAuthorities');
+
+    const elasticsearchHosts = (
+      (customElasticsearchHosts.length > 0 && customElasticsearchHosts) || [
+        'https://localhost:9200',
+      ]
+    ).map((hostUrl) => {
+      const parsedUrl = url.parse(hostUrl);
+      if (parsedUrl.hostname !== 'localhost') {
+        throw new Error(
+          `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
+        );
+      }
+      return `https://localhost:${parsedUrl.port}`;
+    });
+
+    set('elasticsearch.hosts', elasticsearchHosts);
+    set('elasticsearch.ssl.certificateAuthorities', CA_CERT_PATH);
   }
 
   if (opts.elasticsearch) set('elasticsearch.hosts', opts.elasticsearch.split(','));
@@ -262,6 +278,7 @@ export default function (program) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--http2', 'Run the dev server using HTTP2 with TLS')
       .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
         '--no-base-path',

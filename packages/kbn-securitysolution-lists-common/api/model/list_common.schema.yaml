@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  title: Common List Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  schemas:
+    ListId:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListType:
+      type: string
+      enum:
+        - binary
+        - boolean
+        - byte
+        - date
+        - date_nanos
+        - date_range
+        - double
+        - double_range
+        - float
+        - float_range
+        - geo_point
+        - geo_shape
+        - half_float
+        - integer
+        - integer_range
+        - ip
+        - ip_range
+        - keyword
+        - long
+        - long_range
+        - shape
+        - short
+        - text
+
+    ListName:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListDescription:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListMetadata:
+      type: object
+      additionalProperties: true
+
+    ListItemId:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListItemValue:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListItemDescription:
+      $ref: '../../../kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    ListItemMetadata:
+      type: object
+      additionalProperties: true
