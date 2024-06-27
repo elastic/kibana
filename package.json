@@ -391,6 +391,7 @@
     "@kbn/custom-integrations": "link:packages/kbn-custom-integrations",
     "@kbn/custom-integrations-plugin": "link:src/plugins/custom_integrations",
     "@kbn/dashboard-enhanced-plugin": "link:x-pack/plugins/dashboard_enhanced",
+    "@kbn/dashboard-markdown-plugin": "link:src/plugins/dashboard_markdown",
     "@kbn/dashboard-plugin": "link:src/plugins/dashboard",
     "@kbn/data-forge": "link:x-pack/packages/kbn-data-forge",
     "@kbn/data-plugin": "link:src/plugins/data",

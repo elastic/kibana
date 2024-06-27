@@ -656,6 +656,8 @@
       "@kbn/cypress-config/*": ["packages/kbn-cypress-config/*"],
       "@kbn/dashboard-enhanced-plugin": ["x-pack/plugins/dashboard_enhanced"],
       "@kbn/dashboard-enhanced-plugin/*": ["x-pack/plugins/dashboard_enhanced/*"],
+      "@kbn/dashboard-markdown-plugin": ["src/plugins/dashboard_markdown"],
+      "@kbn/dashboard-markdown-plugin/*": ["src/plugins/dashboard_markdown/*"],
       "@kbn/dashboard-plugin": ["src/plugins/dashboard"],
       "@kbn/dashboard-plugin/*": ["src/plugins/dashboard/*"],
       "@kbn/data-forge": ["x-pack/packages/kbn-data-forge"],

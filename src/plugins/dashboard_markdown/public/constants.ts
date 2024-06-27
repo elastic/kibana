@@ -6,13 +6,5 @@
  * Side Public License, v 1.
  */
 
-import { ErrorEmbeddable } from '..';
-
-export function isErrorEmbeddable<TEmbeddable extends object>(
-  embeddable: TEmbeddable | ErrorEmbeddable
-): embeddable is ErrorEmbeddable {
-  return Boolean(
-    (embeddable as ErrorEmbeddable).fatalError ||
-      (embeddable as ErrorEmbeddable).error !== undefined
-  );
-}
+export const MARKDOWN_ID = 'markdown';
+export const ADD_MARKDOWN_ACTION_ID = 'create_markdown';

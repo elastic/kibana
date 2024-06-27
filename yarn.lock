@@ -4525,6 +4525,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dashboard-markdown-plugin@link:src/plugins/dashboard_markdown":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dashboard-plugin@link:src/plugins/dashboard":
   version "0.0.0"
   uid ""
