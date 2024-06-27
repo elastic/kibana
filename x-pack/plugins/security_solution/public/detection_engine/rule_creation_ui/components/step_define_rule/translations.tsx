@@ -245,7 +245,7 @@ export const MACHINE_LEARNING_SUPPRESSION_INCOMPLETE_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionIncompleteLabel',
   {
     defaultMessage:
-      'This list of fields might be incomplete as some Machine Learning jobs are not running. Start more jobs to add more fields.',
+      'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.',
   }
 );
 

@@ -114,7 +114,7 @@ describe(
             cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.enabled');
             cy.get(ALERT_SUPPRESSION_FIELDS).should(
               'contain.text',
-              'This list of fields might be incomplete as some Machine Learning jobs are not running. Start more jobs to add more fields.'
+              'This list of fields might be incomplete as some Machine Learning jobs are not running. Start all relevant jobs for a complete list.'
             );
           });
         });
