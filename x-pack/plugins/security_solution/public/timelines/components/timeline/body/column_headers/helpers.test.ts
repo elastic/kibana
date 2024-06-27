@@ -105,7 +105,6 @@ describe('helpers', () => {
       const expectedData = [
         {
           aggregatable: true,
-          category: 'base',
           columnHeaderType: 'not-filtered',
           description:
             'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
@@ -122,7 +121,6 @@ describe('helpers', () => {
         },
         {
           aggregatable: true,
-          category: 'source',
           columnHeaderType: 'not-filtered',
           description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
           example: '',
@@ -137,7 +135,6 @@ describe('helpers', () => {
         },
         {
           aggregatable: true,
-          category: 'destination',
           columnHeaderType: 'not-filtered',
           description:
             'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
@@ -170,7 +167,6 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, mockBrowserFields)).toEqual([
         {
           aggregatable: false,
-          category: 'base',
           columnHeaderType: 'not-filtered',
           description: 'Each document has an _id that uniquely identifies it',
           esTypes: [],
@@ -199,7 +195,6 @@ describe('helpers', () => {
           fields: {
             test_field_1: {
               aggregatable: true,
-              category: 'test_field_1',
               esTypes: ['keyword'],
               format: 'string',
               indexes: [
@@ -226,7 +221,6 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, oneLevelDeep)).toEqual([
         {
           aggregatable: true,
-          category: 'test_field_1',
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
           format: 'string',
@@ -266,7 +260,6 @@ describe('helpers', () => {
           fields: {
             'foo.bar': {
               aggregatable: true,
-              category: 'foo',
               esTypes: ['keyword'],
               format: 'string',
               indexes: [
@@ -293,7 +286,6 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, twoLevelsDeep)).toEqual([
         {
           aggregatable: true,
-          category: 'foo',
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
           format: 'string',

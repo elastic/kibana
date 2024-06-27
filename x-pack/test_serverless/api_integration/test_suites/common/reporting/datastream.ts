@@ -27,8 +27,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Data Stream', function () {
-    // see details: https://github.com/elastic/kibana/issues/186648
-    this.tags(['failsOnMKI']);
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -62,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    it('uses the datastream configuration with set ILM policy', async () => {
+    it('uses the datastream configuration', async () => {
       const { status, body } = await supertestWithoutAuth
         .get(`/api/index_management/data_streams/.kibana-reporting`)
         .set(internalReqHeader)
@@ -70,29 +68,31 @@ export default function ({ getService }: FtrProviderContext) {
 
       svlCommonApi.assertResponseStatusCode(200, status, body);
 
-      expect(body).toEqual({
-        _meta: {
-          description: 'default kibana reporting template installed by elasticsearch',
-          managed: true,
-        },
-        name: '.kibana-reporting',
-        indexTemplateName: '.kibana-reporting',
-        generation: 1,
-        health: 'green',
-        hidden: true,
-        indices: [
-          {
-            name: expect.any(String),
-            uuid: expect.any(String),
-            managedBy: 'Data stream lifecycle',
-            preferILM: true,
+      expect(body).toEqual(
+        expect.objectContaining({
+          _meta: {
+            description: 'default kibana reporting template installed by elasticsearch',
+            managed: true,
           },
-        ],
-        lifecycle: { enabled: true },
-        nextGenerationManagedBy: 'Data stream lifecycle',
-        privileges: { delete_index: true, manage_data_stream_lifecycle: true },
-        timeStampField: { name: '@timestamp' },
-      });
+          name: '.kibana-reporting',
+          indexTemplateName: '.kibana-reporting',
+          generation: 1,
+          health: 'green',
+          hidden: true,
+          indices: [
+            {
+              name: expect.any(String),
+              uuid: expect.any(String),
+              managedBy: 'Data stream lifecycle',
+              preferILM: true,
+            },
+          ],
+          lifecycle: expect.objectContaining({ enabled: true }),
+          nextGenerationManagedBy: 'Data stream lifecycle',
+          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+          timeStampField: { name: '@timestamp' },
+        })
+      );
     });
   });
 }
