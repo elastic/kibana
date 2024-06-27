@@ -17,7 +17,7 @@ describe('addToControls', () => {
   const mockControlGroupApi = {
     addOptionsListControl: jest.fn(),
     addRangeSliderControl: jest.fn(),
-  } as unknown as ControlGroupApi;
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -45,7 +45,7 @@ describe('addToControls', () => {
     test('should add option list control', () => {
       const mockDataService = dataPluginMock.createStartContract();
       mockDataService.query.filterManager.getFilters = () => [];
-      addToControls(mockControlGroupApi, vis, mockDataService);
+      addToControls(mockControlGroupApi as unknown as ControlGroupApi, vis, mockDataService);
       expect(mockControlGroupApi.addOptionsListControl.mock.calls).toHaveLength(1);
       expect(mockControlGroupApi.addOptionsListControl.mock.calls[0][0]).toEqual({
         controlId: LEGACY_OPTION_LIST_CONTROL_ID,
@@ -70,7 +70,7 @@ describe('addToControls', () => {
           },
         },
       ];
-      addToControls(mockControlGroupApi, vis, mockDataService);
+      addToControls(mockControlGroupApi as unknown as ControlGroupApi, vis, mockDataService);
       expect(mockControlGroupApi.addOptionsListControl.mock.calls).toHaveLength(1);
       expect(mockControlGroupApi.addOptionsListControl.mock.calls[0][0].selectedOptions).toEqual([
         'ios',
@@ -101,7 +101,7 @@ describe('addToControls', () => {
     test('should add range slider control', () => {
       const mockDataService = dataPluginMock.createStartContract();
       mockDataService.query.filterManager.getFilters = () => [];
-      addToControls(mockControlGroupApi, vis, mockDataService);
+      addToControls(mockControlGroupApi as unknown as ControlGroupApi, vis, mockDataService);
       expect(mockControlGroupApi.addRangeSliderControl.mock.calls).toHaveLength(1);
       expect(mockControlGroupApi.addRangeSliderControl.mock.calls[0][0]).toEqual({
         controlId: LEGACY_RANGE_CONTROL_ID,
@@ -129,13 +129,47 @@ describe('addToControls', () => {
           },
         },
       ];
-      addToControls(mockControlGroupApi, vis, mockDataService);
+      addToControls(mockControlGroupApi as unknown as ControlGroupApi, vis, mockDataService);
       expect(mockControlGroupApi.addRangeSliderControl.mock.calls).toHaveLength(1);
       expect(mockControlGroupApi.addRangeSliderControl.mock.calls[0][0].value).toEqual([
         '7014',
         '13103',
       ]);
       expect(mockDataService.query.filterManager.removeFilter.mock.calls).toHaveLength(1);
+    });
+  });
+
+  describe('chaining', () => {
+    test('should re-order controls with parents to be on the right of the parent', () => {
+      const CHILD_CONTROL_ID = 'child1';
+      const PARENT_CONTROL_ID = 'parent1';
+      const vis = {
+        params: {
+          controls: [
+            {
+              id: CHILD_CONTROL_ID,
+              fieldName: 'city',
+              indexPattern: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              options: {},
+              parent: PARENT_CONTROL_ID,
+              type: CONTROL_TYPES.LIST,
+            },
+            {
+              id: PARENT_CONTROL_ID,
+              fieldName: 'country',
+              indexPattern: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              options: {},
+              type: CONTROL_TYPES.LIST,
+            },
+          ],
+        },
+      } as unknown as Vis<InputControlVisParams>;
+      const mockDataService = dataPluginMock.createStartContract();
+      mockDataService.query.filterManager.getFilters = () => [];
+      addToControls(mockControlGroupApi as unknown as ControlGroupApi, vis, mockDataService);
+      expect(mockControlGroupApi.addOptionsListControl.mock.calls).toHaveLength(2);
+      expect(mockControlGroupApi.addOptionsListControl.mock.calls[0][0].controlId).toBe(PARENT_CONTROL_ID);
+      expect(mockControlGroupApi.addOptionsListControl.mock.calls[1][0].controlId).toBe(CHILD_CONTROL_ID);
     });
   });
 });

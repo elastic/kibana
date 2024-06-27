@@ -24,7 +24,32 @@ export function addToControls(
   vis: Vis<InputControlVisParams>,
   dataService: DataPublicPluginStart
 ) {
-  (vis.params?.controls ?? []).forEach((controlParams) => {
+  const orderedControls: ControlParams[] = [];
+  if (vis.params?.controls) {
+    function isRootControl(controlParams: ControlParams) {
+      const parentId = controlParams.parent ?? '';
+      return parentId === '';
+    }
+    // add root controls
+    vis.params?.controls
+      .filter(controlParams => isRootControl(controlParams))
+      .forEach(controlParams => {
+        orderedControls.push(controlParams);
+      });
+    // add child controls to right of parent control
+    vis.params?.controls
+      .filter(controlParams => !isRootControl(controlParams))
+      .forEach(controlParams => {
+        const parentIndex = orderedControls.findIndex(({ parent }) => parent === controlParams.parent);
+        if (parentIndex > 0) {
+          orderedControls.splice(parentIndex, 0, controlParams);
+        } else {
+          orderedControls.push(controlParams);
+        }
+      });
+  }
+
+  orderedControls.forEach((controlParams) => {
     const filter = dataService.query.filterManager
       .getFilters()
       .find(({ meta }) => meta.controlledBy === controlParams.id);
