@@ -45,6 +45,7 @@ import {
   RuleAlertData,
   RuleNotifyWhen,
   RuleSystemAction,
+  SanitizedRuleAction,
 } from '../../common';
 import {
   generateActionHash,
@@ -163,6 +164,7 @@ export class ExecutionHandler<
     ActionGroupIds,
     RecoveryActionGroupId
   >;
+  private actions: SanitizedRuleAction[] = [];
 
   constructor({
     rule,
@@ -179,6 +181,7 @@ export class ExecutionHandler<
     previousStartedAt,
     actionsClient,
     alertsClient,
+    actions,
   }: ExecutionHandlerOptions<
     Params,
     ExtractedParams,
@@ -208,13 +211,15 @@ export class ExecutionHandler<
     this.previousStartedAt = previousStartedAt;
     this.mutedAlertIdsSet = new Set(rule.mutedInstanceIds);
     this.alertsClient = alertsClient;
+    this.actions = actions;
+    console.log(`actions ${JSON.stringify(actions)}`);
   }
 
   public async run(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
     const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
-      actions: this.rule.actions,
+      actions: this.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
     const executables = await this.generateExecutables(alerts, throttledSummaryActions);
@@ -731,7 +736,7 @@ export class ExecutionHandler<
     throttledSummaryActions: ThrottledActions
   ): Promise<Array<Executable<State, Context, ActionGroupIds, RecoveryActionGroupId>>> {
     const executables = [];
-    for (const action of this.rule.actions) {
+    for (const action of this.actions) {
       const alertsArray = Object.entries(alerts);
       let summarizedAlerts = null;
 

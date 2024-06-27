@@ -40,6 +40,7 @@ import {
   RuleAlertData,
   RuleSystemAction,
   RulesSettingsFlappingProperties,
+  SanitizedRuleAction,
 } from '../../common';
 import { ActionsConfigMap } from '../lib/get_actions_config_map';
 import { NormalizedRuleType } from '../rule_type_registry';
@@ -116,6 +117,7 @@ export interface ExecutionHandlerOptions<
   executionId: string;
   ruleLabel: string;
   previousStartedAt: Date | null;
+  actions: SanitizedRuleAction[];
   actionsClient: PublicMethodsOf<ActionsClient>;
   alertsClient: IAlertsClient<AlertData, State, Context, ActionGroupIds, RecoveryActionGroupId>;
 }

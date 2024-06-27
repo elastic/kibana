@@ -156,6 +156,7 @@ export const notificationPolicySchema = schema.object({
   alertType: schema.arrayOf(schema.string()),
   connectors: schema.arrayOf(
     schema.object({
+      actionTypeId: schema.string(),
       id: schema.string(),
       params: schema.any(),
     })

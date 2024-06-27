@@ -55,7 +55,7 @@ interface AlertCondition {
 export interface NotificationPolicy {
   name: string;
   alertType: string[];
-  connectors: Array<{ id: string; params: any }>;
+  connectors: Array<{ id: string; actionTypeId: string; params: any }>;
   frequency: string;
   throttle?: string;
   conditions: Array<{ type: string; value: string[] }>;
@@ -101,6 +101,11 @@ export const CreateNotificationPolicyModal: React.FC<CreateNotificationPolicyMod
     },
     [dispatch]
   );
+
+  const connectorTypeIndex: Record<string, string> = connectors.reduce((acc, connector) => {
+    acc[connector.id] = connector.actionTypeId;
+    return acc;
+  }, {});
 
   const [name, setName] = useState<string>('');
   const [selectedRunWhenOptions, setSelectedRunWhenOptions] = useState<ComboBoxFieldOption[]>([]);
@@ -180,6 +185,7 @@ export const CreateNotificationPolicyModal: React.FC<CreateNotificationPolicyMod
       alertType: selectedRunWhenOptions.map((option) => option.key),
       connectors: selectedConnectorsOptions.map((option) => ({
         id: option.key,
+        actionTypeId: connectorTypeIndex[option.key],
         params: connectorParams[option.key],
       })),
       frequency: selectedCadenceOptions?.[0].key,
