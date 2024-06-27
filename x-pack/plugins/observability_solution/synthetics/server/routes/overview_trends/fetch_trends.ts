@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { UptimeEsClient } from '../../lib';
 
 export function fetchTrends(configId: string, locationIds: string[], esClient: UptimeEsClient) {
-  const query = {
+  const query: SearchRequest = {
     size: 0,
     query: {
       bool: {
@@ -90,12 +91,12 @@ export function fetchTrends(configId: string, locationIds: string[], esClient: U
       },
     },
     aggs: {
-      by_id: {
+      byId: {
         terms: {
           field: 'config_id',
         },
         aggs: {
-          by_location: {
+          byLocation: {
             terms: {
               field: 'observer.name',
             },
@@ -137,6 +138,6 @@ export function fetchTrends(configId: string, locationIds: string[], esClient: U
     ],
     fields: ['monitor.duration.us'],
   };
-  console.log(JSON.stringify(query));
+
   return esClient.search({ body: query });
 }

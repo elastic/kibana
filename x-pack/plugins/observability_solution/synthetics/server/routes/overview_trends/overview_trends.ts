@@ -15,12 +15,14 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
   path: SYNTHETICS_API_URLS.OVERVIEW_TRENDS,
   validate: {
-    body: schema.arrayOf(
-      schema.object({
-        configId: schema.string(),
-        locationId: schema.string(),
-      })
-    ),
+    body: schema.object({
+      body: schema.arrayOf(
+        schema.object({
+          configId: schema.string(),
+          locationId: schema.string(),
+        })
+      ),
+    }),
   },
   handler: async (routeContext): Promise<any> => {
     return withSpan('fetch trends', async () => {
@@ -40,41 +42,23 @@ export const createOverviewTrendsRoute: SyntheticsRestApiRouteFactory = () => ({
       let main = {};
       for (const res of results) {
         const aggregations = res.body.aggregations as any;
-        console.log('aggregations', aggregations);
-        aggregations.by_id.buckets.map(
-          ({ key, by_location }: { key: string; by_location: any }) => {
-            const ret: Record<string, any> = {};
-            for (const location of by_location.buckets) {
-              console.log('creating location bucket for ', key, location);
-              ret[key + location.key] = {
-                data: location.last_50.hits.hits
-                  .reverse()
-                  .map((hit, x) => ({ x, y: hit._source.monitor.duration.us })),
-                ...location.stats,
-                median: location.median.values['50.0'],
-              };
-            }
-            console.log('ret', ret);
-            main = { ...main, ...ret };
+        aggregations.byId.buckets.map(({ key, byLocation }: { key: string; byLocation: any }) => {
+          const ret: Record<string, any> = {};
+          for (const location of byLocation.buckets) {
+            ret[key + location.key] = {
+              configId: key,
+              locationId: location.key,
+              data: location.last_50.hits.hits
+                .reverse()
+                .map((hit: any, x: number) => ({ x, y: hit._source.monitor.duration.us })),
+              ...location.stats,
+              median: location.median.values['50.0'],
+            };
           }
-        );
-        // console.log('formatted', formatted);
-        // console.log('keys', Object.keys(formatted));
+          main = { ...main, ...ret };
+        });
       }
       return routeContext.response.ok({ body: main });
-      // const res = await fetchTrends(Array.from(configIds), Array.from(locationIds), esClient);
-      // const aggregations = res.body.aggregations as any;
-      // const ret: Record<string, any> = {};
-      // aggregations.by_id.buckets.map(({ key, by_location }: { key: string; by_location: any }) => {
-      //   for (const location of by_location.buckets) {
-      //     ret[key + location.key] = {
-      //       data: location.last_50,
-      //       ...location.stats,
-      //       median: location.median.values['50.0'],
-      //     };
-      //   }
-      // });
-      // return routeContext.response.ok({ body: ret });
     });
   },
 });
