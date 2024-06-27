@@ -6,45 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, mergeMap } from 'rxjs';
-import { TRANSFER_DATA_TYPE } from './constants';
+import { Airdrop, TRANSFER_DATA_TYPE } from '@kbn/airdrops';
+import { BehaviorSubject, filter, mergeMap, of, Subject } from 'rxjs';
 
 export class AirdropService {
   private documentEventListenersAdded = false;
   private _isDraggingOver$ = new BehaviorSubject<boolean>(false);
   private _isDragging$ = new BehaviorSubject<boolean>(false);
-  private dropDiv: HTMLElement | null = null;
   private timeRef = 0;
+  private airdrop$ = new Subject<Airdrop>();
 
   constructor() {}
 
-  setup() {
-    // this.addEventListeners();
-    // return {
-    //   setIsDragging: (isDragging: boolean) => {
-    //     this.isDragging$.next(isDragging);
-    //   },
-    // };
-  }
+  setup() {}
 
   start() {
-    // if (!dropDiv) return;
-
     this.addEventListeners();
 
-    // this.createDropDiv().then((dropDiv) => {
-    //   if (dropDiv) {
-    //   }
-    // });
-
     this._isDraggingOver$.subscribe((isDraggingOver) => {
-      console.log('isDraggingOver', isDraggingOver);
       if (isDraggingOver) {
         document.body.style.setProperty('pointer-events', 'none');
-
-        // this.dropDiv?.style.setProperty('background-color', 'rgba(0, 0, 0, 0.5)');
       } else {
-        // this.dropDiv?.style.setProperty('background-color', 'transparent');
         document.body.style.setProperty('pointer-events', 'auto');
       }
     });
@@ -54,7 +36,20 @@ export class AirdropService {
       setIsDragging: (isDragging: boolean) => {
         this._isDragging$.next(isDragging);
       },
+      getAirdrop$For: this.getAirdrop$For.bind(this),
     };
+  }
+
+  public getAirdrop$For<T extends Record<string, unknown> = Record<string, unknown>>(
+    id: string,
+    app?: string
+  ) {
+    return this.airdrop$.asObservable().pipe(
+      filter((airdrop): airdrop is Airdrop<T> => {
+        if (app && airdrop.app !== app) return false;
+        return airdrop.id === id;
+      })
+    );
   }
 
   public get isDraggingOver$() {
@@ -88,9 +83,9 @@ export class AirdropService {
     document.addEventListener('dragleave', (e) => {
       if (e.dataTransfer?.types.includes(TRANSFER_DATA_TYPE)) {
         e.preventDefault();
-        const diff = Date.now() - this.timeRef; // Needed to prevent flickering
+        const diff = Date.now() - this.timeRef;
         if (this._isDragging$.getValue()) return;
-        if (diff < 100) return;
+        if (diff < 100) return; // Needed to prevent flickering
         this._isDraggingOver$.next(false);
       }
     });
@@ -101,9 +96,9 @@ export class AirdropService {
         this._isDraggingOver$.next(false);
         if (this._isDragging$.getValue()) return;
         const data = e.dataTransfer.getData(TRANSFER_DATA_TYPE);
-        const jsonObject = JSON.parse(data);
-        // setFormState(jsonObject);
-        console.log(jsonObject);
+        const airdrop = JSON.parse(data);
+        this.airdrop$.next(airdrop);
+        console.log(airdrop);
       }
     });
 
@@ -119,12 +114,6 @@ export class AirdropService {
     }
     const dropElement = document.createElement('div');
 
-    // width: 100%;
-    // pointer-events: none;
-    // height: 100vh;
-    // top: 0;
-    // left: 0;
-    // transform: translateY(-100%);
     dropElement.style.cssText = `
       position: relative;
       z-index: 1000;

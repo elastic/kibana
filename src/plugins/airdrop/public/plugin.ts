@@ -16,9 +16,11 @@ export class AirdropPlugin
   implements Plugin<AirdropPluginSetup, AirdropPluginStart, object, AppPluginStartDependencies>
 {
   private airdropService = new AirdropService();
+  private pluginStart: AirdropPluginStart | null = null;
 
   public setup(core: CoreSetup<AppPluginStartDependencies>): AirdropPluginSetup {
-    // Register an application into the side navigation menu
+    const _this = this;
+
     core.application.register({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
@@ -27,7 +29,11 @@ export class AirdropPlugin
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();
-        return renderApp(coreStart, depsStart, params);
+        const airdrop = _this.pluginStart;
+        if (!airdrop) {
+          throw new Error('Airdrop plugin is not yet started');
+        }
+        return renderApp(coreStart, { ...depsStart, airdrop }, params);
       },
     });
 
@@ -44,9 +50,11 @@ export class AirdropPlugin
       mountOverlay({ airdropService: this.airdropService }, { element });
     });
 
-    return {
+    this.pluginStart = {
       ...this.airdropService.start(),
     };
+
+    return this.pluginStart;
   }
 
   public stop() {}

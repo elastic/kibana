@@ -12,6 +12,7 @@ export interface FormState {
   firstName: string;
   lastName: string;
   acceptTerms: boolean;
+  [key: string]: unknown;
 }
 
 interface Props {

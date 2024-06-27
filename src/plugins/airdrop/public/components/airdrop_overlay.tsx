@@ -21,7 +21,7 @@ export const AirdropOverlay: FC<Props> = ({ airdropService }) => {
       {isDraggingOver && (
         <div
           css={{
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'rgba(0, 119, 204, 0.3)',
             height: '100vh',
             left: 0,
             position: 'absolute',

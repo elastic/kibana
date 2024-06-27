@@ -11,3 +11,7 @@ export { DragWrapper } from './components';
 export { TRANSFER_DATA_TYPE } from './constants';
 
 export { AirdropKibanaProvider, AirdropProvider } from './services';
+
+export { useOnDrop } from './use_ondrop';
+
+export type { Airdrop } from './types';

@@ -6,4 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { DragWrapper, TRANSFER_DATA_TYPE, AirdropKibanaProvider, AirdropProvider } from './src';
+export {
+  DragWrapper,
+  TRANSFER_DATA_TYPE,
+  AirdropKibanaProvider,
+  AirdropProvider,
+  useOnDrop,
+} from './src';
+
+export type { Airdrop } from './src';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { DragEvent, useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
 import {
@@ -14,15 +14,14 @@ import {
   EuiPageTemplate,
   EuiTitle,
   EuiText,
-  EuiCodeBlock,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { DragWrapper, useOnDrop } from '@kbn/airdrops';
 
-import { TRANSFER_DATA_TYPE } from '../constants';
 import { Form, FormState } from './form';
 
 interface AirdropAppDeps {
@@ -31,16 +30,22 @@ interface AirdropAppDeps {
   http: CoreStart['http'];
 }
 
+const DROP_ID = 'form';
+
 export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) => {
   const [formState, setFormState] = useState<FormState>({
     firstName: '',
     lastName: '',
     acceptTerms: false,
   });
-  const [isDragging, setIsDragging] = useState(false);
-  const [timestamp, setTimestamp] = useState<string | undefined>();
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const timeRef = useRef(0);
+
+  const airdropForm = useOnDrop<FormState>({ id: DROP_ID });
+
+  useEffect(() => {
+    if (airdropForm) {
+      setFormState(airdropForm.content);
+    }
+  }, [airdropForm]);
 
   // const onClickHandler = () => {
   //   // Use the core http service to make a response to the server API.
@@ -55,66 +60,9 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
   //   });
   // };
 
-  const onDragStart = (e: DragEvent) => {
-    setIsDragging(true);
-    e.dataTransfer.setData(TRANSFER_DATA_TYPE, JSON.stringify(formState));
-  };
-
-  const onDragEnd = () => {
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (e: DragEvent) => {
-    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
-      e.preventDefault();
-    }
-  };
-
-  const handleDragEnter = (e: DragEvent) => {
-    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
-      e.preventDefault();
-      if (isDragging || isDraggingOver) return;
-      timeRef.current = Date.now();
-      setIsDraggingOver(true);
-    }
-  };
-
-  const handleDragLeave = (e: DragEvent) => {
-    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
-      e.preventDefault();
-      const diff = Date.now() - timeRef.current; // Needed to prevent flickering
-      if (isDragging) return;
-      if (diff < 100) return;
-      setIsDraggingOver(false);
-    }
-  };
-
-  const handleDrop = (e: DragEvent) => {
-    if (e.dataTransfer.types.includes(TRANSFER_DATA_TYPE)) {
-      e.preventDefault();
-      setIsDraggingOver(false);
-      if (isDragging) return;
-      const data = e.dataTransfer.getData(TRANSFER_DATA_TYPE);
-      const jsonObject = JSON.parse(data);
-      setFormState(jsonObject);
-      console.log(jsonObject);
-    }
-  };
-
   return (
     <Router basename={basename}>
       <I18nProvider>
-        {/* <div
-          id="dropzone"
-          onDragOver={handleDragOver}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          style={{
-            border: isDraggingOver ? '6px solid #4169e1' : '6px solid rgba(0,0,0,0)',
-          }}
-        >
-          <div css={{ pointerEvents: isDraggingOver ? 'none' : 'auto' }}> */}
         <EuiPageTemplate
           restrictWidth="1000px"
           css={{ minBlockSize: 'max(460px,100vh - 108px) !important' }}
@@ -140,14 +88,10 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <div
-                  id="draggable"
-                  draggable
-                  onDragStart={onDragStart}
-                  onDragEnd={onDragEnd}
-                  style={{
-                    cursor: 'grab',
-                    transform: 'translate(0, 0)', // avoids parent bkg rendering
+                <DragWrapper
+                  data={{
+                    id: DROP_ID,
+                    get: () => formState,
                   }}
                 >
                   <EuiButtonIcon
@@ -157,7 +101,7 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
                     iconType="watchesApp"
                     aria-label="Next"
                   />
-                </div>
+                </DragWrapper>
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -180,8 +124,6 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
             <EuiSpacer />
           </EuiPageTemplate.Section>
         </EuiPageTemplate>
-        {/* </div>
-        </div> */}
       </I18nProvider>
     </Router>
   );

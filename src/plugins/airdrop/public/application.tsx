@@ -9,16 +9,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { AppPluginStartDependencies } from './types';
+import { AirdropKibanaProvider } from '@kbn/airdrops';
+import { AirdropPluginStart, AppPluginStartDependencies } from './types';
 import { AirdropApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  {}: AppPluginStartDependencies,
+  { airdrop }: AppPluginStartDependencies & { airdrop: AirdropPluginStart },
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
-    <AirdropApp basename={appBasePath} notifications={notifications} http={http} />,
+    <AirdropKibanaProvider airdrop={airdrop}>
+      <AirdropApp basename={appBasePath} notifications={notifications} http={http} />
+    </AirdropKibanaProvider>,
     element
   );
 

@@ -15,6 +15,10 @@ import type { Observable } from 'rxjs';
 export interface AirdropServices {
   isDraggingOver$: Observable<boolean>;
   setIsDragging: (isDragging: boolean) => void;
+  getAirdrop$For: <T extends Record<string, unknown>>(
+    id: string,
+    app?: string
+  ) => Observable<Airdrop<T>>;
 }
 
 /**
@@ -27,5 +31,15 @@ export interface KibanaDependencies {
   airdrop: {
     isDraggingOver$: Observable<boolean>;
     setIsDragging: (isDragging: boolean) => void;
+    getAirdrop$For: <T extends Record<string, unknown>>(
+      id: string,
+      app?: string
+    ) => Observable<Airdrop<T>>;
   };
+}
+
+export interface Airdrop<T = Record<string, unknown>> {
+  id: string;
+  app?: string;
+  content: T;
 }

@@ -6,22 +6,33 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, type FC, type DragEvent } from 'react';
+import React, { type DragEvent } from 'react';
 import { TRANSFER_DATA_TYPE } from '../constants';
 
 import { useAirdrop } from '../services';
+import { Airdrop } from '../types';
 
-interface Props {
-  dataGetter: () => string;
+interface Props<T = Record<string, unknown>> {
+  data: {
+    id: string;
+    app?: string;
+    get: () => T;
+  };
+  children: React.ReactNode;
 }
 
-export const DragWrapper: FC<Props> = ({ dataGetter, children }) => {
-  // const [isDragging, setIsDragging] = useState(false);
+export function DragWrapper<T>({ data, children }: Props<T>) {
   const { setIsDragging } = useAirdrop();
 
   const onDragStart = (e: DragEvent) => {
     setIsDragging(true);
-    e.dataTransfer.setData(TRANSFER_DATA_TYPE, dataGetter());
+    const airdrop: Airdrop<T> = {
+      id: data.id,
+      app: data.app,
+      content: data.get(),
+    };
+    const serializedData = JSON.stringify(airdrop);
+    e.dataTransfer.setData(TRANSFER_DATA_TYPE, serializedData);
   };
 
   const onDragEnd = () => {
@@ -42,4 +53,4 @@ export const DragWrapper: FC<Props> = ({ dataGetter, children }) => {
       {children}
     </div>
   );
-};
+}
