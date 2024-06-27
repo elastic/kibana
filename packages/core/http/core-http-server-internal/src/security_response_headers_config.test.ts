@@ -86,6 +86,30 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       const result = parse(config, { report_to: [] });
       expect(result.securityResponseHeaders['Permissions-Policy']).toBeUndefined();
     });
+
+    it('includes report-to directive if it is provided', () => {
+      const config = schema.validate({ permissionsPolicy: 'display-capture=(self)' });
+      const result = parse(config, { report_to: ['violations-endpoint'] });
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
+        'display-capture=(self);report-to=violations-endpoint'
+      );
+    });
+  });
+
+  describe('permissionsPolicyReportOnly', () => {
+    it('a custom value results in the expected Permissions-Policy-Report-Only header', () => {
+      const config = schema.validate({ permissionsPolicyReportOnly: 'display-capture=(self)' });
+      const result = parse(config, { report_to: ['violations-endpoint'] });
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
+        'display-capture=(self);report-to=violations-endpoint'
+      );
+    });
+
+    it('includes Permissions-Policy-Report-Only only if report-to directive is set', () => {
+      const config = schema.validate({ permissionsPolicy: 'display-capture=(self)' });
+      const result = parse(config, { report_to: [] });
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toBeUndefined();
+    });
   });
 
   describe('disableEmbedding', () => {
