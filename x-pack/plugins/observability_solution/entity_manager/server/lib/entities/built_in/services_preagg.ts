@@ -14,6 +14,7 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
     name: 'Services from logs',
     type: 'service',
     managed: true,
+    filter: '@timestamp > now-5m',
     indexPatterns: [
       'logs-*',
       'filebeat*',
@@ -27,7 +28,6 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
     history: {
       timestampField: '@timestamp',
       interval: '1m',
-      lookbackPeriod: '5m',
     },
     latest: {
       lookback: '5m',

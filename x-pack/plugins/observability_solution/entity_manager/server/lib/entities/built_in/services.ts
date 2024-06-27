@@ -13,6 +13,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   name: 'Services from logs',
   type: 'service',
   managed: true,
+  filter: '@timestamp > now-5m',
   indexPatterns: [
     'logs-*',
     'filebeat*',
