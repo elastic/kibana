@@ -93,12 +93,12 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
         {
           name: 'A',
           aggregation: 'doc_count',
-          filter: 'log.level: "error"',
+          filter: 'log.level: "error" OR error.log.level: "error"',
         },
         {
           name: 'B',
           aggregation: 'doc_count',
-          filter: 'log.level: *',
+          filter: 'log.level: * OR error.log.level: *',
         },
       ],
     },
@@ -109,7 +109,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
         {
           name: 'A',
           aggregation: 'doc_count',
-          filter: 'log.level: "error"',
+          filter: 'log.level: "error" OR error.log.level: "error"',
         },
       ],
     },
