@@ -86,8 +86,8 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
-  // TODO FLAKY: https://github.com/elastic/kibana/issues/171426
-  describe('@ess @serverless @serverlessQA Machine learning type rules', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/171426
+  describe.skip('@ess @serverless @serverlessQA Machine learning type rules', () => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
