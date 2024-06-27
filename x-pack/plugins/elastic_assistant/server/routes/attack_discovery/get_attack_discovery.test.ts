@@ -15,7 +15,7 @@ import { AttackDiscoveryDataClient } from '../../ai_assistant_data_clients/attac
 import { transformESSearchToAttackDiscovery } from '../../ai_assistant_data_clients/attack_discovery/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../__mocks__/attack_discovery_schema.mock';
 import { getAttackDiscoveryRequest } from '../../__mocks__/request';
-import { getAttackDiscoveryStats, findAttackDiscoveryByConnectorId } from './helpers';
+import { getAttackDiscoveryStats, updateAttackDiscoveryLastViewedAt } from './helpers';
 jest.mock('./helpers');
 
 const mockStats = {
@@ -79,7 +79,7 @@ describe('getAttackDiscoveryRoute', () => {
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
 
     getAttackDiscoveryRoute(server.router);
-    (findAttackDiscoveryByConnectorId as jest.Mock).mockResolvedValue(mockCurrentAd);
+    (updateAttackDiscoveryLastViewedAt as jest.Mock).mockResolvedValue(mockCurrentAd);
     (getAttackDiscoveryStats as jest.Mock).mockResolvedValue(mockStats);
   });
 
@@ -124,7 +124,7 @@ describe('getAttackDiscoveryRoute', () => {
   });
 
   it('should handle findAttackDiscoveryByConnectorId null response', async () => {
-    (findAttackDiscoveryByConnectorId as jest.Mock).mockResolvedValue(null);
+    (updateAttackDiscoveryLastViewedAt as jest.Mock).mockResolvedValue(null);
     const response = await server.inject(
       getAttackDiscoveryRequest('connector-id'),
       requestContextMock.convertContext(context)
@@ -136,7 +136,7 @@ describe('getAttackDiscoveryRoute', () => {
   });
 
   it('should handle findAttackDiscoveryByConnectorId error', async () => {
-    (findAttackDiscoveryByConnectorId as jest.Mock).mockRejectedValue(new Error('Oh no!'));
+    (updateAttackDiscoveryLastViewedAt as jest.Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
       getAttackDiscoveryRequest('connector-id'),
       requestContextMock.convertContext(context)

@@ -203,7 +203,7 @@ export const AttackDiscoveryUpdateProps = z.object({
   /**
    * The status of the attack discovery.
    */
-  status: AttackDiscoveryStatus,
+  status: AttackDiscoveryStatus.optional(),
   replacements: Replacements.optional(),
   /**
    * The most 5 recent generation intervals

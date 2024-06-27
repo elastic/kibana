@@ -186,7 +186,6 @@ components:
       type: object
       required:
         - id
-        - status
         - backingIndex
       properties:
         id:

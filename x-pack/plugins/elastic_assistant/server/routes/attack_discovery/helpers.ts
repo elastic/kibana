@@ -416,7 +416,7 @@ export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginN
   return assistantTools.find((tool) => tool.id === 'attack-discovery');
 };
 
-export const findAttackDiscoveryByConnectorId = async ({
+export const updateAttackDiscoveryLastViewedAt = async ({
   connectorId,
   authenticatedUser,
   dataClient,
@@ -434,9 +434,9 @@ export const findAttackDiscoveryByConnectorId = async ({
     return null;
   }
 
+  // update lastViewedAt time as this is the function used for polling by connectorId
   return dataClient.updateAttackDiscovery({
     attackDiscoveryUpdateProps: {
-      status: attackDiscovery.status,
       id: attackDiscovery.id,
       lastViewedAt: new Date().toISOString(),
       backingIndex: attackDiscovery.backingIndex,

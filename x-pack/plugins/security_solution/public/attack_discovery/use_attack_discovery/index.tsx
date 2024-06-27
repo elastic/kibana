@@ -118,8 +118,9 @@ export const useAttackDiscovery = ({
       setReplacements({});
       setAttackDiscoveries([]);
       setGenerationIntervals([]);
+      setPollStatus(null);
     }
-  }, [pollApi, connectorId, setLoadingConnectorId]);
+  }, [pollApi, connectorId, setLoadingConnectorId, setPollStatus]);
 
   useEffect(() => {
     if (pollStatus === 'running') {
