@@ -34,6 +34,8 @@
       "@kbn/aiops-test-utils/*": ["x-pack/packages/ml/aiops_test_utils/*"],
       "@kbn/airdrop-plugin": ["src/plugins/airdrop"],
       "@kbn/airdrop-plugin/*": ["src/plugins/airdrop/*"],
+      "@kbn/airdrops": ["packages/airdrops"],
+      "@kbn/airdrops/*": ["packages/airdrops/*"],
       "@kbn/alerting-api-integration-helpers": ["x-pack/test/alerting_api_integration/packages/helpers"],
       "@kbn/alerting-api-integration-helpers/*": ["x-pack/test/alerting_api_integration/packages/helpers/*"],
       "@kbn/alerting-api-integration-test-plugin": ["x-pack/test/alerting_api_integration/common/plugins/alerts"],

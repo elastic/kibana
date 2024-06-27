@@ -156,6 +156,7 @@
     "@kbn/aiops-plugin": "link:x-pack/plugins/aiops",
     "@kbn/aiops-test-utils": "link:x-pack/packages/ml/aiops_test_utils",
     "@kbn/airdrop-plugin": "link:src/plugins/airdrop",
+    "@kbn/airdrops": "link:packages/airdrops",
     "@kbn/alerting-api-integration-test-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/alerts",
     "@kbn/alerting-comparators": "link:x-pack/packages/kbn-alerting-comparators",
     "@kbn/alerting-example-plugin": "link:x-pack/examples/alerting_example",
