@@ -17,6 +17,7 @@ import {
   EuiSwitch,
   EuiSearchBarProps,
   EuiInMemoryTableProps,
+  Criteria,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -27,6 +28,10 @@ import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  useEuiTablePersistingPageSize,
+  DEFAULT_PAGE_SIZE_OPTIONS,
+} from '@kbn/shared-ux-table-pagination';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
@@ -102,6 +107,16 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
     false
   );
   const { setListAction } = usePolicyListContext();
+
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const [pageSize, setPageSize] = useState(getPersistingPageSize());
+
+  const onTableChange = ({ page }: Criteria<any>) => {
+    if (page) {
+      setPageSize(page.size);
+      setPersistingPageSize(page.size);
+    }
+  };
 
   const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
     if (!error) {
@@ -313,7 +328,11 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
           'The table below contains {count, plural, one {# Index Lifecycle policy} other {# Index Lifecycle policies}} .',
         values: { count: policies.length },
       })}
-      pagination={true}
+      pagination={{
+        initialPageSize: pageSize,
+        pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+      }}
+      onTableChange={onTableChange}
       sorting={{
         sort: {
           field: 'name',
