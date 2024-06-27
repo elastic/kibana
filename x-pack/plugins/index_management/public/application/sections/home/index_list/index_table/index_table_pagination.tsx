@@ -27,7 +27,7 @@ export const IndexTablePagination = ({
   readURLParams,
   setURLParam,
 }: IndexTablePaginationProps) => {
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('indices');
   const [pageSize, setPageSize] = useState(getPersistingPageSize());
 
   if (pager.itemsPerPage !== pageSize) {

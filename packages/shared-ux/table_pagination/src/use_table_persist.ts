@@ -6,26 +6,22 @@
  * Side Public License, v 1.
  */
 
-import {
-  INITIAL_DEFAULT_PAGE_SIZE,
-  LOCAL_STORAGE_PREFIX,
-  LOCAL_STORAGE_PAGE_SIZE_KEY,
-} from './constants';
+import { INITIAL_DEFAULT_PAGE_SIZE, LOCAL_STORAGE_PREFIX } from './constants';
 import { createStorage } from './storage';
 
-export const useEuiTablePersistingPageSize = () => {
+export const useEuiTablePersistingPageSize = (tableId: string) => {
   const storage = createStorage({
     engine: window.localStorage,
     prefix: LOCAL_STORAGE_PREFIX,
   });
 
   const getPersistingPageSize = () => {
-    const storedPageSize = storage.get(LOCAL_STORAGE_PAGE_SIZE_KEY);
+    const storedPageSize = storage.get(tableId);
     return storedPageSize || INITIAL_DEFAULT_PAGE_SIZE;
   };
 
   const setPersistingPageSize = (pageSize: number) => {
-    storage.set(LOCAL_STORAGE_PAGE_SIZE_KEY, pageSize);
+    storage.set(tableId, pageSize);
   };
 
   return { getPersistingPageSize, setPersistingPageSize };

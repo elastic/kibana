@@ -199,7 +199,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('indexTemplates');
   const [pageSize, setPageSize] = useState(getPersistingPageSize());
 
   const pagination = {

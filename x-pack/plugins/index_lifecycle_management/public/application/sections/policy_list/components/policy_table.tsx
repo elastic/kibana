@@ -108,7 +108,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   );
   const { setListAction } = usePolicyListContext();
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('ilmPolicies');
   const [pageSize, setPageSize] = useState(getPersistingPageSize());
 
   const onTableChange = ({ page }: Criteria<any>) => {

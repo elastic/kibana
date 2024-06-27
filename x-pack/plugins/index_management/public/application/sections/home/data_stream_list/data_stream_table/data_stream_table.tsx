@@ -282,7 +282,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ],
   };
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('dataStreams');
   const [pageSize, setPageSize] = useState(getPersistingPageSize());
 
   const pagination = {

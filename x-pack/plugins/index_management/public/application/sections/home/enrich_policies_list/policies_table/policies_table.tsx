@@ -160,7 +160,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
     },
   ];
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('enrichPolicies');
   const [pageSize, setPageSize] = useState(getPersistingPageSize());
 
   const pagination = {

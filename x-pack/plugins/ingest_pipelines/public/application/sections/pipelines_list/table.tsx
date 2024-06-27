@@ -120,7 +120,8 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const { getPersistingPageSize, setPersistingPageSize } =
+    useEuiTablePersistingPageSize('ingestPipelines');
   const [pageSize, setPageSize] = useState(getPersistingPageSize());
 
   const onTableChange = ({ page }: Criteria<any>) => {

@@ -93,7 +93,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
-  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize();
+  const { getPersistingPageSize, setPersistingPageSize } = useEuiTablePersistingPageSize('componentTemplates');
   const [pageSize, setPageSize] = useState(getPersistingPageSize());
 
   const onTableChange = ({ page }: Criteria<any>) => {
