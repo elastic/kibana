@@ -8,7 +8,7 @@
 export const COMMON_SLO_GROUPING = [
   {
     id: 'slos',
-    getDisplayName: () => 'SLOs',
+    getDisplayName: () => 'Observability',
     getIconType: () => {
       return 'visGauge';
     },
