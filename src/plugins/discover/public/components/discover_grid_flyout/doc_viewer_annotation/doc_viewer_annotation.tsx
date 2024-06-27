@@ -5,7 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { EuiButton, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import { css } from '@emotion/react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
@@ -23,10 +25,30 @@ export const DocViewerAnnotation = ({ dataView, hit }: DocViewRenderProps) => {
   //     : hit.flattened[timeFieldName]
   //   : undefined;
   // const timestamp = timeFieldValue ? timeFieldValue : undefined;
-  const [currentAnnotation, setCurrentAnnotation] = useState<EventAnnotationConfig>(() =>
-    getDefaultManualAnnotation(uuidv4(), new Date().toISOString())
-  );
+  const [currentAnnotation, setCurrentAnnotation] = useState<EventAnnotationConfig>();
   const services = useDiscoverServices();
+
+  const createAnnotation = useCallback(() => {
+    setCurrentAnnotation(getDefaultManualAnnotation(uuidv4(), new Date().toISOString()));
+  }, [setCurrentAnnotation]);
+
+  const deleteAnnotation = useCallback(() => {
+    setCurrentAnnotation(undefined);
+  }, [setCurrentAnnotation]);
+
+  if (!currentAnnotation) {
+    return (
+      <>
+        <EuiSpacer />
+        <EuiButton onClick={createAnnotation}>
+          {i18n.translate('discover.grid.docVisAnnotation.createButton', {
+            defaultMessage: 'Create annotation',
+          })}
+        </EuiButton>
+      </>
+    );
+  }
+
   return (
     <div
       css={css`
@@ -49,6 +71,16 @@ export const DocViewerAnnotation = ({ dataView, hit }: DocViewRenderProps) => {
         appName={PLUGIN_ID}
         queryInputServices={services}
       />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup justifyContent="flexEnd" direction="row" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={deleteAnnotation}>
+            {i18n.translate('discover.grid.docVisAnnotation.deleteButton', {
+              defaultMessage: 'Delete annotation',
+            })}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
