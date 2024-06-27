@@ -79,7 +79,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...conversationsSettingsBulkActions,
               update: {
                 ...(conversationsSettingsBulkActions.update ?? {}),
-                [updatedConversation.id || updatedConversation.title]: {
+                [updatedConversation.id]: {
                   ...updatedConversation,
                   ...(conversationsSettingsBulkActions.update
                     ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
@@ -100,7 +100,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               ...conversationsSettingsBulkActions,
               create: {
                 ...(conversationsSettingsBulkActions.create ?? {}),
-                [updatedConversation.id || updatedConversation.title]: updatedConversation,
+                [updatedConversation.title]: updatedConversation,
               },
             });
           }

@@ -191,6 +191,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     () => ({
       pageIndex: DEFAULT_PAGE_INDEX,
       pageSize: DEFAULT_PAGE_SIZE,
+      pageSizeOptions: [DEFAULT_PAGE_SIZE],
       totalItemCount: conversationOptions.length,
     }),
     [conversationOptions.length]

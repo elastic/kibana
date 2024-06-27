@@ -123,6 +123,7 @@ const QuickPromptSettingsManagementComponent = ({
     () => ({
       pageIndex: DEFAULT_PAGE_INDEX,
       pageSize: DEFAULT_PAGE_SIZE,
+      pageSizeOptions: [DEFAULT_PAGE_SIZE],
       totalItemCount: quickPromptSettings.length,
     }),
     [quickPromptSettings.length]

@@ -156,6 +156,7 @@ const SystemPromptSettingsManagementComponent = ({
     () => ({
       pageIndex: DEFAULT_PAGE_INDEX,
       pageSize: DEFAULT_PAGE_SIZE,
+      pageSizeOptions: [DEFAULT_PAGE_SIZE],
       totalItemCount: systemPromptSettings.length,
     }),
     [systemPromptSettings.length]
