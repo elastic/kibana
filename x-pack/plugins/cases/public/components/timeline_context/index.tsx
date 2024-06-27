@@ -30,7 +30,10 @@ interface TimelineProcessingPluginRendererProps {
 
 export interface CasesTimelineIntegration {
   editor_plugins: {
-    parsingPlugins: Plugin[];
+    parsingPlugins: {
+      timeline: Plugin;
+      customCodeBlock: Plugin;
+    };
     processingPluginRenderer: {
       timeline: React.FC<
         TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }

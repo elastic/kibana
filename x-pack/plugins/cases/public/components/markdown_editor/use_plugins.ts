@@ -37,7 +37,8 @@ export const usePlugins = ({
     if (timelinePlugins) {
       uiPlugins.push(timelinePlugins.uiPlugin);
 
-      parsingPlugins.concat(timelinePlugins.parsingPlugins);
+      parsingPlugins.unshift(timelinePlugins.parsingPlugins.customCodeBlock);
+      parsingPlugins.push(timelinePlugins.parsingPlugins.timeline);
 
       // This line of code is TS-compatible and it will break if [1][1] change in the future.
       processingPlugins[1][1].components.timeline =

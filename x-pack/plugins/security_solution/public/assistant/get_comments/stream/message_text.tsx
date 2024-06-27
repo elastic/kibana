@@ -126,7 +126,7 @@ const getPluginDependencies = (timestamp?: string) => {
   processingPlugins[1][1].components = {
     ...components,
     cursor: Cursor,
-    esql: Esql,
+    esql: (props) => <Esql {...props} timestamp={timestamp} />,
     customCodeBlock: CodeBlock,
     table: (props) => (
       <>

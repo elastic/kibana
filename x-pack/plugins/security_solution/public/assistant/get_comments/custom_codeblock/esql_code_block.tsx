@@ -7,6 +7,7 @@
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,7 +54,7 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
     return lens.stateHelperApi();
   }, [lens]);
 
-  const { data: queryResults } = useQuery({
+  const { data: queryResults, error: queryResultsError } = useQuery({
     queryKey: ['getESQLResults', value, timestamp],
     enabled: true,
     queryFn: async () => {
@@ -61,28 +62,28 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
         esqlQuery: value,
         search: data.search.search,
         filter: {
-          range: {
-            '@timestamp': {
-              lte: timestamp,
-              format: 'strict_date_optional_time',
-            },
-          },
+          range: timestamp
+            ? {
+                '@timestamp': {
+                  lte: timestamp,
+                  format: 'strict_date_optional_time',
+                },
+              }
+            : {},
         },
       });
     },
-    select: (dataz) => {
-      return {
-        params: dataz.params,
-        rows: dataz.response.values,
-        columns: dataz.response.columns,
-      };
-    },
+    select: (queryResultsData) => ({
+      params: queryResultsData.params,
+      rows: queryResultsData.response.values,
+      columns: queryResultsData.response.columns,
+    }),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 
   const indexPattern = useMemo(() => getIndexPatternFromESQLQuery(value), [value]);
-  const { value: formattedColumns } = useAsync(
+  const { value: formattedColumns, error: formattedColumnsError } = useAsync(
     () =>
       getESQLQueryColumns({
         esqlQuery: value,
@@ -91,7 +92,7 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
     [value]
   );
 
-  const { value: dataViewAsync } = useAsync(() => {
+  const { value: dataViewAsync, error: dataViewError } = useAsync(() => {
     return getESQLAdHocDataview(indexPattern, dataViewService).then((dataView) => {
       if (dataView.fields.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';
@@ -173,7 +174,7 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
       >
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiCodeBlock isCopyable fontSize="m">
+            <EuiCodeBlock isCopyable fontSize="m" language="sql">
               {value}
             </EuiCodeBlock>
           </EuiFlexItem>
@@ -199,6 +200,13 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
           )}
         </EuiFlexGroup>
       </EuiPanel>
+      {showVisualization && (queryResultsError || formattedColumnsError || dataViewError) && (
+        <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
+          <EuiCallOut title="Unable to retrieve search results" color="danger" iconType="error">
+            <p>{`${queryResultsError || formattedColumnsError || dataViewError}`}</p>
+          </EuiCallOut>
+        </EuiPanel>
+      )}
       {showVisualization && queryResults && formattedColumns && (
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
           <EuiFlexGroup direction="column" gutterSize="xs">

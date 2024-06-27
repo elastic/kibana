@@ -34,7 +34,7 @@ export const CustomCodeBlock = ({ value }: CustomCodeBlockProps) => {
     >
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiCodeBlock isCopyable fontSize="m">
+          <EuiCodeBlock isCopyable fontSize="m" language="sql">
             {value}
           </EuiCodeBlock>
         </EuiFlexItem>

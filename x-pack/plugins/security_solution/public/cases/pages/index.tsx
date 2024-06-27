@@ -185,7 +185,10 @@ const CaseContainerComponent: React.FC = () => {
           showAlertDetails,
           timelineIntegration: {
             editor_plugins: {
-              parsingPlugins: [timelineMarkdownPlugin.parser, customCodeBlockLanguagePlugin],
+              parsingPlugins: {
+                timeline: timelineMarkdownPlugin.parser,
+                customCodeBlock: customCodeBlockLanguagePlugin,
+              },
               processingPluginRenderer: {
                 timeline: timelineMarkdownPlugin.renderer,
                 esql: Esql,
