@@ -82,13 +82,6 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneGetFileEnabled: false,
 
   /**
-   * 8.15
-   * Enables use of agent status service to get agent status information
-   * for endpoint and third-party agents.
-   */
-  agentStatusClientEnabled: true,
-
-  /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
@@ -117,7 +110,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables new notes
    */
-  notesEnabled: false,
+  securitySolutionNotesEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -232,6 +225,17 @@ export const allowedExperimentalValues = Object.freeze({
    * Expires: on Apr 23, 2024
    */
   perFieldPrebuiltRulesDiffingEnabled: true,
+
+  /**
+   * Enables an ability to customize Elastic prebuilt rules.
+   *
+   * Ticket: https://github.com/elastic/kibana/issues/174168
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   * Added: on Jun 24, 2024 in https://github.com/elastic/kibana/pull/186823
+   * Turned: TBD
+   * Expires: TBD
+   */
+  prebuiltRulesCustomizationEnabled: false,
 
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.

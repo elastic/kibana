@@ -11,7 +11,7 @@ import { CspBenchmarkRuleMetadata } from '../types/latest';
 
 export interface CspFinding {
   '@timestamp': string;
-  cluster_id: string;
+  cluster_id?: string;
   orchestrator?: CspFindingOrchestrator;
   cloud?: CspFindingCloud; // only available on CSPM findings
   result: CspFindingResult;
@@ -33,11 +33,12 @@ interface CspFindingOrchestrator {
 }
 
 interface CspFindingCloud {
-  provider: 'aws';
+  provider: 'aws' | 'azure' | 'gcp';
   account: {
     name: string;
     id: string;
   };
+  region?: string;
 }
 
 interface CspFindingResult {
