@@ -483,6 +483,24 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
     groupByFields.length === 0;
 
+  const isSuppressionGroupByDisabled =
+    !isAlertSuppressionLicenseValid ||
+    areSuppressionFieldsDisabledBySequence ||
+    isEsqlSuppressionLoading ||
+    (isMlRule(ruleType) && (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length));
+
+  const suppressionGroupByDisabledText = areSuppressionFieldsDisabledBySequence
+    ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
+    : isMlRule(ruleType) && noMlJobsStarted
+    ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
+    : alertSuppressionUpsellingMessage;
+
+  const suppressionGroupByFields = isEsqlRule(ruleType)
+    ? esqlSuppressionFields
+    : isMlRule(ruleType)
+    ? mlSuppressionFields
+    : termsAggregationFields;
+
   /**
    * Component that allows selection of suppression intervals disabled:
    *  - if suppression license is not valid(i.e. less than platinum)
@@ -1087,22 +1105,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="groupByFields"
                   component={MultiSelectFieldsAutocomplete}
                   componentProps={{
-                    browserFields: isEsqlRule(ruleType)
-                      ? esqlSuppressionFields
-                      : isMlRule(ruleType)
-                      ? mlSuppressionFields
-                      : termsAggregationFields,
-                    isDisabled:
-                      !isAlertSuppressionLicenseValid ||
-                      areSuppressionFieldsDisabledBySequence ||
-                      isEsqlSuppressionLoading ||
-                      (isMlRule(ruleType) &&
-                        (noMlJobsStarted || mlFieldsLoading || !mlSuppressionFields.length)),
-                    disabledText: areSuppressionFieldsDisabledBySequence
-                      ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
-                      : noMlJobsStarted && isMlRule(ruleType)
-                      ? i18n.MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL
-                      : alertSuppressionUpsellingMessage,
+                    browserFields: suppressionGroupByFields,
+                    isDisabled: isSuppressionGroupByDisabled,
+                    disabledText: suppressionGroupByDisabledText,
                   }}
                 />
                 {someMlJobsStarted && (
