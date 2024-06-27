@@ -7,7 +7,12 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import {
+  VisGroups,
+  type BaseVisType,
+  type VisTypeAlias,
+  type VisParams,
+} from '@kbn/visualizations-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -201,13 +206,17 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
     .map(({ factory }) => factory);
 
   const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
+  const legacyVisTypes = getVisTypesByGroup(VisGroups.LEGACY);
 
   return (
     <Component
       createNewVisType={createNewVisType}
       createNewEmbeddableFromFactory={createNewEmbeddableFromFactory}
       createNewEmbeddableFromAction={createNewEmbeddableFromAction}
-      promotedVisTypes={promotedVisTypes}
+      promotedVisTypes={([] as Array<BaseVisType<VisParams>>).concat(
+        promotedVisTypes,
+        legacyVisTypes
+      )}
       factories={factories}
       addPanelActions={addPanelActions}
       visTypeAliases={visTypeAliases}

@@ -292,11 +292,11 @@ export const AdvancedStepForm: FC<CreateAnalyticsStepProps> = ({
                 ),
               },
             ]}
-            value={computeFeatureInfluence}
+            value={computeFeatureInfluence ? 'true' : 'false'}
             hasNoInitialSelection={false}
             onChange={(e) => {
               setFormState({
-                computeFeatureInfluence: e.target.value,
+                computeFeatureInfluence: e.target.value === 'true' ? true : false,
               });
             }}
           />

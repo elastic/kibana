@@ -28,6 +28,7 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
 
 .c0 . euiDataGridRowCell--controlColumn {
   height: 40px;
+  min-height: 40px;
 }
 
 .c0 .udt--customRow {
@@ -57,12 +58,28 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
   -webkit-box-align: center;
   -ms-flex-align: center;
   align-items: center;
-  height: 36px;
+  height: 40px;
 }
 
 .c1 .euiDataGridRowCell,
 .c1 .euiDataGridRowCell__content {
+  -webkit-align-items: flex-start;
+  -webkit-box-align: flex-start;
+  -ms-flex-align: flex-start;
+  align-items: flex-start;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   height: 100%;
+  min-height: 40px;
 }
 
 .c1 .euiDataGridRowCell .unifiedDataTable__rowControl,

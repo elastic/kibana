@@ -1,0 +1,132 @@
+{
+  "id": "entityManager",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.EntityManagerPublicPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "EntityManagerPublicPluginSetup",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/entity_manager/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityManager",
+            "id": "def-public.EntityManagerPublicPluginSetup.entityClient",
+            "type": "Object",
+            "tags": [],
+            "label": "entityClient",
+            "description": [],
+            "signature": [
+              "IEntityClient"
+            ],
+            "path": "x-pack/plugins/observability_solution/entity_manager/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.EntityManagerPublicPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "EntityManagerPublicPluginStart",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/entity_manager/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "entityManager",
+            "id": "def-public.EntityManagerPublicPluginStart.entityClient",
+            "type": "Object",
+            "tags": [],
+            "label": "entityClient",
+            "description": [],
+            "signature": [
+              "IEntityClient"
+            ],
+            "path": "x-pack/plugins/observability_solution/entity_manager/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-public.EntityManagerAppId",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityManagerAppId",
+        "description": [],
+        "signature": [
+          "\"entityManager\""
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "entityManager",
+        "id": "def-server.EntityManagerConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "EntityManagerConfig",
+        "description": [],
+        "signature": [
+          "{}"
+        ],
+        "path": "x-pack/plugins/observability_solution/entity_manager/common/config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "start": {
+      "parentPluginId": "entityManager",
+      "id": "def-server.EntityManagerServerPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "EntityManagerServerPluginStart",
+      "description": [],
+      "signature": [
+        "{}"
+      ],
+      "path": "x-pack/plugins/observability_solution/entity_manager/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

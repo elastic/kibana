@@ -133,7 +133,7 @@ class DashboardBackupService implements DashboardBackupServiceType {
 
       const panelsStorage = this.sessionStorage.get(DASHBOARD_PANELS_SESSION_KEY) ?? {};
       set(panelsStorage, [this.activeSpaceId, id], unsavedPanels);
-      this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, panelsStorage);
+      this.sessionStorage.set(DASHBOARD_PANELS_SESSION_KEY, panelsStorage, true);
     } catch (e) {
       this.notifications.toasts.addDanger({
         title: backupServiceStrings.getPanelsSetError(e.message),

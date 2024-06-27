@@ -93,7 +93,7 @@ describe('StepSelectHosts', () => {
         packageInfo={packageInfo}
         setHasAgentPolicyError={jest.fn()}
         updateSelectedTab={jest.fn()}
-        selectedAgentPolicyId={undefined}
+        selectedAgentPolicyIds={[]}
       />
     ));
   beforeEach(() => {

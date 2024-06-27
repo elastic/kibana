@@ -30,7 +30,7 @@ import { getProductProductFeaturesConfigurator, getSecurityProductTier } from '.
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import {
   endpointMeteringService,
-  setEndpointPackagePolicyServerlessFlag,
+  setEndpointPackagePolicyServerlessBillingFlags,
 } from './endpoint/services';
 import { enableRuleActions } from './rules/enable_rule_actions';
 import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
@@ -132,13 +132,13 @@ export class SecuritySolutionServerlessPlugin
     this.endpointUsageReportingTask
       ?.start({
         taskManager: pluginsSetup.taskManager,
-        interval: ENDPOINT_METERING_TASK.INTERVAL,
+        interval: this.config.usageReportingTaskInterval,
       })
       .catch(() => {});
 
     this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
 
-    setEndpointPackagePolicyServerlessFlag(
+    setEndpointPackagePolicyServerlessBillingFlags(
       internalSOClient,
       internalESClient,
       pluginsSetup.fleet.packagePolicyService

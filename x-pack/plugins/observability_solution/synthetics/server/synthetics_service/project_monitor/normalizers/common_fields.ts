@@ -75,10 +75,7 @@ export const getNormalizeCommonFields = ({
     [ConfigKey.JOURNEY_ID]: monitor.id || defaultFields[ConfigKey.JOURNEY_ID],
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceType.PROJECT,
     [ConfigKey.NAME]: monitor.name || '',
-    [ConfigKey.SCHEDULE]: {
-      number: `${monitor.schedule}`,
-      unit: ScheduleUnit.MINUTES,
-    },
+    [ConfigKey.SCHEDULE]: getMonitorSchedule(monitor.schedule, defaultFields[ConfigKey.SCHEDULE]),
     [ConfigKey.PROJECT_ID]: projectId,
     [ConfigKey.LOCATIONS]: monLocations,
     [ConfigKey.TAGS]: getOptionalListField(monitor.tags) || defaultFields[ConfigKey.TAGS],
@@ -145,8 +142,27 @@ export const getCustomHeartbeatId = (
   return `${monitor.id}-${projectId}-${namespace}`;
 };
 
-export const getMonitorSchedule = (schedule: number | string | MonitorFields['schedule']) => {
+export const getMonitorSchedule = (
+  schedule: number | string | MonitorFields['schedule'],
+  defaultValue?: MonitorFields['schedule']
+) => {
+  if (!schedule && defaultValue) {
+    return defaultValue;
+  }
   if (typeof schedule === 'number' || typeof schedule === 'string') {
+    if (typeof schedule === 'number') {
+      return {
+        number: `${schedule}`,
+        unit: ScheduleUnit.MINUTES,
+      };
+    }
+    if (schedule.includes('s')) {
+      return {
+        number: schedule.replace('s', ''),
+        unit: ScheduleUnit.SECONDS,
+      };
+    }
+
     return {
       number: `${schedule}`,
       unit: ScheduleUnit.MINUTES,

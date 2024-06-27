@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
   const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
@@ -186,6 +186,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First 2 test creates a real rule - remaining tests use preview API
     it('should be able to execute and get all alerts when doing a specific query (terms query)', async () => {
+      const username = await utils.getUsername();
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule();
 
       const createdRule = await createRule(supertest, log, rule);
@@ -320,7 +321,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           category: 'Indicator Match Rule',
           consumer: 'siem',
-          created_by: ELASTICSEARCH_USERNAME,
+          created_by: username,
           description: 'Detecting root and admin users',
           enabled: true,
           exceptions_list: [],
@@ -342,13 +343,14 @@ export default ({ getService }: FtrProviderContext) => {
           to: 'now',
           type: 'threat_match',
           updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
-          updated_by: ELASTICSEARCH_USERNAME,
+          updated_by: username,
           uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
       });
     });
     it('should be able to execute and get all alerts when doing a specific query (match query)', async () => {
+      const username = await utils.getUsername();
       const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
         threat_mapping: [
           // We match host.name against host.name
@@ -499,7 +501,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           category: 'Indicator Match Rule',
           consumer: 'siem',
-          created_by: ELASTICSEARCH_USERNAME,
+          created_by: username,
           description: 'Detecting root and admin users',
           enabled: true,
           exceptions_list: [],
@@ -521,7 +523,7 @@ export default ({ getService }: FtrProviderContext) => {
           to: 'now',
           type: 'threat_match',
           updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
-          updated_by: ELASTICSEARCH_USERNAME,
+          updated_by: username,
           uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),

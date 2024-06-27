@@ -107,25 +107,6 @@ describe('use responder action data hooks', () => {
 
         expect(onClickMock).not.toHaveBeenCalled();
       });
-    });
-
-    describe('and agentType is NOT Endpoint', () => {
-      beforeEach(() => {
-        alertDetailItemData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
-      });
-
-      it('should show action when agentType is supported', () => {
-        expect(renderHook().result.current).toEqual(getExpectedResponderActionData());
-      });
-
-      it('should NOT call the endpoint host metadata api', () => {
-        renderHook();
-        const wasMetadataApiCalled = appContextMock.coreStart.http.get.mock.calls.some(([path]) => {
-          return (path as unknown as string).includes(HOST_METADATA_LIST_ROUTE);
-        });
-
-        expect(wasMetadataApiCalled).toBe(false);
-      });
 
       it.each([...RESPONSE_ACTION_AGENT_TYPE])(
         'should show action disabled with tooltip for %s if agent id field is missing',
@@ -148,6 +129,25 @@ describe('use responder action data hooks', () => {
           );
         }
       );
+    });
+
+    describe('and agentType is NOT Endpoint', () => {
+      beforeEach(() => {
+        alertDetailItemData = endpointAlertDataMock.generateSentinelOneAlertDetailsItemData();
+      });
+
+      it('should show action when agentType is supported', () => {
+        expect(renderHook().result.current).toEqual(getExpectedResponderActionData());
+      });
+
+      it('should NOT call the endpoint host metadata api', () => {
+        renderHook();
+        const wasMetadataApiCalled = appContextMock.coreStart.http.get.mock.calls.some(([path]) => {
+          return (path as unknown as string).includes(HOST_METADATA_LIST_ROUTE);
+        });
+
+        expect(wasMetadataApiCalled).toBe(false);
+      });
     });
 
     describe('and agentType IS Endpoint', () => {

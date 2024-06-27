@@ -226,13 +226,9 @@ describe('helpers', () => {
         {
           actions,
           aggregatable: true,
-          category: 'base',
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
-          description:
-            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
           esTypes: ['date'],
-          example: '2016-05-23T08:05:34.853Z',
           format: '',
           id: '@timestamp',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -247,12 +243,9 @@ describe('helpers', () => {
         {
           actions,
           aggregatable: true,
-          category: 'source',
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
-          description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
           esTypes: ['ip'],
-          example: '',
           format: '',
           id: 'source.ip',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -266,13 +259,9 @@ describe('helpers', () => {
         {
           actions,
           aggregatable: true,
-          category: 'destination',
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
-          description:
-            'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
           esTypes: ['ip'],
-          example: '',
           format: '',
           id: 'destination.ip',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -296,13 +285,9 @@ describe('helpers', () => {
         {
           actions,
           aggregatable: true,
-          category: 'base',
           columnHeaderType: 'not-filtered',
           defaultSortDirection,
-          description:
-            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
           esTypes: ['date'],
-          example: '2016-05-23T08:05:34.853Z',
           format: '',
           id: '@timestamp',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -355,10 +340,6 @@ describe('helpers', () => {
         const fieldName = 'test_field';
         const testField = {
           aggregatable: true,
-          category: 'base',
-          description:
-            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
-          example: '2016-05-23T08:05:34.853Z',
           format: 'date',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: fieldName,
@@ -389,9 +370,6 @@ describe('helpers', () => {
         const fieldName = 'testFieldName';
         const testField = {
           aggregatable: true,
-          category: fieldName,
-          description: 'test field description',
-          example: '2016-05-23T08:05:34.853Z',
           format: 'date',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: fieldName,
@@ -422,9 +400,6 @@ describe('helpers', () => {
         const fieldName = 'test.field.splittable';
         const testField = {
           aggregatable: true,
-          category: 'test',
-          description: 'test field description',
-          example: '2016-05-23T08:05:34.853Z',
           format: 'date',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           name: fieldName,
@@ -455,10 +430,6 @@ describe('helpers', () => {
 
   describe('allowSorting', () => {
     const aggregatableField = {
-      category: 'cloud',
-      description:
-        'The cloud account or organization id used to identify different entities in a multi-tenant environment. Examples: AWS account id, Google Cloud ORG Id, or other unique identifier.',
-      example: '666777888999',
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       name: 'cloud.account.id',
       searchable: true,

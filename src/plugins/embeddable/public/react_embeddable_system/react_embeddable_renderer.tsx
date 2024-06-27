@@ -9,6 +9,7 @@
 import {
   apiIsPresentationContainer,
   HasSerializedChildState,
+  HasSnapshottableState,
   SerializedPanelState,
 } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
@@ -170,7 +171,7 @@ export const ReactEmbeddableRenderer = <
             } as unknown as SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>);
 
             cleanupFunction.current = () => cleanup();
-            return fullApi;
+            return fullApi as Api & HasSnapshottableState<RuntimeState>;
           };
 
           const { api, Component } = await factory.buildEmbeddable(
@@ -188,7 +189,6 @@ export const ReactEmbeddableRenderer = <
           } else {
             reportPhaseChange(false);
           }
-
           return { api, Component };
         };
 

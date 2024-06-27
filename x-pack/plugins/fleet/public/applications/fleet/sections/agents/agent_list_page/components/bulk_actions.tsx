@@ -68,7 +68,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [updateModalState, setUpgradeModalState] = useState({
+  const [upgradeModalState, setUpgradeModalState] = useState({
     isOpen: false,
     isScheduled: false,
     isUpdating: false,
@@ -256,13 +256,13 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           />
         </EuiPortal>
       )}
-      {updateModalState.isOpen && (
+      {upgradeModalState.isOpen && (
         <EuiPortal>
           <AgentUpgradeAgentModal
             agents={agents}
             agentCount={agentCount}
-            isScheduled={updateModalState.isScheduled}
-            isUpdating={updateModalState.isUpdating}
+            isScheduled={upgradeModalState.isScheduled}
+            isUpdating={upgradeModalState.isUpdating}
             onClose={() => {
               setUpgradeModalState({ isOpen: false, isScheduled: false, isUpdating: false });
               refreshAgents();

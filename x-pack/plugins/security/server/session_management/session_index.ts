@@ -487,7 +487,7 @@ export class SessionIndex {
       for await (const sessionValues of this.getSessionValuesInBatches()) {
         const operations = sessionValues.map(({ _id, _source }) => {
           const { usernameHash, provider } = _source!;
-          auditLogger.log(sessionCleanupEvent({ sessionId: _id, usernameHash, provider }));
+          auditLogger.log(sessionCleanupEvent({ sessionId: _id!, usernameHash, provider }));
           return { delete: { _id } };
         });
 
@@ -1029,7 +1029,9 @@ export class SessionIndex {
           return [];
         }
 
-        return response.hits?.hits?.map((hit) => ({ sid: hit._id, ...sessionGroups[index] })) ?? [];
+        return (
+          response.hits?.hits?.map((hit) => ({ sid: hit._id!, ...sessionGroups[index] })) ?? []
+        );
       }
     );
 

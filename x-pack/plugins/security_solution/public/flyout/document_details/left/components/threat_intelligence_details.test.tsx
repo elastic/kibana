@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import {
   THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID,
@@ -35,15 +35,15 @@ jest.mock('../hooks/use_threat_intelligence_details');
 
 const defaultContextValue = {
   getFieldsData: () => 'id',
-} as unknown as LeftPanelContext;
+} as unknown as DocumentDetailsContext;
 
 // Renders System Under Test
-const renderThreatIntelligenceDetails = (contextValue: LeftPanelContext) =>
+const renderThreatIntelligenceDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <ThreatIntelligenceDetails />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

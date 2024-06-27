@@ -13,7 +13,10 @@ export function createShipperApiKey(esClient: ElasticsearchClient, name: string)
   return esClient.security.createApiKey({
     body: {
       name: `standalone_agent_logs_onboarding_${name}`,
-      metadata: { application: 'logs' },
+      metadata: {
+        managed: true,
+        application: 'logs',
+      },
       role_descriptors: {
         standalone_agent: {
           cluster,

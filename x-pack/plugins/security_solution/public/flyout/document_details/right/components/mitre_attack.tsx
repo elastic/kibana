@@ -10,10 +10,10 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 import { getMitreComponentParts } from '../../../../detections/mitre/get_mitre_threat_component';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 export const MitreAttack: FC = () => {
-  const { searchHit } = useRightPanelContext();
+  const { searchHit } = useDocumentDetailsContext();
   const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
 
   if (!threatDetails || !threatDetails[0]) {

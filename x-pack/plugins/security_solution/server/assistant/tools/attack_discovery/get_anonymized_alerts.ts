@@ -28,7 +28,7 @@ export const getAnonymizedAlerts = async ({
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size?: number;
-}) => {
+}): Promise<string[]> => {
   if (alertsIndexPattern == null || size == null || sizeIsOutOfRange(size)) {
     return [];
   }

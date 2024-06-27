@@ -63,14 +63,13 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react
   })),
 }));
 
-const config = {
+const config: ConfigSchema = {
   unsafe: {
     alertDetails: {
-      metrics: { enabled: false },
       uptime: { enabled: false },
     },
   },
-} as ConfigSchema;
+};
 
 const getFormatterMock = jest.fn();
 const createRuleTypeRegistryMock = () => ({

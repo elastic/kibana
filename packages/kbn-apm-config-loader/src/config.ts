@@ -13,6 +13,7 @@ import { getDataPath } from '@kbn/utils';
 import { readFileSync } from 'fs';
 import type { AgentConfigOptions } from 'elastic-apm-node';
 import type { AgentConfigOptions as RUMAgentConfigOptions } from '@elastic/apm-rum';
+import { getFlattenedObject } from '@kbn/std';
 import type { ApmConfigSchema } from './apm_config';
 
 // https://www.elastic.co/guide/en/apm/agent/nodejs/current/configuration.html
@@ -128,6 +129,15 @@ export class ApmConfiguration {
         this.baseConfig.serverUrl === centralizedConfig.serverUrl
       ) {
         this.baseConfig = merge(this.baseConfig, centralizedConfig);
+      }
+
+      if (this.baseConfig?.globalLabels) {
+        // Global Labels need to be a key/value pair...
+        // Dotted names will be renamed to underscored ones by the agent, but we need to provide key/value pairs
+        // https://github.com/elastic/apm-agent-nodejs/issues/4096#issuecomment-2181621221
+        this.baseConfig.globalLabels = getFlattenedObject(
+          this.baseConfig.globalLabels as Record<string, unknown>
+        );
       }
     }
 

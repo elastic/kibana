@@ -181,6 +181,7 @@ async function deleteAssets(
     installed_es: installedEs,
     installed_kibana: installedKibana,
     installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
+    additional_spaces_installed_kibana: installedInAdditionalSpacesKibana = {},
   }: Installation,
   savedObjectsClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
@@ -237,6 +238,9 @@ async function deleteAssets(
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
       deleteKibanaAssets(installedKibana, spaceId),
+      Object.entries(installedInAdditionalSpacesKibana).map(([additionalSpaceId, kibanaAssets]) =>
+        deleteKibanaAssets(kibanaAssets, additionalSpaceId)
+      ),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -271,21 +275,32 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
 export async function deleteKibanaSavedObjectsAssets({
   savedObjectsClient,
   installedPkg,
+  spaceId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   installedPkg: SavedObject<Installation>;
+  spaceId?: string;
 }) {
-  const { installed_kibana: installedRefs, installed_kibana_space_id: spaceId } =
-    installedPkg.attributes;
-  if (!installedRefs.length) return;
+  const { installed_kibana_space_id: installedSpaceId } = installedPkg.attributes;
+
+  let refsToDelete: KibanaAssetReference[];
+  let spaceIdToDelete: string | undefined;
+  if (!spaceId || spaceId === installedSpaceId) {
+    refsToDelete = installedPkg.attributes.installed_kibana;
+    spaceIdToDelete = installedSpaceId;
+  } else {
+    refsToDelete = installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [];
+    spaceIdToDelete = spaceId;
+  }
+  if (!refsToDelete.length) return;
 
   const logger = appContextService.getLogger();
-  const assetsToDelete = installedRefs
+  const assetsToDelete = refsToDelete
     .filter(({ type }) => kibanaSavedObjectTypes.includes(type))
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
   try {
-    await deleteKibanaAssets(assetsToDelete, spaceId);
+    await deleteKibanaAssets(assetsToDelete, spaceIdToDelete);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {

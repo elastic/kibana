@@ -140,15 +140,14 @@ export class ObservabilityAIAssistantService {
 
       const elserModelId = await this.getModelId();
 
-      const esClient = coreStart.elasticsearch.client.asInternalUser;
-
-      await esClient.cluster.putComponentTemplate({
+      const esClient = coreStart.elasticsearch.client;
+      await esClient.asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: this.resourceNames.componentTemplate.conversations,
         template: conversationComponentTemplate,
       });
 
-      await esClient.indices.putIndexTemplate({
+      await esClient.asInternalUser.indices.putIndexTemplate({
         name: this.resourceNames.indexTemplate.conversations,
         composed_of: [this.resourceNames.componentTemplate.conversations],
         create: false,
@@ -170,7 +169,7 @@ export class ObservabilityAIAssistantService {
       const conversationAliasName = this.resourceNames.aliases.conversations;
 
       await createConcreteWriteIndex({
-        esClient,
+        esClient: esClient.asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {
@@ -183,13 +182,13 @@ export class ObservabilityAIAssistantService {
         dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts: false }),
       });
 
-      await esClient.cluster.putComponentTemplate({
+      await esClient.asInternalUser.cluster.putComponentTemplate({
         create: false,
         name: this.resourceNames.componentTemplate.kb,
         template: kbComponentTemplate,
       });
 
-      await esClient.ingest.putPipeline({
+      await esClient.asInternalUser.ingest.putPipeline({
         id: this.resourceNames.pipelines.kb,
         processors: [
           {
@@ -210,7 +209,7 @@ export class ObservabilityAIAssistantService {
         ],
       });
 
-      await esClient.indices.putIndexTemplate({
+      await esClient.asInternalUser.indices.putIndexTemplate({
         name: this.resourceNames.indexTemplate.kb,
         composed_of: [this.resourceNames.componentTemplate.kb],
         create: false,
@@ -227,7 +226,7 @@ export class ObservabilityAIAssistantService {
       const kbAliasName = this.resourceNames.aliases.kb;
 
       await createConcreteWriteIndex({
-        esClient,
+        esClient: esClient.asInternalUser,
         logger: this.logger,
         totalFieldsLimit: 10000,
         indexPatterns: {

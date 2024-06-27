@@ -7,7 +7,7 @@
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
-import { services } from '../../../api_integration/services';
+import { services } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
 interface CreateTestConfigOptions {

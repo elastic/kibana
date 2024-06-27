@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { rawEventData, TestProviders } from '../../../../common/mock';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
 import { ResponseDetails } from './response_details';
@@ -68,7 +68,7 @@ const defaultContextValue = {
     _id: 'test',
   },
   searchHit: rawEventData,
-} as unknown as LeftPanelContext;
+} as unknown as DocumentDetailsContext;
 
 const contextWithResponseActions = {
   ...defaultContextValue,
@@ -88,12 +88,12 @@ const contextWithResponseActions = {
 };
 
 // Renders System Under Test
-const renderResponseDetails = (contextValue: LeftPanelContext) =>
+const renderResponseDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <ResponseDetails />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

@@ -105,6 +105,6 @@ export const getLastSuccessfulCheck = async ({
   return {
     ...check,
     timestamp: check['@timestamp'],
-    docId: result.hits.hits[0]._id,
+    docId: result.hits.hits[0]._id!,
   };
 };

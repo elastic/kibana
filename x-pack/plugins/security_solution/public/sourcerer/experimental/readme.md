@@ -15,4 +15,7 @@ using the same Kibana instance deployed locally (for now).
 
 ## Architecture
 
-TODO
+- Redux based 
+- Limited use of useEffect or stateful hooks - in favor of thunks and redux middleware (supporting request cancellation and caching)
+- Allows multiple instances of the picker - just wrap the subsection of the app with its own DataviewPickerProvider
+- Data exposed back to Security Solution is memoized with `reselect` for performance

@@ -8,7 +8,11 @@
 
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  IncompatibleActionError,
+  type UiActionsStart,
+  ADD_PANEL_TRIGGER,
+} from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
 import { SearchSerializedState } from './types';
@@ -33,7 +37,7 @@ export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
       );
     },
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_SEARCH_ACTION_ID);
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_SEARCH_ACTION_ID);
   if (uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
     // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
     // the create action if the Canvas-specific trigger does indeed exist.

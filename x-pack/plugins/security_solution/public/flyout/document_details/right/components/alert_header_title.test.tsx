@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import {
   RISK_SCORE_VALUE_TEST_ID,
   SEVERITY_VALUE_TEST_ID,
@@ -32,15 +32,15 @@ const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
   getFieldsData: jest.fn().mockImplementation(mockGetFieldsData),
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 const HEADER_TEXT_TEST_ID = `${FLYOUT_ALERT_HEADER_TITLE_TEST_ID}Text`;
 
-const renderHeader = (contextValue: RightPanelContext) =>
+const renderHeader = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProvidersComponent>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <AlertHeaderTitle />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProvidersComponent>
   );
 

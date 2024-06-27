@@ -253,7 +253,7 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
 
     return {
       total: (result.hits.total as SearchTotalHits).value,
-      files: result.hits.hits.map((r) => ({ id: r._id, metadata: r._source?.file! })),
+      files: result.hits.hits.map((r) => ({ id: r._id!, metadata: r._source?.file! })),
     };
   }
 

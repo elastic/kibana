@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 import {
   Connector,
-  DatastreamName,
+  DataStreamName,
   PackageName,
   Pipeline,
   RawSamples,
@@ -19,7 +19,7 @@ import { CategorizationAPIResponse } from '../model/response_schemas';
 export type CategorizationRequestBody = z.infer<typeof CategorizationRequestBody>;
 export const CategorizationRequestBody = z.object({
   packageName: PackageName,
-  datastreamName: DatastreamName,
+  dataStreamName: DataStreamName,
   rawSamples: RawSamples,
   currentPipeline: Pipeline,
   connectorId: Connector,

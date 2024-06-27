@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
@@ -29,7 +29,7 @@ const DEFAULT_TO = 'now';
  */
 export const PrevalenceOverview: FC = () => {
   const { eventId, indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
-    useRightPanelContext();
+    useDocumentDetailsContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goPrevalenceTab = useCallback(() => {

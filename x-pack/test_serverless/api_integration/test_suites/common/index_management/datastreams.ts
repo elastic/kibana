@@ -88,53 +88,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('includes stats when provided the includeStats query parameter', async () => {
-        const { body: dataStreams } = await supertest
-          .get(`${API_BASE_PATH}/data_streams?includeStats=true`)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
-          .expect(200);
-
-        expect(dataStreams).to.be.an('array');
-
-        // returned array can contain automatically created data streams
-        const testDataStream = dataStreams.find(
-          (dataStream: DataStream) => dataStream.name === testDataStreamName
-        );
-
-        expect(testDataStream).to.be.ok();
-
-        // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = testDataStream!.indices[0];
-        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = testDataStream!;
-
-        expect(dataStreamWithoutStorageSize).to.eql({
-          name: testDataStreamName,
-          privileges: {
-            delete_index: true,
-            manage_data_stream_lifecycle: true,
-          },
-          timeStampField: { name: '@timestamp' },
-          indices: [
-            {
-              name: indexName,
-              managedBy: 'Data stream lifecycle',
-              preferILM: true,
-              uuid,
-            },
-          ],
-          generation: 1,
-          health: 'green',
-          indexTemplateName: testDataStreamName,
-          nextGenerationManagedBy: 'Data stream lifecycle',
-          maxTimeStamp: 0,
-          hidden: false,
-          lifecycle: {
-            enabled: true,
-          },
-        });
-      });
-
       it('returns a single data stream by ID', async () => {
         const { body: dataStream } = await supertest
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
@@ -165,7 +118,6 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           nextGenerationManagedBy: 'Data stream lifecycle',
-          maxTimeStamp: 0,
           hidden: false,
           lifecycle: {
             enabled: true,

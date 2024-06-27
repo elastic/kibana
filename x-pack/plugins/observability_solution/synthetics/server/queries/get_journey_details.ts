@@ -165,7 +165,7 @@ export const getJourneyDetails = async ({
 
     return {
       timestamp: journeySource['@timestamp'],
-      journey: { ...journeySource, _id: foundJourney._id },
+      journey: { ...journeySource, _id: foundJourney._id! },
       ...(summaryPing && 'state' in summaryPing && summaryPing.state
         ? {
             summary: {

@@ -4,13 +4,10 @@ exports[`useTimelineColumns augmentedColumnHeaders should return the default col
 Array [
   Object {
     "aggregatable": true,
-    "category": "base",
     "columnHeaderType": "not-filtered",
-    "description": "Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.",
     "esTypes": Array [
       "date",
     ],
-    "example": "2016-05-23T08:05:34.853Z",
     "format": "",
     "id": "@timestamp",
     "indexes": Array [
@@ -26,13 +23,10 @@ Array [
   },
   Object {
     "aggregatable": false,
-    "category": "base",
     "columnHeaderType": "not-filtered",
-    "description": "For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.",
     "esTypes": Array [
       "text",
     ],
-    "example": "Hello World",
     "format": "string",
     "id": "message",
     "indexes": Array [
@@ -47,13 +41,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "event",
     "columnHeaderType": "not-filtered",
-    "description": "This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy. \`event.category\` represents the \\"big buckets\\" of ECS categories. For example, filtering on \`event.category:process\` yields all events relating to process activity. This field is closely related to \`event.type\`, which is used as a subcategory. This field is an array. This will allow proper categorization of some events that fall in multiple categories.",
     "esTypes": Array [
       "keyword",
     ],
-    "example": "authentication",
     "format": "string",
     "id": "event.category",
     "indexes": Array [
@@ -74,13 +65,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "event",
     "columnHeaderType": "not-filtered",
-    "description": "The action captured by the event. This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
     "esTypes": Array [
       "keyword",
     ],
-    "example": "user-password-change",
     "format": "string",
     "id": "event.action",
     "indexes": Array [
@@ -101,9 +89,7 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "host",
     "columnHeaderType": "not-filtered",
-    "description": "Name of the host. It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
     "esTypes": Array [
       "keyword",
     ],
@@ -127,13 +113,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "source",
     "columnHeaderType": "not-filtered",
-    "description": "IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.",
     "esTypes": Array [
       "ip",
     ],
-    "example": "",
     "format": "",
     "id": "source.ip",
     "indexes": Array [
@@ -148,13 +131,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "destination",
     "columnHeaderType": "not-filtered",
-    "description": "IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.",
     "esTypes": Array [
       "ip",
     ],
-    "example": "",
     "format": "",
     "id": "destination.ip",
     "indexes": Array [
@@ -169,13 +149,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "user",
     "columnHeaderType": "not-filtered",
-    "description": "Short name or login of the user.",
     "esTypes": Array [
       "keyword",
     ],
-    "example": "albert",
     "format": "string",
     "id": "user.name",
     "indexes": Array [
@@ -195,13 +172,10 @@ exports[`useTimelineColumns augmentedColumnHeaders should return the default uni
 Array [
   Object {
     "aggregatable": true,
-    "category": "base",
     "columnHeaderType": "not-filtered",
-    "description": "Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.",
     "esTypes": Array [
       "date",
     ],
-    "example": "2016-05-23T08:05:34.853Z",
     "format": "",
     "id": "@timestamp",
     "indexes": Array [
@@ -217,13 +191,10 @@ Array [
   },
   Object {
     "aggregatable": false,
-    "category": "base",
     "columnHeaderType": "not-filtered",
-    "description": "For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.",
     "esTypes": Array [
       "text",
     ],
-    "example": "Hello World",
     "format": "string",
     "id": "message",
     "indexes": Array [
@@ -238,13 +209,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "event",
     "columnHeaderType": "not-filtered",
-    "description": "This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy. \`event.category\` represents the \\"big buckets\\" of ECS categories. For example, filtering on \`event.category:process\` yields all events relating to process activity. This field is closely related to \`event.type\`, which is used as a subcategory. This field is an array. This will allow proper categorization of some events that fall in multiple categories.",
     "esTypes": Array [
       "keyword",
     ],
-    "example": "authentication",
     "format": "string",
     "id": "event.category",
     "indexes": Array [
@@ -264,13 +232,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "event",
     "columnHeaderType": "not-filtered",
-    "description": "The action captured by the event. This describes the information in the event. It is more specific than \`event.category\`. Examples are \`group-add\`, \`process-started\`, \`file-created\`. The value is normally defined by the implementer.",
     "esTypes": Array [
       "keyword",
     ],
-    "example": "user-password-change",
     "format": "string",
     "id": "event.action",
     "indexes": Array [
@@ -290,9 +255,7 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "host",
     "columnHeaderType": "not-filtered",
-    "description": "Name of the host. It can contain what \`hostname\` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.",
     "esTypes": Array [
       "keyword",
     ],
@@ -315,13 +278,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "source",
     "columnHeaderType": "not-filtered",
-    "description": "IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.",
     "esTypes": Array [
       "ip",
     ],
-    "example": "",
     "format": "",
     "id": "source.ip",
     "indexes": Array [
@@ -335,13 +295,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "destination",
     "columnHeaderType": "not-filtered",
-    "description": "IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.",
     "esTypes": Array [
       "ip",
     ],
-    "example": "",
     "format": "",
     "id": "destination.ip",
     "indexes": Array [
@@ -355,13 +312,10 @@ Array [
   },
   Object {
     "aggregatable": true,
-    "category": "user",
     "columnHeaderType": "not-filtered",
-    "description": "Short name or login of the user.",
     "esTypes": Array [
       "keyword",
     ],
-    "example": "albert",
     "format": "string",
     "id": "user.name",
     "indexes": Array [
@@ -380,13 +334,10 @@ exports[`useTimelineColumns augmentedColumnHeaders should return the provided co
 Array [
   Object {
     "aggregatable": true,
-    "category": "source",
     "columnHeaderType": "not-filtered",
-    "description": "IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.",
     "esTypes": Array [
       "ip",
     ],
-    "example": "",
     "format": "",
     "id": "source.ip",
     "indexes": Array [

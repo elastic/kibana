@@ -7,8 +7,6 @@
 
 export type {
   GetUserProfileResponse,
-  ApiKey,
-  RestApiKey,
   GetUserDisplayNameParams,
   EditUser,
   BuiltinESPrivileges,
@@ -19,6 +17,7 @@ export type {
   InvalidRoleTemplate,
   InlineRoleTemplate,
 } from './model';
+
 export { getUserDisplayName, isRoleReserved, isRoleWithWildcardBasePrivilege } from './model';
 
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.

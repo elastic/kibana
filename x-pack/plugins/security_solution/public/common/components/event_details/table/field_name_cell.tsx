@@ -10,10 +10,20 @@ import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiText, EuiToolTip } from '@elast
 import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { EcsFlat } from '@elastic/ecs';
 import * as i18n from '../translations';
 import { getExampleText } from '../helpers';
 import type { EventFieldsData } from '../types';
 import { getFieldTypeName } from './get_field_type_name';
+
+const getEcsField = (field: string): { example?: string; description?: string } | undefined => {
+  return EcsFlat[field as keyof typeof EcsFlat] as
+    | {
+        example?: string;
+        description?: string;
+      }
+    | undefined;
+};
 
 export interface FieldNameCellProps {
   data: EventFieldsData;
@@ -23,13 +33,11 @@ export interface FieldNameCellProps {
 }
 export const FieldNameCell = React.memo(
   ({ data, field, fieldMapping, scripted }: FieldNameCellProps) => {
+    const ecsField = getEcsField(field);
     const typeName = getFieldTypeName(data.type);
     // TODO: We don't have fieldMapping or isMultiField until kibana indexPatterns is implemented. Will default to field for now
     const displayName = fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : field;
     const defaultTooltip = displayName !== field ? `${field} (${displayName})` : field;
-    // TODO: Remove. This is what was used to show the plaintext fieldName vs the tooltip one
-    // const showPlainTextName =
-    //   (data.isObjectArray && data.type !== 'geo_point') || fieldFromBrowserField == null;
     const isMultiField = fieldMapping?.isSubtypeMulti();
     return (
       <>
@@ -52,8 +60,8 @@ export const FieldNameCell = React.memo(
             <EuiToolTip
               position="top"
               content={
-                !isEmpty(data.description)
-                  ? `${data.description} ${getExampleText(data.example)}`
+                !isEmpty(ecsField?.description)
+                  ? `${ecsField?.description} ${getExampleText(ecsField?.example)}`
                   : defaultTooltip
               }
               delay="long"

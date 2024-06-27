@@ -12,7 +12,7 @@ import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { chronoLiterals, timeUnits, timeUnitsToSuggest } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
@@ -59,7 +59,7 @@ const nestedFunctions = {
 
 const literals = {
   chrono_literal: chronoLiterals[0].name,
-  time_literal: timeLiterals[0].name,
+  time_literal: timeUnitsToSuggest[0].name,
 };
 function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
   if (typeString === 'chrono_literal') {
@@ -421,7 +421,7 @@ describe('validation logic', () => {
         ]);
         testErrorsAndWarnings('row var = 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
         testErrorsAndWarnings('row now() + 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
-        for (const timeLiteral of timeLiterals) {
+        for (const timeLiteral of timeUnitsToSuggest) {
           testErrorsAndWarnings(`row 1 ${timeLiteral.name}`, [
             `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
           ]);
@@ -1247,36 +1247,33 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval now() + 1 anno', [
           "Unexpected time interval qualifier: 'anno'",
         ]);
-        for (const timeLiteral of timeLiterals) {
-          testErrorsAndWarnings(`from a_index | eval 1 ${timeLiteral.name}`, [
-            `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+        for (const unit of timeUnits) {
+          testErrorsAndWarnings(`from a_index | eval 1 ${unit}`, [
+            `EVAL does not support [date_period] in expression [1 ${unit}]`,
           ]);
-          testErrorsAndWarnings(`from a_index | eval 1                ${timeLiteral.name}`, [
-            `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          testErrorsAndWarnings(`from a_index | eval 1                ${unit}`, [
+            `EVAL does not support [date_period] in expression [1 ${unit}]`,
           ]);
 
           // this is not possible for now
           // testErrorsAndWarnings(`from a_index | eval var = 1 ${timeLiteral.name}`, [
           //   `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
           // ]);
-          testErrorsAndWarnings(`from a_index | eval var = now() - 1 ${timeLiteral.name}`, []);
-          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${timeLiteral.name}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = now() - 1 ${unit}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${unit}`, []);
           testErrorsAndWarnings(
-            `from a_index | eval var = dateField - 1 ${timeLiteral.name.toUpperCase()}`,
+            `from a_index | eval var = dateField - 1 ${unit.toUpperCase()}`,
             []
           );
-          testErrorsAndWarnings(
-            `from a_index | eval var = dateField - 1 ${capitalize(timeLiteral.name)}`,
-            []
-          );
-          testErrorsAndWarnings(`from a_index | eval var = dateField + 1 ${timeLiteral.name}`, []);
-          testErrorsAndWarnings(`from a_index | eval 1 ${timeLiteral.name} + 1 year`, [
-            `Argument of [+] must be [date], found value [1 ${timeLiteral.name}] type [duration]`,
+          testErrorsAndWarnings(`from a_index | eval var = dateField - 1 ${capitalize(unit)}`, []);
+          testErrorsAndWarnings(`from a_index | eval var = dateField + 1 ${unit}`, []);
+          testErrorsAndWarnings(`from a_index | eval 1 ${unit} + 1 year`, [
+            `Argument of [+] must be [date], found value [1 ${unit}] type [duration]`,
           ]);
           for (const op of ['*', '/', '%']) {
-            testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${timeLiteral.name}`, [
+            testErrorsAndWarnings(`from a_index | eval var = now() ${op} 1 ${unit}`, [
               `Argument of [${op}] must be [number], found value [now()] type [date]`,
-              `Argument of [${op}] must be [number], found value [1 ${timeLiteral.name}] type [duration]`,
+              `Argument of [${op}] must be [number], found value [1 ${unit}] type [duration]`,
             ]);
           }
         }

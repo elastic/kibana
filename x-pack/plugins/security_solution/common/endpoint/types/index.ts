@@ -949,6 +949,7 @@ export interface PolicyConfig {
     cluster_uuid: string;
     cluster_name: string;
     serverless: boolean;
+    billable?: boolean;
     heartbeatinterval?: number;
   };
   global_manifest_version: 'latest' | string;
