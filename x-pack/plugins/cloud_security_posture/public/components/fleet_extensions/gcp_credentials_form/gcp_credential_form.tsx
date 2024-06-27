@@ -602,24 +602,27 @@ export const GcpInputVarFields = ({
             `}
           >
             <EuiSpacer size="m" />
-            <Suspense fallback={<EuiLoadingSpinner size="l" />}>
-              <LazyPackagePolicyInputVarField
-                varDef={{
-                  ...findVariableDef(packageInfo, credentialJSONFields.id)!,
-                  required: true,
-                  type: 'textarea',
-                  secret: true,
-                  full_width: true,
-                }}
-                value={credentialJSONFields.value || ''}
-                onChange={(value) => {
-                  onChange(credentialJSONFields.id, value);
-                }}
-                errors={[]}
-                forceShowErrors={false}
-                isEditPage={true}
-              />
-            </Suspense>
+            <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.json'].label}>
+              <Suspense fallback={<EuiLoadingSpinner size="l" />}>
+                <LazyPackagePolicyInputVarField
+                  data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
+                  varDef={{
+                    ...findVariableDef(packageInfo, credentialJSONFields.id)!,
+                    required: true,
+                    type: 'textarea',
+                    secret: true,
+                    full_width: true,
+                  }}
+                  value={credentialJSONFields.value || ''}
+                  onChange={(value) => {
+                    onChange(credentialJSONFields.id, value);
+                  }}
+                  errors={[]}
+                  forceShowErrors={false}
+                  isEditPage={true}
+                />
+              </Suspense>
+            </EuiFormRow>
           </div>
         )}
       </EuiForm>
