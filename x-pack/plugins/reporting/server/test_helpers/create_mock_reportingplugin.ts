@@ -51,6 +51,7 @@ export const createMockPluginSetup = (
 };
 
 const coreSetupMock = coreMock.createSetup();
+const coreStartMock = coreMock.createStart();
 const logger = loggingSystemMock.createLogger();
 
 const createMockReportingStore = async (config: ReportingConfigType) => {
@@ -81,9 +82,10 @@ export const createMockPluginStart = async (
       ...licensingMock.createStart(),
       license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
     },
+    security: coreStartMock.security, // we need authc from core.security start
     logger,
     screenshotting: createMockScreenshottingStart(),
-    ...startMock,
+    ...startMock, // allows to override with test instances
   };
 };
 
