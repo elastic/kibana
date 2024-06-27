@@ -10,3 +10,9 @@ export enum Page {
   upload = 'upload',
   assistant = 'assistant',
 }
+
+export const PagePath = {
+  [Page.landing]: '/create',
+  [Page.upload]: '/create/upload',
+  [Page.assistant]: '/create/assistant',
+};

@@ -405,7 +405,24 @@ export const parseBody = (value: string): string[] => {
  * Ideally the parser would do that, but currently they are included in url.
  */
 export const removeTrailingWhitespaces = (url: string): string => {
-  return url.trim().split(whitespacesRegex)[0];
+  let index = 0;
+  let whitespaceIndex = -1;
+  let isQueryParam = false;
+  let char = url[index];
+  while (char) {
+    if (char === '"') {
+      isQueryParam = !isQueryParam;
+    } else if (char === ' ' && !isQueryParam) {
+      whitespaceIndex = index;
+      break;
+    }
+    index++;
+    char = url[index];
+  }
+  if (whitespaceIndex > 0) {
+    return url.slice(0, whitespaceIndex);
+  }
+  return url;
 };
 
 /*

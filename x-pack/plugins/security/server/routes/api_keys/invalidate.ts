@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
 
 import type { RouteDefinitionParams } from '..';
-import type { ApiKey } from '../../../common/model';
 import { wrapError, wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 

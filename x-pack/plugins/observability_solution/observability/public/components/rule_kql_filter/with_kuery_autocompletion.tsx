@@ -16,7 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { InfraClientStartDeps, RendererFunction } from '../custom_threshold/types';
 
-interface WithKueryAutocompletionLifecycleProps {
+export interface WithKueryAutocompletionLifecycleProps {
   kibana: KibanaReactContextValue<InfraClientStartDeps & KibanaServices>;
   children: RendererFunction<{
     isLoadingSuggestions: boolean;
@@ -111,3 +111,6 @@ class WithKueryAutocompletionComponent extends React.Component<
 export const WithKueryAutocompletion = withKibana<WithKueryAutocompletionLifecycleProps>(
   WithKueryAutocompletionComponent
 );
+
+// eslint-disable-next-line import/no-default-export
+export default WithKueryAutocompletion;
