@@ -5,35 +5,59 @@
  * 2.0.
  */
 
-export const TIKA_TYPES = [
+export const TIKA_MIME_TYPES = [
+  'application/doc',
+  'application/ms-doc',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+
+  'application/excel',
   'application/vnd.ms-excel',
+  'application/x-excel',
+  'application/x-msexcel',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+  'application/mspowerpoint',
+  'application/powerpoint',
   'application/vnd.ms-powerpoint',
+  'application/x-mspowerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+
   'application/vnd.oasis.opendocument.presentation',
   'application/vnd.oasis.opendocument.spreadsheet',
   'application/vnd.oasis.opendocument.text',
+
   'text/rtf',
+
   'application/pdf',
+
   'text/plain',
 ];
 
 export function isTikaType(type: string) {
-  return TIKA_TYPES.includes(type);
+  return TIKA_MIME_TYPES.includes(type);
 }
 
 export const getTikaDisplayType = (type: string) => {
   switch (type) {
+    case 'application/doc':
+    case 'application/ms-doc':
     case 'application/msword':
     case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
       return 'Microsoft Office Word document';
 
+    case 'application/excel':
     case 'application/vnd.ms-excel':
+    case 'application/x-excel':
+    case 'application/x-msexcel':
     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
       return 'Microsoft Office Excel document';
 
+    case 'application/mspowerpoint':
+    case 'application/powerpoint':
     case 'application/vnd.ms-powerpoint':
+    case 'application/x-mspowerpoint':
+    case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
       return 'Microsoft Office Power Point document';
 
     case 'application/vnd.oasis.opendocument.presentation':
