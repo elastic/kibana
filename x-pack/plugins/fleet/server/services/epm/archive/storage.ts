@@ -7,11 +7,19 @@
 
 import { extname } from 'path';
 
+import pMap from 'p-map';
+
 import { isBinaryFile } from 'isbinaryfile';
 import mime from 'mime-types';
 import { v5 as uuidv5 } from 'uuid';
-import type { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type {
+  SavedObjectsClientContract,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkResponse,
+} from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import { chunk } from 'lodash';
 
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../common';
 import type {
@@ -112,17 +120,37 @@ export async function saveArchiveEntriesFromAssetsMap(opts: {
   installSource: InstallSource;
 }) {
   const { savedObjectsClient, paths, packageInfo, assetsMap, installSource } = opts;
-  const bulkBody = await Promise.all(
-    paths.map((path) => {
-      const buffer = assetsMap.get(path);
-      if (!buffer) throw new PackageNotFoundError(`Could not find ArchiveEntry at ${path}`);
-      const { name, version } = packageInfo;
-      return archiveEntryToBulkCreateObject({ path, buffer, name, version, installSource });
-    })
-  );
 
-  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody, { refresh: false });
-  return results;
+  // Create 100 assets per bulk create request to avoid allocating a huge JSON payload
+  const BULK_BATCH_SIZE = 100;
+
+  const chunks = chunk(paths, BULK_BATCH_SIZE);
+  const endResults: SavedObjectsBulkResponse<PackageAsset> = { saved_objects: [] };
+
+  for (const chunkPaths of chunks) {
+    const bulkBody = await pMap(
+      chunkPaths,
+      (path) => {
+        const buffer = assetsMap.get(path);
+
+        if (!buffer) {
+          throw new PackageNotFoundError(`Could not find ArchiveEntry at ${path}`);
+        }
+
+        const { name, version } = packageInfo;
+        return archiveEntryToBulkCreateObject({ path, buffer, name, version, installSource });
+      },
+      { concurrency: 10 }
+    );
+
+    const chunkResults = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody, {
+      refresh: false,
+    });
+
+    endResults.saved_objects = [...endResults.saved_objects, ...chunkResults.saved_objects];
+  }
+
+  return endResults;
 }
 
 export async function archiveEntryToBulkCreateObject(opts: {
