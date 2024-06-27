@@ -7,6 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, existsQuery } from '@kbn/observability-plugin/server';
+import { inspect } from 'util';
+import { getIgnoredMetadata } from '../get_ignored_metadata';
 import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
@@ -69,6 +71,17 @@ export async function getDegradedFields({
     },
     aggs,
   });
+
+  // TODO: Achyut will remove this block of code once we have a UI which can call the API.
+  if (response.aggregations?.degradedFields.buckets[0].key) {
+    const apiData = await getIgnoredMetadata({
+      esClient,
+      dataStream,
+      field: response.aggregations.degradedFields.buckets[0].key as string,
+    });
+
+    console.log('API_Data', inspect(apiData, { showHidden: false, depth: null }));
+  }
 
   return {
     degradedFields:
