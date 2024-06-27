@@ -338,7 +338,7 @@ test('allow and remove unknown keys when unknowns = `ignore`', () => {
   });
 });
 
-test('unknowns = `ignore` is recursive if no local preference', () => {
+test('unknowns = `ignore` is recursive if no explicit preferences in sub-keys', () => {
   const type = schema.object(
     { foo: schema.object({ bar: schema.string() }) },
     { unknowns: 'ignore' }
@@ -358,7 +358,7 @@ test('unknowns = `ignore` is recursive if no local preference', () => {
   });
 });
 
-test('unknowns = `ignore` respects local preferences', () => {
+test('unknowns = `ignore` respects local preferences in sub-keys', () => {
   const type = schema.object(
     { foo: schema.object({ bar: schema.string() }, { unknowns: 'forbid' }) },
     { unknowns: 'ignore' }
@@ -447,7 +447,7 @@ describe('nested unknowns', () => {
       },
     });
   });
-  test('unknowns = `ignore` is recursive if no local preference', () => {
+  test('unknowns = `ignore` is recursive if no explicit preferences in sub-keys', () => {
     const type = schema.object({
       myObj: schema.object(
         { foo: schema.object({ bar: schema.string() }) },
@@ -473,7 +473,7 @@ describe('nested unknowns', () => {
     });
   });
 
-  test('unknowns = `ignore` respects local preferences', () => {
+  test('unknowns = `ignore` respects local preferences in sub-keys', () => {
     const type = schema.object({
       myObj: schema.object(
         { foo: schema.object({ bar: schema.string() }, { unknowns: 'forbid' }) },
