@@ -112,7 +112,7 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: "error" OR error.log.level: "error"',
+            filter: 'log.level: * OR error.log.level: *',
           },
         ],
       },
