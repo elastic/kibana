@@ -63,6 +63,7 @@ export interface EuiBasicTableSortTypes {
 export enum DeploymentStatusEnum {
   deployed = 'deployed',
   notDeployed = 'not_deployed',
+  notDeployable = 'not_deployable',
   notApplicable = 'not_applicable',
 }
 
