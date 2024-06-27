@@ -17,6 +17,8 @@ describe('addToControls', () => {
   const mockControlGroupApi = {
     addOptionsListControl: jest.fn(),
     addRangeSliderControl: jest.fn(),
+    setAutoApplySelections: jest.fn(),
+    setApplyGlobalTime: jest.fn(),
   };
 
   afterEach(() => {
