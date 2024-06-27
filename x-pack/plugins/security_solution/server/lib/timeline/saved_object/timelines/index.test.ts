@@ -540,7 +540,9 @@ describe('saved_object', () => {
           noteId: null,
           note: expect.objectContaining({
             ...note,
+            timelineId: mockResolvedTimeline.savedObjectId,
           }),
+          overrideOwner: false,
         })
       );
 
