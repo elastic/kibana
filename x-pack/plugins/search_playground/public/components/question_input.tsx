@@ -38,8 +38,6 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === keys.ENTER && !event.shiftKey) {
       event.preventDefault();
-
-      event.currentTarget.form?.requestSubmit();
     }
   }, []);
 
