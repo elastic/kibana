@@ -11,7 +11,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
+import type { SLOClient } from '@kbn/slo-plugin/server';
 
 import { PackageSavedObjectConflictError } from '../../../../errors';
 import type { HTTPAuthorizationHeader } from '../../../../../common/http_authorization_header';
