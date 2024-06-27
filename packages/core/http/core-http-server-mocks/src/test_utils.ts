@@ -91,7 +91,7 @@ export const createConfigService = ({
         ...csp,
       });
     }
-    if (path === 'permissions_policy') {
+    if (path === 'permissionsPolicy') {
       return new BehaviorSubject({
         report_to: [],
       });
