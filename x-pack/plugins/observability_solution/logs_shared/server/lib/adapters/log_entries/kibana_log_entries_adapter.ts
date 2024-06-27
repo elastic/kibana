@@ -225,7 +225,7 @@ function mapHitsToLogEntryDocuments(hits: SortedSearchHit[], fields: string[]): 
     );
 
     return {
-      id: hit._id,
+      id: hit._id!,
       index: hit._index,
       cursor: { time: hit.sort[0], tiebreaker: hit.sort[1] },
       fields: logFields,
