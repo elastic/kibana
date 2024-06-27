@@ -8,9 +8,8 @@
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiFlexGroup,
   EuiScreenReaderOnly,
   EuiToolTip,
 } from '@elastic/eui';
@@ -117,26 +116,26 @@ export const DegradedFieldTable = () => {
           const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
 
           return (
-            <EuiFlexGroup gutterSize="none" alignItems="center">
-              <EuiButtonIcon
+            <EuiToolTip
+              position="top"
+              content={
+                <p>
+                  {i18n.translate('xpack.datasetQuality.degradedField.expand.aiAssistant', {
+                    defaultMessage: 'Possible causes and remediations from Elastic AI Assistant.',
+                  })}
+                </p>
+              }
+            >
+              <EuiButtonEmpty
+                size="xs"
                 data-test-subj="datasetQualityColumnsWithExpandingRowToggleButton"
                 onClick={() => toggleDetails(row)}
                 aria-label={itemIdToExpandedRowMapValues[row.name] ? 'Collapse' : 'Expand'}
                 iconType={itemIdToExpandedRowMapValues[row.name] ? 'arrowDown' : 'arrowRight'}
-              />
-              <EuiToolTip
-                position="top"
-                content={
-                  <p>
-                    {i18n.translate('xpack.datasetQuality.degradedField.expand.aiAssistant', {
-                      defaultMessage: 'Possible causes and remediations from Elastic AI Assistant.',
-                    })}
-                  </p>
-                }
               >
                 <AssistantAvatar size="xxs" />
-              </EuiToolTip>
-            </EuiFlexGroup>
+              </EuiButtonEmpty>
+            </EuiToolTip>
           );
         },
       },
