@@ -83,7 +83,7 @@ export interface ReportingInternalStart {
   licensing: LicensingPluginStart;
   logger: Logger;
   screenshotting?: ScreenshottingStart;
-  security: SecurityServiceStart;
+  security?: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
 

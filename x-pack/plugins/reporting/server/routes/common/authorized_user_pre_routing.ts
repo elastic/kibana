@@ -30,7 +30,7 @@ export const authorizedUserPreRouting = <P, Q, B>(
   reporting: ReportingCore,
   handler: RequestHandlerUser<P, Q, B>
 ): RequestHandler<P, Q, B, ReportingRequestHandlerContext, RouteMethod> => {
-  const { logger, security: securitySetup, docLinks } = reporting.getPluginSetupDeps();
+  const { logger, security: securitySetup, docLinks } = reporting.getPluginSetupDeps(); // ReportingInternalSetup.security?: SecurityPluginSetup | undefined
 
   return async (context, req, res) => {
     const { security: securityService } = await reporting.getPluginStartDeps();
