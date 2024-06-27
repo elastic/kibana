@@ -33,6 +33,15 @@ type SpecificFields =
 
 type AllRuleProperties = BaseFields | SpecificFields;
 
+/**
+ * The PrebuiltRuleAsset is created out of the Rule schema types defined in our OpenAPI schemas.
+ * However, we don't need all the fields in the rule schemas to be present in the PrebuiltRuleAsset.
+ * We manually exclude those unwanted fields here.
+ *
+ * Reference ticket:
+ * https://github.com/elastic/kibana/issues/180393
+ *
+ */
 type OmittedProperties = Extract<
   AllRuleProperties,
   | 'alert_suppression'
