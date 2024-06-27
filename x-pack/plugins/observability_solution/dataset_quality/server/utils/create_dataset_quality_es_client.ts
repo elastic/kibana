@@ -13,6 +13,9 @@ import {
   Indices,
   IndicesGetMappingResponse,
   IndicesGetSettingsResponse,
+  IndicesGetDataStreamResponse,
+  IndicesGetIndexTemplateResponse,
+  ClusterGetComponentTemplateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
 type DatasetQualityESSearchParams = ESSearchRequest & {
@@ -46,6 +49,17 @@ export function createDatasetQualityESClient(esClient: ElasticsearchClient) {
     },
     async settings(params: { index: string }): Promise<IndicesGetSettingsResponse> {
       return esClient.indices.getSettings(params);
+    },
+    async getDataStream(params: { name: string }): Promise<IndicesGetDataStreamResponse> {
+      return esClient.indices.getDataStream(params);
+    },
+    async getIndexTemplate(params: { name: string }): Promise<IndicesGetIndexTemplateResponse> {
+      return esClient.indices.getIndexTemplate(params);
+    },
+    async getComponentTemplate(params: {
+      name: string;
+    }): Promise<ClusterGetComponentTemplateResponse> {
+      return esClient.cluster.getComponentTemplate(params);
     },
   };
 }
