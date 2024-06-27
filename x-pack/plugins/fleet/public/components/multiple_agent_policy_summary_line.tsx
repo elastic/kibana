@@ -130,7 +130,7 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                     </EuiText>
                   </EuiFlexItem>
                 )}
-                {policies.length > 0 && (
+                {policies.length > 1 && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge
                       color="hollow"
@@ -138,7 +138,7 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
                       onClickAriaLabel="Open agent policies popover"
                     >
-                      {`+${policies.length < 2 ? '' : policies.length - 1}`}
+                      +{policies.length - 1}
                     </EuiBadge>
                     <EuiPopover
                       data-test-subj="agentPoliciesPopover"

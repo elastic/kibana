@@ -147,7 +147,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText data-test-subj="integrationNameText">
             <b>
               <FormattedMessage
                 id="xpack.fleet.manageAgentPolicies.integrationName"
@@ -177,6 +177,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
         {removedPolicies.length > 0 && (
           <EuiFlexItem>
             <EuiCallOut
+              data-test-subj="confirmRemovePoliciesCallout"
               title={
                 <FormattedMessage
                   id="xpack.fleet.manageAgentPolicies.calloutTitle"

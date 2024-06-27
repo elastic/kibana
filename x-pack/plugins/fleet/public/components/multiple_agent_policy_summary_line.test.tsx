@@ -27,11 +27,11 @@ describe('MultipleAgentPolicySummaryLine', () => {
     testRenderer = createFleetTestRendererMock();
   });
 
-  test('it should render the policy name with a + when there is only one policy', async () => {
+  test('it should only render the policy name when there is only one policy', async () => {
     const results = render([{ name: 'Test policy', revision: 2 }] as AgentPolicy[]);
-    expect(results.container.textContent).toBe('Test policyrev. 2+');
+    expect(results.container.textContent).toBe('Test policyrev. 2');
     expect(results.queryByTestId('agentPolicyNameLink')).toBeInTheDocument();
-    expect(results.queryByTestId('agentPoliciesNumberBadge')).toBeInTheDocument();
+    expect(results.queryByTestId('agentPoliciesNumberBadge')).not.toBeInTheDocument();
   });
 
   test('it should render the first policy name and the badge when there are multiple policies', async () => {
