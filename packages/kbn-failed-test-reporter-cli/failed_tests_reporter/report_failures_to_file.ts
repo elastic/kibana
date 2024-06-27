@@ -172,7 +172,10 @@ export async function reportFailuresToFile(
           <small>
             ${
               failure.commandLine
-                ? `<div><strong>Command Line</strong>: ${escape(failure.commandLine)}</div>`
+                ? `<div>
+                     <strong>Command Line</strong>:
+                     <pre>${escape(failure.commandLine)}</pre>
+                   </div>`
                 : ''
             }
             <div>

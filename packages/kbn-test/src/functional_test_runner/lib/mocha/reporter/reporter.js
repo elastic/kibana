@@ -19,6 +19,7 @@ import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 import { setupCiStatsFtrTestGroupReporter } from './ci_stats_ftr_reporter';
+import { prettifyCommandLine } from './prettify_command_line';
 
 export function MochaReporterProvider({ getService }) {
   const log = getService('log');
@@ -44,7 +45,7 @@ export function MochaReporterProvider({ getService }) {
       runner.on('suite end', this.onSuiteEnd);
       runner.on('end', this.onEnd);
 
-      const commandLine = process.argv.join(' ');
+      const commandLine = prettifyCommandLine(process.argv);
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
