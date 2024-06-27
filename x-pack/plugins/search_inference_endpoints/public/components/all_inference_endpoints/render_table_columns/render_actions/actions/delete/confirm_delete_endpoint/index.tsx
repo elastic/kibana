@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import * as i18n from './translations';
-import './confirm_delete_endpoint.scss';
 
 interface ConfirmDeleteEndpointModalProps {
   onCancel: () => void;
@@ -28,7 +27,6 @@ export const ConfirmDeleteEndpointModal: React.FC<ConfirmDeleteEndpointModalProp
       onCancel={onCancel}
       onConfirm={onConfirm}
       title={i18n.DELETE_TITLE}
-      className="confirmDeleteInferenceModal"
     >
       {i18n.CONFIRM_DELETE_WARNING}
     </EuiConfirmModal>
