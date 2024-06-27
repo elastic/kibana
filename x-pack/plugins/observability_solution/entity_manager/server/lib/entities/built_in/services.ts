@@ -27,7 +27,6 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   history: {
     timestampField: '@timestamp',
     interval: '1m',
-    lookbackPeriod: '5m',
   },
   latest: {
     lookback: '5m',
