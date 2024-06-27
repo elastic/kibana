@@ -67,7 +67,7 @@ export const OtelLogsPanel: React.FC = () => {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  const AGENT_CDN_BASE_URL = 'snapshots.elastic.co/8.15.0-021a3fba/downloads/beats/elastic-agent';
+  const AGENT_CDN_BASE_URL = 'snapshots.elastic.co/8.15.0-af44b0a5/downloads/beats/elastic-agent';
   const agentVersion = '8.15.0-SNAPSHOT';
   // TODO uncomment before merge
   // const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
@@ -125,23 +125,68 @@ kubectl apply -f otel-collector-k8s.yml`}
       content: `apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: daemonset-opentelemetry-collector
+  name: elastic-otel-collector-agent
   namespace: default
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
+    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: elastic-otel-collector-agent
+  labels:
+    app.kubernetes.io/name: elastic-opentelemetry-collector
+    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "namespaces", "nodes"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["daemonsets", "deployments", "replicasets"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [ "" ]
+    resources: [ "nodes/stats" ]
+    verbs: [ "get", "watch", "list" ]
+  - apiGroups: [ "" ]
+    resources: [ "nodes/proxy" ]
+    verbs: [ "get" ]
+  - apiGroups: [ "" ]
+    resources: ["configmaps"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: elastic-otel-collector-agent
+  labels:
+    app.kubernetes.io/name: elastic-opentelemetry-collector
+    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: elastic-otel-collector-agent
+subjects:
+  - kind: ServiceAccount
+    name: elastic-otel-collector-agent
+    namespace: default
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: daemonset-opentelemetry-collector-agent
+  name: elastic-otel-collector-agent
   namespace: default
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
+    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
 data:
   otel.yaml: |
     exporters:
       debug:
-        verbosity: detailed
+        verbosity: normal
       elasticsearch:
         endpoints: 
         - \${env:ES_ENDPOINT}
@@ -156,6 +201,9 @@ data:
           num_consumers: 20
           queue_size: 1000
     processors:
+      elasticinframetrics:
+        add_system_metrics: true
+        add_k8s_metrics: true
       resourcedetection/eks:
         detectors: [env, eks]
         timeout: 15s
@@ -164,6 +212,10 @@ data:
           resource_attributes:
             k8s.cluster.name:
               enabled: true
+      resourcedetection/gcp:
+        detectors: [env, gcp]
+        timeout: 2s
+        override: false
       resource/k8s:
         attributes:
           - key: service.name
@@ -246,7 +298,7 @@ data:
           enabled: true
         start_at: end
         exclude:
-        - /var/log/pods/default_daemonset-opentelemetry-collector*_*/elastic-opentelemetry-collector/*.log
+        - /var/log/pods/default_elastic-otel-collector-agent*_*/elastic-opentelemetry-collector/*.log
         include:
         - /var/log/pods/*/*/*.log
         include_file_name: false
@@ -269,6 +321,9 @@ data:
               system.memory.utilization:
                 enabled: true
           process:
+            mute_process_exe_error: true
+            mute_process_io_error: true
+            mute_process_user_error: true
             metrics:
               process.threads:
                 enabled: true
@@ -282,11 +337,50 @@ data:
           processes:
           load:
           disk:
+          filesystem:
+            exclude_mount_points:
+              mount_points:
+                - /dev/*
+                - /proc/*
+                - /sys/*
+                - /run/k3s/containerd/*
+                - /var/lib/docker/*
+                - /var/lib/kubelet/*
+                - /snap/*
+              match_type: regexp
+            exclude_fs_types:
+              fs_types:
+                - autofs
+                - binfmt_misc
+                - bpf
+                - cgroup2
+                - configfs
+                - debugfs
+                - devpts
+                - devtmpfs
+                - fusectl
+                - hugetlbfs
+                - iso9660
+                - mqueue
+                - nsfs
+                - overlay
+                - proc
+                - procfs
+                - pstore
+                - rpc_pipefs
+                - securityfs
+                - selinuxfs
+                - squashfs
+                - sysfs
+                - tracefs
+              match_type: strict
       kubeletstats:
         auth_type: serviceAccount
         collection_interval: 20s
         endpoint: \${env:K8S_NODE_NAME}:10250
         node: '\${env:K8S_NODE_NAME}'
+        # Verify if this can be removed for all CSPs
+        #insecure_skip_verify: true
         k8s_api_config:
           auth_type: serviceAccount
         metric_groups:
@@ -328,46 +422,51 @@ data:
           - k8sattributes
           - resourcedetection/system
           - resourcedetection/eks
+          - resourcedetection/gcp
           - resource/k8s
           - resource/cloud
           receivers:
           - filelog
-#        metrics:
-#          exporters:
-#          #- elasticsearch
-#          - debug
-#          processors:
-#          - k8sattributes
-#          - resourcedetection/system
-#          - resourcedetection/eks
-#          - resource/k8s
-#          - resource/cloud
-#          receivers:
-#          - kubeletstats
-#          - hostmetrics
+        metrics:
+          exporters:
+          - debug
+          processors:
+          - elasticinframetrics
+          - k8sattributes
+          - resourcedetection/system
+          - resourcedetection/eks
+          - resourcedetection/gcp
+          - resource/k8s
+          - resource/cloud
+          receivers:
+          - kubeletstats
+          - hostmetrics
 ---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: daemonset-opentelemetry-collector-agent
+  name: elastic-otel-collector-agent
   namespace: default
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
+    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: elastic-opentelemetry-collector
-      component: agent-collector
+      app.kubernetes.io/version: "8.15.0-SNAPSHOT"
   template:
     metadata:
       labels:
         app.kubernetes.io/name: elastic-opentelemetry-collector
-        component: agent-collector
+        app.kubernetes.io/version: "8.15.0-SNAPSHOT"
     spec:
-      serviceAccountName: daemonset-opentelemetry-collector
+      serviceAccountName: elastic-otel-collector-agent
       securityContext:
         runAsUser: 0
         runAsGroup: 0
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-opentelemetry-collector
           command: [/usr/share/elastic-agent/elastic-agent]
@@ -415,7 +514,7 @@ spec:
       volumes:
         - name: opentelemetry-collector-configmap
           configMap:
-            name: daemonset-opentelemetry-collector-agent
+            name: elastic-otel-collector-agent
             defaultMode: 0640
         - name: varlogpods
           hostPath:
@@ -429,50 +528,7 @@ spec:
             type: DirectoryOrCreate
         - name: hostfs
           hostPath:
-            path: /
-      hostNetwork: false
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: daemonset-opentelemetry-collector
-  labels:
-    app.kubernetes.io/name: elastic-opentelemetry-collector
-rules:
-  - apiGroups: [""]
-    resources: ["pods", "namespaces", "nodes"]
-    verbs: ["get", "watch", "list"]
-  - apiGroups: ["apps"]
-    resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["extensions"]
-    resources: ["daemonsets", "deployments", "replicasets"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: [ "" ]
-    resources: [ "nodes/stats" ]
-    verbs: [ "get", "watch", "list" ]
-  - apiGroups: [ "" ]
-    resources: [ "nodes/proxy" ]
-    verbs: [ "get" ]
-  - apiGroups: [ "" ]
-    resources: ["configmaps"]
-    verbs: ["get"]
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: daemonset-opentelemetry-collector
-  labels:
-    app.kubernetes.io/name: elastic-opentelemetry-collector
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: daemonset-opentelemetry-collector
-subjects:
-  - kind: ServiceAccount
-    name: daemonset-opentelemetry-collector
-    namespace: default
----`,
+            path: /`,
       type: 'download',
       fileName: 'otel-collector-k8s.yml',
     },
