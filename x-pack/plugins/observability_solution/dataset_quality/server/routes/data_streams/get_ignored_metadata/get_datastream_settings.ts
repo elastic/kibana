@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { IndicesMappingLimitSettings } from '@elastic/elasticsearch/lib/api/types';
 import { createDatasetQualityESClient } from '../../../utils';
 
 export interface DataStreamSettingDetails {
@@ -13,6 +14,7 @@ export interface DataStreamSettingDetails {
   ignoreDynamicBeyondLimit: number | undefined;
   nestedFieldLimit: number | undefined;
   ignoreMalformed: boolean | undefined;
+  mappingInsideIndexSettings: IndicesMappingLimitSettings | undefined;
   pipelines: {
     defaultPipeline: string | undefined;
     finalPipeline: string | undefined;
@@ -42,6 +44,7 @@ export async function getDataStreamSettings({
     ignoreDynamicBeyondLimit,
     nestedFieldLimit: wholeSettings[indexName]?.settings?.index?.mapping?.nested_fields?.limit,
     ignoreMalformed: wholeSettings[indexName]?.settings?.index?.mapping?.ignore_malformed,
+    mappingInsideIndexSettings: wholeSettings[indexName]?.settings?.index?.mapping,
     pipelines: {
       defaultPipeline: wholeSettings[indexName]?.settings?.index?.default_pipeline,
       finalPipeline: wholeSettings[indexName]?.settings?.index?.final_pipeline,

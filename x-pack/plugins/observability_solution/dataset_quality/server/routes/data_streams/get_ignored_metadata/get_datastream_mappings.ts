@@ -6,12 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { IndicesGetMappingResponse, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { createDatasetQualityESClient } from '../../../utils';
+import { getMappingForField } from './utils';
 
 export interface FieldMappingWithCount {
   fieldCount: number;
-  mappings: Record<string, MappingProperty>;
+  mappings: MappingProperty | Record<string, MappingProperty> | undefined;
   isDynamic: string | boolean | undefined;
 }
 
@@ -29,7 +30,7 @@ export async function getFieldMappingsWithCount({
   const wholeMapping = await datasetQualityESClient.mappings({ index: dataStream });
   const indexName = Object.keys(wholeMapping)[0];
 
-  const mappingForField = getMappingForField(wholeMapping, indexName, field);
+  const mappingForField = getMappingForField(wholeMapping[indexName].mappings, field);
 
   const fieldCaps = await datasetQualityESClient.fieldCaps({
     index: dataStream,
@@ -41,28 +42,4 @@ export async function getFieldMappingsWithCount({
     fieldCount: totalFields,
     isDynamic: wholeMapping[indexName].mappings.dynamic,
   };
-}
-
-function getMappingForField(mapping: IndicesGetMappingResponse, indexName: string, path: string) {
-  const pathParts = path.split('.');
-  const numDots = pathParts.length - 1;
-  const targetDepth = numDots > 2 ? numDots - 1 : numDots;
-  let currentObject = mapping[indexName].mappings.properties ?? {};
-
-  for (let i = 0; i < targetDepth; i++) {
-    const part = pathParts[i];
-    if (currentObject[part]) {
-      if ('properties' in currentObject[part]) {
-        currentObject = (currentObject[part] as any).properties;
-      } else if ('fields' in currentObject[part]) {
-        currentObject = (currentObject[part] as any).fields;
-      } else {
-        currentObject = {};
-      }
-    } else {
-      currentObject = {};
-    }
-  }
-
-  return { [path]: currentObject };
 }
