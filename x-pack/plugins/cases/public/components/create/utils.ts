@@ -62,20 +62,6 @@ export const trimUserFormData = (
 };
 
 export const createFormDeserializer = (data: CasePostRequest): CreateCaseFormSchema => {
-  if (data == null || isEmpty(data)) {
-    const { connector, settings, customFields, ...restData } = getInitialCaseValue({
-      owner: data.owner,
-    });
-
-    return {
-      ...restData,
-      connectorId: connector.id,
-      fields: connector.fields,
-      syncAlerts: settings.syncAlerts,
-      customFields: {},
-    };
-  }
-
   const { connector, settings, customFields, ...restData } = data;
 
   return {

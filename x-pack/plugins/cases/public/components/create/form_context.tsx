@@ -105,7 +105,7 @@ export const FormContext: React.FC<Props> = ({
        * when creating a case.
        */
       ...getInitialCaseValue({
-        owner: currentConfiguration.owner, // this can be empty
+        owner: selectedOwner,
         connector: currentConfiguration.connector,
       }),
       ...initialValue,
@@ -118,7 +118,7 @@ export const FormContext: React.FC<Props> = ({
         connectors,
         {
           ...currentConfiguration,
-          ...(currentConfiguration.owner === '' && { owner: selectedOwner }),
+          owner: selectedOwner,
         },
         data
       ),
