@@ -1038,7 +1038,7 @@
     "kea": "^2.6.0",
     "langchain": "^0.1.30",
     "langsmith": "^0.1.14",
-    "launchdarkly-js-client-sdk": "^3.3.0",
+    "launchdarkly-js-client-sdk": "^3.4.0",
     "load-json-file": "^6.2.0",
     "lodash": "^4.17.21",
     "lru-cache": "^4.1.5",
