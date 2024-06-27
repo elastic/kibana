@@ -19,12 +19,14 @@ import {
 import type { TranslatedEntry, TranslatedExceptionListItem } from '../../schemas/artifacts';
 import { ArtifactConstants } from './common';
 import {
+  ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
+import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../common/endpoint/service/artifacts/constants';
 
 describe('artifacts lists', () => {
   let mockExceptionClient: ExceptionListClient;
@@ -515,6 +517,71 @@ describe('artifacts lists', () => {
         ArtifactConstants.GLOBAL_ALLOWLIST_NAME
       );
       expect(artifact1.decodedSha256).toEqual(artifact2.decodedSha256);
+    });
+
+    describe('`descendant_of` operator', () => {
+      test('when feature flag is disabled, it should not convert `descendant_of`', () => {});
+
+      test.each([
+        ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+        ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id,
+        ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+      ])('when %s, it should not convert `descendant_of`', () => {});
+
+      test('it should convert `descendant_of` to the expected format', async () => {
+        // todo: event.category is process
+
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              type: 'descendent_of',
+              value: {
+                entries: [
+                  {
+                    type: 'simple',
+                    entries: [
+                      {
+                        field: 'process.executable',
+                        operator: 'included',
+                        type: 'exact_caseless',
+                        value: 'C:\\Windows\\System32\\ping.exe',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const inputEntry: EntriesArray = [
+          {
+            field: 'process.executable.text',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\Windows\\System32\\ping.exe',
+          },
+        ];
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].entries = inputEntry;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_LIST_ID,
+        });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1');
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
+
+      test('it should overwrite user added `event.category` entry', () => {});
+      test('it should handle nested entries properly', () => {});
+      test('it should handle file name artifacts properly', () => {});
     });
   });
 

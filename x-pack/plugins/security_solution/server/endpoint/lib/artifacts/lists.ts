@@ -26,6 +26,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
   InternalArtifactCompleteSchema,
   TranslatedEntry,
@@ -36,6 +37,7 @@ import type {
   TranslatedEntryNestedEntry,
   TranslatedExceptionListItem,
   WrappedTranslatedExceptionList,
+  TranslatedEntriesOfDescendantOf,
 } from '../../schemas';
 import {
   translatedPerformantEntries as translatedPerformantEntriesType,
@@ -180,6 +182,29 @@ export function translateToEndpointExceptions(
             entrySet.add(entryHash);
           }
         });
+      } else if (isFilterProcessDescendantsEnabled(entry)) {
+        const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(
+          schemaVersion,
+          entry
+        ) as TranslatedEntriesOfDescendantOf;
+
+        const translatedItem: TranslatedExceptionListItem = {
+          type: entry.type,
+          entries: [
+            {
+              type: 'descendent_of',
+              value: {
+                entries: [translatedEntries],
+              },
+            },
+          ],
+        };
+
+        const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
+        if (!entrySet.has(entryHash)) {
+          entriesFiltered.push(translatedItem);
+          entrySet.add(entryHash);
+        }
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
         const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
