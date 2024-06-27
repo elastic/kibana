@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { debounce, takeEvery, takeLeading } from 'redux-saga/effects';
+import { debounce, call, takeLeading, put, select } from 'redux-saga/effects';
+import { selectOverviewTrends } from './selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchMonitorOverviewAction, quietFetchOverviewAction, trendStatsBatch } from './actions';
+import {
+  fetchMonitorOverviewAction,
+  quietFetchOverviewAction,
+  refreshOverviewTrends,
+  trendStatsBatch,
+} from './actions';
 import { fetchMonitorOverview, fetchOverviewTrendStats as trendsApi } from './api';
 
 export function* fetchMonitorOverviewEffect() {
@@ -23,9 +29,34 @@ export function* fetchMonitorOverviewEffect() {
 }
 
 export function* fetchOverviewTrendStats() {
-  console.log('in effect');
   yield takeLeading(
     trendStatsBatch.get,
     fetchEffectFactory(trendsApi, trendStatsBatch.success, trendStatsBatch.fail)
   );
+}
+
+// writing refresh logic
+export function* refreshOverviewTrendStats() {
+  yield takeLeading(refreshOverviewTrends.get, function* (): Generator<
+    unknown,
+    void,
+    Record<string, any>
+  > {
+    const trends: Record<string, any> = yield select(selectOverviewTrends);
+    let all = {};
+    const keys = Object.keys(trends);
+    do {
+      const res = yield call(
+        trendsApi,
+        keys.splice(0, keys.length < 10 ? keys.length : 10).map((key: string) => ({
+          configId: trends[key].configId,
+          locationId: trends[key].locationId,
+        }))
+      );
+      all = { ...all, ...res };
+    } while (keys.length);
+    if (Object.keys(all).length) {
+      yield put(trendStatsBatch.success(all));
+    }
+  });
 }
