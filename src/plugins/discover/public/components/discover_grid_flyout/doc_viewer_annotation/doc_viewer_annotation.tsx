@@ -16,6 +16,8 @@ import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { PLUGIN_ID } from '../../../../common';
 import { useDocViewerAnnotationContext } from './doc_viewer_annotation_context';
 
+const VISIBLE_SECTIONS = ['appearance'];
+
 export const DocViewerAnnotation: React.FC<DocViewRenderProps> = ({ dataView, hit }) => {
   const { docVisAnnotation, onDocVisAnnotationChanged } = useDocViewerAnnotationContext();
   const services = useDiscoverServices();
@@ -63,6 +65,7 @@ export const DocViewerAnnotation: React.FC<DocViewRenderProps> = ({ dataView, hi
         dataView={dataView}
         appName={PLUGIN_ID}
         queryInputServices={services}
+        sections={VISIBLE_SECTIONS}
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="flexEnd" direction="row" responsive={false}>
