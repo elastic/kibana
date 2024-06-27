@@ -79,7 +79,7 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV2Enabled: true,
 
   /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: false,
+  responseActionsSentinelOneGetFileEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
