@@ -6,49 +6,59 @@
  */
 
 import type OpenAI from 'openai';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { testHasEmbeddedConsole } from '../embedded_console';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { RoleCredentials } from '../../../../shared/services';
 import { createOpenAIConnector } from './utils/create_openai_connector';
-import { MachineLearningCommonAPIProvider } from '../../services/ml/common_api';
-
-import {
-  createLlmProxy,
-  LlmProxy,
-} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy, LlmProxy } from './utils/create_llm_proxy';
 
 const indexName = 'basic_index';
 const esArchiveIndex = 'test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
-export default function (ftrContext: FtrProviderContext) {
-  const { getService, getPageObjects } = ftrContext;
-  const pageObjects = getPageObjects(['common', 'searchPlayground']);
-  const commonAPI = MachineLearningCommonAPIProvider(ftrContext);
-  const supertest = getService('supertest');
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation', 'searchPlayground']);
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
-
   const log = getService('log');
   const browser = getService('browser');
-
   const createIndex = async () => await esArchiver.load(esArchiveIndex);
+  let roleAuthc: RoleCredentials;
 
-  let proxy: LlmProxy;
-  let removeOpenAIConnector: () => Promise<void>;
-  const createConnector = async () => {
-    removeOpenAIConnector = await createOpenAIConnector({
-      supertest,
-      requestHeader: commonAPI.getCommonRequestHeader(),
-      proxy,
-    });
-  };
+  describe('Serverless Playground Overview', function () {
+    // see details: https://github.com/elastic/kibana/issues/183893
+    this.tags(['failsOnMKI']);
 
-  describe('Playground', () => {
+    let removeOpenAIConnector: () => Promise<void>;
+    let createConnector: () => Promise<void>;
+    let proxy: LlmProxy;
+
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.common.navigateToApp('enterpriseSearchApplications/playground');
+      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonNavigation.sidenav.clickLink({
+        deepLinkId: 'searchPlayground',
+      });
+
+      const requestHeader = svlCommonApi.getInternalRequestHeader();
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      createConnector = async () => {
+        removeOpenAIConnector = await createOpenAIConnector({
+          supertest: supertestWithoutAuth,
+          requestHeader,
+          apiKeyHeader: roleAuthc.apiKeyHeader,
+          proxy,
+        });
+      };
     });
 
     after(async () => {
+      // await removeOpenAIConnector?.();
       await esArchiver.unload(esArchiveIndex);
       proxy.close();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('setup Page', () => {
@@ -94,7 +104,6 @@ export default function (ftrContext: FtrProviderContext) {
       describe('without any indices', () => {
         it('show no index callout', async () => {
           await pageObjects.searchPlayground.PlaygroundStartChatPage.expectNoIndexCalloutExists();
-          await pageObjects.searchPlayground.PlaygroundStartChatPage.expectCreateIndexButtonToExists();
         });
 
         it('hide no index callout when index added', async () => {
@@ -185,6 +194,10 @@ export default function (ftrContext: FtrProviderContext) {
         await esArchiver.unload(esArchiveIndex);
         await browser.refresh();
       });
+    });
+
+    it('has embedded console', async () => {
+      await testHasEmbeddedConsole(pageObjects);
     });
   });
 }
