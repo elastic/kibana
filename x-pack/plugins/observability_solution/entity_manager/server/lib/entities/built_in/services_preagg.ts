@@ -27,6 +27,7 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
     history: {
       timestampField: '@timestamp',
       interval: '1m',
+      lookbackPeriod: '5m',
     },
     latest: {
       lookback: '5m',
@@ -35,6 +36,8 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
     displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
     metadata: [
       'data_stream.type',
+      'service.environment',
+      'service.name',
       'service.namespace',
       'service.version',
       'service.runtime.name',
@@ -43,8 +46,6 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
       'cloud.provider',
       'cloud.availability_zone',
       'cloud.machine.type',
-      'service.name',
-      'service.environment',
     ],
     metrics: [
       {
@@ -61,7 +62,7 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
       },
       {
         name: 'throughput',
-        equation: 'A',
+        equation: 'A / 5',
         metrics: [
           {
             name: 'A',
@@ -95,23 +96,23 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: "error"',
+            filter: 'log.level: "error" OR error.log.level: "error"',
           },
           {
             name: 'B',
             aggregation: 'doc_count',
-            filter: 'log.level: *',
+            filter: 'log.level: * OR error.log.level: *',
           },
         ],
       },
       {
-        name: 'logRatePerMinute',
-        equation: 'A',
+        name: 'logRate',
+        equation: 'A / 5',
         metrics: [
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'log.level: "error"',
+            filter: 'log.level: "error" OR error.log.level: "error"',
           },
         ],
       },

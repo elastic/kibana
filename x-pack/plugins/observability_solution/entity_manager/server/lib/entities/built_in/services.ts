@@ -26,6 +26,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   history: {
     timestampField: '@timestamp',
     interval: '1m',
+    lookbackPeriod: '5m',
   },
   latest: {
     lookback: '5m',
@@ -34,6 +35,8 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
   metadata: [
     'data_stream.type',
+    'service.environment',
+    'service.name',
     'service.namespace',
     'service.version',
     'service.runtime.name',
@@ -42,8 +45,6 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     'cloud.provider',
     'cloud.availability_zone',
     'cloud.machine.type',
-    'service.name',
-    'service.environment',
   ],
   metrics: [
     {
@@ -60,7 +61,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     },
     {
       name: 'throughput',
-      equation: 'A',
+      equation: 'A / 5',
       metrics: [
         {
           name: 'A',
@@ -102,8 +103,8 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
       ],
     },
     {
-      name: 'logRatePerMinute',
-      equation: 'A',
+      name: 'logRate',
+      equation: 'A / 5',
       metrics: [
         {
           name: 'A',
