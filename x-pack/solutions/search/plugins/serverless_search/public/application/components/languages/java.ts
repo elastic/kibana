@@ -21,7 +21,7 @@ export const javaDefinition: LanguageDefinition = {
   // Code Snippets,
   installClient: `dependencies {
     implementation 'co.elastic.clients:elasticsearch-java-serverless:1.0.0-20231031'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
 }`,
   configureClient: ({ apiKey, url }) => `// URL and API key
 String serverUrl = "${url}";
