@@ -143,9 +143,7 @@ export const DiffableEsqlFields = buildSchema({
   },
   // this is a new type of rule, no prebuilt rules created yet.
   // new properties might be added here during further rule type development
-  optional: {
-    name: RuleName,
-  },
+  optional: {},
 });
 
 export type DiffableThreatMatchFields = z.infer<typeof DiffableThreatMatchFields>;
