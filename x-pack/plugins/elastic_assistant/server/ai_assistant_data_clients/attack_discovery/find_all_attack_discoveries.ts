@@ -10,7 +10,7 @@ import { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { EsAttackDiscoverySchema } from './types';
 import { transformESSearchToAttackDiscovery } from './transforms';
-
+const MAX_ITEMS = 10000;
 export interface FindAllAttackDiscoveriesParams {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -49,6 +49,7 @@ export const findAllAttackDiscoveries = async ({
           must: [...filterByUser],
         },
       },
+      size: MAX_ITEMS,
       _source: true,
       ignore_unavailable: true,
       index: attackDiscoveryIndex,
