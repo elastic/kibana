@@ -76,6 +76,7 @@ describe('ManageAgentPoliciesModal', () => {
         selectedAgentPolicies={policies}
         packagePolicyId="integration1"
         onClose={mockOnClose}
+        onAgentPoliciesChange={jest.fn()}
       />
     );
 

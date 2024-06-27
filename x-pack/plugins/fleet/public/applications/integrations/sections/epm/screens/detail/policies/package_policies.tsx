@@ -238,6 +238,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
               <MultipleAgentPoliciesSummaryLine
                 policies={agentPolicies}
                 packagePolicyId={packagePolicy.id}
+                onAgentPoliciesChange={refreshPolicies}
               />
             ) : (
               <AgentPolicySummaryLine policy={agentPolicies[0]} />
@@ -329,6 +330,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
       canAddFleetServers,
       canAddAgents,
       showAddAgentHelpForPackagePolicyId,
+      refreshPolicies,
     ]
   );
 

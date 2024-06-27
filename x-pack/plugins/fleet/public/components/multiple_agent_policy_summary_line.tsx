@@ -37,7 +37,8 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
   policies: AgentPolicy[];
   direction?: 'column' | 'row';
   packagePolicyId: string;
-}>(({ policies, direction = 'row', packagePolicyId }) => {
+  onAgentPoliciesChange: () => void;
+}>(({ policies, direction = 'row', packagePolicyId, onAgentPoliciesChange }) => {
   const { getHref } = useLink();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const closePopover = () => setIsPopoverOpen(false);
@@ -183,6 +184,7 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
       {policiesModalEnabled && (
         <ManageAgentPoliciesModal
           onClose={() => setPoliciesModalEnabled(false)}
+          onAgentPoliciesChange={onAgentPoliciesChange}
           selectedAgentPolicies={policies}
           packagePolicyId={packagePolicyId}
         />

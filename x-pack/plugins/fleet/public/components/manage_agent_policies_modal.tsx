@@ -30,12 +30,14 @@ interface Props {
   onClose: () => void;
   selectedAgentPolicies: AgentPolicy[];
   packagePolicyId: string;
+  onAgentPoliciesChange: () => void;
 }
 
 export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
   onClose,
   selectedAgentPolicies,
   packagePolicyId,
+  onAgentPoliciesChange,
 }) => {
   const initialPolicyIds = selectedAgentPolicies.map((policy) => policy.id);
 
@@ -66,6 +68,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
     });
     setIsSubmitting(false);
     if (!error) {
+      onAgentPoliciesChange();
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.fleet.manageAgentPolicies.updatedNotificationTitle', {
           defaultMessage: `Successfully updated ''{packagePolicyName}''`,

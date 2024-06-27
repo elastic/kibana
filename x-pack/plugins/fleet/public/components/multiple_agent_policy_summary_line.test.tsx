@@ -20,7 +20,11 @@ describe('MultipleAgentPolicySummaryLine', () => {
 
   const render = (agentPolicies: AgentPolicy[]) =>
     testRenderer.render(
-      <MultipleAgentPoliciesSummaryLine policies={agentPolicies} packagePolicyId="policy1" />
+      <MultipleAgentPoliciesSummaryLine
+        policies={agentPolicies}
+        packagePolicyId="policy1"
+        onAgentPoliciesChange={jest.fn()}
+      />
     );
 
   beforeEach(() => {
