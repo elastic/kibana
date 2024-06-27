@@ -314,12 +314,16 @@ export const ActionsLogExpandedTray = memo<{
         description: (
           // codeblock for output
           <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-            <OutputContent action={action} data-test-subj={dataTestSubj} fromAlertWorkaround />
+            <OutputContent
+              action={action}
+              data-test-subj={dataTestSubj}
+              fromAlertWorkaround={fromAlertWorkaround}
+            />
           </StyledEuiCodeBlock>
         ),
       },
     ],
-    [action, dataTestSubj, getTestId]
+    [action, dataTestSubj, fromAlertWorkaround, getTestId]
   );
 
   return (
