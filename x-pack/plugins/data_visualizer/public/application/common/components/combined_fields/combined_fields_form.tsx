@@ -179,7 +179,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
     );
 
     const semanticTextLabel = i18n.translate(
-      'xpack.dataVisualizer.file.geoPointForm.combinedFieldLabel',
+      'xpack.dataVisualizer.file.semanticTextForm.combinedFieldLabel',
       {
         defaultMessage: 'Add semantic text field',
       }

@@ -114,7 +114,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       <EuiSpacer size="s" />
 
       <EuiFormRow
-        label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.latFieldLabel', {
+        label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.fieldLabel', {
           defaultMessage: 'Field',
         })}
       >
@@ -127,7 +127,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
       {renameToFieldOption !== null ? (
         <EuiFormRow
-          label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.latFieldLabel', {
+          label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.copyFieldLabel', {
             defaultMessage: 'Copy to field',
           })}
         >
@@ -141,7 +141,7 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
       ) : null}
 
       <EuiFormRow
-        label={i18n.translate('xpack.dataVisualizer.file.geoPointForm.lonFieldLabel', {
+        label={i18n.translate('xpack.dataVisualizer.file.semanticTextForm.inferenceLabel', {
           defaultMessage: 'Inference service',
         })}
       >
