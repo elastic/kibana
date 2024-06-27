@@ -54,12 +54,7 @@ export class SamlSessionManager {
     this.isCloud = options.isCloud;
     this.log = options.log;
     // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
-    let rolesFile: string;
-    if (process.env.ROLES_FILENAME_OVERRIDE) {
-      rolesFile = process.env.ROLES_FILENAME_OVERRIDE;
-    } else {
-      rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
-    }
+    const rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
     this.log.info(`Using the file ${rolesFile} for the role users`);
     this.userRoleFilePath = resolve(REPO_ROOT, '.ftr', rolesFile);
     const hostOptionsWithoutAuth = {
