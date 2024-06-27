@@ -7,7 +7,7 @@
 
 import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import * as k8s from '@kubernetes/client-node';
-import { rendezvousHash } from './rendezvous_hash';
+import { getPodPartitions } from './get_pod_partitions';
 
 function range(start: number, end: number) {
   const nums: number[] = [];
@@ -81,7 +81,7 @@ export class TaskPartitioner {
     }
 
     const allPodNames = await this.getAllPodNames();
-    const podPartitions = rendezvousHash(this.podName, allPodNames, this.allPartitions, 2);
+    const podPartitions = getPodPartitions(this.podName, allPodNames, this.allPartitions, 2);
     return podPartitions;
   }
 
