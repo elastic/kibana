@@ -23,8 +23,6 @@ interface EndpointResponseActionResultsProps {
   ruleName?: string;
 }
 
-// FIXME:PT move this to `/endpoint/`
-
 export const EndpointResponseActionResults = ({
   action,
   ruleName,
