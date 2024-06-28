@@ -129,7 +129,6 @@ export const MultiSelectFilter = ({
           searchable
           searchProps={{
             placeholder: buttonLabel,
-            compressed: false,
           }}
           emptyMessage="No options"
           onChange={_onChange}

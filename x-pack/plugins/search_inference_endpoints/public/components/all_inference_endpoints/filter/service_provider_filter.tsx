@@ -23,7 +23,7 @@ const options = mapToMultiSelectOption(
   Object.fromEntries(Object.entries(SERVICE_PROVIDERS).map(([key, { name }]) => [key, name]))
 );
 
-export const ProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
+export const ServiceProviderFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
   const onSystemFilterChange = ({
     filterId,
     selectedOptionKeys,

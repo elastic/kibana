@@ -138,7 +138,7 @@ export const ENDPOINT = i18n.translate('xpack.searchInferenceEndpoints.endpoint'
 });
 
 export const SERVICE_PROVIDER = i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
-  defaultMessage: 'Provider',
+  defaultMessage: 'Service',
 });
 
 export const TASK_TYPE = i18n.translate('xpack.searchInferenceEndpoints.taskType', {

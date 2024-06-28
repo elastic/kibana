@@ -19,6 +19,6 @@ export const CONFIRM_DELETE_WARNING = i18n.translate(
   'xpack.searchInferenceEndpoints.confirmDeleteEndpoint.confirmQuestion',
   {
     defaultMessage:
-      'Deleting an active endpoint will cause operations targeting associated semantic_text fields to fail.',
+      'Deleting an active endpoint will cause operations targeting associated semantic_text fields and and inference pipelines to fail.',
   }
 );

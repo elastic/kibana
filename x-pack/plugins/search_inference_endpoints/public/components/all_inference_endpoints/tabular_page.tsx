@@ -17,7 +17,7 @@ import { DeploymentStatusEnum } from './types';
 
 import { useAllInferenceEndpointsState } from '../../hooks/use_all_inference_endpoints_state';
 import { EndpointsTable } from './endpoints_table';
-import { ProviderFilter } from './filter/provider_filter';
+import { ServiceProviderFilter } from './filter/service_provider_filter';
 import { TaskTypeFilter } from './filter/task_type_filter';
 import { TableSearch } from './search/table_search';
 import { useTableColumns } from './render_table_columns/table_columns';
@@ -105,7 +105,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
             <TableSearch searchKey={searchKey} setSearchKey={setSearchKey} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ProviderFilter
+            <ServiceProviderFilter
               optionKeys={filterOptions.provider}
               onChange={onFilterChangedCallback}
             />
