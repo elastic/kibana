@@ -18,6 +18,7 @@
     "@kbn/management-plugin",
     "@kbn/features-plugin",
     "@kbn/share-plugin",
+    "@kbn/airdrop-plugin",
     // optional plugins
     "@kbn/cloud-plugin",
     "@kbn/usage-collection-plugin",
@@ -39,6 +40,7 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/index-management",
     "@kbn/react-kibana-context-render",
+    "@kbn/airdrops",
   ],
   "exclude": [
     "target/**/*",

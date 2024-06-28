@@ -26,7 +26,9 @@ import {
   EuiPageHeader,
   EuiTimeline,
 } from '@elastic/eui';
+import { AirdropDragButton, useOnDrop } from '@kbn/airdrops';
 
+import type { SerializedPolicy } from '../../../../common/types';
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
 import { UseField } from './form';
@@ -53,6 +55,8 @@ import { useEditPolicyContext } from './edit_policy_context';
 import { FormInternal } from './types';
 
 const policyNamePath = 'name';
+
+console.log(AirdropDragButton);
 
 export const EditPolicy: React.FunctionComponent = () => {
   useEffect(() => {
@@ -168,6 +172,16 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
+          // <AirdropDragButton<SerializedPolicy>
+          //   content={{
+          //     id: 'edit_policy',
+          //     get: () => {
+          //       const _formData = form.getFormData();
+          //       console.log(_formData);
+          //       return _formData;
+          //     },
+          //   }}
+          // />,
           <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"

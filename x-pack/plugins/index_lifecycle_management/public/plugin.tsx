@@ -49,7 +49,7 @@ export class IndexLifecycleManagementPlugin
         title: PLUGIN.TITLE,
         order: 2,
         mount: async ({ element, history, setBreadcrumbs }) => {
-          const [coreStart, { licensing }] = await getStartServices();
+          const [coreStart, { licensing, airdrop }] = await getStartServices();
           const {
             chrome: { docTitle },
             application,
@@ -57,6 +57,7 @@ export class IndexLifecycleManagementPlugin
             executionContext,
           } = coreStart;
 
+          console.log('airdrop', airdrop);
           const license = await firstValueFrom(licensing.license$);
 
           docTitle.change(PLUGIN.TITLE);
@@ -73,6 +74,7 @@ export class IndexLifecycleManagementPlugin
             license,
             docLinks,
             executionContext,
+            airdrop,
             cloud
           );
 
