@@ -5296,10 +5296,6 @@
               "path": "x-pack/plugins/actions/server/plugin.ts"
             },
             {
-              "plugin": "data",
-              "path": "src/plugins/data/server/search/session/session_service.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
@@ -5488,67 +5484,7 @@
             },
             {
               "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/services/security/security.ts"
-            },
-            {
-              "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/services/api_keys/transform_api_keys.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
             },
             {
               "plugin": "fleet",
@@ -5557,10 +5493,6 @@
             {
               "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/settings/index.ts"
             },
             {
               "plugin": "cloudDefend",
