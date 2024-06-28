@@ -191,31 +191,10 @@ export function translateToEndpointExceptions(
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
         isFilterProcessDescendantsEnabled(entry)
       ) {
-        const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
-          ...entry,
-          entries: [
-            ...entry.entries,
-            {
-              field: 'event.category',
-              operator: 'included',
-              type: 'match',
-              value: 'process',
-            },
-          ],
-        }) as TranslatedEntriesOfDescendantOf;
-
-        const translatedItem: TranslatedExceptionListItem = {
-          type: entry.type,
-          entries: [
-            {
-              operator: 'included',
-              type: 'descendent_of',
-              value: {
-                entries: [translatedEntries],
-              },
-            },
-          ],
-        };
+        const translatedItem: TranslatedExceptionListItem = translateProcessDescendantEventFilter(
+          schemaVersion,
+          entry
+        );
 
         const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
         if (!entrySet.has(entryHash)) {
@@ -236,6 +215,36 @@ export function translateToEndpointExceptions(
   } else {
     throw new Error('unsupported schemaVersion');
   }
+}
+
+function translateProcessDescendantEventFilter(
+  schemaVersion: string,
+  entry: ExceptionListItemSchema
+): TranslatedExceptionListItem {
+  const additionalEntry: ExceptionListItemSchema['entries'][number] = {
+    field: 'event.category',
+    operator: 'included',
+    type: 'match',
+    value: 'process',
+  };
+
+  const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
+    ...entry,
+    entries: [...entry.entries, additionalEntry],
+  }) as TranslatedEntriesOfDescendantOf;
+
+  return {
+    type: entry.type,
+    entries: [
+      {
+        operator: 'included',
+        type: 'descendent_of',
+        value: {
+          entries: [translatedEntries],
+        },
+      },
+    ],
+  };
 }
 
 function getMatcherFunction({
