@@ -99,7 +99,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         await esTestIndexTool.waitForDocs(source, 'rule-starting-2');
 
         log(`ad-hoc update the alert doc`);
-        await adHocUpdate(es, aadIndex, initialDocs[0]._id);
+        await adHocUpdate(es, aadIndex, initialDocs[0]._id!);
 
         log(`signal the rule to finish`);
         await esTestIndexTool.indexDoc(source, 'rule-complete-2');
@@ -157,8 +157,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         await esTestIndexTool.waitForDocs(source, 'rule-starting-2');
 
         log(`ad-hoc update the 2nd and 4th alert docs`);
-        await adHocUpdate(es, aadIndex, initialDocs[1]._id);
-        await adHocUpdate(es, aadIndex, initialDocs[3]._id);
+        await adHocUpdate(es, aadIndex, initialDocs[1]._id!);
+        await adHocUpdate(es, aadIndex, initialDocs[3]._id!);
 
         log(`signal the rule to finish`);
         await esTestIndexTool.indexDoc(source, 'rule-complete-2');
@@ -287,6 +287,8 @@ const SkipFields = [
   'kibana.alert.workflow_tags',
   'kibana.alert.workflow_status',
   'kibana.alert.consecutive_matches',
+  'kibana.alert.severity_improving',
+  'kibana.alert.previous_action_group',
 ];
 
 function log(message: string) {
