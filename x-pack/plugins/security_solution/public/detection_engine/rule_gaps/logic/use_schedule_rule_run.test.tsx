@@ -60,4 +60,48 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
       })
     );
   });
+
+  it('should call reportManualRuleRunExecute with success status on success', async () => {
+    const { result, waitFor } = renderHook(() => useScheduleRuleRun(), {
+      wrapper: TestProviders,
+    });
+
+    const timeRange = { startDate: moment().subtract(1, 'd'), endDate: moment() };
+    mockUseScheduleRuleRunMutation.mockResolvedValueOnce([{ id: 'rule-1' }]);
+
+    act(() => {
+      result.current.scheduleRuleRun({ ruleIds: ['rule-1'], timeRange });
+    });
+
+    await waitFor(() => {
+      return mockUseScheduleRuleRunMutation.mock.calls.length > 0;
+    });
+
+    expect(mockedUseKibana.services.telemetry.reportManualRuleRunExecute).toHaveBeenCalledWith({
+      rangeInMs: timeRange.endDate.diff(timeRange.startDate),
+      status: 'success',
+    });
+  });
+
+  it('should call reportManualRuleRunExecute with error status on failure', async () => {
+    const { result, waitFor } = renderHook(() => useScheduleRuleRun(), {
+      wrapper: TestProviders,
+    });
+
+    const timeRange = { startDate: moment().subtract(1, 'd'), endDate: moment() };
+    mockUseScheduleRuleRunMutation.mockRejectedValueOnce(new Error('Error scheduling rule run'));
+
+    act(() => {
+      result.current.scheduleRuleRun({ ruleIds: ['rule-1'], timeRange });
+    });
+
+    await waitFor(() => {
+      return mockUseScheduleRuleRunMutation.mock.calls.length > 0;
+    });
+
+    expect(mockedUseKibana.services.telemetry.reportManualRuleRunExecute).toHaveBeenCalledWith({
+      rangeInMs: timeRange.endDate.diff(timeRange.startDate),
+      status: 'error',
+    });
+  });
 });
