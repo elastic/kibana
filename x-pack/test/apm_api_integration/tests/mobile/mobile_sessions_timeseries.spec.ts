@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       await generateMobileData({
         apmSynthtraceEsClient,
-        sptart,
+        start,
         end,
       });
     });
