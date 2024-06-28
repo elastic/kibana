@@ -62,7 +62,9 @@ export class IntegrationAssistantPlugin
 
     return {
       setIsAvailable: (isAvailable: boolean) => {
-        this.isAvailable = isAvailable;
+        if (!isAvailable) {
+          this.isAvailable = false;
+        }
       },
     };
   }

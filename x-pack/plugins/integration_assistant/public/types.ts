@@ -11,15 +11,28 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CreateIntegrationComponent } from './components/create_integration/types';
 import type { CreateIntegrationCardButtonComponent } from './components/create_integration_card_button/types';
-import type { UpsellingPage } from './services';
+import type { RenderUpselling } from './services';
 
-export interface IntegrationAssistantPluginSetup {
-  renderUpsellingComponent: (UpsellingPage: UpsellingPage) => void;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IntegrationAssistantPluginSetup {}
 
 export interface IntegrationAssistantPluginStart {
-  CreateIntegration: CreateIntegrationComponent;
-  CreateIntegrationCardButton: CreateIntegrationCardButtonComponent;
+  components: {
+    /**
+     * Component that allows the user to create an integration.
+     */
+    CreateIntegration: CreateIntegrationComponent;
+    /**
+     * Component that links the user to the create integration component.
+     */
+    CreateIntegrationCardButton: CreateIntegrationCardButtonComponent;
+  };
+  /**
+   * Sets the upselling to be rendered in the UI.
+   * If defined, the section will be displayed and it will prevent
+   * the user from interacting with the rest of the UI.
+   */
+  renderUpselling: (upselling: RenderUpselling | undefined) => void;
 }
 
 export interface IntegrationAssistantPluginSetupDependencies {

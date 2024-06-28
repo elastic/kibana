@@ -46,7 +46,7 @@ export const DefaultLayout: React.FC<Props> = memo(
       },
     ];
 
-    const CreateIntegrationCardButton = integrationAssistant?.CreateIntegrationCardButton;
+    const { CreateIntegrationCardButton } = integrationAssistant?.components ?? {};
 
     return (
       <WithHeaderLayout

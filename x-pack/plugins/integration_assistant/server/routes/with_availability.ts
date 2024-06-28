@@ -23,9 +23,9 @@ export const withAvailability = <
 ): RequestHandler<P, Q, B, IntegrationAssistantRouteHandlerContext, Method> => {
   return async (context, req, res) => {
     const { isAvailable } = await context.integrationAssistant;
-    if (!isAvailable) {
+    if (!isAvailable()) {
       return res.notFound({
-        body: { message: 'This API route is not available using the current product.' },
+        body: { message: 'This API route is not available using your current license/tier.' },
       });
     }
     return handler(context, req, res);
