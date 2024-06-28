@@ -8,7 +8,6 @@ import * as t from 'io-ts';
 import { EntityServiceListItem } from '../../../../common/entities/types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../../default_api_types';
 import { getServiceEntities } from './get_service_entities';
@@ -24,12 +23,8 @@ const servicesEntitiesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   async handler(resources): Promise<EntityServicesResponse> {
-    const { context, params, request, plugins } = resources;
-    const [coreContext] = await Promise.all([
-      context.core,
-      getApmEventClient(resources),
-      plugins.logsDataAccess.start(),
-    ]);
+    const { context, params, request } = resources;
+    const coreContext = await context.core;
 
     const entitiesESClient = await createEntitiesESClient({
       request,

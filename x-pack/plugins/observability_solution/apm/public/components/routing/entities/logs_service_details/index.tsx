@@ -14,11 +14,9 @@ import { LogsServiceTemplate } from '../../templates/entities/logs_service_templ
 import { offsetRt } from '../../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../../common/environment_rt';
-import { RedirectToDefaultServiceRouteView } from '../../service_detail/redirect_to_default_service_route_view';
 import { ApmTimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
 import { ServiceDashboards } from '../../../app/service_dashboards';
 import { ServiceLogs } from '../../../app/service_logs';
-import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import { LogsServiceOverview } from '../../../app/entities/logs/logs_service_overview';
 
 export function page({
@@ -110,10 +108,6 @@ export const logsServiceDetailsRoute = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-            device: t.string,
-            osVersion: t.string,
-            appVersion: t.string,
-            netConnectionType: t.string,
           }),
         }),
       },
@@ -140,7 +134,7 @@ export const logsServiceDetailsRoute = {
           title: i18n.translate('xpack.apm.views.dashboard.title', {
             defaultMessage: 'Dashboards',
           }),
-          element: <ServiceDashboards />,
+          element: <ServiceDashboards checkForEntities />,
           searchBarOptions: {
             showUnifiedSearchBar: false,
           },
