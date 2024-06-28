@@ -14,6 +14,8 @@ import type { AgentPolicy } from '../types';
 
 import { usePackagePolicyWithRelatedData } from '../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks';
 
+import { useGetAgentPolicies } from '../hooks';
+
 import { ManageAgentPoliciesModal } from './manage_agent_policies_modal';
 
 jest.mock('../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks', () => ({
@@ -37,15 +39,7 @@ jest.mock('../hooks', () => ({
       },
     },
   }),
-  useGetAgentPolicies: jest.fn().mockReturnValue({
-    data: {
-      items: [
-        { name: 'Test policy', revision: 2, id: 'policy1' },
-        { name: 'Test policy 2', revision: 1, id: 'policy2' },
-      ] as AgentPolicy[],
-    },
-    isLoading: false,
-  }),
+  useGetAgentPolicies: jest.fn(),
   useGetPackagePolicies: jest.fn().mockReturnValue({
     data: {
       items: [{ name: 'Integration 1', revision: 2, id: 'integration1', policy_ids: ['policy1'] }],
@@ -68,12 +62,12 @@ jest.mock('../hooks', () => ({
 describe('ManageAgentPoliciesModal', () => {
   let testRenderer: TestRenderer;
   const mockOnClose = jest.fn();
-  const policies = [{ name: 'Test policy', revision: 2, id: 'policy1' }] as AgentPolicy[];
+  const mockPolicies = [{ name: 'Test policy', revision: 2, id: 'policy1' }] as AgentPolicy[];
 
-  const render = () =>
+  const render = (policies?: AgentPolicy[]) =>
     testRenderer.render(
       <ManageAgentPoliciesModal
-        selectedAgentPolicies={policies}
+        selectedAgentPolicies={policies || mockPolicies}
         packagePolicyId="integration1"
         onClose={mockOnClose}
         onAgentPoliciesChange={jest.fn()}
@@ -82,6 +76,16 @@ describe('ManageAgentPoliciesModal', () => {
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
+
+    (useGetAgentPolicies as jest.Mock).mockReturnValue({
+      data: {
+        items: [
+          { name: 'Test policy', revision: 2, id: 'policy1' },
+          { name: 'Test policy 2', revision: 1, id: 'policy2' },
+        ] as AgentPolicy[],
+      },
+      isLoading: false,
+    });
   });
 
   it('should update policy on submit', async () => {
@@ -95,6 +99,41 @@ describe('ManageAgentPoliciesModal', () => {
     await act(async () => {
       results.getByTestId('comboBoxToggleListButton').click();
     });
+    await act(async () => {
+      results.getByText('Test policy 2').click();
+    });
+    expect(results.getByText('Confirm').getAttribute('disabled')).toBeNull();
+    await act(async () => {
+      results.getByText('Confirm').click();
+    });
+    expect(usePackagePolicyWithRelatedData('', {}).savePackagePolicy).toHaveBeenCalledWith({
+      policy_ids: ['policy1', 'policy2'],
+    });
+  });
+
+  it('should keep managed policy when policies are changed', async () => {
+    (useGetAgentPolicies as jest.Mock).mockReturnValue({
+      data: {
+        items: [
+          { name: 'Test policy', revision: 2, id: 'policy1', is_managed: true },
+          { name: 'Test policy 2', revision: 1, id: 'policy2' },
+        ] as AgentPolicy[],
+      },
+      isLoading: false,
+    });
+    const results = render([
+      { name: 'Test policy', revision: 2, id: 'policy1', is_managed: true },
+    ] as AgentPolicy[]);
+
+    expect(results.queryByTestId('manageAgentPoliciesModal')).toBeInTheDocument();
+    expect(results.getByTestId('integrationNameText').textContent).toEqual(
+      'Integration: Integration 1'
+    );
+
+    await act(async () => {
+      results.getByTestId('comboBoxToggleListButton').click();
+    });
+    expect(results.queryByText('Test policy')).toBeNull();
     await act(async () => {
       results.getByText('Test policy 2').click();
     });
