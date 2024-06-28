@@ -30,6 +30,38 @@ export const createNote = async ({ note }: { note: BareNote }) => {
   }
 };
 
+export const fetchNotes = async ({
+  page,
+  perPage,
+  sortField,
+  sortOrder,
+  filter,
+  search,
+}: {
+  page: number;
+  perPage: number;
+  sortField: string;
+  sortOrder: string;
+  filter: string;
+  search: string;
+}) => {
+  const response = await KibanaServices.get().http.get<{ totalCount: number; notes: Note[] }>(
+    NOTE_URL,
+    {
+      query: {
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+        filter,
+        search,
+      },
+      version: '2023-10-31',
+    }
+  );
+  return response;
+};
+
 // TODO point to the correct API when it is available
 /**
  * Fetches all the notes for a document id

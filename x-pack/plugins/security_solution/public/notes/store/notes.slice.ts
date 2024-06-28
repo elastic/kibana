@@ -13,6 +13,7 @@ import {
   createNote as createNoteApi,
   deleteNote as deleteNoteApi,
   fetchNotesByDocumentId as fetchNotesByDocumentIdApi,
+  fetchNotes as fetchNotesApi,
 } from '../api/api';
 import type { NormalizedEntities, NormalizedEntity } from './normalize';
 import { normalizeEntities, normalizeEntity } from './normalize';
@@ -35,12 +36,26 @@ export interface NotesState extends EntityState<Note> {
     fetchNotesByDocumentId: ReqStatus;
     createNote: ReqStatus;
     deleteNote: ReqStatus;
+    fetchNotes: ReqStatus;
   };
   error: {
     fetchNotesByDocumentId: SerializedError | HttpError | null;
     createNote: SerializedError | HttpError | null;
     deleteNote: SerializedError | HttpError | null;
+    fetchNotes: SerializedError | HttpError | null;
   };
+  pagination: {
+    page: number;
+    perPage: number;
+    total: number;
+  };
+  sort: {
+    field: string;
+    order: string;
+  };
+  filter: string;
+  search: string;
+  selectedIds: string[];
 }
 
 const notesAdapter = createEntityAdapter<Note>({
@@ -52,12 +67,26 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
     fetchNotesByDocumentId: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
     deleteNote: ReqStatus.Idle,
+    fetchNotes: ReqStatus.Idle,
   },
   error: {
     fetchNotesByDocumentId: null,
     createNote: null,
     deleteNote: null,
+    fetchNotes: null,
   },
+  pagination: {
+    page: 1,
+    perPage: 10,
+    total: 0,
+  },
+  sort: {
+    field: '@timestamp',
+    order: 'desc',
+  },
+  filter: '',
+  search: '',
+  selectedIds: [],
 });
 
 export const fetchNotesByDocumentId = createAsyncThunk<
@@ -67,6 +96,22 @@ export const fetchNotesByDocumentId = createAsyncThunk<
 >('notes/fetchNotesByDocumentId', async (args) => {
   const { documentId } = args;
   const res = await fetchNotesByDocumentIdApi(documentId);
+  return normalizeEntities(res.notes);
+});
+
+export const fetchNotes = createAsyncThunk<
+  NormalizedEntities<Note>,
+  {
+    page: number;
+    perPage: number;
+    sortField: string;
+    sortOrder: string;
+    filter: string;
+    search: string;
+  },
+  {}
+>('notes/fetchNotes', async (args) => {
+  const res = await fetchNotesApi(args);
   return normalizeEntities(res.notes);
 });
 
@@ -91,7 +136,30 @@ export const deleteNote = createAsyncThunk<string, { id: string }, {}>(
 const notesSlice = createSlice({
   name: 'notes',
   initialState: initialNotesState,
-  reducers: {},
+  reducers: {
+    userSelectedPage: (state, action) => {
+      state.pagination.page = action.payload;
+    },
+    userSelectedPerPage: (state, action) => {
+      state.pagination.perPage = action.payload;
+    },
+    userSortedNotes: (state, action) => {
+      state.sort = action.payload;
+    },
+    userFilteredNotes: (state, action) => {
+      state.filter = action.payload;
+    },
+    userSearchedNotes: (state, action) => {
+      state.search = action.payload;
+    },
+    userSelectedRow: (state, action) => {
+      if (state.selectedIds.includes(action.payload)) {
+        state.selectedIds.push(action.payload);
+      } else {
+        state.selectedIds = state.selectedIds.filter((id) => id !== action.payload);
+      }
+    },
+  },
   extraReducers(builder) {
     builder
       .addCase(fetchNotesByDocumentId.pending, (state) => {
@@ -126,6 +194,17 @@ const notesSlice = createSlice({
       .addCase(deleteNote.rejected, (state, action) => {
         state.status.deleteNote = ReqStatus.Failed;
         state.error.deleteNote = action.payload ?? action.error;
+      })
+      .addCase(fetchNotes.pending, (state) => {
+        state.status.fetchNotes = ReqStatus.Loading;
+      })
+      .addCase(fetchNotes.fulfilled, (state, action) => {
+        notesAdapter.setAll(state, action.payload.entities.notes);
+        state.status.fetchNotes = ReqStatus.Succeeded;
+      })
+      .addCase(fetchNotes.rejected, (state, action) => {
+        state.status.fetchNotes = ReqStatus.Failed;
+        state.error.fetchNotes = action.payload ?? action.error;
       });
   },
 });
@@ -152,7 +231,21 @@ export const selectDeleteNoteStatus = (state: State) => state.notes.status.delet
 
 export const selectDeleteNoteError = (state: State) => state.notes.error.deleteNote;
 
+export const selectNotesPagination = (state: State) => state.notes.pagination;
+
+export const selectNotesTableSort = (state: State) => state.notes.sort;
+
+export const selectNotesTableTotalItems = (state: State) => state.notes.pagination.total;
+
 export const selectNotesByDocumentId = createSelector(
   [selectAllNotes, (state, documentId) => documentId],
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
 );
+
+export const {
+  userSelectedPage,
+  userSelectedPerPage,
+  userSortedNotes,
+  userFilteredNotes,
+  userSearchedNotes,
+} = notesSlice.actions;
