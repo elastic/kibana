@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import { reduce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -89,102 +90,123 @@ const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
   overflow-y: auto;
 `;
 
-const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-subj'?: string }>(
-  ({ action, 'data-test-subj': dataTestSubj }) => {
-    const getTestId = useTestIdGenerator(dataTestSubj);
+const OutputContent = memo<{
+  action: MaybeImmutable<ActionDetails>;
+  fromAlertWorkaround?: boolean;
+  'data-test-subj'?: string;
+}>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
+  const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const {
-      canWriteFileOperations,
-      canReadActionsLogManagement,
-      canAccessEndpointActionsLogManagement,
-    } = useUserPrivileges().endpointPrivileges;
+  const {
+    canWriteFileOperations,
+    canReadActionsLogManagement,
+    canAccessEndpointActionsLogManagement,
+  } = useUserPrivileges().endpointPrivileges;
 
-    const { command: _command, isCompleted, isExpired, wasSuccessful } = action;
-    const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
+  const { command: _command, isCompleted, isExpired, wasSuccessful } = action;
+  const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
 
-    if (isExpired) {
-      return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
-    }
-
-    if (!isCompleted) {
-      return <>{OUTPUT_MESSAGES.isPending(command)}</>;
-    }
-
-    if (!wasSuccessful) {
-      return (
-        <>
-          {OUTPUT_MESSAGES.hasFailed(command)}
-          <EuiSpacer size="s" />
-          <EndpointActionFailureMessage
-            action={action}
-            data-test-subj={getTestId('failureMessage')}
-          />
-        </>
-      );
-    }
-
-    if (isGetFileAction(action)) {
-      return (
-        <>
-          {OUTPUT_MESSAGES.wasSuccessful(command)}
-          <ResponseActionFileDownloadLink
-            action={action}
-            canAccessFileDownloadLink={canWriteFileOperations}
-            textSize="xs"
-            data-test-subj={getTestId('getFileDownloadLink')}
-          />
-        </>
-      );
-    }
-
-    if (isExecuteAction(action)) {
-      return (
-        <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
-          {action.agents.map((agentId) => (
-            <div key={agentId}>
-              {OUTPUT_MESSAGES.wasSuccessful(command)}
-              <ExecuteActionHostResponse
-                action={action}
-                agentId={agentId}
-                canAccessFileDownloadLink={
-                  canAccessEndpointActionsLogManagement || canReadActionsLogManagement
-                }
-                textSize="xs"
-                data-test-subj={getTestId('actionsLogTray')}
-              />
-            </div>
-          ))}
-        </EuiFlexGroup>
-      );
-    }
-
-    if (isUploadAction(action)) {
-      return (
-        <EuiFlexGroup direction="column" data-test-subj={getTestId('uploadDetails')}>
-          <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
-
-          <EndpointUploadActionResult
-            action={action}
-            data-test-subj={getTestId('uploadOutput')}
-            textSize="xs"
-          />
-        </EuiFlexGroup>
-      );
-    }
-
-    if (action.agentType === 'crowdstrike') {
-      return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
-    }
-    return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
+  // FIXME:PT remove once automated response actions are corrected to use `ActionDetails` (team issue 9822)
+  if (fromAlertWorkaround && action.errors?.length) {
+    return (
+      <>
+        {(
+          action.errors ?? [
+            i18n.translate('xpack.securitySolution.actionLogExpandedTray.missingErrors', {
+              defaultMessage: 'Action did not specify any errors',
+            }),
+          ]
+        ).map((error) => (
+          <EuiFlexItem>{error}</EuiFlexItem>
+        ))}
+      </>
+    );
   }
-);
+
+  if (isExpired) {
+    return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
+  }
+
+  if (!isCompleted) {
+    return <>{OUTPUT_MESSAGES.isPending(command)}</>;
+  }
+
+  if (!wasSuccessful) {
+    return (
+      <>
+        {OUTPUT_MESSAGES.hasFailed(command)}
+        <EuiSpacer size="s" />
+        <EndpointActionFailureMessage
+          action={action}
+          data-test-subj={getTestId('failureMessage')}
+        />
+      </>
+    );
+  }
+
+  if (isGetFileAction(action)) {
+    return (
+      <>
+        {OUTPUT_MESSAGES.wasSuccessful(command)}
+        <ResponseActionFileDownloadLink
+          action={action}
+          canAccessFileDownloadLink={canWriteFileOperations}
+          textSize="xs"
+          data-test-subj={getTestId('getFileDownloadLink')}
+        />
+      </>
+    );
+  }
+
+  if (isExecuteAction(action)) {
+    return (
+      <EuiFlexGroup direction="column" data-test-subj={getTestId('executeDetails')}>
+        {action.agents.map((agentId) => (
+          <div key={agentId}>
+            {OUTPUT_MESSAGES.wasSuccessful(command)}
+            <ExecuteActionHostResponse
+              action={action}
+              agentId={agentId}
+              canAccessFileDownloadLink={
+                canAccessEndpointActionsLogManagement || canReadActionsLogManagement
+              }
+              textSize="xs"
+              data-test-subj={getTestId('actionsLogTray')}
+            />
+          </div>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+
+  if (isUploadAction(action)) {
+    return (
+      <EuiFlexGroup direction="column" data-test-subj={getTestId('uploadDetails')}>
+        <p>{OUTPUT_MESSAGES.wasSuccessful(command)}</p>
+
+        <EndpointUploadActionResult
+          action={action}
+          data-test-subj={getTestId('uploadOutput')}
+          textSize="xs"
+        />
+      </EuiFlexGroup>
+    );
+  }
+
+  if (action.agentType === 'crowdstrike') {
+    return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
+  }
+  return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
+});
 
 OutputContent.displayName = 'OutputContent';
 
 export const ActionsLogExpandedTray = memo<{
   action: MaybeImmutable<ActionDetails>;
+  // Delete prop `fromAlert` once we refactor automated response actions
+  fromAlertWorkaround?: boolean;
   'data-test-subj'?: string;
-}>(({ action, 'data-test-subj': dataTestSubj }) => {
+}>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
@@ -295,12 +317,16 @@ export const ActionsLogExpandedTray = memo<{
         description: (
           // codeblock for output
           <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
-            <OutputContent action={action} data-test-subj={dataTestSubj} />
+            <OutputContent
+              action={action}
+              data-test-subj={dataTestSubj}
+              fromAlertWorkaround={fromAlertWorkaround}
+            />
           </StyledEuiCodeBlock>
         ),
       },
     ],
-    [action, dataTestSubj, getTestId]
+    [action, dataTestSubj, fromAlertWorkaround, getTestId]
   );
 
   return (
