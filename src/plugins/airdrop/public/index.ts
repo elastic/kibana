@@ -10,9 +10,8 @@ import './index.scss';
 
 import { AirdropPlugin } from './plugin';
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
   return new AirdropPlugin();
 }
+
 export type { AirdropPluginSetup, AirdropPluginStart } from './types';

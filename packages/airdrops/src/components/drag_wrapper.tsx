@@ -12,7 +12,7 @@ import { TRANSFER_DATA_TYPE } from '../constants';
 import { useAirdrop } from '../services';
 import { Airdrop } from '../types';
 
-export interface Props<T = Record<string, unknown>> {
+export interface Props<T extends Record<string, unknown> = Record<string, unknown>> {
   content: {
     id: string;
     app?: string;
@@ -21,7 +21,7 @@ export interface Props<T = Record<string, unknown>> {
   children: React.ReactNode;
 }
 
-export function DragWrapper<T>({ content, children }: Props<T>) {
+export function DragWrapper<T extends Record<string, unknown>>({ content, children }: Props<T>) {
   const { setIsDragging } = useAirdrop();
 
   const onDragStart = (e: DragEvent) => {
