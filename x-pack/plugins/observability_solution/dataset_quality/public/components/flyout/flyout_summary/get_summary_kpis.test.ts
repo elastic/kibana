@@ -6,6 +6,7 @@
  */
 
 import { formatNumber } from '@elastic/eui';
+import { NavigationTarget, NavigationSource } from '../../../services/telemetry';
 import type { useKibanaContextForPlugin } from '../../../utils';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
@@ -79,12 +80,20 @@ describe('getSummaryKpis', () => {
         title: flyoutServicesText,
         value: '3',
         link: undefined,
+        telemetry: {
+          target: NavigationTarget.Services,
+          source: NavigationSource.Summary,
+        },
         userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '3',
         link: undefined,
+        telemetry: {
+          target: NavigationTarget.Hosts,
+          source: NavigationSource.Summary,
+        },
         userHasPrivilege: true,
       },
       {
@@ -93,6 +102,10 @@ describe('getSummaryKpis', () => {
         link: {
           label: flyoutShowAllText,
           href: degradedDocsHref,
+        },
+        telemetry: {
+          target: NavigationTarget.LogsExplorer,
+          source: NavigationSource.Summary,
         },
         userHasPrivilege: true,
       },
@@ -138,12 +151,20 @@ describe('getSummaryKpis', () => {
         title: flyoutServicesText,
         value: '50+',
         link: undefined,
+        telemetry: {
+          target: NavigationTarget.Services,
+          source: NavigationSource.Summary,
+        },
         userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '54+',
         link: undefined,
+        telemetry: {
+          target: NavigationTarget.Hosts,
+          source: NavigationSource.Summary,
+        },
         userHasPrivilege: true,
       },
       {
@@ -152,6 +173,10 @@ describe('getSummaryKpis', () => {
         link: {
           label: flyoutShowAllText,
           href: degradedDocsHref,
+        },
+        telemetry: {
+          target: NavigationTarget.LogsExplorer,
+          source: NavigationSource.Summary,
         },
         userHasPrivilege: true,
       },
