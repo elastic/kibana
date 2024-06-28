@@ -39,15 +39,6 @@ describe('executeAction', () => {
     jest.clearAllMocks();
   });
   it('should execute an action and return a StaticResponse when the response from the actions framework is a string', async () => {
-    /* const actions = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockResolvedValue({
-          data: {
-            message: 'Test message',
-          },
-        }),
-      }),
-    } as unknown as Props['actions'];*/
     testProps.actionsClient.execute = jest.fn().mockResolvedValue({
       data: {
         message: 'Test message',
@@ -66,13 +57,13 @@ describe('executeAction', () => {
 
   it('should execute an action and return a Readable object when the response from the actions framework is a stream', async () => {
     const readableStream = new PassThrough();
-    const actionsClient = {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue({
-        execute: jest.fn().mockResolvedValue({
-          data: readableStream,
-        }),
-      }),
-    } as unknown as Props['actionsClient'];
+    const actionsClient = actionsClientMock.create();
+    actionsClient.execute.mockImplementationOnce(
+      jest.fn().mockResolvedValue({
+        status: 'ok',
+        data: readableStream,
+      })
+    );
 
     const result = await executeAction({ ...testProps, actionsClient });
 

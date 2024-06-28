@@ -18,6 +18,12 @@ const mockExecute = jest.fn().mockImplementation(() => ({
   data: mockActionResponse,
   status: 'ok',
 }));
+actionsClient.execute.mockImplementation(
+  jest.fn().mockImplementation(() => ({
+    data: mockActionResponse,
+    status: 'ok',
+  }))
+);
 
 const mockLogger = loggerMock.create();
 
@@ -79,13 +85,11 @@ describe('ActionsClientLlm', () => {
     });
 
     it('rejects with the expected error when the action result status is error', async () => {
-      const hasErrorStatus = jest.fn().mockImplementation(() => ({
-        message: 'action-result-message',
-        serviceMessage: 'action-result-service-message',
-        status: 'error', // <-- error status
-      }));
-
-      actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
+      actionsClient.execute.mockImplementation(() => {
+        throw new Error(
+          'ActionsClientLlm: action result status is error: action-result-message - action-result-service-message'
+        );
+      });
       const actionsClientLlm = new ActionsClientLlm({
         actionsClient,
         connectorId,
@@ -100,10 +104,12 @@ describe('ActionsClientLlm', () => {
     it('rejects with the expected error the message has invalid content', async () => {
       const invalidContent = { message: 1234 };
 
-      mockExecute.mockImplementation(() => ({
-        data: invalidContent,
-        status: 'ok',
-      }));
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          data: invalidContent,
+          status: 'ok',
+        })
+      );
 
       const actionsClientLlm = new ActionsClientLlm({
         actionsClient,
