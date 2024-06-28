@@ -141,7 +141,7 @@ const mergeManagedProperties = (
     if (
       isBasicObjectProp(prop) &&
       isManaged(prop) &&
-      !Object.prototype.hasOwnProperty.call(managedValue, prop.key.value)
+      !Object.hasOwn(managedValue, prop.key.value)
     ) {
       remove(properties, prop);
     }

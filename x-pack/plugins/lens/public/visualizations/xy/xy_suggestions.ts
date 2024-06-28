@@ -61,7 +61,7 @@ export function getSuggestions({
     !table.isMultiRow ||
     table.columns.length <= 1 ||
     table.columns.every((col) => col.operation.dataType !== 'number') ||
-    table.columns.some((col) => !columnSortOrder.hasOwnProperty(col.operation.dataType));
+    table.columns.some((col) => !Object.hasOwn(columnSortOrder, col.operation.dataType));
 
   if (
     (incompleteTable && state && !subVisualizationId) ||

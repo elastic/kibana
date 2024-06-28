@@ -129,7 +129,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     metricFields.forEach((metricField) => {
       let value;
       for (const key in mbProperties) {
-        if (mbProperties.hasOwnProperty(key) && metricField.getMbFieldName() === key) {
+        if (Object.hasOwn(mbProperties, key) && metricField.getMbFieldName() === key) {
           value = mbProperties[key];
           break;
         }

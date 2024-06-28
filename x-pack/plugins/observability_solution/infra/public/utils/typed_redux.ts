@@ -41,7 +41,7 @@ export const globalizeSelectors = <
 ): GlobalSelectors<GlobalState, LocalSelectors> => {
   const globalSelectors = {} as GlobalSelectors<GlobalState, LocalSelectors>;
   for (const s in selectors) {
-    if (selectors.hasOwnProperty(s)) {
+    if (Object.hasOwn(selectors, s)) {
       globalSelectors[s] = globalizeSelector(globalizer, selectors[s]);
     }
   }

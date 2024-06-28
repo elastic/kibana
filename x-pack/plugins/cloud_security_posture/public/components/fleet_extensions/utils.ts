@@ -152,7 +152,7 @@ type RegistryPolicyTemplateWithInputs = RegistryPolicyTemplate & {
 export const hasPolicyTemplateInputs = (
   policyTemplate: RegistryPolicyTemplate
 ): policyTemplate is RegistryPolicyTemplateWithInputs => {
-  return policyTemplate.hasOwnProperty('inputs');
+  return Object.hasOwn(policyTemplate, 'inputs');
 };
 
 export const getVulnMgmtCloudFormationDefaultValue = (packageInfo: PackageInfo): string => {

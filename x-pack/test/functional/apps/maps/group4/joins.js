@@ -81,9 +81,9 @@ export default function ({ getPageObjects, getService }) {
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
         if (properties.name === 'tango') {
           //left join, which means we won't rescale joins that do not match
-          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(false);
+          expect(Object.hasOwn(properties, JOIN_PROPERTY_NAME)).to.be(false);
         } else {
-          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(true);
+          expect(Object.hasOwn(properties, JOIN_PROPERTY_NAME)).to.be(true);
         }
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
       });

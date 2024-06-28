@@ -49,7 +49,7 @@ function walk(obj: any, keys: string[], value: any, path: string[]) {
     return;
   }
 
-  if (!obj.hasOwnProperty(key)) {
+  if (!Object.hasOwn(obj, key)) {
     obj[key] = {};
   }
 

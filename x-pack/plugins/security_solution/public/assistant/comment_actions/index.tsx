@@ -112,7 +112,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
           </EuiToolTip>
         </EuiFlexItem>
       )}
-
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.ADD_NOTE_TO_TIMELINE}>
           <EuiButtonIcon
@@ -123,7 +122,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
           />
         </EuiToolTip>
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.ADD_TO_CASE_EXISTING_CASE}>
           <EuiButtonIcon
@@ -134,7 +132,6 @@ const CommentActionsComponent: React.FC<Props> = ({ message, isFlyoutMode }) => 
           />
         </EuiToolTip>
       </EuiFlexItem>
-
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
           <EuiCopy textToCopy={content}>

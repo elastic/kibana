@@ -860,10 +860,10 @@ export default ({ getService }: FtrProviderContext) => {
     for (const testData of testDataListNegative) {
       describe('rejects request', function () {
         before(async () => {
-          if (testData.hasOwnProperty('sourceDataArchive')) {
+          if (Object.hasOwn(testData, 'sourceDataArchive')) {
             await esArchiver.loadIfNeeded(testData.sourceDataArchive!);
           }
-          if (testData.hasOwnProperty('indexPattern')) {
+          if (Object.hasOwn(testData, 'indexPattern')) {
             await ml.testResources.createDataViewIfNeeded(
               testData.indexPattern!.name as string,
               testData.indexPattern!.timeField as string
@@ -873,7 +873,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.cleanMlIndices();
-          if (testData.hasOwnProperty('indexPattern')) {
+          if (Object.hasOwn(testData, 'indexPattern')) {
             await ml.testResources.deleteDataViewByTitle(testData.indexPattern!.name);
           }
         });

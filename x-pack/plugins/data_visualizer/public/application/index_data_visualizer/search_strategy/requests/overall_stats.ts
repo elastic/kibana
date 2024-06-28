@@ -60,9 +60,9 @@ export const checkAggregatableFieldsExistRequest = (
 
     if (supportedAggs.has('cardinality')) {
       let cardinalityField: AggCardinality;
-      if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
+      if (Object.hasOwn(datafeedConfig?.script_fields ?? {}, field)) {
         cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
-          cardinality: { script: datafeedConfig?.script_fields[field].script },
+          cardinality: { script: datafeedConfig?.script_fields![field].script },
         };
       } else {
         cardinalityField = {
@@ -119,7 +119,7 @@ export function isNonAggregatableSampledDocs(
 ): arg is IKibanaSearchResponse<estypes.SearchResponse<unknown>> {
   return (
     isPopulatedObject(arg, ['rawResponse']) &&
-    (arg.rawResponse as estypes.SearchResponse).hasOwnProperty('hits')
+    Object.hasOwn(arg.rawResponse as estypes.SearchResponse, 'hits')
   );
 }
 
@@ -178,8 +178,8 @@ export const processAggregatableFieldsExistResponse = (
         });
       } else {
         if (
-          datafeedConfig?.script_fields?.hasOwnProperty(field) ||
-          datafeedConfig?.runtime_mappings?.hasOwnProperty(field)
+          Object.hasOwn(datafeedConfig?.script_fields ?? {}, field) ||
+          Object.hasOwn(datafeedConfig?.runtime_mappings ?? {}, field)
         ) {
           const cardinality = get(aggregations, [
             ...aggsPath,

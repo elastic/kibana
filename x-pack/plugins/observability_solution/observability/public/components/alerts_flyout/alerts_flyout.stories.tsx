@@ -23,6 +23,7 @@ export default {
   decorators: [
     (Story: ComponentType) => {
       return (
+        //
         <KibanaContextProvider
           services={{
             http: { basePath: { prepend: (_: string) => '' } },
@@ -42,7 +43,6 @@ export default {
             <Story />
           </PluginContext.Provider>
         </KibanaContextProvider>
-        //
       );
     },
   ],

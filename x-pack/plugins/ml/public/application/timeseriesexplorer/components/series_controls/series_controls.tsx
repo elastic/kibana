@@ -268,7 +268,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
         // In case anomalous selector has been changed
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
-          if (updatedResultConfig.hasOwnProperty(c)) {
+          if (Object.hasOwn(updatedResultConfig, c)) {
             updatedResultConfig[c as MlEntityFieldType]!.anomalousOnly =
               updatedFieldConfig.anomalousOnly;
           }
@@ -279,7 +279,7 @@ export const SeriesControls: FC<PropsWithChildren<SeriesControlsProps>> = ({
         // In case time range selector has been changed
         // we need to change it for all the other fields
         for (const c in updatedResultConfig) {
-          if (updatedResultConfig.hasOwnProperty(c)) {
+          if (Object.hasOwn(updatedResultConfig, c)) {
             updatedResultConfig[c as MlEntityFieldType]!.applyTimeRange =
               updatedFieldConfig.applyTimeRange;
           }
