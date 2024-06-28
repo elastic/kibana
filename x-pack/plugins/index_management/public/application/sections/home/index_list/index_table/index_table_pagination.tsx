@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { EuiTablePagination } from '@elastic/eui';
-import {
-  DEFAULT_PAGE_SIZE_OPTIONS,
-  useEuiTablePersistingPageSize,
-} from '@kbn/shared-ux-table-pagination';
+import { DEFAULT_PAGE_SIZE_OPTIONS, useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 interface IndexTablePaginationProps {
   pager: any;
@@ -27,7 +24,7 @@ export const IndexTablePagination = ({
   readURLParams,
   setURLParam,
 }: IndexTablePaginationProps) => {
-  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({
+  const { pageSize, onTableChange } = useEuiTablePersist({
     tableId: 'componentTemplates',
     customOnTableChange: ({ page }) => {
       setURLParam('pageSize', page?.size);

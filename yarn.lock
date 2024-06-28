@@ -6505,7 +6505,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/shared-ux-table-pagination@link:packages/shared-ux/table_pagination":
+"@kbn/shared-ux-table-persist@link:packages/shared-ux/table_persist":
   version "0.0.0"
   uid ""
 

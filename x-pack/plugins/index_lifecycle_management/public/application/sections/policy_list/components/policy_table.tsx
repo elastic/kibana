@@ -27,10 +27,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  useEuiTablePersistingPageSize,
-  DEFAULT_PAGE_SIZE_OPTIONS,
-} from '@kbn/shared-ux-table-pagination';
+import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
 import { useStateWithLocalStorage } from '../../../lib/settings_local_storage';
 import { PolicyFromES } from '../../../../../common/types';
 import { useKibana } from '../../../../shared_imports';
@@ -107,7 +104,14 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
   );
   const { setListAction } = usePolicyListContext();
 
-  const { pageSize, onTableChange } = useEuiTablePersistingPageSize({ tableId: 'ilmPolicies' });
+  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+    tableId: 'ilmPolicies',
+    initialPageSize: 25,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
+  });
 
   const handleOnChange: EuiSearchBarProps['onChange'] = ({ queryText, error }) => {
     if (!error) {
@@ -324,12 +328,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
         pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
       }}
       onTableChange={onTableChange}
-      sorting={{
-        sort: {
-          field: 'name',
-          direction: 'asc',
-        },
-      }}
+      sorting={{ sort }}
       search={searchOptions as EuiInMemoryTableProps<PolicyFromES>['search']}
       tableLayout="auto"
       items={filteredPolicies}

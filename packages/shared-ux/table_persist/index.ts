@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const DEFAULT_PAGE_SIZE_OPTIONS = [25, 50, 100];
-export const INITIAL_DEFAULT_PAGE_SIZE = 50;
-
-export const LOCAL_STORAGE_PREFIX = 'persistingTablePageSize';
+export { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from './src';

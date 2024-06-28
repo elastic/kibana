@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { useEuiTablePersistingPageSize } from './use_table_persist';
+export { useEuiTablePersist } from './use_table_persist';
 export { DEFAULT_PAGE_SIZE_OPTIONS } from './constants';
