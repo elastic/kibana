@@ -6,9 +6,7 @@
  */
 
 import * as z from 'zod';
-import {
-  RuleSignatureId,
-  RuleVersion,
+import type {
   EqlRuleCreateFields,
   QueryRuleCreateFields,
   SavedQueryRuleCreateFields,
@@ -17,7 +15,12 @@ import {
   MachineLearningRuleCreateFields,
   NewTermsRuleCreateFields,
   EsqlRuleCreateFields,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
+import {
+  RuleSignatureId,
+  RuleVersion,
   BaseCreateProps,
+  TypeSpecificCreateProps,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 type BaseFields = keyof BaseCreateProps;
@@ -44,7 +47,6 @@ type AllRuleProperties = BaseFields | SpecificFields;
  */
 type OmittedProperties = Extract<
   AllRuleProperties,
-  | 'alert_suppression'
   | 'actions'
   | 'throttle'
   | 'meta'
@@ -56,7 +58,6 @@ type OmittedProperties = Extract<
 >;
 
 const PROPERTIES_TO_OMIT: Record<OmittedProperties, true> = {
-  alert_suppression: true,
   actions: true,
   throttle: true,
   meta: true,
@@ -68,26 +69,6 @@ const PROPERTIES_TO_OMIT: Record<OmittedProperties, true> = {
 };
 
 const RuleAssetBaseCreateProps = BaseCreateProps.omit(PROPERTIES_TO_OMIT);
-
-const EqlRuleAssetFields = EqlRuleCreateFields.omit(PROPERTIES_TO_OMIT);
-const QueryRuleAssetFields = QueryRuleCreateFields.omit(PROPERTIES_TO_OMIT);
-const SavedQueryRuleAssetFields = SavedQueryRuleCreateFields.omit(PROPERTIES_TO_OMIT);
-const ThresholdRuleAssetFields = ThresholdRuleCreateFields.omit(PROPERTIES_TO_OMIT);
-const ThreatMatchRuleAssetFields = ThreatMatchRuleCreateFields.omit(PROPERTIES_TO_OMIT);
-const NewTermsRuleAssetFields = NewTermsRuleCreateFields.omit(PROPERTIES_TO_OMIT);
-const EsqlRuleAssetFields = EsqlRuleCreateFields.omit(PROPERTIES_TO_OMIT);
-const MachineLearningRuleAssetFields = MachineLearningRuleCreateFields;
-
-export const RuleAssetTypeSpecificCreateProps = z.discriminatedUnion('type', [
-  EqlRuleAssetFields,
-  QueryRuleAssetFields,
-  SavedQueryRuleAssetFields,
-  ThresholdRuleAssetFields,
-  ThreatMatchRuleAssetFields,
-  MachineLearningRuleAssetFields,
-  NewTermsRuleAssetFields,
-  EsqlRuleAssetFields,
-]);
 
 /**
  * Asset containing source content of a prebuilt Security detection rule.
@@ -104,7 +85,7 @@ export const RuleAssetTypeSpecificCreateProps = z.discriminatedUnion('type', [
  *  - version is a required field that must exist
  */
 export type PrebuiltRuleAsset = z.infer<typeof PrebuiltRuleAsset>;
-export const PrebuiltRuleAsset = RuleAssetBaseCreateProps.and(RuleAssetTypeSpecificCreateProps).and(
+export const PrebuiltRuleAsset = RuleAssetBaseCreateProps.and(TypeSpecificCreateProps).and(
   z.object({
     rule_id: RuleSignatureId,
     version: RuleVersion,
