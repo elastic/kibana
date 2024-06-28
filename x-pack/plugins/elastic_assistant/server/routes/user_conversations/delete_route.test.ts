@@ -15,7 +15,7 @@ import {
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Delete conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
