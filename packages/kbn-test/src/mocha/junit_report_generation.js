@@ -126,7 +126,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
         const testCaseRelativePath = getPath(node);
         const owners = getCodeOwnersForFile(testCaseRelativePath, reversedCodeowners);
         attrs.owners = owners || ''; // empty string when no codeowners are defined
-        attrs.failedTestConfig = getPath({ file: failedTestConfig });
+        attrs.failedTestConfig = getPath({ file: failedTestConfig }); // getPath() returns a relative path or 'unknown'
       }
 
       return testsuitesEl.ele('testcase', attrs);
