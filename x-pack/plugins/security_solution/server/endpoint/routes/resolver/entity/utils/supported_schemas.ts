@@ -40,7 +40,14 @@ export const getSupportedSchemas = (
 
   const supportedFileBeatDataSets = [
     ...(sentinelOneDataInAnalyzerEnabled
-      ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
+      ? [
+          'sentinel_one_cloud_funnel.event',
+          'sentinel_one.activity',
+          'sentinel_one.agent',
+          'sentinel_one.alert',
+          'sentinel_one.group',
+          'sentinel_one.threat',
+        ]
       : []),
     ...(crowdstrikeDataInAnalyzerEnabled
       ? ['crowdstrike.falcon', 'crowdstrike.fdr', 'crowdstrike.alert']
