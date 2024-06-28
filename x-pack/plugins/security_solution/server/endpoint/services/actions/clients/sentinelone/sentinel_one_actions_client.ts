@@ -559,18 +559,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     await this.ensureValidActionId(actionId);
 
-    // FIXME:PT Refactor this into reusable logic
-    const agentResponseDoc = (
-      await this.fetchActionResponseEsDocs<
-        ResponseActionGetFileOutputContent,
-        SentinelOneGetFileResponseMeta
-      >(actionId, [agentId])
-    )[agentId];
-
-    if (agentResponseDoc.EndpointActions.data.command === 'kill-process') {
-      return this.getFileDownloadForScriptExecution(agentResponseDoc);
-    }
-
     const agentResponse = await this.fetchGetFileResponseEsDocForAgentId(actionId, agentId);
 
     if (!agentResponse.meta?.activityLogEntryId) {
@@ -601,39 +589,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
   }
 
-  private async getFileDownloadForScriptExecution(
-    actionResponseDoc: LogsEndpointActionResponse
-  ): Promise<GetFileDownloadMethodResponse> {
-    // // FIXME:PT throw error if action response show to be at error
-    //
-    // const s1ScriptResultsResponse = await this.sendAction(SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS, {
-    //   taskId: actionResponseDoc.meta.taskId,
-    // });
-    //
-    // this.log.debug(
-    //   `Script results for taskId [${actionResponseDoc.meta.taskId}]:\n${stringify(
-    //     s1ScriptResultsResponse.data
-    //   )}`
-    // );
-    //
-    // // TODO:PT Need to log errors here if no file link found
-    //
-    // // TODO:PT need to ensure that the `taskId` in the item is the same one we searched for
-    // const { downloadUrl, fileName } = s1ScriptResultsResponse.data.data.downloadLinks.at(0);
-    //
-    // // g
-
-    const { data } = await this.sendAction(SUB_ACTION.DOWNLAOD_REMOTE_SCRIPT_RESULTS, {
-      taskId: actionResponseDoc.meta.taskId,
-    });
-
-    return {
-      stream: data,
-      fileName: actionResponseDoc.agent.id, // FIXME:PT capture the value in the action response from the task status. value is in the property `scriptResultsSignature`
-      mimeType: undefined,
-    };
-  }
-
   async killProcess(
     actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
@@ -648,9 +603,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       ...actionRequest,
       ...this.getMethodOptions(options),
       command: 'kill-process',
-      meta: {
-        parentTaskId: '',
-      },
+      meta: { parentTaskId: '' },
     };
 
     if (!reqIndexOptions.error) {
@@ -758,17 +711,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               }
             }
             break;
-
-          case 'kill-process':
-            {
-              const responseDocsForKillProcess = await this.checkPendingKillProcessActions(
-                typePendingActions as ResponseActionsClientPendingAction[] // FIXME:PT types need fixing
-              );
-              if (responseDocsForKillProcess.length) {
-                addToQueue(...responseDocsForKillProcess);
-              }
-            }
-            break;
         }
       }
     }
@@ -805,7 +747,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
           return (
             scriptInfo.creator === 'SentinelOne' &&
             scriptInfo.creatorId === '-1' &&
-            // Using single `-` in match below to ensure both windows and macos/linux are matched
+            // Using single `-` (instead of double `--`) in match below to ensure both windows and macos/linux are matched
             /-terminate/i.test(scriptInfo.inputInstructions ?? '') &&
             /-processes/i.test(scriptInfo.inputInstructions ?? '')
           );
@@ -830,7 +772,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!s1Script) {
       throw new ResponseActionsClientError(
-        `Did not find a script from SentinelOne to handle ([${scriptType}][${osType}])`
+        `Unable to find a script from SentinelOne to handle ([${scriptType}][${osType}])`
       );
     }
 
@@ -1262,111 +1204,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (warnings.length > 0) {
       this.log.warn(warnings.join('\n'));
-    }
-
-    return completedResponses;
-  }
-
-  private calculateTaskState(taskStatusRecord: object) {
-    const taskStatusValue = taskStatusRecord.status;
-    const message =
-      taskStatusRecord.detailedStatus ?? taskStatusRecord.statusDescription ?? taskStatusValue;
-
-    // FIXME:PT should move this to a static readonly object
-    const possibleTaskStatus: Record<
-      string,
-      { isPending: boolean; isError: boolean; message: string }
-    > = {
-      // FIXME:PT adjust all error reasons
-
-      canceled: {
-        isPending: false,
-        isError: true,
-        message: 'SentinelOne Task [${taskStatusRecord.parentTaskId}] was canceled by user...',
-      },
-      completed: { isPending: false, isError: false, message },
-      created: { isPending: true, isError: false, message },
-      expired: { isPending: false, isError: true, message },
-      failed: { isPending: false, isError: true, message },
-      in_progress: { isPending: true, isError: false, message },
-      partially_completed: { isPending: false, isError: false, message },
-      pending: { isPending: true, isError: false, message },
-      pending_user_action: { isPending: true, isError: false, message },
-      scheduled: { isPending: true, isError: false, message },
-    };
-
-    return {
-      ...(possibleTaskStatus[taskStatusValue] ?? {
-        isPending: false,
-        isError: true,
-        message: `Unknown SentinelOne task status value [${taskStatusRecord}] for task parent id [${taskStatusRecord.parentTaskId}]`,
-      }),
-    };
-  }
-
-  private async checkPendingKillProcessActions(
-    actionRequests: Array<
-      ResponseActionsClientPendingAction<
-        ResponseActionGetFileParameters,
-        ResponseActionGetFileOutputContent,
-        SentinelOneGetFileRequestMeta
-      >
-    >
-  ): Promise<LogsEndpointActionResponse[]> {
-    const warnings: string[] = [];
-    const completedResponses: LogsEndpointActionResponse[] = [];
-
-    for (const pendingAction of actionRequests) {
-      const actionRequest = pendingAction.action;
-      const s1TaskStatusApiResponse = await this.sendAction(SUB_ACTION.GET_REMOTE_SCRIPT_STATUS, {
-        parentTaskId: actionRequest.meta.parentTaskId,
-      });
-
-      this.log.debug(
-        `Kill process status for action id [${
-          actionRequest.EndpointActions.action_id
-        }]:\n${stringify(s1TaskStatusApiResponse.data)}`
-      );
-
-      if (s1TaskStatusApiResponse.data.data.length) {
-        const killProcessStatus = s1TaskStatusApiResponse.data.data.at(0);
-        const taskState = this.calculateTaskState(killProcessStatus);
-
-        if (!taskState.isPending) {
-          this.log.debug(`Action is completed - generating response doc for it`);
-
-          const error: LogsEndpointActionResponse['error'] = taskState.isError
-            ? { message: `Action failed to execute in SentinelOne. message: ${taskState.message}` }
-            : undefined;
-
-          completedResponses.push(
-            this.buildActionResponseEsDoc<
-              ResponseActionGetFileOutputContent,
-              SentinelOneGetFileResponseMeta
-            >({
-              actionId: actionRequest.EndpointActions.action_id,
-              agentId: Array.isArray(actionRequest.agent.id)
-                ? actionRequest.agent.id[0]
-                : actionRequest.agent.id,
-              data: {
-                command: 'kill-process',
-                comment: taskState.message,
-                output: {
-                  type: 'json',
-                  content: {
-                    // FIXME:PT populate this
-                  },
-                },
-              },
-              error,
-              meta: {
-                // FIXME:PT type this meta for s1
-                taskId: killProcessStatus.id,
-              },
-            })
-          );
-        }
-      }
     }
 
     return completedResponses;
