@@ -36,15 +36,12 @@ export const ActionColumn: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> 
   return (
     <>
       <EuiPopover
-        id={`inference-action-popover-${interfaceEndpoint.endpoint}`}
-        key={`inference-action-popover-${interfaceEndpoint.endpoint}`}
         button={
           <EuiButtonIcon
             onClick={tooglePopover}
             iconType="boxesHorizontal"
             aria-label={'Actions'}
             color="text"
-            key={`inference-action-popover-button-${interfaceEndpoint.endpoint}`}
             disabled={false}
           />
         }
@@ -74,14 +71,9 @@ export const useActions = (): UseBulkActionsReturnValue => {
     actions: {
       align: 'right',
       render: (interfaceEndpoint: InferenceEndpointUI) => {
-        return (
-          <ActionColumn
-            interfaceEndpoint={interfaceEndpoint}
-            key={interfaceEndpoint.endpoint.model_id}
-          />
-        );
+        return <ActionColumn interfaceEndpoint={interfaceEndpoint} />;
       },
-      width: '100px',
+      width: '165px',
     },
   };
 };

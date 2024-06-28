@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ServiceProviderKeys } from '../../types';
 import { ModelBadge } from './model_badge';
 import * as i18n from './translations';
@@ -60,7 +60,7 @@ function renderElasticsearch(endpoint: InferenceAPIConfigResponse) {
   const modelId = 'model_id' in serviceSettings ? serviceSettings.model_id : undefined;
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       {modelId && (
         <EuiFlexItem grow={false}>
           <ModelBadge model={modelId} />
@@ -68,9 +68,11 @@ function renderElasticsearch(endpoint: InferenceAPIConfigResponse) {
       )}
       {(numThreads || numAllocations) && (
         <EuiFlexItem grow={false}>
-          {numThreads && i18n.THREADS(numThreads)}
-          {numThreads && numAllocations && ' | '}
-          {numAllocations && i18n.ALLOCATIONS(numAllocations)}
+          <EuiText color="subdued" size="xs">
+            {numThreads && i18n.THREADS(numThreads)}
+            {numThreads && numAllocations && ' | '}
+            {numAllocations && i18n.ALLOCATIONS(numAllocations)}
+          </EuiText>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
@@ -88,18 +90,18 @@ function renderCohere(endpoint: InferenceAPIConfigResponse) {
   const truncate = 'truncate' in taskSettings ? taskSettings.truncate : undefined;
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       {modelId && (
         <EuiFlexItem grow={false}>
           <ModelBadge model={modelId} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <span>
+        <EuiText color="subdued" size="xs">
           {[embeddingType, inputType, truncate && `truncate: ${truncate}`]
             .filter(Boolean)
             .join(', ')}
-        </span>
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -109,7 +111,11 @@ function renderHuggingFace(endpoint: InferenceAPIConfigResponse) {
   const serviceSettings = endpoint.service_settings;
   const url = 'url' in serviceSettings ? serviceSettings.url : null;
 
-  return <span>{url}</span>;
+  return (
+    <EuiText color="subdued" size="xs">
+      {url}
+    </EuiText>
+  );
 }
 
 function renderOpenAI(endpoint: InferenceAPIConfigResponse) {
@@ -119,13 +125,19 @@ function renderOpenAI(endpoint: InferenceAPIConfigResponse) {
   const url = 'url' in serviceSettings ? serviceSettings.url : undefined;
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       {modelId && (
         <EuiFlexItem grow={false}>
           <ModelBadge model={modelId} />
         </EuiFlexItem>
       )}
-      {url && <EuiFlexItem grow={false}>{url}</EuiFlexItem>}
+      {url && (
+        <EuiFlexItem grow={false}>
+          <EuiText color="subdued" size="xs">
+            {url}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
@@ -137,7 +149,11 @@ function renderAzureOpenAIStudio(endpoint: InferenceAPIConfigResponse) {
     'endpoint_type' in serviceSettings ? serviceSettings.endpoint_type : undefined;
   const target = 'target' in serviceSettings ? serviceSettings.target : undefined;
 
-  return <span>{[provider, endpointType, target].filter(Boolean).join(', ')}</span>;
+  return (
+    <EuiText color="subdued" size="xs">
+      {[provider, endpointType, target].filter(Boolean).join(', ')}
+    </EuiText>
+  );
 }
 
 function renderAzureOpenAI(endpoint: InferenceAPIConfigResponse) {
@@ -149,7 +165,11 @@ function renderAzureOpenAI(endpoint: InferenceAPIConfigResponse) {
     'deployment_id' in serviceSettings ? serviceSettings.deployment_id : undefined;
   const apiVersion = 'api_version' in serviceSettings ? serviceSettings.api_version : undefined;
 
-  return <span>{[resourceName, deploymentId, apiVersion].filter(Boolean).join(', ')}</span>;
+  return (
+    <EuiText color="subdued" size="xs">
+      {[resourceName, deploymentId, apiVersion].filter(Boolean).join(', ')}
+    </EuiText>
+  );
 }
 
 function renderMistral(endpoint: InferenceAPIConfigResponse) {
@@ -162,21 +182,21 @@ function renderMistral(endpoint: InferenceAPIConfigResponse) {
     'rate_limit' in serviceSettings ? serviceSettings.rate_limit.requests_per_minute : undefined;
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       {model && (
         <EuiFlexItem grow={false}>
           <ModelBadge model={model} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <span>
+        <EuiText color="subdued" size="xs">
           {[
             maxInputTokens && `max_input_tokens: ${maxInputTokens}`,
             rateLimit && `rate_limit: ${rateLimit}`,
           ]
             .filter(Boolean)
             .join(', ')}
-        </span>
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -190,14 +210,16 @@ function renderGoogleAIStudio(endpoint: InferenceAPIConfigResponse) {
     'rate_limit' in serviceSettings ? serviceSettings.rate_limit.requests_per_minute : undefined;
 
   return (
-    <EuiFlexGroup gutterSize="s">
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       {modelId && (
         <EuiFlexItem grow={false}>
           <ModelBadge model={modelId} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <span>{rateLimit && `rate_limit: ${rateLimit}`}</span>
+        <EuiText color="subdued" size="xs">
+          {rateLimit && `rate_limit: ${rateLimit}`}
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
