@@ -17,10 +17,12 @@ import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { AppWrapper } from './app_containers';
+import { HelpCenterStart } from '@kbn/core-help-center-browser';
+import { AppWrapper, HelpCenterWrapper } from './app_containers';
 
 interface StartServices {
   analytics: AnalyticsServiceStart;
+  helpCenter: HelpCenterStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
 }
@@ -41,7 +43,14 @@ export interface StartDeps extends StartServices {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, targetDomElement, ...startServices }: StartDeps) {
+  start({
+    application,
+    chrome,
+    overlays,
+    targetDomElement,
+    helpCenter,
+    ...startServices
+  }: StartDeps) {
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
@@ -55,9 +64,11 @@ export class RenderingService {
         body.classList.add(...newClasses);
       });
 
+    const { helpCenterUrl$, helpTopics$, version$ } = helpCenter;
+
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <>
+        <HelpCenterWrapper {...{ helpCenterUrl$, helpTopics$, version$ }}>
           {/* Fixed headers */}
           {chromeHeader}
 
@@ -72,7 +83,7 @@ export class RenderingService {
             {/* The actual plugin/app */}
             {appComponent}
           </AppWrapper>
-        </>
+        </HelpCenterWrapper>
       </KibanaRootContextProvider>,
       targetDomElement
     );

@@ -30,6 +30,12 @@ import { createIndexDocumentsContent } from './application/components/index_docu
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { navigationTree } from './navigation_tree';
 
+const HELP_CENTER_ES_HOME = 'elasticsearch/what-is-elasticsearch-serverless';
+const HELP_CENTER_CONSOLE = 'devtools/run-api-requests-in-the-console';
+const HELP_CENTER_SEARCH_PROFILER = 'devtools/profile-queries-and-aggregations';
+const HELP_CENTER_GROK = 'devtools/debug-grok-expressions';
+const HELP_CENTER_CONNECTORS = 'elasticsearch/ingest-data-through-integrations-connector-client';
+
 export class ServerlessSearchPlugin
   implements
     Plugin<
@@ -134,6 +140,25 @@ export class ServerlessSearchPlugin
     });
 
     setupDeps.discover.showInlineTopNav();
+
+    const createItem = (name: string, hostPath?: string | RegExp) => ({
+      name,
+      path: name,
+      hostPath,
+      popup: { width: 600, height: 800 },
+    });
+
+    core.helpCenter.configure({
+      helpCenterUrl: 'https://www.elastic.co/docs/current/serverless/',
+      version: '0.0.1',
+      helpTopics: {
+        [HELP_CENTER_ES_HOME]: createItem(HELP_CENTER_ES_HOME),
+        [HELP_CENTER_CONSOLE]: createItem(HELP_CENTER_CONSOLE, '/console'),
+        [HELP_CENTER_SEARCH_PROFILER]: createItem(HELP_CENTER_SEARCH_PROFILER, '/searchprofiler'),
+        [HELP_CENTER_GROK]: createItem(HELP_CENTER_GROK, '/grokdebugger'),
+        [HELP_CENTER_CONNECTORS]: createItem(HELP_CENTER_CONNECTORS, '/connectors'),
+      },
+    });
 
     return {};
   }

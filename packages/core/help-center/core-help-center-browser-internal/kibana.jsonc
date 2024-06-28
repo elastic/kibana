@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-help-center-browser-internal",
+  "owner": "@elastic/appex-sharedux"
+}
