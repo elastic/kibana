@@ -6,4 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { createLogsDataSourceProfileProviders } from './create_profile_providers';
+export {
+  getColorIndicatorControlColumn,
+  type ColorIndicatorControlColumnParams,
+} from './color_indicator';

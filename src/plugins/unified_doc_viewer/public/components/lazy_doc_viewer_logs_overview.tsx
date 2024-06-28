@@ -6,4 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { createLogsDataSourceProfileProviders } from './create_profile_providers';
+import React from 'react';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
+
+export const UnifiedDocViewerLogsOverview = dynamic(() => import('./doc_viewer_logs_overview'), {
+  fallback: (
+    <EuiDelayRender delay={300}>
+      <EuiSkeletonText />
+    </EuiDelayRender>
+  ),
+});
