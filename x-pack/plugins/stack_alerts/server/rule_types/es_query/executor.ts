@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
@@ -247,10 +246,6 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   if (sortDate && !isNaN(sortDate)) {
     return new Date(sortDate).toISOString();
   }
-}
-
-export function getChecksum(params: OnlyEsQueryRuleParams) {
-  return sha256.create().update(JSON.stringify(params));
 }
 
 export function getInvalidComparatorError(comparator: string) {

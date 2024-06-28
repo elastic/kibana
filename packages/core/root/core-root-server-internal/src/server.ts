@@ -463,6 +463,8 @@ export class Server {
       analytics: analyticsStart,
     });
 
+    Object.freeze(Object.prototype);
+
     return this.coreStart;
   }
 
