@@ -58,10 +58,10 @@ export function useSemanticText(props: UseSemanticTextProps) {
         form.setFieldValue('name', defaultName);
       }
       if (!form.getFormData().reference_field) {
-        form.setFieldValue('referenceField', referenceField);
+        form.setFieldValue('reference_field', referenceField);
       }
       if (!form.getFormData().inference_id) {
-        form.setFieldValue('inferenceId', 'elser_model_2');
+        form.setFieldValue('inference_id', 'elser_model_2');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
