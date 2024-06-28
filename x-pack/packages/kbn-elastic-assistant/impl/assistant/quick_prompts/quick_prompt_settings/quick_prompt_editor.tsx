@@ -38,7 +38,11 @@ const QuickPromptSettingsEditorComponent = ({
   const { basePromptContexts } = useAssistantContext();
 
   // Prompt
-  const prompt = useMemo(() => selectedQuickPrompt?.prompt ?? '', [selectedQuickPrompt?.prompt]);
+  const prompt = useMemo(
+    // Fixing Cursor Jump in text area
+    () => quickPromptSettings.find((p) => p.title === selectedQuickPrompt?.title)?.prompt ?? '',
+    [selectedQuickPrompt?.title, quickPromptSettings]
+  );
 
   const handlePromptChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

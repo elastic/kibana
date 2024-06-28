@@ -64,8 +64,9 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
 }) => {
   // Prompt
   const promptContent = useMemo(
-    () => selectedSystemPrompt?.content ?? '',
-    [selectedSystemPrompt?.content]
+    // Fixing Cursor Jump in text area
+    () => systemPromptSettings.find((sp) => sp.id === selectedSystemPrompt?.id)?.content ?? '',
+    [selectedSystemPrompt?.id, systemPromptSettings]
   );
 
   const handlePromptContentChange = useCallback(
