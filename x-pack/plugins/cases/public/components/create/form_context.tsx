@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { CreateCaseFormSchema } from './schema';
 import { schema } from './schema';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
@@ -21,6 +20,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
 import { useApplication } from '../../common/lib/kibana/use_application';
 import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
+import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 
 interface Props {
   afterCaseCreated?: (
@@ -113,7 +113,7 @@ export const FormContext: React.FC<Props> = ({
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,
-    serializer: (data: CreateCaseFormSchema) =>
+    serializer: (data: CaseFormFieldsSchemaProps) =>
       createFormSerializer(
         connectors,
         {

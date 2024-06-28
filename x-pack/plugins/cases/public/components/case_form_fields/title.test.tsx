@@ -13,14 +13,14 @@ import { act } from '@testing-library/react';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Title } from './title';
-import type { CreateCaseFormSchema } from '../create/schema';
 import { schema } from '../create/schema';
+import type { CaseFormFieldsSchemaProps } from './schema';
 
 describe('Title', () => {
   let globalForm: FormHook;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<CreateCaseFormSchema>({
+    const { form } = useForm<CaseFormFieldsSchemaProps>({
       defaultValue: { title: 'My title' },
       schema: {
         title: schema.title,

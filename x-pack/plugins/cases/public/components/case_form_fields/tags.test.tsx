@@ -13,12 +13,12 @@ import userEvent from '@testing-library/user-event';
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Tags } from './tags';
-import type { CreateCaseFormSchema } from '../create/schema';
 import { schema } from '../create/schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { MAX_LENGTH_PER_TAG } from '../../../common/constants';
+import type { CaseFormFieldsSchemaProps } from './schema';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
@@ -30,7 +30,7 @@ describe('Tags', () => {
   let appMockRender: AppMockRenderer;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<CreateCaseFormSchema>({
+    const { form } = useForm<CaseFormFieldsSchemaProps>({
       defaultValue: { tags: [] },
       schema: {
         tags: schema.tags,

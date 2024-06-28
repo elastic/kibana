@@ -148,6 +148,7 @@ describe('utils', () => {
       connectorId: '',
       fields: { incidentTypes: null, severityCode: null },
       customFields: {},
+      syncAlerts: false,
     };
     const serializedFormData = {
       title: 'title',
