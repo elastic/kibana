@@ -6,9 +6,15 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+} from '@elastic/eui';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
-import { map } from 'lodash';
+import { reduce } from 'lodash';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { getAgentTypeName } from '../../../../common/translations';
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -22,9 +28,9 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { OUTPUT_MESSAGES } from '../translations';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
+import { EndpointActionFailureMessage } from '../../endpoint_action_failure_message';
 import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-
 import { type ActionDetails, type MaybeImmutable } from '../../../../../common/endpoint/types';
 
 const emptyValue = getEmptyValue();
@@ -93,19 +99,8 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       canAccessEndpointActionsLogManagement,
     } = useUserPrivileges().endpointPrivileges;
 
-    const { command: _command, isCompleted, isExpired, wasSuccessful, errors } = action;
+    const { command: _command, isCompleted, isExpired, wasSuccessful } = action;
     const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
-
-    if (errors?.length) {
-      return (
-        // TODO: temporary solution, waiting for UI
-        <>
-          {errors.map((error) => (
-            <EuiFlexItem>{error}</EuiFlexItem>
-          ))}
-        </>
-      );
-    }
 
     if (isExpired) {
       return <>{OUTPUT_MESSAGES.hasExpired(command)}</>;
@@ -116,7 +111,16 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
     }
 
     if (!wasSuccessful) {
-      return <>{OUTPUT_MESSAGES.hasFailed(command)}</>;
+      return (
+        <>
+          {OUTPUT_MESSAGES.hasFailed(command)}
+          <EuiSpacer size="s" />
+          <EndpointActionFailureMessage
+            action={action}
+            data-test-subj={getTestId('failureMessage')}
+          />
+        </>
+      );
     }
 
     if (isGetFileAction(action)) {
@@ -168,6 +172,9 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       );
     }
 
+    if (action.agentType === 'crowdstrike') {
+      return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
+    }
     return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
   }
 );
@@ -234,7 +241,19 @@ export const ActionsLogExpandedTray = memo<{
       },
       {
         title: OUTPUT_MESSAGES.expandSection.hostname,
-        description: map(hosts, (host) => host.name).join(', ') || emptyValue,
+        description:
+          reduce(
+            hosts,
+            (acc, host) => {
+              if (host.name.trim().length) {
+                acc.push(host.name);
+              } else {
+                acc.push(emptyValue);
+              }
+              return acc;
+            },
+            [] as string[]
+          ).join(', ') || emptyValue,
       },
     ];
 
@@ -248,7 +267,11 @@ export const ActionsLogExpandedTray = memo<{
     return list.map(({ title, description }) => {
       return {
         title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
-        description: <StyledEuiCodeBlock>{description}</StyledEuiCodeBlock>,
+        description: (
+          <StyledEuiCodeBlock data-test-subj={getTestId(`action-details-info-${title}`)}>
+            {description}
+          </StyledEuiCodeBlock>
+        ),
       };
     });
   }, [
@@ -256,6 +279,7 @@ export const ActionsLogExpandedTray = memo<{
     command,
     comment,
     completedAt,
+    getTestId,
     hosts,
     isSentinelOneV1Enabled,
     parametersList,

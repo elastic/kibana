@@ -12018,7 +12018,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection, fieldFormats, security }: ",
+              ">, { bfetch, expressions, usageCollection, fieldFormats }: ",
               "DataPluginSetupDependencies",
               ") => { search: ",
               "ISearchSetup",
@@ -12075,7 +12075,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ bfetch, expressions, usageCollection, fieldFormats, security }",
+                "label": "{ bfetch, expressions, usageCollection, fieldFormats }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"

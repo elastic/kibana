@@ -41,6 +41,10 @@ interface DryRunBulkEditBulkActionsValidationArgs {
   experimentalFeatures: ExperimentalFeatures;
 }
 
+interface DryRunManualRuleRunBulkActionsValidationArgs extends BulkActionsValidationArgs {
+  experimentalFeatures: ExperimentalFeatures;
+}
+
 /**
  * throws ML authorization error wrapped with MACHINE_LEARNING_AUTH error code
  * @param mlAuthz - {@link MlAuthz}
@@ -74,6 +78,27 @@ export const validateBulkDisableRule = async ({ rule, mlAuthz }: BulkActionsVali
  */
 export const validateBulkDuplicateRule = async ({ rule, mlAuthz }: BulkActionsValidationArgs) => {
   await throwMlAuthError(mlAuthz, rule.params.type);
+};
+
+/**
+ * runs validation for bulk schedule backfill for a single rule
+ * @param params - {@link DryRunManualRuleRunBulkActionsValidationArgs}
+ */
+export const validateBulkScheduleBackfill = async ({
+  rule,
+  experimentalFeatures,
+}: DryRunManualRuleRunBulkActionsValidationArgs) => {
+  // check whether "manual rule run" feature is enabled
+  await throwDryRunError(
+    () =>
+      invariant(experimentalFeatures?.manualRuleRunEnabled, 'Manual rule run feature is disabled.'),
+    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE
+  );
+
+  await throwDryRunError(
+    () => invariant(rule.enabled, 'Cannot schedule manual rule run for a disabled rule'),
+    BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE
+  );
 };
 
 /**
