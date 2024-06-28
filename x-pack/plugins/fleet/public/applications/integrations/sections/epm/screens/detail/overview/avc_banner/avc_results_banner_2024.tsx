@@ -10,7 +10,8 @@ import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiCallOut, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../lib/kibana';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import avcBannerBackground from './avc_banner_background.svg';
 
 export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
@@ -41,7 +42,7 @@ export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDi
         defaultMessage="Elastic security shines in Malware Protection Test by AV-Comparatives"
       />
       <EuiSpacer size="s" />
-      <EuiButton size="s" color="success" href={docLinks.links.securitySolution.avcResults}>
+      <EuiButton size="s" color="success" href={docLinks?.links.securitySolution.avcResults}>
         <FormattedMessage
           id="xpack.securitySolution.app.avcResults.readTheBlog.link"
           defaultMessage="Read the blog"

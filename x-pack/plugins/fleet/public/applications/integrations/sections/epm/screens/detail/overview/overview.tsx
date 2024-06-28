@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AVCResultsBanner2024 } from '@kbn/security-solution-plugin/public';
 
 import {
   isIntegrationPolicyTemplate,
@@ -40,11 +39,12 @@ import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
 import type { FleetStartServices } from '../../../../../../../plugin';
 
+import { AVCResultsBanner2024 } from './avc_banner/avc_results_banner_2024';
+
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 import { Details } from './details';
 import { Requirements } from './requirements';
-// import { storage } from '@kbn/security-solution-plugin/public/common/lib/local_storage';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -165,7 +165,7 @@ export const OverviewPage: React.FC<Props> = memo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
     );
-    const { services } = useKibana<FleetStartServices>();
+    const { storage } = useKibana<FleetStartServices>().services;
     const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
@@ -292,12 +292,12 @@ export const OverviewPage: React.FC<Props> = memo(
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
 
     const [showAVCBanner, setShowAVCBanner] = useState(
-      services.storage.get('securitySolution.avcBanner') ?? true
+      storage.get('securitySolution.avcBanner') ?? true
     );
     const onBannerDismiss = useCallback(() => {
       setShowAVCBanner(false);
-      services.storage.set('securitySolution.avcBanner', false);
-    }, [services.storage]);
+      storage.set('securitySolution.avcBanner', false);
+    }, [storage]);
 
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
@@ -313,7 +313,12 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
-          {isElasticDefend && showAVCBanner && <AVCResultsBanner2024 onDismiss={onBannerDismiss} />}
+          {isElasticDefend && showAVCBanner && (
+            <>
+              <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+              <EuiSpacer size="s" />
+            </>
+          )}
           {isPrerelease && (
             <PrereleaseCallout
               packageName={packageInfo.name}

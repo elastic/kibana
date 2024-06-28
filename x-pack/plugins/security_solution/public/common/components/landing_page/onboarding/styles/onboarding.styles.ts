@@ -8,7 +8,6 @@
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useMemo } from 'react';
-import avcBannerBackground from '../images/avc_banner_background.svg';
 
 export const useOnboardingStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -29,19 +28,11 @@ export const useOnboardingStyles = () => {
       bannerStyles: css({
         margin: `-${euiTheme.size.l} 0`,
       }),
-      calloutStyles: css({
-        paddingLeft: `${euiTheme.size.xl}`,
-        backgroundImage: `url(${avcBannerBackground})`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPositionX: 'right',
-        backgroundPositionY: 'bottom',
-      }),
     }),
     [
       euiTheme.colors.lightestShade,
       euiTheme.size.l,
       euiTheme.size.m,
-      euiTheme.size.xl,
       euiTheme.size.xxl,
       euiTheme.size.xxxl,
     ]
