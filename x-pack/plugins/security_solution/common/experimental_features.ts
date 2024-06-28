@@ -79,20 +79,13 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsSentinelOneV2Enabled: true,
 
   /** Enables the `get-file` response action for SentinelOne */
-  responseActionsSentinelOneGetFileEnabled: false,
-
-  /**
-   * 8.15
-   * Enables use of agent status service to get agent status information
-   * for endpoint and third-party agents.
-   */
-  agentStatusClientEnabled: false,
+  responseActionsSentinelOneGetFileEnabled: true,
 
   /**
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
    * Enables scan response action on Endpoint
@@ -118,6 +111,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables new notes
    */
   securitySolutionNotesEnabled: false,
+
+  /**
+   * Enables entity and alert previews
+   */
+  entityAlertPreviewEnabled: false,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -187,7 +185,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
-  crowdstrikeDataInAnalyzerEnabled: false,
+  crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
