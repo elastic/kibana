@@ -676,10 +676,12 @@ describe('ruleType', () => {
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        ...dataViewMock.toSpec(),
-        toSpec: () => dataViewMock.toSpec(),
-        toMinimalSpec: () => dataViewMock.toSpec(),
+      ruleServices.getDataViewsService.mockResolvedValueOnce({
+        create: jest.fn().mockResolvedValueOnce({
+          ...dataViewMock.toSpec(),
+          toSpec: () => dataViewMock.toSpec(),
+          toMinimalSpec: () => dataViewMock.toSpec(),
+        }),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {
@@ -715,11 +717,13 @@ describe('ruleType', () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
       const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
-      (ruleServices.dataViews.create as jest.Mock).mockResolvedValueOnce({
-        ...dataViewMock.toSpec(),
-        toSpec: () => dataViewMock.toSpec(),
-        getTimeField: () => dataViewMock.fields[1],
-        toMinimalSpec: () => dataViewMock.toSpec(),
+      ruleServices.getDataViewsService.mockResolvedValueOnce({
+        create: jest.fn().mockResolvedValueOnce({
+          ...dataViewMock.toSpec(),
+          toSpec: () => dataViewMock.toSpec(),
+          getTimeField: () => dataViewMock.fields[1],
+          toMinimalSpec: () => dataViewMock.toSpec(),
+        }),
       });
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementation((name: string) => {
         if (name === 'index') {

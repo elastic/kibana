@@ -339,23 +339,21 @@ export class TaskRunner<
         taskInstance: this.taskInstance,
       })
     );
-    const executorServices = await withAlertingSpan('alerting:get-executor-services', () =>
-      getExecutorServices({
-        context: this.context,
-        fakeRequest,
-        abortController: this.searchAbortController,
-        logger: this.logger,
-        ruleMonitoringService: this.ruleMonitoring,
-        ruleResultService: this.ruleResult,
-        ruleData: {
-          name: rule.name,
-          alertTypeId: rule.alertTypeId,
-          id: rule.id,
-          spaceId,
-        },
-        ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
-      })
-    );
+    const executorServices = getExecutorServices({
+      context: this.context,
+      fakeRequest,
+      abortController: this.searchAbortController,
+      logger: this.logger,
+      ruleMonitoringService: this.ruleMonitoring,
+      ruleResultService: this.ruleResult,
+      ruleData: {
+        name: rule.name,
+        alertTypeId: rule.alertTypeId,
+        id: rule.id,
+        spaceId,
+      },
+      ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
+    });
 
     const {
       state: updatedRuleTypeState,

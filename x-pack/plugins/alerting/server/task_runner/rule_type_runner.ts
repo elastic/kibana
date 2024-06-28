@@ -14,6 +14,7 @@ import {
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 import { IAlertsClient } from '../alerts_client/types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithReason } from '../lib';
@@ -203,6 +204,7 @@ export class RuleTypeRunner<
         };
 
         let executorResult: { state: RuleState } | undefined;
+        let wrappedSearchSourceClientCache: WrappedSearchSourceClient | undefined;
         try {
           const ctx = {
             type: 'alert',
@@ -219,12 +221,18 @@ export class RuleTypeRunner<
                 services: {
                   alertFactory: alertsClient.factory(),
                   alertsClient: alertsClient.client(),
-                  dataViews: executorServices.dataViews,
+                  getDataViewsService: executorServices.getDataViewsService,
                   ruleMonitoringService: executorServices.ruleMonitoringService,
                   ruleResultService: executorServices.ruleResultService,
                   savedObjectsClient: executorServices.savedObjectsClient,
                   scopedClusterClient: executorServices.wrappedScopedClusterClient.client(),
-                  searchSourceClient: executorServices.wrappedSearchSourceClient.searchSourceClient,
+                  getSearchSourceClient: async () => {
+                    if (!wrappedSearchSourceClientCache) {
+                      wrappedSearchSourceClientCache =
+                        await executorServices.getWrappedSearchSourceClient();
+                    }
+                    return wrappedSearchSourceClientCache.searchSourceClient;
+                  },
                   share: this.options.context.share,
                   shouldStopExecution: () => this.cancelled,
                   shouldWriteAlerts: () =>
@@ -306,10 +314,11 @@ export class RuleTypeRunner<
         context.alertingEventLogger.setExecutionSucceeded(
           `rule executed: ${context.ruleLogPrefix}`
         );
-        context.ruleRunMetricsStore.setSearchMetrics([
-          executorServices.wrappedScopedClusterClient.getMetrics(),
-          executorServices.wrappedSearchSourceClient.getMetrics(),
-        ]);
+        const searchMetrics = [executorServices.wrappedScopedClusterClient.getMetrics()];
+        if (wrappedSearchSourceClientCache) {
+          searchMetrics.push(wrappedSearchSourceClientCache.getMetrics());
+        }
+        context.ruleRunMetricsStore.setSearchMetrics(searchMetrics);
 
         return {
           updatedRuleTypeState: executorResult?.state || undefined,

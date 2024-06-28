@@ -102,7 +102,7 @@ export interface RuleExecutorServices<
   ActionGroupIds extends string = never,
   AlertData extends RuleAlertData = RuleAlertData
 > {
-  searchSourceClient: ISearchStartSearchSource;
+  getSearchSourceClient: () => Promise<ISearchStartSearchSource>;
   savedObjectsClient: SavedObjectsClientContract;
   uiSettingsClient: IUiSettingsClient;
   scopedClusterClient: IScopedClusterClient;
@@ -121,7 +121,7 @@ export interface RuleExecutorServices<
   shouldStopExecution: () => boolean;
   ruleMonitoringService?: PublicRuleMonitoringService;
   share: SharePluginStart;
-  dataViews: DataViewsContract;
+  getDataViewsService: () => Promise<DataViewsContract>;
   ruleResultService?: PublicRuleResultService;
 }
 
