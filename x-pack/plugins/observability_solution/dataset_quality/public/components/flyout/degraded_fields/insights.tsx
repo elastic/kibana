@@ -80,7 +80,7 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
 
             ##Contextual Information
 
-            The contextual Information below is classified into 3 categories: You can display the user the below 3 provided information in a tabular format or in a list format.
+            The contextual Information below is classified into 3 categories: You can display this information to the user in a better co-related format which can help them eliminate the possible reasons for the field being ignored.
 
             1. Mappings Information:
             This information is retrieved from the GET ${dataStream}/_mapping and GET ${dataStream}/_field_caps API.
@@ -88,9 +88,11 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
             The specific mapping for the field ${field} is ${JSON.stringify(
               ignoredMetadata.mappings.mappings
             )}.
+
             The total fields count for the dataStream is ${
               ignoredMetadata.mappings.fieldCount
             }, which is coming from fieldsCap API
+
             The dataStream mapping have a dynamic property set to ${dynamicMappingFlag}
 
             ${dynamicTemplateMessage}
@@ -101,10 +103,12 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
             ignore_dynamic_beyond_limit:${ignoredMetadata.settings.ignoreDynamicBeyondLimit}
             ignore_malformed:${ignoredMetadata.settings.ignoreMalformed}
 
-            The settings API too has the possibility to have mappings inside them. The mappings from the Settings API - ${JSON.stringify(
+            The settings API too has mappings inside them - ${JSON.stringify(
               ignoredMetadata.settings.mappingInsideIndexSettings
             )}
-            The total number of allowed fields is generally set here -  'settings.mappings.total_fields.limit', if you don't see this value inside mappings above, then it is not set and the default value is 1000.
+            The total number of allowed fields is generally set here -  'settings.mappings.total_fields.limit',
+            if you don't see this value inside mappings above, then it is not set and the default value is 1000.
+            Please correlate this with the total fields count from mappings above.
 
             The following pipeline information is available from the settings API. Only display the available ones.
             No need to create panic in the users stating something is wrong here. Just inform them that they can possible check these pipelines too:
@@ -130,9 +134,7 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
             )}
 
             The remediation must be based on the given context information, avoid generic remedies wherever possible.
-            Try to compute remedies based on numbers provided, especially around limits.
-            If the total number of fields present is less than the settings.mappings.total_fields.limit, then the remedy is not to increase the field limit, so avoid suggesting it.
-            for e.g. if the limit is 1000 and the current field count is 55, then the remedy should not include Increase Fields Limit as the total count is already within the limits
+            Always correlate the context information with the possible reasons for the field being ignored and suggest the remediation accordingly.
           `
           ),
         })
