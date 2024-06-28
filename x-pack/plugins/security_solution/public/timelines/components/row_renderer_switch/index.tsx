@@ -39,28 +39,25 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
     selectExcludedRowRendererIds(state, timelineId)
   );
 
-  const [checked, setChecked] = useState(
-    !Object.values(RowRendererId).every((id) => excludedRowRendererIds.includes(id))
+  const areAllRowRenderersExcluded = useMemo(
+    () => Object.values(RowRendererId).every((id) => excludedRowRendererIds.includes(id)),
+    [excludedRowRendererIds]
   );
 
-  const updateExcludedRowRenderers = useCallback(
-    (payload) =>
-      dispatch(
-        setExcludedRowRendererIds({
-          id: timelineId,
-          excludedRowRendererIds: payload,
-        })
-      ),
-    [dispatch, timelineId]
-  );
+  const [checked, setChecked] = useState(!areAllRowRenderersExcluded);
 
   const handleDisableAll = useCallback(() => {
-    updateExcludedRowRenderers(Object.values(RowRendererId));
-  }, [updateExcludedRowRenderers]);
+    dispatch(
+      setExcludedRowRendererIds({
+        id: timelineId,
+        excludedRowRendererIds: Object.values(RowRendererId),
+      })
+    );
+  }, [dispatch, timelineId]);
 
   const handleEnableAll = useCallback(() => {
-    updateExcludedRowRenderers([]);
-  }, [updateExcludedRowRenderers]);
+    dispatch(setExcludedRowRendererIds({ id: timelineId, excludedRowRendererIds: [] }));
+  }, [dispatch, timelineId]);
 
   const onChange = (e: EuiSwitchEvent) => {
     setChecked(e.target.checked);
@@ -77,8 +74,8 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
   );
 
   useEffect(() => {
-    setChecked(!Object.values(RowRendererId).every((id) => excludedRowRendererIds.includes(id)));
-  }, [excludedRowRendererIds]);
+    setChecked(!areAllRowRenderersExcluded);
+  }, [areAllRowRenderersExcluded]);
 
   return (
     <EuiToolTip position="top" content={i18n.EVENT_RENDERERS_SWITCH_WARNING}>
