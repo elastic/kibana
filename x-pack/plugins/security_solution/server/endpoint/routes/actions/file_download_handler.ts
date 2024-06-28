@@ -66,11 +66,12 @@ export const getActionFileDownloadRouteHandler = (
 
   return async (context, req, res) => {
     const { action_id: actionId, file_id: fileId } = req.params;
+    const coreContext = await context.core;
 
     try {
-      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const esClient = coreContext.elasticsearch.client.asInternalUser;
       const { agentType } = await getActionAgentType(esClient, actionId);
-      const user = endpointContext.service.security?.authc.getCurrentUser(req);
+      const user = coreContext.security.authc.getCurrentUser();
       const casesClient = await endpointContext.service.getCasesClient(req);
       const connectorActions = (await context.actions).getActionsClient();
       const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {

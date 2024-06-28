@@ -12,7 +12,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_PREPACKAGED_URL } from '../../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../../plugin';
 import type { ConfigType } from '../../../../../config';
 
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
@@ -27,8 +26,7 @@ export { installPrepackagedTimelines } from './helpers';
 
 export const installPrepackedTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
+  config: ConfigType
 ) => {
   router.versioned
     .post({
@@ -49,7 +47,7 @@ export const installPrepackedTimelinesRoute = (
       },
       async (context, request, response) => {
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const prepackagedTimelineStatus = await checkTimelinesStatus(frameworkRequest);
           const [validatedprepackagedTimelineStatus, prepackagedTimelineStatusError] = validate(
             prepackagedTimelineStatus,

@@ -10,7 +10,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { PINNED_EVENT_URL } from '../../../../../common/constants';
 
-import type { SetupPlugins } from '../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../..';
 
@@ -22,8 +21,7 @@ import { persistPinnedEventOnTimeline } from '../../saved_object/pinned_events';
 
 export const persistPinnedEventRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
+  config: ConfigType
 ) => {
   router.versioned
     .patch({
@@ -44,7 +42,7 @@ export const persistPinnedEventRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const frameworkRequest = await buildFrameworkRequest(context, request);
           const { eventId } = request.body;
           const pinnedEventId = request.body?.pinnedEventId ?? null;
           const timelineId = request.body?.timelineId ?? null;
