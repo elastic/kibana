@@ -52,6 +52,13 @@ import type {
 } from '../lib/types';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
+const getInvalidAgentsWarning = (invalidAgents: string[]) =>
+  invalidAgents.length
+    ? `The following agent ids are not valid: ${JSON.stringify(
+        invalidAgents
+      )} and will not be included in action request`
+    : '';
+
 export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
 
@@ -69,11 +76,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const invalidIds = ids.filter((id) => !validIds.includes(id));
 
     if (invalidIds.length) {
-      this.log.warn(
-        `The following agent ids are not valid: ${JSON.stringify(
-          invalidIds
-        )} and would not be included in action request.`
-      );
+      this.log.warn(getInvalidAgentsWarning(invalidIds));
     }
 
     return {
@@ -127,6 +130,15 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       }
     }
 
+    // Append warning message to comment if there are invalid agents
+    const commentMessage = actionReq.comment ? actionReq.comment : '';
+    const warningMessage = `(WARNING: ${getInvalidAgentsWarning(validatedAgents.invalid)})`;
+    const comment = validatedAgents.invalid.length
+      ? commentMessage
+        ? `${commentMessage}. ${warningMessage}`
+        : warningMessage
+      : actionReq.comment;
+
     // Write action to endpoint index
     await this.writeActionRequestToEndpointIndex({
       ...actionReq,
@@ -137,18 +149,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       hosts,
       actionId,
       command,
-      comment: validatedAgents.invalid.length
-        ? `${actionReq.comment}; WARNING: The following agent ids are not valid: ${JSON.stringify(
-            validatedAgents.invalid
-          )} and would not be included in action request.`
-        : actionReq.comment,
+      comment,
     });
 
     // Update cases
     await this.updateCases({
       command,
       actionId,
-      comment: actionReq.comment,
+      comment,
       caseIds: actionReq.case_ids,
       alertIds: actionReq.alert_ids,
       hosts: validatedAgents.valid.map((hostId) => {

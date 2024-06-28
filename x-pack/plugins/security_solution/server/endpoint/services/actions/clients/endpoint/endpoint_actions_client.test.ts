@@ -43,7 +43,7 @@ describe('EndpointActionsClient', () => {
     );
 
     expect(classConstructorOptions.endpointService.createLogger().warn).toHaveBeenCalledWith(
-      'The following agent ids are not valid: ["invalid-id"] and would not be included in action request.'
+      'The following agent ids are not valid: ["invalid-id"] and will not be included in action request'
     );
   });
 
@@ -100,7 +100,7 @@ describe('EndpointActionsClient', () => {
             data: {
               command: 'isolate',
               comment:
-                'test comment; WARNING: The following agent ids are not valid: ["invalid-id"] and would not be included in action request.',
+                'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
               parameters: undefined,
             },
             expiration: expect.any(String),
@@ -159,7 +159,10 @@ describe('EndpointActionsClient', () => {
 
   it('should update cases for valid agent ids', async () => {
     await endpointActionsClient.isolate(
-      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      responseActionsClientMock.createIsolateOptions({
+        endpoint_ids: ['1-2-3'],
+        case_ids: ['case-a'],
+      })
     );
 
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
@@ -170,6 +173,39 @@ describe('EndpointActionsClient', () => {
           externalReferenceMetadata: {
             command: 'isolate',
             comment: 'test comment',
+            targets: [
+              {
+                agentType: 'endpoint',
+                endpointId: '1-2-3',
+                hostname: 'Host-ku5jy6j0pw',
+              },
+            ],
+          },
+          externalReferenceStorage: {
+            type: 'elasticSearchDoc',
+          },
+          owner: 'securitySolution',
+          type: 'externalReference',
+        },
+      ],
+      caseId: 'case-a',
+    });
+  });
+
+  it('should update cases for valid/invalid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+    );
+
+    expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
+      attachments: [
+        {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: expect.any(String),
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment:
+              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
             targets: [
               {
                 agentType: 'endpoint',
@@ -208,6 +244,7 @@ describe('EndpointActionsClient', () => {
       { meta: true }
     );
   });
+
   it('should create an action with error when agents are invalid', async () => {
     // @ts-expect-error mocking this for testing purposes
     endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({
