@@ -38,4 +38,11 @@ export const MODELS: ModelProvider[] = [
     promptTokenLimit: 200000,
     provider: LLMs.bedrock,
   },
+  {
+    name: 'Gemini 1.5 Pro',
+    model: 'gemini-1.5-pro-001',
+    // someone check this
+    promptTokenLimit: 200000,
+    provider: LLMs.gemini,
+  },
 ];
