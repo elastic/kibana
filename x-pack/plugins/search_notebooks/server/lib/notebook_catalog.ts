@@ -116,7 +116,6 @@ export const DEFAULT_NOTEBOOK_CATALOG: NotebookCatalog = {
       '03_elser',
       '04_multilingual',
     ],
-    ml: ['03_elser', '02_hybrid_search', '04_multilingual'],
   },
 };
 export const NOTEBOOKS_MAP: Record<string, NotebookInformation> =
