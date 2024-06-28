@@ -45,7 +45,7 @@ fi
 
 echo "--- Archive Kibana Distribution"
 version="$(jq -r '.version' package.json)"
-linuxBuild="kibana-$version-SNAPSHOT-linux-x86_64.tar.gz"
+linuxBuild="$KIBANA_DIR/target/kibana-$version-SNAPSHOT-linux-x86_64.tar.gz"
 installDir="$KIBANA_DIR/install/kibana"
 mkdir -p "$installDir"
 tar -xzf "$linuxBuild" -C "$installDir" --strip=1
