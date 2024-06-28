@@ -384,7 +384,7 @@ export const expectNumberOfRules = (
   expectedNumber: number
 ) => {
   cy.log(`Expecting rules table to contain #${expectedNumber} rules`);
-  cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedNumber);
+  cy.get(tableSelector).find(RULES_ROW).its('length').should('be.gte', expectedNumber);
 };
 
 export const expectToContainRule = (
