@@ -7,6 +7,8 @@
 
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import moment from 'moment';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+
 import {
   REQUIRED_FOR_ATTACK_DISCOVERY,
   addGenerationInterval,
@@ -20,7 +22,6 @@ import {
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { AttackDiscoveryDataClient } from '../../ai_assistant_data_clients/attack_discovery';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { KibanaRequest } from '@kbn/core-http-server';
@@ -87,7 +88,6 @@ const mockApiConfig = {
 
 const mockCurrentAd = transformESSearchToAttackDiscovery(getAttackDiscoverySearchEsMock())[0];
 
-const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as unknown as KibanaRequest<
   unknown,
@@ -114,14 +114,14 @@ describe('helpers', () => {
   describe('getAssistantToolParams', () => {
     const alertsIndexPattern = '.alerts-security.alerts-default';
     const esClient = elasticsearchClientMock.createElasticsearchClient();
+    const actionsClient = actionsClientMock.create();
     const langChainTimeout = 1000;
     const latestReplacements = {};
     const llm = new ActionsClientLlm({
-      actions: mockActions,
+      actionsClient,
       connectorId: 'test-connecter-id',
       llmType: 'bedrock',
       logger: mockLogger,
-      request: mockRequest,
       temperature: 0,
       timeout: 580000,
     });
@@ -129,7 +129,7 @@ describe('helpers', () => {
     const size = 20;
 
     const mockParams = {
-      actions: {} as unknown as ActionsPluginStart,
+      actionsClient,
       alertsIndexPattern: 'alerts-*',
       anonymizationFields: [{ id: '1', field: 'field1', allowed: true, anonymized: true }],
       apiConfig: mockApiConfig,
@@ -170,7 +170,7 @@ describe('helpers', () => {
       ];
 
       const result = getAssistantToolParams({
-        actions: mockParams.actions,
+        actionsClient,
         alertsIndexPattern,
         apiConfig: mockApiConfig,
         anonymizationFields,
@@ -205,7 +205,7 @@ describe('helpers', () => {
       const anonymizationFields = undefined;
 
       const result = getAssistantToolParams({
-        actions: mockParams.actions,
+        actionsClient,
         alertsIndexPattern,
         apiConfig: mockApiConfig,
         anonymizationFields,

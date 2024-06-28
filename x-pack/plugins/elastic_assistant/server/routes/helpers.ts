@@ -7,6 +7,7 @@
 
 import {
   AnalyticsServiceSetup,
+  IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
@@ -23,12 +24,13 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
+import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
 import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
-import { getLlmType } from './utils';
+import { buildResponse, getLlmType } from './utils';
 import {
   AgentExecutorParams,
   AssistantDataClients,
@@ -607,4 +609,70 @@ export const updateConversationWithUserInput = async ({
     });
   }
   return updatedConversation;
+};
+
+interface PerformChecksParams {
+  authenticatedUser?: boolean;
+  capability?: AssistantFeatureKey;
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >;
+  license?: boolean;
+  request: KibanaRequest;
+  response: KibanaResponseFactory;
+}
+
+/**
+ * Helper to perform checks for authenticated user, capability, and license. Perform all or one
+ * of the checks by providing relevant optional params. Check order is license, authenticated user,
+ * then capability.
+ *
+ * @param authenticatedUser - Whether to check for an authenticated user
+ * @param capability - Specific capability to check if enabled, e.g. `assistantModelEvaluation`
+ * @param context - Route context
+ * @param license - Whether to check for a valid license
+ * @param request - Route KibanaRequest
+ * @param response - Route KibanaResponseFactory
+ */
+export const performChecks = ({
+  authenticatedUser,
+  capability,
+  context,
+  license,
+  request,
+  response,
+}: PerformChecksParams): IKibanaResponse | undefined => {
+  const assistantResponse = buildResponse(response);
+
+  if (license) {
+    if (!hasAIAssistantLicense(context.licensing.license)) {
+      return response.forbidden({
+        body: {
+          message: UPGRADE_LICENSE_MESSAGE,
+        },
+      });
+    }
+  }
+
+  if (authenticatedUser) {
+    if (context.elasticAssistant.getCurrentUser() == null) {
+      return assistantResponse.error({
+        body: `Authenticated user not found`,
+        statusCode: 401,
+      });
+    }
+  }
+
+  if (capability) {
+    const pluginName = getPluginNameFromRequest({
+      request,
+      defaultPluginName: DEFAULT_PLUGIN_NAME,
+    });
+    const registeredFeatures = context.elasticAssistant.getRegisteredFeatures(pluginName);
+    if (!registeredFeatures[capability]) {
+      return response.notFound();
+    }
+  }
+
+  return undefined;
 };

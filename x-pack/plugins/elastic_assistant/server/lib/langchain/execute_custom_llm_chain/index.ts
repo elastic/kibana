@@ -17,9 +17,9 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
+import { MessagesPlaceholder } from '@langchain/core/prompts';
 import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
-import { MessagesPlaceholder } from '@langchain/core/prompts';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
