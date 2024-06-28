@@ -15,14 +15,14 @@ import { getTimeSeriesColor, ChartType } from '../../../shared/charts/helper/get
 import { TimeseriesChartWithContext } from '../../../shared/charts/timeseries_chart_with_context';
 import { yLabelAsPercent } from '../../../../../common/utils/formatters';
 
-type LogRateReturnType =
-  APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries'>;
+type LogErrorRateReturnType =
+  APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries'>;
 
-const INITIAL_STATE: LogRateReturnType = {
+const INITIAL_STATE: LogErrorRateReturnType = {
   currentPeriod: [],
 };
 
-export function LogRateChart({ height }: { height: number }) {
+export function LogErrorRateChart({ height }: { height: number }) {
   const {
     query: { rangeFrom, rangeTo, environment, kuery },
     path: { serviceName },
@@ -33,7 +33,7 @@ export function LogRateChart({ height }: { height: number }) {
     (callApmApi) => {
       if (start && end) {
         return callApmApi(
-          'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries',
+          'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries',
           {
             params: {
               path: {
@@ -52,15 +52,15 @@ export function LogRateChart({ height }: { height: number }) {
     },
     [environment, kuery, serviceName, start, end]
   );
-  const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_RATE);
+  const { currentPeriodColor } = getTimeSeriesColor(ChartType.LOG_ERROR_RATE);
 
   const timeseries = [
     {
       data: data?.currentPeriod?.[serviceName] ?? [],
       type: 'linemark',
       color: currentPeriodColor,
-      title: i18n.translate('xpack.apm.logs.chart.logRate', {
-        defaultMessage: 'Log Rate',
+      title: i18n.translate('xpack.apm.logs.chart.logsErrorRate', {
+        defaultMessage: 'Log Error Rate',
       }),
     },
   ];
@@ -71,8 +71,8 @@ export function LogRateChart({ height }: { height: number }) {
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h2>
-              {i18n.translate('xpack.apm.logRate', {
-                defaultMessage: 'Log rate',
+              {i18n.translate('xpack.apm.logErrorRate', {
+                defaultMessage: 'Log error rate',
               })}
             </h2>
           </EuiTitle>
@@ -80,7 +80,7 @@ export function LogRateChart({ height }: { height: number }) {
       </EuiFlexGroup>
 
       <TimeseriesChartWithContext
-        id="logRate"
+        id="logErrorRate"
         height={height}
         showAnnotations={false}
         fetchStatus={status}

@@ -22,6 +22,15 @@ export interface LogsErrorRateTimeseries {
   kuery?: string;
 }
 
+interface AggFieldBucket {
+  doc_count_error_upper_bound: number;
+  sum_other_doc_count: number;
+  buckets: Array<{
+    key?: string;
+    doc_count?: string;
+  }>;
+}
+
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
@@ -31,6 +40,7 @@ interface LogsErrorRateTimeseriesHistogram {
   >;
   doc_count: number;
   key: string;
+  logErrors: AggFieldBucket;
 }
 
 interface LogRateQueryAggregation {
@@ -86,7 +96,7 @@ export function createGetLogErrorRateTimeseries(params: RegisterServicesParams) 
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                fixed_interval: `1m`,
+                fixed_interval: `${intervalString}s`,
                 min_doc_count: 0,
                 extended_bounds: {
                   min: timeFrom,

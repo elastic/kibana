@@ -22,6 +22,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { AddAPMCallOut } from './add_apm_callout';
 import { LogRateChart } from '../charts/log_rate_chart';
+import { LogErrorRateChart } from '../charts/log_error_rate_chart';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -58,7 +59,7 @@ export function LogsServiceOverview() {
                 <LogRateChart height={400} />
               </EuiFlexItem>
               <EuiFlexItem grow={4}>
-                <LogRateChart height={400} />
+                <LogErrorRateChart height={400} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
