@@ -7,29 +7,35 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { SerializedHotPhase } from '../../../../../common/types';
+import { SearchableSnapshot } from './searchable_snapshot';
+import { Readonly } from './readonly';
+import { SerializedColdPhase } from '../../../../../common/types';
+
 import { i18nTexts } from '../../edit_policy/i18n_texts';
-import { Rollover } from './rollover';
-import { Forcemerge } from './forcemerge';
-import { Shrink } from './shrink';
+import { MinAge } from './min_age';
 import { Downsample } from './downsample';
 import { IndexPriority } from './index_priority';
-import { Readonly } from './readonly';
-import { SearchableSnapshot } from './searchable_snapshot';
+import { Replicas } from './replicas';
+import { DataAllocation } from './data_allocation';
 
-export const HotPhase = ({ phase }: { phase: SerializedHotPhase }) => {
+export const ColdPhase = ({ phase }: { phase: SerializedColdPhase }) => {
   return (
     <>
       <EuiTitle size="s">
-        <h2>{i18nTexts.editPolicy.titles.hot}</h2>
+        <h2>{i18nTexts.editPolicy.titles.cold}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <Rollover rollover={phase.actions.rollover} />
-      <Forcemerge forcemerge={phase.actions.forcemerge} />
-      <Shrink shrink={phase.actions.shrink} />
+      <MinAge minAge={phase.min_age} />
+
       <SearchableSnapshot searchableSnapshot={phase.actions.searchable_snapshot} />
+      <Replicas allocate={phase.actions.allocate} />
       <Downsample downsample={phase.actions.downsample} />
       <Readonly readonly={phase.actions.readonly} />
+      <DataAllocation
+        phase={'warm'}
+        allocate={phase.actions.allocate}
+        migrate={phase.actions.migrate}
+      />
       <IndexPriority indexPriority={phase.actions.set_priority} />
     </>
   );

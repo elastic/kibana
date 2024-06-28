@@ -24,8 +24,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { HotPhase } from './hot_phase';
 import { PolicyFromES } from '../../../../../common/types';
 import { trackUiMetric } from '../../../services/ui_metric';
 import { hasLinkedIndices } from '../../../lib/policies';
@@ -34,8 +32,12 @@ import { UIM_EDIT_CLICK } from '../../../constants';
 import { useIsReadOnly } from '../../../lib/use_is_read_only';
 import { usePolicyListContext } from '../policy_list_context';
 import { DeprecatedPolicyBadge, ManagedPolicyBadge } from '../components';
-import { PhaseDescription } from './phase_description';
+import { HotPhase } from './hot_phase';
+import { WarmPhase } from './warm_phase';
 import { Timeline } from './timeline';
+import { ColdPhase } from './cold_phase';
+import { FrozenPhase } from './frozen_phase';
+import { DeletePhase } from './delete_phase';
 
 export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
   const isReadOnly = useIsReadOnly();
@@ -142,31 +144,17 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
         {policy.policy.phases.warm && (
           <>
             <EuiSpacer size="m" />
-            <PhaseDescription
-              phase={policy.policy.phases.warm}
-              title={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyFlyout.warmPhaseTitle"
-                  defaultMessage="Warm phase"
-                />
-              }
-            />
+            <WarmPhase phase={policy.policy.phases.warm} />
           </>
         )}
 
         {/* Cold phase */}
         {policy.policy.phases.cold && (
           <>
-            <EuiSpacer size="m" />
-            <PhaseDescription
-              phase={policy.policy.phases.cold}
-              title={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyFlyout.coldPhaseTitle"
-                  defaultMessage="Cold phase"
-                />
-              }
-            />
+            <>
+              <EuiSpacer size="m" />
+              <ColdPhase phase={policy.policy.phases.cold} />
+            </>
           </>
         )}
 
@@ -174,15 +162,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
         {policy.policy.phases.frozen && (
           <>
             <EuiSpacer size="m" />
-            <PhaseDescription
-              phase={policy.policy.phases.frozen}
-              title={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyFlyout.frozenPhaseTitle"
-                  defaultMessage="Frozen phase"
-                />
-              }
-            />
+            <FrozenPhase phase={policy.policy.phases.frozen} />
           </>
         )}
 
@@ -190,15 +170,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
         {policy.policy.phases.delete && (
           <>
             <EuiSpacer size="m" />
-            <PhaseDescription
-              phase={policy.policy.phases.delete}
-              title={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.policyFlyout.deletePhaseTitle"
-                  defaultMessage="Delete phase"
-                />
-              }
-            />
+            <DeletePhase phase={policy.policy.phases.delete} />
           </>
         )}
       </EuiFlyoutBody>

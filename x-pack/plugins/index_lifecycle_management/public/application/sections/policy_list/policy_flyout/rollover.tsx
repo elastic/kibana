@@ -20,7 +20,6 @@ import { i18nTexts } from '../../edit_policy/i18n_texts';
 export const Rollover = ({ rollover }: { rollover?: RolloverAction }) => {
   return rollover ? (
     <>
-      <EuiSpacer size="m" />
       <EuiDescriptionListTitle>
         <FormattedMessage
           id="xpack.indexLifecycleMgmt.policyFlyout.rolloverTitle"

@@ -20,7 +20,6 @@ import { i18nTexts as i18nTextsFlyout } from './i18n_texts';
 export const Forcemerge = ({ forcemerge }: { forcemerge?: ForcemergeAction }) => {
   return forcemerge ? (
     <>
-      <EuiSpacer size="m" />
       <EuiDescriptionListTitle>
         <FormattedMessage
           id="xpack.indexLifecycleMgmt.policyFlyout.forcemergeLabel"

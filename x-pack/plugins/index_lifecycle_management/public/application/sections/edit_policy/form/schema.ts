@@ -80,9 +80,7 @@ export const searchableSnapshotFields = {
 };
 
 const numberOfReplicasField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.numberOfReplicasLabel', {
-    defaultMessage: 'Number of replicas',
-  }),
+  label: i18nTexts.editPolicy.numberOfReplicasLabel,
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -95,9 +93,7 @@ const numberOfReplicasField = {
 };
 
 const numberOfShardsField = {
-  label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
-    defaultMessage: 'Number of primary shards',
-  }),
+  label: i18nTexts.editPolicy.shrinkNumberOfShardsLabel,
   defaultValue: 1,
   validations: [
     {
