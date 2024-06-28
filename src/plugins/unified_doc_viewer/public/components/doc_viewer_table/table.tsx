@@ -141,9 +141,10 @@ export const DocViewerTable = ({
   onRemoveColumn,
 }: DocViewRenderProps) => {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
-  const { fieldFormats, storage, uiSettings } = getUnifiedDocViewerServices();
+  const { fieldFormats, storage, uiSettings, fieldsMetadata } = getUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
+  const hasEscFields = useMemo(() => Boolean(dataView.getFieldByName('ecs.version')), [dataView]);
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
@@ -387,9 +388,15 @@ export const DocViewerTable = ({
               isPinned={pinned}
             />
 
-            {isDetails && fieldMapping?.customDescription ? (
+            {isDetails && !!fieldMapping ? (
               <div>
-                <FieldDescription field={fieldMapping} truncate={false} />
+                <FieldDescription
+                  fieldsMetadataService={fieldsMetadata}
+                  field={fieldMapping}
+                  truncate={false}
+                  isEcsField={true}
+                  // isEcsField={hasEscFields}
+                />
               </div>
             ) : null}
           </div>
@@ -409,7 +416,8 @@ export const DocViewerTable = ({
 
       return null;
     },
-    [rows, searchText]
+    // [rows, searchText, fieldsMetadata, hasEscFields]
+    [rows, searchText, fieldsMetadata]
   );
 
   const renderCellPopover = useCallback(

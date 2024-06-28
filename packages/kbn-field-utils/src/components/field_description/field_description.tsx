@@ -8,12 +8,19 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButtonEmpty, EuiTextBlockTruncate, useEuiTheme } from '@elastic/eui';
+import {
+  EuiText,
+  EuiButtonEmpty,
+  EuiTextBlockTruncate,
+  EuiSkeletonText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 const MAX_VISIBLE_LENGTH = 110;
 
-export interface FieldDescriptionProps {
+export interface FieldDescriptionContentProps {
   field: {
     name: string;
     customDescription?: string;
@@ -22,7 +29,44 @@ export interface FieldDescriptionProps {
   truncate?: boolean;
 }
 
+export interface FieldDescriptionProps extends FieldDescriptionContentProps {
+  fieldsMetadataService?: FieldsMetadataPublicStart;
+  isEcsField?: boolean;
+}
+
 export const FieldDescription: React.FC<FieldDescriptionProps> = ({
+  fieldsMetadataService,
+  isEcsField,
+  ...props
+}) => {
+  if (fieldsMetadataService && isEcsField && !props.field.customDescription) {
+    return <EcsFieldDescriptionFallback fieldsMetadataService={fieldsMetadataService} {...props} />;
+  }
+
+  return <FieldDescriptionContent {...props} />;
+};
+
+const EcsFieldDescriptionFallback: React.FC<
+  FieldDescriptionProps & { fieldsMetadataService: FieldsMetadataPublicStart }
+> = ({ fieldsMetadataService, ...props }) => {
+  const { fieldsMetadata, loading } = fieldsMetadataService.useFieldsMetadata({
+    attributes: ['description'],
+    fieldNames: [props.field.name],
+  });
+  return (
+    <EuiSkeletonText isLoading={loading} size="s">
+      <FieldDescriptionContent
+        {...props}
+        field={{
+          ...props.field,
+          customDescription: fieldsMetadata?.[props.field.name]?.description,
+        }}
+      />
+    </EuiSkeletonText>
+  );
+};
+
+export const FieldDescriptionContent: React.FC<FieldDescriptionContentProps> = ({
   field,
   color,
   truncate = true,
