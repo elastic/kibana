@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { MappingDynamicTemplate, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export function getMappingForField(mapping: MappingTypeMapping, path: string) {
   const pathParts = path.split('.');
@@ -26,4 +26,44 @@ export function getMappingForField(mapping: MappingTypeMapping, path: string) {
   }
 
   return currentObject;
+}
+
+export function getPossibleMatchingDynamicTemplates({
+  dynamicTemplates,
+  field,
+}: {
+  dynamicTemplates: Array<Record<string, MappingDynamicTemplate>> | undefined;
+  field: string;
+}) {
+  const possibleMatchingDynamicTemplates = [];
+  if (dynamicTemplates) {
+    for (const dynamicTemplate of dynamicTemplates) {
+      const template = dynamicTemplate[Object.keys(dynamicTemplate)[0]];
+
+      // Check the exact match condition
+      if (template.match && template.match === field) {
+        possibleMatchingDynamicTemplates.push(template);
+        break;
+      }
+
+      // Check the path_match condition
+      if (template.path_match) {
+        const pathMatches = Array.isArray(template.path_match)
+          ? template.path_match
+          : [template.path_match];
+        for (const pathMatch of pathMatches) {
+          if (matchesPattern(pathMatch, field)) {
+            possibleMatchingDynamicTemplates.push(template);
+            break;
+          }
+        }
+      }
+    }
+  }
+  return possibleMatchingDynamicTemplates;
+}
+
+function matchesPattern(pattern: string, value: string): boolean {
+  const regex = new RegExp(`^${pattern.replace(/\*/g, '.*')}$`);
+  return regex.test(value);
 }

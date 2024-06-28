@@ -6,14 +6,15 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { MappingDynamicTemplate, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { createDatasetQualityESClient } from '../../../utils';
-import { getMappingForField } from './utils';
+import { getMappingForField, getPossibleMatchingDynamicTemplates } from './utils';
 
 export interface FieldMappingWithCount {
   fieldCount: number;
   mappings: MappingProperty | Record<string, MappingProperty> | undefined;
   isDynamic: string | boolean | undefined;
+  possibleMatchingDynamicTemplates: MappingDynamicTemplate[];
 }
 
 export async function getFieldMappingsWithCount({
@@ -30,6 +31,12 @@ export async function getFieldMappingsWithCount({
   const wholeMapping = await datasetQualityESClient.mappings({ index: dataStream });
   const indexName = Object.keys(wholeMapping)[0];
 
+  const dynamicTemplates = wholeMapping[indexName].mappings.dynamic_templates;
+  const possibleMatchingDynamicTemplates = getPossibleMatchingDynamicTemplates({
+    dynamicTemplates,
+    field,
+  });
+
   const mappingForField = getMappingForField(wholeMapping[indexName].mappings, field);
 
   const fieldCaps = await datasetQualityESClient.fieldCaps({
@@ -41,5 +48,6 @@ export async function getFieldMappingsWithCount({
     mappings: mappingForField,
     fieldCount: totalFields,
     isDynamic: wholeMapping[indexName].mappings.dynamic,
+    possibleMatchingDynamicTemplates,
   };
 }
