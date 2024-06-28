@@ -85,7 +85,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the ability to send Response actions to Crowdstrike and persist the results
    * in ES.
    */
-  responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+  responseActionsCrowdstrikeManualHostIsolationEnabled: true,
 
   /**
    * Enables scan response action on Endpoint
@@ -185,7 +185,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
-  crowdstrikeDataInAnalyzerEnabled: false,
+  crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
    * Enables experimental JAMF integration data to be available in Analyzer
