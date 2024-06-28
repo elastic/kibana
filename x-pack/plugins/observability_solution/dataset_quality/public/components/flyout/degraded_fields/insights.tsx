@@ -106,11 +106,10 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
             )}
             The total number of allowed fields is generally set here -  'settings.mappings.total_fields.limit', if you don't see this value inside mappings above, then it is not set and the default value is 1000.
 
-            The following pipeline information is available:
+            The following pipeline information is available from the settings API. Only display the available ones.
+            No need to create panic in the users stating something is wrong here. Just inform them that they can possible check these pipelines too:
             default_pipeline:${ignoredMetadata.settings.pipelines.defaultPipeline}
             final_pipeline:${ignoredMetadata.settings.pipelines.finalPipeline}
-
-            You can tell the user to check the pipelines for any issues that might be causing the field to be ignored. Only tell if their values are not undefined
 
             3. Templates Information:
             This information is retrieved from the GET /_index_template/${dataStream} and GET /_component_template/ API.
@@ -118,6 +117,11 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
             The following index template information is available:
             index_template_name:${ignoredMetadata.templates.indexTemplateName}
             does_template_exist:${ignoredMetadata.templates.doesIndexTemplateExists}
+
+            If the index templates exists, inform the user about its name and tell that they exists with this mapping and settings
+            ${JSON.stringify(ignoredMetadata.templates.indexTemplateSettingsAndMappings)}
+
+            See if these is anything in these setting which could cause the problem
 
             The following component template information is available:
             component_template_name:${ignoredMetadata.templates.customComponentTemplates}
