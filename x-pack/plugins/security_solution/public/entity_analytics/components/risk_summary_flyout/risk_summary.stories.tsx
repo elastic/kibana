@@ -33,3 +33,20 @@ export const Default: Story<void> = () => {
     </StorybookProviders>
   );
 };
+
+export const PreviewMode: Story<void> = () => {
+  return (
+    <StorybookProviders>
+      <TestProvider>
+        <div style={{ maxWidth: '300px' }}>
+          <RiskSummary
+            riskScoreData={{ ...mockRiskScoreState, data: [] }}
+            queryId={'testQuery'}
+            recalculatingScore={false}
+            isPreviewMode
+          />
+        </div>
+      </TestProvider>
+    </StorybookProviders>
+  );
+};

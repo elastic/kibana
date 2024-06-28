@@ -32,7 +32,6 @@ import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
 import { setActiveTabTimeline } from '../../../timelines/store/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
@@ -50,6 +49,7 @@ const ActionsContainer = styled.div`
 const ActionsComponent: React.FC<ActionProps> = ({
   ariaRowindex,
   columnValues,
+  disableExpandAction = false,
   ecsData,
   eventId,
   eventIdToNoteIds,
@@ -63,9 +63,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
   refetch,
 }) => {
   const dispatch = useDispatch();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
-  );
   const emptyNotes: string[] = [];
   const { timelineType } = useShallowEqualSelector((state) =>
     isTimelineScope(timelineId) ? selectTimelineById(state, timelineId) : timelineDefaults
@@ -212,15 +209,11 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
-  const showExpandEvent = useMemo(
-    () => !unifiedComponentsInTimelineEnabled || isEventViewer,
-    [isEventViewer, unifiedComponentsInTimelineEnabled]
-  );
 
   return (
     <ActionsContainer>
       <>
-        {showExpandEvent && (
+        {!disableExpandAction && (
           <GuidedOnboardingTourStep
             isTourAnchor={isTourAnchor}
             onClick={onExpandEvent}

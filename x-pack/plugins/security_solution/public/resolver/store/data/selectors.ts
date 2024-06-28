@@ -54,6 +54,10 @@ export function overriddenTimeBounds(state: DataState) {
   return state.overriddenTimeBounds;
 }
 
+export function agentId(state: DataState): string {
+  return state.tree?.lastResponse?.parameters.agentId || '';
+}
+
 /**
  * If a request was made and it threw an error or returned a failure response code.
  */

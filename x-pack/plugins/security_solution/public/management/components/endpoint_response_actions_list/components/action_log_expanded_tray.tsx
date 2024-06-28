@@ -172,6 +172,9 @@ const OutputContent = memo<{ action: MaybeImmutable<ActionDetails>; 'data-test-s
       );
     }
 
+    if (action.agentType === 'crowdstrike') {
+      return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
+    }
     return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
   }
 );

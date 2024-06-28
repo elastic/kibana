@@ -24,10 +24,11 @@ interface HostPanelContentProps {
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
   hostName: string;
   onAssetCriticalityChange: () => void;
   recalculatingScore: boolean;
+  isPreviewMode?: boolean;
 }
 
 export const HostPanelContent = ({
@@ -40,6 +41,7 @@ export const HostPanelContent = ({
   isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
+  isPreviewMode,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
 
@@ -52,6 +54,7 @@ export const HostPanelContent = ({
             recalculatingScore={recalculatingScore}
             queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
           />
           <EuiHorizontalRule />
         </>

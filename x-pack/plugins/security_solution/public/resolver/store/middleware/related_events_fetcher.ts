@@ -37,6 +37,7 @@ export function RelatedEventsFetcher(
 
     const oldParams = last[id];
     const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
+    const agentId = selectors.agentId(state.analyzer[id]);
     const timeRangeFilters =
       detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
@@ -61,6 +62,7 @@ export function RelatedEventsFetcher(
             after: cursor,
             indexPatterns: indices,
             timeRange: timeRangeFilters,
+            agentId,
           });
         } else {
           result = await dataAccessLayer.eventsWithEntityIDAndCategory({
@@ -68,6 +70,7 @@ export function RelatedEventsFetcher(
             category: eventCategory,
             indexPatterns: indices,
             timeRange: timeRangeFilters,
+            agentId,
           });
         }
       } catch (error) {
@@ -84,6 +87,7 @@ export function RelatedEventsFetcher(
             eventCategory,
             cursor: result.nextEvent,
             nodeID,
+            agentId,
           })
         );
       }

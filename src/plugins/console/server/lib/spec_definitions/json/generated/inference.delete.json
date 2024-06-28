@@ -1,10 +1,12 @@
 {
-  "inference.get_model": {
+  "inference.delete": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "dry_run": "__flag__",
+      "force": "__flag__"
     },
     "url_components": {
       "task_type": [
@@ -15,14 +17,13 @@
       ]
     },
     "methods": [
-      "GET"
+      "DELETE"
     ],
     "patterns": [
-      "_inference",
       "_inference/{inference_id}",
       "_inference/{task_type}/{inference_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/get-inference-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-inference-api.html",
     "availability": {
       "stack": true,
       "serverless": true

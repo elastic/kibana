@@ -106,8 +106,6 @@ export interface DataViewsPublicStartDependencies {
   contentManagement: ContentManagementPublicStart;
 }
 
-export type UserIdGetter = () => Promise<string | undefined>;
-
 /**
  * Data plugin public Setup contract
  */

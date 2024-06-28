@@ -44,6 +44,30 @@ describe('<ExpandablePanel />', () => {
       expect(queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID))).not.toBeInTheDocument();
     });
 
+    it('should not render if iconType is not available', () => {
+      const props = {
+        ...defaultProps,
+        header: {
+          ...defaultProps.header,
+          iconType: undefined,
+          headerContent: <>{'test header content'}</>,
+        },
+      };
+      const { getByTestId, queryByTestId } = render(
+        <ThemeProvider theme={mockTheme}>
+          <ExpandablePanel {...props}>{children}</ExpandablePanel>
+        </ThemeProvider>
+      );
+
+      expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(TEST_ID))).toHaveTextContent(
+        'test content'
+      );
+      expect(
+        queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(TEST_ID))
+      ).not.toBeInTheDocument();
+      expect(queryByTestId(EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(TEST_ID))).not.toBeInTheDocument();
+    });
+
     it('should only render left section of panel header when headerContent is not passed', () => {
       const { getByTestId, queryByTestId } = render(
         <ThemeProvider theme={mockTheme}>

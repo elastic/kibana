@@ -1,0 +1,17 @@
+{
+  "simulate.ingest": {
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ingest/_simulate",
+      "_ingest/{index}/_simulate"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/simulate-ingest-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

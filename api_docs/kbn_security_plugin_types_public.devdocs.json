@@ -628,10 +628,6 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/plugin.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/plugin.tsx"
               },

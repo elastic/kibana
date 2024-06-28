@@ -141,7 +141,10 @@ export class WebElementWrapper {
   }
 
   private getActions() {
-    return this.driver.actions();
+    return this.driver.actions({
+      async: undefined,
+      bridge: undefined,
+    });
   }
 
   /**
