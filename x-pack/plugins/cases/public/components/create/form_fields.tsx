@@ -98,7 +98,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           <CaseFormFields
             configurationCustomFields={configuration.customFields}
             isLoading={isSubmitting}
-            setCustomFieldsOptional={true}
+            setCustomFieldsOptional={false}
             isEditMode={false}
             draftStorageKey={draftStorageKey}
           />
