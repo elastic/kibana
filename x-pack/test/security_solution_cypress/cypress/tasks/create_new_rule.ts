@@ -807,8 +807,9 @@ export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreatePro
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
-
+  jobsAsArray.forEach((job) => {
+    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${job}{downArrow}{enter}{esc}`);
+  });
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
   });
@@ -910,7 +911,6 @@ export const enablesAndPopulatesThresholdSuppression = (
 
 export const fillAlertSuppressionFields = (fields: string[]) => {
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).clear();
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
