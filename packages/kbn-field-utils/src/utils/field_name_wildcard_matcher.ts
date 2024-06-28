@@ -22,7 +22,7 @@ const makeRegEx = memoize(function makeRegEx(glob: string) {
     globRegex = '.*' + globRegex + '.*';
   }
 
-  return new RegExp(globRegex.includes('*') ? `^${globRegex}$` : globRegex, 'i');
+  return new RegExp(globRegex.includes('*') ? `^${globRegex}$` : globRegex);
 });
 
 /**
@@ -38,41 +38,47 @@ export const fieldNameWildcardMatcher = (
   if (!fieldSearchHighlight?.trim()) {
     return false;
   }
+  const searchLower = fieldSearchHighlight.toLowerCase();
+  const displayNameLower = field.displayName?.toLowerCase();
+  const nameLower = field.name.toLowerCase();
 
-  const regExp = makeRegEx(fieldSearchHighlight);
+  const regExp = makeRegEx(searchLower);
   const doesWildcardMatch =
-    (!!field.displayName && regExp.test(field.displayName)) || regExp.test(field.name);
+    (!!displayNameLower && regExp.test(displayNameLower)) || regExp.test(nameLower);
   if (doesWildcardMatch) {
     return true;
   }
 
-  return testFuzzySearch(field, fieldSearchHighlight);
+  if (searchLower.length < FUZZY_STRING_MIN_LENGTH) {
+    return false;
+  }
+  return testFuzzySearch({ name: nameLower, displayName: displayNameLower }, searchLower);
 };
 
-const STRING_MIN_LENGTH = 4;
+const FUZZY_STRING_MIN_LENGTH = 4;
 const FUZZY_SEARCH_DISTANCE = 1;
 
 const testFuzzySearch = (field: { name: string; displayName?: string }, searchValue: string) => {
-  if (searchValue.length < STRING_MIN_LENGTH) {
-    return false;
-  }
   return (
-    testFuzzySearchForString(field.displayName?.toLowerCase(), searchValue.toLowerCase()) ||
-    testFuzzySearchForString(field.name.toLowerCase(), searchValue.toLowerCase())
+    testFuzzySearchForString(field.displayName, searchValue) ||
+    (field.name !== field.displayName && testFuzzySearchForString(field.name, searchValue))
   );
 };
 
 const testFuzzySearchForString = (label: string | undefined, searchValue: string) => {
-  if (!label) {
+  if (!label || label.length < searchValue.length - 2) {
     return false;
   }
 
-  const substrLength = Math.max(Math.min(searchValue.length, label.length), STRING_MIN_LENGTH);
+  const substrLength = Math.max(
+    Math.min(searchValue.length, label.length),
+    FUZZY_STRING_MIN_LENGTH
+  );
+
   // performance optimization: instead of building the whole matrix,
   // only iterate through the strings of the substring length +- 1 character,
   // for example for searchValue = 'test' and label = 'test_value',
   // we iterate through 'test', 'est_', 'st_v' (and +- character cases too).
-
   const iterationsCount = label.length - substrLength + 1;
   for (let i = 0; i <= iterationsCount; i++) {
     for (let j = substrLength - 1; j <= substrLength + 1; j++) {
