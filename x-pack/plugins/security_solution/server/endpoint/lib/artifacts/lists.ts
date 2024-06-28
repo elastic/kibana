@@ -163,7 +163,16 @@ export function translateToEndpointExceptions(
   experimentalFeatures: ExperimentalFeatures
 ): TranslatedExceptionListItem[] {
   const entrySet = new Set();
-  const entriesFiltered: TranslatedExceptionListItem[] = [];
+  const deduplicatedItems: TranslatedExceptionListItem[] = [];
+  const storeDeduplicatedItem = (item: TranslatedExceptionListItem) => {
+    const entryHash = createHash('sha256').update(JSON.stringify(item)).digest('hex');
+
+    if (!entrySet.has(entryHash)) {
+      deduplicatedItems.push(item);
+      entrySet.add(entryHash);
+    }
+  };
+
   if (schemaVersion === 'v1') {
     exceptions.forEach((entry) => {
       // For Blocklist, we create a single entry for each blocklist entry item
@@ -178,40 +187,23 @@ export function translateToEndpointExceptions(
             ...entry,
             entries: [blocklistSingleEntry],
           });
-          const entryHash = createHash('sha256')
-            .update(JSON.stringify(translatedItem))
-            .digest('hex');
-          if (!entrySet.has(entryHash)) {
-            entriesFiltered.push(translatedItem);
-            entrySet.add(entryHash);
-          }
+
+          storeDeduplicatedItem(translatedItem);
         });
       } else if (
         experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
         isFilterProcessDescendantsEnabled(entry)
       ) {
-        const translatedItem: TranslatedExceptionListItem = translateProcessDescendantEventFilter(
-          schemaVersion,
-          entry
-        );
-
-        const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
-        if (!entrySet.has(entryHash)) {
-          entriesFiltered.push(translatedItem);
-          entrySet.add(entryHash);
-        }
+        const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
+        storeDeduplicatedItem(translatedItem);
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
-        const entryHash = createHash('sha256').update(JSON.stringify(translatedItem)).digest('hex');
-        if (!entrySet.has(entryHash)) {
-          entriesFiltered.push(translatedItem);
-          entrySet.add(entryHash);
-        }
+        storeDeduplicatedItem(translatedItem);
       }
     });
 
-    return entriesFiltered;
+    return deduplicatedItems;
   } else {
     throw new Error('unsupported schemaVersion');
   }
