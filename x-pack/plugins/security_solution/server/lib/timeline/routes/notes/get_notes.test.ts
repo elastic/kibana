@@ -61,8 +61,8 @@ describe('get notes route', () => {
     jest.doMock('../../saved_object/notes', () => ({
       getAllSavedNote: mockGetAllSavedNote,
     }));
-    const getNotesByDocumentIdsRoute = jest.requireActual('.').getNotesByDocumentIdsRoute;
-    getNotesByDocumentIdsRoute(server.router, createMockConfig(), securitySetup);
+    const getNotesRoute = jest.requireActual('.').getNotesRoute;
+    getNotesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   test('should return a list of notes and the count by default', async () => {
