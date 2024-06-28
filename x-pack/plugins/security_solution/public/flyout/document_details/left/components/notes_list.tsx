@@ -35,8 +35,8 @@ import {
   selectCreateNoteStatus,
   selectDeleteNoteError,
   selectDeleteNoteStatus,
-  selectFetchNotesByDocumentIdError,
-  selectFetchNotesByDocumentIdStatus,
+  selectFetchNotesByDocumentIdsError,
+  selectFetchNotesByDocumentIdsStatus,
   selectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -84,8 +84,9 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
     'unifiedComponentsInTimelineEnabled'
   );
 
-  const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdStatus(state));
-  const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdError(state));
+  const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
+  const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
+
   const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
