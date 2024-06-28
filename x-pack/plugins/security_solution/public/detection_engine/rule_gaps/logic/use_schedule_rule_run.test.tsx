@@ -80,6 +80,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
     expect(mockedUseKibana.services.telemetry.reportManualRuleRunExecute).toHaveBeenCalledWith({
       rangeInMs: timeRange.endDate.diff(timeRange.startDate),
       status: 'success',
+      rulesCount: 1,
     });
   });
 
@@ -102,6 +103,7 @@ describe('When using the `useScheduleRuleRun()` hook', () => {
     expect(mockedUseKibana.services.telemetry.reportManualRuleRunExecute).toHaveBeenCalledWith({
       rangeInMs: timeRange.endDate.diff(timeRange.startDate),
       status: 'error',
+      rulesCount: 1,
     });
   });
 });
