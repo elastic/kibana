@@ -446,7 +446,7 @@ describe('Actions', () => {
       expect(wrapper.find('[data-test-subj="add-note-mock-action"]').exists()).toBeTruthy();
     });
 
-    test('should show notes action if showNotes is false', () => {
+    test('should NOT show notes action if showNotes is false', () => {
       const wrapper = mount(
         <TestProviders>
           <Actions {...defaultProps} showNotes={false} />

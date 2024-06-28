@@ -102,6 +102,10 @@ export interface ActionProps {
   setEventsDeleted: SetEventsDeleted;
   setEventsLoading: SetEventsLoading;
   showCheckboxes: boolean;
+  /**
+   * This prop is used to determine if the notes button should be displayed
+   * as the part of Row Actions
+   * */
   showNotes?: boolean;
   tabType?: string;
   timelineId: string;

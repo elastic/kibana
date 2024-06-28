@@ -31,7 +31,7 @@ export const NOTES_TOOLTIP_ADD_NOTE = i18n.translate(
 export const NOTES_TOOLTIP_ADD_NOTE_SINGLE_NOTE_AVAILABLE = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.addNote.singleNoteAvailableTooltip',
   {
-    defaultMessage: '1 note available. Click to Add more.',
+    defaultMessage: '1 note available. Click to add more.',
   }
 );
 
@@ -44,7 +44,7 @@ export const NOTES_TOOLTIP_ADD_NOTE_MULTIPLE_NOTES_AVAILABLE = ({
     'xpack.securitySolution.timeline.body.notes.addNote.multipleNotesAvailableTooltip',
     {
       values: { notesCount },
-      defaultMessage: '{notesCount} note available. Click to Add more.',
+      defaultMessage: '{notesCount} notes available. Click to add more.',
     }
   );
 

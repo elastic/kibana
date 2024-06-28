@@ -192,7 +192,7 @@ describe('AddEventNoteAction', () => {
       );
     });
 
-    test('should render button correctly', async () => {
+    test('should render button correctly when multiple notes exist', async () => {
       renderTestComponent({ eventId: 'event-1' });
 
       await waitFor(() => {
@@ -206,9 +206,53 @@ describe('AddEventNoteAction', () => {
           isDisabled: false,
           timelineType: TimelineType.default,
           toggleShowNotes: expect.any(Function),
-          toolTip: '2 notes available. Add more',
+          toolTip: '2 notes available. Click to add more.',
           eventId: 'event-1',
           notesCount: 2,
+        }),
+        expect.anything()
+      );
+    });
+
+    test('should render button correctly when single note exists', async () => {
+      renderTestComponent({ eventId: 'event-2' });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeDisabled();
+      });
+
+      expect(NotesButtonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ariaLabel: 'Add Note',
+          'data-test-subj': 'add-note',
+          isDisabled: false,
+          timelineType: TimelineType.default,
+          toggleShowNotes: expect.any(Function),
+          toolTip: '1 note available. Click to add more.',
+          eventId: 'event-2',
+          notesCount: 1,
+        }),
+        expect.anything()
+      );
+    });
+
+    test('should render button correctly when no note exist', async () => {
+      renderTestComponent({ eventId: 'event-3' });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('timeline-notes-button-small-mock')).not.toBeDisabled();
+      });
+
+      expect(NotesButtonMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ariaLabel: 'Add Note',
+          'data-test-subj': 'add-note',
+          isDisabled: false,
+          timelineType: TimelineType.default,
+          toggleShowNotes: expect.any(Function),
+          toolTip: 'Add Note',
+          eventId: 'event-3',
+          notesCount: 0,
         }),
         expect.anything()
       );

@@ -64,7 +64,12 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
     return (
       <NotesButtonContainer>
         <EuiFlexItem grow={false}>
-          {notesCount > 0 ? <NotificationDot className="notes-notification-dot" /> : null}
+          {notesCount > 0 ? (
+            <NotificationDot
+              className="timeline-notes-notification-dot"
+              data-test-subj="timeline-notes-notification-dot"
+            />
+          ) : null}
           <EuiButtonIcon
             aria-label={ariaLabel}
             className={NOTES_BUTTON_CLASS_NAME}
