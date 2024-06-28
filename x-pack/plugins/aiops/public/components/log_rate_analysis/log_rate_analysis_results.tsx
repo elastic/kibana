@@ -186,7 +186,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   );
   const [shouldStart, setShouldStart] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(resultsGroupedOffId);
-  const [skippedColumns, setSkippedColumns] = useState<ColumnNames[]>(['p-value']);
+  const [skippedColumns, setSkippedColumns] = useState<ColumnNames[]>([
+    'p-value',
+    'Baseline rate',
+    'Deviation rate',
+  ]);
 
   const onGroupResultsToggle = (optionId: string) => {
     setToggleIdSelected(optionId);

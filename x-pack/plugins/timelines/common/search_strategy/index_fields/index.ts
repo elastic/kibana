@@ -76,17 +76,14 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  */
 export interface BrowserField {
   aggregatable: boolean;
-  category: string;
-  description: string | null;
-  example: string | number | null;
-  fields: Record<string, Partial<BrowserField>>;
+  fields: Record<string, Partial<BrowserField>>; // FIXME: missing in FieldSpec
   format: string;
-  indexes: string[];
+  indexes: string[]; // FIXME: missing in FieldSpec
   name: string;
   searchable: boolean;
   type: string;
   esTypes?: string[];
-  subType?: IFieldSubType;
+  subType?: IFieldSubType; // not sure
   readFromDocValues: boolean;
   runtimeField?: RuntimeField;
 }
