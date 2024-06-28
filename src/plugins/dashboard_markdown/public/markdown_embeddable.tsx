@@ -8,6 +8,8 @@
 
 import {
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiMarkdownEditor,
   EuiMarkdownFormat,
   getDefaultEuiMarkdownParsingPlugins,
@@ -17,6 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { apiCanFocusPanels } from '@kbn/presentation-containers';
 import {
   apiIsOfType,
   getRequiredViewModeSubject,
@@ -27,7 +30,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { MARKDOWN_ID } from './constants';
-import { getDashboardLinksPlugin } from './markdown_dashboard_links_plugin';
+import { getDashboardLinksPlugin } from './dashboard_links/dashboard_links_plugin';
+import { extractDashboardLinkReferences } from './dashboard_links/dashboard_link_references';
 import {
   MarkdownEditorApi,
   MarkdownEditorRuntimeState,
@@ -50,8 +54,8 @@ const EuiMarkdownStyleOverrides = css`
     border-top: 1px solid ${euiThemeVars.euiBorderColor};
     min-height: 40px;
   }
-  .euiMarkdownEditorFooter {
-    padding-right: ${euiThemeVars.euiSizeL};
+  .euiMarkdownEditorFooter__actions {
+    display: none;
   }
   .euiMarkdownEditorToolbar {
     border-bottom: 1px solid ${euiThemeVars.euiBorderColor};
@@ -77,6 +81,13 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
 
     let editBackupContent: string | undefined = state.content;
 
+    const onStopEditing = () => {
+      isEditing$.next(false);
+      if (api.parentApi && apiCanFocusPanels(api.parentApi)) {
+        api.parentApi.setFocusedPanelId(undefined);
+      }
+    };
+
     const api = buildApi(
       {
         ...titlesApi,
@@ -84,6 +95,9 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
         onEdit: async () => {
           isEditing$.next(true);
           editBackupContent = content$.getValue();
+          if (api.parentApi && apiCanFocusPanels(api.parentApi)) {
+            api.parentApi.setFocusedPanelId(api.uuid);
+          }
         },
         isEditingEnabled: () => !isEditing$.getValue(),
         getTypeDisplayName: () =>
@@ -91,10 +105,13 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
             defaultMessage: 'Markdown',
           }),
         serializeState: () => {
+          const markdownContent = content$.getValue();
+          const references = extractDashboardLinkReferences(markdownContent);
           return {
+            references,
             rawState: {
               ...serializeTitles(),
-              content: content$.getValue(),
+              content: markdownContent,
             },
           };
         },
@@ -149,32 +166,35 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
               css={css`
                 padding: ${euiThemeVars.euiSizeXS};
                 position: absolute;
+                bottom: 0;
                 right: 0;
                 display: flex;
+                z-index: 10;
               `}
             >
-              <EuiButtonEmpty
-                size="s"
-                color="text"
-                onClick={() => {
-                  isEditing$.next(false);
-                  if (editBackupContent) content$.next(editBackupContent);
-                }}
-              >
-                {i18n.translate('embeddableExamples.euiMarkdownEditor.cancel', {
-                  defaultMessage: 'Cancel',
-                })}
-              </EuiButtonEmpty>
-              <EuiButtonEmpty
-                size="s"
-                color="text"
-                iconType="save"
-                onClick={() => isEditing$.next(false)}
-              >
-                {i18n.translate('embeddableExamples.euiMarkdownEditor.save', {
-                  defaultMessage: 'Save',
-                })}
-              </EuiButtonEmpty>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem>
+                  <EuiButtonEmpty
+                    size="s"
+                    color="text"
+                    onClick={() => {
+                      if (editBackupContent) content$.next(editBackupContent);
+                      onStopEditing();
+                    }}
+                  >
+                    {i18n.translate('embeddableExamples.euiMarkdownEditor.cancel', {
+                      defaultMessage: 'Cancel',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiButtonEmpty size="s" iconType="save" onClick={() => onStopEditing()}>
+                    {i18n.translate('embeddableExamples.euiMarkdownEditor.save', {
+                      defaultMessage: 'Save',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </span>
             <EuiMarkdownEditor
               value={content ?? ''}
@@ -191,7 +211,9 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
           </div>
         ) : (
           <EuiMarkdownFormat
+            className="eui-yScroll"
             css={css`
+              width: 100%;
               padding: ${euiThemeVars.euiSizeM};
             `}
             parsingPluginList={parsingPlugins}

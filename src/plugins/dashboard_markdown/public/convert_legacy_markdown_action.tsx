@@ -16,6 +16,7 @@ import {
   apiHasUniqueId,
   CanAccessViewMode,
   EmbeddableApiContext,
+  getInheritedViewMode,
   HasParentApi,
   HasUniqueId,
   PublishesPanelDescription,
@@ -25,6 +26,7 @@ import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/
 import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import React from 'react';
 import { MARKDOWN_ID } from './constants';
+import { convertLegacyDashboardLinks } from './dashboard_links/dashboard_link_converter';
 
 const CONVERT_LEGACY_MARKDOWN_ACTION_ID = 'CONVERT_LEGACY_MARKDOWN';
 
@@ -67,7 +69,7 @@ export const registerConvertLegacyMarkdownAction = (uiActions: UiActionsStart) =
     showNotification: true,
     MenuItem: ActionMenuItem,
     isCompatible: async ({ embeddable }) => {
-      if (!compatibilityCheck(embeddable)) {
+      if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== 'edit') {
         return false;
       }
       const vis = embeddable.getVis();
@@ -76,10 +78,13 @@ export const registerConvertLegacyMarkdownAction = (uiActions: UiActionsStart) =
     order: 49,
     execute: async ({ embeddable }) => {
       if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
+      const legacyContent = embeddable.getVis().params.markdown;
+      const content = convertLegacyDashboardLinks(legacyContent);
+
       embeddable.parentApi.replacePanel(embeddable.uuid, {
         panelType: MARKDOWN_ID,
         initialState: {
-          content: embeddable.getVis().params.markdown,
+          content,
         },
       });
     },
