@@ -199,6 +199,46 @@ describe('EndpointActionFailureMessage', () => {
   });
 
   describe('when there are multiple agents for the action', () => {
+    it('should not show errors and outputs for each agent grouped by Host/Errors when the agentIds are same', () => {
+      action = {
+        ...action,
+        agents: ['agent-fails-a-lot', 'agent-fails-a-lot'],
+        command: 'scan',
+        isCompleted: true,
+        wasSuccessful: false,
+        hosts: {
+          'agent-fails-a-lot': {
+            name: 'Fails-a-lot',
+          },
+        },
+        errors: ['Error info A', 'Error info B', 'Error info C'],
+        agentState: {
+          'agent-fails-a-lot': {
+            isCompleted: true,
+            wasSuccessful: false,
+            completedAt: new Date().toISOString(),
+            errors: ['Error info A', 'Error info B', 'Error info C'],
+          },
+        },
+        outputs: {
+          'agent-fails-a-lot': {
+            type: 'json',
+            content: {
+              code: 'ra_scan_error_scan-queue-quota',
+            },
+          },
+        },
+      };
+      render();
+      const { getByTestId } = renderResult;
+
+      const errorMessages = getByTestId(testId);
+      expect(errorMessages).not.toBeNull();
+      expect(errorMessages.textContent).toContain(
+        'The following errors were encountered:Too many scans are queued | Error info A | Error info B | Error info C'
+      );
+    });
+
     it('should show errors and outputs for each agent grouped by Host/Errors', () => {
       action = {
         ...action,

@@ -89,7 +89,8 @@ export const EndpointActionFailureMessage = memo<EndpointActionFailureMessagePro
       const errorCount = allAgentErrors
         .map((agentErrorInfo) => agentErrorInfo.errors)
         .flat().length;
-      const isMultiAgentAction = errorCount && action.agents.length > 1;
+
+      const isMultiAgentAction = errorCount && [...new Set(action.agents)].length > 1;
 
       return (
         <div data-test-subj={getTestId('response-action-failure-info')}>
