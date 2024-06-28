@@ -6,15 +6,19 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SearchHit } from '@kbn/es-types';
 import { FieldMappingWithCount, getFieldMappingsWithCount } from './get_datastream_mappings';
 import { DataStreamSettingDetails, getDataStreamSettings } from './get_datastream_settings';
 import { DataStreamTemplateMetadata, getDataStreamTemplates } from './get_datastream_templates';
+import { createDatasetQualityESClient } from '../../../utils';
+import { getIgnoredDc } from './get_datastream_document';
 
 export interface IgnoredMetadataResponse {
   ignoredMetadata: {
     mappings: FieldMappingWithCount;
     settings: DataStreamSettingDetails;
     templates: DataStreamTemplateMetadata;
+    ignoredDocument: SearchHit;
   };
 }
 
@@ -27,18 +31,24 @@ export async function getIgnoredMetadata({
   dataStream: string;
   field: string;
 }): Promise<IgnoredMetadataResponse> {
-  const [mappingsData, settingData, templateData] = await Promise.all([
+  const datasetQualityESClient = createDatasetQualityESClient(esClient);
+  const [mappingsData, settingData, templateData, ignoredDocument] = await Promise.all([
     getFieldMappingsWithCount({
-      esClient,
+      datasetQualityESClient,
       dataStream,
       field,
     }),
     getDataStreamSettings({
-      esClient,
+      datasetQualityESClient,
       dataStream,
     }),
     getDataStreamTemplates({
-      esClient,
+      datasetQualityESClient,
+      dataStream,
+      field,
+    }),
+    getIgnoredDc({
+      datasetQualityESClient,
       dataStream,
       field,
     }),
@@ -49,6 +59,7 @@ export async function getIgnoredMetadata({
       mappings: mappingsData,
       settings: settingData,
       templates: templateData,
+      ignoredDocument,
     },
   };
 }

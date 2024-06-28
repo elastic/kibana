@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { MappingDynamicTemplate, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { createDatasetQualityESClient } from '../../../utils';
 import { getMappingForField, getPossibleMatchingDynamicTemplates } from './utils';
+import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 export interface FieldMappingWithCount {
   fieldCount: number;
@@ -18,16 +17,14 @@ export interface FieldMappingWithCount {
 }
 
 export async function getFieldMappingsWithCount({
-  esClient,
+  datasetQualityESClient,
   dataStream,
   field,
 }: {
-  esClient: ElasticsearchClient;
+  datasetQualityESClient: DatasetQualityESClient;
   dataStream: string;
   field: string;
 }): Promise<FieldMappingWithCount> {
-  const datasetQualityESClient = createDatasetQualityESClient(esClient);
-
   const wholeMapping = await datasetQualityESClient.mappings({ index: dataStream });
   const indexName = Object.keys(wholeMapping)[0];
 

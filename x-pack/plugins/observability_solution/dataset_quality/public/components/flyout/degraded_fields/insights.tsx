@@ -125,7 +125,7 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
             If the index templates exists, inform the user about its name and tell that they exists with this mapping and settings
             ${JSON.stringify(ignoredMetadata.templates.indexTemplateSettingsAndMappings)}
 
-            See if these is anything in these setting which could cause the problem
+            See if these is anything in these setting which could cause the problem.
 
             The following component template information is available:
             component_template_name:${ignoredMetadata.templates.customComponentTemplates}
@@ -133,8 +133,15 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
               ignoredMetadata.templates.customComponentTemplatesSettingsAndMappings
             )}
 
+            4. A sample latest Elasticsearch document with ${field} field ignored:
+            ${JSON.stringify(ignoredMetadata.ignoredDocument)}
+
             The remediation must be based on the given context information, avoid generic remedies wherever possible.
             Always correlate the context information with the possible reasons for the field being ignored and suggest the remediation accordingly.
+            Always consider the provided Sample Document and check it against the 1st 3 points provided to narrow down the root cause.
+
+            At the end when providing "Suggested Remedies:", do not suggest solution which are not related to the context
+            information provided above. Do not suggest checking pipelines in this section here.
           `
           ),
         })

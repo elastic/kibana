@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { IndicesMappingLimitSettings } from '@elastic/elasticsearch/lib/api/types';
-import { createDatasetQualityESClient } from '../../../utils';
+import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 
 export interface DataStreamSettingDetails {
   totalFieldLimit: number | undefined;
@@ -22,14 +21,12 @@ export interface DataStreamSettingDetails {
 }
 
 export async function getDataStreamSettings({
-  esClient,
+  datasetQualityESClient,
   dataStream,
 }: {
-  esClient: ElasticsearchClient;
+  datasetQualityESClient: DatasetQualityESClient;
   dataStream: string;
 }): Promise<DataStreamSettingDetails> {
-  const datasetQualityESClient = createDatasetQualityESClient(esClient);
-
   const wholeSettings = await datasetQualityESClient.settings({ index: dataStream });
   const indexName = Object.keys(wholeSettings)[0];
 

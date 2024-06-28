@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   IndicesIndexSettings,
   IndicesIndexTemplateSummary,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { createDatasetQualityESClient } from '../../../utils';
 import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
 import { getMappingForField } from './utils';
 
@@ -31,16 +29,14 @@ export interface ComponentTemplateMetadata {
 }
 
 export async function getDataStreamTemplates({
-  esClient,
+  datasetQualityESClient,
   dataStream,
   field,
 }: {
-  esClient: ElasticsearchClient;
+  datasetQualityESClient: DatasetQualityESClient;
   dataStream: string;
   field: string;
 }): Promise<DataStreamTemplateMetadata> {
-  const datasetQualityESClient = createDatasetQualityESClient(esClient);
-
   const dataStreamDetails = await datasetQualityESClient.getDataStream({ name: dataStream });
 
   const indexTemplateName = dataStreamDetails.data_streams[0].template;
