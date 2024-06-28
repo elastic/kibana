@@ -24,7 +24,7 @@ describe('utils', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
-        templateDescription: undefined,
+        templateDescription: '',
         title: '',
         description: '',
         templateTags: [],
@@ -57,7 +57,7 @@ describe('utils', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
-        templateDescription: undefined,
+        templateDescription: '',
         fields: null,
       });
 
@@ -115,7 +115,7 @@ describe('utils', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
-        templateDescription: undefined,
+        templateDescription: '',
         customFields: {
           custom_field_1: 'foobar',
           custom_fields_2: '',
@@ -147,7 +147,7 @@ describe('utils', () => {
       const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
-        templateDescription: undefined,
+        templateDescription: '',
         fields: {
           impact: 'high',
           severity: 'low',
@@ -183,7 +183,7 @@ describe('utils', () => {
       const res = removeEmptyFields({
         key: '',
         name: '',
-        templateDescription: undefined,
+        templateDescription: '',
         title: '',
         description: '',
         templateTags: [],
@@ -216,7 +216,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: undefined,
+        templateDescription: '',
         templateTags: [],
         tags: [],
         connectorId: 'none',
@@ -263,7 +263,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: undefined,
+        templateDescription: '',
         templateTags: [],
         title: 'Case title',
         description: 'This is test case',
@@ -300,7 +300,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: undefined,
+        templateDescription: '',
         templateTags: [],
         tags: [],
         connectorId: 'none',
@@ -335,7 +335,7 @@ describe('utils', () => {
       expect(res).toEqual({
         key: 'temlate_1',
         name: 'Template 1',
-        templateDescription: undefined,
+        templateDescription: '',
         templateTags: [],
         tags: [],
         connectorId: 'servicenow-1',

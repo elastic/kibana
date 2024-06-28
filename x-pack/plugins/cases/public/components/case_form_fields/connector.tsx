@@ -13,7 +13,7 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { schema } from '../create/schema';
+import { schema } from './schema';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';

@@ -17,7 +17,7 @@ import type { TemplateFormProps } from './types';
 import type { CasesConfigurationUI } from '../../containers/types';
 
 interface Props {
-  onChange: (state: FormState<TemplateFormProps>) => void;
+  onChange: (state: FormState<TemplateConfiguration, TemplateFormProps>) => void;
   initialValue: TemplateConfiguration | null;
   connectors: ActionConnector[];
   currentConfiguration: CasesConfigurationUI;

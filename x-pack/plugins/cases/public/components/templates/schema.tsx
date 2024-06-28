@@ -22,13 +22,15 @@ import {
   validateMaxLength,
   validateMaxTagsLength,
 } from '../case_form_fields/utils';
-import { schema as CaseFormFieldsSchema } from '../case_form_fields/schema';
+import { schema as caseFormFieldsSchema } from '../case_form_fields/schema';
 const { emptyField, maxLengthField } = fieldValidators;
 
+const nonOptionalFields = ['connectorId', 'fields', 'severity', 'customFields'];
+
 // add optional label to all case form fields
-export const CaseFormFieldsSchemaWithOptionalLabel = Object.fromEntries(
-  Object.entries(CaseFormFieldsSchema).map(([key, value]) => {
-    if (typeof value === 'object') {
+export const caseFormFieldsSchemaWithOptionalLabel = Object.fromEntries(
+  Object.entries(caseFormFieldsSchema).map(([key, value]) => {
+    if (typeof value === 'object' && !nonOptionalFields.includes(key)) {
       const updatedValue = { ...value, labelAppend: OptionalFieldLabel };
       return [key, updatedValue];
     }
@@ -102,16 +104,5 @@ export const schema: FormSchema<TemplateFormProps> = {
       },
     ],
   },
-  connectorId: {
-    label: i18n.CONNECTORS,
-  },
-  fields: {
-    defaultValue: null,
-  },
-  syncAlerts: {
-    helpText: i18n.SYNC_ALERTS_HELP,
-    labelAppend: OptionalFieldLabel,
-    defaultValue: true,
-  },
-  ...CaseFormFieldsSchemaWithOptionalLabel,
+  ...caseFormFieldsSchemaWithOptionalLabel,
 };

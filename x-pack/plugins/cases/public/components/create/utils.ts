@@ -11,6 +11,7 @@ import { GENERAL_CASES_OWNER } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CasesConfigurationUI } from '../../containers/types';
+import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 import { normalizeActionConnector, getNoneConnector } from '../configure_cases/utils';
 import {
   customFieldsFormDeserializer,
@@ -18,7 +19,6 @@ import {
   getConnectorById,
   getConnectorsFormSerializer,
 } from '../utils';
-import type { CreateCaseFormSchema } from './schema';
 
 type GetInitialCaseValueArgs = Partial<Omit<CasePostRequest, 'owner'>> &
   Pick<CasePostRequest, 'owner'>;
@@ -42,7 +42,10 @@ export const getInitialCaseValue = ({
 });
 
 export const trimUserFormData = (
-  userFormData: Omit<CreateCaseFormSchema, 'connectorId' | 'fields' | 'syncAlerts' | 'customFields'>
+  userFormData: Omit<
+    CaseFormFieldsSchemaProps,
+    'connectorId' | 'fields' | 'syncAlerts' | 'customFields'
+  >
 ) => {
   let formData = {
     ...userFormData,
@@ -61,7 +64,7 @@ export const trimUserFormData = (
   return formData;
 };
 
-export const createFormDeserializer = (data: CasePostRequest): CreateCaseFormSchema => {
+export const createFormDeserializer = (data: CasePostRequest): CaseFormFieldsSchemaProps => {
   const { connector, settings, customFields, ...restData } = data;
 
   return {
@@ -76,7 +79,7 @@ export const createFormDeserializer = (data: CasePostRequest): CreateCaseFormSch
 export const createFormSerializer = (
   connectors: ActionConnector[],
   currentConfiguration: CasesConfigurationUI,
-  data: CreateCaseFormSchema
+  data: CaseFormFieldsSchemaProps
 ): CasePostRequest => {
   if (data == null || isEmpty(data)) {
     return getInitialCaseValue({
