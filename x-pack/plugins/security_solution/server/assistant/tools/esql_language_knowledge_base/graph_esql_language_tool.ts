@@ -376,8 +376,8 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { esClient, search, llm } = params;
-    if (!llm) return null;
+    const { chain, esClient, search, llm } = params;
+    if (!llm || !chain) return null;
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
@@ -400,11 +400,17 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
         const app = workflow.compile();
 
         let query;
-
         try {
           query = await app.invoke({ question: input.question }, { recursionLimit: 20 });
         } catch (e) {
-          return 'error';
+          // Fallback to KnowledgeBase tool
+          const result = await chain.invoke(
+            {
+              query: input.question,
+            },
+            cbManager
+          );
+          return result.text;
         }
 
         return query.esqlQuery;

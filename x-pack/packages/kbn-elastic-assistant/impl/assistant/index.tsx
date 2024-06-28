@@ -519,13 +519,6 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedAnonymizationFields,
   ]);
 
-  useEffect(() => {}, [
-    areConnectorsFetched,
-    connectors,
-    conversationsLoaded,
-    currentConversation,
-    isLoading,
-  ]);
 
   const createCodeBlockPortals = useCallback(
     () =>
