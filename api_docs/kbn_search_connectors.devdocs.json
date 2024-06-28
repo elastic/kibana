@@ -23451,13 +23451,10 @@
                       {
                         "parentPluginId": "@kbn/search-connectors",
                         "id": "def-common.NATIVE_CONNECTOR_DEFINITIONS.jira.configuration.account_email.tooltip",
-                        "type": "Uncategorized",
+                        "type": "string",
                         "tags": [],
                         "label": "tooltip",
                         "description": [],
-                        "signature": [
-                          "null"
-                        ],
                         "path": "packages/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,
                         "trackAdoption": false
