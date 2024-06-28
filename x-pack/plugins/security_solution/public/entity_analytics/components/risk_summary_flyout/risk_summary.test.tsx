@@ -134,6 +134,23 @@ describe('RiskSummary', () => {
     expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
   });
 
+  it('risk summary header does not render expand icon when in preview mode', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
+    expect(queryByTestId('riskInputsTitleIcon')).not.toBeInTheDocument();
+  });
+
   it('renders visualization embeddable', () => {
     const { getByTestId } = render(
       <TestProviders>
