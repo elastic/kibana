@@ -7,11 +7,12 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  SavedObjectsErrorHelpers,
   type AuthenticatedUser,
-  type KibanaRequest,
-  type Logger,
   type SecurityServiceStart,
+  AnalyticsServiceStart,
+  KibanaRequest,
+  Logger,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -21,6 +22,7 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -63,6 +65,7 @@ export interface ActionExecutorContext {
   getUnsecuredServices: GetUnsecuredServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
+  analyticsService: AnalyticsServiceStart;
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
@@ -385,7 +388,7 @@ export class ActionExecutor {
         },
       },
       async (span) => {
-        const { actionTypeRegistry, eventLogger } = this.actionExecutorContext!;
+        const { actionTypeRegistry, analyticsService, eventLogger } = this.actionExecutorContext!;
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
@@ -591,6 +594,15 @@ export class ActionExecutor {
                   total_tokens: tokenTracking.total_tokens,
                   prompt_tokens: tokenTracking.prompt_tokens,
                   completion_tokens: tokenTracking.completion_tokens,
+                });
+                analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
+                  actionTypeId,
+                  total_tokens: tokenTracking.total_tokens,
+                  prompt_tokens: tokenTracking.prompt_tokens,
+                  completion_tokens: tokenTracking.completion_tokens,
+                  ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
+                    ? { provider: config?.apiProvider }
+                    : {}),
                 });
               }
             })

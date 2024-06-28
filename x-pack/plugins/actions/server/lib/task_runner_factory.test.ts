@@ -17,6 +17,7 @@ import {
   loggingSystemMock,
   httpServiceMock,
   savedObjectsRepositoryMock,
+  analyticsServiceMock,
   securityServiceMock,
 } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
@@ -97,6 +98,7 @@ const actionExecutorInitializerParams = {
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger,
   inMemoryConnectors: [],
+  analyticsService: analyticsServiceMock.createAnalyticsServiceStart(),
   security: securityServiceMock.createStart(),
 };
 
