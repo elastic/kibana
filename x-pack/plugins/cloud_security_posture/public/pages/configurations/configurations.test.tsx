@@ -266,12 +266,6 @@ describe('<Findings />', () => {
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
-
       await waitFor(() => expect(screen.getByText(/10 findings/i)).toBeInTheDocument());
 
       screen.getByRole('button', {
@@ -301,12 +295,6 @@ describe('<Findings />', () => {
 
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
@@ -343,12 +331,6 @@ describe('<Findings />', () => {
 
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
