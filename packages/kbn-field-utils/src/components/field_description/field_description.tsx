@@ -27,6 +27,7 @@ export interface FieldDescriptionContentProps {
   };
   color?: 'subdued';
   truncate?: boolean;
+  Wrapper?: React.FC<{ children: React.ReactNode }>;
 }
 
 export interface FieldDescriptionProps extends FieldDescriptionContentProps {
@@ -53,13 +54,16 @@ const EcsFieldDescriptionFallback: React.FC<
     attributes: ['description'],
     fieldNames: [props.field.name],
   });
+
+  const escFieldDescription = fieldsMetadata?.[props.field.name]?.description;
+
   return (
     <EuiSkeletonText isLoading={loading} size="s">
       <FieldDescriptionContent
         {...props}
         field={{
           ...props.field,
-          customDescription: fieldsMetadata?.[props.field.name]?.description,
+          customDescription: escFieldDescription ? `ECS: ${escFieldDescription}` : undefined,
         }}
       />
     </EuiSkeletonText>
@@ -70,6 +74,7 @@ export const FieldDescriptionContent: React.FC<FieldDescriptionContentProps> = (
   field,
   color,
   truncate = true,
+  Wrapper,
 }) => {
   const { euiTheme } = useEuiTheme();
   const customDescription = (field?.customDescription || '').trim();
@@ -80,7 +85,7 @@ export const FieldDescriptionContent: React.FC<FieldDescriptionContentProps> = (
     return null;
   }
 
-  return (
+  const result = (
     <div data-test-subj={`fieldDescription-${field.name}`}>
       {isTruncated ? (
         <EuiText color={color} size="xs" className="eui-textBreakWord eui-textLeft">
@@ -129,4 +134,6 @@ export const FieldDescriptionContent: React.FC<FieldDescriptionContentProps> = (
       )}
     </div>
   );
+
+  return Wrapper ? <Wrapper>{result}</Wrapper> : result;
 };
