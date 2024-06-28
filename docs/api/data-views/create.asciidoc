@@ -234,6 +234,9 @@ The API returns the {data-source} object:
 `customLabel`:::
 (Optional, string) Custom label for the field.
 
+`customDescription`:::
+(Optional, string) Custom description for the field. Max length is 300 characters.
+
 `count`:::
 (Optional, number) Popularity count for the field.
 =====
