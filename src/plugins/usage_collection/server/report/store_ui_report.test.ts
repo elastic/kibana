@@ -13,7 +13,6 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { ReportSchemaType } from './schema';
 import { storeUiReport } from './store_ui_report';
 import { usageCountersServiceMock } from '../usage_counters/usage_counters_service.mock';
-import { UI_COUNTERS_SAVED_OBJECT_TYPE } from '../usage_counters';
 
 describe('store_ui_report', () => {
   let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
@@ -23,10 +22,7 @@ describe('store_ui_report', () => {
   beforeEach(() => {
     usageCountersServiceSetup = usageCountersServiceMock.createSetupContract();
     repository = savedObjectsRepositoryMock.create();
-    usageCounterMock = usageCountersServiceSetup.createUsageCounter(
-      'dashboards',
-      UI_COUNTERS_SAVED_OBJECT_TYPE
-    );
+    usageCounterMock = usageCountersServiceSetup.createUsageCounter('dashboards');
     usageCountersServiceSetup.createUsageCounter.mockReturnValue(usageCounterMock);
   });
 
@@ -77,15 +73,12 @@ describe('store_ui_report', () => {
       Array [
         Array [
           "dashboards",
-          "ui-counters",
         ],
         Array [
           "test-app-name",
-          "ui-counters",
         ],
         Array [
           "test-app-name",
-          "ui-counters",
         ],
       ]
     `);
@@ -126,6 +119,7 @@ describe('store_ui_report', () => {
             "counterName": "test-event-name",
             "counterType": "loaded",
             "incrementBy": 1,
+            "source": "ui",
           },
         ],
         Array [
@@ -133,6 +127,7 @@ describe('store_ui_report', () => {
             "counterName": "test-event-name",
             "counterType": "click",
             "incrementBy": 2,
+            "source": "ui",
           },
         ],
       ]

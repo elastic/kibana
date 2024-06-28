@@ -40,10 +40,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   describe('Usage Counters service', () => {
     before(async () => {
       const key = serializeCounterKey({
+        domainId: 'usageCollectionTestPlugin',
         counterName: 'routeAccessed',
         counterType: 'count',
-        domainId: 'usageCollectionTestPlugin',
-        date: Date.now(),
+        source: 'server',
       });
 
       await supertest.delete(`/api/saved_objects/usage-counters/${key}`).set('kbn-xsrf', 'true');

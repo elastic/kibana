@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { USAGE_COUNTERS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type {
   SavedObject,
   SavedObjectsRepository,
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
-import moment from 'moment';
-import { UsageCounters } from '../../common/types';
+import { UsageCounters } from '../../common';
 
 /**
  * The attributes stored in the UsageCounters' SavedObjects
@@ -25,6 +25,8 @@ export interface UsageCountersSavedObjectAttributes {
   counterName: string;
   /** The counter type **/
   counterType: string;
+  /** The source of the event that is being counted: 'server' | 'ui' **/
+  source: string;
   /** Number of times the event has occurred **/
   count: number;
 }
@@ -35,20 +37,14 @@ export interface UsageCountersSavedObjectAttributes {
 export type UsageCountersSavedObject = SavedObject<UsageCountersSavedObjectAttributes>;
 
 /** The Saved Objects type for Usage Counters **/
-export const SERVER_COUNTERS_SAVED_OBJECT_TYPE = 'server-counters';
-export const UI_COUNTERS_SAVED_OBJECT_TYPE = 'ui-counters';
-export type UsageCounterSavedObjectType = 'server-counters' | 'ui-counters';
-export const USAGE_COUNTERS_SAVED_OBJECT_TYPES = [
-  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
-  UI_COUNTERS_SAVED_OBJECT_TYPE,
-];
+export const USAGE_COUNTERS_SAVED_OBJECT_TYPE = 'counter';
 
 export const registerUsageCountersSavedObjectTypes = (
   savedObjectsSetup: SavedObjectsServiceSetup
 ) => {
   savedObjectsSetup.registerType({
+    name: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     indexPattern: USAGE_COUNTERS_SAVED_OBJECT_INDEX,
-    name: SERVER_COUNTERS_SAVED_OBJECT_TYPE,
     hidden: false,
     namespaceType: 'single',
     mappings: {
@@ -57,21 +53,20 @@ export const registerUsageCountersSavedObjectTypes = (
         domainId: { type: 'keyword' },
         counterName: { type: 'keyword' },
         counterType: { type: 'keyword' },
+        source: { type: 'keyword' },
       },
     },
   });
 
+  // DEPRECATED: we keep it just to ensure non-reindex migrations (serverless)
   savedObjectsSetup.registerType({
-    indexPattern: USAGE_COUNTERS_SAVED_OBJECT_INDEX,
-    name: UI_COUNTERS_SAVED_OBJECT_TYPE,
+    name: 'usage-counters',
     hidden: false,
-    namespaceType: 'single',
+    namespaceType: 'agnostic',
     mappings: {
       dynamic: false,
       properties: {
         domainId: { type: 'keyword' },
-        counterName: { type: 'keyword' },
-        counterType: { type: 'keyword' },
       },
     },
   });
@@ -79,58 +74,71 @@ export const registerUsageCountersSavedObjectTypes = (
 
 /**
  * Parameters to the `serializeCounterKey` method
- * @internal used in kibana_usage_collectors
+ * @internal bused in kibana_usage_collectors
  */
-export interface SerializeCounterParams {
+export interface SerializeCounterKeyParams {
   /** The domain ID registered in the UsageCounter **/
   domainId: string;
   /** The counter name **/
   counterName: string;
   /** The counter type **/
   counterType: string;
-  /** The date to which serialize the key **/
-  date: moment.MomentInput;
-  /** The namespace of this counter (optional) */
+  /** The namespace of this counter */
   namespace?: string;
+  /** The source of the event we are counting */
+  source: string;
+  /** The date to which serialize the key (defaults to 'now') **/
+  date?: moment.MomentInput;
 }
 
 /**
  * Generates a key based on the UsageCounter details
  * @internal used in kibana_usage_collectors
- * @param opts {@link SerializeCounterParams}
+ * @param opts {@link SerializeCounterKeyParams}
  */
 export const serializeCounterKey = ({
   domainId,
   counterName,
   counterType,
-  date,
   namespace,
-}: SerializeCounterParams) => {
-  const dayDate = moment(date).format('DDMMYYYY');
-  return `${domainId}:${dayDate}:${counterType}:${counterName}${namespace ? `:${namespace}` : ''}`;
+  source,
+  date,
+}: SerializeCounterKeyParams) => {
+  const dayDate = moment(date).format('YYYYMMDD');
+  // e.g. 'dashboards:viewed:total:ui:20240628'          // namespace-agnostic counters
+  // e.g. 'dashboards:viewed:total:ui:20240628:default'  // namespaced counters
+  const namespaceSuffix = namespace ? `:${namespace}` : '';
+  return `${domainId}:${counterName}:${counterType}:${source}:${dayDate}${namespaceSuffix}`;
 };
 
 export interface StoreCounterParams {
   metric: UsageCounters.v1.CounterMetric;
   soRepository: Pick<SavedObjectsRepository, 'incrementCounter'>;
-  soType: UsageCounterSavedObjectType;
 }
 
-export const storeCounter = async ({ metric, soRepository, soType }: StoreCounterParams) => {
-  const { namespace, counterName, counterType, domainId, incrementBy } = metric;
+export const storeCounter = async ({ metric, soRepository }: StoreCounterParams) => {
+  const { namespace, counterName, counterType, domainId, source, incrementBy } = metric;
+  // same counter key can be used in different namespaces (no need to make namespace part of the key)
   const key = serializeCounterKey({
-    date: moment.now(),
     domainId,
     counterName,
     counterType,
+    source,
+    date: moment.now(),
   });
 
-  return await soRepository.incrementCounter(soType, key, [{ fieldName: 'count', incrementBy }], {
-    namespace,
-    upsertAttributes: {
-      domainId,
-      counterName,
-      counterType,
-    },
-  });
+  return await soRepository.incrementCounter(
+    USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+    key,
+    [{ fieldName: 'count', incrementBy }],
+    {
+      ...(namespace && { namespace }),
+      upsertAttributes: {
+        domainId,
+        counterName,
+        counterType,
+        source,
+      },
+    }
+  );
 };

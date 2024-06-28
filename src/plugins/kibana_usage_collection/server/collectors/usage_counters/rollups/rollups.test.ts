@@ -13,9 +13,7 @@ import type { SavedObjectsFindResult } from '@kbn/core/server';
 
 import {
   type UsageCountersSavedObjectAttributes,
-  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPES,
-  UI_COUNTERS_SAVED_OBJECT_TYPE,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
 
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
@@ -23,7 +21,7 @@ import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 const createMockSavedObjectDoc = (
   updatedAt: moment.Moment,
   id: string,
-  type: string = SERVER_COUNTERS_SAVED_OBJECT_TYPE
+  type: string = USAGE_COUNTERS_SAVED_OBJECT_TYPE
 ) =>
   ({
     id,
@@ -33,6 +31,7 @@ const createMockSavedObjectDoc = (
       counterName: 'testName',
       counterType: 'count',
       domainId: 'testDomain',
+      source: 'server',
     },
     references: [],
     updated_at: updatedAt.format(),
@@ -95,7 +94,7 @@ describe('rollUsageCountersIndices', () => {
   it('does not delete any documents on empty saved objects', async () => {
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
-        case USAGE_COUNTERS_SAVED_OBJECT_TYPES:
+        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: [], total: 0, page, per_page: perPage };
         default:
           throw new Error(`Unexpected type [${type}]`);
@@ -115,13 +114,13 @@ describe('rollUsageCountersIndices', () => {
       createMockSavedObjectDoc(
         moment().subtract(6, 'days'),
         'doc-id-3',
-        UI_COUNTERS_SAVED_OBJECT_TYPE
+        USAGE_COUNTERS_SAVED_OBJECT_TYPE
       ),
     ];
 
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
-        case USAGE_COUNTERS_SAVED_OBJECT_TYPES:
+        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: mockSavedObjects, total: 0, page, per_page: perPage };
         default:
           throw new Error(`Unexpected type [${type}]`);
@@ -132,12 +131,12 @@ describe('rollUsageCountersIndices', () => {
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(2);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
       1,
-      SERVER_COUNTERS_SAVED_OBJECT_TYPE,
+      USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-1'
     );
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
       2,
-      UI_COUNTERS_SAVED_OBJECT_TYPE,
+      USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-3'
     );
     expect(logger.warn).toHaveBeenCalledTimes(0);
@@ -158,7 +157,7 @@ describe('rollUsageCountersIndices', () => {
 
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {
       switch (type) {
-        case USAGE_COUNTERS_SAVED_OBJECT_TYPES:
+        case USAGE_COUNTERS_SAVED_OBJECT_TYPE:
           return { saved_objects: mockSavedObjects, total: 0, page, per_page: perPage };
         default:
           throw new Error(`Unexpected type [${type}]`);
@@ -172,7 +171,7 @@ describe('rollUsageCountersIndices', () => {
     expect(savedObjectClient.delete).toHaveBeenCalledTimes(1);
     expect(savedObjectClient.delete).toHaveBeenNthCalledWith(
       1,
-      SERVER_COUNTERS_SAVED_OBJECT_TYPE,
+      USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       'doc-id-1'
     );
     expect(logger.warn).toHaveBeenCalledTimes(2);

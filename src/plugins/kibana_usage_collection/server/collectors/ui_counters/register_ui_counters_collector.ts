@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounters } from '@kbn/usage-collection-plugin/common';
 import {
-  UI_COUNTERS_SAVED_OBJECT_TYPE,
   type UsageCollectionSetup,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
 import { type CounterEvent, createCounterFetcher } from '../common/counters';
 
@@ -16,14 +17,17 @@ interface UiCounterEvent {
   appName: string;
   eventName: string;
   counterType: string;
-  lastUpdatedAt?: string;
-  fromTimestamp?: string;
+  lastUpdatedAt: string;
+  fromTimestamp: string;
   total: number;
 }
 
 export interface UiUsageCounters {
   dailyEvents: UiCounterEvent[];
 }
+
+const UI: UsageCounters.v1.CounterEventSource = 'ui';
+const UI_COUNTERS_FILTER = `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.source: ${UI}`;
 
 export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {
   const collector = usageCollection.makeUsageCollector<UiUsageCounters>({
@@ -59,7 +63,7 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
         },
       },
     },
-    fetch: createCounterFetcher(UI_COUNTERS_SAVED_OBJECT_TYPE, toDailyEvents),
+    fetch: createCounterFetcher(UI_COUNTERS_FILTER, toDailyEvents),
     isReady: () => true,
   });
 

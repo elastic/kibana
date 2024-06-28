@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { UsageCounters } from '@kbn/usage-collection-plugin/common';
 import {
   type UsageCollectionSetup,
-  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
 import { type CounterEvent, createCounterFetcher } from '../common/counters';
 
 export interface UsageCounters {
   dailyEvents: CounterEvent[];
 }
+
+const SERVER: UsageCounters.v1.CounterEventSource = 'server';
+const SERVER_COUNTERS_FILTER = `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.source: ${SERVER}`;
 
 export function registerUsageCountersUsageCollector(usageCollection: UsageCollectionSetup) {
   const collector = usageCollection.makeUsageCollector<UsageCounters>({
@@ -50,7 +54,7 @@ export function registerUsageCountersUsageCollector(usageCollection: UsageCollec
         },
       },
     },
-    fetch: createCounterFetcher(SERVER_COUNTERS_SAVED_OBJECT_TYPE, toDailyEvents),
+    fetch: createCounterFetcher(SERVER_COUNTERS_FILTER, toDailyEvents),
     isReady: () => true,
   });
 

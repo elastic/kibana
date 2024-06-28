@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UsageCounters } from '../../common/types';
+import { UsageCounters } from '../../common';
 export type IncrementCounterParams = UsageCounters.v1.IncrementCounterParams;
 
 export type { UsageCountersServiceSetup } from './usage_counters_service';
@@ -13,11 +13,4 @@ export type { UsageCountersSavedObjectAttributes, UsageCountersSavedObject } fro
 export type { IUsageCounter as UsageCounter } from './usage_counter';
 
 export { UsageCountersService } from './usage_counters_service';
-export type { SerializeCounterParams } from './saved_objects';
-export {
-  type UsageCounterSavedObjectType,
-  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
-  UI_COUNTERS_SAVED_OBJECT_TYPE,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPES,
-  serializeCounterKey,
-} from './saved_objects';
+export { serializeCounterKey, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from './saved_objects';

@@ -8,11 +8,11 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { transformRawCounter, createCounterFetcher } from './counters';
-import { rawCounters } from './__fixtures__/counters_saved_objects';
+import { rawServerCounters, rawUiCounters } from './__fixtures__/counters_saved_objects';
 
 describe('transformRawCounter', () => {
   it('transforms usage counters savedObject raw entries', () => {
-    const result = rawCounters.map(transformRawCounter);
+    const result = rawServerCounters.map(transformRawCounter);
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -92,18 +92,25 @@ describe('createCounterFetcher', () => {
     jest.clearAllMocks();
   });
 
-  it('returns saved objects only from usage_counters saved objects', async () => {
+  it('returns saved objects only from a given source', async () => {
     // @ts-expect-error incomplete mock implementation
-    soClientMock.find.mockImplementation(async ({ type }) => {
-      switch (type) {
-        case 'foo-counters':
-          return { saved_objects: rawCounters };
-        default:
-          throw new Error(`unexpected type ${type}`);
+    soClientMock.find.mockImplementation(async ({ type, filter }) => {
+      if (type !== 'counter') {
+        throw new Error(`unexpected type ${type}`);
       }
+
+      if (filter === 'counter.attributes.source: server') {
+        return { saved_objects: rawServerCounters };
+      } else if (filter === 'counter.attributes.source: ui') {
+        return { saved_objects: rawUiCounters };
+      }
+
+      throw new Error(`unexpected filter ${filter}`);
     });
 
-    const fetch = createCounterFetcher('foo-counters', (dailyEvents) => ({ dailyEvents }));
+    const fetch = createCounterFetcher('counter.attributes.source: server', (dailyEvents) => ({
+      dailyEvents,
+    }));
     // @ts-expect-error incomplete mock implementation
     const { dailyEvents } = await fetch({ soClient: soClientMock });
     expect(dailyEvents).toHaveLength(5);

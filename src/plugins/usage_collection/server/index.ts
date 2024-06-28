@@ -23,16 +23,9 @@ export type {
   UsageCountersSavedObjectAttributes,
   IncrementCounterParams,
   UsageCounter,
-  SerializeCounterParams,
 } from './usage_counters';
 
-export {
-  type UsageCounterSavedObjectType,
-  SERVER_COUNTERS_SAVED_OBJECT_TYPE,
-  UI_COUNTERS_SAVED_OBJECT_TYPE,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPES,
-  serializeCounterKey,
-} from './usage_counters';
+export { serializeCounterKey, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from './usage_counters';
 
 export type { UsageCollectionSetup } from './plugin';
 export { config } from './config';

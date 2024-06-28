@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import * as Rx from 'rxjs';
-import type { UsageCounters } from '../../common/types';
-import type { UsageCounterSavedObjectType } from './saved_objects';
+import type { UsageCounters } from '../../common';
 
 export interface UsageCounterParams {
-  soType: UsageCounterSavedObjectType;
   domainId: string;
   counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
 }
@@ -33,28 +30,28 @@ export interface IUsageCounter {
 export class UsageCounter implements IUsageCounter {
   private domainId: string;
   private counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
-  public readonly type: UsageCounterSavedObjectType;
 
-  constructor({ domainId, counter$, soType }: UsageCounterParams) {
+  constructor({ domainId, counter$ }: UsageCounterParams) {
     this.domainId = domainId;
     this.counter$ = counter$;
-    this.type = soType;
   }
 
   public incrementCounter = (params: UsageCounters.v1.IncrementCounterParams) => {
     const {
-      namespace = DEFAULT_NAMESPACE_STRING,
       counterName,
       counterType = 'count',
+      source = 'server', // default behavior before introducing the property
       incrementBy = 1,
+      namespace,
     } = params;
 
     this.counter$.next({
-      namespace,
-      counterName,
       domainId: this.domainId,
+      counterName,
       counterType,
+      source,
       incrementBy,
+      ...(namespace && { namespace }),
     });
   };
 }

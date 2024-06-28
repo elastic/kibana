@@ -11,23 +11,28 @@ import {
   CollectorFetchContext,
   UsageCountersSavedObject,
   UsageCountersSavedObjectAttributes,
+  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
 
 export interface CounterEvent {
   domainId: string;
   counterName: string;
   counterType: string;
-  lastUpdatedAt?: string;
-  fromTimestamp?: string;
+  lastUpdatedAt: string;
+  fromTimestamp: string;
   total: number;
 }
 
-export function createCounterFetcher<T>(type: string, transform: (counters: CounterEvent[]) => T) {
+export function createCounterFetcher<T>(
+  filter: string,
+  transform: (counters: CounterEvent[]) => T
+) {
   return async ({ soClient }: CollectorFetchContext) => {
     const finder = soClient.createPointInTimeFinder<UsageCountersSavedObjectAttributes>({
-      type,
+      type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
       namespaces: ['*'],
       fields: ['count', 'counterName', 'counterType', 'domainId'],
+      filter,
       perPage: 1000,
     });
 
@@ -68,7 +73,7 @@ export function transformRawCounter(
     domainId,
     counterType,
     counterName,
-    lastUpdatedAt,
+    lastUpdatedAt: lastUpdatedAt!,
     fromTimestamp,
     total: count,
   };

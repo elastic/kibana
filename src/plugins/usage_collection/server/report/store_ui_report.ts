@@ -11,11 +11,7 @@ import moment from 'moment';
 import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
 import { storeApplicationUsage } from './store_application_usage';
-import {
-  type UsageCounter,
-  type UsageCountersServiceSetup,
-  UI_COUNTERS_SAVED_OBJECT_TYPE,
-} from '../usage_counters';
+import { type UsageCountersServiceSetup } from '../usage_counters';
 
 export async function storeUiReport(
   internalRepository: ISavedObjectsRepository,
@@ -64,41 +60,17 @@ export async function storeUiReport(
     ...uiCounters.map(async ([, metric]) => {
       const { appName, eventName, total, type } = metric;
 
-      const counter = createOrGetUiCounter(counters, appName);
+      const counter =
+        counters.getUsageCounterByDomainId(appName) ?? counters.createUsageCounter(appName);
 
       counter.incrementCounter({
         counterName: eventName,
         counterType: type,
         incrementBy: total,
+        source: 'ui',
       });
     }),
     // Application Usage
     storeApplicationUsage(internalRepository, appUsages, timestamp),
   ]);
-}
-
-/**
- * Tries to create / fetch a counter by `domainId`.
- * Uses 3 attempts to account for potential race conditions
- */
-function createOrGetUiCounter(
-  counters: UsageCountersServiceSetup,
-  domainId: string,
-  attempts = 3
-): UsageCounter {
-  const counter = counters.getUsageCounterByDomainId(domainId);
-
-  if (counter) {
-    return counter;
-  }
-
-  try {
-    return counters.createUsageCounter(domainId, UI_COUNTERS_SAVED_OBJECT_TYPE);
-  } catch (err) {
-    if (attempts > 0) {
-      return createOrGetUiCounter(counters, domainId, --attempts);
-    } else {
-      throw err;
-    }
-  }
 }
