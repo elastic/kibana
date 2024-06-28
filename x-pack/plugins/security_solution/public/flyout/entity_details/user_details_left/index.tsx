@@ -27,6 +27,7 @@ export interface UserDetailsPanelProps extends Record<string, unknown> {
   isRiskScoreExist: boolean;
   user: UserParam;
   path?: PanelPath;
+  scopeId: string;
 }
 export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'user_details';
@@ -34,9 +35,14 @@ export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'user_details';
 
-export const UserDetailsPanel = ({ isRiskScoreExist, user, path }: UserDetailsPanelProps) => {
+export const UserDetailsPanel = ({
+  isRiskScoreExist,
+  user,
+  path,
+  scopeId,
+}: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
-  const tabs = useTabs(managedUser.data, user.name, isRiskScoreExist);
+  const tabs = useTabs(managedUser.data, user.name, isRiskScoreExist, scopeId);
   const { selectedTabId, setSelectedTabId } = useSelectedTab(isRiskScoreExist, user, tabs, path);
 
   if (managedUser.isLoading) return <FlyoutLoading />;

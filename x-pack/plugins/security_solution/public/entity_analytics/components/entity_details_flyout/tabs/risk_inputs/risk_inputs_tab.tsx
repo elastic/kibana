@@ -14,6 +14,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
+import { RuleLink } from '../../../../../flyout/document_details/shared/components/rule_link';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { formatRiskScore } from '../../../../common';
@@ -40,6 +41,7 @@ import { ActionColumn } from '../../components/action_column';
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
   entityName: string;
+  scopeId: string;
 }
 
 const FIRST_RECORD_PAGINATION = {
@@ -49,7 +51,7 @@ const FIRST_RECORD_PAGINATION = {
 
 export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
 
-export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
+export const RiskInputsTab = ({ entityType, entityName, scopeId }: RiskInputsTabProps) => {
   const { setQuery, deleteQuery } = useGlobalTime();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
@@ -135,7 +137,14 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         truncateText: true,
         mobileOptions: { show: true },
         sortable: true,
-        render: (alert: InputAlert['alert']) => get(ALERT_RULE_NAME, alert),
+        render: (alert: InputAlert['alert'], data) => (
+          <RuleLink
+            ruleName={get(ALERT_RULE_NAME, alert)}
+            id={data._id}
+            indexName={data.input.index}
+            scopeId={scopeId}
+          />
+        ),
       },
       {
         field: 'input.contribution_score',
@@ -153,7 +162,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         render: formatContribution,
       },
     ],
-    []
+    [scopeId]
   );
 
   const [isAssetCriticalityEnabled] = useUiSetting$<boolean>(ENABLE_ASSET_CRITICALITY_SETTING);
