@@ -9,3 +9,5 @@
 export { DragWrapper } from './drag_wrapper';
 
 export { AirdropDragButton } from './airdrop_drag_button';
+
+export { AirdropPopover } from './airdrop_popover';

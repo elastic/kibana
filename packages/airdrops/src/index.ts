@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { DragWrapper, AirdropDragButton } from './components';
+export { DragWrapper, AirdropDragButton, AirdropPopover } from './components';
 
 export { TRANSFER_DATA_TYPE } from './constants';
 

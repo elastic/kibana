@@ -54,6 +54,7 @@ import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { AirdropPluginStart } from '@kbn/airdrop-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import type { DiscoverStartPlugins } from './types';
@@ -77,6 +78,7 @@ export interface UrlTracker {
 
 export interface DiscoverServices {
   aiops?: AiopsPluginStart;
+  airdrop: AirdropPluginStart;
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
@@ -164,6 +166,7 @@ export const buildServices = memoize(
       application: core.application,
       addBasePath: core.http.basePath.prepend,
       analytics: core.analytics,
+      airdrop: plugins.airdrop,
       capabilities: core.application.capabilities,
       chrome: core.chrome,
       core,

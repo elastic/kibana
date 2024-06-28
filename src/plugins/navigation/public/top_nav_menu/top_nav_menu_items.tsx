@@ -22,7 +22,11 @@ export const TopNavMenuItems = ({
   return (
     <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
       {config.map((menuItem: TopNavMenuData, i: number) => {
-        return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
+        return menuItem.renderItem ? (
+          menuItem.renderItem()
+        ) : (
+          <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />
+        );
       })}
     </EuiHeaderLinks>
   );

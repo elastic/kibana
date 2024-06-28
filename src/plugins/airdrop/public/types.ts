@@ -15,10 +15,7 @@ export interface AirdropPluginSetup {}
 export interface AirdropPluginStart {
   isDraggingOver$: Observable<boolean>;
   setIsDragging: (isDragging: boolean) => void;
-  getAirdrop$For: <T extends Record<string, unknown>>(
-    id: string,
-    app?: string
-  ) => Observable<Airdrop<T>>;
+  getAirdrop$For: <T>(id: string, app?: string) => Observable<Airdrop<T>>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

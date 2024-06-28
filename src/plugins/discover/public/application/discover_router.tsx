@@ -14,6 +14,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
+import { AirdropKibanaProvider } from '@kbn/airdrops';
 import { ExperimentalFeatures } from '../../common/config';
 import { ContextAppRoute } from './context';
 import { SingleDocRoute } from './doc';
@@ -44,14 +45,16 @@ export const DiscoverRouter = ({
   return (
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
-        <Router history={history} data-test-subj="discover-react-router">
-          <DiscoverRoutes
-            customizationContext={customizationContext}
-            services={services}
-            history={history}
-            {...routeProps}
-          />
-        </Router>
+        <AirdropKibanaProvider airdrop={services.airdrop}>
+          <Router history={history} data-test-subj="discover-react-router">
+            <DiscoverRoutes
+              customizationContext={customizationContext}
+              services={services}
+              history={history}
+              {...routeProps}
+            />
+          </Router>
+        </AirdropKibanaProvider>
       </EuiErrorBoundary>
     </KibanaContextProvider>
   );

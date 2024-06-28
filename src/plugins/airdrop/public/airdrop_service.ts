@@ -46,10 +46,7 @@ export class AirdropService {
     };
   }
 
-  public getAirdrop$For<T extends Record<string, unknown> = Record<string, unknown>>(
-    id: string,
-    app?: string
-  ) {
+  public getAirdrop$For<T>(id: string, app?: string) {
     return this.airdrop$.asObservable().pipe(
       filter((airdrop): airdrop is Airdrop<T> => {
         if (app && airdrop.app !== app) return false;
