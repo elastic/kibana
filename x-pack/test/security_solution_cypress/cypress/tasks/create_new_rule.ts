@@ -908,14 +908,13 @@ export const enablesAndPopulatesThresholdSuppression = (
   cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
 };
 
-const optionsToComboboxText = (options: string[]) => {
-  return options.map((o) => `${o}{downArrow}{enter}{esc}`).join('');
-};
-
 export const fillAlertSuppressionFields = (fields: string[]) => {
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).clear();
   cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
-  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(optionsToComboboxText(fields));
+  fields.forEach((field) => {
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+  });
 };
 
 export const clearAlertSuppressionFields = () => {
