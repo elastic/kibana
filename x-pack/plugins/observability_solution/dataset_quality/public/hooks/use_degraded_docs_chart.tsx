@@ -160,7 +160,7 @@ export const useDegradedDocsChart = ({ dataStream }: DegradedDocsChartDeps) => {
         return redirectLinkProps.linkProps.href;
       },
       getIconType(): string | undefined {
-        return 'popout';
+        return 'visTable';
       },
       async isCompatible(): Promise<boolean> {
         return true;
