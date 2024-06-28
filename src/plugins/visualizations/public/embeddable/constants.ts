@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
+
 export { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 
 export const COMMON_VISUALIZATION_GROUPING = [
   {
     id: 'visualizations',
-    getDisplayName: () => 'Visualizations',
+    getDisplayName: () =>
+      i18n.translate('visualizations.common.constants.grouping.legacy', {
+        defaultMessage: 'Visualizations',
+      }),
     getIconType: () => {
       return 'visGauge';
     },
