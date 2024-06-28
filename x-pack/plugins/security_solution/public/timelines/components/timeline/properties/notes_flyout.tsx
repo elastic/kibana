@@ -32,7 +32,7 @@ export type NotesFlyoutProps = {
  * z-index override is needed because otherwise NotesFlyout appears below
  * Timeline Modal as they both have same z-index of 1000
  */
-export const NotesFlyoutContainer = styled(EuiFlyout)`
+const NotesFlyoutContainer = styled(EuiFlyout)`
   z-index: ${(props) =>
     ((props.theme as EuiTheme).eui.euiZFlyout.toFixed() ?? 1000) + 2} !important;
 `;
