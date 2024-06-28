@@ -24,7 +24,7 @@ export const ASK_ASSISTANT_DESCRIPTION = i18n.translate(
 export const ASK_ASSISTANT_USER_PROMPT = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantUserPrompt',
   {
-    defaultMessage: 'Fix errors in query',
+    defaultMessage: 'Explain errors in query and generate query where all errors fixed',
   }
 );
 
