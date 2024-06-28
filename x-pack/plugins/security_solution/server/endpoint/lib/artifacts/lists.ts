@@ -26,6 +26,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
@@ -213,16 +214,9 @@ function translateProcessDescendantEventFilter(
   schemaVersion: string,
   entry: ExceptionListItemSchema
 ): TranslatedExceptionListItem {
-  const additionalEntry: ExceptionListItemSchema['entries'][number] = {
-    field: 'event.category',
-    operator: 'included',
-    type: 'match',
-    value: 'process',
-  };
-
   const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
     ...entry,
-    entries: [...entry.entries, additionalEntry],
+    entries: [...entry.entries, PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY],
   }) as TranslatedEntriesOfDescendantOf;
 
   return {
