@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { ANNOTATION_RESOURCES_VERSION, ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import {
@@ -43,7 +44,7 @@ export function createAnnotationsClient(params: {
   function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {
     return ((...args) => {
       if (!license?.hasAtLeast('gold')) {
-        // throw Boom.forbidden('Annotations require at least a gold license or a trial license.');
+        throw Boom.forbidden('Annotations require at least a gold license or a trial license.');
       }
       return fn(...args);
     }) as T;

@@ -12,8 +12,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { CreateAnnotationParams } from '../../../../common/annotations';
 
 export function FillOptions() {
-  const { control, watch } = useFormContext<CreateAnnotationParams>();
-  const isOutside = watch('annotation.style.rect.fill') === 'outside';
+  const { control } = useFormContext<CreateAnnotationParams>();
 
   return (
     <>
@@ -45,41 +44,6 @@ export function FillOptions() {
           )}
         />
       </EuiFormRow>
-      {isOutside && (
-        <>
-          <EuiFormRow
-            label={i18n.translate('xpack.observability.fillOptions.euiFormRow.positionLabel', {
-              defaultMessage: 'Position',
-            })}
-            display="columnCompressed"
-            fullWidth
-          >
-            <Controller
-              defaultValue="top"
-              name="annotation.style.rect.position"
-              control={control}
-              render={({ field }) => (
-                <EuiButtonGroup
-                  buttonSize="compressed"
-                  isFullWidth={true}
-                  id="positionOptions"
-                  idSelected={field.value as string}
-                  onChange={(id) => {
-                    field.onChange(id);
-                  }}
-                  options={positionOptions}
-                  legend={i18n.translate(
-                    'xpack.observability.annotationForm.positionLabel.legend',
-                    {
-                      defaultMessage: 'Position',
-                    }
-                  )}
-                />
-              )}
-            />
-          </EuiFormRow>
-        </>
-      )}
     </>
   );
 }
@@ -95,21 +59,6 @@ const options = [
     id: 'outside',
     label: i18n.translate('xpack.observability.annotationForm.fillOptions.outside', {
       defaultMessage: 'Outside',
-    }),
-  },
-];
-
-const positionOptions = [
-  {
-    id: 'top',
-    label: i18n.translate('xpack.observability.annotationForm.fillOptions.top', {
-      defaultMessage: 'Top',
-    }),
-  },
-  {
-    id: 'bottom',
-    label: i18n.translate('xpack.observability.annotationForm.fillOptions.bottom', {
-      defaultMessage: 'Bottom',
     }),
   },
 ];

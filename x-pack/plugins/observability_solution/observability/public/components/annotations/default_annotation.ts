@@ -36,7 +36,6 @@ export function getDefaultAnnotation({
         },
         rect: {
           fill: 'inside',
-          position: 'top',
         },
       },
     },

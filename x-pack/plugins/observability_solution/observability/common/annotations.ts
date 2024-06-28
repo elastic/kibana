@@ -45,7 +45,6 @@ export const createAnnotationRt = t.intersection([
         }),
         rect: t.partial({
           fill: rectFill,
-          position: rectPosition,
         }),
       }),
     }),

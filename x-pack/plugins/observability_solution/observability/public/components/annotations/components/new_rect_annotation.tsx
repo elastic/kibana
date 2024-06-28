@@ -70,10 +70,6 @@ export function ObsRectAnnotation({
       style={{ fill: color, opacity: 1 }}
       outside={annotationStyle?.rect?.fill === 'outside'}
       outsideDimension={14}
-      groupId="primary"
-      {...(annotationStyle?.rect?.position === 'top' && {
-        groupId: 'secondary',
-      })}
       customTooltip={() => <AnnotationTooltip annotation={annotation} />}
     />
   );
