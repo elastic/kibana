@@ -6,25 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from 'zod';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
+
+/** Intended to cover a wide set of schema configurations */
+export const testSchema = z.object({
+  string: z.string().max(10).min(1),
+  maybeNumber: z.number().max(1000).min(1).optional(),
+  booleanDefault: z.boolean({ description: 'defaults to to true' }).default(true),
+  ipType: z.string().ip({ version: 'v4' }),
+  literalType: z.literal('literallythis'),
+  neverType: z.never(),
+  map: z.record(z.string(), z.string()),
+  union: z.array(
+    z.string({ description: 'Union string' }).max(1),
+    z.number({ description: 'Union number' }).min(0)
+  ),
+  uri: z.string().url().default('prototest://something'),
+  any: z.any({ description: 'any type' }),
+});
 
 type RoutesMeta = ReturnType<Router['getRoutes']>[number];
 type VersionedRoutesMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
 
-export const createRouter = (args: { routes: RoutesMeta[] }) => {
+export const createRouterForZod = (args: { routes: RoutesMeta[] }) => {
   return {
     getRoutes: () => args.routes,
   } as unknown as Router;
 };
-export const createVersionedRouter = (args: { routes: VersionedRoutesMeta[] }) => {
+export const createVersionedRouterForZod = (args: { routes: VersionedRoutesMeta[] }) => {
   return {
     getRoutes: () => args.routes,
   } as unknown as CoreVersionedRouter;
 };
 
-export const getRouterDefaults = (bodySchema?: any) => ({
+export const getRouterDefaults = (bodySchema: any) => ({
   isVersioned: false,
   path: '/foo/{id}/{path*}',
   method: 'get',
@@ -35,18 +51,18 @@ export const getRouterDefaults = (bodySchema?: any) => ({
   },
   validationSchemas: {
     request: {
-      params: schema.object({
-        id: schema.string({ maxLength: 36, meta: { description: 'id' } }),
-        path: schema.string({ maxLength: 36, meta: { description: 'path' } }),
+      params: z.object({
+        id: z.string({ description: 'id' }).max(36),
+        path: z.string({ description: 'path' }).max(36),
       }),
-      query: schema.object({
-        page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
+      query: z.object({
+        page: z.number({ description: 'page' }).max(999).min(1).default(1),
       }),
-      body: bodySchema ?? createLargeSchema(),
+      body: bodySchema ?? testSchema,
     },
     response: {
       200: {
-        body: () => schema.string({ maxLength: 10, minLength: 1 }),
+        body: () => z.string().max(10).min(1),
       },
       unsafe: { body: true },
     },
@@ -54,7 +70,7 @@ export const getRouterDefaults = (bodySchema?: any) => ({
   handler: jest.fn(),
 });
 
-export const getVersionedRouterDefaults = (bodySchema?: any) => ({
+export const getVersionedRouterDefaults = (bodySchema: any) => ({
   method: 'get',
   path: '/bar',
   options: {
@@ -73,19 +89,19 @@ export const getVersionedRouterDefaults = (bodySchema?: any) => ({
           request: {
             body:
               bodySchema ??
-              schema.object({
-                foo: schema.string(),
-                deprecatedFoo: schema.maybe(
-                  schema.string({ meta: { description: 'deprecated foo', deprecated: true } })
-                ),
+              z.object({
+                foo: z.string(),
+                deprecatedFoo:
+                  // TODO check Zod for deprecated: true
+                  z.string({ description: 'deprecated foo' }).optional(),
               }),
           },
           response: {
             [200]: {
               body: () =>
-                schema.object(
-                  { fooResponseWithDescription: schema.string() },
-                  { meta: { description: 'fooResponse' } }
+                z.object(
+                  { fooResponseWithDescription: z.string() },
+                  { description: 'fooResponse' }
                 ),
             },
           },
@@ -97,10 +113,10 @@ export const getVersionedRouterDefaults = (bodySchema?: any) => ({
       fn: jest.fn(),
       options: {
         validate: {
-          request: { body: schema.object({ foo: schema.string() }) },
+          request: { body: z.object({ foo: z.string() }) },
           response: {
             [200]: {
-              body: () => schema.stream({ meta: { description: 'stream response' } }),
+              body: () => z.object({}, { description: 'stream response' }),
               bodyContentType: 'application/octet-stream',
             },
             unsafe: { body: true },
@@ -120,7 +136,7 @@ interface CreatTestRouterArgs {
   bodySchema?: any;
 }
 
-export const createTestRouters = (
+export const createTestRoutersForZod = (
   { routers = {}, versionedRouters = {}, bodySchema }: CreatTestRouterArgs = {
     routers: { testRouter: { routes: [{}] } },
     versionedRouters: { testVersionedRouter: { routes: [{}] } },
@@ -129,14 +145,14 @@ export const createTestRouters = (
   return [
     [
       ...Object.values(routers).map((rs) =>
-        createRouter({
+        createRouterForZod({
           routes: rs.routes.map((r) => Object.assign(getRouterDefaults(bodySchema), r)),
         })
       ),
     ],
     [
       ...Object.values(versionedRouters).map((rs) =>
-        createVersionedRouter({
+        createVersionedRouterForZod({
           routes: rs.routes.map((r) => Object.assign(getVersionedRouterDefaults(bodySchema), r)),
         })
       ),

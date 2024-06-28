@@ -10,8 +10,8 @@ import { z } from 'zod';
 import type { OpenAPIV3 } from 'openapi-types';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import zodToJsonSchema from 'zod-to-json-schema';
-import { KnownParameters, OpenAPIConverter } from '../type';
-import { validatePathParameters } from './common';
+import { KnownParameters } from '../../type';
+import { validatePathParameters } from '../common';
 
 // Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
 
@@ -171,7 +171,7 @@ const convertObjectMembersToParameterObjects = (
   });
 };
 
-const convertQuery = (schema: unknown) => {
+export const convertQuery = (schema: unknown) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
   if (!instanceofZodTypeObject(unwrappedSchema)) {
@@ -185,7 +185,7 @@ const convertQuery = (schema: unknown) => {
   };
 };
 
-const convertPathParameters = (schema: unknown, knownParameters: KnownParameters) => {
+export const convertPathParameters = (schema: unknown, knownParameters: KnownParameters) => {
   assertInstanceOfZodType(schema);
   const unwrappedSchema = unwrapZodType(schema, true);
   const paramKeys = Object.keys(knownParameters);
@@ -206,7 +206,7 @@ const convertPathParameters = (schema: unknown, knownParameters: KnownParameters
   };
 };
 
-const convert = (schema: z.ZodTypeAny) => {
+export const convert = (schema: z.ZodTypeAny) => {
   return {
     shared: {},
     schema: zodToJsonSchema(schema, {
@@ -216,11 +216,4 @@ const convert = (schema: z.ZodTypeAny) => {
   };
 };
 
-const is = instanceofZodType;
-
-export const zodConverter: OpenAPIConverter = {
-  convertPathParameters,
-  convertQuery,
-  convert,
-  is,
-};
+export const is = instanceofZodType;
