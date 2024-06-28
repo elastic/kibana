@@ -14,10 +14,7 @@ import { mockActionResponse } from './mocks';
 const connectorId = 'mock-connector-id';
 
 const actionsClient = actionsClientMock.create();
-const mockExecute = jest.fn().mockImplementation(() => ({
-  data: mockActionResponse,
-  status: 'ok',
-}));
+
 actionsClient.execute.mockImplementation(
   jest.fn().mockImplementation(() => ({
     data: mockActionResponse,

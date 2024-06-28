@@ -59,6 +59,7 @@ describe('ActionsClientChatOpenAI', () => {
       data: mockChatCompletion,
       status: 'ok',
     }));
+    actionsClient.execute.mockImplementation(mockExecute);
   });
 
   describe('_llmType', () => {
@@ -98,6 +99,7 @@ describe('ActionsClientChatOpenAI', () => {
       functions: [jest.fn()],
     };
     it('returns the expected data', async () => {
+      actionsClient.execute.mockImplementation(mockStreamExecute);
       const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
         ...defaultArgs,
         streaming: true,

@@ -79,6 +79,12 @@ jest.mock('../utils/gemini');
 describe('ActionsClientSimpleChatModel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    actionsClient.execute.mockImplementation(
+      jest.fn().mockImplementation(() => ({
+        data: mockActionResponse,
+        status: 'ok',
+      }))
+    );
     mockExecute.mockImplementation(() => ({
       data: mockActionResponse,
       status: 'ok',
@@ -125,18 +131,18 @@ describe('ActionsClientSimpleChatModel', () => {
         callOptions,
         callRunManager
       );
-      const subAction = mockExecute.mock.calls[0][0].params.subAction;
+      const subAction = actionsClient.execute.mock.calls[0][0].params.subAction;
       expect(subAction).toEqual('invokeAI');
 
       expect(result).toEqual(mockActionResponse.message);
     });
 
     it('rejects with the expected error when the action result status is error', async () => {
-      const hasErrorStatus = jest.fn().mockImplementation(() => ({
-        message: 'action-result-message',
-        serviceMessage: 'action-result-service-message',
-        status: 'error', // <-- error status
-      }));
+      const hasErrorStatus = jest.fn().mockImplementation(() => {
+        throw Error(
+          'ActionsClientSimpleChatModel: action result status is error: action-result-message - action-result-service-message'
+        );
+      });
 
       actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
 
@@ -155,10 +161,12 @@ describe('ActionsClientSimpleChatModel', () => {
     it('rejects with the expected error the message has invalid content', async () => {
       const invalidContent = { message: 1234 };
 
-      mockExecute.mockImplementation(() => ({
-        data: invalidContent,
-        status: 'ok',
-      }));
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          data: invalidContent,
+          status: 'ok',
+        })
+      );
 
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel(defaultArgs);
 
