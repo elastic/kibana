@@ -193,6 +193,9 @@ const OutputContent = memo<{
     );
   }
 
+  if (action.agentType === 'crowdstrike') {
+    return <>{OUTPUT_MESSAGES.submittedSuccessfully(command)}</>;
+  }
   return <>{OUTPUT_MESSAGES.wasSuccessful(command)}</>;
 });
 
