@@ -143,7 +143,7 @@ export const EventColumnView = React.memo<Props>(
                   isEventViewer={isEventViewer}
                   onRuleChange={onRuleChange}
                   refetch={refetch}
-                  showNotes={true}
+                  showNotes={showNotes}
                   tabType={tabType}
                   timelineId={timelineId}
                   toggleShowNotes={toggleShowNotes}
@@ -178,6 +178,7 @@ export const EventColumnView = React.memo<Props>(
         toggleShowNotes,
         setEventsLoading,
         setEventsDeleted,
+        showNotes,
       ]
     );
     return (

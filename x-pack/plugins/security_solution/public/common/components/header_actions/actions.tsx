@@ -62,6 +62,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   showNotes,
   timelineId,
   refetch,
+  toggleShowNotes,
 }) => {
   const dispatch = useDispatch();
   const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
@@ -264,6 +265,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
               key="add-event-note"
               timelineId={timelineId}
               eventId={eventId}
+              toggleShowNotes={toggleShowNotes}
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}

@@ -19,6 +19,8 @@ import { NotesFlyout } from '../../../timelines/components/timeline/properties/n
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { useDispatch } from 'react-redux';
 
+jest.mock('../../experimental_features_service');
+
 jest.mock('../user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
@@ -206,7 +208,7 @@ describe('AddEventNoteAction', () => {
           isDisabled: false,
           timelineType: TimelineType.default,
           toggleShowNotes: expect.any(Function),
-          toolTip: '2 notes available. Click to add more.',
+          toolTip: '2 Notes available. Click to add more.',
           eventId: 'event-1',
           notesCount: 2,
         }),
@@ -228,7 +230,7 @@ describe('AddEventNoteAction', () => {
           isDisabled: false,
           timelineType: TimelineType.default,
           toggleShowNotes: expect.any(Function),
-          toolTip: '1 note available. Click to add more.',
+          toolTip: '1 Note available. Click to add more.',
           eventId: 'event-2',
           notesCount: 1,
         }),

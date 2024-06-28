@@ -62,7 +62,9 @@ describe('Notes Flyout', () => {
   });
 
   it('should respond to visibility prop correctly', () => {
-    renderTestComponent();
+    renderTestComponent({
+      show: false,
+    });
 
     expect(screen.queryByTestId('timeline-notes-flyout')).not.toBeInTheDocument();
   });

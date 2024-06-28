@@ -24,6 +24,7 @@ interface AddEventNoteActionProps {
   eventId?: string;
   refetch?: () => void;
   timelineId: string;
+  toggleShowNotes?: () => void;
 }
 
 const EMPTY_STRING_ARRAY: string[] = [];
@@ -37,16 +38,23 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   eventId,
   refetch,
   timelineId,
+  toggleShowNotes,
 }) => {
   const [areNotesVisible, setAreNotesVisible] = React.useState(false);
 
   const toggleNotes = useCallback(() => {
+    if (toggleShowNotes) {
+      toggleShowNotes();
+    }
     setAreNotesVisible((prev) => !prev);
-  }, []);
+  }, [toggleShowNotes]);
 
   const handleNotesFlyoutClose = useCallback(() => {
+    if (toggleShowNotes) {
+      toggleShowNotes();
+    }
     setAreNotesVisible(false);
-  }, []);
+  }, [toggleShowNotes]);
 
   const getNotesByIds = useMemo(() => appSelectors.notesByIdsSelector(), []);
 
@@ -120,10 +128,8 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   const NOTES_TOOLTIP = useMemo(
     () =>
       noteIds.length > 0
-        ? noteIds.length === 1
-          ? i18n.NOTES_TOOLTIP_ADD_NOTE_SINGLE_NOTE_AVAILABLE
-          : i18n.NOTES_TOOLTIP_ADD_NOTE_MULTIPLE_NOTES_AVAILABLE({ notesCount: noteIds.length })
-        : i18n.NOTES_TOOLTIP_ADD_NOTE,
+        ? i18n.NOTES_COUNT_TOOLTIP({ notesCount: noteIds.length })
+        : i18n.NOTES_ADD_TOOLTIP,
     [noteIds.length]
   );
 

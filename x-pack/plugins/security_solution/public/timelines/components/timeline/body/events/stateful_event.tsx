@@ -126,7 +126,8 @@ const StatefulEventComponent: React.FC<Props> = ({
     tabType,
   });
 
-  const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
+  const [focusedNotes, setFocusedNotes] = useState<{ [eventId: string]: boolean }>({});
+
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).expandedDetail ?? {}
@@ -211,7 +212,7 @@ const StatefulEventComponent: React.FC<Props> = ({
         },
       });
     } else {
-      setShowNotes((prevShowNotes) => {
+      setFocusedNotes((prevShowNotes) => {
         if (prevShowNotes[eventId]) {
           // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
           setTimeout(() => {
@@ -276,19 +277,6 @@ const StatefulEventComponent: React.FC<Props> = ({
     tabType,
   ]);
 
-  const associateNote = useCallback(
-    (noteId: string) => {
-      dispatch(
-        timelineActions.addNoteToEvent({
-          eventId,
-          id: timelineId,
-          noteId,
-        })
-      );
-    },
-    [dispatch, eventId, timelineId]
-  );
-
   const setEventsLoading = useCallback<SetEventsLoading>(
     ({ eventIds, isLoading }) => {
       dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
@@ -336,7 +324,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           onRuleChange={onRuleChange}
           selectedEventIds={selectedEventIds}
           showCheckboxes={showCheckboxes}
-          showNotes={!!showNotes[eventId]}
+          showNotes={true}
           tabType={tabType}
           timelineId={timelineId}
           toggleShowNotes={onToggleShowNotes}
