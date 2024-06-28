@@ -35,6 +35,6 @@ export const buildSchema = <TRequired extends z.ZodRawShape, TOptional extends z
     .strict();
 
   return schema as z.ZodObject<
-    TRequired & { [K in keyof TOptional]: z.ZodOptional<InferredOptional<TOptional[K]>> }
+    TRequired & { [K in keyof TOptional]: InferredOptional<TOptional[K]> }
   >;
 };
