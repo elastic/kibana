@@ -17,7 +17,7 @@ import type {
 } from './api_keys';
 
 /**
- * Public API Keys service exposed through core to manage
+ * Public API Keys service exposed through core context to manage
  * API keys in Elasticsearch, including creation,
  * validation, and invalidation of API keys,
  * as well as checking the status of API key features.
