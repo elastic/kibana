@@ -68,11 +68,11 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         </p>
       </EuiText>
       <EuiSpacer size="s" />
-      <EuiCode>git clone https://github.com/elastic/connectors</EuiCode>&nbsp;
+      <EuiCode>git clone https://github.com/elastic/connectors</EuiCode>&nbsp;&nbsp;&nbsp;
       {i18n.translate('xpack.enterpriseSearch.connectorDeployment.orLabel', {
         defaultMessage: 'or',
       })}
-      &nbsp;
+      &nbsp;&nbsp;&nbsp;
       <EuiButton
         data-test-subj="enterpriseSearchConnectorDeploymentGoToSourceButton"
         iconType="logoGithub"
