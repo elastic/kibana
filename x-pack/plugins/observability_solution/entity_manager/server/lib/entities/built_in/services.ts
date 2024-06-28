@@ -13,7 +13,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
   name: 'Services from logs',
   type: 'service',
   managed: true,
-  filter: '@timestamp > now-5m',
+  filter: '@timestamp >= now-5m',
   indexPatterns: [
     'logs-*',
     'filebeat*',
@@ -61,7 +61,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     },
     {
       name: 'throughput',
-      equation: 'A / 5',
+      equation: 'A',
       metrics: [
         {
           name: 'A',
@@ -104,7 +104,7 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     },
     {
       name: 'logRate',
-      equation: 'A / 5',
+      equation: 'A',
       metrics: [
         {
           name: 'A',

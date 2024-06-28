@@ -14,7 +14,7 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
     name: 'Services from logs',
     type: 'service',
     managed: true,
-    filter: '@timestamp > now-5m',
+    filter: '@timestamp >= now-5m',
     indexPatterns: [
       'logs-*',
       'filebeat*',
@@ -55,19 +55,21 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
           {
             name: 'A',
             aggregation: 'avg',
-            filter: 'processor.event: "metric" AND metricset.name: "transaction"',
+            filter:
+              'processor.event: "metric" AND metricset.name: "transaction" AND data_stream.dataset: "apm.transaction.1m"',
             field: 'transaction.duration.histogram',
           },
         ],
       },
       {
         name: 'throughput',
-        equation: 'A / 5',
+        equation: 'A',
         metrics: [
           {
             name: 'A',
             aggregation: 'doc_count',
-            filter: 'processor.event: "metric" AND metricset.name: "transaction"',
+            filter:
+              'processor.event: "metric" AND metricset.name: "transaction" AND data_stream.dataset: "apm.transaction.1m"',
           },
         ],
       },
@@ -107,7 +109,7 @@ export const builtInServicesPreaggEntityDefinition: EntityDefinition = entityDef
       },
       {
         name: 'logRate',
-        equation: 'A / 5',
+        equation: 'A',
         metrics: [
           {
             name: 'A',
