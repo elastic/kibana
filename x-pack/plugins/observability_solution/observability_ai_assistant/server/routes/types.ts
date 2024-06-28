@@ -17,6 +17,7 @@ import type { Logger } from '@kbn/logging';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server/types';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import type { ObservabilityAIAssistantService } from '../service';
 import type {
   ObservabilityAIAssistantPluginSetupDependencies,
@@ -46,6 +47,7 @@ export type ObservabilityAIAssistantRequestHandlerContext = Omit<
       client: SavedObjectsClientContract;
     };
     coreStart: CoreStart;
+    security: SecurityRequestHandlerContext;
   }>;
 };
 

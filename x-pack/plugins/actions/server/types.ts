@@ -16,6 +16,7 @@ import {
   SavedObjectReference,
   Logger,
   ISavedObjectsRepository,
+  CoreRequestHandlerContext,
 } from '@kbn/core/server';
 import { AnySchema } from 'joi';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
@@ -87,6 +88,7 @@ export interface ActionTypeExecutorOptions<
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
+  context?: CoreRequestHandlerContext;
   request?: KibanaRequest;
 }
 

@@ -12,6 +12,7 @@ import {
   type PluginInitializerContext,
   type CoreStart,
   KibanaRequest,
+  CoreRequestHandlerContext,
 } from '@kbn/core/server';
 import {
   ObservabilityAIAssistantRequestHandlerContext,
@@ -68,7 +69,8 @@ export class ObservabilityAIAssistantAppPlugin
     }) as ObservabilityAIAssistantRouteHandlerResources['plugins'];
 
     const initResources = async (
-      request: KibanaRequest
+      request: KibanaRequest,
+      coreContext: CoreRequestHandlerContext
     ): Promise<ObservabilityAIAssistantRouteHandlerResources> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
       const license = await firstValueFrom(pluginsStart.licensing.license$);
@@ -101,6 +103,7 @@ export class ObservabilityAIAssistantAppPlugin
           savedObjects: {
             client: savedObjectsClient,
           },
+          security: coreContext.security,
         }),
         licensing: Promise.resolve({ license, featureUsage: pluginsStart.licensing.featureUsage }),
       };
