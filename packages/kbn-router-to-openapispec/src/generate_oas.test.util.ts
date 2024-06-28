@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { schema } from '@kbn/config-schema';
+import type { ZodType } from 'zod';
+import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 
 type RoutesMeta = ReturnType<Router['getRoutes']>[number];
 type VersionedRoutesMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
+type RuntimeSchema = Type<unknown> | ZodType<unknown>;
 
 export const createRouter = (args: { routes: RoutesMeta[] }) => {
   return {
@@ -24,7 +25,7 @@ export const createVersionedRouter = (args: { routes: VersionedRoutesMeta[] }) =
   } as unknown as CoreVersionedRouter;
 };
 
-export const getRouterDefaults = (bodySchema?: any) => ({
+export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   isVersioned: false,
   path: '/foo/{id}/{path*}',
   method: 'get',
@@ -117,7 +118,7 @@ interface CreatTestRouterArgs {
   versionedRouters?: {
     [routerId: string]: { routes: Array<Partial<VersionedRoutesMeta>> };
   };
-  bodySchema?: any;
+  bodySchema?: RuntimeSchema;
 }
 
 export const createTestRouters = (

@@ -12,7 +12,6 @@ import { generateOpenApiDocument } from './generate_oas';
 import { createSharedSchema as createConfigSchemaSharedSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 import { createSharedSchema as createZodSharedSchema } from './oas_converter/zod/lib.test.util';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
-import { createTestRoutersForZod, createRouterForZod } from './generate_oas.test.zod.util';
 import { sharedOas } from './generate_oas.test.shared.fixture';
 
 interface RecursiveType {
@@ -163,7 +162,7 @@ describe('generateOpenApiDocument', () => {
 
   describe('Zod', () => {
     it('generates the expected OpenAPI document for the shared schema', () => {
-      const [routers, versionedRouters] = createTestRoutersForZod({
+      const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
         bodySchema: createZodSharedSchema(),
@@ -191,7 +190,7 @@ describe('generateOpenApiDocument', () => {
         generateOpenApiDocument(
           {
             routers: [
-              createRouterForZod({
+              createRouter({
                 routes: [
                   {
                     isVersioned: false,
