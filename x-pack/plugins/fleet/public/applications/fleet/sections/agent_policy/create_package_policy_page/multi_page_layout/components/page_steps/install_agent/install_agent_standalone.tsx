@@ -56,7 +56,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
         if (!agentPolicy?.id) {
           return;
         }
-        const query = { standalone: true, kubernetes: false };
+        const query = { standalone: true, standalone_api_key: apiKey, kubernetes: false };
         const res = await sendGetOneAgentPolicyFull(agentPolicy?.id, query);
         if (res.error) {
           throw res.error;
@@ -73,7 +73,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       }
     }
     fetchFullPolicy();
-  }, [core.http.basePath, agentPolicy?.id, core.notifications.toasts]);
+  }, [core.http.basePath, agentPolicy?.id, core.notifications.toasts, apiKey]);
 
   useEffect(() => {
     if (!fullAgentPolicy) {
@@ -92,17 +92,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
     }
     const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
     setApiKey(newApiKey);
-    // TODO: this only changes the contents of the code box, so the downloaded file doesn't get the key value.
-    // This logic should be replaced with returning the API key value instead of the placeholder from backend.
-    const updatedFullAgentPolicy = {
-      ...fullAgentPolicy,
-      outputs: {
-        ...fullAgentPolicy?.outputs,
-        default: { ...fullAgentPolicy?.outputs.default, api_key: newApiKey },
-      },
-    } as FullAgentPolicy;
-    setYaml(fullAgentPolicyToYaml(updatedFullAgentPolicy, safeDump));
-  }, [fullAgentPolicy]);
+  }, []);
 
   if (!agentPolicy) {
     return (

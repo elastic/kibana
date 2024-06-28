@@ -71,22 +71,19 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   const [yaml, setYaml] = useState<any | undefined>('');
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
 
-  let downloadLink = '';
-
-  if (selectedPolicy?.id) {
-    downloadLink =
-      isK8s === 'IS_KUBERNETES'
-        ? core.http.basePath.prepend(
-            `${agentPolicyRouteService.getInfoFullDownloadPath(
-              selectedPolicy?.id
-            )}?kubernetes=true&standalone=true&apiVersion=${API_VERSIONS.public.v1}`
-          )
-        : core.http.basePath.prepend(
-            `${agentPolicyRouteService.getInfoFullDownloadPath(
-              selectedPolicy?.id
-            )}?standalone=true&apiVersion=${API_VERSIONS.public.v1}`
-          );
-  }
+  const downloadLink = useMemo(() => {
+    if (!selectedPolicy?.id) {
+      return '';
+    }
+    const downloadLinkOptions = `${
+      isK8s === 'IS_KUBERNETES' ? 'kubernetes=true&' : ''
+    }standalone=true${apiKey ? `&standalone_api_key=${apiKey}` : ''}&apiVersion=${
+      API_VERSIONS.public.v1
+    }`;
+    return core.http.basePath.prepend(
+      `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicy.id)}?${downloadLinkOptions}`
+    );
+  }, [apiKey, core.http.basePath, isK8s, selectedPolicy?.id]);
 
   useEffect(() => {
     async function fetchFullPolicy() {
@@ -94,9 +91,9 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         if (!selectedPolicy?.id) {
           return;
         }
-        let query = { standalone: true, kubernetes: false };
+        let query = { standalone: true, standalone_api_key: apiKey, kubernetes: false };
         if (isK8s === 'IS_KUBERNETES') {
-          query = { standalone: true, kubernetes: true };
+          query = { standalone: true, standalone_api_key: apiKey, kubernetes: true };
         }
         const res = await sendGetOneAgentPolicyFull(selectedPolicy?.id, query);
         if (res.error) {
@@ -116,7 +113,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     if (isK8s !== 'IS_LOADING') {
       fetchFullPolicy();
     }
-  }, [selectedPolicy, notifications.toasts, isK8s, core.http.basePath]);
+  }, [selectedPolicy, notifications.toasts, isK8s, core.http.basePath, apiKey]);
 
   useEffect(() => {
     if (!fullAgentPolicy) {
@@ -144,17 +141,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     }
     const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
     setApiKey(newApiKey);
-    // TODO: this only changes the contents of the code box, so the downloaded file doesn't get the key value.
-    // This logic should be replaced with returning the API key value instead of the placeholder from backend.
-    const updatedFullAgentPolicy = {
-      ...fullAgentPolicy,
-      outputs: {
-        ...fullAgentPolicy?.outputs,
-        default: { ...fullAgentPolicy?.outputs.default, api_key: newApiKey },
-      },
-    } as FullAgentPolicy;
-    setYaml(fullAgentPolicyToYaml(updatedFullAgentPolicy, safeDump));
-  }, [fullAgentPolicy]);
+  }, []);
 
   const agentVersion = useAgentVersion();
 
