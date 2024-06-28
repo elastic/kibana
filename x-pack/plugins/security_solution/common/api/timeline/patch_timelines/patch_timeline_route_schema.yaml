@@ -32,7 +32,7 @@ paths:
                 timeline:
                   $ref: '../model/components.yaml#/components/schemas/SavedTimeline'
       responses:
-        200:
+        '200':
           description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
           content:
             application/json:
@@ -49,7 +49,7 @@ paths:
                             $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
                 required:
                   - data
-        405:
+        '405':
           description: Indicates that the user does not have the required access to create a draft timeline.
           content:
             application/json:

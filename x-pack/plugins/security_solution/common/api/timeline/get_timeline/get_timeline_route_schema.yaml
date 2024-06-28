@@ -3,7 +3,7 @@ info:
   title: Elastic Security - Timeline - Get Timeline API
   version: 8.9.0
 externalDocs:
-  url: https://www.elastic.co/guide/en/security/current/_get_timeline_timeline_template_by_savedobjectid.html
+  url: https://www.elastic.co/guide/en/security/current/_get_timeline_or_timeline_template_by_savedobjectid.html
   description: Documentation
 servers:
   - url: 'http://{kibana_host}:{port}'
@@ -16,7 +16,7 @@ paths:
   /api/timeline:
     get:
       operationId: getTimeline
-      description: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
+      summary: Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
       tags:
         - access:securitySolution
       parameters:
@@ -31,8 +31,8 @@ paths:
             type: string
           description: The ID of the timeline to retrieve
       responses:
-        200:
-          description: Indicates that the draft timeline was successfully created. In the event the user already has a draft timeline, the existing draft timeline is cleared and returned.
+        '200':
+          description: Indicates that the (template) timeline was found and returned.
           content:
             application/json:
               schema:

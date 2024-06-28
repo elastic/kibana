@@ -16,7 +16,7 @@ paths:
   /api/timeline:
     post:
       operationId: createTimelines
-      description: Creates a new timeline.
+      summary: Creates a new timeline.
       tags:
         - access:securitySolution
       requestBody:
@@ -52,7 +52,7 @@ paths:
                 timeline:
                   $ref: '../model/components.yaml#/components/schemas/SavedTimeline'
       responses:
-        200:
+        '200':
           description: Indicates the timeline was successfully created.
           content:
             application/json:
@@ -69,7 +69,7 @@ paths:
                             $ref: '../model/components.yaml#/components/schemas/TimelineResponse'
                 required:
                   - data
-        405:
+        '405':
           description: Indicates that there was an error in the timeline creation.
           content:
             application/json:
