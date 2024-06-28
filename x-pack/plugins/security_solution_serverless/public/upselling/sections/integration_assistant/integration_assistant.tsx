@@ -47,7 +47,7 @@ interface IntegrationsAssistantProps {
   requiredPLI: ProductFeatureKeyType;
 }
 export const IntegrationsAssistant = React.memo<IntegrationsAssistantProps>(({ requiredPLI }) => {
-  const requiredProductType = useProductTypeByPLI(requiredPLI) ?? '';
+  const requiredProductType = useProductTypeByPLI(requiredPLI);
   return (
     <>
       <EuiSpacer size="m" />

@@ -31,6 +31,6 @@ export const getProductTypeByPLI = (requiredPLI: ProductFeatureKeyType): string 
   return null;
 };
 
-export const useProductTypeByPLI = (requiredPLI: ProductFeatureKeyType): string | null => {
-  return useMemo(() => getProductTypeByPLI(requiredPLI), [requiredPLI]);
+export const useProductTypeByPLI = (requiredPLI: ProductFeatureKeyType): string => {
+  return useMemo(() => getProductTypeByPLI(requiredPLI) ?? '', [requiredPLI]);
 };
