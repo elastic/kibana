@@ -6,6 +6,7 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { ReactElement } from 'react';
 import React from 'react';
 
 import type { ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
@@ -23,7 +24,7 @@ export const getFormattedFields = ({
 }) => {
   return headers.reduce(
     (
-      obj: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>,
+      obj: Record<string, (props: EuiDataGridCellValueElementProps) => ReactElement>,
       header: ColumnHeaderOptions
     ) => {
       obj[header.id] = function UnifiedFieldRender(props: EuiDataGridCellValueElementProps) {

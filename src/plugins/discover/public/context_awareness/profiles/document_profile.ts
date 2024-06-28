@@ -15,7 +15,7 @@ export enum DocumentType {
   Default = 'default',
 }
 
-export type DocumentProfile = Omit<Profile, 'getCellRenderers'>;
+export type DocumentProfile = Omit<Profile, 'getCellRenderers' | 'getDefaultAppState'>;
 
 export interface DocumentProfileProviderParams {
   record: DataTableRecord;
