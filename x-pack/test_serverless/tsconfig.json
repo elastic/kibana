@@ -104,5 +104,6 @@
     "@kbn/reporting-server",
     "@kbn/config-schema",
     "@kbn/features-plugin",
+    "@kbn/observability-ai-assistant-plugin",
   ]
 }
