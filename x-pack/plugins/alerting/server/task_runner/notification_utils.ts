@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import { ActionsClient, NotificationPolicyWithId } from '@kbn/actions-plugin/server/actions_client';
-import { flatten } from 'lodash';
+import { flatten, isEqual, uniqWith } from 'lodash';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   AlertInstanceContext,
@@ -122,7 +122,10 @@ export const getMatchingNotificationsAsActions = async <
 
   console.log(`matching Policies ${JSON.stringify(matchingPolicies)}`);
 
-  return flatten(matchingPolicies.map((policy) => convertPolicyToActions(policy, opts.ruleType)));
+  return uniqWith(
+    flatten(matchingPolicies.map((policy) => convertPolicyToActions(policy, opts.ruleType))),
+    (action1, action2) => action1.uuid === action2.uuid
+  );
 };
 
 export const convertPolicyToActions = <
@@ -196,7 +199,7 @@ export const convertPolicyToActions = <
             notifyWhen: policy.frequency,
           },
           uuid: generateActionUuid([
-            actionGroupId,
+            type === 'summary' ? 'default' : actionGroupId,
             type,
             connector.id,
             connector.actionTypeId,
@@ -210,7 +213,7 @@ export const convertPolicyToActions = <
   return actions;
 };
 
-export const generateActionUuid = (hashParts: string[]) => {
+export const generateActionUuid = (hashParts: string[]): string => {
   const hash = createHash('sha1');
 
   const hashFeed = hashParts.join('-');
