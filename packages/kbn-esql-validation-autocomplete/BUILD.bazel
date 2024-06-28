@@ -22,7 +22,7 @@ SRCS = glob(
 
 SHARED_DEPS = [
   "//packages/kbn-i18n",
-  "@npm//js-levenshtein",
+  "@npm//fastest-levenshtein",
 ]
 
 js_library(
