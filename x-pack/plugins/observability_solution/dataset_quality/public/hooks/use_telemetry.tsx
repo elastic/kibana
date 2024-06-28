@@ -336,9 +336,6 @@ function getDatasetDetailsEbtProps(
     to,
     degraded_percentage: degradedPercentage,
     integration: flyoutDataset.integration?.name,
-    filters: {
-      is_degraded: false,
-    },
     breakdown_field: breakdownField,
   };
 }

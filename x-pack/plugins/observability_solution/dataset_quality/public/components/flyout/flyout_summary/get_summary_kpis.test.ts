@@ -6,7 +6,6 @@
  */
 
 import { formatNumber } from '@elastic/eui';
-import { NavigationTarget, NavigationSource } from '../../../services/telemetry';
 import type { useKibanaContextForPlugin } from '../../../utils';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
@@ -47,7 +46,11 @@ const timeRange: TimeRangeConfig = {
   to: 'now',
 };
 
-const degradedDocsHref = 'http://exploratory-view/degraded-docs';
+const degradedDocsLinkProps = {
+  linkProps: { href: 'http://exploratory-view/degraded-docs', onClick: () => {} },
+  navigate: () => {},
+  isLogsExplorerAvailable: true,
+};
 const hostsRedirectUrl = 'http://hosts/metric/';
 
 const hostsLocator = {
@@ -61,7 +64,7 @@ describe('getSummaryKpis', () => {
     const result = getSummaryKpis({
       dataStreamDetails,
       timeRange,
-      degradedDocsHref,
+      degradedDocsLinkProps,
       hostsLocator,
     });
 
@@ -80,20 +83,12 @@ describe('getSummaryKpis', () => {
         title: flyoutServicesText,
         value: '3',
         link: undefined,
-        telemetry: {
-          target: NavigationTarget.Services,
-          source: NavigationSource.Summary,
-        },
         userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '3',
         link: undefined,
-        telemetry: {
-          target: NavigationTarget.Hosts,
-          source: NavigationSource.Summary,
-        },
         userHasPrivilege: true,
       },
       {
@@ -101,11 +96,7 @@ describe('getSummaryKpis', () => {
         value: '200',
         link: {
           label: flyoutShowAllText,
-          href: degradedDocsHref,
-        },
-        telemetry: {
-          target: NavigationTarget.LogsExplorer,
-          source: NavigationSource.Summary,
+          props: degradedDocsLinkProps.linkProps,
         },
         userHasPrivilege: true,
       },
@@ -132,7 +123,7 @@ describe('getSummaryKpis', () => {
     const result = getSummaryKpis({
       dataStreamDetails: detailsWithMaxPlusHosts,
       timeRange,
-      degradedDocsHref,
+      degradedDocsLinkProps,
       hostsLocator,
     });
 
@@ -151,20 +142,12 @@ describe('getSummaryKpis', () => {
         title: flyoutServicesText,
         value: '50+',
         link: undefined,
-        telemetry: {
-          target: NavigationTarget.Services,
-          source: NavigationSource.Summary,
-        },
         userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '54+',
         link: undefined,
-        telemetry: {
-          target: NavigationTarget.Hosts,
-          source: NavigationSource.Summary,
-        },
         userHasPrivilege: true,
       },
       {
@@ -172,11 +155,7 @@ describe('getSummaryKpis', () => {
         value: '200',
         link: {
           label: flyoutShowAllText,
-          href: degradedDocsHref,
-        },
-        telemetry: {
-          target: NavigationTarget.LogsExplorer,
-          source: NavigationSource.Summary,
+          props: degradedDocsLinkProps.linkProps,
         },
         userHasPrivilege: true,
       },

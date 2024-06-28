@@ -189,17 +189,6 @@ const datasetDetailsOpenedEventType: DatasetQualityTelemetryEvent = {
         description: 'Duration in milliseconds to load the dataset details page',
       },
     },
-    filters: {
-      properties: {
-        is_degraded: {
-          type: 'boolean',
-          _meta: {
-            description: 'Whether _ignored filter is applied',
-            optional: false,
-          },
-        },
-      },
-    },
     breakdown_field: {
       type: 'keyword',
       _meta: {
@@ -214,6 +203,17 @@ const datasetDetailsNavigatedEventType: DatasetQualityTelemetryEvent = {
   eventType: DatasetQualityTelemetryEventTypes.DETAILS_NAVIGATED,
   schema: {
     ...omit(datasetDetailsOpenedEventType.schema, 'duration'),
+    filters: {
+      properties: {
+        is_degraded: {
+          type: 'boolean',
+          _meta: {
+            description: 'Whether _ignored filter is applied to the link',
+            optional: false,
+          },
+        },
+      },
+    },
     target: {
       type: 'keyword',
       _meta: {

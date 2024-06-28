@@ -108,9 +108,6 @@ describe('TelemetryService', () => {
     const telemetry = service.start();
     const exampleEventData: DatasetDetailsEbtProps = {
       ...defaultEbtProps,
-      filters: {
-        is_degraded: false,
-      },
     };
 
     telemetry.startDatasetDetailsTracking();
@@ -140,14 +137,14 @@ describe('TelemetryService', () => {
     const telemetry = service.start();
     const exampleOpenEventData: DatasetDetailsEbtProps = {
       ...defaultEbtProps,
-      filters: {
-        is_degraded: false,
-      },
     };
 
     const exampleNavigatedEventData: DatasetDetailsNavigatedEbtProps = {
       ...exampleOpenEventData,
       breakdown_field: 'example_field',
+      filters: {
+        is_degraded: false,
+      },
       target: NavigationTarget.Exit,
       source: NavigationSource.Chart,
     };

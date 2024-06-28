@@ -83,13 +83,13 @@ export interface DatasetNavigatedEbtProps extends DatasetEbtProps {
 }
 
 export interface DatasetDetailsEbtProps extends DatasetEbtProps {
-  filters: {
-    is_degraded: boolean;
-  };
   breakdown_field?: string;
 }
 
 export interface DatasetDetailsNavigatedEbtProps extends DatasetDetailsEbtProps {
+  filters: {
+    is_degraded: boolean;
+  };
   target: NavigationTarget;
   source: NavigationSource;
 }
