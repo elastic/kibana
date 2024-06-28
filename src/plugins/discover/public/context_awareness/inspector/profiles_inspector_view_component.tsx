@@ -19,7 +19,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { DataTableRecordWithContext } from '../record_has_context';
 import type { ProfilesAdapter } from './profiles_adapter';
 
@@ -28,21 +29,10 @@ const ProfilesInspectorViewComponent = ({
 }: {
   profilesAdapter: ProfilesAdapter;
 }) => {
-  const [{ rootContext, dataSourceContext, documentContexts }, setContexts] = useState(
+  const { rootContext, dataSourceContext, documentContexts } = useObservable(
+    profilesAdapter.getContexts$(),
     profilesAdapter.getContexts()
   );
-
-  useEffect(() => {
-    const onChange = () => {
-      setContexts(profilesAdapter.getContexts());
-    };
-
-    profilesAdapter.on('change', onChange);
-
-    return () => {
-      profilesAdapter.off('change', onChange);
-    };
-  }, [profilesAdapter]);
 
   return (
     <div css={{ overflowY: 'auto' }}>
@@ -106,7 +96,10 @@ const ProfilesInspectorViewComponent = ({
           defaultMessage: 'Document profiles',
         })}
       >
-        <DocumentProfilesDisplay documentContexts={documentContexts} />
+        <DocumentProfilesDisplay
+          profilesAdapter={profilesAdapter}
+          documentContexts={documentContexts}
+        />
       </ProfileSection>
     </div>
   );
@@ -123,8 +116,10 @@ const ProfileSection: FC<{ title: string }> = ({ title, children }) => (
 );
 
 const DocumentProfilesDisplay = ({
+  profilesAdapter,
   documentContexts,
 }: {
+  profilesAdapter: ProfilesAdapter;
   documentContexts?: Record<string, DataTableRecordWithContext[]>;
 }) => {
   const [expandedProfileId, setExpandedProfileId] = useState<string | undefined>(undefined);
@@ -178,6 +173,7 @@ const DocumentProfilesDisplay = ({
           ? {
               [expandedProfileId]: (
                 <DocumentProfileDisplay
+                  profilesAdapter={profilesAdapter}
                   profileId={expandedProfileId}
                   records={documentContexts?.[expandedProfileId] ?? []}
                 />
@@ -190,9 +186,11 @@ const DocumentProfilesDisplay = ({
 };
 
 const DocumentProfileDisplay = ({
+  profilesAdapter,
   profileId,
   records,
 }: {
+  profilesAdapter: ProfilesAdapter;
   profileId: string;
   records: DataTableRecordWithContext[];
 }) => {
@@ -228,6 +226,42 @@ const DocumentProfileDisplay = ({
               defaultMessage: 'Type',
             }
           ),
+        },
+        {
+          width: '40px',
+          name: (
+            <EuiScreenReaderOnly>
+              <span>
+                {i18n.translate(
+                  'discover.inspector.profilesInspectorView.documentProfileActionsColumn',
+                  {
+                    defaultMessage: 'Actions',
+                  }
+                )}
+              </span>
+            </EuiScreenReaderOnly>
+          ),
+          actions: [
+            {
+              name: i18n.translate(
+                'discover.inspector.profilesInspectorView.documentProfileDetailsAction',
+                {
+                  defaultMessage: 'View details',
+                }
+              ),
+              description: i18n.translate(
+                'discover.inspector.profilesInspectorView.documentProfileDetailsActionDescription',
+                {
+                  defaultMessage: 'View record details',
+                }
+              ),
+              icon: 'inspect',
+              type: 'icon',
+              onClick: (record) => {
+                profilesAdapter.viewRecordDetails(record);
+              },
+            },
+          ],
         },
         getExpandColumn<DataTableRecordWithContext>({
           isExpanded: (record) => expandedRecord?.id === record.id,

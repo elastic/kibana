@@ -7,52 +7,67 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import EventEmitter from 'events';
+import { BehaviorSubject, combineLatest, map, skip, Subject } from 'rxjs';
 import type { DataSourceContext, RootContext } from '../profiles';
 import type { ContextWithProfileId } from '../profile_service';
 import { DataTableRecordWithContext, recordHasContext } from '../record_has_context';
 
-export class ProfilesAdapter extends EventEmitter {
-  private rootContext?: ContextWithProfileId<RootContext>;
-  private dataSourceContext?: ContextWithProfileId<DataSourceContext>;
-  private documentContexts?: Record<string, DataTableRecordWithContext[]>;
+export class ProfilesAdapter {
+  private readonly rootContext$ = new BehaviorSubject<
+    ContextWithProfileId<RootContext> | undefined
+  >(undefined);
+  private readonly dataSourceContext$ = new BehaviorSubject<
+    ContextWithProfileId<DataSourceContext> | undefined
+  >(undefined);
+  private readonly documentContexts$ = new BehaviorSubject<
+    Record<string, DataTableRecordWithContext[]> | undefined
+  >(undefined);
+  private readonly viewRecordDetails$ = new Subject<DataTableRecord>();
 
   setRootContext(rootContext: ContextWithProfileId<RootContext>) {
-    this.rootContext = rootContext;
-    this.onChange();
+    this.rootContext$.next(rootContext);
   }
 
   setDataSourceContext(dataSourceContext: ContextWithProfileId<DataSourceContext>) {
-    this.dataSourceContext = dataSourceContext;
-    this.onChange();
+    this.dataSourceContext$.next(dataSourceContext);
   }
 
-  setDocumentContexts(documentContexts: DataTableRecord[]) {
-    const documentContextsMap: Record<string, DataTableRecordWithContext[]> = {};
+  setDocumentContexts(records: DataTableRecord[]) {
+    const documentContexts: Record<string, DataTableRecordWithContext[]> = {};
 
-    for (const record of documentContexts) {
+    for (const record of records) {
       if (recordHasContext(record)) {
-        if (!documentContextsMap[record.context.profileId]) {
-          documentContextsMap[record.context.profileId] = [];
+        if (!documentContexts[record.context.profileId]) {
+          documentContexts[record.context.profileId] = [];
         }
 
-        documentContextsMap[record.context.profileId].push(record);
+        documentContexts[record.context.profileId].push(record);
       }
     }
 
-    this.documentContexts = documentContextsMap;
-    this.onChange();
+    this.documentContexts$.next(documentContexts);
   }
 
   getContexts() {
     return {
-      rootContext: this.rootContext,
-      dataSourceContext: this.dataSourceContext,
-      documentContexts: this.documentContexts,
+      rootContext: this.rootContext$.getValue(),
+      dataSourceContext: this.dataSourceContext$.getValue(),
+      documentContexts: this.documentContexts$.getValue(),
     };
   }
 
-  private onChange() {
-    this.emit('change');
+  getContexts$() {
+    return combineLatest([this.rootContext$, this.dataSourceContext$, this.documentContexts$]).pipe(
+      map(() => this.getContexts()),
+      skip(1)
+    );
+  }
+
+  viewRecordDetails(record: DataTableRecord) {
+    this.viewRecordDetails$.next(record);
+  }
+
+  getViewRecordDetails$() {
+    return this.viewRecordDetails$.asObservable();
   }
 }

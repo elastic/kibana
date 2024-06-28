@@ -12,6 +12,7 @@ import {
   RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
@@ -34,6 +35,7 @@ export function useInspector({
   const onOpenInspector = useCallback(() => {
     // prevent overlapping
     stateContainer.internalState.transitions.setExpandedDoc(undefined);
+
     const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
 
     const requestAdapters = inspectorAdapters.lensRequests
@@ -56,5 +58,19 @@ export function useInspector({
       }
     };
   }, [inspectorSession]);
+
+  useEffect(() => {
+    const subscription = profilesAdapter
+      .getViewRecordDetails$()
+      .subscribe((record: DataTableRecord) => {
+        inspectorSession?.close();
+        stateContainer.internalState.transitions.setExpandedDoc(record);
+      });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [inspectorSession, profilesAdapter, stateContainer]);
+
   return onOpenInspector;
 }
