@@ -1669,7 +1669,7 @@
     "rxjs-marbles": "^7.0.1",
     "sass-embedded": "^1.71.1",
     "sass-loader": "^10.5.1",
-    "selenium-webdriver": "^4.21.0",
+    "selenium-webdriver": "^4.22.0",
     "sharp": "0.32.6",
     "simple-git": "^3.16.0",
     "sinon": "^7.4.2",
