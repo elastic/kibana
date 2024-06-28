@@ -104,20 +104,6 @@ describe('convertPolicyToActions', () => {
         uuid: generateActionUuid(['default', 'summary', 'slack', '.slack', 'onActiveAlert']),
       },
       {
-        group: 'other-group',
-        id: 'slack',
-        actionTypeId: '.slack',
-        params: {
-          message: '{{alert.id}} slack',
-        },
-        frequency: {
-          summary: true,
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-        },
-        uuid: generateActionUuid(['other-group', 'summary', 'slack', '.slack', 'onActiveAlert']),
-      },
-      {
         group: 'default',
         id: 'preconfigured-server-log',
         actionTypeId: '.server-log',
@@ -132,27 +118,6 @@ describe('convertPolicyToActions', () => {
         },
         uuid: generateActionUuid([
           'default',
-          'summary',
-          'preconfigured-server-log',
-          '.server-log',
-          'onActiveAlert',
-        ]),
-      },
-      {
-        group: 'other-group',
-        id: 'preconfigured-server-log',
-        actionTypeId: '.server-log',
-        params: {
-          level: 'info',
-          message: '{{alert.id}} server log',
-        },
-        frequency: {
-          summary: true,
-          throttle: null,
-          notifyWhen: 'onActiveAlert',
-        },
-        uuid: generateActionUuid([
-          'other-group',
           'summary',
           'preconfigured-server-log',
           '.server-log',
@@ -374,40 +339,6 @@ describe('convertPolicyToActions', () => {
         uuid: generateActionUuid(['default', 'summary', 'slack', '.slack', 'onThrottleInterval']),
       },
       {
-        group: 'recovered',
-        id: 'slack',
-        actionTypeId: '.slack',
-        params: {
-          message: '{{alert.id}} slack',
-        },
-        frequency: {
-          summary: true,
-          throttle: '1h',
-          notifyWhen: 'onThrottleInterval',
-        },
-        uuid: generateActionUuid(['recovered', 'summary', 'slack', '.slack', 'onThrottleInterval']),
-      },
-      {
-        group: 'other-group',
-        id: 'slack',
-        actionTypeId: '.slack',
-        params: {
-          message: '{{alert.id}} slack',
-        },
-        frequency: {
-          summary: true,
-          throttle: '1h',
-          notifyWhen: 'onThrottleInterval',
-        },
-        uuid: generateActionUuid([
-          'other-group',
-          'summary',
-          'slack',
-          '.slack',
-          'onThrottleInterval',
-        ]),
-      },
-      {
         group: 'default',
         id: 'slack',
         actionTypeId: '.slack',
@@ -476,48 +407,6 @@ describe('convertPolicyToActions', () => {
         },
         uuid: generateActionUuid([
           'default',
-          'summary',
-          'preconfigured-server-log',
-          '.server-log',
-          'onThrottleInterval',
-        ]),
-      },
-      {
-        group: 'recovered',
-        id: 'preconfigured-server-log',
-        actionTypeId: '.server-log',
-        params: {
-          level: 'info',
-          message: '{{alert.id}} server log',
-        },
-        frequency: {
-          summary: true,
-          throttle: '1h',
-          notifyWhen: 'onThrottleInterval',
-        },
-        uuid: generateActionUuid([
-          'recovered',
-          'summary',
-          'preconfigured-server-log',
-          '.server-log',
-          'onThrottleInterval',
-        ]),
-      },
-      {
-        group: 'other-group',
-        id: 'preconfigured-server-log',
-        actionTypeId: '.server-log',
-        params: {
-          level: 'info',
-          message: '{{alert.id}} server log',
-        },
-        frequency: {
-          summary: true,
-          throttle: '1h',
-          notifyWhen: 'onThrottleInterval',
-        },
-        uuid: generateActionUuid([
-          'other-group',
           'summary',
           'preconfigured-server-log',
           '.server-log',

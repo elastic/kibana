@@ -182,7 +182,9 @@ export const convertPolicyToActions = <
       if (type === 'summary' && policy.frequency === 'onActionGroupChange') {
         continue;
       }
-      for (const actionGroupId of actionGroupIds) {
+      // only use one action group for summary notifications
+      const actionGroupIdsToUse = type === 'summary' ? [actionGroupIds[0]] : actionGroupIds;
+      for (const actionGroupId of actionGroupIdsToUse) {
         actions.push({
           group: actionGroupId,
           id: connector.id,
