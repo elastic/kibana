@@ -64,9 +64,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
   }) => {
     const {
-      actionTypeRegistry,
       assistantFeatures: { assistantModelEvaluation: modelEvaluatorEnabled },
-      basePromptContexts,
       http,
       selectedSettingsTab,
       setSelectedSettingsTab,
@@ -274,7 +272,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           {selectedSettingsTab === CONNECTORS_TAB && <ConnectorsSettingsManagement />}
           {selectedSettingsTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
-              actionTypeRegistry={actionTypeRegistry}
               allSystemPrompts={systemPromptSettings}
               assistantStreamingEnabled={assistantStreamingEnabled}
               connectors={connectors}
@@ -295,7 +292,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
             <SystemPromptSettingsManagement
               connectors={connectors}
-              conversations={conversations}
               conversationSettings={conversationSettings}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               defaultConnector={defaultConnector}
@@ -312,7 +308,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && (
             <QuickPromptSettingsManagement
-              basePromptContexts={basePromptContexts}
               handleSave={handleSave}
               onCancelClick={onCancelClick}
               onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}

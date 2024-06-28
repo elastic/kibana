@@ -8,7 +8,6 @@
 import { EuiPanel, EuiSpacer, EuiConfirmModal, EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { Conversation } from '../../../assistant_context/types';
 import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
@@ -24,10 +23,10 @@ import { Flyout } from '../../common/components/assistant_settings_management/fl
 import { CANCEL, DELETE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
 import { useConversationChanged } from '../conversation_settings/use_conversation_changed';
+import { CONVERSATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
+import { useSessionPagination } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { DEFAULT_PAGE_SIZE } from '../../settings/const';
-
 interface Props {
-  actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   assistantStreamingEnabled: boolean;
   connectors: AIConnector[] | undefined;
@@ -48,8 +47,12 @@ interface Props {
   onSelectedConversationChange: (conversation?: Conversation) => void;
 }
 
+export const DEFAULT_TABLE_OPTIONS = {
+  page: { size: DEFAULT_PAGE_SIZE, index: 0 },
+  sort: { field: 'createdAt', direction: 'desc' as const },
+};
+
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
-  actionTypeRegistry,
   allSystemPrompts,
   assistantStreamingEnabled,
   connectors,
@@ -67,7 +70,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   setConversationSettings,
   setConversationsSettingsBulkActions,
 }) => {
-  const { http } = useAssistantContext();
+  const { http, nameSpace, actionTypeRegistry } = useAssistantContext();
+
   const {
     isFlyoutOpen: editFlyoutVisible,
     openFlyout: openEditFlyout,
@@ -139,6 +143,12 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const { getConversationsList, getColumns } = useConversationsTable();
 
+  const { onTableChange, pagination, sorting } = useSessionPagination({
+    nameSpace,
+    storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
+    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+  });
+
   const conversationOptions = getConversationsList({
     allSystemPrompts,
     actionTypeRegistry,
@@ -164,19 +174,8 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         conversations: conversationSettings,
         onDeleteActionClicked,
         onEditActionClicked,
-        allSystemPrompts,
       }),
-    [allSystemPrompts, conversationSettings, getColumns, onDeleteActionClicked, onEditActionClicked]
-  );
-
-  const sorting = useMemo(
-    () => ({
-      sort: {
-        field: 'updatedAt',
-        direction: 'desc' as const,
-      },
-    }),
-    []
+    [conversationSettings, getColumns, onDeleteActionClicked, onEditActionClicked]
   );
 
   const confirmationTitle = useMemo(
@@ -185,14 +184,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         ? i18n.DELETE_CONVERSATION_CONFIRMATION_TITLE(deletedConversation?.title)
         : i18n.DELETE_CONVERSATION_CONFIRMATION_DEFAULT_TITLE,
     [deletedConversation?.title]
-  );
-
-  const pagination = useMemo(
-    () => ({
-      initialPageSize: DEFAULT_PAGE_SIZE,
-      pageSizeOptions: [10, DEFAULT_PAGE_SIZE, 50],
-    }),
-    []
   );
 
   if (!conversationsLoaded) {
@@ -213,6 +204,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           columns={columns}
           pagination={pagination}
           sorting={sorting}
+          onTableChange={onTableChange}
         />
       </EuiPanel>
       {editFlyoutVisible && (

@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiTitle,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React from 'react';
 import * as i18n from './translations';
 
@@ -37,7 +38,13 @@ const FlyoutComponent: React.FC<Props> = ({
   onSaveConfirmed,
 }) => {
   return flyoutVisible ? (
-    <EuiFlyout ownFocus onClose={onClose}>
+    <EuiFlyout
+      ownFocus
+      onClose={onClose}
+      css={css`
+        max-width: 656px;
+      `}
+    >
       <EuiFlyoutHeader>
         <EuiTitle size={'s'}>
           <h2>{title}</h2>

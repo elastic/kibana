@@ -29,12 +29,12 @@ const RowActionsComponent = <T,>({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-  const handleEditConnector = useCallback(() => {
+  const handleEdit = useCallback(() => {
     closePopover();
     onEdit?.(rowItem);
   }, [closePopover, onEdit, rowItem]);
 
-  const handleDeleteConnector = useCallback(() => {
+  const handleDelete = useCallback(() => {
     closePopover();
     onDelete?.(rowItem);
   }, [closePopover, onDelete, rowItem]);
@@ -59,7 +59,7 @@ const RowActionsComponent = <T,>({
           <EuiFlexItem>
             <EuiButtonEmpty
               iconType="pencil"
-              onClick={handleEditConnector}
+              onClick={handleEdit}
               disabled={!isEditable}
               color="text"
             >
@@ -72,7 +72,7 @@ const RowActionsComponent = <T,>({
             <EuiButtonEmpty
               aria-label={i18n.DELETE_BUTTON}
               iconType="trash"
-              onClick={handleDeleteConnector}
+              onClick={handleDelete}
               disabled={!isDeletable}
               color="text"
             >

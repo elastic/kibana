@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 
@@ -32,7 +33,7 @@ export interface GetConversationsListParams {
 }
 
 export type ConversationTableItem = Conversation & {
-  actionType?: string | null;
+  connectorTypeTitle?: string | null;
   systemPromptTitle?: string | null;
 };
 
@@ -41,7 +42,6 @@ export const useConversationsTable = () => {
     ({
       onDeleteActionClicked,
       onEditActionClicked,
-      allSystemPrompts,
     }): Array<EuiBasicTableColumn<ConversationTableItem>> => {
       return [
         {
@@ -62,11 +62,11 @@ export const useConversationsTable = () => {
           sortable: true,
         },
         {
-          field: 'actionType',
+          field: 'connectorTypeTitle',
           name: i18n.CONVERSATIONS_TABLE_COLUMN_CONNECTOR,
           align: 'left',
-          render: (actionType: ConversationTableItem['actionType']) =>
-            actionType ? <EuiBadge color="hollow">{actionType}</EuiBadge> : null,
+          render: (connectorTypeTitle: ConversationTableItem['connectorTypeTitle']) =>
+            connectorTypeTitle ? <EuiBadge color="hollow">{connectorTypeTitle}</EuiBadge> : null,
           sortable: true,
         },
         {
@@ -113,8 +113,8 @@ export const useConversationsTable = () => {
       connectors,
       conversations = emptyConversations,
       defaultConnector,
-    }: GetConversationsListParams): ConversationTableItem[] => {
-      return Object.values(conversations).map((conversation) => {
+    }: GetConversationsListParams): ConversationTableItem[] =>
+      Object.values(conversations).map((conversation) => {
         const conversationApiConfig = getConversationApiConfig({
           allSystemPrompts,
           connectors,
@@ -124,13 +124,11 @@ export const useConversationsTable = () => {
         const connector: AIConnector | undefined = connectors?.find(
           (c) => c.id === conversationApiConfig.apiConfig?.connectorId
         );
-
-        const actionType = getConnectorTypeTitle(connector, actionTypeRegistry);
+        const connectorTypeTitle = getConnectorTypeTitle(connector, actionTypeRegistry);
 
         const systemPrompt: Prompt | undefined = allSystemPrompts.find(
           ({ id }) => id === conversation.apiConfig?.defaultSystemPromptId
         );
-
         const defaultSystemPrompt = getInitialDefaultSystemPrompt({
           allSystemPrompts,
           conversation,
@@ -144,14 +142,16 @@ export const useConversationsTable = () => {
 
         return {
           ...conversation,
-          actionType,
+          connectorTypeTitle,
           systemPromptTitle,
           ...conversationApiConfig,
         };
-      });
-    },
+      }),
     []
   );
 
-  return { getColumns, getConversationsList };
+  return {
+    getColumns,
+    getConversationsList,
+  };
 };

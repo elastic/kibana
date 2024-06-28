@@ -22,11 +22,14 @@ import { Flyout } from '../../common/components/assistant_settings_management/fl
 import { CANCEL, DELETE } from '../../settings/translations';
 import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 import { useQuickPromptTable } from './use_quick_prompt_table';
-import { DEFAULT_PAGE_SIZE } from '../../settings/const';
-import { PromptContextTemplate } from '../../prompt_context/types';
+import {
+  DEFAULT_TABLE_OPTIONS,
+  useSessionPagination,
+} from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
+import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
+import { useAssistantContext } from '../../../assistant_context';
 
 interface Props {
-  basePromptContexts: PromptContextTemplate[];
   handleSave: (shouldRefetchConversation?: boolean) => void;
   onCancelClick: () => void;
   onSelectedQuickPromptChange: (quickPrompt?: QuickPrompt) => void;
@@ -37,7 +40,6 @@ interface Props {
 }
 
 const QuickPromptSettingsManagementComponent = ({
-  basePromptContexts,
   handleSave,
   onCancelClick,
   onSelectedQuickPromptChange,
@@ -46,6 +48,8 @@ const QuickPromptSettingsManagementComponent = ({
   selectedQuickPrompt,
   setUpdatedQuickPromptSettings,
 }: Props) => {
+  const { nameSpace, basePromptContexts } = useAssistantContext();
+
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const [deletedQuickPrompt, setDeletedQuickPrompt] = useState<QuickPrompt | null>();
   const {
@@ -111,6 +115,12 @@ const QuickPromptSettingsManagementComponent = ({
     onDeleteActionClicked,
   });
 
+  const { onTableChange, pagination, sorting } = useSessionPagination({
+    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+    nameSpace,
+    storageKey: QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY,
+  });
+
   const confirmationTitle = useMemo(
     () =>
       deletedQuickPrompt?.title
@@ -119,13 +129,6 @@ const QuickPromptSettingsManagementComponent = ({
     [deletedQuickPrompt?.title]
   );
 
-  const pagination = useMemo(
-    () => ({
-      initialPageSize: DEFAULT_PAGE_SIZE,
-      pageSizeOptions: [10, DEFAULT_PAGE_SIZE, 50],
-    }),
-    []
-  );
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -137,7 +140,13 @@ const QuickPromptSettingsManagementComponent = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
-        <EuiInMemoryTable pagination={pagination} columns={columns} items={quickPromptSettings} />
+        <EuiInMemoryTable
+          columns={columns}
+          items={quickPromptSettings}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          sorting={sorting}
+        />
       </EuiPanel>
       <Flyout
         flyoutVisible={editFlyoutVisible}

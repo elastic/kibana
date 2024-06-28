@@ -17,8 +17,10 @@ import { Toolbar } from './toolbar';
 import * as i18n from './translations';
 import { BatchUpdateListItem, ContextEditorRow, FIELDS, SortConfig } from './types';
 import { useAssistantContext } from '../../assistant_context';
+import { useSessionPagination } from '../../assistant/common/components/assistant_settings_management/pagination/use_session_pagination';
+import { ANONYMIZATION_TABLE_SESSION_STORAGE_KEY } from '../../assistant_context/constants';
 
-export const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 
 const Wrapper = styled.div`
   > div > .euiSpacer {
@@ -31,6 +33,11 @@ const defaultSort: SortConfig = {
     direction: 'asc',
     field: FIELDS.FIELD,
   },
+};
+
+export const DEFAULT_TABLE_OPTIONS = {
+  page: { size: DEFAULT_PAGE_SIZE, index: 0 },
+  ...defaultSort,
 };
 
 export interface Props {
@@ -69,6 +76,7 @@ const ContextEditorComponent: React.FC<Props> = ({
   const isAllSelected = useRef(false); // Must be a ref and not state in order not to re-render `selectionValue`, which fires `onSelectionChange` twice
   const {
     assistantAvailability: { hasUpdateAIAssistantAnonymization },
+    nameSpace,
   } = useAssistantContext();
   const [selected, setSelection] = useState<ContextEditorRow[]>([]);
   const selectionValue: EuiTableSelectionType<ContextEditorRow> = useMemo(
@@ -108,12 +116,11 @@ const ContextEditorComponent: React.FC<Props> = ({
     setSelection(rows);
   }, [rows]);
 
-  const pagination = useMemo(() => {
-    return {
-      initialPageSize: pageSize,
-      pageSizeOptions: [5, DEFAULT_PAGE_SIZE, 25, 50],
-    };
-  }, [pageSize]);
+  const { onTableChange, pagination, sorting } = useSessionPagination({
+    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+    nameSpace,
+    storageKey: ANONYMIZATION_TABLE_SESSION_STORAGE_KEY,
+  });
 
   const toolbar = useMemo(
     () => (
@@ -140,7 +147,8 @@ const ContextEditorComponent: React.FC<Props> = ({
         pagination={pagination}
         search={search}
         selection={selectionValue}
-        sorting={defaultSort}
+        sorting={sorting}
+        onTableChange={onTableChange}
       />
     </Wrapper>
   );

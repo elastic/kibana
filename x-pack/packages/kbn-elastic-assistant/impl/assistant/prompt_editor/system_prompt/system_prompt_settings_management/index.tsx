@@ -16,11 +16,15 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { Conversation, ConversationsBulkActions } from '../../../../..';
+import { Conversation, ConversationsBulkActions, useAssistantContext } from '../../../../..';
+import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
-import { DEFAULT_PAGE_SIZE } from '../../../settings/const';
+import {
+  DEFAULT_TABLE_OPTIONS,
+  useSessionPagination,
+} from '../../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { CANCEL, DELETE } from '../../../settings/translations';
 import { Prompt } from '../../../types';
 import { SystemPromptEditor } from '../system_prompt_modal/system_prompt_editor';
@@ -31,7 +35,6 @@ import { useSystemPromptTable } from './use_system_prompt_table';
 
 interface Props {
   connectors: AIConnector[] | undefined;
-  conversations: Record<string, Conversation>;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;
@@ -50,7 +53,6 @@ interface Props {
 
 const SystemPromptSettingsManagementComponent = ({
   connectors,
-  conversations,
   conversationSettings,
   onSelectedSystemPromptChange,
   setUpdatedSystemPromptSettings,
@@ -64,6 +66,7 @@ const SystemPromptSettingsManagementComponent = ({
   onCancelClick,
   resetSettings,
 }: Props) => {
+  const { nameSpace } = useAssistantContext();
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
   const {
     isFlyoutOpen: deleteConfirmModalVisibility,
@@ -137,6 +140,12 @@ const SystemPromptSettingsManagementComponent = ({
 
   const { getColumns, getSystemPromptsList } = useSystemPromptTable();
 
+  const { onTableChange, pagination, sorting } = useSessionPagination({
+    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+    nameSpace,
+    storageKey: SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY,
+  });
+
   const columns = useMemo(
     () => getColumns({ onEditActionClicked, onDeleteActionClicked }),
     [getColumns, onEditActionClicked, onDeleteActionClicked]
@@ -152,13 +161,6 @@ const SystemPromptSettingsManagementComponent = ({
     [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPromptSettings]
   );
 
-  const pagination = useMemo(
-    () => ({
-      initialPageSize: DEFAULT_PAGE_SIZE,
-      pageSizeOptions: [10, DEFAULT_PAGE_SIZE, 50],
-    }),
-    []
-  );
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -171,7 +173,13 @@ const SystemPromptSettingsManagementComponent = ({
         </EuiFlexGroup>
 
         <EuiSpacer size="s" />
-        <EuiInMemoryTable pagination={pagination} items={systemPromptListItems} columns={columns} />
+        <EuiInMemoryTable
+          columns={columns}
+          items={systemPromptListItems}
+          onTableChange={onTableChange}
+          pagination={pagination}
+          sorting={sorting}
+        />
       </EuiPanel>
       <Flyout
         flyoutVisible={editFlyoutVisible}

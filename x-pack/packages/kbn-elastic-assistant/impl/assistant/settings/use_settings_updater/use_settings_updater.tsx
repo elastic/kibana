@@ -189,6 +189,7 @@ export const useSettingsUpdater = (
   ]);
 
   useEffect(() => {
+    // Update conversation settings when conversations are loaded
     if (conversationsLoaded) {
       setConversationSettings(conversations);
     }
