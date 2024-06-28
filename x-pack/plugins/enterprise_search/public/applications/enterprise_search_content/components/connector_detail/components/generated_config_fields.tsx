@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -38,9 +39,11 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   connector,
   apiKey,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <EuiFlexGrid columns={3} alignItems="center">
-      <EuiFlexItem>
+    <EuiFlexGrid columns={3} alignItems="center" gutterSize="m">
+      <EuiFlexItem css={{ minHeight: euiTheme.size.l }}>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiIcon type="check" />
@@ -86,7 +89,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             <EuiCopy textToCopy={connector.id}>
               {(copy) => (
                 <EuiButtonEmpty
-                  size="s"
+                  size="xs"
                   data-test-subj="enterpriseSearchConnectorDeploymentButton"
                   iconType="copyClipboard"
                   onClick={copy}
@@ -96,7 +99,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem css={{ minHeight: euiTheme.size.l }}>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiIcon type="check" />
@@ -121,7 +124,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem />
-      <EuiFlexItem>
+      <EuiFlexItem css={{ minHeight: euiTheme.size.l }}>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiIcon type="check" />
@@ -150,7 +153,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                 <EuiFlexItem>{apiKey?.encoded}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    size="s"
+                    size="xs"
                     data-test-subj="enterpriseSearchConnectorDeploymentButton"
                     iconType="copyClipboard"
                     onClick={copy}
