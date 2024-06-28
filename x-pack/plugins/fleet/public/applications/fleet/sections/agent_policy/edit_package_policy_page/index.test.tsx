@@ -566,9 +566,6 @@ describe('edit package policy page', () => {
         if (ids.includes('fleet-server-policy')) {
           items.push({ id: 'fleet-server-policy', name: 'Fleet Server Policy' });
         }
-        if (ids.includes('agent-policy-2')) {
-          items.push({ id: 'agent-policy-2', name: 'Agent policy 2' });
-        }
         return Promise.resolve({
           data: {
             items,
@@ -580,7 +577,6 @@ describe('edit package policy page', () => {
           items: [
             { id: 'agent-policy-1', name: 'Agent policy 1', is_managed: true },
             { id: 'fleet-server-policy', name: 'Fleet Server Policy' },
-            { id: 'agent-policy-2', name: 'Agent policy 2' },
           ],
         },
         isLoading: false,

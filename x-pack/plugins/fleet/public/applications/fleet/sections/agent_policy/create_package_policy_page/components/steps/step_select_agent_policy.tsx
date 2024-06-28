@@ -123,7 +123,10 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
       setIsFirstLoad(false);
       if (canUseMultipleAgentPolicies) {
         const enabledOptions = agentPolicyMultiOptions.filter((option) => !option.disabled);
-        if (enabledOptions.length === 1) {
+        if (
+          enabledOptions.length === 1 &&
+          agentPolicies.filter((policy) => policy.is_managed).length === 0
+        ) {
           setSelectedPolicyIds([enabledOptions[0].key!]);
         } else if (initialSelectedAgentPolicyIds.length > 0) {
           setSelectedPolicyIds(initialSelectedAgentPolicyIds);
@@ -145,6 +148,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     selectedPolicyIds,
     existingAgentPolicies,
     isFirstLoad,
+    agentPolicies,
   ]);
 
   // Bubble up any issues with agent policy selection
