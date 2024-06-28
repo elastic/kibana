@@ -28,6 +28,7 @@ export type {
 export type { AuditLogger } from './src/audit_logging/audit_logger';
 
 export type {
+  APIKeysServiceWithContext,
   APIKeysService,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
@@ -46,3 +47,4 @@ export type {
 } from './src/authentication/api_keys';
 
 export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';
+export { isCreateRestAPIKeyParams } from './src/authentication/api_keys';

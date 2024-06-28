@@ -24,7 +24,6 @@ import type {
 } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
-  APIKeys as APIKeysType,
   AuditServiceSetup,
   AuthorizationServiceSetup,
   SecurityPluginSetup as SecurityPluginSetupWithoutDeprecatedMembers,
@@ -40,7 +39,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
-import { APIKeysService } from './api_keys';
 import { AuditService } from './audit';
 import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
@@ -63,7 +61,6 @@ import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
 import type { AuthenticatedUser, SecurityLicense } from '../common';
-import { APPLICATION_PREFIX } from '../common/constants';
 import { SecurityLicenseService } from '../common/licensing';
 
 export type SpacesService = Pick<
@@ -80,7 +77,6 @@ export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecate
    */
   authc: {
     getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-    apiKeys: APIKeysType | null;
   };
   /**
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
@@ -160,7 +156,6 @@ export class SecurityPlugin
   };
 
   private readonly auditService: AuditService;
-  private readonly apiKeysService: APIKeysService;
   private readonly securityLicenseService = new SecurityLicenseService();
   private readonly analyticsService: AnalyticsService;
   private readonly authorizationService = new AuthorizationService();
@@ -192,7 +187,6 @@ export class SecurityPlugin
       this.initializerContext.logger.get('authentication')
     );
     this.auditService = new AuditService(this.initializerContext.logger.get('audit'));
-    this.apiKeysService = new APIKeysService(this.initializerContext.logger.get('api-keys'));
 
     this.elasticsearchService = new ElasticsearchService(
       this.initializerContext.logger.get('elasticsearch')
@@ -271,16 +265,6 @@ export class SecurityPlugin
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
 
-    const applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
-    const apiKeysSetup = this.apiKeysService.setup({
-      getClusterClient: () =>
-        startServicesPromise.then(({ elasticsearch }) => elasticsearch.client),
-      license,
-      applicationName,
-      getKibanaFeatures: () =>
-        startServicesPromise.then((services) => services.features.getKibanaFeatures()),
-    });
-
     this.anonymousAccessService.setup();
 
     this.authorizationSetup = this.authorizationService.setup({
@@ -352,7 +336,6 @@ export class SecurityPlugin
       audit: this.auditSetup,
       authc: {
         getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
-        apiKeys: apiKeysSetup,
       },
       authz: {
         actions: this.authorizationSetup.actions,

@@ -21,8 +21,11 @@ export const restApiKeySchema = schema.object({
 export const getRestApiKeyWithKibanaPrivilegesSchema = (
   getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
 ) =>
-  restApiKeySchema.extends({
-    role_descriptors: null,
+  schema.object({
+    type: schema.maybe(schema.literal('rest')),
+    name: schema.string(),
+    expiration: schema.maybe(schema.string()),
+    metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     kibana_role_descriptors: schema.recordOf(
       schema.string(),
       schema.object({
@@ -32,9 +35,11 @@ export const getRestApiKeyWithKibanaPrivilegesSchema = (
     ),
   });
 
-export const crossClusterApiKeySchema = restApiKeySchema.extends({
+export const crossClusterApiKeySchema = schema.object({
   type: schema.literal('cross_cluster'),
-  role_descriptors: null,
+  name: schema.string(),
+  expiration: schema.maybe(schema.string()),
+  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   access: schema.object(
     {
       search: schema.maybe(
@@ -59,22 +64,52 @@ export const crossClusterApiKeySchema = restApiKeySchema.extends({
   ),
 });
 
-export const updateRestApiKeySchema = restApiKeySchema.extends({
-  name: null,
+export const updateRestApiKeySchema = schema.object({
   id: schema.string(),
+  type: schema.maybe(schema.literal('rest')),
+  expiration: schema.maybe(schema.string()),
+  role_descriptors: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }), {
+    defaultValue: {},
+  }),
+  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-export const updateCrossClusterApiKeySchema = crossClusterApiKeySchema.extends({
-  name: null,
+export const updateCrossClusterApiKeySchema = schema.object({
   id: schema.string(),
+  type: schema.literal('cross_cluster'),
+  expiration: schema.maybe(schema.string()),
+  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  access: schema.object(
+    {
+      search: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            names: schema.arrayOf(schema.string()),
+            query: schema.maybe(schema.any()),
+            field_security: schema.maybe(schema.any()),
+            allow_restricted_indices: schema.maybe(schema.boolean()),
+          })
+        )
+      ),
+      replication: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            names: schema.arrayOf(schema.string()),
+          })
+        )
+      ),
+    },
+    { unknowns: 'allow' }
+  ),
 });
 
 export const getUpdateRestApiKeyWithKibanaPrivilegesSchema = (
   getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
 ) =>
-  restApiKeySchema.extends({
-    role_descriptors: null,
-    name: null,
+  schema.object({
+    type: schema.maybe(schema.literal('rest')),
+    expiration: schema.maybe(schema.string()),
+    metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     id: schema.string(),
     kibana_role_descriptors: schema.recordOf(
       schema.string(),

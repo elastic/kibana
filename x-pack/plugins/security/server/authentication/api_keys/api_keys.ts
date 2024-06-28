@@ -13,7 +13,6 @@ import type {
   APIKeys as APIKeysType,
   CreateAPIKeyParams,
   CreateAPIKeyResult,
-  CreateCrossClusterAPIKeyParams,
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   GrantAPIKeyResult,
@@ -21,6 +20,7 @@ import type {
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
+import { isCreateRestAPIKeyParams } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
@@ -178,14 +178,13 @@ export class APIKeys implements APIKeysType {
             name,
             expiration,
             metadata,
-            role_descriptors:
-              'role_descriptors' in createParams
-                ? createParams.role_descriptors
-                : this.parseRoleDescriptorsWithKibanaPrivileges(
-                    createParams.kibana_role_descriptors,
-                    features,
-                    false
-                  ),
+            role_descriptors: isCreateRestAPIKeyParams(createParams)
+              ? createParams.role_descriptors
+              : this.parseRoleDescriptorsWithKibanaPrivileges(
+                  createParams.kibana_role_descriptors,
+                  features,
+                  false
+                ),
           },
         });
       }

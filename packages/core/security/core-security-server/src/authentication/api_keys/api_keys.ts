@@ -105,15 +105,15 @@ export interface CreateRestAPIKeyParams {
   type?: 'rest';
   expiration?: string;
   name: string;
-  role_descriptors: Record<string, { [key: string]: unknown }>;
-  metadata?: { [key: string]: unknown };
+  role_descriptors: Record<string, { [key: string]: any }>;
+  metadata?: { [key: string]: any };
 }
 
-export type CreateRestAPIKeyWithKibanaPrivilegesParams = Omit<
-  CreateRestAPIKeyParams,
-  'role_descriptors'
-> & {
-  role_descriptors: null;
+export interface CreateRestAPIKeyWithKibanaPrivilegesParams {
+  type?: 'rest';
+  expiration?: string;
+  name: string;
+  metadata?: { [key: string]: any };
   kibana_role_descriptors: Record<
     string,
     {
@@ -121,15 +121,14 @@ export type CreateRestAPIKeyWithKibanaPrivilegesParams = Omit<
       kibana: KibanaPrivilegesType;
     }
   >;
-};
-export type CreateCrossClusterAPIKeyParams = Omit<
-  CreateRestAPIKeyParams,
-  'type' | 'role_descriptors'
-> & {
-  type?: 'cross_cluster';
-  role_descriptors: null;
+}
+export interface CreateCrossClusterAPIKeyParams {
+  type: 'cross_cluster';
+  expiration?: string;
+  name: string;
+  metadata?: { [key: string]: any };
   access: {
-    search: Array<{
+    search?: Array<{
       names: string[];
       query?: unknown;
       field_security?: unknown;
@@ -139,7 +138,7 @@ export type CreateCrossClusterAPIKeyParams = Omit<
       names: string[];
     }>;
   };
-};
+}
 
 export interface GrantAPIKeyResult {
   /**
@@ -223,21 +222,37 @@ export type UpdateAPIKeyParams =
   | UpdateCrossClusterAPIKeyParams
   | UpdateRestAPIKeyWithKibanaPrivilegesParams;
 
-export type UpdateRestAPIKeyParams = Omit<CreateRestAPIKeyParams, 'name'> & {
-  name: null;
+export interface UpdateRestAPIKeyParams {
   id: string;
-};
+  type?: 'rest';
+  expiration?: string;
+  role_descriptors: Record<string, { [key: string]: unknown }>;
+  metadata?: { [key: string]: any };
+}
 
-export type UpdateCrossClusterAPIKeyParams = Omit<CreateCrossClusterAPIKeyParams, 'name'> & {
-  name: null;
+export interface UpdateCrossClusterAPIKeyParams {
   id: string;
-};
+  type: 'cross_cluster';
+  expiration?: string;
+  metadata?: { [key: string]: any };
+  access: {
+    search?: Array<{
+      names: string[];
+      query?: unknown;
+      field_security?: unknown;
+      allow_restricted_indices?: boolean;
+    }>;
+    replication?: Array<{
+      names: string[];
+    }>;
+  };
+}
 
-export type UpdateRestAPIKeyWithKibanaPrivilegesParams = Omit<
-  CreateRestAPIKeyParams,
-  'name' | 'role_descriptors'
-> & {
+export interface UpdateRestAPIKeyWithKibanaPrivilegesParams {
   id: string;
+  type?: 'rest';
+  expiration?: string;
+  metadata?: { [key: string]: any };
   kibana_role_descriptors: Record<
     string,
     {
@@ -245,4 +260,8 @@ export type UpdateRestAPIKeyWithKibanaPrivilegesParams = Omit<
       kibana: KibanaPrivilegesType;
     }
   >;
-};
+}
+
+export function isCreateRestAPIKeyParams(params: any): params is CreateRestAPIKeyParams {
+  return 'role_descriptor' in params;
+}

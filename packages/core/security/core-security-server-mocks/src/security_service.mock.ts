@@ -82,7 +82,13 @@ const createRequestHandlerContextMock = () => {
   const mock: jest.MockedObjectDeep<SecurityRequestHandlerContext> = {
     authc: {
       getCurrentUser: jest.fn(),
-      apiKeys: apiKeysMock.create(),
+      apiKeys: {
+        areAPIKeysEnabled: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+        validate: jest.fn(),
+        invalidate: jest.fn(),
+      },
     },
     audit: {
       logger: {

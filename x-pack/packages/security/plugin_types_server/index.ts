@@ -80,6 +80,7 @@ export type {
   CreateCrossClusterAPIKeyParams,
   GrantAPIKeyResult,
 } from '@kbn/core-security-server';
+export { isCreateRestAPIKeyParams } from '@kbn/core-security-server';
 
 export {
   restApiKeySchema,

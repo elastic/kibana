@@ -23,3 +23,5 @@ export type {
   UpdateRestAPIKeyParams,
   UpdateRestAPIKeyWithKibanaPrivilegesParams,
 } from './api_keys';
+export type { APIKeysServiceWithContext } from './api_keys_context';
+export { isCreateRestAPIKeyParams } from './api_keys';
