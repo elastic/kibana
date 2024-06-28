@@ -6,5 +6,13 @@
  * Side Public License, v 1.
  */
 
-export * as v2023_10_31 from './2023_10_31';
-export * as v2024_06_24 from './2024_06_24';
+export const API_CONTENT_PATH = '/api/{appName}/{contentId}';
+
+export const SPECIFIC_ITEM_PATH = `${API_CONTENT_PATH}/{id}`;
+
+export const MAYBE_SPECIFIC_ITEM_PATH = `${API_CONTENT_PATH}/{id?}`;
+
+export const contentManagementApiVersions = {
+  '2023-10-31': '2023-10-31',
+  '2024-06-24': '2024-06-24',
+} as const;

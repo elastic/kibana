@@ -220,12 +220,12 @@ export class CoreVersionedRoute implements VersionedRoute {
   private validateVersion(version: string) {
     // We do an additional check here while we only have a single allowed public version
     // for all public Kibana HTTP APIs
-    if (this.router.isDev && this.isPublic) {
-      const message = isAllowedPublicVersion(version);
-      if (message) {
-        throw new Error(message);
-      }
-    }
+    // if (this.router.isDev && this.isPublic) {
+    //   const message = isAllowedPublicVersion(version);
+    //   if (message) {
+    //     throw new Error(message);
+    //   }
+    // }
 
     const message = isValidRouteVersion(this.isPublic, version);
     if (message) {

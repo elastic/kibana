@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * as v2023_10_31 from './2023_10_31';
-export * as v2024_06_24 from './2024_06_24';
+export { registerAPIRoutes } from './src/register_routes';
+export { contentManagementApiVersions } from './src/constants';

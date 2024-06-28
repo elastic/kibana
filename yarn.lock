@@ -3577,6 +3577,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-management-api@link:packages/kbn-content-management-api":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-content-editor@link:packages/content-management/content_editor":
   version "0.0.0"
   uid ""

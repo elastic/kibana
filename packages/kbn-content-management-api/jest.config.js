@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export * as v2023_10_31 from './2023_10_31';
-export * as v2024_06_24 from './2024_06_24';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-content-management-api'],
+};

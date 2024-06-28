@@ -10,14 +10,39 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 const controlGroupInputSchema = schema
   .object({
-    panelsJSON: schema.maybe(schema.string({ meta: { description: 'Lorem ipsum' } })),
-    controlStyle: schema.maybe(schema.string({ meta: { description: 'Lorem ipsum' } })),
-    chainingSystem: schema.maybe(schema.string({ meta: { description: 'Lorem ipsum' } })),
-    ignoreParentSettingsJSON: schema.maybe(schema.string({ meta: { description: 'Lorem ipsum' } })),
+    panelsJSON: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Stringified JSON representing the state of the controls panels in the dashboard.',
+        },
+      })
+    ),
+    controlStyle: schema.maybe(
+      schema.string({
+        meta: { description: 'Style of the controls. For example, "oneLine", "twoLine".' },
+      })
+    ),
+    chainingSystem: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".',
+        },
+      })
+    ),
+    ignoreParentSettingsJSON: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'Stringified JSON representing options for ignoring certain parent settings.',
+        },
+      })
+    ),
   })
   .extends({}, { unknowns: 'ignore' });
 
-const baseDashboard = schema.object({
+export const baseDashboard = schema.object({
   // General
   title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
   description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
@@ -28,7 +53,7 @@ const baseDashboard = schema.object({
       searchSourceJSON: schema.maybe(
         schema.string({
           meta: {
-            description: 'A string containing search source',
+            description: 'Stringified JSON representing search source.',
           },
         })
       ),
@@ -61,21 +86,21 @@ const baseDashboard = schema.object({
         }),
         value: schema.number({
           meta: {
-            description:
-              'A numeric value indicating refresh frequency expressed as, for example, 30s.',
+            description: 'A numeric value indicating refresh frequency in milliseconds.',
           },
         }),
         display: schema.maybe(
           schema.string({
             meta: {
-              description: 'Lorem ipsum',
+              description:
+                'A human-readable string indicating the refresh frequency. No longer used.',
             },
           })
         ),
         section: schema.maybe(
           schema.number({
             meta: {
-              description: 'Lorem ipsum',
+              description: 'No longer used.', // TODO what is this legacy property?
             },
           })
         ),
@@ -90,8 +115,17 @@ const baseDashboard = schema.object({
 
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
-  panelsJSON: schema.string({ defaultValue: '[]', meta: { description: 'Lorem ipsum' } }),
-  optionsJSON: schema.string({ defaultValue: '{}', meta: { description: 'Lorem ipsum' } }),
+  panelsJSON: schema.string({
+    defaultValue: '[]',
+    meta: {
+      description:
+        'Stringified JSON representing the state of panels and their represented embeddable state.',
+    },
+  }),
+  optionsJSON: schema.string({
+    defaultValue: '{}',
+    meta: { description: 'Stringified JSON representing the dashboard settings.' },
+  }),
 
   // Legacy
   // hits: schema.maybe(schema.number()),
