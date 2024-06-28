@@ -8,14 +8,13 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  ApmRuleType,
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   UPTIME_SYNTHETICS_RULE_TYPES,
   SLO_RULE_TYPES,
   INFRA_RULE_TYPES,
+  APM_RULE_TYPES,
 } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import {
@@ -41,8 +40,6 @@ const O11Y_RULE_TYPES = [
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  ...Object.values(ApmRuleType),
 ];
 
 const ALL_RULE_TYPES = [
@@ -50,6 +47,7 @@ const ALL_RULE_TYPES = [
   ...UPTIME_SYNTHETICS_RULE_TYPES,
   ...SLO_RULE_TYPES,
   ...INFRA_RULE_TYPES,
+  ...APM_RULE_TYPES,
 ];
 
 const ALL_APPS = [
@@ -71,8 +69,10 @@ export const OBSERVABILITY_FEATURE = {
   }),
   order: 1000,
   category: DEFAULT_APP_CATEGORIES.observability,
+  // specify apps here to control visibility based on the current space
   app: ALL_APPS,
   catalogue: [...ALL_APPS, 'infraops'],
+  // specify alerting here to control visibility based on the current space
   alerting: ALL_RULE_TYPES,
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -83,15 +83,15 @@ export const OBSERVABILITY_FEATURE = {
       catalogue: [...ALL_APPS, 'infraops'],
       api: ['rac'],
       savedObject: {
-        all: [],
         read: [],
+        all: [],
       },
       alerting: {
         rule: {
-          all: ALL_RULE_TYPES,
+          all: O11Y_RULE_TYPES,
         },
         alert: {
-          all: ALL_RULE_TYPES,
+          all: O11Y_RULE_TYPES,
         },
       },
       ui: ['read', 'write'],
@@ -109,10 +109,10 @@ export const OBSERVABILITY_FEATURE = {
       },
       alerting: {
         rule: {
-          read: ALL_RULE_TYPES,
+          read: O11Y_RULE_TYPES,
         },
         alert: {
-          read: ALL_RULE_TYPES,
+          read: O11Y_RULE_TYPES,
         },
       },
       ui: ['read'],
