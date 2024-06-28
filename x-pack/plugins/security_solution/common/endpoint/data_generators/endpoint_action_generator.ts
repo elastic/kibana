@@ -27,7 +27,7 @@ import {
   type ResponseActionGetFileParameters,
   type ResponseActionScanOutputContent,
   type ResponseActionsExecuteParameters,
-  type ResponseActionsScanParameters,
+  type ResponseActionScanParameters,
   type ResponseActionUploadOutputContent,
   type ResponseActionUploadParameters,
   type WithAllKeys,
@@ -231,7 +231,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
       comment: 'thisisacomment',
       createdBy: 'auserid',
       parameters: undefined,
-      outputs: {},
+      outputs: undefined,
       agentState: {
         'agent-a': {
           errors: undefined,
@@ -265,8 +265,13 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionGetFileOutputContent,
             ResponseActionGetFileParameters
           >
-        ).outputs = {
-          [details.agents[0]]: {
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionGetFileOutputContent,
+            ResponseActionGetFileParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
             type: 'json',
             content: {
               code: 'ra_get-file_success',
@@ -281,8 +286,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
                 },
               ],
             },
-          },
-        };
+          };
+          return acc;
+        }, {});
       }
     }
 
@@ -291,7 +297,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
         ).parameters = {
           path: '/some/folder/to/scan',
@@ -302,16 +308,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         (
           details as unknown as ActionDetails<
             ResponseActionScanOutputContent,
-            ResponseActionsScanParameters
+            ResponseActionScanParameters
           >
-        ).outputs = {
-          [details.agents[0]]: {
+        ).outputs = details.agents.reduce<
+          ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = {
             type: 'json',
             content: {
-              code: 'ra_scan_success_done',
+              code: 'ra_scan_success',
             },
-          },
-        };
+          };
+
+          return acc;
+        }, {});
       }
     }
 
@@ -336,14 +346,20 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionExecuteOutputContent,
             ResponseActionsExecuteParameters
           >
-        ).outputs = {
-          [details.agents[0]]: this.generateExecuteActionResponseOutput({
+        ).outputs = details.agents.reduce<
+          ActionDetails<
+            ResponseActionExecuteOutputContent,
+            ResponseActionsExecuteParameters
+          >['outputs']
+        >((acc = {}, agentId) => {
+          acc[agentId] = this.generateExecuteActionResponseOutput({
             content: {
               output_file_id: getFileDownloadId(details, details.agents[0]),
               ...(overrides.outputs?.[details.agents[0]]?.content ?? {}),
             },
-          }),
-        };
+          });
+          return acc;
+        }, {});
       }
     }
 
@@ -360,16 +376,19 @@ export class EndpointActionGenerator extends BaseDataGenerator {
         file_sha256: 'file-hash-sha-256',
       };
 
-      uploadActionDetails.outputs = {
-        'agent-a': {
+      uploadActionDetails.outputs = details.agents.reduce<
+        ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>['outputs']
+      >((acc = {}, agentId) => {
+        acc[agentId] = {
           type: 'json',
           content: {
             code: 'ra_upload_file-success',
             path: '/path/to/uploaded/file',
             disk_free_space: 1234567,
           },
-        },
-      };
+        };
+        return acc;
+      }, {});
     }
 
     return merge(details, overrides as ActionDetails) as unknown as ActionDetails<

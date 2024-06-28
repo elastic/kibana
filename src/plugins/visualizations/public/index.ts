@@ -21,6 +21,7 @@ export {
   apiHasVisualizeConfig,
   VISUALIZE_EMBEDDABLE_TYPE,
   VIS_EVENT_TO_TRIGGER,
+  COMMON_VISUALIZATION_GROUPING,
 } from './embeddable';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';

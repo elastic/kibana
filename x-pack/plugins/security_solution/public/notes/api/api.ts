@@ -32,25 +32,37 @@ export const createNote = async ({ note }: { note: BareNote }) => {
 
 // TODO point to the correct API when it is available
 /**
- * Fetches all the notes for a document id
+ * Fetches all the notes for an array of document ids
  */
-export const fetchNotesByDocumentId = async (documentId: string) => {
+export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
   const response = {
     totalCount: 1,
-    notes: [generateNoteMock(documentId)],
+    notes: generateNoteMock(documentIds),
   };
   return response.notes;
 };
 
 // TODO remove when the API is available
-export const generateNoteMock = (documentId: string) => ({
-  noteId: uuid.v4(),
-  version: 'WzU1MDEsMV0=',
-  timelineId: '',
-  eventId: documentId,
-  note: 'This is a mocked note',
-  created: new Date().getTime(),
-  createdBy: 'elastic',
-  updated: new Date().getTime(),
-  updatedBy: 'elastic',
-});
+export const generateNoteMock = (documentIds: string[]) =>
+  documentIds.map((documentId: string) => ({
+    noteId: uuid.v4(),
+    version: 'WzU1MDEsMV0=',
+    timelineId: '',
+    eventId: documentId,
+    note: 'This is a mocked note',
+    created: new Date().getTime(),
+    createdBy: 'elastic',
+    updated: new Date().getTime(),
+    updatedBy: 'elastic',
+  }));
+
+/**
+ * Deletes a note
+ */
+export const deleteNote = async (noteId: string) => {
+  const response = await KibanaServices.get().http.delete<{ data: unknown }>(NOTE_URL, {
+    body: JSON.stringify({ noteId }),
+    version: '2023-10-31',
+  });
+  return response;
+};
