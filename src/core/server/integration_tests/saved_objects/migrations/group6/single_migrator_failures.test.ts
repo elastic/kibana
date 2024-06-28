@@ -50,6 +50,8 @@ describe('split .kibana index into multiple system indices', () => {
       failOn: (methodName: string, methodArgs: any[]) => boolean;
       delaySeconds?: number;
     }) => {
+      throw new Error('XOXO from here too!');
+
       const clientWrapperFactory = getElasticsearchClientWrapperFactory({
         failOn,
         errorDelaySeconds: delaySeconds,
