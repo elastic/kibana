@@ -230,9 +230,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add more columns to the table', async function () {
+        const expectedFieldLength: Record<string, number> = {
+          phpmemory: 1,
+          ip: 4,
+        };
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clearFieldSearchInput();
           await PageObjects.unifiedFieldList.findFieldByName(column);
+          await retry.waitFor('unified field list updated', async () => {
+            return (
+              (await find.allByCssSelector('.kbnFieldButton')).length ===
+              expectedFieldLength[column]
+            );
+          });
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test the header now

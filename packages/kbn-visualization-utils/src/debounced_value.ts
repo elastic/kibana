@@ -9,6 +9,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { debounce } from 'lodash';
 
+const DEFAULT_TIMEOUT = 256;
 /**
  * Debounces value changes and updates inputValue on root state changes if no debounced changes
  * are in flight because the user is currently modifying the value.
@@ -28,7 +29,9 @@ export const useDebouncedValue = <T>(
     value: T;
     defaultValue?: T;
   },
-  { allowFalsyValue }: { allowFalsyValue?: boolean } = {}
+  { allowFalsyValue, wait }: { allowFalsyValue?: boolean; wait?: number } = {
+    wait: DEFAULT_TIMEOUT,
+  }
 ) => {
   const [inputValue, setInputValue] = useState(value);
   const unflushedChanges = useRef(false);
@@ -45,8 +48,8 @@ export const useDebouncedValue = <T>(
       // do not reset unflushed flag right away, wait a bit for upstream to pick it up
       flushChangesTimeout.current = setTimeout(() => {
         unflushedChanges.current = false;
-      }, 256);
-    }, 256);
+      }, wait);
+    }, wait);
     return (val: T) => {
       if (flushChangesTimeout.current) {
         clearTimeout(flushChangesTimeout.current);
@@ -54,7 +57,7 @@ export const useDebouncedValue = <T>(
       unflushedChanges.current = true;
       callback(val);
     };
-  }, [onChange]);
+  }, [onChange, wait]);
 
   useEffect(() => {
     if (!unflushedChanges.current && value !== inputValue) {
