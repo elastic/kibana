@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-import type {
-  CaseBaseOptionalFields,
-  ConnectorTypeFields,
-  TemplateConfiguration,
-} from '../../../common/types/domain';
-
-export type CaseFieldsProps = Omit<
-  CaseBaseOptionalFields,
-  'customFields' | 'connector' | 'settings'
-> & {
-  customFields?: Record<string, string | boolean>;
-  connectorId?: string;
-  fields?: ConnectorTypeFields['fields'];
-  syncAlerts?: boolean;
-};
+import type { TemplateConfiguration } from '../../../common/types/domain';
+import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
 
 export type TemplateFormProps = Pick<TemplateConfiguration, 'key' | 'name'> &
-  CaseFieldsProps & {
+  Partial<CaseFormFieldsSchemaProps> & {
     templateTags?: string[];
     templateDescription?: string;
   };

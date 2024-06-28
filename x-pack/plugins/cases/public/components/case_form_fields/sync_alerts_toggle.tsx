@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import * as i18n from './translations';
+import * as i18n from '../create/translations';
 
 interface Props {
   isLoading: boolean;

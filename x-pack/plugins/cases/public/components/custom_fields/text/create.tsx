@@ -11,7 +11,7 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import { getTextFieldConfig } from './config';
-import { OptionalFieldLabel } from '../../create/optional_field_label';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
   customFieldConfiguration,

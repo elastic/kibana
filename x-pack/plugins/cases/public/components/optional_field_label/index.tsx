@@ -8,7 +8,7 @@
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
-import * as i18n from '../../../common/translations';
+import * as i18n from '../../common/translations';
 
 export const OptionalFieldLabel = (
   <EuiText color="subdued" size="xs" data-test-subj="form-optional-field-label">

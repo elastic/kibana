@@ -119,7 +119,7 @@ describe('Templates', () => {
   it('shows error when templates reaches the limit', async () => {
     const mockTemplates = [];
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < MAX_TEMPLATES_LENGTH; i++) {
       mockTemplates.push({
         key: `field_key_${i + 1}`,
         name: `template_${i + 1}`,
@@ -127,9 +127,8 @@ describe('Templates', () => {
         caseFields: null,
       });
     }
-    const templates = [...templatesConfigurationMock, ...mockTemplates];
 
-    appMockRender.render(<Templates {...{ ...props, templates }} />);
+    appMockRender.render(<Templates {...{ ...props, templates: mockTemplates }} />);
 
     userEvent.click(await screen.findByTestId('add-template'));
 

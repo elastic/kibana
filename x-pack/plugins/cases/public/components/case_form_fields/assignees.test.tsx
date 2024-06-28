@@ -40,113 +40,99 @@ describe('Assignees', () => {
   });
 
   it('renders', async () => {
-    const result = appMockRender.render(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
+    expect(await screen.findByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
 
   it('does not render the assign yourself link when the current user profile is undefined', async () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(undefined as unknown as UserProfile);
 
-    const result = appMockRender.render(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    expect(result.queryByTestId('create-case-assign-yourself-link')).not.toBeInTheDocument();
-    expect(result.getByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
+    expect(screen.queryByTestId('create-case-assign-yourself-link')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('createCaseAssigneesComboBox')).toBeInTheDocument();
   });
 
   it('selects the current user correctly', async () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
 
-    const result = appMockRender.render(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
-    });
+    userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
 
-    await waitFor(() => {
-      expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
-    });
+    expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
   });
 
   it('disables the assign yourself button if the current user is already selected', async () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
 
-    const result = appMockRender.render(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      userEvent.click(result.getByTestId('create-case-assign-yourself-link'));
-    });
+    userEvent.click(await screen.findByTestId('create-case-assign-yourself-link'));
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
     });
 
-    expect(result.getByTestId('create-case-assign-yourself-link')).toBeDisabled();
+    expect(await screen.findByTestId('create-case-assign-yourself-link')).toBeDisabled();
   });
 
   it('assignees users correctly', async () => {
-    const result = appMockRender.render(
+    appMockRender.render(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
     );
 
     await waitFor(() => {
-      expect(result.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    await act(async () => {
-      await userEvent.type(result.getByTestId('comboBoxSearchInput'), 'dr', { delay: 1 });
-    });
+    await userEvent.type(await screen.findByTestId('comboBoxSearchInput'), 'dr', { delay: 1 });
 
-    await waitFor(() => {
-      expect(
-        result.getByTestId('comboBoxOptionsList createCaseAssigneesComboBox-optionsList')
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByTestId('comboBoxOptionsList createCaseAssigneesComboBox-optionsList')
+    ).toBeInTheDocument();
 
-    await waitFor(async () => {
-      expect(result.getByText(`${currentUserProfile.user.full_name}`)).toBeInTheDocument();
-    });
+    expect(await screen.findByText(`${currentUserProfile.user.full_name}`)).toBeInTheDocument();
 
-    act(() => {
-      userEvent.click(result.getByText(`${currentUserProfile.user.full_name}`));
-    });
+    userEvent.click(await screen.findByText(`${currentUserProfile.user.full_name}`));
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ assignees: [{ uid: currentUserProfile.uid }] });
@@ -185,25 +171,62 @@ describe('Assignees', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId('comboBoxSearchInput')).not.toBeDisabled();
+      expect(screen.queryByTestId('comboBoxSearchInput')).not.toBeDisabled();
     });
 
-    act(() => {
-      userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-    });
+    userEvent.click(await screen.findByTestId('comboBoxSearchInput'));
 
-    await waitFor(() => {
-      expect(screen.getByText('Turtle')).toBeInTheDocument();
-      expect(screen.getByText('turtle')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Turtle')).toBeInTheDocument();
+    expect(await screen.findByText('turtle')).toBeInTheDocument();
 
-    act(() => {
-      userEvent.click(screen.getByText('Turtle'), undefined, { skipPointerEventsCheck: true });
-    });
+    userEvent.click(screen.getByText('Turtle'), undefined, { skipPointerEventsCheck: true });
 
     // ensure that the similar user is still available for selection
-    await waitFor(() => {
-      expect(screen.getByText('turtle')).toBeInTheDocument();
+    expect(await screen.findByText('turtle')).toBeInTheDocument();
+  });
+
+  it('fetches the unknown user profiles using bulk_get', async () => {
+    // the profile is not returned by the suggest API
+    const userProfile = {
+      uid: 'u_qau3P4T1H-_f1dNHyEOWJzVkGQhLH1gnNMVvYxqmZcs_0',
+      enabled: true,
+      data: {},
+      user: {
+        username: 'uncertain_crawdad',
+        email: 'uncertain_crawdad@profiles.elastic.co',
+        full_name: 'Uncertain Crawdad',
+      },
+    };
+
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+    spyOnBulkGetUserProfiles.mockResolvedValue([userProfile]);
+
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Assignees isLoading={false} />
+      </MockHookWrapperComponent>
+    );
+
+    expect(screen.queryByText(userProfile.user.full_name)).not.toBeInTheDocument();
+
+    act(() => {
+      globalForm.setFieldValue('assignees', [{ uid: userProfile.uid }]);
     });
+
+    await waitFor(() => {
+      expect(globalForm.getFormData()).toEqual({
+        assignees: [{ uid: userProfile.uid }],
+      });
+    });
+
+    await waitFor(() => {
+      expect(spyOnBulkGetUserProfiles).toBeCalledTimes(1);
+      expect(spyOnBulkGetUserProfiles).toHaveBeenCalledWith({
+        security: expect.anything(),
+        uids: [userProfile.uid],
+      });
+    });
+
+    expect(await screen.findByText(userProfile.user.full_name)).toBeInTheDocument();
   });
 });

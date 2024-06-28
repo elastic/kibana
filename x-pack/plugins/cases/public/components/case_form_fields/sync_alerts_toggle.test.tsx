@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { schema } from './schema';
+import { schema } from '../create/schema';
 import { FormTestComponent } from '../../common/test_utils';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';

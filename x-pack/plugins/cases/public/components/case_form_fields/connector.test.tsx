@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../common/mock';
 import { connectorsMock } from '../../containers/mock';
@@ -46,7 +46,7 @@ const useGetChoicesResponse = {
 const defaultProps = {
   connectors: connectorsMock,
   isLoading: false,
-  configurationConnectorId: 'none',
+  isLoadingConnectors: false,
 };
 
 describe('Connector', () => {
@@ -62,7 +62,7 @@ describe('Connector', () => {
 
   it('renders correctly', async () => {
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
     );
@@ -73,7 +73,7 @@ describe('Connector', () => {
 
   it('renders loading state correctly', async () => {
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...{ ...defaultProps, isLoading: true }} />
       </FormTestComponent>
     );
@@ -85,8 +85,8 @@ describe('Connector', () => {
 
   it('renders default connector correctly', async () => {
     appMockRender.render(
-      <FormTestComponent>
-        <Connector {...{ ...defaultProps, configurationConnectorId: connectorsMock[2].id }} />
+      <FormTestComponent formDefaultValue={{ connectorId: connectorsMock[2].id }}>
+        <Connector {...defaultProps} />
       </FormTestComponent>
     );
 
@@ -96,56 +96,9 @@ describe('Connector', () => {
     expect(await screen.findByTestId('connector-fields-jira')).toBeInTheDocument();
   });
 
-  it('renders existing connector correctly in edit mode', async () => {
-    appMockRender.render(
-      <FormTestComponent formDefaultValue={{ connectorId: connectorsMock[3].id }}>
-        <Connector {...{ ...defaultProps, configurationConnectorId: 'none', isEditMode: true }} />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    expect(await screen.findByText('My Connector SIR')).toBeInTheDocument();
-
-    expect(await screen.findByTestId('connector-fields-sn-sir')).toBeInTheDocument();
-  });
-
-  it('calls on submit with existing connector over configuration connector in edit mode', async () => {
-    const onSubmit = jest.fn();
-
-    appMockRender.render(
-      <FormTestComponent
-        formDefaultValue={{ connectorId: connectorsMock[1].id }}
-        onSubmit={onSubmit}
-      >
-        <Connector
-          {...{ ...defaultProps, configurationConnectorId: connectorsMock[2].id, isEditMode: true }}
-        />
-      </FormTestComponent>
-    );
-
-    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
-    expect(await screen.findByText('My Resilient connector')).toBeInTheDocument();
-
-    expect(screen.queryByTestId('connector-fields-jira')).not.toBeInTheDocument();
-
-    userEvent.click(await screen.findByText('Submit'));
-
-    await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith(
-        {
-          connectorId: 'resilient-2',
-          fields: {
-            incidentTypes: [],
-          },
-        },
-        true
-      );
-    });
-  });
-
   it('shows all connectors in dropdown', async () => {
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
     );
@@ -163,9 +116,9 @@ describe('Connector', () => {
     ).toBeInTheDocument();
   });
 
-  it(`loads connector fields when dropdown selected`, async () => {
+  it('changes connector correctly', async () => {
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
     );
@@ -187,7 +140,7 @@ describe('Connector', () => {
     };
 
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
     );
@@ -201,7 +154,7 @@ describe('Connector', () => {
     appMockRender = createAppMockRenderer({ permissions: noConnectorsCasePermission() });
 
     appMockRender.render(
-      <FormTestComponent>
+      <FormTestComponent formDefaultValue={{ connectorId: 'none' }}>
         <Connector {...defaultProps} />
       </FormTestComponent>
     );

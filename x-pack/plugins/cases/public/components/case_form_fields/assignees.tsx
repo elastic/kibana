@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, differenceWith } from 'lodash';
 import React, { memo, useCallback, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
@@ -23,18 +23,22 @@ import type { FieldConfig, FieldHook } from '@kbn/es-ui-shared-plugin/static/for
 import {
   UseField,
   getFieldValidityAndErrorMessage,
+  useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CaseAssignees } from '../../../common/types/domain';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
-import { OptionalFieldLabel } from './optional_field_label';
-import * as i18n from './translations';
+import { OptionalFieldLabel } from '../optional_field_label';
+import * as i18n from '../create/translations';
 import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getAllPermissionsExceptFrom } from '../../utils/permissions';
 import { useIsUserTyping } from '../../common/use_is_user_typing';
+import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
+
+const FIELD_ID = 'assignees';
 
 interface Props {
   isLoading: boolean;
@@ -172,6 +176,7 @@ const AssigneesFieldComponent: React.FC<FieldProps> = React.memo(
         }
         isInvalid={isInvalid}
         error={errorMessage}
+        data-test-subj="caseAssignees"
       >
         <EuiComboBox
           fullWidth
@@ -195,6 +200,7 @@ AssigneesFieldComponent.displayName = 'AssigneesFieldComponent';
 
 const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const { owner: owners } = useCasesContext();
+  const [{ assignees }] = useFormData<{ assignees?: CaseAssignees }>({ watch: [FIELD_ID] });
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const [searchTerm, setSearchTerm] = useState('');
   const { isUserTyping, onContentChange, onDebounce } = useIsUserTyping();
@@ -204,7 +210,7 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
     useGetCurrentUserProfile();
 
   const {
-    data: userProfiles,
+    data: userProfiles = [],
     isLoading: isLoadingSuggest,
     isFetching: isFetchingSuggest,
   } = useSuggestUserProfiles({
@@ -213,10 +219,22 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
     onDebounce,
   });
 
+  const assigneesWithoutProfiles = differenceWith(
+    assignees ?? [],
+    userProfiles ?? [],
+    (assignee, userProfile) => assignee.uid === userProfile.uid
+  );
+
+  const { data: bulkUserProfiles = new Map(), isFetching: isLoadingBulkGetUserProfiles } =
+    useBulkGetUserProfiles({ uids: assigneesWithoutProfiles.map((assignee) => assignee.uid) });
+
+  const bulkUserProfilesAsArray = Array.from(bulkUserProfiles).map(([_, profile]) => profile);
+
   const options =
-    bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles)?.map((userProfile) =>
-      userProfileToComboBoxOption(userProfile)
-    ) ?? [];
+    bringCurrentUserToFrontAndSort(currentUserProfile, [
+      ...userProfiles,
+      ...bulkUserProfilesAsArray,
+    ])?.map((userProfile) => userProfileToComboBoxOption(userProfile)) ?? [];
 
   const onSearchComboChange = (value: string) => {
     if (!isEmpty(value)) {
@@ -229,15 +247,16 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm }) => {
   const isLoading =
     isLoadingForm ||
     isLoadingCurrentUserProfile ||
+    isLoadingBulkGetUserProfiles ||
     isLoadingSuggest ||
     isFetchingSuggest ||
     isUserTyping;
 
-  const isDisabled = isLoadingForm || isLoadingCurrentUserProfile;
+  const isDisabled = isLoadingForm || isLoadingCurrentUserProfile || isLoadingBulkGetUserProfiles;
 
   return (
     <UseField
-      path="assignees"
+      path={FIELD_ID}
       config={getConfig()}
       component={AssigneesFieldComponent}
       componentProps={{

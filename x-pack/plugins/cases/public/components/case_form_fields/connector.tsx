@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiFormRow } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -14,7 +14,6 @@ import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
 import { schema } from './schema';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';
@@ -29,20 +28,9 @@ interface Props {
 const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const connector = getConnectorById(connectorId, connectors) ?? null;
-
-  const {
-    data: { connector: configurationConnector },
-  } = useGetCaseConfiguration();
-
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;
-
-  const defaultConnectorId = useMemo(() => {
-    return connectors.some((c) => c.id === configurationConnector.id)
-      ? configurationConnector.id
-      : 'none';
-  }, [configurationConnector.id, connectors]);
 
   const connectorIdConfig = getConnectorsFormValidators({
     config: schema.connectorId as FieldConfig,
@@ -58,26 +46,27 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
   }
 
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <UseField
-          path="connectorId"
-          config={connectorIdConfig}
-          component={ConnectorSelector}
-          defaultValue={defaultConnectorId}
-          componentProps={{
-            connectors,
-            dataTestSubj: 'caseConnectors',
-            disabled: isLoading || isLoadingConnectors,
-            idAria: 'caseConnectors',
-            isLoading: isLoading || isLoadingConnectors,
-          }}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ConnectorFieldsForm connector={connector} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFormRow fullWidth>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField
+            path="connectorId"
+            config={connectorIdConfig}
+            component={ConnectorSelector}
+            componentProps={{
+              connectors,
+              dataTestSubj: 'caseConnectors',
+              disabled: isLoading || isLoadingConnectors,
+              idAria: 'caseConnectors',
+              isLoading: isLoading || isLoadingConnectors,
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ConnectorFieldsForm connector={connector} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };
 

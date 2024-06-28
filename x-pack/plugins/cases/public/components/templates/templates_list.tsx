@@ -30,18 +30,18 @@ export interface Props {
 const TemplatesListComponent: React.FC<Props> = (props) => {
   const { templates, onEditTemplate, onDeleteTemplate } = props;
   const { euiTheme } = useEuiTheme();
-  const [itemToBeDeleted, SetItemToBeDeleted] = useState<TemplateConfiguration | null>(null);
+  const [itemToBeDeleted, setItemToBeDeleted] = useState<TemplateConfiguration | null>(null);
 
   const onConfirm = useCallback(() => {
     if (itemToBeDeleted) {
       onDeleteTemplate(itemToBeDeleted.key);
     }
 
-    SetItemToBeDeleted(null);
-  }, [onDeleteTemplate, SetItemToBeDeleted, itemToBeDeleted]);
+    setItemToBeDeleted(null);
+  }, [onDeleteTemplate, setItemToBeDeleted, itemToBeDeleted]);
 
   const onCancel = useCallback(() => {
-    SetItemToBeDeleted(null);
+    setItemToBeDeleted(null);
   }, []);
 
   const showModal = Boolean(itemToBeDeleted);
@@ -101,7 +101,7 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                           aria-label={`${template.key}-template-delete`}
                           iconType="minusInCircle"
                           color="danger"
-                          onClick={() => SetItemToBeDeleted(template)}
+                          onClick={() => setItemToBeDeleted(template)}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

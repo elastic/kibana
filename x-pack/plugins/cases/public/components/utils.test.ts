@@ -29,6 +29,8 @@ import {
   parseCaseUsers,
   convertCustomFieldValue,
   addOrReplaceField,
+  removeEmptyFields,
+  customFieldsFormSerializer,
 } from './utils';
 
 describe('Utils', () => {
@@ -723,6 +725,87 @@ describe('Utils', () => {
               ]
           `
       );
+    });
+  });
+
+  describe('removeEmptyFields', () => {
+    it('removes empty fields', () => {
+      const res = removeEmptyFields({
+        key: '',
+        name: '',
+        templateDescription: '',
+        title: '',
+        description: '',
+        templateTags: [],
+        tags: [],
+        fields: null,
+      });
+
+      expect(res).toEqual({});
+    });
+
+    it('does not remove not empty fields', () => {
+      const res = removeEmptyFields({
+        key: 'key_1',
+        name: 'template 1',
+        templateDescription: 'description 1',
+      });
+
+      expect(res).toEqual({
+        key: 'key_1',
+        name: 'template 1',
+        templateDescription: 'description 1',
+      });
+    });
+  });
+
+  describe('customFieldsFormSerializer', () => {
+    it('transforms customFields correctly', () => {
+      const customFields = {
+        test_key_1: 'first value',
+        test_key_2: true,
+        test_key_3: 'second value',
+      };
+
+      expect(customFieldsFormSerializer(customFields, customFieldsConfigurationMock)).toEqual([
+        {
+          key: 'test_key_1',
+          type: 'text',
+          value: 'first value',
+        },
+        {
+          key: 'test_key_2',
+          type: 'toggle',
+          value: true,
+        },
+        {
+          key: 'test_key_3',
+          type: 'text',
+          value: 'second value',
+        },
+      ]);
+    });
+
+    it('returns empty array when custom fields are empty', () => {
+      expect(customFieldsFormSerializer({}, customFieldsConfigurationMock)).toEqual([]);
+    });
+
+    it('returns empty array when not custom fields in the configuration', () => {
+      const customFields = {
+        test_key_1: 'first value',
+        test_key_2: true,
+        test_key_3: 'second value',
+      };
+
+      expect(customFieldsFormSerializer(customFields, [])).toEqual([]);
+    });
+
+    it('returns empty array when custom fields do not match with configuration', () => {
+      const customFields = {
+        random_key: 'first value',
+      };
+
+      expect(customFieldsFormSerializer(customFields, customFieldsConfigurationMock)).toEqual([]);
     });
   });
 });

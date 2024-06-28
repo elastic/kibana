@@ -7,13 +7,13 @@
 
 import React, { memo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { Title } from '../create/title';
-import { Tags } from '../create/tags';
-import { Category } from '../create/category';
-import { Severity } from '../create/severity';
-import { Description } from '../create/description';
+import { Title } from './title';
+import { Tags } from './tags';
+import { Category } from './category';
+import { Severity } from './severity';
+import { Description } from './description';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { Assignees } from '../create/assignees';
+import { Assignees } from './assignees';
 import { CustomFields } from './custom_fields';
 import type { CasesConfigurationUI } from '../../containers/types';
 
@@ -22,6 +22,7 @@ interface Props {
   configurationCustomFields: CasesConfigurationUI['customFields'];
   setCustomFieldsOptional?: boolean;
   isEditMode?: boolean;
+  draftStorageKey?: string;
 }
 
 const CaseFormFieldsComponent: React.FC<Props> = ({
@@ -29,23 +30,18 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   configurationCustomFields,
   setCustomFieldsOptional = false,
   isEditMode,
+  draftStorageKey,
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
   return (
-    <EuiFlexGroup data-test-subj="case-form-fields" direction="column">
+    <EuiFlexGroup data-test-subj="case-form-fields" direction="column" gutterSize="none">
       <Title isLoading={isLoading} />
-
       {caseAssignmentAuthorized ? <Assignees isLoading={isLoading} /> : null}
-
       <Tags isLoading={isLoading} />
-
       <Category isLoading={isLoading} />
-
       <Severity isLoading={isLoading} />
-
-      <Description isLoading={isLoading} />
-
+      <Description isLoading={isLoading} draftStorageKey={draftStorageKey} />
       <CustomFields
         isLoading={isLoading}
         setCustomFieldsOptional={setCustomFieldsOptional}

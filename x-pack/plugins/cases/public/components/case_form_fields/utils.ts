@@ -36,7 +36,7 @@ export const validateMaxLength = ({
   limit: number;
 }) => {
   if (
-    (!Array.isArray(value) && value.trim().length > limit) ||
+    (!Array.isArray(value) && isTagCharactersInLimit(value, limit)) ||
     (Array.isArray(value) &&
       value.length > 0 &&
       value.some((item) => isTagCharactersInLimit(item, limit)))

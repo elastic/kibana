@@ -11,12 +11,12 @@ import { HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiSteps } from '@elastic/eui';
 import { CaseFormFields } from '../case_form_fields';
 import * as i18n from './translations';
-import { Connector } from './connector';
 import type { ActionConnector } from '../../containers/configure/types';
 import type { CasesConfigurationUI } from '../../containers/types';
 import { TemplateFields } from './template_fields';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { SyncAlertsToggle } from '../create/sync_alerts_toggle';
+import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
+import { Connector } from '../case_form_fields/connector';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
@@ -32,7 +32,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   isEditMode,
 }) => {
   const { isSyncAlertsEnabled } = useCasesFeatures();
-  const { customFields: configurationCustomFields, connector, templates } = currentConfiguration;
+  const { customFields: configurationCustomFields, templates } = currentConfiguration;
   const configurationTemplateTags = templates
     .map((template) => (template?.tags?.length ? template.tags : []))
     .flat();
@@ -77,15 +77,10 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
     () => ({
       title: i18n.CONNECTOR_FIELDS,
       children: (
-        <Connector
-          connectors={connectors}
-          isLoading={isSubmitting}
-          configurationConnectorId={connector.id}
-          isEditMode={isEditMode}
-        />
+        <Connector connectors={connectors} isLoading={isSubmitting} isLoadingConnectors={false} />
       ),
     }),
-    [connectors, connector, isSubmitting, isEditMode]
+    [connectors, isSubmitting]
   );
 
   const allSteps = useMemo(
@@ -96,7 +91,6 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   return (
     <>
       <UseField path="key" component={HiddenField} />
-
       <EuiSteps
         headingElement="h2"
         steps={allSteps}

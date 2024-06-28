@@ -8,6 +8,7 @@
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { VALIDATION_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { CasePostRequest } from '../../../common';
 import {
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
@@ -15,20 +16,24 @@ import {
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import { SEVERITY_TITLE } from '../severity/translations';
-import type { CaseBaseOptionalFields } from '../../../common/types/domain';
+import type { ConnectorTypeFields } from '../../../common/types/domain';
 import * as i18n from './translations';
 import { validateEmptyTags, validateMaxLength, validateMaxTagsLength } from './utils';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 const { maxLengthField } = fieldValidators;
 
-type CaseFormFieldsProps = Omit<
-  CaseBaseOptionalFields,
-  'customFields' | 'connector' | 'settings'
+export type CaseFormFieldsSchemaProps = Omit<
+  CasePostRequest,
+  'connector' | 'settings' | 'owner' | 'customFields'
 > & {
-  customFields?: Record<string, string | boolean>;
+  connectorId: string;
+  fields: ConnectorTypeFields['fields'];
+  syncAlerts: boolean;
+  customFields: Record<string, string | boolean>;
 };
 
-export const schema: FormSchema<CaseFormFieldsProps> = {
+export const schema: FormSchema<CaseFormFieldsSchemaProps> = {
   title: {
     label: i18n.NAME,
     validations: [
@@ -54,6 +59,7 @@ export const schema: FormSchema<CaseFormFieldsProps> = {
   tags: {
     label: i18n.TAGS,
     helpText: i18n.TAGS_HELP,
+    labelAppend: OptionalFieldLabel,
     validations: [
       {
         validator: ({ value }: { value: string | string[] }) =>
@@ -84,6 +90,20 @@ export const schema: FormSchema<CaseFormFieldsProps> = {
   severity: {
     label: SEVERITY_TITLE,
   },
-  assignees: {},
-  category: {},
+  assignees: { labelAppend: OptionalFieldLabel },
+  category: {
+    labelAppend: OptionalFieldLabel,
+  },
+  syncAlerts: {
+    helpText: i18n.SYNC_ALERTS_HELP,
+    defaultValue: true,
+  },
+  customFields: {},
+  connectorId: {
+    label: i18n.CONNECTORS,
+    defaultValue: 'none',
+  },
+  fields: {
+    defaultValue: null,
+  },
 };

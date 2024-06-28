@@ -1231,4 +1231,31 @@ export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
       },
     },
   },
+  {
+    key: 'test_template_5',
+    name: 'Fifth test template',
+    description: 'This is a fifth test template',
+    tags: ['foo', 'bar'],
+    caseFields: {
+      title: 'Case with sample template 5',
+      description: 'case desc',
+      severity: CaseSeverity.HIGH,
+      category: 'my category',
+      tags: ['sample-4'],
+      assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+      customFields: [
+        {
+          key: 'first_custom_field_key',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value',
+        },
+      ],
+      connector: {
+        id: 'jira-1',
+        name: 'Jira',
+        type: ConnectorTypes.jira,
+        fields: { issueType: 'Task', priority: 'Low', parent: null },
+      },
+    },
+  },
 ];

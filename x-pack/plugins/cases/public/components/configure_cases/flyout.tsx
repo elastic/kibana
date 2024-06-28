@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -21,33 +21,33 @@ import type { FormHook, FormData } from '@kbn/es-ui-shared-plugin/static/forms/h
 
 import * as i18n from './translations';
 
-export interface FormState<T extends FormData = FormData> {
+export interface FormState<T extends FormData = FormData, I extends FormData = T> {
   isValid: boolean | undefined;
-  submit: FormHook<T>['submit'];
+  submit: FormHook<T, I>['submit'];
 }
 
-export interface FlyOutBodyProps<T extends FormData = FormData> {
-  onChange: (state: FormState<T>) => void;
+export interface FlyOutBodyProps<T extends FormData = FormData, I extends FormData = T> {
+  onChange: (state: FormState<T, I>) => void;
 }
 
-export interface FlyoutProps<T extends FormData = FormData> {
+export interface FlyoutProps<T extends FormData = FormData, I extends FormData = T> {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
-  onSaveField: (data: T) => void;
+  onSaveField: (data: I) => void;
   renderHeader: () => React.ReactNode;
-  renderBody: ({ onChange }: FlyOutBodyProps<T>) => React.ReactNode;
+  children: ({ onChange }: FlyOutBodyProps<T, I>) => React.ReactNode;
 }
 
-export const CommonFlyout = <T extends FormData = FormData>({
+export const CommonFlyout = <T extends FormData = FormData, I extends FormData = T>({
   onCloseFlyout,
   onSaveField,
   isLoading,
   disabled,
   renderHeader,
-  renderBody,
-}: FlyoutProps<T>) => {
-  const [formState, setFormState] = useState<FormState<T>>({
+  children,
+}: FlyoutProps<T, I>) => {
+  const [formState, setFormState] = useState<FormState<T, I>>({
     isValid: undefined,
     submit: async () => ({
       isValid: false,
@@ -61,9 +61,28 @@ export const CommonFlyout = <T extends FormData = FormData>({
     const { isValid, data } = await submit();
 
     if (isValid) {
-      onSaveField(data as T);
+      /**
+       * The serializer transforms the data
+       * from the form format to the backend
+       * format. The I generic is the correct
+       * format of the data.
+       */
+      onSaveField(data as unknown as I);
     }
   }, [onSaveField, submit]);
+
+  /**
+   * The children will call setFormState which in turn will make the parent
+   * to rerender which in turn will rerender the children etc.
+   * To avoid an infinitive loop we need to memoize the children.
+   */
+  const memoizedChildren = useMemo(
+    () =>
+      children({
+        onChange: setFormState,
+      }),
+    [children]
+  );
 
   return (
     <EuiFlyout onClose={onCloseFlyout} data-test-subj="common-flyout">
@@ -72,11 +91,7 @@ export const CommonFlyout = <T extends FormData = FormData>({
           <h3 id="flyoutTitle">{renderHeader()}</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {renderBody({
-          onChange: setFormState,
-        })}
-      </EuiFlyoutBody>
+      <EuiFlyoutBody>{memoizedChildren}</EuiFlyoutBody>
       <EuiFlyoutFooter data-test-subj={'common-flyout-footer'}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
@@ -41,13 +43,11 @@ import { CustomFields } from '../custom_fields';
 import { CommonFlyout } from './flyout';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { usePersistConfiguration } from '../../containers/configure/use_persist_configuration';
-import { transformCustomFieldsData } from '../custom_fields/utils';
 import { useLicense } from '../../common/use_license';
 import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
-import { getTemplateSerializedData } from '../templates/utils';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -399,43 +399,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
   }, [setFlyOutVisibility, setTemplateToEdit]);
 
   const onTemplateSave = useCallback(
-    (data: TemplateFormProps) => {
-      const serializedData = getTemplateSerializedData(data);
-      const {
-        connectorId,
-        fields,
-        customFields: templateCustomFields,
-        syncAlerts = false,
-        key,
-        name,
-        templateTags,
-        templateDescription,
-        ...otherCaseFields
-      } = serializedData;
-
-      const transformedCustomFields = templateCustomFields
-        ? transformCustomFieldsData(templateCustomFields, customFields)
-        : [];
-      const templateConnector = connectorId ? getConnectorById(connectorId, connectors) : null;
-
-      const transformedConnector = templateConnector
-        ? normalizeActionConnector(templateConnector, fields)
-        : getNoneConnector();
-
-      const transformedData: TemplateConfiguration = {
-        key,
-        name,
-        description: templateDescription,
-        tags: templateTags ?? [],
-        caseFields: {
-          ...otherCaseFields,
-          connector: transformedConnector,
-          customFields: transformedCustomFields,
-          settings: { syncAlerts },
-        },
-      };
-
-      const updatedTemplates = addOrReplaceField(templates, transformedData);
+    (data: TemplateConfiguration) => {
+      const updatedTemplates = addOrReplaceField(templates, data);
 
       persistCaseConfigure({
         connector,
@@ -454,7 +419,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
       configurationId,
       configurationVersion,
       connector,
-      connectors,
       customFields,
       templates,
       persistCaseConfigure,
@@ -474,15 +438,16 @@ export const ConfigureCases: React.FC = React.memo(() => {
         onCloseFlyout={onCloseCustomFieldFlyout}
         onSaveField={onCustomFieldSave}
         renderHeader={() => <span>{i18n.ADD_CUSTOM_FIELD}</span>}
-        renderBody={({ onChange }) => (
+      >
+        {({ onChange }) => (
           <CustomFieldsForm onChange={onChange} initialValue={customFieldToEdit} />
         )}
-      />
+      </CommonFlyout>
     ) : null;
 
   const AddOrEditTemplateFlyout =
     flyOutVisibility?.type === 'template' && flyOutVisibility?.visible ? (
-      <CommonFlyout<TemplateFormProps>
+      <CommonFlyout<TemplateFormProps, TemplateConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
         disabled={
           !permissions.create ||
@@ -493,7 +458,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
         onCloseFlyout={onCloseTemplateFlyout}
         onSaveField={onTemplateSave}
         renderHeader={() => <span>{i18n.CREATE_TEMPLATE}</span>}
-        renderBody={({ onChange }) => (
+      >
+        {({ onChange }) => (
           <TemplateForm
             initialValue={templateToEdit}
             connectors={connectors ?? []}
@@ -502,7 +468,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             onChange={onChange}
           />
         )}
-      />
+      </CommonFlyout>
     ) : null;
 
   return (

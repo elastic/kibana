@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import type { CaseUI } from '../../../common';
-import { CaseSeverity } from '../../../common';
+import { CaseSeverity, ConnectorTypes } from '../../../common';
+import { CustomFieldTypes } from '../../../common/types/domain';
+import { casesConfigurationsMock } from '../../containers/configure/mock';
+import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
+import type { CaseUI } from '../../containers/types';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 import {
   convertTemplateCustomFields,
-  getTemplateSerializedData,
   removeEmptyFields,
   templateDeserializer,
+  templateSerializer,
 } from './utils';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
-import { customFieldsConfigurationMock } from '../../containers/mock';
-import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 
 describe('utils', () => {
   describe('getTemplateSerializedData', () => {
     it('serializes empty fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
         templateDescription: '',
@@ -32,11 +33,28 @@ describe('utils', () => {
         category: null,
       });
 
-      expect(res).toEqual({ fields: null });
+      expect(res).toEqual({
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
+        key: '',
+        name: '',
+        tags: [],
+      });
     });
 
     it('serializes connectors fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: '',
         name: '',
         templateDescription: '',
@@ -44,12 +62,27 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
-        fields: null,
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
+        key: '',
+        name: '',
+        tags: [],
       });
     });
 
     it('serializes non empty fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
         templateDescription: 'description 1',
@@ -58,17 +91,28 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
+        caseFields: {
+          category: 'new',
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: 'description 1',
         key: 'key_1',
         name: 'template 1',
-        templateDescription: 'description 1',
-        category: 'new',
-        templateTags: ['sample'],
-        fields: null,
+        tags: ['sample'],
       });
     });
 
     it('serializes custom fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
         templateDescription: '',
@@ -80,18 +124,27 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
         key: 'key_1',
         name: 'template 1',
-        customFields: {
-          custom_field_1: 'foobar',
-          custom_field_3: true,
-        },
-        fields: null,
+        tags: [],
       });
     });
 
     it('serializes connector fields correctly', () => {
-      const res = getTemplateSerializedData({
+      const res = templateSerializer(connectorsMock, casesConfigurationsMock, {
         key: 'key_1',
         name: 'template 1',
         templateDescription: '',
@@ -105,15 +158,22 @@ describe('utils', () => {
       });
 
       expect(res).toEqual({
+        caseFields: {
+          connector: {
+            fields: null,
+            id: 'none',
+            name: 'none',
+            type: '.none',
+          },
+          customFields: [],
+          settings: {
+            syncAlerts: false,
+          },
+        },
+        description: undefined,
         key: 'key_1',
         name: 'template 1',
-        fields: {
-          impact: 'high',
-          severity: 'low',
-          category: null,
-          urgency: null,
-          subcategory: null,
-        },
+        tags: [],
       });
     });
   });

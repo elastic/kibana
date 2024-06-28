@@ -9,14 +9,14 @@ import React, { memo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField, TextAreaField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { EuiFlexGroup } from '@elastic/eui';
-import { OptionalFieldLabel } from '../create/optional_field_label';
+import { OptionalFieldLabel } from '../optional_field_label';
 import { TemplateTags } from './template_tags';
 
 const TemplateFieldsComponent: React.FC<{
   isLoading: boolean;
   configurationTemplateTags: string[];
 }> = ({ isLoading = false, configurationTemplateTags }) => (
-  <EuiFlexGroup data-test-subj="template-fields" direction="column">
+  <EuiFlexGroup data-test-subj="template-fields" direction="column" gutterSize="none">
     <UseField
       path="name"
       component={TextField}

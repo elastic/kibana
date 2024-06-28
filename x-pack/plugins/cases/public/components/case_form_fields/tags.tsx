@@ -10,7 +10,7 @@ import React, { memo, useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ComboBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { useGetTags } from '../../containers/use_get_tags';
-import * as i18n from './translations';
+import * as i18n from '../create/translations';
 interface Props {
   isLoading: boolean;
 }

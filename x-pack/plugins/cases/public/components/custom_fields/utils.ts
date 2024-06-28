@@ -8,8 +8,6 @@
 import { isEmptyString } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import { isString } from 'lodash';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
-import type { CasesConfigurationUI, CaseUI, CaseUICustomField } from '../../containers/types';
-import { convertCustomFieldValue } from '../utils';
 
 export const customFieldSerializer = (
   field: CustomFieldConfiguration
@@ -21,28 +19,4 @@ export const customFieldSerializer = (
   }
 
   return field;
-};
-
-export const transformCustomFieldsData = (
-  customFields: Record<string, string | boolean>,
-  selectedCustomFieldsConfiguration: CasesConfigurationUI['customFields']
-) => {
-  const transformedCustomFields: CaseUI['customFields'] = [];
-
-  if (!customFields || !selectedCustomFieldsConfiguration.length) {
-    return [];
-  }
-
-  for (const [key, value] of Object.entries(customFields)) {
-    const configCustomField = selectedCustomFieldsConfiguration.find((item) => item.key === key);
-    if (configCustomField) {
-      transformedCustomFields.push({
-        key: configCustomField.key,
-        type: configCustomField.type,
-        value: convertCustomFieldValue(value),
-      } as CaseUICustomField);
-    }
-  }
-
-  return transformedCustomFields;
 };
