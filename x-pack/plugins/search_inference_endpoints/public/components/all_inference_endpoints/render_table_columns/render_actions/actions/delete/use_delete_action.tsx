@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { EuiContextMenuItem, EuiIcon } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { EuiIcon, EuiTextColor } from '@elastic/eui';
-import { InferenceEndpointUI } from '../../../../types';
 import * as i18n from '../../../../../../../common/translations';
-import type { UseActionProps } from '../types';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
+import { InferenceEndpointUI } from '../../../../types';
+import type { UseActionProps } from '../types';
 
 export const useDeleteAction = ({ onActionSuccess }: UseActionProps) => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
@@ -40,11 +40,15 @@ export const useDeleteAction = ({ onActionSuccess }: UseActionProps) => {
   }, [deleteEndpoint, onCloseModal, endpointToBeDeleted]);
 
   const getAction = (selectedEndpoint: InferenceEndpointUI) => {
-    return {
-      name: <EuiTextColor color={'danger'}>{i18n.DELETE_ACTION_LABEL}</EuiTextColor>,
-      onClick: () => openModal(selectedEndpoint),
-      icon: <EuiIcon type="trash" size="m" color={'danger'} />,
-    };
+    return (
+      <EuiContextMenuItem
+        key="delete"
+        icon={<EuiIcon type="trash" size="m" color={'danger'} />}
+        onClick={() => openModal(selectedEndpoint)}
+      >
+        {i18n.DELETE_ACTION_LABEL}
+      </EuiContextMenuItem>
+    );
   };
 
   return { getAction, isModalVisible, onConfirmDeletion, onCloseModal };

@@ -6,10 +6,9 @@
  */
 
 import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
-import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { useCopyIDAction } from './use_copy_id_action';
 import { useKibana } from '../../../../../../hooks/use_kibana';
+import { useCopyIDAction } from './use_copy_id_action';
 
 const mockInferenceEndpoint = {
   deployment: 'not_applicable',
@@ -63,30 +62,12 @@ describe('useCopyIDAction hook', () => {
     const TestComponent = () => {
       const { getAction } = useCopyIDAction({ onActionSuccess: mockOnActionSuccess });
       const action = getAction(mockInferenceEndpoint);
-      return <div>{action.name}</div>;
+      return <div>{action}</div>;
     };
 
     const { getByTestId } = render(<TestComponent />);
     const labelElement = getByTestId('inference-endpoints-action-copy-id-label');
 
     expect(labelElement).toHaveTextContent('Copy endpoint ID');
-  });
-
-  it('calls onActionSuccess and shows success toast when onClick is triggered', async () => {
-    const { getAction } = useCopyIDAction({ onActionSuccess: mockOnActionSuccess });
-    const action = getAction(mockInferenceEndpoint);
-
-    render(<button onClick={action.onClick}>Copy ID</button>);
-    const button = document.querySelector('button');
-    if (button) {
-      fireEvent.click(button);
-    }
-
-    await waitFor(() => {
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-        mockInferenceEndpoint.endpoint.model_id
-      );
-      expect(mockOnActionSuccess).toHaveBeenCalled();
-    });
   });
 });

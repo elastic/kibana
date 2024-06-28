@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiTextColor } from '@elastic/eui';
+import { EuiContextMenuItem, EuiCopy, EuiIcon } from '@elastic/eui';
 import React from 'react';
 import * as i18n from '../../../../../../../common/translations';
 import { useKibana } from '../../../../../../hooks/use_kibana';
@@ -19,20 +19,25 @@ export const useCopyIDAction = ({ onActionSuccess }: UseCopyIDActionProps) => {
   const toasts = notifications?.toasts;
 
   const getAction = (inferenceEndpoint: InferenceEndpointUI) => {
-    return {
-      name: (
-        <EuiTextColor data-test-subj="inference-endpoints-action-copy-id-label">
-          {i18n.COPY_ID_ACTION_LABEL}
-        </EuiTextColor>
-      ),
-      onClick: () => {
-        navigator.clipboard.writeText(inferenceEndpoint.endpoint.model_id).then(() => {
-          onActionSuccess();
-          toasts?.addSuccess({ title: i18n.COPY_ID_ACTION_SUCCESS });
-        });
-      },
-      icon: <EuiIcon type="copyClipboard" size="m" />,
-    };
+    return (
+      <EuiCopy textToCopy={inferenceEndpoint.endpoint.model_id} anchorClassName="eui-fullWidth">
+        {(copy) => (
+          <EuiContextMenuItem
+            key="copy"
+            data-test-subj="inference-endpoints-action-copy-id-label"
+            icon={<EuiIcon type="copyClipboard" size="m" />}
+            onClick={() => {
+              copy();
+              onActionSuccess();
+              toasts?.addSuccess({ title: i18n.COPY_ID_ACTION_SUCCESS });
+            }}
+            size="s"
+          >
+            {i18n.COPY_ID_ACTION_LABEL}
+          </EuiContextMenuItem>
+        )}
+      </EuiCopy>
+    );
   };
 
   return { getAction };
