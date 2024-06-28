@@ -8,7 +8,7 @@
 import {
   createNote,
   deleteNote,
-  fetchNotesByDocumentId,
+  fetchNotesByDocumentIds,
   initialNotesState,
   notesReducer,
   ReqStatus,
@@ -17,8 +17,8 @@ import {
   selectCreateNoteStatus,
   selectDeleteNoteError,
   selectDeleteNoteStatus,
-  selectFetchNotesByDocumentIdError,
-  selectFetchNotesByDocumentIdStatus,
+  selectFetchNotesByDocumentIdsError,
+  selectFetchNotesByDocumentIdsStatus,
   selectNoteById,
   selectNoteIds,
   selectNotesByDocumentId,
@@ -28,18 +28,18 @@ import { mockGlobalState } from '../../common/mock';
 
 const initalEmptyState = initialNotesState;
 
-const mockNote = { ...generateNoteMock('1') };
+const mockNote = { ...generateNoteMock(['1'])[0] };
 const initialNonEmptyState = {
   entities: {
     [mockNote.noteId]: mockNote,
   },
   ids: [mockNote.noteId],
   status: {
-    fetchNotesByDocumentId: ReqStatus.Idle,
+    fetchNotesByDocumentIds: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
     deleteNote: ReqStatus.Idle,
   },
-  error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+  error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
 };
 
 describe('notesSlice', () => {
@@ -49,33 +49,33 @@ describe('notesSlice', () => {
         entities: {},
         ids: [],
         status: {
-          fetchNotesByDocumentId: ReqStatus.Idle,
+          fetchNotesByDocumentIds: ReqStatus.Idle,
           createNote: ReqStatus.Idle,
           deleteNote: ReqStatus.Idle,
         },
-        error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+        error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
       });
     });
 
-    describe('fetchNotesByDocumentId', () => {
+    describe('fetchNotesByDocumentIds', () => {
       it('should set correct status state when fetching notes by document id', () => {
-        const action = { type: fetchNotesByDocumentId.pending.type };
+        const action = { type: fetchNotesByDocumentIds.pending.type };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           entities: {},
           ids: [],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Loading,
+            fetchNotesByDocumentIds: ReqStatus.Loading,
             createNote: ReqStatus.Idle,
             deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
       it('should set correct state when success on fetch notes by document id on an empty state', () => {
         const action = {
-          type: fetchNotesByDocumentId.fulfilled.type,
+          type: fetchNotesByDocumentIds.fulfilled.type,
           payload: {
             entities: {
               notes: {
@@ -90,18 +90,18 @@ describe('notesSlice', () => {
           entities: action.payload.entities.notes,
           ids: action.payload.result,
           status: {
-            fetchNotesByDocumentId: ReqStatus.Succeeded,
+            fetchNotesByDocumentIds: ReqStatus.Succeeded,
             createNote: ReqStatus.Idle,
             deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
       it('should replace notes when success on fetch notes by document id on a non-empty state', () => {
         const newMockNote = { ...mockNote, timelineId: 'timelineId' };
         const action = {
-          type: fetchNotesByDocumentId.fulfilled.type,
+          type: fetchNotesByDocumentIds.fulfilled.type,
           payload: {
             entities: {
               notes: {
@@ -116,27 +116,27 @@ describe('notesSlice', () => {
           entities: action.payload.entities.notes,
           ids: action.payload.result,
           status: {
-            fetchNotesByDocumentId: ReqStatus.Succeeded,
+            fetchNotesByDocumentIds: ReqStatus.Succeeded,
             createNote: ReqStatus.Idle,
             deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
       it('should set correct error state when failing to fetch notes by document id', () => {
-        const action = { type: fetchNotesByDocumentId.rejected.type, error: 'error' };
+        const action = { type: fetchNotesByDocumentIds.rejected.type, error: 'error' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
           entities: {},
           ids: [],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Failed,
+            fetchNotesByDocumentIds: ReqStatus.Failed,
             createNote: ReqStatus.Idle,
             deleteNote: ReqStatus.Idle,
           },
           error: {
-            fetchNotesByDocumentId: 'error',
+            fetchNotesByDocumentIds: 'error',
             createNote: null,
             deleteNote: null,
           },
@@ -152,11 +152,11 @@ describe('notesSlice', () => {
           entities: {},
           ids: [],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Idle,
+            fetchNotesByDocumentIds: ReqStatus.Idle,
             createNote: ReqStatus.Loading,
             deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
@@ -177,11 +177,11 @@ describe('notesSlice', () => {
           entities: action.payload.entities.notes,
           ids: [action.payload.result],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Idle,
+            fetchNotesByDocumentIds: ReqStatus.Idle,
             createNote: ReqStatus.Succeeded,
             deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
@@ -192,12 +192,12 @@ describe('notesSlice', () => {
           entities: {},
           ids: [],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Idle,
+            fetchNotesByDocumentIds: ReqStatus.Idle,
             createNote: ReqStatus.Failed,
             deleteNote: ReqStatus.Idle,
           },
           error: {
-            fetchNotesByDocumentId: null,
+            fetchNotesByDocumentIds: null,
             createNote: 'error',
             deleteNote: null,
           },
@@ -213,11 +213,11 @@ describe('notesSlice', () => {
           entities: {},
           ids: [],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Idle,
+            fetchNotesByDocumentIds: ReqStatus.Idle,
             createNote: ReqStatus.Idle,
             deleteNote: ReqStatus.Loading,
           },
-          error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
@@ -231,11 +231,11 @@ describe('notesSlice', () => {
           entities: {},
           ids: [],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Idle,
+            fetchNotesByDocumentIds: ReqStatus.Idle,
             createNote: ReqStatus.Idle,
             deleteNote: ReqStatus.Succeeded,
           },
-          error: { fetchNotesByDocumentId: null, createNote: null, deleteNote: null },
+          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
@@ -246,12 +246,12 @@ describe('notesSlice', () => {
           entities: {},
           ids: [],
           status: {
-            fetchNotesByDocumentId: ReqStatus.Idle,
+            fetchNotesByDocumentIds: ReqStatus.Idle,
             createNote: ReqStatus.Idle,
             deleteNote: ReqStatus.Failed,
           },
           error: {
-            fetchNotesByDocumentId: null,
+            fetchNotesByDocumentIds: null,
             createNote: null,
             deleteNote: 'error',
           },
@@ -283,11 +283,11 @@ describe('notesSlice', () => {
     });
 
     it('should return fetch notes by document id status', () => {
-      expect(selectFetchNotesByDocumentIdStatus(mockGlobalState)).toEqual(ReqStatus.Idle);
+      expect(selectFetchNotesByDocumentIdsStatus(mockGlobalState)).toEqual(ReqStatus.Idle);
     });
 
     it('should return fetch notes by document id error', () => {
-      expect(selectFetchNotesByDocumentIdError(mockGlobalState)).toEqual(null);
+      expect(selectFetchNotesByDocumentIdsError(mockGlobalState)).toEqual(null);
     });
 
     it('should return create note by document id status', () => {
