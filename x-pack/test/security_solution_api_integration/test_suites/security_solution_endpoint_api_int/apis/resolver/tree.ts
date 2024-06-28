@@ -30,9 +30,11 @@ export default function ({ getService }: FtrProviderContext) {
     { category: RelatedEventCategory.File, count: 1 },
     { category: RelatedEventCategory.Registry, count: 1 },
   ];
+
   const relatedAlerts = 4;
   let resolverTrees: GeneratedTrees;
   let tree: Tree;
+  let tree2: Tree;
   const treeOptions: Options = {
     ancestors: 5,
     relatedEvents: relatedEventsToGen,
@@ -41,16 +43,15 @@ export default function ({ getService }: FtrProviderContext) {
     generations: 2,
     percentTerminated: 100,
     percentWithRelated: 100,
-    numTrees: 1,
+    numTrees: 2,
     alwaysGenMaxChildrenPerNode: true,
     ancestryArraySize: 2,
   };
-
   describe('@ess @serverless Resolver tree', function () {
     before(async () => {
       resolverTrees = await resolver.createTrees(treeOptions);
-      // we only requested a single alert so there's only 1 tree
-      tree = resolverTrees.trees[0];
+      // we need tree2 for comparison tests
+      [tree, tree2] = resolverTrees.trees;
     });
     after(async () => {
       await resolver.deleteData(resolverTrees);
@@ -72,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -97,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
@@ -118,6 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -143,6 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -171,6 +176,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: from,
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -198,6 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -234,6 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -265,6 +273,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['doesnotexist-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
@@ -287,6 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -317,6 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -346,6 +357,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
@@ -369,6 +381,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -402,6 +415,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -435,6 +449,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -472,6 +487,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -508,6 +524,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: end,
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -537,6 +554,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -575,6 +593,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -613,6 +632,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -651,6 +671,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
@@ -664,6 +685,137 @@ export default function ({ getService }: FtrProviderContext) {
           response: body,
           schema: schemaWithAncestry,
           genTree: tree,
+        });
+      });
+    });
+    describe('different agent.ids', () => {
+      it('should return correct nodes for tree1 and tree2 based on agent.id', async () => {
+        const { body: body1 }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set(HEADERS)
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timeRange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            {
+              origin: tree.origin.id,
+              nodeExpectations: { descendants: 12, descendantLevels: 2, ancestors: 5 },
+            },
+          ],
+          response: body1,
+          schema: schemaWithAncestry,
+          genTree: tree,
+          relatedEventsCategories: relatedEventsToGen,
+        });
+
+        const { body: body2 }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set(HEADERS)
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithAncestry,
+            nodes: [tree2.origin.id],
+            timeRange: {
+              from: tree2.startTime.toISOString(),
+              to: tree2.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+            agentId: 'wrong-agent-id',
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            {
+              origin: tree2.origin.id,
+              nodeExpectations: { descendants: 0, descendantLevels: 0, ancestors: 0 },
+            },
+          ],
+          response: body2,
+          schema: schemaWithAncestry,
+          genTree: tree2,
+          relatedEventsCategories: relatedEventsToGen,
+        });
+      });
+    });
+
+    describe('collision in process.entity_id', () => {
+      it('should handle process.entity_id collisions correctly', async () => {
+        const duplicateEntityId = tree.origin.id;
+
+        const { body: body1 }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set(HEADERS)
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithAncestry,
+            nodes: [duplicateEntityId],
+            timeRange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
+          })
+          .expect(200);
+
+        const { body: body2 }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set(HEADERS)
+          .send({
+            descendants: 100,
+            descendantLevels: 10,
+            ancestors: 50,
+            schema: schemaWithAncestry,
+            nodes: [duplicateEntityId],
+            timeRange: {
+              from: tree2.startTime.toISOString(),
+              to: tree2.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+            agentId: 'wrong-agent-id',
+          })
+          .expect(200);
+
+        verifyTree({
+          expectations: [
+            {
+              origin: duplicateEntityId,
+              nodeExpectations: { descendants: 12, descendantLevels: 2, ancestors: 5 },
+            },
+          ],
+          response: body1,
+          schema: schemaWithAncestry,
+          genTree: tree,
+          relatedEventsCategories: relatedEventsToGen,
+        });
+
+        verifyTree({
+          expectations: [
+            {
+              origin: duplicateEntityId,
+              nodeExpectations: { descendants: 0, descendantLevels: 0, ancestors: 0 },
+            },
+          ],
+          response: body2,
+          schema: schemaWithAncestry,
+          genTree: tree2,
+          relatedEventsCategories: relatedEventsToGen,
         });
       });
     });

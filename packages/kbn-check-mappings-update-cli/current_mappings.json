@@ -1041,6 +1041,10 @@
   },
   "epm-packages": {
     "properties": {
+      "additional_spaces_installed_kibana": {
+        "index": false,
+        "type": "flattened"
+      },
       "es_index_patterns": {
         "dynamic": false,
         "properties": {}

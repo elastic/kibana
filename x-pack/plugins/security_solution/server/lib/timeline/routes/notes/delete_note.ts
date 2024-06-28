@@ -46,15 +46,26 @@ export const deleteNoteRoute = (
         try {
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
           const noteId = request.body?.noteId ?? '';
+          const noteIds = request.body?.noteIds ?? null;
+          if (noteIds != null) {
+            const res = await deleteNote({
+              request: frameworkRequest,
+              noteIds,
+            });
 
-          const res = await deleteNote({
-            request: frameworkRequest,
-            noteId,
-          });
+            return response.ok({
+              body: { data: { persistNote: res } },
+            });
+          } else {
+            const res = await deleteNote({
+              request: frameworkRequest,
+              noteIds: [noteId],
+            });
 
-          return response.ok({
-            body: { data: { persistNote: res } },
-          });
+            return response.ok({
+              body: { data: { persistNote: res } },
+            });
+          }
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

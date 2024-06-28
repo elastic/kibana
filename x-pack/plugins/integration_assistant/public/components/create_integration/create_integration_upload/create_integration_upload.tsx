@@ -16,10 +16,12 @@ import { IntegrationImageHeader } from '../../../common/components/integration_i
 import { runInstallPackage, type RequestDeps } from '../../../common/lib/api';
 import { getIntegrationNameFromResponse } from '../../../common/lib/api_parsers';
 import { useNavigate, Page } from '../../../common/hooks/use_navigate';
+import { useTelemetry } from '../telemetry';
 import { DocsLinkSubtitle } from './docs_link_subtitle';
 import * as i18n from './translations';
 
 export const CreateIntegrationUpload = React.memo(() => {
+  const telemetry = useTelemetry();
   const navigate = useNavigate();
   const { http } = useKibana().services;
   const [file, setFile] = useState<Blob>();
@@ -49,19 +51,24 @@ export const CreateIntegrationUpload = React.memo(() => {
 
         const integrationNameFromResponse = getIntegrationNameFromResponse(response);
         if (integrationNameFromResponse) {
+          telemetry.reportUploadZipIntegrationComplete({
+            integrationName: integrationNameFromResponse,
+          });
           setIntegrationName(integrationNameFromResponse);
         } else {
           throw new Error('Integration name not found in response');
         }
       } catch (e) {
         if (!abortController.signal.aborted) {
-          setError(`${i18n.UPLOAD_ERROR}: ${e.body.message}`);
+          const errorMessage = e.body?.message ?? e.message;
+          telemetry.reportUploadZipIntegrationComplete({ error: errorMessage });
+          setError(`${i18n.UPLOAD_ERROR}: ${errorMessage}`);
         }
       } finally {
         setIsLoading(false);
       }
     })();
-  }, [file, http, setIntegrationName, setError]);
+  }, [file, http, telemetry, setIntegrationName, setError]);
 
   return (
     <KibanaPageTemplate>
