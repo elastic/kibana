@@ -22,8 +22,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.uuid).to.be.a('string');
         expect(body.version.number).to.be.a('string');
 
-        throw new Error('XOXO');
-
         expect(body.status.overall).to.be.an('object');
         expect(body.status.core).to.be.an('object');
         expect(body.status.plugins).to.be.an('object');
