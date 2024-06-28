@@ -61,11 +61,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     allValid: boolean;
     hosts: HostMetadata[];
   }> {
+    const uniqueIds = [...new Set(ids)];
     const foundEndpointHosts = await this.options.endpointService
       .getEndpointMetadataService()
-      .getMetadataForEndpoints(this.options.esClient, [...new Set(ids)]);
+      .getMetadataForEndpoints(this.options.esClient, uniqueIds);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+    console.log('validIds: ', validIds);
     const invalidIds = ids.filter((id) => !validIds.includes(id));
+    console.log('InValidIds: ', invalidIds);
 
     if (invalidIds.length) {
       this.log.debug(`The following agent ids are not valid: ${JSON.stringify(invalidIds)}`);
@@ -98,13 +101,15 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
+    // validated agent ids (unique and ones that have Elastic Defend installed)
+    const agents = agentIds.valid;
 
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
       try {
         await this.dispatchActionViaFleet({
           actionId,
-          agents: agentIds.valid,
+          agents,
           data: {
             command,
             comment: actionReq.comment,
@@ -125,6 +130,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     // Write action to endpoint index
     await this.writeActionRequestToEndpointIndex({
       ...actionReq,
+      endpoint_ids: agents,
       error: actionError,
       ruleId,
       ruleName,
@@ -140,7 +146,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       comment: actionReq.comment,
       caseIds: actionReq.case_ids,
       alertIds: actionReq.alert_ids,
-      hosts: actionReq.endpoint_ids.map((hostId) => {
+      hosts: agentIds.valid.map((hostId) => {
         return {
           hostId,
           hostname:

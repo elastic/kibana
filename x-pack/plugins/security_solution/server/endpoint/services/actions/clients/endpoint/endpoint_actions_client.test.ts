@@ -27,7 +27,7 @@ describe('EndpointActionsClient', () => {
     'endpoint_ids' | 'case_ids'
   > => {
     return {
-      endpoint_ids: ['1-2-3', 'invalid-id'],
+      endpoint_ids: ['1-2-3', 'invalid-id', '1-2-3'],
       case_ids: ['case-a'],
     };
   };
@@ -85,7 +85,7 @@ describe('EndpointActionsClient', () => {
     });
   });
 
-  it('should write action request document', async () => {
+  it('should write action request document to endpoint action request index', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
@@ -107,7 +107,7 @@ describe('EndpointActionsClient', () => {
             type: 'INPUT_ACTION',
           },
           agent: {
-            id: ['1-2-3', 'invalid-id'],
+            id: ['1-2-3'],
           },
           user: {
             id: 'foo',
@@ -119,7 +119,7 @@ describe('EndpointActionsClient', () => {
     );
   });
 
-  it('should update cases', async () => {
+  it('should update cases for valid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
@@ -137,11 +137,6 @@ describe('EndpointActionsClient', () => {
                 agentType: 'endpoint',
                 endpointId: '1-2-3',
                 hostname: 'Host-ku5jy6j0pw',
-              },
-              {
-                agentType: 'endpoint',
-                endpointId: 'invalid-id',
-                hostname: '',
               },
             ],
           },
