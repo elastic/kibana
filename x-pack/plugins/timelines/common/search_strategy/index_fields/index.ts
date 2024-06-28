@@ -77,7 +77,6 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
 export interface BrowserField {
   aggregatable: boolean;
   format: string;
-  indexes: string[]; // FIXME: missing in FieldSpec
   name: string;
   searchable: boolean;
   type: string;
