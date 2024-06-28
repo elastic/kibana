@@ -111,5 +111,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-utils-server",
     "@kbn/integration-assistant-plugin",
+    "@kbn/core-security-server-mocks",
   ]
 }
