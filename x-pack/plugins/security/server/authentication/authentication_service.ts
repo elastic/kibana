@@ -342,11 +342,11 @@ export class AuthenticationService {
     customLogoutURL,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
-      getClusterClient: () => Promise.resolve(clusterClient),
+      clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
       applicationName,
-      getKibanaFeatures: () => Promise.resolve(kibanaFeatures),
+      kibanaFeatures,
     });
     /**
      * Retrieves server protocol name/host name/port and merges it with `xpack.security.public` config

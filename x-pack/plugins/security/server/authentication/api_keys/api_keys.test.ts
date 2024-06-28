@@ -46,11 +46,11 @@ describe('API Keys', () => {
     logger = loggingSystemMock.create().get('api-keys');
 
     apiKeys = new APIKeys({
-      getClusterClient: () => Promise.resolve(mockClusterClient),
+      clusterClient: mockClusterClient,
       logger,
       license: mockLicense,
       applicationName: 'kibana-.kibana',
-      getKibanaFeatures: () => Promise.resolve([]),
+      kibanaFeatures: [],
     });
   });
 

@@ -41,10 +41,10 @@ const ELASTICSEARCH_CLIENT_AUTHENTICATION_HEADER = 'es-client-authentication';
  */
 export interface ConstructorOptions {
   logger: Logger;
-  getClusterClient: () => Promise<IClusterClient>;
+  clusterClient: IClusterClient;
   license: SecurityLicense;
   applicationName: string;
-  getKibanaFeatures: () => Promise<KibanaFeature[]>;
+  kibanaFeatures: KibanaFeature[];
 }
 
 type GrantAPIKeyParams =
@@ -65,23 +65,23 @@ type GrantAPIKeyParams =
  */
 export class APIKeys implements APIKeysType {
   private readonly logger: Logger;
-  private readonly getClusterClient: () => Promise<IClusterClient>;
+  private readonly clusterClient: IClusterClient;
   private readonly license: SecurityLicense;
   private readonly applicationName: string;
-  private readonly getKibanaFeatures: () => Promise<KibanaFeature[]>;
+  private readonly kibanaFeatures: KibanaFeature[];
 
   constructor({
     logger,
-    getClusterClient,
+    clusterClient,
     license,
     applicationName,
-    getKibanaFeatures,
+    kibanaFeatures,
   }: ConstructorOptions) {
     this.logger = logger;
-    this.getClusterClient = getClusterClient;
+    this.clusterClient = clusterClient;
     this.license = license;
     this.applicationName = applicationName;
-    this.getKibanaFeatures = getKibanaFeatures;
+    this.kibanaFeatures = kibanaFeatures;
   }
 
   /**
@@ -97,9 +97,8 @@ export class APIKeys implements APIKeysType {
     this.logger.debug(
       `Testing if API Keys are enabled by attempting to invalidate a non-existant key: ${id}`
     );
-    const clusterClient = await this.getClusterClient();
     try {
-      await clusterClient.asInternalUser.security.invalidateApiKey({
+      await this.clusterClient.asInternalUser.security.invalidateApiKey({
         body: {
           ids: [id],
         },
@@ -126,9 +125,8 @@ export class APIKeys implements APIKeysType {
     this.logger.debug(
       `Testing if cross-cluster API Keys are enabled by attempting to update a non-existant key: ${id}`
     );
-    const clusterClient = await this.getClusterClient();
     try {
-      await clusterClient.asInternalUser.transport.request({
+      await this.clusterClient.asInternalUser.transport.request({
         method: 'PUT',
         path: `/_security/cross_cluster/api_key/${id}`,
         body: {}, // We are sending an empty request body and expect a validation error if Update cross-cluster API key endpoint is available.
@@ -156,9 +154,8 @@ export class APIKeys implements APIKeysType {
     if (!this.license.isEnabled()) {
       return null;
     }
-    const clusterClient = await this.getClusterClient();
     const { type, expiration, name, metadata } = createParams;
-    const scopedClusterClient = clusterClient.asScoped(request);
+    const scopedClusterClient = this.clusterClient.asScoped(request);
 
     this.logger.debug('Trying to create an API key');
 
@@ -172,7 +169,6 @@ export class APIKeys implements APIKeysType {
           body: { name, expiration, metadata, access: createParams.access },
         });
       } else {
-        const features = await this.getKibanaFeatures();
         result = await scopedClusterClient.asCurrentUser.security.createApiKey({
           body: {
             name,
@@ -182,7 +178,7 @@ export class APIKeys implements APIKeysType {
               ? createParams.role_descriptors
               : this.parseRoleDescriptorsWithKibanaPrivileges(
                   createParams.kibana_role_descriptors,
-                  features,
+                  this.kibanaFeatures,
                   false
                 ),
           },
@@ -214,9 +210,9 @@ export class APIKeys implements APIKeysType {
     if (!this.license.isEnabled()) {
       return null;
     }
-    const clusterClient = await this.getClusterClient();
+
     const { type, id, metadata } = updateParams;
-    const scopedClusterClient = clusterClient.asScoped(request);
+    const scopedClusterClient = this.clusterClient.asScoped(request);
 
     this.logger.debug('Trying to edit an API key');
 
@@ -229,7 +225,6 @@ export class APIKeys implements APIKeysType {
           body: { metadata, access: updateParams.access },
         });
       } else {
-        const features = await this.getKibanaFeatures();
         result = await scopedClusterClient.asCurrentUser.security.updateApiKey({
           id,
           metadata,
@@ -238,7 +233,7 @@ export class APIKeys implements APIKeysType {
               ? updateParams.role_descriptors
               : this.parseRoleDescriptorsWithKibanaPrivileges(
                   updateParams.kibana_role_descriptors,
-                  features,
+                  this.kibanaFeatures,
                   true
                 ),
         });
@@ -284,13 +279,12 @@ export class APIKeys implements APIKeysType {
     );
 
     const { expiration, metadata, name } = createParams;
-    const features = await this.getKibanaFeatures();
     const roleDescriptors =
       'role_descriptors' in createParams
         ? createParams.role_descriptors
         : this.parseRoleDescriptorsWithKibanaPrivileges(
             createParams.kibana_role_descriptors,
-            features,
+            this.kibanaFeatures,
             false
           );
 
@@ -299,11 +293,10 @@ export class APIKeys implements APIKeysType {
       authorizationHeader,
       clientAuthorizationHeader
     );
-    const clusterClient = await this.getClusterClient();
     // User needs `manage_api_key` or `grant_api_key` privilege to use this API
     let result: GrantAPIKeyResult;
     try {
-      result = await clusterClient.asInternalUser.security.grantApiKey({ body: params });
+      result = await this.clusterClient.asInternalUser.security.grantApiKey({ body: params });
       this.logger.debug('API key was granted successfully');
     } catch (e) {
       this.logger.error(`Failed to grant API key: ${e.message}`);
@@ -324,11 +317,10 @@ export class APIKeys implements APIKeysType {
     }
 
     this.logger.debug(`Trying to invalidate ${params.ids.length} an API key as current user`);
-    const clusterClient = await this.getClusterClient();
     let result: InvalidateAPIKeyResult;
     try {
       // User needs `manage_api_key` privilege to use this API
-      result = await clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
+      result = await this.clusterClient.asScoped(request).asCurrentUser.security.invalidateApiKey({
         body: {
           ids: params.ids,
         },
@@ -360,10 +352,10 @@ export class APIKeys implements APIKeysType {
     this.logger.debug(`Trying to invalidate ${params.ids.length} API keys`);
 
     let result: InvalidateAPIKeyResult;
-    const clusterClient = await this.getClusterClient();
+
     try {
       // Internal user needs `cluster:admin/xpack/security/api_key/invalidate` privilege to use this API
-      result = await clusterClient.asInternalUser.security.invalidateApiKey({
+      result = await this.clusterClient.asInternalUser.security.invalidateApiKey({
         body: {
           ids: params.ids,
         },
@@ -391,9 +383,8 @@ export class APIKeys implements APIKeysType {
     const fakeRequest = getFakeKibanaRequest(apiKeyPrams);
 
     this.logger.debug(`Trying to validate an API key`);
-    const clusterClient = await this.getClusterClient();
     try {
-      await clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
+      await this.clusterClient.asScoped(fakeRequest).asCurrentUser.security.authenticate();
       this.logger.debug(`API key was validated successfully`);
       return true;
     } catch (e) {
