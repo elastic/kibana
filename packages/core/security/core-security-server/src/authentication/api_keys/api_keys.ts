@@ -264,5 +264,5 @@ export interface UpdateRestAPIKeyWithKibanaPrivilegesParams {
 }
 
 export function isCreateRestAPIKeyParams(params: any): params is CreateRestAPIKeyParams {
-  return 'role_descriptor' in params;
+  return 'role_descriptors' in params;
 }

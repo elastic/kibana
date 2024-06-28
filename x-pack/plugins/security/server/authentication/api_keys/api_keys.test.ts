@@ -243,6 +243,7 @@ describe('API Keys', () => {
         role_descriptors: roleDescriptors,
         expiration: '1d',
       });
+
       expect(result).toEqual({
         api_key: 'abc123',
         expiration: '1d',
@@ -254,7 +255,7 @@ describe('API Keys', () => {
       expect(mockScopedClusterClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
         body: {
           name: 'key-name',
-          role_descriptors: { foo: true },
+          role_descriptors: roleDescriptors,
           expiration: '1d',
         },
       });
