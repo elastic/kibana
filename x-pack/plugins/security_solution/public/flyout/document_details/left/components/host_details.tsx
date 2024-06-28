@@ -18,9 +18,13 @@ import {
   EuiToolTip,
   EuiIcon,
   EuiPanel,
+  EuiLink,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
@@ -43,9 +47,17 @@ import { useHostDetails } from '../../../../explore/hosts/containers/hosts/detai
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from './test_ids';
+import {
+  HOST_DETAILS_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
+} from './test_ids';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -82,6 +94,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
+  const { openPreviewPanel } = useExpandableFlyoutApi();
+  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+
   const narrowDateRange = useCallback(
     (score, interval) => {
       const fromTo = scoreIntervalToDateTime(score, interval);
@@ -94,6 +109,31 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
       );
     },
     [dispatch]
+  );
+
+  const openHostPreview = useCallback(() => {
+    openPreviewPanel({
+      id: HostPreviewPanelKey,
+      params: {
+        hostName,
+        scopeId,
+        banner: HOST_PREVIEW_BANNER,
+      },
+    });
+  }, [openPreviewPanel, hostName, scopeId]);
+
+  const openUserPreview = useCallback(
+    (userName: string) => {
+      openPreviewPanel({
+        id: UserPreviewPanelKey,
+        params: {
+          userName,
+          scopeId,
+          banner: USER_PREVIEW_BANNER,
+        },
+      });
+    },
+    [openPreviewPanel, scopeId]
   );
 
   const [isHostLoading, { inspect, hostDetails, refetch }] = useHostDetails({
@@ -131,7 +171,16 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         render: (user: string) => (
           <EuiText grow={false} size="xs">
             <CellActions field={'user.name'} value={user}>
-              {user}
+              {isPreviewEnabled ? (
+                <EuiLink
+                  data-test-subj={HOST_DETAILS_RELATED_USERS_LINK_TEST_ID}
+                  onClick={() => openUserPreview(user)}
+                >
+                  {user}
+                </EuiLink>
+              ) : (
+                <>{user}</>
+              )}
             </CellActions>
           </EuiText>
         ),
@@ -175,7 +224,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           ]
         : []),
     ],
-    [isEntityAnalyticsAuthorized, scopeId]
+    [isEntityAnalyticsAuthorized, scopeId, isPreviewEnabled, openUserPreview]
   );
 
   const relatedUsersCount = useMemo(
@@ -205,6 +254,22 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
     showPerPageOptions: false,
   };
 
+  const hostLink = useMemo(
+    () =>
+      isPreviewEnabled
+        ? {
+            callback: openHostPreview,
+            tooltip: i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.entities.host.hostPreviewTitle',
+              {
+                defaultMessage: 'Preview host',
+              }
+            ),
+          }
+        : undefined,
+    [isPreviewEnabled, openHostPreview]
+  );
+
   return (
     <>
       <EuiTitle size="xs">
@@ -221,6 +286,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
           title: hostName,
           iconType: 'storage',
           headerContent: relatedUsersCount,
+          link: hostLink,
         }}
         expand={{ expandable: true, expandedOnFirstRender: true }}
         data-test-subj={HOST_DETAILS_TEST_ID}

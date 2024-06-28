@@ -25,7 +25,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
     "@kbn/screenshot-mode-plugin",
-    "@kbn/security-plugin",
     "@kbn/expressions-plugin",
     "@kbn/field-types",
     "@kbn/es-query",
