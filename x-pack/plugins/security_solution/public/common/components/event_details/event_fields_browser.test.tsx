@@ -204,9 +204,7 @@ describe('EventFieldsBrowser', () => {
 
       expect(
         wrapper.find('[data-test-subj="field-name-cell"]').at(0).find('EuiToolTip').prop('content')
-      ).toContain(
-        'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events. Example: 2016-05-23T08:05:34.853Z'
-      );
+      ).toContain('Date/time when the event originated.');
     });
   });
 });

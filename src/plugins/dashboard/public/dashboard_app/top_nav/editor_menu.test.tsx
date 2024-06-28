@@ -34,9 +34,10 @@ describe('mergeGroupedItemsProvider', () => {
 
   const factoryGroupMap = {
     group1: {
-      panelId: 'panel1',
+      id: 'panel1',
       appName: 'App 1',
       icon: 'icon1',
+      order: 10,
       factories: [mockFactory],
     },
   } as unknown as Record<string, FactoryGroup>;
@@ -46,29 +47,23 @@ describe('mergeGroupedItemsProvider', () => {
       id: 'panel2',
       title: 'Panel 2',
       icon: 'icon2',
+      order: 10,
       items: [
         {
           id: 'addPanelActionId',
+          order: 0,
         },
       ],
     },
   } as unknown as Record<string, GroupedAddPanelActions>;
 
   it('should merge factoryGroupMap and groupedAddPanelAction correctly', () => {
-    const [initialPanelGroups, additionalPanels] = mergeGroupedItemsProvider(
-      getEmbeddableFactoryMenuItem
-    )(factoryGroupMap, groupedAddPanelAction);
+    const groupedPanels = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
+      factoryGroupMap,
+      groupedAddPanelAction
+    );
 
-    expect(initialPanelGroups).toEqual([
-      {
-        'data-test-subj': 'dashboardEditorMenu-group1Group',
-        name: 'App 1',
-        icon: 'icon1',
-        panel: 'panel1',
-      },
-    ]);
-
-    expect(additionalPanels).toEqual([
+    expect(groupedPanels).toEqual([
       {
         id: 'panel1',
         title: 'App 1',
@@ -76,72 +71,68 @@ describe('mergeGroupedItemsProvider', () => {
           {
             icon: 'icon1',
             name: 'Factory 1',
-            toolTipContent: 'Factory 1 description',
+            id: 'mockFactory',
+            description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
+            order: 0,
           },
           {
             id: 'addPanelActionId',
+            order: 0,
           },
         ],
+        'data-test-subj': 'dashboardEditorMenu-group1Group',
+        order: 10,
       },
     ]);
   });
 
   it('should handle missing factoryGroup correctly', () => {
-    const [initialPanelGroups, additionalPanels] = mergeGroupedItemsProvider(
-      getEmbeddableFactoryMenuItem
-    )({}, groupedAddPanelAction);
+    const groupedPanels = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
+      {},
+      groupedAddPanelAction
+    );
 
-    expect(initialPanelGroups).toEqual([
-      {
-        'data-test-subj': 'dashboardEditorMenu-group1Group',
-        name: 'Panel 2',
-        icon: 'icon2',
-        panel: 'panel2',
-      },
-    ]);
-
-    expect(additionalPanels).toEqual([
+    expect(groupedPanels).toEqual([
       {
         id: 'panel2',
+        icon: 'icon2',
         title: 'Panel 2',
         items: [
           {
             id: 'addPanelActionId',
+            order: 0,
           },
         ],
+        order: 10,
       },
     ]);
   });
 
   it('should handle missing groupedAddPanelAction correctly', () => {
-    const [initialPanelGroups, additionalPanels] = mergeGroupedItemsProvider(
-      getEmbeddableFactoryMenuItem
-    )(factoryGroupMap, {});
+    const groupedPanels = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
+      factoryGroupMap,
+      {}
+    );
 
-    expect(initialPanelGroups).toEqual([
-      {
-        'data-test-subj': 'dashboardEditorMenu-group1Group',
-        name: 'App 1',
-        icon: 'icon1',
-        panel: 'panel1',
-      },
-    ]);
-
-    expect(additionalPanels).toEqual([
+    expect(groupedPanels).toEqual([
       {
         id: 'panel1',
         title: 'App 1',
         items: [
           {
             icon: 'icon1',
+            id: 'mockFactory',
             name: 'Factory 1',
-            toolTipContent: 'Factory 1 description',
+            description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
+            order: 0,
           },
         ],
+        order: 10,
+        'data-test-subj': 'dashboardEditorMenu-group1Group',
       },
     ]);
   });
