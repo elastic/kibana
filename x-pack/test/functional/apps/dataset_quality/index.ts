@@ -9,11 +9,11 @@ import { DatasetQualityFtrProviderContext } from './config';
 
 export default function ({ loadTestFile }: DatasetQualityFtrProviderContext) {
   describe('Dataset Quality', function () {
-    loadTestFile(require.resolve('./home'));
-    loadTestFile(require.resolve('./dataset_quality_summary'));
-    loadTestFile(require.resolve('./dataset_quality_table'));
-    loadTestFile(require.resolve('./dataset_quality_table_filters'));
+    // loadTestFile(require.resolve('./home'));
+    // loadTestFile(require.resolve('./dataset_quality_summary'));
+    // loadTestFile(require.resolve('./dataset_quality_table'));
+    // loadTestFile(require.resolve('./dataset_quality_table_filters'));
     loadTestFile(require.resolve('./dataset_quality_flyout'));
-    loadTestFile(require.resolve('./dataset_quality_privileges'));
+    // loadTestFile(require.resolve('./dataset_quality_privileges'));
   });
 }

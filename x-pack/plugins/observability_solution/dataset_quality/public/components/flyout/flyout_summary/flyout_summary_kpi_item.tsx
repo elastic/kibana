@@ -64,7 +64,6 @@ export function FlyoutSummaryKpiItem({
                 width: 'fit-content',
               }}
               {...link.props}
-              target="_blank"
             >
               <EuiText
                 css={{
