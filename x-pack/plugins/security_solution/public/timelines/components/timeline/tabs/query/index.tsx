@@ -338,6 +338,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [timelineDataService, combinedQueries, kqlQueryLanguage]);
   // </Synchronisation of the timeline data service>
 
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
+
   if (unifiedComponentsInTimelineEnabled) {
     return (
       <>
@@ -349,15 +363,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           refetch={refetch}
           skip={!canQueryTimeline}
         />
-        <NotesFlyout
-          associateNote={associateNote}
-          eventId={noteEventId}
-          show={isNotesFlyoutVisible}
-          notes={notes}
-          onClose={closeNotesFlyout}
-          onCancel={closeNotesFlyout}
-          timelineId={timelineId}
-        />
+        {NotesFlyoutMemo}
 
         <UnifiedTimelineBody
           header={
@@ -406,15 +412,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
-      <NotesFlyout
-        associateNote={associateNote}
-        eventId={noteEventId}
-        show={isNotesFlyoutVisible}
-        notes={notes}
-        onClose={closeNotesFlyout}
-        onCancel={closeNotesFlyout}
-        timelineId={timelineId}
-      />
+      {NotesFlyoutMemo}
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
           <QueryTabHeader

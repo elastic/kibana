@@ -256,7 +256,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
-              timelinetype={timelineType}
+              timelineType={timelineType}
               notesCount={noteIds.length}
               eventId={eventId}
               toggleShowNotes={toggleShowNotes}
