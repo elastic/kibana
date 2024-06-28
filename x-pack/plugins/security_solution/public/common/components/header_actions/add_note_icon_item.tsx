@@ -14,18 +14,18 @@ import { ActionIconItem } from './action_icon_item';
 
 interface AddEventNoteActionProps {
   ariaLabel?: string;
-  eventId?: string;
-  toggleShowNotes?: () => void | ((eventId: string) => void);
-  notesCount: number;
   timelineType: TimelineType;
+  toggleShowNotes?: () => void | ((eventId: string) => void);
+  eventId?: string;
+  notesCount: number;
 }
 
 const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
   ariaLabel,
-  eventId,
-  toggleShowNotes,
-  notesCount,
   timelineType,
+  toggleShowNotes,
+  eventId,
+  notesCount,
 }) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
 

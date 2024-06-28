@@ -87,6 +87,14 @@ export const useTimelineControlColumn = ({
         rowCellRender: (
           props: EuiDataGridCellValueElementProps & UnifiedTimelineDataGridCellContext
         ) => {
+          /*
+           * In some cases, when number of events is updated
+           * but new table is not yet rendered it can result
+           * in the mismatch between the number of events v/s
+           * the number of rows in the table currently rendered.
+           *
+           * */
+          if (props.rowIndex >= events.length) return <></>;
           props.setCellProps({
             className:
               props.expandedEventId === events[props.rowIndex]?._id
