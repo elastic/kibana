@@ -519,7 +519,6 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedAnonymizationFields,
   ]);
 
-
   const createCodeBlockPortals = useCallback(
     () =>
       messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[], i: number) => {
