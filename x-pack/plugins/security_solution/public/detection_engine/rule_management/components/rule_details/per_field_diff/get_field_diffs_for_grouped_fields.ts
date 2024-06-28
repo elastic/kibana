@@ -8,6 +8,7 @@
 import stringify from 'json-stable-stringify';
 import type {
   AllFieldsDiff,
+  RuleFieldsDiffWithDataSource,
   RuleFieldsDiffWithKqlQuery,
 } from '../../../../../../common/api/detection_engine';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
@@ -24,8 +25,11 @@ export const sortAndStringifyJson = (fieldValue: unknown): string => {
 };
 
 export const getFieldDiffsForDataSource = (
-  dataSourceThreeWayDiff: AllFieldsDiff['data_source']
+  dataSourceThreeWayDiff: RuleFieldsDiffWithDataSource['data_source']
 ): FieldDiff[] => {
+  if (!dataSourceThreeWayDiff) {
+    return [];
+  }
   const currentType = sortAndStringifyJson(dataSourceThreeWayDiff.current_version?.type);
   const targetType = sortAndStringifyJson(dataSourceThreeWayDiff.target_version?.type);
 
@@ -303,6 +307,9 @@ export const getFieldDiffsForRuleSchedule = (
 export const getFieldDiffsForRuleNameOverride = (
   ruleNameOverrideThreeWayDiff: AllFieldsDiff['rule_name_override']
 ): FieldDiff[] => {
+  if (!ruleNameOverrideThreeWayDiff) {
+    return [];
+  }
   const currentFieldName = sortAndStringifyJson(
     ruleNameOverrideThreeWayDiff.current_version?.field_name
   );
@@ -325,6 +332,10 @@ export const getFieldDiffsForRuleNameOverride = (
 export const getFieldDiffsForTimestampOverride = (
   timestampOverrideThreeWayDiff: AllFieldsDiff['timestamp_override']
 ): FieldDiff[] => {
+  if (!timestampOverrideThreeWayDiff) {
+    return [];
+  }
+
   const currentFieldName = sortAndStringifyJson(
     timestampOverrideThreeWayDiff.current_version?.field_name
   );
@@ -363,6 +374,10 @@ export const getFieldDiffsForTimestampOverride = (
 export const getFieldDiffsForTimelineTemplate = (
   timelineTemplateThreeWayDiff: AllFieldsDiff['timeline_template']
 ): FieldDiff[] => {
+  if (!timelineTemplateThreeWayDiff) {
+    return [];
+  }
+
   const currentTimelineId = sortAndStringifyJson(
     timelineTemplateThreeWayDiff.current_version?.timeline_id
   );
@@ -401,6 +416,9 @@ export const getFieldDiffsForTimelineTemplate = (
 export const getFieldDiffsForBuildingBlock = (
   buildingBlockThreeWayDiff: AllFieldsDiff['building_block']
 ): FieldDiff[] => {
+  if (!buildingBlockThreeWayDiff) {
+    return [];
+  }
   const currentType = sortAndStringifyJson(buildingBlockThreeWayDiff.current_version?.type);
   const targetType = sortAndStringifyJson(buildingBlockThreeWayDiff.target_version?.type);
   return [

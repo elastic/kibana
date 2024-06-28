@@ -88,7 +88,7 @@ export const DiffableCommonFields = buildSchema({
 
     // Other domain fields
     rule_schedule: RuleSchedule, // NOTE: new field
-    exceptions_list: RuleExceptionList,
+    exceptions_list: z.array(RuleExceptionList),
     max_signals: MaxSignals,
   },
   optional: {
