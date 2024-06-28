@@ -34,7 +34,11 @@ import {
   getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
+import {
+  MetricsTracker,
+  EmbeddableConsoleDependencies,
+  ConsoleStartServices,
+} from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
 import { EsHostService } from '../../lib/es_host_service';
@@ -47,7 +51,7 @@ import {
 import { Main } from '../main';
 import { EditorContentSpinner } from '../../components';
 
-interface ConsoleDependencies {
+interface ConsoleDependencies extends ConsoleStartServices {
   autocompleteInfo: AutocompleteInfo;
   docLinks: DocLinksStart['links'];
   docLinkVersion: string;
@@ -70,7 +74,7 @@ const loadDependencies = async (
     docLinks: { DOC_LINK_VERSION, links },
     http,
     notifications,
-    theme: { theme$ },
+    ...startServices
   } = core;
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_embedded_app');
@@ -86,6 +90,7 @@ const loadDependencies = async (
 
   autocompleteInfo.mapping.setup(http, settings);
   return {
+    ...startServices,
     autocompleteInfo,
     docLinks: links,
     docLinkVersion: DOC_LINK_VERSION,
@@ -96,7 +101,7 @@ const loadDependencies = async (
     objectStorageClient,
     settings,
     storage,
-    theme$,
+    theme$: startServices.theme.theme$,
     trackUiMetric,
   };
 };
@@ -107,27 +112,26 @@ interface ConsoleWrapperProps
     'setDispatch' | 'alternateView' | 'setConsoleHeight' | 'getConsoleHeight'
   > {
   onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
+  isOpen: boolean;
 }
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isMonacoEnabled } = props;
+  const { core, usageCollection, onKeyDown, isMonacoEnabled, isOpen } = props;
 
   useEffect(() => {
-    if (dependencies === null) {
+    if (dependencies === null && isOpen) {
       loadDependencies(core, usageCollection).then(setDependencies);
     }
-  }, [dependencies, setDependencies, core, usageCollection]);
+  }, [dependencies, setDependencies, core, usageCollection, isOpen]);
 
-  useEffect(() => {
-    return () => {
-      if (dependencies) {
-        dependencies.autocompleteInfo.clearSubscriptions();
-      }
-    };
-  }, [dependencies]);
+  if (!dependencies && !isOpen) {
+    // Console has not been opened
+    return null;
+  }
 
   if (!dependencies) {
+    // Console open for the first time, wait for dependencies to load.
     return <EditorContentSpinner />;
   }
 
@@ -142,13 +146,14 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     objectStorageClient,
     settings,
     storage,
-    theme$,
     trackUiMetric,
+    ...startServices
   } = dependencies;
   return (
     <KibanaRenderContextProvider {...core}>
       <ServicesContextProvider
         value={{
+          ...startServices,
           docLinkVersion,
           docLinks,
           services: {
@@ -162,7 +167,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
             http,
             autocompleteInfo,
           },
-          theme$,
           config: {
             isMonacoEnabled,
           },
@@ -170,10 +174,14 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
-              <EuiWindowEvent event="keydown" handler={onKeyDown} />
-              <Main hideWelcome />
-            </div>
+            {isOpen ? (
+              <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
+                <EuiWindowEvent event="keydown" handler={onKeyDown} />
+                <Main hideWelcome />
+              </div>
+            ) : (
+              <span />
+            )}
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

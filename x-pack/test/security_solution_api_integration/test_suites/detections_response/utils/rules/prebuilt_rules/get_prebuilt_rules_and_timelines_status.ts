@@ -21,7 +21,7 @@ import { refreshSavedObjectIndices } from '../../refresh_index';
  */
 export const getPrebuiltRulesAndTimelinesStatus = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<GetPrebuiltRulesAndTimelinesStatusResponse> => {
   await refreshSavedObjectIndices(es);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange, infra } from '@kbn/apm-synthtrace-client';
 
 const SERVICE_PREFIX = 'service';
 // generates traces, metrics for services
@@ -44,5 +44,40 @@ export function generateAddServicesToExistingHost({
           .duration(500)
           .success()
       )
+    );
+}
+
+export function generateDockerContainersData({
+  from,
+  to,
+  count = 1,
+}: {
+  from: string;
+  to: string;
+  count?: number;
+}) {
+  const range = timerange(from, to);
+
+  const containers = Array(count)
+    .fill(0)
+    .map((_, idx) =>
+      infra.dockerContainer(`container-id-${idx}`).defaults({
+        'container.name': `container-id-${idx}`,
+        'container.id': `container-id-${idx}`,
+        'container.runtime': 'docker',
+        'container.image.name': 'image-1',
+        'host.name': 'host-1',
+        'cloud.instance.id': 'instance-1',
+        'cloud.image.id': 'image-1',
+        'cloud.provider': 'aws',
+        'event.dataset': 'docker.container',
+      })
+    );
+
+  return range
+    .interval('30s')
+    .rate(1)
+    .generator((timestamp) =>
+      containers.flatMap((container) => container.metrics().timestamp(timestamp))
     );
 }

@@ -205,8 +205,11 @@ describe('split .kibana index into multiple system indices', () => {
             "connector_token",
             "core-usage-stats",
             "csp-rule-template",
+            "endpoint:unified-user-artifact-manifest",
             "endpoint:user-artifact-manifest",
             "enterprise_search_telemetry",
+            "entity-definition",
+            "entity-discovery-api-key",
             "epm-packages",
             "epm-packages-assets",
             "event-annotation-group",
@@ -220,6 +223,7 @@ describe('split .kibana index into multiple system indices', () => {
             "fleet-message-signing-keys",
             "fleet-preconfiguration-deletion-record",
             "fleet-proxy",
+            "fleet-setup-lock",
             "fleet-uninstall-tokens",
             "graph-workspace",
             "guided-onboarding-guide-state",
@@ -269,6 +273,7 @@ describe('split .kibana index into multiple system indices', () => {
             "slo-settings",
             "space",
             "spaces-usage-stats",
+            "synthetics-dynamic-settings",
             "synthetics-monitor",
             "synthetics-param",
             "synthetics-privates-locations",
@@ -303,7 +308,8 @@ describe('split .kibana index into multiple system indices', () => {
       expect(logs).toContainLogEntries(
         [
           // .kibana_task_manager index exists and has no aliases => LEGACY_* migration path
-          '[.kibana_task_manager] INIT -> LEGACY_SET_WRITE_BLOCK.',
+          '[.kibana_task_manager] INIT -> LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION.',
+          '[.kibana_task_manager] LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION -> LEGACY_SET_WRITE_BLOCK.',
           '[.kibana_task_manager] LEGACY_REINDEX_WAIT_FOR_TASK -> LEGACY_DELETE.',
           '[.kibana_task_manager] LEGACY_DELETE -> SET_SOURCE_WRITE_BLOCK.',
           '[.kibana_task_manager] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.',
@@ -357,7 +363,8 @@ describe('split .kibana index into multiple system indices', () => {
       expect(logs).toContainLogEntries(
         [
           '[.kibana] INIT -> WAIT_FOR_YELLOW_SOURCE.',
-          '[.kibana] WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS.',
+          '[.kibana] WAIT_FOR_YELLOW_SOURCE -> CHECK_CLUSTER_ROUTING_ALLOCATION.',
+          '[.kibana] CHECK_CLUSTER_ROUTING_ALLOCATION -> CHECK_UNKNOWN_DOCUMENTS.',
           '[.kibana] CHECK_UNKNOWN_DOCUMENTS -> SET_SOURCE_WRITE_BLOCK.',
           '[.kibana] SET_SOURCE_WRITE_BLOCK -> CALCULATE_EXCLUDE_FILTERS.',
           '[.kibana] CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP.',

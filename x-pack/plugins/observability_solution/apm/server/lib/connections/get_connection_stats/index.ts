@@ -14,6 +14,7 @@ import { getDestinationMap } from './get_destination_map';
 import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { RandomSampler } from '../../helpers/get_random_sampler';
 
 export function getConnectionStats({
   apmEventClient,
@@ -23,6 +24,7 @@ export function getConnectionStats({
   filter,
   collapseBy,
   offset,
+  randomSampler,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -31,9 +33,10 @@ export function getConnectionStats({
   filter: QueryDslQueryContainer[];
   collapseBy: 'upstream' | 'downstream';
   offset?: string;
+  randomSampler: RandomSampler;
 }) {
   return withApmSpan('get_connection_stats_and_map', async () => {
-    const [allMetrics, destinationMap] = await Promise.all([
+    const [allMetrics, { nodesBydependencyName: destinationMap, sampled }] = await Promise.all([
       getStats({
         apmEventClient,
         start,
@@ -48,6 +51,7 @@ export function getConnectionStats({
         end,
         filter,
         offset,
+        randomSampler,
       }),
     ]);
 
@@ -155,6 +159,6 @@ export function getConnectionStats({
       };
     });
 
-    return statsItems;
+    return { statsItems, sampled };
   });
 }

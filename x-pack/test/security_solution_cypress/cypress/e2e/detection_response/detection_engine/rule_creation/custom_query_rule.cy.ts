@@ -60,7 +60,8 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(RULE_NAME_HEADER).should('contain', rule.name);
     });
 
-    it('Adds filter on define step', () => {
+    // FLAKEY - see https://github.com/elastic/kibana/issues/182891
+    it('@skipInServerless Adds filter on define step', () => {
       visit(CREATE_RULE_URL);
       fillDefineCustomRule(rule);
       openAddFilterPopover();

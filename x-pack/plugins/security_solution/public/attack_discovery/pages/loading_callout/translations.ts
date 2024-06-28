@@ -11,7 +11,7 @@ export const AI_IS_CURRENTLY_ANALYZING = (alertsCount: number) =>
   i18n.translate(
     'xpack.securitySolution.attackDiscovery.pages.loadingCallout.aiIsCurrentlyAnalyzing',
     {
-      defaultMessage: `AI is currently analyzing up to {alertsCount} {alertsCount, plural, =1 {alert} other {alerts}} in the last 24 hours to generate discoveries.`,
+      defaultMessage: `AI is analyzing up to {alertsCount} {alertsCount, plural, =1 {alert} other {alerts}} in the last 24 hours to generate discoveries.`,
       values: { alertsCount },
     }
   );

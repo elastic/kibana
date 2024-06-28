@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import type {
-  AttackDiscoveryTelemetryEvent,
-  ReportAttackDiscoveriesGeneratedParams,
-  ReportAttackDiscoveryTelemetryEventParams,
-} from './events/attack_discovery/types';
-import type { SecurityMetadata } from '../../../actions/types';
+import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
   AlertsGroupingTelemetryEvent,
@@ -62,7 +56,6 @@ import type {
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
-export * from './events/attack_discovery/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
 export type {
@@ -91,7 +84,7 @@ export interface ReportMLJobUpdateParams {
 }
 
 export interface ReportCellActionClickedParams {
-  metadata: SecurityMetadata | undefined;
+  metadata: SecurityCellActionMetadata | undefined;
   displayName: string;
   actionId: string;
   fieldName: string;
@@ -109,7 +102,6 @@ export interface ReportBreadcrumbClickedParams {
 export type TelemetryEventParams =
   | ReportAlertsGroupingTelemetryEventParams
   | ReportAssistantTelemetryEventParams
-  | ReportAttackDiscoveryTelemetryEventParams
   | ReportEntityAnalyticsTelemetryEventParams
   | ReportMLJobUpdateParams
   | ReportCellActionClickedParams
@@ -132,9 +124,6 @@ export interface TelemetryClientStart {
   reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
   reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
   reportAssistantSettingToggled(params: ReportAssistantSettingToggledParams): void;
-
-  // Attack discovery
-  reportAttackDiscoveriesGenerated(params: ReportAttackDiscoveriesGeneratedParams): void;
 
   // Entity Analytics
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
@@ -174,7 +163,6 @@ export type TelemetryEvent =
   | EntityAnalyticsTelemetryEvent
   | DataQualityTelemetryEvents
   | DocumentDetailsTelemetryEvents
-  | AttackDiscoveryTelemetryEvent
   | {
       eventType: TelemetryEventTypes.MLJobUpdate;
       schema: RootSchema<ReportMLJobUpdateParams>;

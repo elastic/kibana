@@ -9,13 +9,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAppContext } from '../../hooks/use_app_context';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const SELECTED_CONNECTOR_LOCAL_STORAGE_KEY =
   'xpack.observabilityAiAssistant.lastUsedConnector';
 
 export function SearchConnectorTab() {
-  const { application } = useAppContext();
+  const { application } = useKibana().services;
   const url = application.getUrlForApp('enterprise_search', { path: '/content/connectors' });
 
   return (

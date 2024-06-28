@@ -161,7 +161,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       searchStrategyParams?.timeFieldName,
       searchStrategyParams?.earliest,
       searchStrategyParams?.latest,
-      searchStrategyParams?.searchQuery,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({ query: searchStrategyParams?.searchQuery }),
       searchStrategyParams?.index,
     ]
   );

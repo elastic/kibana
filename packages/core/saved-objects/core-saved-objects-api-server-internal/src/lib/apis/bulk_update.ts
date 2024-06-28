@@ -58,6 +58,7 @@ type ExpectedBulkGetResult = Either<
     objectNamespace?: string;
     esRequestIndex: number;
     migrationVersionCompatibility?: 'raw' | 'compatible';
+    mergeAttributes: boolean;
   }
 >;
 
@@ -81,15 +82,25 @@ export const performBulkUpdate = async <T>(
     common: commonHelper,
     encryption: encryptionHelper,
     migration: migrationHelper,
+    user: userHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const { migrationVersionCompatibility } = options;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
+  const updatedBy = userHelper.getCurrentUserProfileUid();
   const time = getCurrentTime();
 
   let bulkGetRequestIndexCounter = 0;
   const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
-    const { type, id, attributes, references, version, namespace: objectNamespace } = object;
+    const {
+      type,
+      id,
+      attributes,
+      references,
+      version,
+      namespace: objectNamespace,
+      mergeAttributes = true,
+    } = object;
     let error: DecoratedError | undefined;
 
     if (!allowedTypes.includes(type)) {
@@ -111,6 +122,7 @@ export const performBulkUpdate = async <T>(
     const documentToSave = {
       [type]: attributes,
       updated_at: time,
+      updated_by: updatedBy,
       ...(Array.isArray(references) && { references }),
     };
 
@@ -122,6 +134,7 @@ export const performBulkUpdate = async <T>(
       objectNamespace,
       esRequestIndex: bulkGetRequestIndexCounter++,
       migrationVersionCompatibility,
+      mergeAttributes,
     });
   });
 
@@ -205,8 +218,15 @@ export const performBulkUpdate = async <T>(
         return expectedBulkGetResult;
       }
 
-      const { esRequestIndex, id, type, version, documentToSave, objectNamespace } =
-        expectedBulkGetResult.value;
+      const {
+        esRequestIndex,
+        id,
+        type,
+        version,
+        documentToSave,
+        objectNamespace,
+        mergeAttributes,
+      } = expectedBulkGetResult.value;
 
       let namespaces: string[] | undefined;
       const versionProperties = getExpectedVersionProperties(version);
@@ -261,18 +281,23 @@ export const performBulkUpdate = async <T>(
       }
 
       const typeDefinition = registry.getType(type)!;
-      const updatedAttributes = mergeForUpdate({
-        targetAttributes: {
-          ...(migrated!.attributes as Record<string, unknown>),
-        },
-        updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
-          type,
-          id,
-          objectNamespace || namespace,
-          documentToSave[type]
-        ),
-        typeMappings: typeDefinition.mappings,
-      });
+
+      const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+        type,
+        id,
+        objectNamespace || namespace,
+        documentToSave[type]
+      );
+
+      const updatedAttributes = mergeAttributes
+        ? mergeForUpdate({
+            targetAttributes: {
+              ...(migrated!.attributes as Record<string, unknown>),
+            },
+            updatedAttributes: encryptedUpdatedAttributes,
+            typeMappings: typeDefinition.mappings,
+          })
+        : encryptedUpdatedAttributes;
 
       const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
         ...migrated!,
@@ -282,6 +307,7 @@ export const performBulkUpdate = async <T>(
         namespaces,
         attributes: updatedAttributes,
         updated_at: time,
+        updated_by: updatedBy,
         ...(Array.isArray(documentToSave.references) && { references: documentToSave.references }),
       });
       const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
@@ -342,7 +368,7 @@ export const performBulkUpdate = async <T>(
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { [type]: attributes, references, updated_at } = documentToSave;
+      const { [type]: attributes, references, updated_at, updated_by } = documentToSave;
 
       const { originId } = rawMigratedUpdatedDoc._source;
       return {
@@ -351,6 +377,7 @@ export const performBulkUpdate = async <T>(
         ...(namespaces && { namespaces }),
         ...(originId && { originId }),
         updated_at,
+        updated_by,
         version: encodeVersion(seqNo, primaryTerm),
         attributes,
         references,

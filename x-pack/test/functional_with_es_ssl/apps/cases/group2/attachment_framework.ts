@@ -24,7 +24,7 @@ import {
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const createLogStashDataView = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<{ data_view: { id: string } }> => {
   const { body } = await supertest
     .post(`/api/data_views/data_view`)
@@ -36,7 +36,7 @@ const createLogStashDataView = async (
 };
 
 const deleteLogStashDataView = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   dataViewId: string
 ): Promise<void> => {
   await supertest
@@ -263,7 +263,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Modal', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/157642
+      describe.skip('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {

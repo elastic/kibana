@@ -90,17 +90,16 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       return { label: '', value: '' };
     }, [nodeType, node.ip, node.id]);
 
-    const nodeDetailMenuItemLinkProps = useLinkProps({
-      ...getNodeDetailUrl({
-        assetType: nodeType,
-        assetId: node.id,
-        search: {
-          from: nodeDetailFrom,
-          to: currentTime,
-          name: node.name,
-        },
-      }),
+    const nodeDetailMenuItemLinkProps = getNodeDetailUrl({
+      assetType: nodeType,
+      assetId: node.id,
+      search: {
+        from: nodeDetailFrom,
+        to: currentTime,
+        name: node.name,
+      },
     });
+
     const apmTracesMenuItemLinkProps = useLinkProps({
       app: 'apm',
       hash: 'traces',
@@ -128,7 +127,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} metrics',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      ...nodeDetailMenuItemLinkProps,
+      href: nodeDetailMenuItemLinkProps.href,
+      onClick: nodeDetailMenuItemLinkProps.onClick,
       isDisabled: !showDetail,
     };
 

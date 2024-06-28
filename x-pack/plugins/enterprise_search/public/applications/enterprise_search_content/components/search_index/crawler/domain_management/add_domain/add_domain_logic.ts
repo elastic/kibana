@@ -241,7 +241,7 @@ export const AddDomainLogic = kea<MakeLogicType<AddDomainLogicValues, AddDomainL
       const { indexName } = IndexNameLogic.values;
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.crawler.domainsTable.action.add.successMessage', {
-          defaultMessage: "Successfully added domain '{domainUrl}'",
+          defaultMessage: "Successfully added domain ''{domainUrl}''",
           values: {
             domainUrl: domain.url,
           },

@@ -46,7 +46,7 @@ describe('Transform: Transform List <TransformList />', () => {
     );
 
     await waitFor(() => {
-      expect(useQueryMock).toHaveBeenCalledTimes(4);
+      expect(useQueryMock).toHaveBeenCalledTimes(5);
       expect(container.textContent).toContain('Create your first transform');
     });
   });

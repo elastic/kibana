@@ -6,20 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React, { JSXElementConstructor, MutableRefObject } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiDataGridColumnCellActionProps,
-  EuiDataGridRefProps,
-  type EuiDataGridColumnCellAction,
-} from '@elastic/eui';
-import { render, waitFor, act } from '@testing-library/react';
+import type { JSXElementConstructor, MutableRefObject } from 'react';
+import React from 'react';
+import type { EuiDataGridColumnCellActionProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiButtonEmpty, type EuiDataGridColumnCellAction } from '@elastic/eui';
+import { render, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import { makeAction } from '../mocks/helpers';
-import {
-  useDataGridColumnsCellActions,
-  UseDataGridColumnsCellActionsProps,
-} from './use_data_grid_column_cell_actions';
+import type { UseDataGridColumnsCellActionsProps } from './use_data_grid_column_cell_actions';
+import { useDataGridColumnsCellActions } from './use_data_grid_column_cell_actions';
 
 const action1 = makeAction('action-1', 'icon1', 1);
 action1.execute = jest.fn();
@@ -79,23 +74,13 @@ describe('useDataGridColumnsCellActions', () => {
     const { result, waitForNextUpdate } = renderHook(useDataGridColumnsCellActions, {
       initialProps: useDataGridColumnsCellActionsProps,
     });
-    expect(result.current).toHaveLength(columns.length);
-    expect(result.current[0]).toHaveLength(1); // loader
+
+    expect(result.current).toHaveLength(0);
 
     await waitForNextUpdate();
 
     expect(result.current).toHaveLength(columns.length);
     expect(result.current[0]).toHaveLength(actions.length);
-  });
-
-  it('should render cell actions loading state', async () => {
-    const { result } = renderHook(useDataGridColumnsCellActions, {
-      initialProps: useDataGridColumnsCellActionsProps,
-    });
-    await act(async () => {
-      const cellAction = renderCellAction(result.current[0][0]);
-      expect(cellAction.getByTestId('dataGridColumnCellAction-loading')).toBeInTheDocument();
-    });
   });
 
   it('should call getCellValue with the proper params', async () => {

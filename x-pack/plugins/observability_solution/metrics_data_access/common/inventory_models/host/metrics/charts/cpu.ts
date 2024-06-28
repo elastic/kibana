@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
+  CPU_USAGE_LABEL,
+  LOAD_LABEL,
   DEFAULT_XY_FITTING_FUNCTION,
   DEFAULT_XY_HIDDEN_AXIS_TITLE,
   DEFAULT_XY_HIDDEN_LEGEND,
@@ -19,9 +20,7 @@ import { formulas } from '../formulas';
 const cpuUsageBreakdown: LensConfigWithId = {
   id: 'cpuUsageBreakdown',
   chartType: 'xy',
-  title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
-    defaultMessage: 'CPU Usage',
-  }),
+  title: CPU_USAGE_LABEL,
   layers: [
     {
       seriesType: 'area',
@@ -47,9 +46,7 @@ const cpuUsageBreakdown: LensConfigWithId = {
 const loadBreakdown: LensConfigWithId = {
   id: 'loadBreakdown',
   chartType: 'xy',
-  title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
-    defaultMessage: 'Load',
-  }),
+  title: LOAD_LABEL,
   layers: [
     {
       seriesType: 'area',

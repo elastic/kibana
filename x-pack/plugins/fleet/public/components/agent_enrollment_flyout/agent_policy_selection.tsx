@@ -96,7 +96,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
       </EuiText>
       <EuiSpacer size="m" />
       <AgentPolicyFormRow
-        fullWidth={true}
+        fullWidth
         label={
           authz.fleet.allAgentPolicies && (
             <EuiFlexGroup justifyContent="flexEnd">

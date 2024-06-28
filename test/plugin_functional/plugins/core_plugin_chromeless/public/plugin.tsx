@@ -17,8 +17,9 @@ export class CorePluginChromelessPlugin
       title: 'Chromeless',
       chromeless: true,
       async mount(params) {
+        const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./application');
-        return renderApp(params);
+        return renderApp(params, coreStart);
       },
     });
   }

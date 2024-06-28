@@ -7,5 +7,9 @@
 
 export type { AdHocRunStatus } from './ad_hoc_run_status';
 export { adHocRunStatus } from './ad_hoc_run_status';
-export { MAX_SCHEDULE_BACKFILL_BULK_SIZE } from './backfill';
+export {
+  MAX_SCHEDULE_BACKFILL_BULK_SIZE,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS,
+  MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
+} from './backfill';
 export { PLUGIN } from './plugin';

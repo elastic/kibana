@@ -20,7 +20,6 @@ import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   getFields,
-  COMPARATORS,
   builtInComparators,
   OfExpression,
   ThresholdExpression,
@@ -30,6 +29,7 @@ import {
   builtInAggregationTypes,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';
 import { IndexThresholdRuleParams } from './types';
 import './expression.scss';

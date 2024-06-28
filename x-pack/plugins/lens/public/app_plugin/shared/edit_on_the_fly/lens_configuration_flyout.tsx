@@ -37,7 +37,11 @@ import {
   useLensDispatch,
 } from '../../../state_management';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { EXPRESSION_BUILD_ERROR_ID, extractReferencesFromState } from '../../../utils';
+import {
+  EXPRESSION_BUILD_ERROR_ID,
+  extractReferencesFromState,
+  getAbsoluteDateRange,
+} from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -93,6 +97,10 @@ export function LensEditConfigurationFlyout({
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
+
+  framePublicAPI.absDateRange = getAbsoluteDateRange(
+    startDependencies.data.query.timefilter.timefilter
+  );
 
   const layers = useMemo(
     () => activeDatasource.getLayers(datasourceState),
@@ -230,7 +238,6 @@ export function LensEditConfigurationFlyout({
       },
       references,
       visualizationType: visualization.activeId,
-      title: visualization.activeId ?? '',
     };
     if (savedObjectId) {
       saveByRef?.(attrs);
@@ -427,6 +434,12 @@ export function LensEditConfigurationFlyout({
                 flex: 1;
               }
             }
+            .lnsIndexPatternDimensionEditor-advancedOptions {
+              .euiAccordion__childWrapper {
+                flex: none;
+                overflow: hidden !important;
+              }
+            }
           `}
           direction="column"
           gutterSize="none"
@@ -470,18 +483,13 @@ export function LensEditConfigurationFlyout({
           <EuiFlexItem
             grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-                .euiAccordion__childWrapper {
-                  flex: ${isLayerAccordionOpen ? 1 : 'none'}
-                }
+              .euiAccordion__childWrapper {
+                flex: ${isLayerAccordionOpen ? 1 : 'none'};
               }
+              padding: 0 ${euiThemeVars.euiSize};
             `}
           >
             <EuiAccordion
-              css={css`
-                .euiAccordion__triggerWrapper {
-                  padding: 0 ${euiThemeVars.euiSize};
-                }
-              `}
               id="layer-configuration"
               buttonContent={
                 <EuiTitle

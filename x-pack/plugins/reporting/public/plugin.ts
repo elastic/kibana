@@ -24,12 +24,11 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import {
   getSharedComponents,
-  reportingCsvShareProvider,
   reportingCsvShareModalProvider,
   reportingExportModalProvider,
-  reportingScreenshotShareProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
+import { InjectedIntl } from '@kbn/i18n-react';
 import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { StartServices } from './types';
@@ -40,6 +39,7 @@ export interface ReportingPublicPluginSetupDependencies {
   uiActions: UiActionsSetup;
   screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
+  intl: InjectedIntl;
 }
 
 export interface ReportingPublicPluginStartDependencies {
@@ -148,6 +148,7 @@ export class ReportingPublicPlugin
       id: 'reporting',
       title: this.title,
       order: 3,
+      keywords: ['reports', 'report', 'reporting'],
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[coreStart, startDeps], { mountManagementSection }] = await Promise.all([
@@ -207,7 +208,7 @@ export class ReportingPublicPlugin
     startServices$.subscribe(([{ application }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         shareSetup.register(
-          reportingCsvShareProvider({
+          reportingCsvShareModalProvider({
             apiClient,
             license,
             application,
@@ -215,40 +216,17 @@ export class ReportingPublicPlugin
             startServices$,
           })
         );
-        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          // needed for Canvas and legacy tests
-          shareSetup.register(
-            reportingScreenshotShareProvider({
-              apiClient,
-              license,
-              application,
-              usesUiCapabilities,
-              startServices$,
-            })
-          );
-        }
-        if (shareSetup.isNewVersion()) {
-          shareSetup.register(
-            reportingCsvShareModalProvider({
-              apiClient,
-              license,
-              application,
-              usesUiCapabilities,
-              startServices$,
-            })
-          );
 
-          if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-            shareSetup.register(
-              reportingExportModalProvider({
-                apiClient,
-                license,
-                application,
-                usesUiCapabilities,
-                startServices$,
-              })
-            );
-          }
+        if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
+          shareSetup.register(
+            reportingExportModalProvider({
+              apiClient,
+              license,
+              application,
+              usesUiCapabilities,
+              startServices$,
+            })
+          );
         }
       });
     });

@@ -123,15 +123,14 @@ function useUrlStateSyncEffect(
       replace
     );
 
-    start();
-
-    syncUrlStateWithInitialContainerState(
+    initializeUrlAndStateContainer(
       timefilterService,
       stateContainer,
       urlStateStorage,
-      urlStorageKey,
-      replace
+      urlStorageKey
     );
+
+    start();
 
     return stop;
   }, [stateContainer, history, timefilterService, urlStorageKey, replace]);
@@ -162,43 +161,33 @@ function setupUrlStateSync(
   });
 }
 
-function syncUrlStateWithInitialContainerState(
+function initializeUrlAndStateContainer(
   timefilterService: TimefilterContract,
   stateContainer: AlertSearchBarStateContainer,
   urlStateStorage: IKbnUrlStateStorage,
-  urlStorageKey: string,
-  replace: boolean = true
+  urlStorageKey: string
 ) {
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
   );
+  const validUrlState = isRight(urlState) ? pipe(urlState).right : {};
+  const timeFilterTime = timefilterService.getTime();
+  const timeFilterState = timefilterService.isTimeTouched()
+    ? {
+        rangeFrom: timeFilterTime.from,
+        rangeTo: timeFilterTime.to,
+      }
+    : {};
 
-  if (isRight(urlState)) {
-    const newState = {
-      ...defaultState,
-      ...pipe(urlState).right,
-    };
+  const currentState = {
+    ...defaultState,
+    ...timeFilterState,
+    ...validUrlState,
+  };
 
-    stateContainer.set(newState);
-    urlStateStorage.set(urlStorageKey, stateContainer.get(), {
-      replace: true,
-    });
-    return;
-  } else if (timefilterService.isTimeTouched()) {
-    const { from, to } = timefilterService.getTime();
-    const newState = {
-      ...defaultState,
-      rangeFrom: from,
-      rangeTo: to,
-    };
-    stateContainer.set(newState);
-  } else {
-    // Reset the state container when no URL state or timefilter range is set to avoid accidentally
-    // re-using state set on a previous visit to the page in the same session
-    stateContainer.set(defaultState);
-  }
-
-  urlStateStorage.set(urlStorageKey, stateContainer.get(), {
-    replace,
+  stateContainer.set(currentState);
+  urlStateStorage.set(urlStorageKey, currentState, {
+    replace: true,
   });
+  urlStateStorage.kbnUrlControls.flush();
 }

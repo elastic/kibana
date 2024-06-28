@@ -16,6 +16,7 @@ export const mapUnifiedManifestSavedObjectToUnifiedManifest = ({
   attributes: { artifactIds, policyId, semanticVersion },
   // eslint-disable-next-line @typescript-eslint/naming-convention
   created_at,
+  version,
 }: SavedObject<InternalUnifiedManifestBaseSchema>): InternalUnifiedManifestSchema => {
   return {
     id,
@@ -23,5 +24,6 @@ export const mapUnifiedManifestSavedObjectToUnifiedManifest = ({
     semanticVersion,
     created: created_at,
     artifactIds,
+    version,
   };
 };

@@ -31,12 +31,19 @@ interface RAGOptions {
   hit_doc_mapper?: (hit: SearchHit) => Document;
   content_field: string | Record<string, string>;
   size?: number;
+  inputTokensLimit?: number;
 }
 
 interface ConversationalChainOptions {
   model: BaseLanguageModel;
   prompt: string;
   rag?: RAGOptions;
+}
+
+interface ContextInputs {
+  context: string;
+  chat_history: string;
+  question: string;
 }
 
 const CONDENSE_QUESTION_TEMPLATE = `Given the following conversation and a follow up question, rephrase the follow up question to be a standalone question, in its original language. Be verbose in your answer.
@@ -77,6 +84,51 @@ position: ${i + 1}
   return serializedDocs.join('\n');
 };
 
+export function clipContext(
+  modelLimit: number | undefined,
+  prompt: ChatPromptTemplate,
+  data: experimental_StreamData
+): (input: ContextInputs) => Promise<ContextInputs> {
+  return async (input) => {
+    if (!modelLimit) return input;
+    let context = input.context;
+    const clippedContext = [];
+
+    while (
+      getTokenEstimate(await prompt.format({ ...input, context })) > modelLimit &&
+      context.length > 0
+    ) {
+      // remove the last paragraph
+      const lines = context.split('\n');
+      clippedContext.push(lines.pop());
+      context = lines.join('\n');
+    }
+
+    if (clippedContext.length > 0) {
+      data.appendMessageAnnotation({
+        type: 'context_clipped',
+        count: getTokenEstimate(clippedContext.join('\n')),
+      });
+    }
+
+    return {
+      ...input,
+      context,
+    };
+  };
+}
+
+export function registerContextTokenCounts(data: experimental_StreamData) {
+  return (input: ContextInputs) => {
+    data.appendMessageAnnotation({
+      type: 'context_token_count',
+      count: getTokenEstimate(input.context),
+    });
+
+    return input;
+  };
+}
+
 class ConversationalChainFn {
   options: ConversationalChainOptions;
 
@@ -93,6 +145,7 @@ class ConversationalChainFn {
     const retrievedDocs: Document[] = [];
 
     let retrievalChain: Runnable = RunnableLambda.from(() => '');
+    const chatHistory = formatVercelMessages(previousMessages);
 
     if (this.options.rag) {
       const retriever = new ElasticsearchRetriever({
@@ -129,8 +182,10 @@ class ConversationalChainFn {
         chat_history: (input) => input.chat_history,
         question: (input) => input.question,
       },
+      RunnableLambda.from(clipContext(this.options?.rag?.inputTokensLimit, prompt, data)),
+      RunnableLambda.from(registerContextTokenCounts(data)),
       prompt,
-      this.options.model,
+      this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),
     ]);
 
     const conversationalRetrievalQAChain = RunnableSequence.from([
@@ -140,20 +195,17 @@ class ConversationalChainFn {
       },
       answerChain,
       new BytesOutputParser(),
-    ]).withConfig({
-      metadata: {
-        type: 'conversational_retrieval_qa',
-      },
-    });
+    ]);
 
     const stream = await conversationalRetrievalQAChain.stream(
       {
         question,
-        chat_history: formatVercelMessages(previousMessages),
+        chat_history: chatHistory,
       },
       {
         callbacks: [
           {
+            // callback for chat based models (OpenAI)
             handleChatModelStart(
               llm,
               msg: BaseMessage[][],
@@ -163,10 +215,19 @@ class ConversationalChainFn {
               tags,
               metadata: Record<string, string>
             ) {
-              if (metadata?.type === 'conversational_retrieval_qa') {
+              if (metadata?.type === 'question_answer_qa') {
                 data.appendMessageAnnotation({
                   type: 'prompt_token_count',
                   count: getTokenEstimateFromMessages(msg),
+                });
+              }
+            },
+            // callback for prompt based models (Bedrock uses ActionsClientLlm)
+            handleLLMStart(llm, input, runId, parentRunId, extraParams, tags, metadata) {
+              if (metadata?.type === 'question_answer_qa') {
+                data.appendMessageAnnotation({
+                  type: 'prompt_token_count',
+                  count: getTokenEstimate(input[0]),
                 });
               }
             },
@@ -175,10 +236,6 @@ class ConversationalChainFn {
               data.appendMessageAnnotation({
                 type: 'retrieved_docs',
                 documents: documents as any,
-              });
-              data.appendMessageAnnotation({
-                type: 'context_token_count',
-                count: getTokenEstimate(buildContext(documents)),
               });
             },
             handleChainEnd(outputs, runId, parentRunId) {

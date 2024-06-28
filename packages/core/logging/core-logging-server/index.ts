@@ -23,4 +23,5 @@ export type {
   RewritePolicyConfig,
   MetaRewritePolicyConfigProperty,
   MetaRewritePolicyConfig,
+  RetentionPolicyConfig,
 } from './src/appenders';

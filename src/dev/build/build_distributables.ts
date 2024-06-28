@@ -31,12 +31,14 @@ export interface BuildOptions {
   createDebPackage: boolean;
   createDockerUBI: boolean;
   createDockerUbuntu: boolean;
+  createDockerWolfi: boolean;
   createDockerCloud: boolean;
   createDockerServerless: boolean;
   createDockerContexts: boolean;
   createDockerFIPS: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
+  targetServerlessPlatforms: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;
   eprRegistry: 'production' | 'snapshot';
@@ -74,7 +76,6 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     }
 
     await run(Tasks.CopyLegacySource);
-    await run(Tasks.CopyBinScripts);
 
     await run(Tasks.CreateEmptyDirsAndFiles);
     await run(Tasks.CreateReadme);
@@ -108,7 +109,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateArchivesSources);
     await run(Tasks.PatchNativeModules);
     await run(Tasks.InstallChromium);
-    await run(Tasks.CleanExtraBinScripts);
+    await run(Tasks.CopyBinScripts);
     await run(Tasks.CleanNodeBuilds);
 
     await run(Tasks.AssertFileTime);
@@ -150,6 +151,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateDockerUbuntu);
   }
 
+  if (options.createDockerWolfi) {
+    // control w/ --docker-images or --skip-docker-wolfi or --skip-os-packages
+    await run(Tasks.CreateDockerWolfi);
+  }
   if (options.createDockerCloud) {
     // control w/ --docker-images and --skip-docker-cloud
     if (options.downloadCloudDependencies) {

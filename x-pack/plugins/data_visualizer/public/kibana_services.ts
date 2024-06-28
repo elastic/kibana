@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DataVisualizerStartDependencies } from './plugin';
+import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
 
 let coreStart: CoreStart;
 let pluginsStart: DataVisualizerStartDependencies;

@@ -10,12 +10,10 @@ import {
   SnapshotGroupBy,
   SnapshotMetricInput,
 } from '../../../../../../common/http_api/snapshot_api';
-import { CreateDerivedIndexPattern } from '../../../../../containers/metrics_source';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
 import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
 
 export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
-  createDerivedIndexPattern: CreateDerivedIndexPattern;
   changeMetric: (payload: SnapshotMetricInput) => void;
   changeGroupBy: (payload: SnapshotGroupBy) => void;
   changeCustomOptions: (payload: InfraGroupByOptions[]) => void;

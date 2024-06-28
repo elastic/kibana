@@ -30,6 +30,7 @@ function getProps() {
       name: '',
       elasticsearch: {
         cluster: [],
+        remote_cluster: [],
         indices: [],
         run_as: [],
       },
@@ -43,6 +44,7 @@ function getProps() {
     builtinESPrivileges: {
       cluster: ['all', 'manage', 'monitor'],
       index: ['all', 'read', 'write', 'index'],
+      remote_cluster: [],
     },
     indicesAPIClient: indicesAPIClientMock.create(),
     docLinks,
@@ -75,13 +77,26 @@ test('it renders remote index privileges section when `canUseRemoteIndices` is e
   expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
 });
 
+test('it does not render remote cluster privileges section by default', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} />);
+  expect(wrapper.find('RemoteClusterPrivileges')).toHaveLength(0);
+});
+
+test('it renders remote index privileges section when `canUseRemoteClusters` is enabled', () => {
+  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} canUseRemoteClusters />);
+  expect(wrapper.find('RemoteClusterPrivileges')).toHaveLength(1);
+});
+
 test('it renders fields as disabled when not editable', () => {
-  const wrapper = shallowWithIntl(<ElasticsearchPrivileges {...getProps()} editable={false} />);
+  const wrapper = shallowWithIntl(
+    <ElasticsearchPrivileges {...getProps()} canUseRemoteClusters editable={false} />
+  );
   expect(wrapper.find('EuiComboBox').prop('isDisabled')).toBe(true);
   expect(wrapper.find('ClusterPrivileges').prop('editable')).toBe(false);
   expect(
     wrapper.find('IndexPrivileges').everyWhere((component) => component.prop('editable'))
   ).toBe(false);
+  expect(wrapper.find('RemoteClusterPrivileges').prop('editable')).toBe(false);
 });
 
 test('it renders correctly in serverless mode', () => {

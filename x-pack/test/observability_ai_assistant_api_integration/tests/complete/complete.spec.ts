@@ -193,7 +193,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             role: MessageRole.Assistant,
             function_call: {
               name: 'context',
-              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
@@ -302,7 +301,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         )[0]?.conversation.id;
 
         await observabilityAIAssistantAPIClient
-          .writeUser({
+          .adminUser({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {
@@ -378,7 +377,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ).to.eql(0);
 
         const conversations = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'POST /internal/observability_ai_assistant/conversations',
           })
           .expect(200);
@@ -415,14 +414,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               },
             },
           ])
-          .complete();
+          .waitAndComplete();
 
         proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good morning, sir!')
-          .complete();
+          .waitAndComplete();
 
         const createResponse = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -440,7 +439,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
         const conversationId = conversationCreatedEvent.conversation.id;
-        const fullConversation = await observabilityAIAssistantAPIClient.readUser({
+        const fullConversation = await observabilityAIAssistantAPIClient.editorUser({
           endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
           params: {
             path: {
@@ -451,10 +450,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         proxy
           .intercept('conversation', (body) => !isFunctionTitleRequest(body), 'Good night, sir!')
-          .complete();
+          .waitAndComplete();
 
         const updatedResponse = await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
             params: {
               body: {
@@ -484,7 +483,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await observabilityAIAssistantAPIClient
-          .writeUser({
+          .editorUser({
             endpoint: 'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
             params: {
               path: {

@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { lastValueFrom } from 'rxjs';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
 import type { AggregateQuery } from '@kbn/es-query';
-import { ESQL_LATEST_VERSION, getESQLWithSafeLimit } from '@kbn/esql-utils';
+import { getESQLWithSafeLimit, getESQLResults } from '@kbn/esql-utils';
 import type { FieldStatsResponse } from '../../types';
 import {
   buildSearchFilter,
@@ -63,27 +60,15 @@ export const loadFieldStatsTextBased: LoadFieldStatsTextBasedHandler = async ({
       return {};
     }
 
-    const searchHandler: SearchHandlerTextBased = async (body) => {
+    const searchHandler: SearchHandlerTextBased = async ({ query }) => {
       const filter = buildSearchFilter({ timeFieldName: dataView.timeFieldName, fromDate, toDate });
-      const result = await lastValueFrom(
-        data.search.search<
-          IKibanaSearchRequest<ESQLSearchParams>,
-          IKibanaSearchResponse<ESQLSearchReponse>
-        >(
-          {
-            params: {
-              ...(filter ? { filter } : {}),
-              ...body,
-              version: ESQL_LATEST_VERSION,
-            },
-          },
-          {
-            abortSignal: abortController?.signal,
-            strategy: 'esql',
-          }
-        )
-      );
-      return result.rawResponse;
+      const result = await getESQLResults({
+        esqlQuery: query,
+        filter,
+        search: data.search.search,
+        signal: abortController?.signal,
+      });
+      return result.response;
     };
 
     if (!('esql' in baseQuery)) {

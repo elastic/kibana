@@ -10,7 +10,8 @@ import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/s
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 import { flatMap, get } from 'lodash';
-
+import { parseDuration } from '@kbn/alerting-plugin/server';
+import moment from 'moment';
 import type {
   GetRuleExecutionResultsResponse,
   RuleExecutionResult,
@@ -48,6 +49,7 @@ const GAP_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.execution_gap_du
 const INDEXING_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_indexing_duration_ms';
 const SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
 const STATUS_FIELD = 'kibana.alert.rule.execution.status';
+const BACKFILL_FIELD = 'kibana.alert.rule.execution.backfill';
 
 const ONE_MILLISECOND_AS_NANOSECONDS = 1_000_000;
 
@@ -143,7 +145,7 @@ export const getExecutionEventAggregation = ({
         },
         // Filter by alerting execute doc to retrieve platform metrics
         ruleExecution: {
-          filter: getProviderAndActionFilter('alerting', 'execute'),
+          filter: getProviderAndActionFilter('alerting', ['execute', 'execute-backfill']),
           aggs: {
             executeStartTime: {
               min: {
@@ -168,6 +170,14 @@ export const getExecutionEventAggregation = ({
             executionDuration: {
               max: {
                 field: DURATION_FIELD,
+              },
+            },
+            backfill: {
+              top_hits: {
+                size: 1,
+                _source: {
+                  includes: [BACKFILL_FIELD],
+                },
               },
             },
             outcomeAndMessage: {
@@ -248,23 +258,44 @@ export const getExecutionEventAggregation = ({
  * @param provider provider to match
  * @param action action to match
  */
-export const getProviderAndActionFilter = (provider: string, action: string) => {
+export const getProviderAndActionFilter = (provider: string, action: string | string[]) => {
+  const actions = Array.isArray(action) ? action : [action];
   return {
     bool: {
       must: [
-        {
-          match: {
-            [ACTION_FIELD]: action,
-          },
-        },
         {
           match: {
             [PROVIDER_FIELD]: provider,
           },
         },
       ],
+      should: actions.map((a) => ({
+        match: {
+          [ACTION_FIELD]: a,
+        },
+      })),
+      minimum_should_match: 1,
     },
   };
+};
+
+const getBackfill = (bucket: ExecutionUuidAggBucket) => {
+  const backfill =
+    bucket?.ruleExecution?.backfill?.hits?.hits[0]?._source?.kibana?.alert?.rule?.execution
+      ?.backfill;
+
+  if (backfill) {
+    backfill.from = moment(backfill.start)
+      .subtract(parseDuration(backfill.interval), 'ms')
+      .toISOString();
+
+    return {
+      from: moment(backfill.start).subtract(parseDuration(backfill.interval), 'ms').toISOString(),
+      to: backfill.start,
+    };
+  }
+
+  return backfill;
 };
 
 /**
@@ -281,6 +312,7 @@ export const formatAggExecutionEventFromBucket = (
   const actionOutcomes = bucket?.actionExecution?.actionOutcomes?.buckets ?? [];
   const actionExecutionSuccess = actionOutcomes.find((b) => b?.key === 'success')?.doc_count ?? 0;
   const actionExecutionError = actionOutcomes.find((b) => b?.key === 'failure')?.doc_count ?? 0;
+  const backfill = getBackfill(bucket);
 
   return {
     execution_uuid: bucket?.key ?? '',
@@ -313,6 +345,7 @@ export const formatAggExecutionEventFromBucket = (
     security_message:
       bucket?.securityStatus?.message?.hits?.hits[0]?._source?.message ??
       bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.error?.message,
+    backfill,
   };
 };
 

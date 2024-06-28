@@ -17,11 +17,15 @@ import {
 } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -56,6 +60,8 @@ export interface PluginStart {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
+  dataViews: DataViewsServerPluginStart;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -144,6 +150,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           ...plugins,
           core,
         },
+        getDataViewsStart: async () => {
+          const [, pluginStart] = await core.getStartServices();
+          return pluginStart.dataViews;
+        },
         getSpacesStart: async () => {
           const [, pluginStart] = await core.getStartServices();
           return pluginStart.spaces;
@@ -152,6 +162,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
         getRulesClientWithRequest: async (request) => {
           const [, pluginStart] = await core.getStartServices();
           return pluginStart.alerting.getRulesClientWithRequest(request);
+        },
+        getRacClientWithRequest: async (request) => {
+          const [, pluginStart] = await core.getStartServices();
+          return pluginStart.ruleRegistry.getRacClientWithRequest(request);
         },
       },
       logger: this.logger,

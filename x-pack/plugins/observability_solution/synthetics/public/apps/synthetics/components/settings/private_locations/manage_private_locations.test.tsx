@@ -35,6 +35,16 @@ describe('<ManagePrivateLocations />', () => {
       onDelete: jest.fn(),
       deleteLoading: false,
     });
+    jest.spyOn(permissionsHooks, 'useEnablement').mockReturnValue({
+      isServiceAllowed: true,
+      areApiKeysEnabled: true,
+      canManageApiKeys: true,
+      canEnable: true,
+      isEnabled: true,
+      invalidApiKeyError: false,
+      loading: false,
+      error: null,
+    });
   });
 
   it.each([true, false])(

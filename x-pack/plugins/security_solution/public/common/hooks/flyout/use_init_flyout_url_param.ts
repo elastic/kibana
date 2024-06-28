@@ -14,12 +14,11 @@ import {
   tableDefaults,
   dataTableActions,
 } from '@kbn/securitysolution-data-table';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../common/constants';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../use_url_state';
 import type { FlyoutUrlState } from './types';
 import { useShallowEqualSelector } from '../use_selector';
-import { useUiSetting$ } from '../../lib/kibana';
 import { getQueryStringKeyValue } from '../timeline/use_query_timeline_by_id_on_url_change';
 
 /**
@@ -31,7 +30,7 @@ import { getQueryStringKeyValue } from '../timeline/use_query_timeline_by_id_on_
 
 export const useInitFlyoutFromUrlParam = () => {
   const { search } = useLocation();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const [urlDetails, setUrlDetails] = useState<FlyoutUrlState | null>(null);
   const [hasLoadedUrlDetails, updateHasLoadedUrlDetails] = useState(false);
   const dispatch = useDispatch();
@@ -45,15 +44,15 @@ export const useInitFlyoutFromUrlParam = () => {
 
   const onInitialize = useCallback(
     (initialState: FlyoutUrlState | null) => {
-      if (!isSecurityFlyoutEnabled && initialState != null && initialState.panelView) {
+      if (expandableFlyoutDisabled && initialState != null && initialState.panelView) {
         setUrlDetails(initialState);
       }
     },
-    [isSecurityFlyoutEnabled]
+    [expandableFlyoutDisabled]
   );
 
   const loadExpandedDetailFromUrl = useCallback(() => {
-    if (isSecurityFlyoutEnabled) return;
+    if (!expandableFlyoutDisabled) return;
 
     const { initialized, isLoading, totalCount, additionalFilters } = dataTableCurrent;
     const isTableLoaded = initialized && !isLoading && totalCount > 0;
@@ -78,21 +77,21 @@ export const useInitFlyoutFromUrlParam = () => {
         );
       }
     }
-  }, [dataTableCurrent, dispatch, isSecurityFlyoutEnabled, urlDetails]);
+  }, [dataTableCurrent, dispatch, expandableFlyoutDisabled, urlDetails]);
 
   // The alert page creates a default dataTable slice in redux initially that is later overriden when data is retrieved
   // We use the below to store the urlDetails on app load, and then set it when the table is done loading and has data
   useEffect(() => {
-    if (!isSecurityFlyoutEnabled && !hasLoadedUrlDetails) {
+    if (expandableFlyoutDisabled && !hasLoadedUrlDetails) {
       loadExpandedDetailFromUrl();
     }
-  }, [hasLoadedUrlDetails, isSecurityFlyoutEnabled, loadExpandedDetailFromUrl]);
+  }, [hasLoadedUrlDetails, expandableFlyoutDisabled, loadExpandedDetailFromUrl]);
 
   // We check the url for the presence of the old `evenFlyout` parameter. If it exists replace it with the new `flyout` key.
   const eventFlyoutKey = getQueryStringKeyValue({ urlKey: URL_PARAM_KEY.eventFlyout, search });
   let currentKey = '';
   let newKey = '';
-  if (!isSecurityFlyoutEnabled) {
+  if (expandableFlyoutDisabled) {
     if (eventFlyoutKey) {
       currentKey = URL_PARAM_KEY.eventFlyout;
       newKey = URL_PARAM_KEY.flyout;

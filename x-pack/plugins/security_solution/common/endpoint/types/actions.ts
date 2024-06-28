@@ -90,6 +90,10 @@ export interface ResponseActionExecuteOutputContent {
   output_file_stderr_truncated: boolean;
 }
 
+export interface ResponseActionScanOutputContent {
+  code: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -197,12 +201,17 @@ export interface ResponseActionsExecuteParameters {
   timeout?: number;
 }
 
+export interface ResponseActionScanParameters {
+  path: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
   | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters
-  | ResponseActionUploadParameters;
+  | ResponseActionUploadParameters
+  | ResponseActionScanParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -212,7 +221,8 @@ export type EndpointActionResponseDataOutput =
   | ResponseActionUploadOutputContent
   | GetProcessesActionOutputContent
   | SuspendProcessActionOutputContent
-  | KillProcessActionOutputContent;
+  | KillProcessActionOutputContent
+  | ResponseActionScanOutputContent;
 
 /**
  * The data stored with each Response Action under `EndpointActions.data` property
@@ -225,6 +235,12 @@ export interface EndpointActionData<
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
+  /**
+   * If `alert_id` is defined, then action request is of type `automated`
+   *
+   * **IMPORTANT**: should be used only when response actions are created from a Rule (automated response actions)
+   *                as this property is used to determine if an action is of type `automated`
+   */
   alert_id?: string[];
   hosts?: Record<string, { name: string }>;
 }
@@ -522,6 +538,7 @@ export type UploadedFileInfo = Pick<
 > & {
   actionId: string;
   agentId: string;
+  agentType: ResponseActionAgentType;
 };
 
 export interface ActionFileInfoApiResponse {

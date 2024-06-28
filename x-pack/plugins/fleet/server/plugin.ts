@@ -23,6 +23,7 @@ import type {
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   ServiceStatus,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
@@ -41,6 +42,7 @@ import type {
   SecurityPluginStart,
 } from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FieldsMetadataServerSetup } from '@kbn/fields-metadata-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -125,6 +127,7 @@ import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
+import { registerIntegrationFieldsExtractor } from './services/register_integration_fields_extractor';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -135,6 +138,7 @@ export interface FleetSetupDeps {
   spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
+  fieldsMetadata: FieldsMetadataServerSetup;
 }
 
 export interface FleetStartDeps {
@@ -152,6 +156,7 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
+  securityCoreStart: SecurityServiceStart;
   securitySetup: SecurityPluginSetup;
   securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
@@ -279,7 +284,7 @@ export class FleetPlugin
     });
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStartContract>, deps: FleetSetupDeps) {
     this.httpSetup = core.http;
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
@@ -288,10 +293,14 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects);
+    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
+    const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
+
+    registerSavedObjects(core.savedObjects, {
+      useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
+    });
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
-    const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental ?? []);
     // Register feature
     if (deps.features) {
       deps.features.registerKibanaFeature({
@@ -325,7 +334,7 @@ export class FleetPlugin
           ? [
               {
                 name: 'Agents',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -359,7 +368,7 @@ export class FleetPlugin
               },
               {
                 name: 'Agent policies',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -396,7 +405,7 @@ export class FleetPlugin
               },
               {
                 name: 'Settings',
-                requireAllSpaces: true,
+                requireAllSpaces,
                 privilegeGroups: [
                   {
                     groupType: 'mutually_exclusive',
@@ -434,7 +443,7 @@ export class FleetPlugin
           all: {
             api: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-all`],
             app: [PLUGIN_ID],
-            requireAllSpaces: true,
+            requireAllSpaces,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -446,7 +455,7 @@ export class FleetPlugin
             api: [`${PLUGIN_ID}-read`],
             app: [PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
+            requireAllSpaces,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
@@ -515,6 +524,18 @@ export class FleetPlugin
               asInternalUser: agentService.asInternalUser,
             };
           },
+          get uninstallTokenService() {
+            const uninstallTokenService = new UninstallTokenService(
+              appContextService.getEncryptedSavedObjectsStart()!.getClient({
+                includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+              }),
+              appContextService.getInternalUserSOClientForSpaceId(soClient.getCurrentNamespace())
+            );
+
+            return {
+              asCurrentUser: uninstallTokenService,
+            };
+          },
           get packagePolicyService() {
             const service = plugin.setupPackagePolicyService();
 
@@ -571,6 +592,9 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+
+    // Register fields metadata extractor
+    registerIntegrationFieldsExtractor({ core, fieldsMetadata: deps.fieldsMetadata });
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
@@ -591,6 +615,7 @@ export class FleetPlugin
       data: plugins.data,
       encryptedSavedObjectsStart: plugins.encryptedSavedObjects,
       encryptedSavedObjectsSetup: this.encryptedSavedObjectsSetup,
+      securityCoreStart: core.security,
       securitySetup: this.securitySetup,
       securityStart: plugins.security,
       configInitialValue: this.configInitialValue,
@@ -653,18 +678,24 @@ export class FleetPlugin
           )
           .toPromise();
 
+        const randomIntFromInterval = (min: number, max: number) => {
+          return Math.floor(Math.random() * (max - min + 1) + min);
+        };
+
         // Retry Fleet setup w/ backoff
         await backOff(
           async () => {
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-              core.elasticsearch.client.asInternalUser
+              core.elasticsearch.client.asInternalUser,
+              { useLock: true }
             );
           },
           {
             numOfAttempts: setupAttempts,
+            delayFirstAttempt: true,
             // 1s initial backoff
-            startingDelay: 1000,
+            startingDelay: randomIntFromInterval(100, 1000),
             // 5m max backoff
             maxDelay: 60000 * 5,
             timeMultiple: 2,

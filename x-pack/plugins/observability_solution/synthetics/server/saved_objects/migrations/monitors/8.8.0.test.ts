@@ -410,7 +410,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
     it.each([
       [5, '5'],
       [4, '3'],
-      [2.5, '3'],
+      [2.5, '2'],
     ])('handles migrating schedule numeric values - browser', (invalidSchedule, migrated) => {
       const testMonitorWithSchedule = {
         ...browserUptimeUI,
@@ -422,7 +422,7 @@ describe('Monitor migrations v8.7.0 -> v8.8.0', () => {
           },
         },
       };
-      // @ts-ignore specificially testing monitors with invalid values for full coverage
+      // @ts-ignore specifically testing monitors with invalid values for full coverage
       const actual = migration880(encryptedSavedObjectsSetup)(testMonitorWithSchedule, context);
       expect(actual.attributes[ConfigKey.SCHEDULE].number).toEqual(migrated);
       expect(

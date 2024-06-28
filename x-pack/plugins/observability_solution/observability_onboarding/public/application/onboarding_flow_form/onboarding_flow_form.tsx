@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
@@ -19,6 +20,9 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  useEuiTheme,
+  EuiBadge,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -32,7 +36,22 @@ interface UseCaseOption {
   id: Category;
   label: string;
   description: React.ReactNode;
+  logos?: SupportedLogo[];
+  showIntegrationsBadge?: boolean;
 }
+
+type SupportedLogo =
+  | 'aws'
+  | 'azure'
+  | 'docker'
+  | 'dotnet'
+  | 'prometheus'
+  | 'gcp'
+  | 'java'
+  | 'javascript'
+  | 'kubernetes'
+  | 'nginx'
+  | 'opentelemetry';
 
 export const OnboardingFlowForm: FunctionComponent = () => {
   const options: UseCaseOption[] = [
@@ -49,6 +68,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'Detect patterns, gain insights from logs, get alerted when surpassing error thresholds',
         }
       ),
+      logos: ['azure', 'aws', 'nginx', 'gcp'],
+      showIntegrationsBadge: true,
     },
     {
       id: 'apm',
@@ -63,6 +84,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'Catch application problems, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
+      logos: ['opentelemetry', 'java', 'javascript', 'dotnet'],
     },
     {
       id: 'infra',
@@ -77,6 +99,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             'Check my system’s health, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
+      logos: ['kubernetes', 'prometheus', 'docker', 'opentelemetry'],
+      showIntegrationsBadge: true,
     },
   ];
 
@@ -85,29 +109,10 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [hasPackageListLoaded, setHasPackageListLoaded] = useState<boolean>(false);
-  const onPackageListLoaded = useCallback(() => {
-    setHasPackageListLoaded(true);
-  }, []);
-  const packageListRef = useRef<HTMLDivElement | null>(null);
-  const formRef = useRef<HTMLDivElement | null>(null);
+  const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
+  const searchResultsRef = useRef<HTMLDivElement | null>(null);
   const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
-  const selectedCategory: Category | null = searchParams.get('category') as Category | null;
-
-  useEffect(() => {
-    if (selectedCategory === null || !hasPackageListLoaded) {
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      formRef.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-      });
-    }, 10);
-
-    return () => clearTimeout(timeout);
-  }, [selectedCategory, hasPackageListLoaded]);
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     const searchParam = searchParams.get('search') ?? '';
@@ -124,17 +129,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
       setIntegrationSearch(query);
-      if (packageListRef.current) {
-        // adding a slight delay causes the search bar to be rendered
-        new Promise((r) => setTimeout(r, 10)).then(() =>
-          packageListRef.current?.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start',
-          })
+      if (searchResultsRef.current) {
+        setTimeout(
+          scrollIntoViewWithOffset,
+          40, // Adding slight delay to ensure DOM is updated before calculating scroll position
+          searchResultsRef.current,
+          parseInt(euiTheme.size.l, 10)
         );
       }
     },
-    []
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const customCards = useCustomCardsForCategory(
@@ -143,15 +147,16 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   );
   const virtualSearchResults = useVirtualSearchResults();
 
+  let isSelectingCategoryWithKeyboard: boolean = false;
+
   return (
-    <EuiPanel hasBorder paddingSize="xl" panelRef={formRef}>
+    <EuiPanel hasBorder paddingSize="xl">
       <TitleWithIcon
-        iconType="indexRollupApp"
+        iconType="createSingleMetricJob"
         title={i18n.translate(
           'xpack.observability_onboarding.experimentalOnboardingFlow.strong.startCollectingYourDataLabel',
           {
-            defaultMessage:
-              'Start collecting your data by selecting one of the following use cases',
+            defaultMessage: 'What do you want to monitor?',
           }
         )}
       />
@@ -172,20 +177,62 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   <EuiText color="subdued" size="s">
                     {option.description}
                   </EuiText>
+                  {(option.logos || option.showIntegrationsBadge) && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <EuiFlexGroup gutterSize="s" responsive={false}>
+                        {option.logos?.map((logo) => (
+                          <EuiFlexItem key={logo} grow={false}>
+                            <LogoIcon logo={logo} />
+                          </EuiFlexItem>
+                        ))}
+                        {option.showIntegrationsBadge && (
+                          <EuiBadge color="hollow">
+                            <FormattedMessage
+                              defaultMessage="+ Integrations"
+                              id="xpack.observability_onboarding.experimentalOnboardingFlow.form.addIntegrations"
+                              description="A badge indicating that the user can add additional observability integrations to their deployment via this option"
+                            />
+                          </EuiBadge>
+                        )}
+                      </EuiFlexGroup>
+                    </>
+                  )}
                 </>
               }
               checked={option.id === searchParams.get('category')}
+              /**
+               * onKeyDown and onKeyUp handlers disable
+               * scrolling to the category items when user
+               * changes the selected category using keyboard,
+               * which prevents our custom scroll behavior
+               * from conflicting with browser's native one to
+               * put keyboard-focused item into the view.
+               */
+              onKeyDown={() => (isSelectingCategoryWithKeyboard = true)}
+              onKeyUp={() => (isSelectingCategoryWithKeyboard = false)}
               onChange={() => {
                 setIntegrationSearch('');
                 setSearchParams({ category: option.id }, { replace: true });
+              }}
+              onClick={() => {
+                if (!isSelectingCategoryWithKeyboard && suggestedPackagesRef.current) {
+                  setTimeout(
+                    scrollIntoViewWithOffset,
+                    40, // Adding slight delay to ensure DOM is updated before calculating scroll position
+                    suggestedPackagesRef.current,
+                    parseInt(euiTheme.size.l, 10)
+                  );
+                }
               }}
             />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-      {searchParams.get('category') && (
-        <>
-          <EuiSpacer />
+      {/* Hiding element instead of not rending these elements in order to preload available packages on page load */}
+      <div hidden={!searchParams.get('category') || !customCards}>
+        <EuiSpacer />
+        <div ref={suggestedPackagesRef}>
           <TitleWithIcon
             iconType="savedObjectsApp"
             title={i18n.translate(
@@ -196,16 +243,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             )}
           />
           <EuiSpacer size="s" />
-
-          {Array.isArray(customCards) && (
-            <OnboardingFlowPackageList
-              customCards={customCards}
-              flowSearch={integrationSearch}
-              flowCategory={searchParams.get('category')}
-              onLoaded={onPackageListLoaded}
-            />
-          )}
-
+          <OnboardingFlowPackageList
+            customCards={customCards}
+            flowSearch={integrationSearch}
+            flowCategory={searchParams.get('category')}
+          />
+        </div>
+        <div ref={searchResultsRef}>
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
@@ -218,7 +262,6 @@ export const OnboardingFlowForm: FunctionComponent = () => {
             flowSearch={integrationSearch}
             setSearchQuery={setIntegrationSearch}
             flowCategory={searchParams.get('category')}
-            ref={packageListRef}
             customCards={customCards
               ?.filter(
                 // Filter out collection cards and regular integrations that show up via search anyway
@@ -227,8 +270,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               .concat(virtualSearchResults)}
             joinCardLists
           />
-        </>
-      )}
+        </div>
+      </div>
     </EuiPanel>
   );
 };
@@ -241,22 +284,7 @@ interface TitleWithIconProps {
 const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiAvatar
-        size="l"
-        name={title}
-        iconType={iconType}
-        iconSize="l"
-        color="subdued"
-        css={{
-          /**
-           * Nudges the icon a bit to the
-           * right because it's not symmetrical and
-           * look off-center by default. This makes
-           * it visually centered.
-           */
-          padding: '24px 22px 24px 26px',
-        }}
-      />
+      <EuiAvatar size="l" name={title} iconType={iconType} iconSize="l" color="subdued" />
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiTitle size="s">
@@ -265,3 +293,48 @@ const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType 
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
+  // Fixed header in Kibana is different height between serverless and stateful so need to calculate dynamically.
+  const fixedHeaders = document.querySelectorAll('#globalHeaderBars [data-fixed-header=true]');
+  fixedHeaders.forEach((header) => {
+    offset += header.getBoundingClientRect().height;
+  });
+
+  window.scrollTo({
+    behavior: 'smooth',
+    top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
+  });
+}
+
+function useIconForLogo(logo?: SupportedLogo): string | undefined {
+  const {
+    services: { http },
+  } = useKibana();
+  switch (logo) {
+    case 'aws':
+      return 'logoAWS';
+    case 'azure':
+      return 'logoAzure';
+    case 'gcp':
+      return 'logoGCP';
+    case 'kubernetes':
+      return 'logoKubernetes';
+    case 'nginx':
+      return 'logoNginx';
+    case 'prometheus':
+      return 'logoPrometheus';
+    case 'docker':
+      return 'logoDocker';
+    default:
+      return http?.staticAssets.getPluginAssetHref(`${logo}.svg`);
+  }
+}
+
+function LogoIcon({ logo }: { logo: SupportedLogo }) {
+  const iconType = useIconForLogo(logo);
+  if (iconType) {
+    return <EuiIcon type={iconType} />;
+  }
+  return null;
+}

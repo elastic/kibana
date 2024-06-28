@@ -238,7 +238,6 @@ function registerSyntheticsRoutesWithNavigation(
                   path: OVERVIEW_ROUTE,
                   matchFullPath: true,
                   ignoreTrailingSlash: true,
-                  isNewFeature: true,
                 },
                 {
                   label: i18n.translate('xpack.synthetics.certificatesPage.heading', {

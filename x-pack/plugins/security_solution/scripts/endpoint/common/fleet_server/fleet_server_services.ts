@@ -10,12 +10,12 @@ import type { KbnClient } from '@kbn/test';
 import execa from 'execa';
 import chalk from 'chalk';
 import assert from 'assert';
+import pRetry from 'p-retry';
 import type { AgentPolicy, CreateAgentPolicyResponse, Output } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   API_VERSIONS,
   FLEET_SERVER_PACKAGE,
-  FLEET_SERVER_SERVERS_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type {
@@ -41,13 +41,8 @@ import {
 } from '@kbn/dev-utils';
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
-import {
-  createToolingLogger,
-  RETRYABLE_TRANSIENT_ERRORS,
-  retryOnError,
-} from '../../../../common/endpoint/data_loaders/utils';
+import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 import { isServerlessKibanaFlavor } from '../stack_services';
 import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
@@ -137,7 +132,12 @@ export const startFleetServer = async ({
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     const policyId =
       policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
-    const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
+    const serviceToken = isServerless
+      ? ''
+      : await pRetry(async () => generateFleetServiceToken(kbnClient, logger), {
+          retries: 2,
+          forever: false,
+        });
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
       logger,
@@ -187,10 +187,10 @@ const getOrCreateFleetServerAgentPolicyId = async (
         )}`
       );
       log.info(
-        `Using existing Fleet Server agent policy id: ${existingFleetServerIntegrationPolicy.policy_id}`
+        `Using existing Fleet Server agent policy id: ${existingFleetServerIntegrationPolicy.policy_ids[0]}`
       );
 
-      return existingFleetServerIntegrationPolicy.policy_id;
+      return existingFleetServerIntegrationPolicy.policy_ids[0];
     }
 
     log.info(`Creating new Fleet Server policy`);
@@ -323,9 +323,12 @@ const startFleetServerWithDocker = async ({
         await updateFleetElasticsearchOutputHostNames(kbnClient, log);
 
         if (isServerless) {
-          log.info(`Waiting for server [${hostname}] to register with Elasticsearch`);
-          await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 180000);
+          log.info(`Waiting for Fleet Server [${hostname}] to start running`);
+          if (!(await isFleetServerRunning(kbnClient, log))) {
+            throw Error(`Unable to start Fleet Server [${hostname}]`);
+          }
         } else {
+          log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
           await waitForHostToEnroll(kbnClient, log, hostname, 120000);
         }
 
@@ -677,82 +680,35 @@ export const isFleetServerRunning = async (
   const url = new URL(fleetServerUrl);
   url.pathname = '/api/status';
 
-  return axios
-    .request({
-      method: 'GET',
-      url: url.toString(),
-      responseType: 'json',
-      // Custom agent to ensure we don't get cert errors
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-    })
-    .then((response) => {
-      log.debug(`Fleet server is up and running at [${fleetServerUrl}]. Status: `, response.data);
-      return true;
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .catch((e) => {
-      log.debug(`Fleet server not up at [${fleetServerUrl}]`);
-      log.verbose(`Call to [${url.toString()}] failed with:`, e);
-      return false;
-    });
-};
-
-/**
- * Checks and waits until the given fleet server hostname has been registered into elasticsearch.
- * This check can be used when enrolling a standalone fleet-server, since those would not show up
- * in Kibana's Fleet UI.
- */
-const waitForFleetServerToRegisterWithElasticsearch = async (
-  kbnClient: KbnClient,
-  fleetServerHostname: string,
-  timeoutMs: number = 30000
-): Promise<void> => {
-  const started = new Date();
-  const hasTimedOut = (): boolean => {
-    const elapsedTime = Date.now() - started.getTime();
-    return elapsedTime > timeoutMs;
-  };
-  let found = false;
-
-  while (!found && !hasTimedOut()) {
-    found = await retryOnError(async () => {
-      const fleetServerRecord = await kbnClient
-        .request<estypes.SearchResponse>({
-          method: 'POST',
-          path: '/api/console/proxy',
-          query: {
-            path: `${FLEET_SERVER_SERVERS_INDEX}/_search`,
-            method: 'GET',
-          },
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'host.name': fleetServerHostname,
-                    },
-                  },
-                ],
-              },
-            },
-          },
+  return pRetry(
+    async () => {
+      return axios
+        .request({
+          method: 'GET',
+          url: url.toString(),
+          responseType: 'json',
+          // Custom agent to ensure we don't get cert errors
+          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
         })
-        .then((response) => response.data)
+        .then((response) => {
+          log.debug(
+            `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
+            response.data
+          );
+        })
         .catch(catchAxiosErrorFormatAndThrow);
-
-      return ((fleetServerRecord?.hits?.total as estypes.SearchTotalHits)?.value ?? 0) === 1;
-    }, RETRYABLE_TRANSIENT_ERRORS);
-
-    if (!found) {
-      // sleep and check again
-      await new Promise((r) => setTimeout(r, 2000));
+    },
+    {
+      maxTimeout: 10000,
+      retries: 5,
+      onFailedAttempt: (e) => {
+        log.warning(
+          `Fleet server not (yet) up at [${fleetServerUrl}]. Retrying... (attempt #${e.attemptNumber}, ${e.retriesLeft} retries left)`
+        );
+        log.verbose(`Call to [${url.toString()}] failed with:`, e);
+      },
     }
-  }
-
-  if (!found) {
-    throw new Error(
-      `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsearch`
-    );
-  }
+  )
+    .then(() => true)
+    .catch(() => false);
 };

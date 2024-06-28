@@ -18,7 +18,7 @@ import type {
   ShareContext,
 } from '../../types';
 
-export type { ShareMenuItem } from '../../types';
+export type { ShareMenuItemV2 } from '../../types';
 
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
@@ -28,10 +28,11 @@ export interface IShareContext extends ShareContext {
   anonymousAccess?: AnonymousAccessServiceContract;
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
-  objectTypeTitle?: string;
   isEmbedded: boolean;
   theme: ThemeServiceSetup;
   i18n: I18nStart;
+  publicAPIEnabled?: boolean;
+  anchorElement?: HTMLElement;
 }
 
 export const ShareTabsContext = createContext<IShareContext | null>(null);

@@ -74,6 +74,9 @@ export const useAssistantOverlay = (
    */
   tooltip: PromptContext['tooltip'],
 
+  /** Required to identify the availability of the Assistant for the current license level */
+  isAssistantEnabled: boolean,
+
   /**
    * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context
    */
@@ -96,7 +99,7 @@ export const useAssistantOverlay = (
   const { data: conversations, isLoading } = useFetchCurrentUserConversations({
     http,
     onFetch: onFetchedConversations,
-    isAssistantEnabled: true,
+    isAssistantEnabled,
   });
 
   // memoize the props so that we can use them in the effect below:
@@ -135,7 +138,7 @@ export const useAssistantOverlay = (
           : undefined;
       }
 
-      if (!conversation && defaultConnector && !isLoading) {
+      if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
         try {
           conversation = await createConversation({
             apiConfig: {
@@ -166,6 +169,7 @@ export const useAssistantOverlay = (
       conversations,
       createConversation,
       defaultConnector,
+      isAssistantEnabled,
       isLoading,
       promptContextId,
     ]

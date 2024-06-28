@@ -11,7 +11,7 @@ import { expandableFlyoutStateFromEventMeta } from '../../../flyout/document_det
 export interface ResolveFlyoutParamsConfig {
   index: string;
   alertId: string;
-  isSecurityFlyoutEnabled: boolean;
+  expandableFlyoutDisabled: boolean;
 }
 
 /**
@@ -21,10 +21,10 @@ export interface ResolveFlyoutParamsConfig {
  * with Share Button on the Expandable Flyout
  */
 export const resolveFlyoutParams = (
-  { index, alertId, isSecurityFlyoutEnabled }: ResolveFlyoutParamsConfig,
+  { index, alertId, expandableFlyoutDisabled }: ResolveFlyoutParamsConfig,
   currentParamsString: string | null
 ) => {
-  if (!isSecurityFlyoutEnabled) {
+  if (expandableFlyoutDisabled) {
     const legacyFlyoutString = encode({
       panelView: 'eventDetail',
       params: {

@@ -9,7 +9,6 @@ if [ -z "$1" ]
 fi
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/steps/functional/common_cypress.sh
 .buildkite/scripts/bootstrap.sh
 
 export JOB=kibana-security-solution-chrome

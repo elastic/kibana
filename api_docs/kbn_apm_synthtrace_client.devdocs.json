@@ -787,7 +787,7 @@
             "label": "error",
             "description": [],
             "signature": [
-              "({ message, type, culprit }: { message: string; type?: string | undefined; culprit?: string | undefined; }) => ",
+              "({ message, type, culprit, groupingKey, }: { message: string; type?: string | undefined; culprit?: string | undefined; groupingKey?: string | undefined; }) => ",
               "ApmError"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
@@ -799,7 +799,7 @@
                 "id": "def-common.Instance.error.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ message, type, culprit }",
+                "label": "{\n    message,\n    type,\n    culprit,\n    groupingKey,\n  }",
                 "description": [],
                 "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
                 "deprecated": false,
@@ -836,6 +836,20 @@
                     "type": "string",
                     "tags": [],
                     "label": "culprit",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "packages/kbn-apm-synthtrace-client/src/lib/apm/instance.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/apm-synthtrace-client",
+                    "id": "def-common.Instance.error.$1.groupingKey",
+                    "type": "string",
+                    "tags": [],
+                    "label": "groupingKey",
                     "description": [],
                     "signature": [
                       "string | undefined"
@@ -1845,28 +1859,12 @@
         "label": "generateLongId",
         "description": [],
         "signature": [
-          "(seed: string | undefined) => string"
+          "() => string"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.generateLongId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "seed",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1878,28 +1876,12 @@
         "label": "generateShortId",
         "description": [],
         "signature": [
-          "(seed: string | undefined) => string"
+          "() => string"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.generateShortId.$1",
-            "type": "string",
-            "tags": [],
-            "label": "seed",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "packages/kbn-apm-synthtrace-client/src/lib/utils/generate_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -2632,7 +2614,9 @@
           " | ",
           "PodMetricsDocument",
           " | ",
-          "ContainerMetricsDocument"
+          "DockerContainerMetricsDocument",
+          " | ",
+          "K8sContainerMetricsDocument"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
         "deprecated": false,
@@ -2647,7 +2631,7 @@
         "label": "LogDocument",
         "description": [],
         "signature": [
-          "{ '@timestamp'?: number | undefined; } & Partial<{ 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception.stacktrace'?: string | undefined; 'error.log.stacktrace'?: string | undefined; }>"
+          "{ '@timestamp'?: number | undefined; } & Partial<{ 'input.type': string; 'log.file.path'?: string | undefined; 'service.name'?: string | undefined; 'data_stream.namespace': string; 'data_stream.type': string; 'data_stream.dataset': string; message?: string | undefined; 'error.message'?: string | undefined; 'event.original'?: string | undefined; 'event.dataset': string; 'log.level'?: string | undefined; 'host.name'?: string | undefined; 'container.id'?: string | undefined; 'trace.id'?: string | undefined; 'transaction.id'?: string | undefined; 'agent.id'?: string | undefined; 'agent.name'?: string | undefined; 'orchestrator.cluster.name'?: string | undefined; 'orchestrator.cluster.id'?: string | undefined; 'orchestrator.resource.id'?: string | undefined; 'kubernetes.pod.uid'?: string | undefined; 'aws.s3.bucket.name'?: string | undefined; 'orchestrator.namespace'?: string | undefined; 'container.name'?: string | undefined; 'cloud.provider'?: string | undefined; 'cloud.region'?: string | undefined; 'cloud.availability_zone'?: string | undefined; 'cloud.project.id'?: string | undefined; 'cloud.instance.id'?: string | undefined; 'error.stack_trace'?: string | undefined; 'error.exception.stacktrace'?: string | undefined; 'error.log.stacktrace'?: string | undefined; 'log.custom': Record<string, unknown>; }>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/logs/index.ts",
         "deprecated": false,
@@ -2926,14 +2910,14 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.infra.container",
+            "id": "def-common.infra.dockerContainer",
             "type": "Function",
             "tags": [],
-            "label": "container",
+            "label": "dockerContainer",
             "description": [],
             "signature": [
-              "(id: string, uid: string, nodeName: string) => ",
-              "Container"
+              "(id: string) => ",
+              "DockerContainer"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
             "deprecated": false,
@@ -2942,34 +2926,63 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.infra.container.$1",
+                "id": "def-common.infra.dockerContainer.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/container.ts",
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/docker_container.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.infra.k8sContainer",
+            "type": "Function",
+            "tags": [],
+            "label": "k8sContainer",
+            "description": [],
+            "signature": [
+              "(id: string, uid: string, nodeName: string) => ",
+              "K8sContainer"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.infra.k8sContainer.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_container.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.infra.container.$2",
+                "id": "def-common.infra.k8sContainer.$2",
                 "type": "string",
                 "tags": [],
                 "label": "uid",
                 "description": [],
-                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/container.ts",
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_container.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.infra.container.$3",
+                "id": "def-common.infra.k8sContainer.$3",
                 "type": "string",
                 "tags": [],
                 "label": "nodeName",
                 "description": [],
-                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/container.ts",
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_container.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

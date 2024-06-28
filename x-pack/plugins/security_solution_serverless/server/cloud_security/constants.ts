@@ -14,7 +14,7 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
 
-const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat';
+export const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat-*';
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
 export const ASSETS_SAMPLE_GRANULARITY = '24h';
@@ -50,7 +50,7 @@ export const BILLABLE_ASSETS_CONFIG = {
     filter_attribute: 'resource.sub_type',
     values: [
       // 'aws-ebs', we can't include EBS volumes until https://github.com/elastic/security-team/issues/9283 is resolved
-      'aws-ec2',
+      // 'aws-ec2', we can't include EC2 instances until https://github.com/elastic/security-team/issues/9254 is resolved
       'aws-s3',
       'aws-rds',
       'azure-disk',
@@ -60,9 +60,9 @@ export const BILLABLE_ASSETS_CONFIG = {
       'azure-mysql-server-db',
       'azure-postgresql-server-db',
       'azure-sql-server',
+      'azure-storage-account',
       'azure-vm',
       'gcp-bigquery-dataset',
-      'gcp-bigquery-table',
       'gcp-compute-disk',
       'gcp-compute-instance',
       'gcp-sqladmin-instance',

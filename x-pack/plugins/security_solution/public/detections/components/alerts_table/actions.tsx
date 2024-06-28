@@ -42,7 +42,7 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import { isEqlRule } from '../../../../common/detection_engine/utils';
+import { isEqlRule, isEsqlRule } from '../../../../common/detection_engine/utils';
 import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
@@ -279,6 +279,11 @@ export const isEqlAlert = (ecsData: Ecs): boolean => {
   return isEqlRule(ruleType) || (Array.isArray(ruleType) && isEqlRule(ruleType[0]));
 };
 
+export const isEsqlAlert = (ecsData: Ecs): boolean => {
+  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  return isEsqlRule(ruleType) || (Array.isArray(ruleType) && isEsqlRule(ruleType[0]));
+};
+
 export const isNewTermsAlert = (ecsData: Ecs): boolean => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
   return (
@@ -466,7 +471,8 @@ const createThresholdTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            _id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
           },
@@ -624,7 +630,8 @@ const createNewTermsTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            _id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
           },
@@ -790,7 +797,8 @@ const createSuppressedTimeline = async (
           ...acc,
           {
             ...formatAlertToEcsSignal(_source),
-            _id,
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            _id: _id!,
             _index,
             timestamp: _source['@timestamp'],
           },
@@ -1026,8 +1034,8 @@ export const sendAlertToTimelineAction = async ({
             },
             getExceptionFilter
           );
-          // The Query field should remain unpopulated with the suppressed EQL alert.
-        } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
+          // The Query field should remain unpopulated with the suppressed EQL/ES|QL alert.
+        } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData) && !isEsqlAlert(ecsData)) {
           return createSuppressedTimeline(
             ecsData,
             createTimeline,
@@ -1097,8 +1105,8 @@ export const sendAlertToTimelineAction = async ({
     return createThresholdTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
-    // The Query field should remain unpopulated with the suppressed EQL alert.
-  } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData)) {
+    // The Query field should remain unpopulated with the suppressed EQL/ES|QL alert.
+  } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData) && !isEsqlAlert(ecsData)) {
     return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(

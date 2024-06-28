@@ -18,7 +18,7 @@ export const Page: FC<PropsWithChildren<PageProps>> = ({ title = 'Untitled', chi
     <>
       <EuiPageTemplate.Header>
         <EuiTitle size="l">
-          <h1>{title}</h1>
+          <h1 data-test-subj="responseStreamPageTitle">{title}</h1>
         </EuiTitle>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>

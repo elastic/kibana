@@ -18,7 +18,6 @@ export const HeaderRightContent = () => {
   return (
     <div style={{ maxWidth: '800px' }}>
       <Component
-        policyId="test123"
         isLoading={false}
         addAgent={() => {}}
         isAddAgentHelpPopoverOpen={false}
@@ -29,11 +28,6 @@ export const HeaderRightContent = () => {
             revision: 1,
             updated_at: new Date().toISOString(),
             package_policies: ['test1', 'test2'],
-          } as any
-        }
-        agentStatus={
-          {
-            total: 0,
           } as any
         }
       />
@@ -45,7 +39,6 @@ export const HeaderRightContentWithManagedPolicy = () => {
   return (
     <div style={{ maxWidth: '800px' }}>
       <Component
-        policyId="test123"
         isLoading={false}
         addAgent={() => {}}
         isAddAgentHelpPopoverOpen={false}
@@ -57,11 +50,6 @@ export const HeaderRightContentWithManagedPolicy = () => {
             updated_at: new Date().toISOString(),
             package_policies: ['test1', 'test2'],
             is_managed: true,
-          } as any
-        }
-        agentStatus={
-          {
-            total: 0,
           } as any
         }
       />

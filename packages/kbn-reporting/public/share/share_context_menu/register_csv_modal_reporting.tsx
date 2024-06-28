@@ -85,7 +85,7 @@ export const reportingCsvShareProvider = ({
     const generateReportingJobCSV = ({ intl }: { intl: InjectedIntl }) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
       return apiClient
-        .createReportingJob(reportType, decoratedJobParams)
+        .createReportingShareJob(reportType, decoratedJobParams)
         .then(() => firstValueFrom(startServices$))
         .then(([startServices]) => {
           toasts.addSuccess({
@@ -122,7 +122,10 @@ export const reportingCsvShareProvider = ({
               id: 'reporting.share.modalContent.notification.reportingErrorTitle',
               defaultMessage: 'Unable to create report',
             }),
-            toastMessage: error.body?.message,
+            toastMessage: (
+              // eslint-disable-next-line react/no-danger
+              <span dangerouslySetInnerHTML={{ __html: error.body?.message }} />
+            ) as unknown as string,
           });
         });
     };
@@ -139,7 +142,7 @@ export const reportingCsvShareProvider = ({
 
       const relativePath = apiClient.getReportingPublicJobPath(
         reportType,
-        apiClient.getDecoratedJobParams(getJobParams())
+        apiClient.getDecoratedJobParams(getJobParams(true))
       );
 
       const absoluteUrl = new URL(relativePath, window.location.href).toString();
@@ -154,7 +157,7 @@ export const reportingCsvShareProvider = ({
         helpText: (
           <FormattedMessage
             id="reporting.share.csv.reporting.helpTextCSV"
-            defaultMessage="Export a CSV of this {objectType}"
+            defaultMessage="Export a CSV of this {objectType}."
             values={{ objectType }}
           />
         ),
@@ -165,14 +168,14 @@ export const reportingCsvShareProvider = ({
           dataTestSubj: 'shareReportingCopyURL',
           label: 'Post URL',
         },
-        generateReportButton: (
+        generateExportButton: (
           <FormattedMessage
             id="reporting.share.generateButtonLabelCSV"
             data-test-subj="generateReportButton"
             defaultMessage="Generate CSV"
           />
         ),
-        generateReport: generateReportingJobCSV,
+        generateExport: generateReportingJobCSV,
         generateCopyUrl: reportingUrl,
         absoluteUrl,
         renderCopyURLButton: true,

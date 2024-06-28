@@ -2,6 +2,7 @@ title: Connector response properties
 description: The properties vary depending on the connector type.        
 oneOf:
   - $ref: 'connector_response_properties_bedrock.yaml'
+  - $ref: 'connector_response_properties_gemini.yaml'
   - $ref: 'connector_response_properties_cases_webhook.yaml'
   - $ref: 'connector_response_properties_d3security.yaml'
   - $ref: 'connector_response_properties_email.yaml'
@@ -28,6 +29,7 @@ discriminator:
   propertyName: connector_type_id
   mapping:
     .bedrock: 'connector_response_properties_bedrock.yaml'
+    .gemini: 'connector_response_properties_gemini.yaml'
     .cases-webhook: 'connector_response_properties_cases_webhook.yaml'
     .d3security: 'connector_response_properties_d3security.yaml'
     .email: 'connector_response_properties_email.yaml'

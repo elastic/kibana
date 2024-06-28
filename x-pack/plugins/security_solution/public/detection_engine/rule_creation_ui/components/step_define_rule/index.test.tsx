@@ -8,6 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewBase } from '@kbn/es-query';
 import { StepDefineRule, aggregatableFields } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
@@ -18,6 +19,11 @@ import type { FormSubmitHandler } from '../../../../shared_imports';
 import { useForm } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
+import {
+  addRequiredFieldRow,
+  createIndexPatternField,
+  getSelectToggleButtonForName,
+} from '../../../rule_creation/components/required_fields/required_fields.test';
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');
@@ -201,8 +207,8 @@ jest.mock('../../../../common/components/link_to', () => {
     }),
   };
 });
-jest.mock('../../../../common/containers/sourcerer', () => {
-  const actual = jest.requireActual('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers', () => {
+  const actual = jest.requireActual('../../../../sourcerer/containers');
   return {
     ...actual,
     useSourcererDataView: jest
@@ -410,6 +416,116 @@ describe('StepDefineRule', () => {
     });
   });
 
+  describe('required fields', () => {
+    it('submits a form without selected required fields', async () => {
+      const initialState = {
+        index: ['test-index'],
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />, {
+        wrapper: TestProviders,
+      });
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          requiredFields: expect.anything(),
+        }),
+        true
+      );
+    });
+
+    it('submits saved early required fields without the "ecs" property', async () => {
+      const initialState = {
+        index: ['test-index'],
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+        requiredFields: [{ name: 'host.name', type: 'string', ecs: false }],
+      };
+
+      const handleSubmit = jest.fn();
+
+      render(<TestForm initialState={initialState} onSubmit={handleSubmit} />, {
+        wrapper: TestProviders,
+      });
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requiredFields: [{ name: 'host.name', type: 'string' }],
+        }),
+        true
+      );
+    });
+
+    it('submits newly added required fields', async () => {
+      const initialState = {
+        index: ['test-index'],
+        queryBar: {
+          query: { query: '*:*', language: 'kuery' },
+          filters: [],
+          saved_id: null,
+        },
+      };
+
+      const indexPattern: DataViewBase = {
+        fields: [createIndexPatternField({ name: 'host.name', esTypes: ['string'] })],
+        title: '',
+      };
+
+      const handleSubmit = jest.fn();
+
+      render(
+        <TestForm
+          initialState={initialState}
+          indexPattern={indexPattern}
+          onSubmit={handleSubmit}
+        />,
+        {
+          wrapper: TestProviders,
+        }
+      );
+
+      await addRequiredFieldRow();
+
+      await selectFirstEuiComboBoxOption({
+        comboBoxToggleButton: getSelectToggleButtonForName('empty'),
+      });
+
+      await submitForm();
+
+      await waitFor(() => {
+        expect(handleSubmit).toHaveBeenCalled();
+      });
+
+      expect(handleSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          requiredFields: [{ name: 'host.name', type: 'string' }],
+        }),
+        true
+      );
+    });
+  });
+
   describe('handleSetRuleFromTimeline', () => {
     it('updates KQL query correctly', () => {
       const kqlQuery = {
@@ -497,14 +613,16 @@ describe('StepDefineRule', () => {
 });
 
 interface TestFormProps {
-  ruleType?: RuleType;
   initialState?: Partial<DefineStepRule>;
+  ruleType?: RuleType;
+  indexPattern?: DataViewBase;
   onSubmit?: FormSubmitHandler<DefineStepRule>;
 }
 
 function TestForm({
-  ruleType = stepDefineDefaultValue.ruleType,
   initialState,
+  ruleType = stepDefineDefaultValue.ruleType,
+  indexPattern = { fields: [], title: '' },
   onSubmit,
 }: TestFormProps): JSX.Element {
   const [selectedEqlOptions, setSelectedEqlOptions] = useState(stepDefineDefaultValue.eqlOptions);
@@ -524,7 +642,7 @@ function TestForm({
         threatIndicesConfig={[]}
         optionsSelected={selectedEqlOptions}
         setOptionsSelected={setSelectedEqlOptions}
-        indexPattern={{ fields: [], title: '' }}
+        indexPattern={indexPattern}
         isIndexPatternLoading={false}
         browserFields={{}}
         isQueryBarValid={true}
@@ -560,32 +678,71 @@ function addRelatedIntegrationRow(): Promise<void> {
   });
 }
 
-function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
-  fireEvent.click(comboBoxToggleButton);
-
-  return waitFor(() => {
-    expect(screen.getByRole('listbox')).toBeInTheDocument();
-  });
-}
-
-function selectEuiComboBoxOption({
-  comboBoxToggleButton,
-  optionIndex,
-}: {
-  comboBoxToggleButton: HTMLElement;
-  optionIndex: number;
-}): Promise<void> {
-  return act(async () => {
-    await showEuiComboBoxOptions(comboBoxToggleButton);
-
-    fireEvent.click(within(screen.getByRole('listbox')).getAllByRole('option')[optionIndex]);
-  });
-}
-
 function setVersion({ input, value }: { input: HTMLInputElement; value: string }): Promise<void> {
   return act(async () => {
     fireEvent.input(input, {
       target: { value },
     });
   });
+}
+
+function showEuiComboBoxOptions(comboBoxToggleButton: HTMLElement): Promise<void> {
+  fireEvent.click(comboBoxToggleButton);
+
+  return waitFor(() => {
+    const listWithOptionsElement = document.querySelector('[role="listbox"]');
+    const emptyListElement = document.querySelector('.euiComboBoxOptionsList__empty');
+
+    expect(listWithOptionsElement || emptyListElement).toBeInTheDocument();
+  });
+}
+
+type SelectEuiComboBoxOptionParameters =
+  | {
+      comboBoxToggleButton: HTMLElement;
+      optionIndex: number;
+      optionText?: undefined;
+    }
+  | {
+      comboBoxToggleButton: HTMLElement;
+      optionText: string;
+      optionIndex?: undefined;
+    };
+
+function selectEuiComboBoxOption({
+  comboBoxToggleButton,
+  optionIndex,
+  optionText,
+}: SelectEuiComboBoxOptionParameters): Promise<void> {
+  return act(async () => {
+    await showEuiComboBoxOptions(comboBoxToggleButton);
+
+    const options = Array.from(
+      document.querySelectorAll('[data-test-subj*="comboBoxOptionsList"] [role="option"]')
+    );
+
+    if (typeof optionText === 'string') {
+      const optionToSelect = options.find((option) => option.textContent === optionText);
+
+      if (optionToSelect) {
+        fireEvent.click(optionToSelect);
+      } else {
+        throw new Error(
+          `Could not find option with text "${optionText}". Available options: ${options
+            .map((option) => option.textContent)
+            .join(', ')}`
+        );
+      }
+    } else {
+      fireEvent.click(options[optionIndex]);
+    }
+  });
+}
+
+function selectFirstEuiComboBoxOption({
+  comboBoxToggleButton,
+}: {
+  comboBoxToggleButton: HTMLElement;
+}): Promise<void> {
+  return selectEuiComboBoxOption({ comboBoxToggleButton, optionIndex: 0 });
 }

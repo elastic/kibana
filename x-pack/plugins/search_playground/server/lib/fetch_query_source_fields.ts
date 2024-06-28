@@ -5,10 +5,71 @@
  * 2.0.
  */
 
-import { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  SearchResponse,
+  FieldCapsResponse,
+  IndicesGetMappingResponse,
+  FieldCapsFieldCapability,
+  MappingPropertyBase,
+} from '@elastic/elasticsearch/lib/api/types';
+
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { get, has } from 'lodash';
 import { IndicesQuerySourceFields } from '../types';
+
+interface FieldModelId {
+  field: string;
+  modelId: string | undefined;
+}
+
+type SemanticEmbeddingType = 'sparse_vector' | 'dense_vector';
+
+interface SemanticField {
+  field: string;
+  inferenceId: string;
+  embeddingType?: SemanticEmbeddingType;
+}
+
+interface IndexFieldModel {
+  index: string;
+  fields: FieldModelId[];
+  semanticTextFields: SemanticField[];
+}
+
+type TaskType = 'sparse_embedding' | 'text_embedding';
+
+interface MappingSemanticTextProperty extends MappingPropertyBase {
+  type: 'semantic_text';
+  inference_id: string;
+  model_settings?: {
+    task_type: TaskType;
+  };
+}
+
+const EMBEDDING_TYPE: Record<TaskType, SemanticEmbeddingType> = {
+  sparse_embedding: 'sparse_vector',
+  text_embedding: 'dense_vector',
+};
+
+export const getModelIdFields = (fieldCapsResponse: FieldCapsResponse) => {
+  const { fields } = fieldCapsResponse;
+  return Object.keys(fields).reduce<Array<{ path: string; aggField: string }>>((acc, fieldKey) => {
+    if (fieldKey.endsWith('model_id')) {
+      const multiField = Object.keys(fields)
+        .filter((key) => key.startsWith(fieldKey))
+        .find((key) => fields[key].keyword && fields[key].keyword.aggregatable);
+
+      if (multiField) {
+        acc.push({
+          path: fieldKey,
+          aggField: multiField,
+        });
+        return acc;
+      }
+    }
+
+    return acc;
+  }, []);
+};
 
 export const fetchFields = async (
   client: IScopedClusterClient,
@@ -21,47 +82,56 @@ export const fetchFields = async (
     index: indices,
   });
 
-  const indexDocs = [];
+  const modelIdFields = getModelIdFields(fieldCapabilities);
 
-  for (const index of indices) {
-    const x = await client.asCurrentUser.search({
+  const indicesAggsMappings = await Promise.all(
+    indices.map(async (index) => ({
       index,
-      body: {
-        query: {
-          match_all: {},
-        },
-        size: 1,
-      },
-    });
-
-    if (x.hits.total !== 0) {
-      indexDocs.push({
+      doc: await client.asCurrentUser.search({
         index,
-        doc: x.hits.hits[0],
-      });
-    }
-  }
+        body: {
+          size: 0,
+          aggs: modelIdFields.reduce(
+            (sum, modelIdField) => ({
+              ...sum,
+              [modelIdField.path]: {
+                terms: {
+                  field: modelIdField.aggField,
+                  size: 1,
+                },
+              },
+            }),
+            {}
+          ),
+        },
+      }),
+      mapping: await client.asCurrentUser.indices.getMapping({ index }),
+    }))
+  );
 
-  return parseFieldsCapabilities(fieldCapabilities, indexDocs);
+  return parseFieldsCapabilities(fieldCapabilities, indicesAggsMappings);
 };
 
 const INFERENCE_MODEL_FIELD_REGEXP = /\.predicted_value|\.tokens/;
 
-const hasModelField = (field: string, indexDoc: any, nestedField: string | false) => {
-  if (field.match(INFERENCE_MODEL_FIELD_REGEXP)) {
-    const path = nestedField ? field.replace(`${nestedField}.`, `${nestedField}[0].`) : field;
-    return has(
-      indexDoc.doc,
-      `_source.${[path.replace(INFERENCE_MODEL_FIELD_REGEXP, '.model_id')]}`
-    );
-  }
-  return false;
+const getSemanticField = (field: string, semanticFields: SemanticField[]) => {
+  return semanticFields.find((sf) => sf.field === field);
 };
 
-const getModelField = (field: string, indexDoc: any, nestedField: string | false) => {
-  // If the field is nested, we need to get the first occurrence as its an array
-  const path = nestedField ? field.replace(`${nestedField}.`, `${nestedField}[0].`) : field;
-  return get(indexDoc.doc, `_source.${[path.replace(INFERENCE_MODEL_FIELD_REGEXP, '.model_id')]}`);
+const getModelField = (field: string, modelIdFields: FieldModelId[]) => {
+  // For input_output inferred fields, the model_id is at the top level
+  const topLevelModelField = modelIdFields.find(
+    (modelIdField) => modelIdField.field === 'model_id'
+  )?.modelId;
+
+  if (topLevelModelField) {
+    return topLevelModelField;
+  }
+
+  return modelIdFields.find(
+    (modelIdField) =>
+      modelIdField.field === field.replace(INFERENCE_MODEL_FIELD_REGEXP, '.model_id')
+  )?.modelId;
 };
 
 const isFieldNested = (field: string, fieldCapsResponse: FieldCapsResponse) => {
@@ -83,12 +153,56 @@ const isFieldNested = (field: string, fieldCapsResponse: FieldCapsResponse) => {
   return false;
 };
 
+const isFieldInIndex = (
+  field: Record<string, FieldCapsFieldCapability>,
+  fieldKey: string,
+  index: string
+) => {
+  return (
+    fieldKey in field &&
+    ('indices' in field[fieldKey] ? field[fieldKey]?.indices?.includes(index) : true)
+  );
+};
+
 export const parseFieldsCapabilities = (
   fieldCapsResponse: FieldCapsResponse,
-  indexDocs: Array<{ index: string; doc: SearchHit }>
+  aggMappingDocs: Array<{ index: string; doc: SearchResponse; mapping: IndicesGetMappingResponse }>
 ): IndicesQuerySourceFields => {
   const { fields, indices: indexOrIndices } = fieldCapsResponse;
   const indices = Array.isArray(indexOrIndices) ? indexOrIndices : [indexOrIndices];
+
+  const indexModelIdFields = aggMappingDocs.map<IndexFieldModel>((aggDoc) => {
+    const modelIdFields = Object.keys(aggDoc.doc.aggregations || {}).map<FieldModelId>((field) => {
+      return {
+        field,
+        modelId: (aggDoc.doc.aggregations![field] as any)?.buckets?.[0]?.key,
+      };
+    });
+
+    const mappingProperties = aggDoc.mapping[aggDoc.index].mappings.properties || {};
+
+    const semanticTextFields: SemanticField[] = Object.keys(mappingProperties || {})
+      .filter(
+        // @ts-ignore
+        (field) => mappingProperties[field].type === 'semantic_text'
+      )
+      .map((field) => {
+        const mapping = mappingProperties[field] as unknown as MappingSemanticTextProperty;
+        return {
+          field,
+          inferenceId: mapping?.inference_id,
+          embeddingType: mapping?.model_settings?.task_type
+            ? EMBEDDING_TYPE[mapping.model_settings.task_type]
+            : undefined,
+        };
+      });
+
+    return {
+      index: aggDoc.index,
+      fields: modelIdFields,
+      semanticTextFields,
+    };
+  });
 
   const indicesFieldsMap = indices.reduce<IndicesQuerySourceFields>((acc, index) => {
     acc[index] = {
@@ -97,13 +211,14 @@ export const parseFieldsCapabilities = (
       bm25_query_fields: [],
       source_fields: [],
       skipped_fields: 0,
+      semantic_fields: [],
     };
     return acc;
   }, {});
 
   // metadata fields that are ignored
   const shouldIgnoreField = (field: string) => {
-    return !field.endsWith('.model_id');
+    return !field.endsWith('model_id');
   };
 
   const querySourceFields = Object.keys(fields).reduce<IndicesQuerySourceFields>(
@@ -116,33 +231,66 @@ export const parseFieldsCapabilities = (
           : (indices as unknown as string[]);
 
       for (const index of indicesPresentIn) {
-        const indexDoc = indexDocs.find((x) => x.index === index);
-        if ('rank_features' in field || 'sparse_vector' in field) {
-          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
+        const { fields: modelIdFields, semanticTextFields } = indexModelIdFields.find(
+          (indexModelIdField) => indexModelIdField.index === index
+        )!;
+        const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
 
-          if (!nestedField) {
+        if (isFieldInIndex(field, 'semantic_text', index)) {
+          const semanticFieldMapping = getSemanticField(fieldKey, semanticTextFields);
+
+          // only use this when embeddingType and inferenceId is defined
+          // this requires semantic_text field to be set up correctly and ingested
+          if (
+            semanticFieldMapping &&
+            semanticFieldMapping.embeddingType &&
+            semanticFieldMapping.inferenceId &&
+            !nestedField
+          ) {
+            const semanticField = {
+              field: fieldKey,
+              inferenceId: semanticFieldMapping.inferenceId,
+              embeddingType: semanticFieldMapping.embeddingType,
+              indices: (field.semantic_text.indices as string[]) || indicesPresentIn,
+            };
+
+            acc[index].semantic_fields.push(semanticField);
+            acc[index].source_fields.push(fieldKey);
+          } else {
+            acc[index].skipped_fields++;
+          }
+        } else if (
+          isFieldInIndex(field, 'rank_features', index) ||
+          isFieldInIndex(field, 'sparse_vector', index)
+        ) {
+          const modelId = getModelField(fieldKey, modelIdFields);
+          const fieldCapabilities = field.rank_features || field.sparse_vector;
+
+          // Check if the sparse vector field has a model_id associated with it
+          // skip this field if has no model associated with it
+          // and the vectors were embedded outside of stack
+          if (modelId && !nestedField) {
             const elserModelField = {
               field: fieldKey,
-              model_id: getModelField(fieldKey, indexDoc, nestedField),
-              nested: !!isFieldNested(fieldKey, fieldCapsResponse),
-              indices: indicesPresentIn,
+              model_id: modelId,
+              indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
             };
             acc[index].elser_query_fields.push(elserModelField);
           } else {
             acc[index].skipped_fields++;
           }
-        } else if ('dense_vector' in field) {
-          const nestedField = isFieldNested(fieldKey, fieldCapsResponse);
+        } else if (isFieldInIndex(field, 'dense_vector', index)) {
+          const modelId = getModelField(fieldKey, modelIdFields);
+          const fieldCapabilities = field.dense_vector;
 
           // Check if the dense vector field has a model_id associated with it
           // skip this field if has no model associated with it
           // and the vectors were embedded outside of stack
-          if (hasModelField(fieldKey, indexDoc, nestedField) && !nestedField) {
+          if (modelId && !nestedField) {
             const denseVectorField = {
               field: fieldKey,
-              model_id: getModelField(fieldKey, indexDoc, nestedField),
-              nested: !!nestedField,
-              indices: indicesPresentIn,
+              model_id: modelId,
+              indices: (fieldCapabilities.indices as string[]) || indicesPresentIn,
             };
             acc[index].dense_vector_query_fields.push(denseVectorField);
           } else {

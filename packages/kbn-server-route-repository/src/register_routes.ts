@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import { isBoom } from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import { isKibanaResponse } from '@kbn/core-http-server';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
 import * as t from 'io-ts';
@@ -58,9 +59,10 @@ export function registerRoutes({
           runtimeType
         );
 
-        const { aborted, data } = await Promise.race([
+        const { aborted, result } = await Promise.race([
           handler({
             request,
+            response,
             context,
             params: validatedParams,
             logger,
@@ -68,13 +70,13 @@ export function registerRoutes({
           }).then((value) => {
             return {
               aborted: false,
-              data: value,
+              result: value,
             };
           }),
           request.events.aborted$.toPromise().then(() => {
             return {
               aborted: true,
-              data: undefined,
+              result: undefined,
             };
           }),
         ]);
@@ -83,9 +85,12 @@ export function registerRoutes({
           return response.custom(CLIENT_CLOSED_REQUEST);
         }
 
-        const body = data || {};
-
-        return response.ok({ body });
+        if (isKibanaResponse(result)) {
+          return result;
+        } else {
+          const body = result || {};
+          return response.ok({ body });
+        }
       } catch (error) {
         logger.error(error);
 

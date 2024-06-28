@@ -22,8 +22,12 @@ const Container = styled.div`
   }
 `;
 
-const Wrapper = styled.div<{ maxWidth?: number }>`
-  max-width: ${(props) => props.maxWidth || 1200}px;
+const Wrapper = styled.div<{ maxWidth?: number | string }>`
+  max-width: ${(props) =>
+    typeof props.maxWidth === 'number'
+      ? `${props.maxWidth || 1200}px` || props.maxWidth
+      : props.maxWidth};
+
   margin-left: auto;
   margin-right: auto;
   padding-top: ${(props) => props.theme.eui.euiSizeXL};
@@ -39,7 +43,7 @@ const Tabs = styled(EuiTabs)`
 `;
 
 export interface HeaderProps {
-  maxWidth?: number;
+  maxWidth?: number | string;
   leftColumn?: JSX.Element;
   rightColumn?: JSX.Element;
   rightColumnGrow?: EuiFlexItemProps['grow'];
@@ -79,7 +83,6 @@ export const Header: React.FC<HeaderProps> = ({
       <EuiFlexGroup>
         {tabs ? (
           <EuiFlexItem>
-            <EuiSpacer size="s" />
             <Tabs className={tabsClassName}>
               {tabs.map((props, index) => (
                 <EuiTab {...(props as EuiTabProps)} key={`${props.id}-${index}`}>

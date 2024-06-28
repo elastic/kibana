@@ -9,7 +9,7 @@
 /* eslint-disable max-classes-per-file */
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
-import { container } from './container';
+import { k8sContainer } from './k8s_container';
 
 interface PodDocument extends Fields {
   'kubernetes.pod.uid': string;
@@ -26,7 +26,7 @@ export class Pod extends Entity<PodDocument> {
   }
 
   container(id: string) {
-    return container(id, this.fields['kubernetes.pod.uid'], this.fields['kubernetes.node.name']);
+    return k8sContainer(id, this.fields['kubernetes.pod.uid'], this.fields['kubernetes.node.name']);
   }
 }
 

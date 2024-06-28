@@ -45,10 +45,10 @@ export const defaultRangeAnnotationLabel = i18n.translate(
 
 export function getStaticDate(dataLayers: XYDataLayerConfig[], frame: FramePublicAPI) {
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
-  const { activeData, dateRange } = frame;
+  const { activeData, absDateRange } = frame;
 
-  const dateRangeMinValue = moment(dateRange.fromDate).valueOf();
-  const dateRangeMaxValue = moment(dateRange.toDate).valueOf();
+  const dateRangeMinValue = moment(absDateRange.fromDate).valueOf();
+  const dateRangeMaxValue = moment(absDateRange.toDate).valueOf();
   const fallbackValue = moment((dateRangeMinValue + dateRangeMaxValue) / 2).toISOString();
 
   if (

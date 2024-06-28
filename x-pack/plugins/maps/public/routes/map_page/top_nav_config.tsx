@@ -21,7 +21,6 @@ import { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
-  getIsAllowByValueEmbeddables,
   getInspector,
   getCoreOverlays,
   getSavedObjectsTagging,
@@ -151,15 +150,15 @@ export function getTopNavConfig({
         }
       },
       run: () => {
-        let selectedTags = savedMap.getTags();
-        function onTagsSelected(newTags: string[]) {
-          selectedTags = newTags;
+        let tags = savedMap.getTags();
+        function onTagsSelected(nextTags: string[]) {
+          tags = nextTags;
         }
 
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagSelector = savedObjectsTagging ? (
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={selectedTags}
+            initialSelection={tags}
             onTagsSelected={onTagsSelected}
             markOptional
           />
@@ -194,7 +193,7 @@ export function getTopNavConfig({
 
             await savedMap.save({
               ...props,
-              newTags: selectedTags,
+              tags,
               saveByReference: props.addToLibrary,
               history,
             });
@@ -215,7 +214,7 @@ export function getTopNavConfig({
 
         let saveModal;
 
-        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}

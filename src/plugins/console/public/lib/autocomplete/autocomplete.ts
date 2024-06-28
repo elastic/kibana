@@ -43,8 +43,14 @@ function isUrlParamsToken(token: { type: string } | null) {
   }
 }
 
+/* Logs the provided arguments to the console if the `window.autocomplete_trace` flag is set to true.
+ * This function checks if the `autocomplete_trace` flag is enabled on the `window` object. This is
+ * only used when executing functional tests.
+ * If the flag is enabled, it logs each argument to the console.
+ * If an argument is an object, it is stringified before logging.
+ */
 const tracer = (...args: any[]) => {
-  // @ts-expect-error ts upgrade v4.7.4
+  // @ts-ignore
   if (window.autocomplete_trace) {
     // eslint-disable-next-line no-console
     console.log.call(
@@ -423,12 +429,7 @@ export default function ({
     });
   }
 
-  function applyTerm(term: {
-    value?: string;
-    context?: AutoCompleteContext;
-    template?: { __raw?: boolean; value?: string; [key: string]: unknown };
-    insertValue?: string;
-  }) {
+  function applyTerm(term: ResultTerm) {
     const context = term.context!;
 
     if (context?.endpoint && term.value) {
@@ -804,7 +805,8 @@ export default function ({
       // if not on the first line
       if (context.rangeToReplace && context.rangeToReplace.start?.lineNumber > 1) {
         const prevTokenLineNumber = position.lineNumber;
-        const line = context.editor?.getLineValue(prevTokenLineNumber) ?? '';
+        const editorFromContext = context.editor as CoreEditor | undefined;
+        const line = editorFromContext?.getLineValue(prevTokenLineNumber) ?? '';
         const prevLineLength = line.length;
         const linesToEnter = context.rangeToReplace.end.lineNumber - prevTokenLineNumber;
 
@@ -1193,7 +1195,7 @@ export default function ({
           context: AutoCompleteContext;
           completer?: { insertMatch: (v: unknown) => void };
         } = {
-          value: term.name,
+          value: term.name + '',
           meta: 'API',
           score: 0,
           context,
@@ -1211,8 +1213,8 @@ export default function ({
     );
 
     terms.sort(function (
-      t1: { score: number; name?: string },
-      t2: { score: number; name?: string }
+      t1: { score: number; name?: string | boolean },
+      t2: { score: number; name?: string | boolean }
     ) {
       /* score sorts from high to low */
       if (t1.score > t2.score) {

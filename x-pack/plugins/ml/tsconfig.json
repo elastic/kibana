@@ -126,5 +126,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-context-render",
     "@kbn/esql-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/json-schemas",
   ],
 }

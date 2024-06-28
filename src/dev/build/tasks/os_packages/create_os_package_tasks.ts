@@ -80,6 +80,27 @@ export const CreateDockerUbuntu: Task = {
   },
 };
 
+export const CreateDockerWolfi: Task = {
+  description: 'Creating Docker Wolfi image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+  },
+};
+
 export const CreateDockerServerless: Task = {
   description: 'Creating Docker Serverless image',
 
@@ -157,6 +178,12 @@ export const CreateDockerContexts: Task = {
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       baseImage: 'ubuntu',
+      context: true,
+      image: false,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'wolfi',
       context: true,
       image: false,
       dockerBuildDate,

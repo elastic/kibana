@@ -29,10 +29,13 @@ interface UserPanelContentProps {
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
   riskScoreState: RiskScoreState<RiskScoreEntity.user>;
+  recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  onAssetCriticalityChange: () => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
 export const UserPanelContent = ({
@@ -40,10 +43,13 @@ export const UserPanelContent = ({
   observedUser,
   managedUser,
   riskScoreState,
+  recalculatingScore,
   contextID,
   scopeId,
   isDraggable,
   openDetailsPanel,
+  onAssetCriticalityChange,
+  isPreviewMode,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
@@ -54,13 +60,18 @@ export const UserPanelContent = ({
         <>
           <RiskSummary
             riskScoreData={riskScoreState}
+            recalculatingScore={recalculatingScore}
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
           />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion entity={{ name: userName, type: 'user' }} />
+      <AssetCriticalityAccordion
+        entity={{ name: userName, type: 'user' }}
+        onChange={onAssetCriticalityChange}
+      />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}

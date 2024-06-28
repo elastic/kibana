@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-describe('[Observability onboarding] Landing page', () => {
+// Failing: See https://github.com/elastic/kibana/issues/183341
+describe.skip('[Observability onboarding] Landing page', () => {
   beforeEach(() => {
     cy.loginAsElastic();
   });
