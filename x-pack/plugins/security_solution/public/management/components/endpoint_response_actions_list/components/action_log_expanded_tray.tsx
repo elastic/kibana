@@ -94,7 +94,7 @@ const OutputContent = memo<{
   action: MaybeImmutable<ActionDetails>;
   fromAlertWorkaround?: boolean;
   'data-test-subj'?: string;
-}>(({ action, fromAlertWorkaround, 'data-test-subj': dataTestSubj }) => {
+}>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
   const {
@@ -203,7 +203,7 @@ export const ActionsLogExpandedTray = memo<{
   // Delete prop `fromAlert` once we refactor automated response actions
   fromAlertWorkaround?: boolean;
   'data-test-subj'?: string;
-}>(({ action, fromAlertWorkaround, 'data-test-subj': dataTestSubj }) => {
+}>(({ action, fromAlertWorkaround = false, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
