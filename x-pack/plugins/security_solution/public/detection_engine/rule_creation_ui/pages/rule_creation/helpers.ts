@@ -30,6 +30,8 @@ import type {
   RuleSystemAction as AlertingRuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 
+import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
+
 import { assertUnreachable } from '../../../../../common/utility_types';
 import {
   transformAlertToRuleAction,
@@ -642,18 +644,20 @@ export const formatAboutStepData = (
   return resp;
 };
 
-export const formatActionsStepData = (actionsStepData: ActionsStepRule): ActionsStepRuleJson => {
-  const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
+export const isRuleAction = (
+  action: AlertingRuleAction | AlertingRuleSystemAction,
+  actionTypeRegistry: ActionTypeRegistryContract
+): action is AlertingRuleAction => !actionTypeRegistry.get(action.actionTypeId).isSystemActionType;
 
-  const isRuleAction = (
-    action: AlertingRuleAction | AlertingRuleSystemAction
-  ): action is AlertingRuleAction =>
-    (action as AlertingRuleAction).group != null &&
-    (action as AlertingRuleAction).frequency != null;
+export const formatActionsStepData = (
+  actionsStepData: ActionsStepRule,
+  actionTypeRegistry: ActionTypeRegistryContract
+): ActionsStepRuleJson => {
+  const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
   return {
     actions: actions.map((action) =>
-      isRuleAction(action)
+      isRuleAction(action, actionTypeRegistry)
         ? transformAlertToRuleAction(action)
         : transformAlertToRuleSystemAction(action)
     ),
@@ -673,13 +677,14 @@ export const formatRule = <T>(
   aboutStepData: AboutStepRule,
   scheduleData: ScheduleStepRule,
   actionsData: ActionsStepRule,
+  actionTypeRegistry: ActionTypeRegistryContract,
   exceptionsList?: List[]
 ): T =>
   deepmerge.all([
     formatDefineStepData(defineStepData),
     formatAboutStepData(aboutStepData, exceptionsList),
     formatScheduleStepData(scheduleData),
-    formatActionsStepData(actionsData),
+    formatActionsStepData(actionsData, actionTypeRegistry),
   ]) as unknown as T;
 
 export const formatPreviewRule = ({
@@ -687,10 +692,12 @@ export const formatPreviewRule = ({
   aboutRuleData,
   scheduleRuleData,
   exceptionsList,
+  actionTypeRegistry,
 }: {
   defineRuleData: DefineStepRule;
   aboutRuleData: AboutStepRule;
   scheduleRuleData: ScheduleStepRule;
+  actionTypeRegistry: ActionTypeRegistryContract;
   exceptionsList?: List[];
 }): RuleCreateProps => {
   const aboutStepData = {
@@ -704,6 +711,7 @@ export const formatPreviewRule = ({
       aboutStepData,
       scheduleRuleData,
       stepActionsDefaultValue,
+      actionTypeRegistry,
       exceptionsList
     ),
   };
