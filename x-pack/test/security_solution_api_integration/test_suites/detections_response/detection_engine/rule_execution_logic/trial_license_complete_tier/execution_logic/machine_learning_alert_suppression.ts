@@ -589,7 +589,12 @@ export default ({ getService }: FtrProviderContext) => {
             timestamp,
             'user.name': ['irrelevant'],
           };
-          await indexListOfDocuments([anomaly, anomaly, anomalyWithoutSuppressionField]);
+          await indexListOfDocuments([
+            anomaly,
+            anomaly,
+            anomalyWithoutSuppressionField,
+            anomalyWithoutSuppressionField,
+          ]);
 
           const { previewId } = await previewRule({
             supertest,
@@ -603,7 +608,7 @@ export default ({ getService }: FtrProviderContext) => {
             sort: [ALERT_ORIGINAL_TIME],
           });
 
-          expect(previewAlerts.length).toEqual(2);
+          expect(previewAlerts.length).toEqual(3);
           expect(previewAlerts[0]._source).toEqual(
             expect.objectContaining({
               'user.name': ['irrelevant'],
@@ -623,6 +628,23 @@ export default ({ getService }: FtrProviderContext) => {
           );
 
           expect(previewAlerts[1]._source).toEqual(
+            expect.objectContaining({
+              'user.name': ['irrelevant'],
+              [TIMESTAMP]: timestamp,
+              [ALERT_START]: timestamp,
+            })
+          );
+          expect(previewAlerts[1]._source).toEqual(
+            expect.not.objectContaining({
+              [ALERT_SUPPRESSION_TERMS]: expect.anything(),
+              [ALERT_ORIGINAL_TIME]: expect.anything(),
+              [ALERT_SUPPRESSION_START]: expect.anything(),
+              [ALERT_SUPPRESSION_END]: expect.anything(),
+              [ALERT_SUPPRESSION_DOCS_COUNT]: expect.anything(),
+            })
+          );
+
+          expect(previewAlerts[2]._source).toEqual(
             expect.objectContaining({
               [ALERT_SUPPRESSION_TERMS]: [
                 {
