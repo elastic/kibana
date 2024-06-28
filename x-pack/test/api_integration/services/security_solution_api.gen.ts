@@ -24,17 +24,26 @@ import { BulkCreateRulesRequestBodyInput } from '@kbn/security-solution-plugin/c
 import { BulkDeleteRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_delete_rules/bulk_delete_rules_route.gen';
 import { BulkPatchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_patch_rules/bulk_patch_rules_route.gen';
 import { BulkUpdateRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_crud/bulk_update_rules/bulk_update_rules_route.gen';
+import { CleanDraftTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
 import { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
+import { CreateTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/create_timelines/create_timelines_route.gen';
+import { DeleteNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_note/delete_note_route.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
+import { DeleteTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/delete_timelines/delete_timelines_route.gen';
 import {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/export_rules/export_rules_route.gen';
+import {
+  ExportTimelinesRequestQueryInput,
+  ExportTimelinesRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/timeline/export_timelines/export_timelines_route.gen';
 import { FinalizeAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/finalize_signals_migration/finalize_signals_migration.gen';
 import { FindRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/find_rules/find_rules_route.gen';
 import { GetAgentPolicySummaryRequestQueryInput } from '@kbn/security-solution-plugin/common/api/endpoint/policy/policy.gen';
 import { GetAlertsMigrationStatusRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/get_signals_migration_status/get_signals_migration_status.gen';
+import { GetDraftTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_draft_timelines/get_draft_timelines_route.gen';
 import {
   GetEndpointSuggestionsRequestParamsInput,
   GetEndpointSuggestionsRequestBodyInput,
@@ -48,13 +57,21 @@ import {
   GetRuleExecutionResultsRequestQueryInput,
   GetRuleExecutionResultsRequestParamsInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring/rule_execution_logs/get_rule_execution_results/get_rule_execution_results_route.gen';
+import { GetTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timeline/get_timeline_route.gen';
+import { GetTimelinesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/get_timelines/get_timelines_route.gen';
 import { ImportRulesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/import_rules/import_rules_route.gen';
+import { ImportTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/import_timelines/import_timelines_route.gen';
+import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
 import { ManageAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
+import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
 import {
   PerformBulkActionRequestQueryInput,
   PerformBulkActionRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route.gen';
+import { PersistFavoriteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_favorite/persist_favorite_route.gen';
+import { PersistNoteRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/persist_note/persist_note_route.gen';
+import { PersistPinnedEventRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/pinned_events/pinned_events_route.gen';
 import { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
@@ -127,6 +144,18 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+      * Retrieves a clean draft timeline. If a draft timeline does not exist, it is created and returned.
+
+      */
+    cleanDraftTimelines(props: CleanDraftTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_draft')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     createAlertsIndex() {
       return supertest
         .post('/api/detection_engine/index')
@@ -153,12 +182,34 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
+    /**
+     * Creates a new timeline.
+     */
+    createTimelines(props: CreateTimelinesProps) {
+      return supertest
+        .post('/api/timeline')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     deleteAlertsIndex() {
       return supertest
         .delete('/api/detection_engine/index')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Deletes a note from a timeline.
+     */
+    deleteNote(props: DeleteNoteProps) {
+      return supertest
+        .delete('/api/note')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Deletes a single rule using the `rule_id` or `id` field.
@@ -172,11 +223,34 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
         .query(props.query);
     },
     /**
+     * Deletes one or more timelines or timeline templates.
+     */
+    deleteTimelines(props: DeleteTimelinesProps) {
+      return supertest
+        .delete('/api/timeline')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.
      */
     exportRules(props: ExportRulesProps) {
       return supertest
         .post('/api/detection_engine/rules/_export')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object)
+        .query(props.query);
+    },
+    /**
+     * Exports timelines as an NDJSON file
+     */
+    exportTimelines(props: ExportTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_export')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -231,6 +305,17 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Retrieves the draft timeline for the current user. If the user does not have a draft timeline, an empty timeline is returned.
+     */
+    getDraftTimelines(props: GetDraftTimelinesProps) {
+      return supertest
+        .get('/api/timeline/_draft')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
     getEndpointSuggestions(props: GetEndpointSuggestionsProps) {
       return supertest
         .post(replaceParams('/api/endpoint/suggestions/{suggestion_type}', props.params))
@@ -275,6 +360,28 @@ finalize it.
         .query(props.query);
     },
     /**
+     * Get an existing saved timeline or timeline template. This API is used to retrieve an existing saved timeline or timeline template.
+     */
+    getTimeline(props: GetTimelineProps) {
+      return supertest
+        .get('/api/timeline')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
+     * This API is used to retrieve a list of existing saved timelines or timeline templates.
+     */
+    getTimelines(props: GetTimelinesProps) {
+      return supertest
+        .get('/api/timelines')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .query(props.query);
+    },
+    /**
      * Imports rules from an `.ndjson` file, including actions and exception lists.
      */
     importRules(props: ImportRulesProps) {
@@ -285,12 +392,34 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .query(props.query);
     },
+    /**
+     * Imports timelines.
+     */
+    importTimelines(props: ImportTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_import')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     installPrebuiltRulesAndTimelines() {
       return supertest
         .put('/api/detection_engine/rules/prepackaged')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+    },
+    /**
+     * Installs prepackaged timelines.
+     */
+    installPrepackedTimelines(props: InstallPrepackedTimelinesProps) {
+      return supertest
+        .post('/api/timeline/_prepackaged')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     manageAlertTags(props: ManageAlertTagsProps) {
       return supertest
@@ -312,6 +441,17 @@ finalize it.
         .send(props.body as object);
     },
     /**
+     * Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+     */
+    patchTimeline(props: PatchTimelineProps) {
+      return supertest
+        .patch('/api/timeline')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
      * The bulk action is applied to all rules that match the filter or to the list of rules by their IDs.
      */
     performBulkAction(props: PerformBulkActionProps) {
@@ -322,6 +462,39 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object)
         .query(props.query);
+    },
+    /**
+     * Persists a given users favorite status of a timeline.
+     */
+    persistFavorite(props: PersistFavoriteProps) {
+      return supertest
+        .patch('/api/timeline/_favorite')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Persists a note to a timeline.
+     */
+    persistNote(props: PersistNoteProps) {
+      return supertest
+        .patch('/api/note')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    /**
+     * Persists a pinned event to a timeline.
+     */
+    persistPinnedEvent(props: PersistPinnedEventProps) {
+      return supertest
+        .patch('/api/pinned_event')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Read a single rule
@@ -408,18 +581,34 @@ export interface BulkPatchRulesProps {
 export interface BulkUpdateRulesProps {
   body: BulkUpdateRulesRequestBodyInput;
 }
+export interface CleanDraftTimelinesProps {
+  body: CleanDraftTimelinesRequestBodyInput;
+}
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
 }
 export interface CreateRuleProps {
   body: CreateRuleRequestBodyInput;
 }
+export interface CreateTimelinesProps {
+  body: CreateTimelinesRequestBodyInput;
+}
+export interface DeleteNoteProps {
+  body: DeleteNoteRequestBodyInput;
+}
 export interface DeleteRuleProps {
   query: DeleteRuleRequestQueryInput;
+}
+export interface DeleteTimelinesProps {
+  body: DeleteTimelinesRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;
   body: ExportRulesRequestBodyInput;
+}
+export interface ExportTimelinesProps {
+  query: ExportTimelinesRequestQueryInput;
+  body: ExportTimelinesRequestBodyInput;
 }
 export interface FinalizeAlertsMigrationProps {
   body: FinalizeAlertsMigrationRequestBodyInput;
@@ -432,6 +621,9 @@ export interface GetAgentPolicySummaryProps {
 }
 export interface GetAlertsMigrationStatusProps {
   query: GetAlertsMigrationStatusRequestQueryInput;
+}
+export interface GetDraftTimelinesProps {
+  query: GetDraftTimelinesRequestQueryInput;
 }
 export interface GetEndpointSuggestionsProps {
   params: GetEndpointSuggestionsRequestParamsInput;
@@ -448,8 +640,20 @@ export interface GetRuleExecutionResultsProps {
   query: GetRuleExecutionResultsRequestQueryInput;
   params: GetRuleExecutionResultsRequestParamsInput;
 }
+export interface GetTimelineProps {
+  query: GetTimelineRequestQueryInput;
+}
+export interface GetTimelinesProps {
+  query: GetTimelinesRequestQueryInput;
+}
 export interface ImportRulesProps {
   query: ImportRulesRequestQueryInput;
+}
+export interface ImportTimelinesProps {
+  body: ImportTimelinesRequestBodyInput;
+}
+export interface InstallPrepackedTimelinesProps {
+  body: InstallPrepackedTimelinesRequestBodyInput;
 }
 export interface ManageAlertTagsProps {
   body: ManageAlertTagsRequestBodyInput;
@@ -457,9 +661,21 @@ export interface ManageAlertTagsProps {
 export interface PatchRuleProps {
   body: PatchRuleRequestBodyInput;
 }
+export interface PatchTimelineProps {
+  body: PatchTimelineRequestBodyInput;
+}
 export interface PerformBulkActionProps {
   query: PerformBulkActionRequestQueryInput;
   body: PerformBulkActionRequestBodyInput;
+}
+export interface PersistFavoriteProps {
+  body: PersistFavoriteRequestBodyInput;
+}
+export interface PersistNoteProps {
+  body: PersistNoteRequestBodyInput;
+}
+export interface PersistPinnedEventProps {
+  body: PersistPinnedEventRequestBodyInput;
 }
 export interface ReadRuleProps {
   query: ReadRuleRequestQueryInput;
