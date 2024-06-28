@@ -109,9 +109,14 @@ export const streamGraph = async ({
             }
           }
         }
+      } else if (event.event === 'on_llm_end') {
+        const generations = event.data.output?.generations[0];
+        if (generations?.[0]?.generationInfo?.finish_reason === 'stop') {
+          handleStreamEnd(finalMessage);
+        }
       }
 
-      await processEvent();
+      processEvent();
     } catch (err) {
       // if I throw an error here, it crashes the server. Not sure how to get around that.
       // If I put await on this function the error works properly, but when there is not an error

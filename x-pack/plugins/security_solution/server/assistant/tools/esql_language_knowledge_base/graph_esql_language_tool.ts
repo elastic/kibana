@@ -6,13 +6,12 @@
  */
 
 import Fs from 'fs';
-import { keyBy, mapValues, once, pick, isEmpty, map } from 'lodash';
+import { once, isEmpty, map } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
-import pLimit from 'p-limit';
 import Path from 'path';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import { JsonOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
+import { StringOutputParser } from '@langchain/core/output_parsers';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { BaseMessage } from '@langchain/core/messages';
@@ -38,9 +37,9 @@ export const ECS_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
 
 Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
 <context>
-<availableIndices>
-{availableIndices}
-</availableIndices>
+<availableDataStreams>
+{availableDataStreams}
+</availableDataStreams>
 </context>`,
   ],
   [
@@ -85,13 +84,8 @@ const toolDetails = {
 interface IState {
   messages: BaseMessage[];
   esqlQuery: string;
-  documentation: {
-    functions: string[];
-    commands: string[];
-    intention: string;
-  };
   errors: ValidationResult['errors'];
-  availableIndices: string[];
+  availableDataStreams: string[];
   invalidQueries: string[];
 }
 
@@ -105,25 +99,6 @@ const graphState: StateGraphArgs<IState>['channels'] = {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   },
-  documentation: {
-    value: (
-      x: {
-        functions: string[];
-        commands: string[];
-        intention: string;
-      },
-      y?: {
-        functions: string[];
-        commands: string[];
-        intention: string;
-      }
-    ) => y ?? x,
-    default: () => ({
-      functions: [],
-      commands: [],
-      intention: '',
-    }),
-  },
   errors: {
     value: (x, y) => (y && !y.length ? y : x.concat(y)),
     default: () => [],
@@ -132,14 +107,13 @@ const graphState: StateGraphArgs<IState>['channels'] = {
     value: (x, y) => x.concat(y),
     default: () => [],
   },
-  availableIndices: {
+  availableDataStreams: {
     value: (x, y) => y ?? x,
     default: () => [],
   },
 };
 
 const readFile = promisify(Fs.readFile);
-const readdir = promisify(Fs.readdir);
 
 const loadSystemMessage = once(async () => {
   const data = await readFile(
@@ -151,114 +125,13 @@ const loadSystemMessage = once(async () => {
   return data.toString('utf-8');
 });
 
-const loadEsqlDocs = once(async () => {
-  const dir = Path.join(
-    __dirname,
-    '../../../../../observability_solution/observability_ai_assistant_app/server/functions/query/esql_docs'
-  );
-  const files = (await readdir(dir)).filter((file) => Path.extname(file) === '.txt');
-
-  if (!files.length) {
-    return {};
-  }
-
-  const limiter = pLimit(10);
-  return keyBy(
-    await Promise.all(
-      files.map((file) =>
-        limiter(async () => {
-          const data = (await readFile(Path.join(dir, file))).toString('utf-8');
-          const filename = Path.basename(file, '.txt');
-
-          const keyword = filename
-            .replace('esql-', '')
-            .replace('agg-', '')
-            .replaceAll('-', '_')
-            .toUpperCase();
-
-          return {
-            keyword: keyword === 'STATS_BY' ? 'STATS' : keyword,
-            data,
-          };
-        })
-      )
-    ),
-    'keyword'
-  );
-});
-
-const getClassifyEsql =
-  ({
-    userQuery,
-    llm,
-    esClient,
-  }: {
-    userQuery: string;
-    llm: NonNullable<AssistantToolParams['llm']>;
-    esClient: AssistantToolParams['esClient'];
-  }) =>
-  async (state: IState, config?: RunnableConfig) => {
-    const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
-
-    const formatInstructions = `Respond only in valid JSON. The JSON object you return should match the following schema:
-  {{ commands: [], functions: [], intention: string }}
-
-  Where commands is a list of processing or source commands that are referenced in the list of commands in this conversation.
-  Where functions is a list of functions that are referenced in the list of functions in this conversation.
-  Where intention is the user\'s intention.
-  `;
-
-    const prompt = await ChatPromptTemplate.fromMessages([
-      [
-        'system',
-        `${systemMessage} Answer the user query. Wrap the output in \`json\` tags\n{format_instructions}`,
-      ],
-      [
-        'user',
-        `Use this function to determine:
-      - what ES|QL functions and commands are candidates for answering the user's question
-      - whether the user has requested a query, and if so, it they want it to be executed, or just shown.
-
-      All parameters are required. Make sure the functions and commands you request are available in the
-      system message.
-
-      {query}
-      `,
-      ],
-    ]).partial({
-      format_instructions: formatInstructions,
-    });
-
-    // Set up a parser
-    const parser = new JsonOutputParser();
-
-    const chainss = prompt.pipe(llm).pipe(parser);
-
-    const result = await chainss.invoke({
-      query: userQuery,
-      date: 'date',
-      msg: 'msg',
-      ip: 'ip',
-    });
-
-    const keywords = [
-      ...(result.commands ?? []),
-      ...(result.functions ?? []),
-      'SYNTAX',
-      'OVERVIEW',
-      'OPERATORS',
-    ].map((keyword) => keyword.toUpperCase());
-
-    const messagesToInclude = mapValues(
-      pick(esqlDocs, keywords),
-      ({ data }) => data
-    ) as unknown as IState['documentation'];
-
+const getDataStreams =
+  ({ esClient }: { esClient: AssistantToolParams['esClient'] }) =>
+  async () => {
     const allDataStreams = await esClient.indices.getDataStream();
 
     return {
-      documentation: messagesToInclude,
-      availableIndices: map(allDataStreams.data_streams, 'name'),
+      availableDataStreams: map(allDataStreams.data_streams, 'name'),
     };
   };
 
@@ -268,22 +141,19 @@ const getGenerateQuery =
     const [systemMessage] = await Promise.all([loadSystemMessage()]);
 
     const answerPrompt = await ChatPromptTemplate.fromMessages([
-      [
-        'system',
-        `${systemMessage}\nDocumentation: {documentation}\nAvailable indices: {availableIndices}`,
-      ],
+      ['system', `${systemMessage}\nAvailable data streams: {availableDataStreams}`],
       [
         'user',
-        `Answer the user's question that was previously asked ("{query}...") using the attached documentation. Take into account any previous errors {errors} and invalid ES|QL queries {invalidQueries}.
+        `Answer the user's question that was previously asked ("{query}..."). Take into account any previous errors {errors} and invalid ES|QL queries {invalidQueries}.
 
           Format any ES|QL query as follows:
+          <format>
           \`\`\`esql
           <query>
           \`\`\`
+          </format>
 
           Respond in plain text. Do not attempt to use a function.
-
-          You must use commands and functions for which you have requested documentation.
 
           DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
           If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
@@ -306,14 +176,13 @@ const getGenerateQuery =
           \`\`\`
 
           DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
-          as mentioned in the system message and documentation. When converting queries from one language
+          as mentioned in the system message. When converting queries from one language
           to ES|QL, make sure that the functions are available and documented in ES|QL.
           E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
         `,
       ],
     ]).partial({
-      documentation: JSON.stringify(state.documentation),
-      availableIndices: JSON.stringify(state.availableIndices),
+      availableDataStreams: JSON.stringify(state.availableDataStreams),
       errors: state.errors.join('\n'),
       invalidQueries: state.invalidQueries.join('\n'),
     });
@@ -357,7 +226,10 @@ const getValidateQuery =
       });
       return { errors: [] };
     } catch (e) {
-      return { errors: [e?.message], invalidQueries: [state.esqlQuery] };
+      return {
+        errors: e?.message.match(new RegExp(/Unknown column.*/)),
+        invalidQueries: [state.esqlQuery],
+      };
     }
   };
 
@@ -372,7 +244,10 @@ const shouldRegenerate = (state: IState) => {
 export const GRAPH_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: () => true,
+  isSupported: (params: AssistantToolParams): params is AssistantToolParams => {
+    const { kbDataClient, isEnabledKnowledgeBase, modelExists } = params;
+    return isEnabledKnowledgeBase && modelExists && kbDataClient != null;
+  },
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
@@ -389,11 +264,11 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
         const workflow = new StateGraph<IState>({
           channels: graphState,
         })
-          .addNode('classifyEsql', getClassifyEsql({ userQuery: input.question, llm, esClient }))
+          .addNode('getDataStreams', getDataStreams({ esClient }))
           .addNode('generateQuery', getGenerateQuery({ userQuery: input.question, llm }))
           .addNode('validateQuery', getValidateQuery({ search }))
-          .addEdge(START, 'classifyEsql')
-          .addEdge('classifyEsql', 'generateQuery')
+          .addEdge(START, 'getDataStreams')
+          .addEdge('getDataStreams', 'generateQuery')
           .addEdge('generateQuery', 'validateQuery')
           .addConditionalEdges('validateQuery', shouldRegenerate);
 
@@ -403,17 +278,14 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
         try {
           query = await app.invoke({ question: input.question }, { recursionLimit: 20 });
         } catch (e) {
-          // Fallback to KnowledgeBase tool
-          const result = await chain.invoke(
-            {
-              query: input.question,
-            },
-            cbManager
-          );
-          return result.text;
+          return e;
         }
 
-        return query.esqlQuery;
+        return `
+        \`\`\`esql
+        ${query.esqlQuery}
+        \`\`\`
+        `;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });
