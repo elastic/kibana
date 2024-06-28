@@ -15,7 +15,7 @@ import {
   ExpressionAstExpressionBuilder,
   ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import { OperationDefinition } from '.';
 import {

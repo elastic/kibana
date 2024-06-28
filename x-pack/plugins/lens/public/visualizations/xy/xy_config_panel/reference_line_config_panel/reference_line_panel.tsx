@@ -11,12 +11,12 @@ import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { FillStyle } from '@kbn/expression-xy-plugin/common';
 import {
-  useDebouncedValue,
   IconSelectSetting,
   ColorPicker,
   LineStyleSettings,
   TextDecorationSetting,
 } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import type { VisualizationDimensionEditorProps } from '../../../../types';
 import { State, XYState, XYReferenceLineLayerConfig, YConfig } from '../../types';
 import { FormatFactory } from '../../../../../common/types';
