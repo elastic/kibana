@@ -17,7 +17,6 @@ import {
   selectThresholdRuleType,
   selectEsqlRuleType,
   openSuppressionFieldsTooltipAndCheckLicense,
-  selectMachineLearningRuleType,
 } from '../../../../tasks/create_new_rule';
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
 import { login } from '../../../../tasks/login';
