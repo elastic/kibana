@@ -344,7 +344,8 @@ export class AlertsClient {
         throw Boom.badData(errorMessage);
       }
 
-      if (result?.hits?.hits != null && result?.hits.hits.length > 0) {
+      if (result?.hits.hits.length > 0) {
+        // @ts-expect-error type mismatch: SearchHit._id is optional
         await this.ensureAllAuthorized(result.hits.hits, operation);
 
         result?.hits.hits.map((item) =>

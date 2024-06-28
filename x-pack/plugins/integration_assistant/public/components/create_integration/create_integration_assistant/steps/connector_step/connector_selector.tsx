@@ -42,7 +42,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
     const {
       triggersActionsUi: { actionTypeRegistry },
     } = useKibana().services;
-    const { setConnectorId } = useActions();
+    const { setConnector } = useActions();
     const rowCss = useRowCss();
     return (
       <>
@@ -50,7 +50,7 @@ export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
           <EuiFlexItem key={connector.id}>
             <EuiPanel
               key={connector.id}
-              onClick={() => setConnectorId(connector.id)}
+              onClick={() => setConnector(connector)}
               hasShadow={false}
               hasBorder
               paddingSize="l"

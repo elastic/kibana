@@ -23,7 +23,7 @@ interface ManagedUserAccordionProps {
   title: string;
   managedUser: ManagedUserFields;
   tableType: UserAssetTableType;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
 }
 
 export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
@@ -64,12 +64,14 @@ export const ManagedUserAccordion: React.FC<ManagedUserAccordionProps> = ({
           </span>
         ),
         link: {
-          callback: () =>
-            openDetailsPanel(
-              tableType === UserAssetTableType.assetOkta
-                ? EntityDetailsLeftPanelTab.OKTA
-                : EntityDetailsLeftPanelTab.ENTRA
-            ),
+          callback: openDetailsPanel
+            ? () =>
+                openDetailsPanel(
+                  tableType === UserAssetTableType.assetOkta
+                    ? EntityDetailsLeftPanelTab.OKTA
+                    : EntityDetailsLeftPanelTab.ENTRA
+                )
+            : undefined,
           tooltip: (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.showAssetDocument"
