@@ -6,11 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
@@ -26,13 +24,9 @@ const DUPLICATE_TITLE = i18n.translate(
 
 interface DuplicateRuleParams {
   rule: SanitizedRule<RuleParams>;
-  actionsClient: ActionsClient;
 }
 
-export const duplicateRule = async ({
-  actionsClient,
-  rule,
-}: DuplicateRuleParams): Promise<InternalRuleCreate> => {
+export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
   // Generate a new static ruleId
   const ruleId = uuidv4();
 
@@ -42,11 +36,7 @@ export const duplicateRule = async ({
   const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
   const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
 
-  // actions stuff
-  const [systemActions, externalActions] = partition(rule.actions, (action) =>
-    actionsClient.isSystemAction(action.id)
-  );
-  const actions = transformToActionFrequency(externalActions, rule.throttle);
+  const actions = transformToActionFrequency(rule.actions, rule.throttle);
 
   // Duplicated rules are always considered custom rules
   const immutable = false;
@@ -68,6 +58,6 @@ export const duplicateRule = async ({
     schedule: rule.schedule,
     enabled: false,
     actions,
-    systemActions,
+    systemActions: rule.systemActions ?? [],
   };
 };
