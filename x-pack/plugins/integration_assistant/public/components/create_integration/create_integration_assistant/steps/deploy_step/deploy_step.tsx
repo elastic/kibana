@@ -26,15 +26,15 @@ import * as i18n from './translations';
 interface DeployStepProps {
   integrationSettings: State['integrationSettings'];
   result: State['result'];
-  connectorId: State['connectorId'];
+  connector: State['connector'];
 }
 
 export const DeployStep = React.memo<DeployStepProps>(
-  ({ integrationSettings, result, connectorId }) => {
+  ({ integrationSettings, result, connector }) => {
     const { isLoading, error, integrationFile, integrationName } = useDeployIntegration({
       integrationSettings,
       result,
-      connectorId,
+      connector,
     });
 
     const onSaveZip = useCallback(() => {
