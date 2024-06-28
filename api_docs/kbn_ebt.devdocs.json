@@ -1839,6 +1839,10 @@
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts"
               },
               {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/public/services/telemetry/service.ts"
+              },
+              {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/telemetry/fleet_usage_sender.ts"
               },
