@@ -549,7 +549,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleOnChatCleared,
+    handleOnChatCleared: onChatCleared,
     handlePromptChange,
     handleSendMessage,
     handleRegenerateResponse,
@@ -566,6 +566,11 @@ const AssistantComponent: React.FC<Props> = ({
     setSelectedPromptContexts,
     setCurrentConversation,
   });
+
+  const handleOnChatCleared = useCallback(async () => {
+    await onChatCleared();
+    await refetchResults();
+  }, [onChatCleared, refetchResults]);
 
   const handleChatSend = useCallback(
     async (promptText: string) => {
