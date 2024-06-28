@@ -84,6 +84,12 @@ $controlMinWidth: $euiSize * 14;
   flex-basis: auto;
   position: relative;
 
+  &:not(.controlFrameWrapper-isEditable) {
+    .controlFrame--twoLine {
+      border-radius: $euiFormControlBorderRadius !important;
+    }
+  }
+
   .controlFrame__labelToolTip {
     max-width: 40%;
   }

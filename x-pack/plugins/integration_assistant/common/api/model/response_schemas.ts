@@ -16,7 +16,7 @@
 
 import { z } from 'zod';
 
-import { Docs, Errors, Mapping, Pipeline, PipelineResults } from './common_attributes';
+import { Docs, Mapping, Pipeline } from './common_attributes';
 
 export type EcsMappingAPIResponse = z.infer<typeof EcsMappingAPIResponse>;
 export const EcsMappingAPIResponse = z.object({
@@ -44,6 +44,7 @@ export const RelatedAPIResponse = z.object({
 
 export type CheckPipelineAPIResponse = z.infer<typeof CheckPipelineAPIResponse>;
 export const CheckPipelineAPIResponse = z.object({
-  pipelineResults: PipelineResults,
-  errors: Errors.optional(),
+  results: z.object({
+    docs: Docs,
+  }),
 });
