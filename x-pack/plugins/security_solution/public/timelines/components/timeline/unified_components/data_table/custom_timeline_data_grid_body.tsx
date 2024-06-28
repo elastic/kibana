@@ -31,10 +31,14 @@ export type CustomTimelineDataGridBodyProps = EuiDataGridCustomBodyProps & {
   eventIdToNoteIds?: Record<string, string[]> | null;
   eventIdsAddingNotes?: Set<string>;
   onToggleShowNotes: (eventId?: string) => void;
+  rowHeight?: number;
   refetch?: () => void;
 };
 
 const emptyNotes: string[] = [];
+
+// THE DataGrid Row default is 34px, but we make ours 40 to account for our row actions
+const DEFAULT_UDT_ROW_HEIGHT = 40;
 
 /**
  *
@@ -56,6 +60,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
       visibleColumns,
       visibleRowData,
       rows,
+      rowHeight,
       enabledRowRenderers,
       events = [],
       eventIdToNoteIds = {},
@@ -98,6 +103,7 @@ export const CustomTimelineDataGridBody: FC<CustomTimelineDataGridBodyProps> = m
               rowIndex={rowIndex}
               key={rowIndex}
               visibleColumns={visibleColumns}
+              rowHeight={rowHeight}
               Cell={Cell}
               enabledRowRenderers={enabledRowRenderers}
               notes={notes}
@@ -127,7 +133,8 @@ const CustomGridRow = styled.div.attrs<{
   width: fit-content;
   border-bottom: 1px solid ${(props) => (props.theme as EuiTheme).eui.euiBorderThin};
   . euiDataGridRowCell--controlColumn {
-    height: 40px;
+    height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
+    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
   }
   .udt--customRow {
     border-radius: 0;
@@ -160,10 +167,15 @@ const CustomGridRowCellWrapper = styled.div.attrs<{
 }))`
   display: flex;
   align-items: center;
-  height: 36px;
+  height: ${(props: { $cssRowHeight: string }) => props.$cssRowHeight};
   .euiDataGridRowCell,
   .euiDataGridRowCell__content {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     height: 100%;
+    min-height: ${DEFAULT_UDT_ROW_HEIGHT}px;
     .unifiedDataTable__rowControl {
       margin-top: 0;
     }
@@ -182,8 +194,18 @@ type CustomTimelineDataGridSingleRowProps = {
   onToggleShowNotes: (eventId?: string) => void;
 } & Pick<
   CustomTimelineDataGridBodyProps,
-  'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch'
+  'visibleColumns' | 'Cell' | 'enabledRowRenderers' | 'refetch' | 'rowHeight'
 >;
+
+const calculateRowHeightInPixels = (lineHeightMultiple: number): string => {
+  // The line height multiple can be negative to indicate "auto" in the unified data table
+  if (lineHeightMultiple < 0) return 'auto';
+  // The base line-height in pixels is 16px. This would be calculated default by the datagird and we could use
+  // the `configRowHeight` prop, but since we own control of our rows via `customGridBody` we have to calculate it ourselves.
+  const baseRowLineHeightInPx = 16;
+  const rowHeightInPixels = DEFAULT_UDT_ROW_HEIGHT + baseRowLineHeightInPx * lineHeightMultiple;
+  return `${rowHeightInPixels}px`;
+};
 
 /**
  *
@@ -204,6 +226,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     eventId = '',
     onToggleShowNotes,
     refetch,
+    rowHeight: rowHeightMultiple = 0,
   } = props;
   const dispatch = useDispatch();
   const { canShowRowRenderer } = useStatefulRowRenderer({
@@ -211,6 +234,7 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
     rowRenderers: enabledRowRenderers,
   });
 
+  const cssRowHeight: string = calculateRowHeightInPixels(rowHeightMultiple);
   /**
    * removes the border between the actual row ( timelineEvent) and `TimelineEventDetail` row
    * which renders the row-renderer, notes and notes editor
@@ -250,9 +274,10 @@ const CustomDataGridSingleRow = memo(function CustomDataGridSingleRow(
   return (
     <CustomGridRow
       className={`${rowIndex % 2 === 0 ? 'euiDataGridRow--striped' : ''}`}
+      $cssRowHeight={cssRowHeight}
       key={rowIndex}
     >
-      <CustomGridRowCellWrapper className={eventTypeRowClassName}>
+      <CustomGridRowCellWrapper className={eventTypeRowClassName} $cssRowHeight={cssRowHeight}>
         {visibleColumns.map((column, colIndex) => {
           // Skip the expanded row cell - we'll render it manually outside of the flex wrapper
           if (column.id !== TIMELINE_EVENT_DETAIL_ROW_ID) {
