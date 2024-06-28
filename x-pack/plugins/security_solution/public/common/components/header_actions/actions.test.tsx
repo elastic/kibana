@@ -98,6 +98,7 @@ const defaultProps = {
   checked: false,
   columnId: '',
   columnValues: 'abc def',
+  disableExpandAction: false,
   data: mockTimelineData[0].data,
   ecsData: mockTimelineData[0].ecs,
   eventId: 'abc',
@@ -426,6 +427,18 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('Expand action', () => {
+    test('should not be visible if disableExpandAction is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toBeFalsy();
     });
   });
 });
