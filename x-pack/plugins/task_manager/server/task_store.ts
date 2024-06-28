@@ -26,6 +26,7 @@ import {
 
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result } from './lib/result_type';
+import { recommendRunAt } from './lib/recommend_run_at';
 
 import {
   ConcreteTaskInstance,
@@ -167,6 +168,12 @@ export class TaskStore {
     try {
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+      if (!validatedTaskInstance.runAt && validatedTaskInstance.schedule?.interval) {
+        validatedTaskInstance.runAt = await recommendRunAt({
+          taskStore: this,
+          interval: validatedTaskInstance.schedule?.interval,
+        });
+      }
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
         'task',
         taskInstanceToAttributes(validatedTaskInstance),
