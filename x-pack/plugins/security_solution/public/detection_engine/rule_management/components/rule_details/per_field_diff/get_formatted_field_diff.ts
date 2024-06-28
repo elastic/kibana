@@ -114,6 +114,12 @@ export const getFormattedFieldDiffGroups = (
       };
     default:
       const fieldThreeWayDiff = (fields as AllFieldsDiff)[fieldName];
+      if (fieldThreeWayDiff === undefined) {
+        return {
+          shouldShowSubtitles: false,
+          fieldDiffs: [],
+        };
+      }
       const currentVersionField = sortAndStringifyJson(fieldThreeWayDiff.current_version);
       const targetVersionField = sortAndStringifyJson(fieldThreeWayDiff.target_version);
       return {
