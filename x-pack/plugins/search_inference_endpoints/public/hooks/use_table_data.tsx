@@ -41,15 +41,13 @@ export const useTableData = (
 
     if (filterOptions.provider.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
-        filterOptions.provider.includes(
-          ServiceProviderKeys[endpoint.service as keyof typeof ServiceProviderKeys]
-        )
+        filterOptions.provider.includes(ServiceProviderKeys[endpoint.service])
       );
     }
 
     if (filterOptions.type.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
-        filterOptions.type.includes(TaskTypes[endpoint.task_type as keyof typeof TaskTypes])
+        filterOptions.type.includes(TaskTypes[endpoint.task_type])
       );
     }
 

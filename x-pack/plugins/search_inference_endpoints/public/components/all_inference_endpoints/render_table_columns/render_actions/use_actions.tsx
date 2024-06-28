@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import type {
-  EuiTableComputedColumnType,
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiTableComputedColumnType } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
 import { InferenceEndpointUI } from '../../types';
 import { useCopyIDAction } from './actions/copy_id/use_copy_id_action';
-import { useDeleteAction } from './actions/delete/use_delete_action';
 import { ConfirmDeleteEndpointModal } from './actions/delete/confirm_delete_endpoint';
+import { useDeleteAction } from './actions/delete/use_delete_action';
 
 export const ActionColumn: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> = ({
   interfaceEndpoint,
@@ -32,15 +28,10 @@ export const ActionColumn: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> 
     onActionSuccess: closePopover,
   });
 
-  const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
-    const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
-    const panelsToBuild: EuiContextMenuPanelDescriptor[] = [{ id: 0, items: mainPanelItems }];
-
-    mainPanelItems.push(copyIDAction.getAction(interfaceEndpoint));
-    mainPanelItems.push(deleteAction.getAction(interfaceEndpoint));
-
-    return panelsToBuild;
-  }, [copyIDAction, deleteAction, interfaceEndpoint]);
+  const items = [
+    copyIDAction.getAction(interfaceEndpoint),
+    deleteAction.getAction(interfaceEndpoint),
+  ];
 
   return (
     <>
@@ -62,11 +53,7 @@ export const ActionColumn: React.FC<{ interfaceEndpoint: InferenceEndpointUI }> 
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={panels}
-          key={`inference-action-menu-${interfaceEndpoint.endpoint}`}
-        />
+        <EuiContextMenuPanel size="s" items={items} />
       </EuiPopover>
       {deleteAction.isModalVisible ? (
         <ConfirmDeleteEndpointModal
