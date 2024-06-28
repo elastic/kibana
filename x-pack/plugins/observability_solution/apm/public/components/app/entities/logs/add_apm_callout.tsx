@@ -8,11 +8,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -64,14 +62,12 @@ export function AddAPMCallOut() {
           <EuiSpacer size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem grow={false}
-        <div>
-          <EuiButton data-test-subj="" href={core.http.basePath.prepend('/app/apm/tutorial')}>
-            {i18n.translate('xpack.apm.servicesTable.notAvailableApmMetrics.footer', {
-              defaultMessage: 'Add APM',
-            })}
-          </EuiButton>
-        </div>
+      <EuiFlexItem grow={false}>
+        <EuiButton data-test-subj="" href={core.http.basePath.prepend('/app/apm/tutorial')}>
+          {i18n.translate('xpack.apm.servicesTable.notAvailableApmMetrics.footer', {
+            defaultMessage: 'Add APM',
+          })}
+        </EuiButton>
       </EuiFlexItem>
     </EuiPanel>
   );
