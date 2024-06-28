@@ -443,7 +443,7 @@ export function updateIndexMappings(indexName: string, newFields: Fields) {
 }
 
 export function getInferenceModels() {
-  return sendRequest({
+  return sendRequest<InferenceAPIConfigResponse[]>({
     path: `${API_BASE_PATH}/inference/all`,
     method: 'get',
   });

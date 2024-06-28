@@ -39,16 +39,13 @@ import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/compon
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
-import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
-import {
-  CustomInferenceEndpointConfig,
-  DefaultInferenceModels,
-  DeploymentState,
-} from '../../../types';
+import { CustomInferenceEndpointConfig, DeploymentState } from '../../../types';
+import { UseField } from '../../../shared_imports';
+import { useDispatch, useMappingsState } from '../../../mappings_state_context';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
   {
@@ -62,34 +59,26 @@ const uncheckSelectedModelOption = (options: EuiSelectableOption[]) => {
   }
 };
 interface Props {
-  onChange(value: string): void;
   'data-test-subj'?: string;
-  setValue: (value: string) => void;
-  setNewInferenceEndpoint: (
-    newInferenceEndpoint: InferenceToModelIdMap,
-    customInferenceEndpointConfig: CustomInferenceEndpointConfig
-  ) => void;
+  setCustomInferenceEndpointConfig: (config: CustomInferenceEndpointConfig) => void;
 }
-export const SelectInferenceId = ({
-  onChange,
+export const SelectInferenceId: React.FC<Props> = ({
   'data-test-subj': dataTestSubj,
-  setValue,
-  setNewInferenceEndpoint,
+  setCustomInferenceEndpointConfig,
 }: Props) => {
   const {
     core: { application },
     docLinks,
     plugins: { ml },
   } = useAppContext();
+  const dispatch = useDispatch();
+  const { inferenceToModelIdMap } = useMappingsState();
 
   const getMlTrainedModelPageUrl = useCallback(async () => {
     return await ml?.locator?.getUrl({
       page: 'trained_models',
     });
   }, [ml]);
-
-  const { form } = useForm({ defaultValue: { main: DefaultInferenceModels.elser_model_2 } });
-  const { subscribe } = form;
 
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [availableTrainedModels, setAvailableTrainedModels] = useState<
@@ -193,26 +182,30 @@ export const SelectInferenceId = ({
           taskType,
           modelConfig,
         };
-        setNewInferenceEndpoint(newModelId, customInferenceEndpointConfig);
+        dispatch({
+          type: 'inferenceToModelIdMap.update',
+          value: {
+            inferenceToModelIdMap: {
+              ...inferenceToModelIdMap,
+              ...newModelId,
+            },
+          },
+        });
+        setCustomInferenceEndpointConfig(customInferenceEndpointConfig);
       } catch (error) {
         showErrorToasts(error);
       }
     },
-    [isInferenceFlyoutVisible, ml, setNewInferenceEndpoint, options, showErrorToasts]
+    [
+      dispatch,
+      inferenceToModelIdMap,
+      isInferenceFlyoutVisible,
+      ml?.mlApi?.trainedModels,
+      options,
+      setCustomInferenceEndpointConfig,
+      showErrorToasts,
+    ]
   );
-  useEffect(() => {
-    const subscription = subscribe((updateData) => {
-      const formData = updateData.data.internal;
-      const value = formData.main;
-      onChange(value);
-    });
-
-    return subscription.unsubscribe;
-  }, [subscribe, onChange]);
-  const selectedOptionLabel = options.find((option) => option.checked)?.label;
-  useEffect(() => {
-    setValue(selectedOptionLabel ?? DefaultInferenceModels.elser_model_2);
-  }, [selectedOptionLabel, setValue]);
   const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
   const [inferenceEndpointError, setInferenceEndpointError] = useState<string | undefined>(
     undefined
@@ -221,7 +214,15 @@ export const SelectInferenceId = ({
     async (inferenceId: string) => {
       const modelsExist = options.some((i) => i.label === inferenceId);
       if (modelsExist) {
-        setInferenceEndpointError('Inference Endpoint id already exists');
+        setInferenceEndpointError(
+          i18n.translate(
+            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultLabel',
+            {
+              defaultMessage: 'Inference endpoint {inferenceId} already exists',
+              values: { inferenceId },
+            }
+          )
+        );
       } else {
         setInferenceEndpointError(undefined);
       }
@@ -229,139 +230,141 @@ export const SelectInferenceId = ({
     [options]
   );
 
+  const selectedOptionLabel = options.find((option) => option.checked)?.label;
+
   const inferencePopover = () => {
     return (
-      <EuiPopover
-        button={
-          <>
-            <UseField path="main" config={fieldConfigModelId}>
-              {(field) => (
-                <>
-                  <EuiText size="xs">
-                    <p>
-                      <strong>{field.label}</strong>
-                    </p>
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <EuiButton
-                    iconType="arrowDown"
-                    iconSide="right"
-                    color="text"
-                    data-test-subj="inferenceIdButton"
-                    onClick={() => {
-                      setIsInferencePopoverVisible(!isInferencePopoverVisible);
-                    }}
-                  >
-                    {selectedOptionLabel ||
-                      i18n.translate(
-                        'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultLabel',
-                        {
-                          defaultMessage: 'No model selected',
-                        }
-                      )}
-                  </EuiButton>
-                </>
-              )}
-            </UseField>
-          </>
-        }
-        isOpen={isInferencePopoverVisible}
-        panelPaddingSize="m"
-        closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
-      >
-        <EuiContextMenuPanel>
-          <EuiContextMenuItem
-            key="addInferenceEndpoint"
-            icon="plusInCircle"
-            size="s"
-            data-test-subj="addInferenceEndpointButton"
-            onClick={() => {
-              setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-              setInferenceEndpointError(undefined);
-              setIsInferencePopoverVisible(!isInferencePopoverVisible);
-            }}
-          >
-            {i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.addInferenceEndpointButton',
-              {
-                defaultMessage: 'Add inference Endpoint',
-              }
-            )}
-          </EuiContextMenuItem>
-          <EuiHorizontalRule margin="none" />
-          <EuiContextMenuItem
-            key="manageInferenceEndpointButton"
-            icon="gear"
-            size="s"
-            data-test-subj="manageInferenceEndpointButton"
-            onClick={async () => {
-              const mlTrainedPageUrl = await getMlTrainedModelPageUrl();
-              if (typeof mlTrainedPageUrl === 'string') {
-                application.navigateToUrl(mlTrainedPageUrl);
-              }
-            }}
-          >
-            {i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
-              {
-                defaultMessage: 'Manage Inference Endpoint',
-              }
-            )}
-          </EuiContextMenuItem>
-        </EuiContextMenuPanel>
-        <EuiHorizontalRule margin="none" />
-        <EuiPanel color="transparent" paddingSize="s">
-          <EuiTitle size="xxxs">
-            <h3>
-              {i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
-                {
-                  defaultMessage: 'Existing endpoints',
-                }
-              )}
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="xs" />
-
-          <EuiSelectable
-            aria-label={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
-              {
-                defaultMessage: 'Search',
-              }
-            )}
-            data-test-subj={dataTestSubj}
-            searchable
-            isLoading={isLoading}
-            singleSelection="always"
-            searchProps={{
-              compressed: true,
-              placeholder: i18n.translate(
-                'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
-                {
-                  defaultMessage: 'Search',
-                }
-              ),
-            }}
-            options={options}
-            onChange={(newOptions) => {
-              setOptions(newOptions);
-              setIsInferencePopoverVisible(!isInferencePopoverVisible);
-            }}
-          >
-            {(list, search) => (
+      <UseField path="inference_id" config={fieldConfigModelId}>
+        {(field) => (
+          <EuiPopover
+            button={
               <>
-                {search}
-                {list}
+                <EuiText size="xs">
+                  <p>
+                    <strong>{field.label}</strong>
+                  </p>
+                </EuiText>
+                <EuiSpacer size="xs" />
+                <EuiButton
+                  iconType="arrowDown"
+                  iconSide="right"
+                  color="text"
+                  data-test-subj="inferenceIdButton"
+                  onClick={() => {
+                    setIsInferencePopoverVisible(!isInferencePopoverVisible);
+                  }}
+                >
+                  {selectedOptionLabel ||
+                    i18n.translate(
+                      'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultLabel',
+                      {
+                        defaultMessage: 'No inference endpoint selected',
+                      }
+                    )}
+                </EuiButton>
               </>
-            )}
-          </EuiSelectable>
-        </EuiPanel>
-      </EuiPopover>
+            }
+            isOpen={isInferencePopoverVisible}
+            panelPaddingSize="m"
+            closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
+          >
+            <EuiContextMenuPanel>
+              <EuiContextMenuItem
+                key="addInferenceEndpoint"
+                icon="plusInCircle"
+                size="s"
+                data-test-subj="addInferenceEndpointButton"
+                onClick={() => {
+                  setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+                  setInferenceEndpointError(undefined);
+                  setIsInferencePopoverVisible(!isInferencePopoverVisible);
+                }}
+              >
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.addInferenceEndpointButton',
+                  {
+                    defaultMessage: 'Add inference Endpoint',
+                  }
+                )}
+              </EuiContextMenuItem>
+              <EuiHorizontalRule margin="none" />
+              <EuiContextMenuItem
+                key="manageInferenceEndpointButton"
+                icon="gear"
+                size="s"
+                data-test-subj="manageInferenceEndpointButton"
+                onClick={async () => {
+                  const mlTrainedPageUrl = await getMlTrainedModelPageUrl();
+                  if (typeof mlTrainedPageUrl === 'string') {
+                    application.navigateToUrl(mlTrainedPageUrl);
+                  }
+                }}
+              >
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.manageInferenceEndpointButton',
+                  {
+                    defaultMessage: 'Manage Inference Endpoint',
+                  }
+                )}
+              </EuiContextMenuItem>
+            </EuiContextMenuPanel>
+            <EuiHorizontalRule margin="none" />
+            <EuiPanel color="transparent" paddingSize="s">
+              <EuiTitle size="xxxs">
+                <h3>
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
+                    {
+                      defaultMessage: 'Existing endpoints',
+                    }
+                  )}
+                </h3>
+              </EuiTitle>
+              <EuiSpacer size="xs" />
+
+              <EuiSelectable
+                aria-label={i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
+                  {
+                    defaultMessage: 'Search',
+                  }
+                )}
+                data-test-subj={dataTestSubj}
+                searchable
+                isLoading={isLoading}
+                singleSelection="always"
+                searchProps={{
+                  compressed: true,
+                  placeholder: i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
+                    {
+                      defaultMessage: 'Search',
+                    }
+                  ),
+                }}
+                options={options}
+                onChange={(newOptions) => {
+                  setOptions(newOptions);
+                  field.setValue(newOptions.find((option) => option.checked)?.label);
+                  setIsInferencePopoverVisible(!isInferencePopoverVisible);
+                }}
+              >
+                {(list, search) => (
+                  <>
+                    {search}
+                    {list}
+                  </>
+                )}
+              </EuiSelectable>
+            </EuiPanel>
+          </EuiPopover>
+        )}
+      </UseField>
     );
   };
   return (
-    <Form form={form}>
+    <>
+      <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId">
         <EuiFlexItem grow={false}>
           {inferencePopover()}
@@ -395,6 +398,6 @@ export const SelectInferenceId = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Form>
+    </>
   );
 };

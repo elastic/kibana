@@ -28,6 +28,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ILicense } from '@kbn/licensing-plugin/public';
+import { cloneDeep } from 'lodash';
+import { getFieldByPathName } from '../../../../components/mappings_editor/reducer';
 import { Index } from '../../../../../../common';
 import { useDetailsPageMappingsModelManagement } from '../../../../../hooks/use_details_page_mappings_model_management';
 import { useAppContext } from '../../../../app_context';
@@ -46,7 +48,11 @@ import {
   getFieldsFromState,
   getFieldsMatchingFilterFromState,
 } from '../../../../components/mappings_editor/lib';
-import { NormalizedFields, State } from '../../../../components/mappings_editor/types';
+import {
+  NormalizedField,
+  NormalizedFields,
+  State,
+} from '../../../../components/mappings_editor/types';
 import { MappingsFilter } from './details_page_filter_fields';
 
 import { useMappingsStateListener } from '../../../../components/mappings_editor/use_state_listener';
@@ -210,8 +216,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   }, [fetchInferenceToModelIdMap, isSemanticTextEnabled, hasMLPermissions]);
 
   const updateMappings = useCallback(async () => {
+    const hasSemanticText = hasSemanticTextField(state.fields);
     try {
-      if (isSemanticTextEnabled && hasMLPermissions) {
+      if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText) {
         await fetchInferenceToModelIdMap();
 
         if (pendingDeployments.length > 0) {
@@ -220,7 +227,9 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         }
       }
 
-      const denormalizedFields = deNormalize(state.fields);
+      const fields = hasSemanticText ? getStateWithCopyToFields(state).fields : state.fields;
+
+      const denormalizedFields = deNormalize(fields);
 
       const { error } = await updateIndexMappings(indexName, denormalizedFields);
 
@@ -474,7 +483,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
                   >
                     <FormattedMessage
                       id="xpack.idxMgmt.indexDetails.mappings.saveMappings"
-                      defaultMessage="Save mappings"
+                      defaultMessage="Save mapping"
                     />
                   </EuiButton>
                 )}
@@ -593,3 +602,78 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     </>
   );
 };
+
+function hasSemanticTextField(fields: NormalizedFields): boolean {
+  return Object.values(fields.byId).some((field) => field.source.type === 'semantic_text');
+}
+
+function getStateWithCopyToFields(state: State): State {
+  // Make sure we don't accidentally modify existing state
+  let updatedState = cloneDeep(state);
+  for (const field of Object.values(updatedState.fields.byId)) {
+    if (field.source.type === 'semantic_text' && field.source.reference_field) {
+      // Check fields already added to the list of to-update fields first
+      // API will not accept referenceField so removing it now
+      const { reference_field: referenceField, ...source } = field.source;
+      if (typeof referenceField !== 'string') {
+        // should never happen
+        throw new Error('Reference field is not a string');
+      }
+      field.source = source;
+      const existingTextField =
+        getFieldByPathName(updatedState.fields, referenceField) ||
+        getFieldByPathName(updatedState.mappingViewFields, referenceField);
+      if (existingTextField) {
+        // Add copy_to to existing text field's copy_to array
+        const updatedTextField: NormalizedField = {
+          ...existingTextField,
+          source: {
+            ...existingTextField.source,
+            copy_to: existingTextField.source.copy_to
+              ? [
+                  ...(Array.isArray(existingTextField.source.copy_to)
+                    ? existingTextField.source.copy_to
+                    : [existingTextField.source.copy_to]),
+                  field.path.join('.'),
+                ]
+              : [field.path.join('.')],
+          },
+        };
+        updatedState = {
+          ...updatedState,
+          fields: {
+            ...updatedState.fields,
+            byId: {
+              ...updatedState.fields.byId,
+              [existingTextField.id]: updatedTextField,
+            },
+          },
+        };
+        if (existingTextField.parentId) {
+          let currentField = existingTextField;
+          let hasParent = true;
+          while (hasParent) {
+            if (!currentField.parentId) {
+              // reached the top of the tree, push current field to root level fields
+              updatedState.fields.rootLevelFields.push(currentField.id);
+              hasParent = false;
+            } else if (updatedState.fields.byId[currentField.parentId]) {
+              // parent is already in state, don't need to do anything
+              hasParent = false;
+            } else {
+              // parent is not in state yet
+              updatedState.fields.byId[currentField.parentId] =
+                updatedState.mappingViewFields.byId[currentField.parentId];
+              currentField = updatedState.fields.byId[currentField.parentId];
+            }
+          }
+        } else {
+          updatedState.fields.rootLevelFields.push(existingTextField.id);
+        }
+      } else {
+        throw new Error('Cannot save semantic text field with no reference field');
+      }
+    }
+  }
+  return updatedState;
+}
