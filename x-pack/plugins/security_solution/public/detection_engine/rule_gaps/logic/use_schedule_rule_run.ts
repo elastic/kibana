@@ -25,6 +25,7 @@ export function useScheduleRuleRun() {
         telemetry.reportManualRuleRunExecute({
           rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
           status: 'success',
+          rulesCount: options.ruleIds.length,
         });
         addSuccess(i18n.BACKFILL_SCHEDULE_SUCCESS(results.length));
         return results;
@@ -33,6 +34,7 @@ export function useScheduleRuleRun() {
         telemetry.reportManualRuleRunExecute({
           rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
           status: 'error',
+          rulesCount: options.ruleIds.length,
         });
       }
     },

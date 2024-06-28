@@ -13,6 +13,7 @@ export interface ReportManualRuleRunOpenModalParams {
 
 export interface ReportManualRuleRunExecuteParams {
   rangeInMs: number;
+  rulesCount: number;
   status: 'success' | 'error';
 }
 

@@ -40,6 +40,13 @@ export const manualRuleRunExecuteEvent: TelemetryEvent = {
         optional: false,
       },
     },
+    rulesCount: {
+      type: 'integer',
+      _meta: {
+        description: 'Number of rules that were executed in the manual rule run',
+        optional: false,
+      },
+    },
   },
 };
 
