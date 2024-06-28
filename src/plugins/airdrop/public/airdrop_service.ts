@@ -10,6 +10,8 @@ import { Airdrop, TRANSFER_DATA_TYPE } from '@kbn/airdrops';
 import { BehaviorSubject, filter, mergeMap, of, Subject } from 'rxjs';
 
 export class AirdropService {
+  static dropElement: HTMLElement | null = null;
+
   private documentEventListenersAdded = false;
   private _isDraggingOver$ = new BehaviorSubject<boolean>(false);
   private _isDragging$ = new BehaviorSubject<boolean>(false);
@@ -26,8 +28,12 @@ export class AirdropService {
     this._isDraggingOver$.subscribe((isDraggingOver) => {
       if (isDraggingOver) {
         document.body.style.setProperty('pointer-events', 'none');
+        AirdropService.dropElement?.style.setProperty('width', '100%');
+        AirdropService.dropElement?.style.setProperty('height', '100%');
       } else {
         document.body.style.setProperty('pointer-events', 'auto');
+        AirdropService.dropElement?.style.setProperty('width', '0');
+        AirdropService.dropElement?.style.setProperty('height', '0');
       }
     });
 
@@ -112,15 +118,17 @@ export class AirdropService {
       console.log('Kibana body not found');
       return null;
     }
-    const dropElement = document.createElement('div');
+    this.dropElement = document.createElement('div');
 
-    dropElement.style.cssText = `
-      position: relative;
-      z-index: 1000;
-    `;
-    kibanaBody.parentNode?.insertBefore(dropElement, kibanaBody.nextSibling);
+    this.dropElement.style.cssText = `
+      position: fixed;
+      z-index: 10000;
+      top: 0;
+      left: 0;
+      `;
+    kibanaBody.appendChild(this.dropElement);
 
-    return dropElement;
+    return this.dropElement;
   }
 
   static async getKibanaBody(attempt = 0): Promise<HTMLElement | null> {

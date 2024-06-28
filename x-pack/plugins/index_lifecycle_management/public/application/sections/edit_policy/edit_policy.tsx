@@ -55,8 +55,7 @@ import { useEditPolicyContext } from './edit_policy_context';
 import { FormInternal } from './types';
 
 const policyNamePath = 'name';
-
-console.log(AirdropDragButton);
+const DROP_ID = 'edit_policy';
 
 export const EditPolicy: React.FunctionComponent = () => {
   useEffect(() => {
@@ -75,6 +74,7 @@ export const EditPolicy: React.FunctionComponent = () => {
   const {
     services: { cloud, docLinks },
   } = useKibana();
+  const airdropForm = useOnDrop<SerializedPolicy>({ id: DROP_ID });
 
   const [isClonedPolicy, setIsClonedPolicy] = useState(false);
   const originalPolicyName: string = isNewPolicy ? '' : policyName!;
@@ -155,6 +155,17 @@ export const EditPolicy: React.FunctionComponent = () => {
     setIsShowingPolicyJsonFlyout(!isShowingPolicyJsonFlyout);
   };
 
+  const { reset } = form;
+
+  useEffect(() => {
+    if (airdropForm) {
+      reset({
+        resetValues: true,
+        defaultValue: airdropForm.content,
+      });
+    }
+  }, [airdropForm, reset]);
+
   return (
     <>
       <EuiPageHeader
@@ -172,16 +183,17 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          // <AirdropDragButton<SerializedPolicy>
-          //   content={{
-          //     id: 'edit_policy',
-          //     get: () => {
-          //       const _formData = form.getFormData();
-          //       console.log(_formData);
-          //       return _formData;
-          //     },
-          //   }}
-          // />,
+          <AirdropDragButton<SerializedPolicy>
+            content={{
+              id: DROP_ID,
+              get: () => {
+                return {
+                  ...form.getFormData(),
+                  name: getPolicyName(),
+                };
+              },
+            }}
+          />,
           <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"

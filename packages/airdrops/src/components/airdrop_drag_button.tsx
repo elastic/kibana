@@ -11,17 +11,12 @@ import { EuiButtonIcon, EuiButtonIconProps } from '@elastic/eui';
 
 import { DragWrapper, Props as DragWrapperProps } from './drag_wrapper';
 
-interface Props<T extends Record<string, unknown> = Record<string, unknown>>
-  extends Omit<DragWrapperProps<T>, 'children'> {
+interface Props<T = Record<string, unknown>> extends Omit<DragWrapperProps<T>, 'children'> {
   size?: EuiButtonIconProps['size'];
   iconSize?: EuiButtonIconProps['iconSize'];
 }
 
-export function AirdropDragButtonr<T extends Record<string, unknown>>({
-  size = 's',
-  iconSize = 'm',
-  ...rest
-}: Props<T>) {
+export function AirdropDragButton<T>({ size = 's', iconSize = 'm', ...rest }: Props<T>) {
   return (
     <DragWrapper {...rest}>
       <EuiButtonIcon

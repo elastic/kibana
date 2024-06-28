@@ -57,7 +57,6 @@ export class IndexLifecycleManagementPlugin
             executionContext,
           } = coreStart;
 
-          console.log('airdrop', airdrop);
           const license = await firstValueFrom(licensing.license$);
 
           docTitle.change(PLUGIN.TITLE);

@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useAirdrop } from './services';
 
-export const useOnDrop = <T extends Record<string, unknown>>({ id }: { id: string }) => {
+export const useOnDrop = <T>({ id }: { id: string }) => {
   const { getAirdrop$For } = useAirdrop();
   const airdrop$ = useMemo(() => getAirdrop$For<T>(id), [getAirdrop$For, id]);
   const airdrop = useObservable(airdrop$);

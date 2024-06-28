@@ -22,11 +22,10 @@ export const AirdropOverlay: FC<Props> = ({ airdropService }) => {
         <div
           css={{
             backgroundColor: 'rgba(0, 119, 204, 0.3)',
-            height: '100vh',
+            height: '100%',
             left: 0,
             position: 'absolute',
             top: 0,
-            transform: 'translateY(-100%)',
             width: '100%',
             zIndex: 1,
           }}

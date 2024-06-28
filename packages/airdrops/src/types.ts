@@ -15,10 +15,7 @@ import type { Observable } from 'rxjs';
 export interface AirdropServices {
   isDraggingOver$: Observable<boolean>;
   setIsDragging: (isDragging: boolean) => void;
-  getAirdrop$For: <T extends Record<string, unknown>>(
-    id: string,
-    app?: string
-  ) => Observable<Airdrop<T>>;
+  getAirdrop$For: <T>(id: string, app?: string) => Observable<Airdrop<T>>;
 }
 
 /**
