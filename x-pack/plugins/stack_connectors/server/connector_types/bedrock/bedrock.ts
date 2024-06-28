@@ -78,6 +78,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       method: 'runApi',
       schema: RunActionParamsSchema,
     });
+
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
@@ -305,11 +306,14 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     stopSequences,
     system,
     temperature,
+    maxTokens,
     signal,
     timeout,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
-      body: JSON.stringify(formatBedrockBody({ messages, stopSequences, system, temperature })),
+      body: JSON.stringify(
+        formatBedrockBody({ messages, stopSequences, system, temperature, maxTokens })
+      ),
       model,
       signal,
       timeout,
@@ -323,16 +327,18 @@ const formatBedrockBody = ({
   stopSequences,
   temperature = 0,
   system,
+  maxTokens = DEFAULT_TOKEN_LIMIT,
 }: {
   messages: Array<{ role: string; content: string }>;
   stopSequences?: string[];
   temperature?: number;
+  maxTokens?: number;
   // optional system message to be sent to the API
   system?: string;
 }) => ({
   anthropic_version: 'bedrock-2023-05-31',
   ...ensureMessageFormat(messages, system),
-  max_tokens: DEFAULT_TOKEN_LIMIT,
+  max_tokens: maxTokens,
   stop_sequences: stopSequences,
   temperature,
 });
@@ -351,6 +357,11 @@ const ensureMessageFormat = (
 
   const newMessages = messages.reduce((acc: Array<{ role: string; content: string }>, m) => {
     const lastMessage = acc[acc.length - 1];
+    if (m.role === 'system') {
+      system = `${system.length ? `${system}\n` : ''}${m.content}`;
+      return acc;
+    }
+
     if (lastMessage && lastMessage.role === m.role) {
       // Bedrock only accepts assistant and user roles.
       // If 2 user or 2 assistant messages are sent in a row, combine the messages into a single message
@@ -359,13 +370,12 @@ const ensureMessageFormat = (
         { content: `${lastMessage.content}\n${m.content}`, role: m.role },
       ];
     }
-    if (m.role === 'system') {
-      system = `${system.length ? `${system}\n` : ''}${m.content}`;
-      return acc;
-    }
 
     // force role outside of system to ensure it is either assistant or user
-    return [...acc, { content: m.content, role: m.role === 'assistant' ? 'assistant' : 'user' }];
+    return [
+      ...acc,
+      { content: m.content, role: ['assistant', 'ai'].includes(m.role) ? 'assistant' : 'user' },
+    ];
   }, []);
   return system.length ? { system, messages: newMessages } : { messages: newMessages };
 };

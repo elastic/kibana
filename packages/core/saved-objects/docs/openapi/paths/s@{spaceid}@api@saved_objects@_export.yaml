@@ -1,0 +1,41 @@
+post:
+  summary: Export saved objects
+  operationId: exportSavedObjects
+  description: |
+    Retrieves sets of saved objects that you want to import into Kibana.
+    You must include `type` or `objects` in the request body.
+
+    NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be exported.
+
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/export_objects_request.yaml'
+        examples:
+          exportSavedObjectsRequest:
+            $ref: '../components/examples/export_objects_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/x-ndjson:
+          schema:
+            type: object
+            additionalProperties: true
+          examples:
+            exportSavedObjectsResponse:
+              $ref: '../components/examples/export_objects_response.yaml'
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

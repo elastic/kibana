@@ -8,7 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 
-import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -88,6 +88,7 @@ export interface PluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {

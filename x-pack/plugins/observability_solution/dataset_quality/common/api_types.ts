@@ -7,9 +7,26 @@
 
 import * as rt from 'io-ts';
 
+const userPrivilegesRt = rt.type({
+  canMonitor: rt.boolean,
+});
+
+export type DataStreamUserPrivileges = rt.TypeOf<typeof userPrivilegesRt>;
+
+const datasetUserPrivilegesRt = rt.intersection([
+  userPrivilegesRt,
+  rt.type({
+    canRead: rt.boolean,
+    canViewIntegrations: rt.boolean,
+  }),
+]);
+
+export type DatasetUserPrivileges = rt.TypeOf<typeof datasetUserPrivilegesRt>;
+
 export const dataStreamStatRt = rt.intersection([
   rt.type({
     name: rt.string,
+    userPrivileges: userPrivilegesRt,
   }),
   rt.partial({
     size: rt.string,
@@ -111,12 +128,14 @@ export const dataStreamDetailsRt = rt.partial({
   sizeBytes: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
   services: rt.record(rt.string, rt.array(rt.string)),
   hosts: rt.record(rt.string, rt.array(rt.string)),
+  userPrivileges: userPrivilegesRt,
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
 
 export const getDataStreamsStatsResponseRt = rt.exact(
   rt.type({
+    datasetUserPrivileges: datasetUserPrivilegesRt,
     dataStreamsStats: rt.array(dataStreamStatRt),
   })
 );

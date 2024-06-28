@@ -44,6 +44,7 @@
     "@kbn/unified-search-plugin",
     "@kbn/xstate-utils",
     "@kbn/esql-utils",
+    "@kbn/data-view-utils",
   ],
   "exclude": [
     "target/**/*"

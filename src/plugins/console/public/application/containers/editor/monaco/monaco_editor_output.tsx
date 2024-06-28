@@ -93,6 +93,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
         </label>
       </EuiScreenReaderOnly>
       <CodeEditor
+        dataTestSubj={'consoleMonacoOutput'}
         languageId={mode}
         value={value}
         fullWidth={true}

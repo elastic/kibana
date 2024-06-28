@@ -8,3 +8,5 @@
 
 export * from './types';
 export * from './utils';
+
+export * from './logs_context_service';
