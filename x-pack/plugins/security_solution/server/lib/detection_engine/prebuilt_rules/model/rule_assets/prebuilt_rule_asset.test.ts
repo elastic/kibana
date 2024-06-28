@@ -36,7 +36,6 @@ describe('Prebuilt rule asset schema', () => {
   // but the following fields are manually omitted.
   // See: detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts
   const omittedFields = [
-    'alert_suppression',
     'actions',
     'throttle',
     'meta',
