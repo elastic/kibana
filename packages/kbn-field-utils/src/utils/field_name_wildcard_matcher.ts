@@ -7,7 +7,7 @@
  */
 
 import { escapeRegExp, memoize } from 'lodash';
-import levenshtein from 'js-levenshtein';
+import { distance } from 'fastest-levenshtein';
 
 const makeRegEx = memoize(function makeRegEx(glob: string) {
   const trimmedGlob = glob.trim();
@@ -91,7 +91,7 @@ const testFuzzySearchForString = (label: string | undefined, searchValue: string
 };
 
 const compareLevenshtein = (str1: string, str2: string) =>
-  levenshtein(str1, str2) <= FUZZY_SEARCH_DISTANCE;
+  distance(str1, str2) <= FUZZY_SEARCH_DISTANCE;
 
 /**
  * Adapts fieldNameWildcardMatcher to combobox props.
