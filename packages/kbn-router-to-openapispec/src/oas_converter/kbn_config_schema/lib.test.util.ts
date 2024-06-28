@@ -34,27 +34,3 @@ export function createLargeSchema() {
     any: schema.any({ meta: { description: 'any type' } }),
   });
 }
-
-export function createSharedSchema() {
-  return schema.object({
-    string: schema.string({ maxLength: 10, minLength: 1 }),
-    maybeNumber: schema.maybe(schema.number({ max: 1000, min: 1 })),
-    booleanDefault: schema.boolean({
-      defaultValue: true,
-      meta: {
-        description: 'defaults to to true',
-      },
-    }),
-    ipType: schema.ip({ versions: ['ipv4'] }),
-    literalType: schema.literal('literallythis'),
-    record: schema.recordOf(schema.string(), schema.string()),
-    union: schema.oneOf([
-      schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
-      schema.number({ min: 0, meta: { description: 'Union number' } }),
-    ]),
-    uri: schema.uri({
-      scheme: ['prototest'],
-      defaultValue: () => 'prototest://something',
-    }),
-  });
-}
