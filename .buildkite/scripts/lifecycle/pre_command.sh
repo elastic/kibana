@@ -12,7 +12,7 @@ else
   source .buildkite/scripts/common/setup_node.sh
   source .buildkite/scripts/common/setup_buildkite_deps.sh
 
-  echo '--- Agent Debug'
+  echo '--- Agent Debug Info'
   ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 fi
 
