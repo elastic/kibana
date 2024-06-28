@@ -21,6 +21,9 @@ export function checkAccessRoute(server: MonitoringCore) {
     method: 'get',
     path: '/api/monitoring/v1/check_access',
     validate: {},
+    options: {
+      access: 'internal',
+    },
     handler: async (req: LegacyRequest) => {
       const response: { has_access?: boolean } = {};
       try {

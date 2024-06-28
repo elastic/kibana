@@ -23,7 +23,7 @@ import type {
   LogsEndpointActionResponse,
   UploadedFileInfo,
   ResponseActionScanOutputContent,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -152,5 +152,5 @@ export interface ResponseActionsClient {
   scan: (
     actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
     options?: CommonResponseActionMethodOptions
-  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>>;
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>>;
 }

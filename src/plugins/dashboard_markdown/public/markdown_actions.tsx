@@ -9,7 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  ADD_PANEL_TRIGGER,
+  IncompatibleActionError,
+  UiActionsStart,
+} from '@kbn/ui-actions-plugin/public';
 import { ADD_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
 
@@ -39,7 +43,7 @@ export const registerMarkdownActions = (uiActions: UiActionsStart) => {
         defaultMessage: 'Markdown',
       }),
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_MARKDOWN_ACTION_ID);
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_MARKDOWN_ACTION_ID);
   if (uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
     // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
     // the create action if the Canvas-specific trigger does indeed exist.

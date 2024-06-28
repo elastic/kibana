@@ -470,10 +470,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/asset_manager/README.md[assetManager]
-|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/assets_data_access[assetsDataAccess]
 |WARNING: Missing README.
 
@@ -571,6 +567,10 @@ security and spaces filtering.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/enterprise_search/README.md[enterpriseSearch]
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/entity_manager/README.md[entityManager]
+|This plugin provides access to observed asset data, such as information about hosts, pods, containers, services, and more.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/event_log/README.md[eventLog]
