@@ -99,7 +99,7 @@ export type TranslatedEntriesOfDescendantOf = t.TypeOf<typeof translatedEntriesO
 
 export const translatedEntryDescendantOf = t.exact(
   t.type({
-    // todo: do we need operator?
+    operator,
     type: t.keyof({ descendent_of: null }),
     value: t.type({
       entries: t.array(translatedEntriesOfDescendantOf),

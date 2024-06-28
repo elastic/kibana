@@ -208,6 +208,7 @@ export function translateToEndpointExceptions(
           type: entry.type,
           entries: [
             {
+              operator: 'included',
               type: 'descendent_of',
               value: {
                 entries: [translatedEntries],

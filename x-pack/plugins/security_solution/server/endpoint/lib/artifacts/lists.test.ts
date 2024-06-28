@@ -620,6 +620,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
+              operator: 'included',
               type: 'descendent_of',
               value: {
                 entries: [
@@ -676,6 +677,7 @@ describe('artifacts lists', () => {
           type: 'simple',
           entries: [
             {
+              operator: 'included',
               type: 'descendent_of',
               value: {
                 entries: [
