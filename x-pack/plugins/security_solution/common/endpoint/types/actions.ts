@@ -212,7 +212,7 @@ export interface ResponseActionsExecuteParameters {
   timeout?: number;
 }
 
-export interface ResponseActionsScanParameters {
+export interface ResponseActionScanParameters {
   path: string;
 }
 
@@ -222,7 +222,7 @@ export type EndpointActionDataParameterTypes =
   | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters
   | ResponseActionUploadParameters
-  | ResponseActionsScanParameters;
+  | ResponseActionScanParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =

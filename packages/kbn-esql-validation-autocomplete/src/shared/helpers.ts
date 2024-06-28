@@ -24,7 +24,7 @@ import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeUnits, chronoLiterals } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -376,7 +376,7 @@ export function getAllArrayTypes(
 }
 
 export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
-  return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
+  return timeUnits.some((unit) => unit === item.unit.toLowerCase());
 }
 
 /**
@@ -571,3 +571,6 @@ export function shouldBeQuotedText(
 ) {
   return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
+
+export const isAggFunction = (arg: ESQLFunction): boolean =>
+  getFunctionDefinition(arg.name)?.type === 'agg';

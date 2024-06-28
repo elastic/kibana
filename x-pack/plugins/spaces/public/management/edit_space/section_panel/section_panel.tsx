@@ -13,12 +13,13 @@ import React, { Component, Fragment } from 'react';
 interface Props {
   iconType?: IconType;
   title: string | ReactNode;
+  dataTestSubj?: string;
 }
 
 export class SectionPanel extends Component<Props, {}> {
   public render() {
     return (
-      <EuiPanel hasShadow={false} hasBorder={true}>
+      <EuiPanel hasShadow={false} hasBorder={true} data-test-subj={this.props.dataTestSubj}>
         {this.getTitle()}
         {this.getForm()}
       </EuiPanel>

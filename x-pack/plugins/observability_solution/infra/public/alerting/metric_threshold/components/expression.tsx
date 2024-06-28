@@ -28,6 +28,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { GenericAggType, RuleConditionChart } from '@kbn/observability-plugin/public';
 import { Aggregators, QUERY_INVALID } from '../../../../common/alerting/metrics';
 import {
   useMetricsDataViewContext,
@@ -40,7 +41,6 @@ import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { convertKueryToElasticSearchQuery } from '../../../utils/kuery';
 import { AlertContextMeta, AlertParams, MetricExpression } from '../types';
-import { ExpressionChart } from './expression_chart';
 import { ExpressionRow } from './expression_row';
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -69,7 +69,6 @@ export const Expressions: React.FC<Props> = (props) => {
   const { docLinks } = useKibanaContextForPlugin().services;
   const { source } = useSourceContext();
   const { metricsView } = useMetricsDataViewContext();
-
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
 
@@ -304,8 +303,24 @@ export const Expressions: React.FC<Props> = (props) => {
         </h4>
       </EuiText>
       <EuiSpacer size="xs" />
-      {ruleParams.criteria &&
+      {metricsView &&
         ruleParams.criteria.map((e, idx) => {
+          let metricExpression = [
+            {
+              aggType: e.aggType as GenericAggType,
+              // RuleConditionChart uses A,B,C etc in its parser to identify multiple conditions
+              name: String.fromCharCode('A'.charCodeAt(0) + idx),
+              field: e.metric || '',
+            },
+          ];
+          if (e.customMetrics) {
+            metricExpression = e.customMetrics.map((metric) => ({
+              name: metric.name,
+              aggType: metric.aggType as GenericAggType,
+              field: metric.field || '',
+              filter: metric.filter,
+            }));
+          }
           return (
             <ExpressionRow
               canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
@@ -317,9 +332,26 @@ export const Expressions: React.FC<Props> = (props) => {
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
             >
-              <ExpressionChart
-                expression={e}
-                filterQuery={ruleParams.filterQueryText}
+              <RuleConditionChart
+                metricExpression={{
+                  metrics: metricExpression,
+                  threshold: e.threshold,
+                  comparator: e.comparator,
+                  timeSize,
+                  timeUnit,
+                  warningComparator: e.warningComparator,
+                  warningThreshold: e.warningThreshold,
+                }}
+                searchConfiguration={{
+                  index: metricsView.dataViewReference.id,
+                  query: {
+                    query: ruleParams.filterQueryText || '',
+                    language: 'kuery',
+                  },
+                }}
+                timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
+                error={(errors[idx] as IErrorObject) || emptyError}
+                dataView={metricsView.dataViewReference}
                 groupBy={ruleParams.groupBy}
               />
             </ExpressionRow>

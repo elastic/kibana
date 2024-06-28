@@ -99,10 +99,12 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
       ruleId: 'rule-id',
     });
     beforeEach(() => {
+      jest.resetAllMocks();
+      rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
       (readRules as jest.Mock).mockResolvedValue(installedRule);
     });
 
-    it('deletes the old rule ', async () => {
+    it('deletes the old rule', async () => {
       await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
       expect(rulesClient.delete).toHaveBeenCalled();
     });
@@ -153,6 +155,8 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
     });
 
     it('patches the existing rule with the new params from the rule asset', async () => {
+      rulesClient.update.mockResolvedValue(getRuleMock(getEqlRuleParams()));
+
       await detectionRulesClient.upgradePrebuiltRule({ ruleAsset });
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({

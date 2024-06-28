@@ -49,7 +49,7 @@ import type {
   EndpointActionDataParameterTypes,
   ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
   KillProcessRequestBody,
   SuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
@@ -302,7 +302,7 @@ export function registerResponseActionRoutes(
         withEndpointAuthz(
           { all: ['canWriteScanOperations'] },
           logger,
-          responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
+          responseActionRequestHandler<ResponseActionScanParameters>(endpointContext, 'scan')
         )
       );
   }

@@ -445,17 +445,6 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.elasticeuidisteui_charts_theme",
-            "type": "string",
-            "tags": [],
-            "label": "'@elastic/eui/dist/eui_charts_theme'",
-            "description": [],
-            "path": "packages/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
             "id": "def-common.externals.hellopangeadnd",
             "type": "string",
             "tags": [],

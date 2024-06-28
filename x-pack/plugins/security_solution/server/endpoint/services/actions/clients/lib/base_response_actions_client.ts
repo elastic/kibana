@@ -58,7 +58,7 @@ import type {
   ResponseActionParametersWithProcessData,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
-  ResponseActionsScanParameters,
+  ResponseActionScanParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
@@ -730,7 +730,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   public async scan(
     actionRequest: ScanActionRequestBody,
     options?: CommonResponseActionMethodOptions
-  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionScanParameters>> {
     throw new ResponseActionsNotSupportedError('scan');
   }
 

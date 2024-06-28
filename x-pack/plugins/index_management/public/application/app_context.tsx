@@ -26,6 +26,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 import { EuiBreadcrumb } from '@elastic/eui';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExtensionsService } from '../services';
 import { HttpService, NotificationService, UiMetricService } from './services';
 import { IndexManagementBreadcrumb } from './services/breadcrumbs';
@@ -48,6 +49,7 @@ export interface AppDependencies {
     share: SharePluginStart;
     cloud?: CloudSetup;
     console?: ConsolePluginStart;
+    licensing?: LicensingPluginStart;
     ml?: MlPluginStart;
   };
   services: {
@@ -60,8 +62,8 @@ export interface AppDependencies {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
+    enableDataStreamStats: boolean;
     editableIndexSettings: 'all' | 'limited';
-    enableDataStreamsStorageColumn: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
     enableSemanticText: boolean;
