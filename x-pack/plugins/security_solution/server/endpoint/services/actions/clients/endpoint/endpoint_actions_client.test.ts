@@ -42,8 +42,8 @@ describe('EndpointActionsClient', () => {
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
 
-    expect(classConstructorOptions.endpointService.createLogger().debug).toHaveBeenCalledWith(
-      'The following agent ids are not valid: ["invalid-id"]'
+    expect(classConstructorOptions.endpointService.createLogger().warn).toHaveBeenCalledWith(
+      'The following agent ids are not valid: ["invalid-id"] and would not be included in action request.'
     );
   });
 
@@ -99,7 +99,8 @@ describe('EndpointActionsClient', () => {
             action_id: expect.any(String),
             data: {
               command: 'isolate',
-              comment: 'test comment',
+              comment:
+                'test comment; WARNING: The following agent ids are not valid: ["invalid-id"] and would not be included in action request.',
               parameters: undefined,
             },
             expiration: expect.any(String),

@@ -66,12 +66,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       .getEndpointMetadataService()
       .getMetadataForEndpoints(this.options.esClient, uniqueIds);
     const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
-    console.log('validIds: ', validIds);
     const invalidIds = ids.filter((id) => !validIds.includes(id));
-    console.log('InValidIds: ', invalidIds);
 
     if (invalidIds.length) {
-      this.log.debug(`The following agent ids are not valid: ${JSON.stringify(invalidIds)}`);
+      this.log.warn(
+        `The following agent ids are not valid: ${JSON.stringify(
+          invalidIds
+        )} and would not be included in action request.`
+      );
     }
 
     return {
@@ -91,25 +93,23 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionReq: TOptions,
     options?: TMethodOptions
   ): Promise<TResponse> {
-    const agentIds = await this.checkAgentIds(actionReq.endpoint_ids);
+    const validatedAgents = await this.checkAgentIds(actionReq.endpoint_ids);
     const actionId = uuidv4();
     const { error: validationError } = await this.validateRequest({
       ...actionReq,
       command,
-      endpoint_ids: agentIds.valid || [],
+      endpoint_ids: validatedAgents.valid || [],
     });
 
     const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
     let actionError: string | undefined = validationError?.message || error;
-    // validated agent ids (unique and ones that have Elastic Defend installed)
-    const agents = agentIds.valid;
 
     // Dispatch action to Endpoint using Fleet
     if (!actionError) {
       try {
         await this.dispatchActionViaFleet({
           actionId,
-          agents,
+          agents: validatedAgents.valid,
           data: {
             command,
             comment: actionReq.comment,
@@ -130,13 +130,18 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     // Write action to endpoint index
     await this.writeActionRequestToEndpointIndex({
       ...actionReq,
-      endpoint_ids: agents,
+      endpoint_ids: validatedAgents.valid,
       error: actionError,
       ruleId,
       ruleName,
       hosts,
       actionId,
       command,
+      comment: validatedAgents.invalid.length
+        ? `${actionReq.comment}; WARNING: The following agent ids are not valid: ${JSON.stringify(
+            validatedAgents.invalid
+          )} and would not be included in action request.`
+        : actionReq.comment,
     });
 
     // Update cases
@@ -146,11 +151,11 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       comment: actionReq.comment,
       caseIds: actionReq.case_ids,
       alertIds: actionReq.alert_ids,
-      hosts: agentIds.valid.map((hostId) => {
+      hosts: validatedAgents.valid.map((hostId) => {
         return {
           hostId,
           hostname:
-            agentIds.hosts.find((host) => host.agent.id === hostId)?.host.hostname ??
+            validatedAgents.hosts.find((host) => host.agent.id === hostId)?.host.hostname ??
             hosts?.[hostId].name ??
             '',
         };
