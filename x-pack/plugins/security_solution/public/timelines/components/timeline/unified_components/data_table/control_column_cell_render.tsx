@@ -50,6 +50,8 @@ export const TimelineControlColumnCellRender = memo(function TimelineControlColu
       ariaRowindex={rowIndex}
       checked={false}
       loadingEventIds={props.loadingEventIds}
+      toggleShowNotes={props.toggleShowNotes}
+      disableExpandAction
     />
   );
 });

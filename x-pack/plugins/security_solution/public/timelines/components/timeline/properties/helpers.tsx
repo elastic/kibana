@@ -24,17 +24,6 @@ interface NotesButtonProps {
   notesCount?: number;
 }
 
-interface SmallNotesButtonProps {
-  ariaLabel?: string;
-  isDisabled?: boolean;
-  toggleShowNotes: (eventId?: string) => void;
-  timelineType: TimelineTypeLiteral;
-  eventId?: string;
-  notesCount: number;
-}
-
-export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
-
 export const NotificationDot = styled.span`
   position: absolute;
   display: block;
@@ -42,9 +31,23 @@ export const NotificationDot = styled.span`
   height: 6px;
   border-radius: 50%;
   background-color: ${({ theme }) => theme.eui.euiColorDanger};
-  top: 15%;
-  left: 65%;
+  top: 17%;
+  left: 52%;
 `;
+
+interface SmallNotesButtonProps {
+  ariaLabel?: string;
+  isDisabled?: boolean;
+  toggleShowNotes: (eventId?: string) => void;
+  timelineType: TimelineTypeLiteral;
+  eventId?: string;
+  /**
+   * Number of notes. If > 0, then a red dot is shown in the top right corner of the icon.
+   */
+  notesCount: number;
+}
+
+export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
 const NotesButtonContainer = styled(EuiFlexGroup)`
   position: relative;
@@ -81,6 +84,19 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
   }
 );
 SmallNotesButton.displayName = 'SmallNotesButton';
+
+interface NotesButtonProps {
+  ariaLabel?: string;
+  isDisabled?: boolean;
+  toggleShowNotes: () => void | ((eventId: string) => void);
+  toolTip?: string;
+  timelineType: TimelineTypeLiteral;
+  eventId?: string;
+  /**
+   * Number of notes. If > 0, then a red dot is shown in the top right corner of the icon.
+   */
+  notesCount?: number;
+}
 
 export const NotesButton = React.memo<NotesButtonProps>(
   ({ ariaLabel, isDisabled, timelineType, toggleShowNotes, toolTip, eventId, notesCount }) => (

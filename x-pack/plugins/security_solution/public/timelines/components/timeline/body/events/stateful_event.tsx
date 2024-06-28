@@ -126,7 +126,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     tabType,
   });
 
-  const [focusedNotes, setFocusedNotes] = useState<{ [eventId: string]: boolean }>({});
+  const [, setFocusedNotes] = useState<{ [eventId: string]: boolean }>({});
 
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const expandedDetail = useDeepEqualSelector(

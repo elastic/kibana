@@ -31,6 +31,7 @@ interface UseTimelineControlColumnArgs {
   events: TimelineItem[];
   pinnedEventIds: Record<string, boolean>;
   eventIdToNoteIds: Record<string, string[]>;
+  onToggleShowNotes: (eventId?: string) => void;
 }
 
 const EMPTY_STRING_ARRAY: string[] = [];
@@ -46,6 +47,7 @@ export const useTimelineControlColumn = ({
   events,
   pinnedEventIds,
   eventIdToNoteIds,
+  onToggleShowNotes,
 }: UseTimelineControlColumnArgs) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
@@ -113,6 +115,7 @@ export const useTimelineControlColumn = ({
               setEventsDeleted={noOp}
               pinnedEventIds={pinnedEventIds}
               eventIdToNoteIds={eventIdToNoteIds}
+              toggleShowNotes={onToggleShowNotes}
             />
           );
         },
@@ -124,17 +127,18 @@ export const useTimelineControlColumn = ({
       })) as unknown as ColumnHeaderOptions[];
     }
   }, [
-    ACTION_BUTTON_COUNT,
+    unifiedComponentsInTimelineEnabled,
     UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT,
     browserFields,
     localColumns,
     sort,
-    unifiedComponentsInTimelineEnabled,
-    timelineId,
     activeTab,
+    timelineId,
     refetch,
     events,
     pinnedEventIds,
     eventIdToNoteIds,
+    onToggleShowNotes,
+    ACTION_BUTTON_COUNT,
   ]);
 };

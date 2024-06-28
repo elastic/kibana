@@ -54,6 +54,7 @@ describe('useTimelineColumns', () => {
             events: [],
             pinnedEventIds: {},
             eventIdToNoteIds: {},
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -76,6 +77,7 @@ describe('useTimelineColumns', () => {
             events: [],
             pinnedEventIds: {},
             eventIdToNoteIds: {},
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -99,6 +101,7 @@ describe('useTimelineColumns', () => {
             events: [],
             pinnedEventIds: {},
             eventIdToNoteIds: {},
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
