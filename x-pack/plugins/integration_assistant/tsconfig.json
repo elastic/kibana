@@ -31,6 +31,10 @@
     "@kbn/shared-ux-router",
     "@kbn/zod-helpers",
     "@kbn/stack-connectors-plugin",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server"
   ]
 }
