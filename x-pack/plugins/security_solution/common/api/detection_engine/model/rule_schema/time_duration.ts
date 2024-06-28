@@ -28,28 +28,25 @@ const isTimeSafe = (time: number) => time >= 1 && Number.isSafeInteger(time);
  * ```
  */
 export const TimeDuration = ({ allowedUnits }: TimeDurationType) => {
-  return z
-    .string()
-    .refine(
-      (input) => {
-        if (input.trim() === '') return false;
+  return z.string().refine(
+    (input) => {
+      if (input.trim() === '') return false;
 
-        try {
-          const inputLength = input.length;
-          const time = Number(input.trim().substring(0, inputLength - 1));
-          const unit = input.trim().at(-1) as TimeUnits;
+      try {
+        const inputLength = input.length;
+        const time = Number(input.trim().substring(0, inputLength - 1));
+        const unit = input.trim().at(-1) as TimeUnits;
 
-          return isTimeSafe(time) && allowedUnits.includes(unit);
-        } catch (error) {
-          return false;
-        }
-      },
-      {
-        message:
-          'Invalid time duration format. Must be a string that is not empty, and composed of a positive integer greater than 0 followed by a unit of time in the format {safe_integer}{timeUnit}, e.g. "30s", "1m", "2h", "7d"',
+        return isTimeSafe(time) && allowedUnits.includes(unit);
+      } catch (error) {
+        return false;
       }
-    )
-    .brand<'TimeDuration'>();
+    },
+    {
+      message:
+        'Invalid time duration format. Must be a string that is not empty, and composed of a positive integer greater than 0 followed by a unit of time in the format {safe_integer}{timeUnit}, e.g. "30s", "1m", "2h", "7d"',
+    }
+  );
 };
 
 export type TimeDurationSchema = ReturnType<typeof TimeDuration>;

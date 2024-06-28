@@ -18,8 +18,7 @@ export const extractRuleSchedule = (rule: RuleResponse | PrebuiltRuleAsset): Rul
   const from = rule.from ?? 'now-6m';
   const to = rule.to ?? 'now';
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const ruleMeta = (rule.meta ?? {}) as any;
+  const ruleMeta = (rule as RuleResponse).meta ?? {};
   const lookbackFromMeta = String(ruleMeta.from ?? '');
 
   const intervalDuration = parseInterval(interval);
