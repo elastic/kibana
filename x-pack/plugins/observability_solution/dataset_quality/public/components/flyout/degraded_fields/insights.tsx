@@ -135,6 +135,7 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
 
             4. A sample latest Elasticsearch document with ${field} field ignored:
             ${JSON.stringify(ignoredMetadata.ignoredDocument)}
+            Make sure you report the "_id" and ${field} field value from the document if present.
 
             The remediation must be based on the given context information, avoid generic remedies wherever possible.
             Always correlate the context information with the possible reasons for the field being ignored and suggest the remediation accordingly.
@@ -142,6 +143,10 @@ export function Insights({ dataStream, field }: { dataStream: string; field: str
 
             At the end when providing "Suggested Remedies:", do not suggest solution which are not related to the context
             information provided above. Do not suggest checking pipelines in this section here.
+
+            Always add a small section at the end of the result with the following message:
+            Remember, any changes to the mapping will only affect new indices after a rollover. Existing indices will need to be
+            re-indexed if you want the changes to apply to them.
           `
           ),
         })
