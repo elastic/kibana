@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
   AnalyticsServiceSetup,
@@ -17,12 +18,12 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -36,7 +37,6 @@ import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server'
 import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
-import { z } from 'zod';
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
@@ -98,7 +98,7 @@ export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   data: DataPluginStart;
   spaces?: SpacesPluginStart;
-  security: SecurityPluginStart;
+  security: SecurityServiceStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
