@@ -491,8 +491,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (output.type === outputType.Elasticsearch && standalone) {
-    newOutput.username = '${ES_USERNAME}';
-    newOutput.password = '${ES_PASSWORD}';
+    newOutput.api_key = '${API_KEY}';
   }
 
   if (output.type === outputType.RemoteElasticsearch) {

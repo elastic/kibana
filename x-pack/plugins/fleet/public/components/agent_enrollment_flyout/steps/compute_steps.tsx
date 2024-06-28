@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import crypto from 'crypto';
+
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 
 import { EuiSteps, EuiLoadingSpinner } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
@@ -26,6 +28,7 @@ import {
   useStartServices,
   sendGetOneAgentPolicyFull,
   useAgentVersion,
+  sendCreateStandaloneAgentAPIKey,
 } from '../../../hooks';
 
 import type { InstructionProps } from '../types';
@@ -66,6 +69,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   const { notifications } = core;
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
   const [yaml, setYaml] = useState<any | undefined>('');
+  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
 
   let downloadLink = '';
 
@@ -131,6 +135,27 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     }
   }, [fullAgentPolicy, isK8s]);
 
+  const onCreateApiKey = useCallback(async () => {
+    const res = await sendCreateStandaloneAgentAPIKey({
+      name: crypto.randomBytes(16).toString('hex'),
+    });
+    if (res.error) {
+      throw res.error;
+    }
+    const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
+    setApiKey(newApiKey);
+    // TODO: this only changes the contents of the code box, so the downloaded file doesn't get the key value.
+    // This logic should be replaced with returning the API key value instead of the placeholder from backend.
+    const updatedFullAgentPolicy = {
+      ...fullAgentPolicy,
+      outputs: {
+        ...fullAgentPolicy?.outputs,
+        default: { ...fullAgentPolicy?.outputs.default, api_key: newApiKey },
+      },
+    } as FullAgentPolicy;
+    setYaml(fullAgentPolicyToYaml(updatedFullAgentPolicy, safeDump));
+  }, [fullAgentPolicy]);
+
   const agentVersion = useAgentVersion();
 
   const instructionsSteps = useMemo(() => {
@@ -161,6 +186,8 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         selectedPolicyId: selectedPolicy?.id,
         yaml,
         downloadLink,
+        apiKey,
+        onCreateApiKey,
       })
     );
 
@@ -176,8 +203,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     return steps;
   }, [
     agentVersion,
-    isK8s,
-    cloudSecurityIntegration,
     agentPolicy,
     selectedPolicy,
     agentPolicies,
@@ -186,8 +211,12 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     setSelectedPolicyId,
     refreshAgentPolicies,
     selectionType,
+    isK8s,
     yaml,
     downloadLink,
+    apiKey,
+    onCreateApiKey,
+    cloudSecurityIntegration,
     mode,
     setMode,
   ]);

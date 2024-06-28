@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import crypto from 'crypto';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSteps, EuiSpacer } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
@@ -28,6 +30,7 @@ import {
   useKibanaVersion,
   useStartServices,
   sendGetOneAgentPolicyFull,
+  sendCreateStandaloneAgentAPIKey,
 } from '../../../../../../../../../hooks';
 import {
   InstallStandaloneAgentStep,
@@ -45,6 +48,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
   const [commandCopied, setCommandCopied] = useState(false);
   const [policyCopied, setPolicyCopied] = useState(false);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
+  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     async function fetchFullPolicy() {
@@ -79,6 +83,27 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
     setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
   }, [fullAgentPolicy]);
 
+  const onCreateApiKey = useCallback(async () => {
+    const res = await sendCreateStandaloneAgentAPIKey({
+      name: crypto.randomBytes(16).toString('hex'),
+    });
+    if (res.error) {
+      throw res.error;
+    }
+    const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
+    setApiKey(newApiKey);
+    // TODO: this only changes the contents of the code box, so the downloaded file doesn't get the key value.
+    // This logic should be replaced with returning the API key value instead of the placeholder from backend.
+    const updatedFullAgentPolicy = {
+      ...fullAgentPolicy,
+      outputs: {
+        ...fullAgentPolicy?.outputs,
+        default: { ...fullAgentPolicy?.outputs.default, api_key: newApiKey },
+      },
+    } as FullAgentPolicy;
+    setYaml(fullAgentPolicyToYaml(updatedFullAgentPolicy, safeDump));
+  }, [fullAgentPolicy]);
+
   if (!agentPolicy) {
     return (
       <FleetError
@@ -105,6 +130,8 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       selectedPolicyId: agentPolicy?.id,
       yaml,
       downloadLink,
+      apiKey,
+      onCreateApiKey,
       isComplete: policyCopied,
       onCopy: () => setPolicyCopied(true),
     }),
