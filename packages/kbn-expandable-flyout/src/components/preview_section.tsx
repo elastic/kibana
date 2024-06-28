@@ -141,8 +141,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           margin: ${euiTheme.size.xs};
           box-shadow: 0 0 4px 4px ${euiTheme.colors.darkShade};
         `}
-        className="eui-yScroll"
         data-test-subj={PREVIEW_SECTION_TEST_ID}
+        className="eui-fullHeight"
       >
         {isPreviewBanner(banner) && (
           <EuiSplitPanel.Inner
@@ -168,7 +168,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         >
           {header}
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner paddingSize="none">{component}</EuiSplitPanel.Inner>
+        {component}
       </EuiSplitPanel.Outer>
     </div>
   );
