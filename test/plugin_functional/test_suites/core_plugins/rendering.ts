@@ -126,6 +126,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data_views.scriptedFieldsEnabled (any)', // It's a boolean (any because schema.conditional)
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string)',
+        'discover.experimental.enabledProfiles (array)',
         'enterpriseSearch.canDeployEntSearch (boolean)',
         'enterpriseSearch.host (string)',
         'enterpriseSearch.ui.enabled (boolean)',
@@ -219,7 +220,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
         'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
-        'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
@@ -260,6 +260,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
+        'xpack.fleet.agentless.api.url (string)',
         'xpack.fleet.enableExperimental (array)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',
@@ -289,8 +290,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
         'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.enableDataStreamStats (any)',
         'xpack.index_management.editableIndexSettings (any)',
-        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.index_management.enableMappingsSourceFieldSection (any)',
         'xpack.index_management.dev.enableSemanticText (boolean)',
         'xpack.license_management.ui.enabled (boolean)',

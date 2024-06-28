@@ -28,6 +28,7 @@ import {
   TIMESTAMP,
   VERSION,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_SEVERITY_IMPROVING,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
 import { Alert as LegacyAlert } from '../../alert/alert';
@@ -94,6 +95,7 @@ export const buildNewAlert = <
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
         [ALERT_STATUS]: 'active',
         [ALERT_UUID]: legacyAlert.getUuid(),
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_WORKFLOW_STATUS]: get(cleanedPayload, ALERT_WORKFLOW_STATUS, 'open'),
         ...(legacyAlert.getState().duration
           ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }

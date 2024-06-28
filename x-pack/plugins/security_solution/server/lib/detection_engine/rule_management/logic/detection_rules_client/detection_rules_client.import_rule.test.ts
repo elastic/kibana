@@ -46,6 +46,8 @@ describe('DetectionRulesClient.importRule', () => {
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
+    rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
   });
 

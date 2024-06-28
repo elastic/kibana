@@ -68,7 +68,7 @@ export const setup = async (httpSetup: HttpSetup): Promise<WatchListTestBed> => 
 
   const searchWatches = async (term: string) => {
     const { find, component } = testBed;
-    const searchInput = find('watchesTableContainer').find('.euiFieldSearch');
+    const searchInput = find('watchesTableContainer').find('input.euiFieldSearch');
 
     // Enter input into the search box
     // @ts-ignore

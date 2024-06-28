@@ -6,14 +6,6 @@
  */
 
 /**
- * Public Risk Score routes
- */
-export const RISK_ENGINE_PUBLIC_PREFIX = '/api/risk_scores' as const;
-export const RISK_SCORE_CALCULATION_URL = `${RISK_ENGINE_PUBLIC_PREFIX}/calculation` as const;
-export const RISK_SCORE_ENTITY_CALCULATION_URL =
-  `${RISK_ENGINE_PUBLIC_PREFIX}/calculation/entity` as const;
-
-/**
  * Internal Risk Score routes
  */
 export const INTERNAL_RISK_SCORE_URL = '/internal/risk_score' as const;
@@ -36,3 +28,5 @@ export const RISK_SCORE_CREATE_STORED_SCRIPT =
 export const RISK_SCORE_DELETE_STORED_SCRIPT =
   `${INTERNAL_RISK_SCORE_URL}/stored_scripts/delete` as const;
 export const RISK_SCORE_PREVIEW_URL = `${INTERNAL_RISK_SCORE_URL}/preview` as const;
+export const RISK_SCORE_ENTITY_CALCULATION_URL =
+  `${INTERNAL_RISK_SCORE_URL}/calculation/entity` as const;

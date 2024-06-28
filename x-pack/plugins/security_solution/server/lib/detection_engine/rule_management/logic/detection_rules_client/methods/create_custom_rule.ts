@@ -12,8 +12,10 @@ import type { CreateCustomRuleArgs } from '../detection_rules_client_interface';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleParams } from '../../../../rule_schema';
 import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
-import { convertCreateAPIToInternalSchema } from '../../../normalization/rule_converters';
-import { transform } from '../../../utils/utils';
+import {
+  convertCreateAPIToInternalSchema,
+  internalRuleToAPIResponse,
+} from '../../../normalization/rule_converters';
 import { validateMlAuth, RuleResponseValidationError } from '../utils';
 
 export const createCustomRule = async (
@@ -33,7 +35,7 @@ export const createCustomRule = async (
   });
 
   /* Trying to convert the rule to a RuleResponse object */
-  const parseResult = RuleResponse.safeParse(transform(rule));
+  const parseResult = RuleResponse.safeParse(internalRuleToAPIResponse(rule));
 
   if (!parseResult.success) {
     throw new RuleResponseValidationError({
