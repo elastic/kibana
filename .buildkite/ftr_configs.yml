@@ -193,7 +193,6 @@ enabled:
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/content_management/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
@@ -388,8 +387,10 @@ enabled:
   - x-pack/test/security_api_integration/login_selector.config.ts
   - x-pack/test/security_api_integration/oidc_implicit_flow.config.ts
   - x-pack/test/security_api_integration/oidc.config.ts
+  - x-pack/test/security_api_integration/oidc.http2.config.ts
   - x-pack/test/security_api_integration/pki.config.ts
   - x-pack/test/security_api_integration/saml.config.ts
+  - x-pack/test/security_api_integration/saml.http2.config.ts
   - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
@@ -400,6 +401,8 @@ enabled:
   - x-pack/test/security_functional/login_selector.config.ts
   - x-pack/test/security_functional/oidc.config.ts
   - x-pack/test/security_functional/saml.config.ts
+  - x-pack/test/security_functional/saml.http2.config.ts
+  - x-pack/test/security_functional/oidc.http2.config.ts
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
