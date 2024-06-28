@@ -224,7 +224,7 @@ describe('conversational chain', () => {
           _index: 'index',
           _id: '1',
           inner_hits: {
-            'field.inference.chunks': {
+            'index.field': {
               hits: {
                 hits: [
                   {

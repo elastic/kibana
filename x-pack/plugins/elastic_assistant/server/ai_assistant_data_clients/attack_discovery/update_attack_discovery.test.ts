@@ -14,7 +14,7 @@ import {
   AttackDiscoveryStatus,
   AttackDiscoveryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 jest.mock('./get_attack_discovery');
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
