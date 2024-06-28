@@ -85,6 +85,8 @@ components:
           type: string
         promptId:
           type: string
+        isStream:
+          type: boolean  
         responseLanguage:
           type: string
         langSmithProject:

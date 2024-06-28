@@ -19,7 +19,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
-import { buildResponse } from '../utils';
+import { buildResponse } from '../../lib/build_response';
 import {
   DEFAULT_PLUGIN_NAME,
   UPGRADE_LICENSE_MESSAGE,
@@ -98,7 +98,7 @@ export const chatCompleteRoute = (
           };
 
           // get the actions plugin start contract from the request context:
-          const actions = (await context.elasticAssistant).actions;
+          const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
           const actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
@@ -158,9 +158,8 @@ export const chatCompleteRoute = (
             defaultPluginName: DEFAULT_PLUGIN_NAME,
             logger,
           });
-          const enableKnowledgeBaseByDefault = (
-            await context.elasticAssistant
-          ).getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const enableKnowledgeBaseByDefault =
+            ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           // TODO: remove non-graph persistance when KB will be enabled by default
           if (!enableKnowledgeBaseByDefault && request.body.persist && conversationsDataClient) {
             const updatedConversation = await createOrUpdateConversationWithUserInput({
@@ -207,12 +206,12 @@ export const chatCompleteRoute = (
           return await langChainExecute({
             abortSignal,
             isEnabledKnowledgeBase: true,
-            isStream: false,
+            isStream: request.body.isStream ?? false,
             actionsClient,
             actionTypeId,
             connectorId,
             conversationId,
-            context,
+            context: ctx,
             getElser,
             logger,
             messages: messages ?? [],

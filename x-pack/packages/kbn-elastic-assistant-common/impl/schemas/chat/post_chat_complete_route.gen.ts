@@ -54,6 +54,7 @@ export type ChatCompleteProps = z.infer<typeof ChatCompleteProps>;
 export const ChatCompleteProps = z.object({
   conversationId: z.string().optional(),
   promptId: z.string().optional(),
+  isStream: z.boolean().optional(),
   responseLanguage: z.string().optional(),
   langSmithProject: z.string().optional(),
   langSmithApiKey: z.string().optional(),

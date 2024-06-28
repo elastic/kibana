@@ -330,7 +330,9 @@ export interface LangChainExecuteParams {
   actionTypeId: string;
   connectorId: string;
   conversationId?: string;
-  context: ElasticAssistantRequestHandlerContext;
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >;
   actionsClient: PublicMethodsOf<ActionsClient>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request: KibanaRequest<unknown, unknown, any>;
@@ -374,13 +376,13 @@ export const langChainExecute = async ({
     defaultPluginName: DEFAULT_PLUGIN_NAME,
     logger,
   });
-  const assistantContext = await context.elasticAssistant;
+  const assistantContext = context.elasticAssistant;
   const assistantTools = assistantContext
     .getRegisteredTools(pluginName)
     .filter((x) => x.id !== 'attack-discovery'); // We don't (yet) support asking the assistant for NEW attack discoveries from a conversation
 
   // get a scoped esClient for assistant memory
-  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asCurrentUser;
 
   // convert the assistant messages to LangChain messages:
   const langChainMessages = getLangChainMessages(messages);

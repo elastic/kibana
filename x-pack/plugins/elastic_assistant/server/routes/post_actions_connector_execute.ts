@@ -58,7 +58,8 @@ export const postActionsConnectorExecuteRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         const resp = buildResponse(response);
-        const assistantContext = await context.elasticAssistant;
+        const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
+        const assistantContext = ctx.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
         let onLlmResponse;
@@ -90,7 +91,7 @@ export const postActionsConnectorExecuteRoute = (
           }
 
           // get the actions plugin start contract from the request context:
-          const actions = (await context.elasticAssistant).actions;
+          const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
 
           const conversationsDataClient =
@@ -172,7 +173,7 @@ export const postActionsConnectorExecuteRoute = (
             actionTypeId,
             connectorId,
             conversationId,
-            context,
+            context: ctx,
             getElser,
             logger,
             messages: (isGraphAvailable && newMessage ? [newMessage] : messages) ?? [],

@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, IRouter, KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { BaseMessage } from '@langchain/core/messages';
 import { NEVER } from 'rxjs';
 import { mockActionResponse } from '../../__mocks__/action_result_data';
@@ -24,6 +24,10 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../__mocks__/response';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { chatCompleteRoute } from './chat_complete_route';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+
+const license = licensingMock.createLicenseMock();
 
 const actionsClient = actionsClientMock.create();
 jest.mock('../../lib/build_response', () => ({
@@ -49,7 +53,7 @@ jest.mock('../../lib/langchain/execute_custom_llm_chain', () => ({
       connectorId,
       isStream,
     }: {
-      actions: ActionsPluginStart;
+      actionsClient: PublicMethodsOf<ActionsClient>;
       connectorId: string;
       esClient: ElasticsearchClient;
       langChainMessages: BaseMessage[];
@@ -88,49 +92,54 @@ const existingConversation = getConversationResponseMock();
 const reportEvent = jest.fn();
 const appendConversationMessages = jest.fn();
 const mockContext = {
-  elasticAssistant: {
-    actions: {
-      getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+  resolve: jest.fn().mockResolvedValue({
+    elasticAssistant: {
+      actions: {
+        getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
+      },
+      getRegisteredTools: jest.fn(() => []),
+      getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
+      logger: loggingSystemMock.createLogger(),
+      telemetry: { ...coreMock.createSetup().analytics, reportEvent },
+      getCurrentUser: () => ({
+        username: 'user',
+        email: 'email',
+        fullName: 'full name',
+        roles: ['user-role'],
+        enabled: true,
+        authentication_realm: { name: 'native1', type: 'native' },
+        lookup_realm: { name: 'native1', type: 'native' },
+        authentication_provider: { type: 'basic', name: 'basic1' },
+        authentication_type: 'realm',
+        elastic_cloud_user: false,
+        metadata: { _reserved: false },
+      }),
+      getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
+        getConversation: jest.fn().mockResolvedValue(existingConversation),
+        updateConversation: jest.fn().mockResolvedValue(existingConversation),
+        appendConversationMessages:
+          appendConversationMessages.mockResolvedValue(existingConversation),
+      }),
+      getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
+        findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
+      }),
     },
-    getRegisteredTools: jest.fn(() => []),
-    getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
-    logger: loggingSystemMock.createLogger(),
-    telemetry: { ...coreMock.createSetup().analytics, reportEvent },
-    getCurrentUser: () => ({
-      username: 'user',
-      email: 'email',
-      fullName: 'full name',
-      roles: ['user-role'],
-      enabled: true,
-      authentication_realm: { name: 'native1', type: 'native' },
-      lookup_realm: { name: 'native1', type: 'native' },
-      authentication_provider: { type: 'basic', name: 'basic1' },
-      authentication_type: 'realm',
-      elastic_cloud_user: false,
-      metadata: { _reserved: false },
-    }),
-    getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
-      getConversation: jest.fn().mockResolvedValue(existingConversation),
-      updateConversation: jest.fn().mockResolvedValue(existingConversation),
-      appendConversationMessages:
-        appendConversationMessages.mockResolvedValue(existingConversation),
-    }),
-    getAIAssistantAnonymizationFieldsDataClient: jest.fn().mockResolvedValue({
-      findDocuments: jest.fn().mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit()),
-    }),
-  },
-  core: {
-    elasticsearch: {
-      client: elasticsearchServiceMock.createScopedClusterClient(),
+    core: {
+      elasticsearch: {
+        client: elasticsearchServiceMock.createScopedClusterClient(),
+      },
+      savedObjects: coreMock.createRequestHandlerContext().savedObjects,
     },
-    savedObjects: coreMock.createRequestHandlerContext().savedObjects,
-  },
+    licensing: {
+      ...licensingMock.createRequestHandlerContext({ license }),
+      license,
+    },
+  }),
 };
 
 const mockRequest = {
-  params: { connectorId: 'mock-connector-id' },
   body: {
-    connectorId: 'my-gen-ai',
+    connectorId: 'mock-connector-id',
     persist: true,
     messages: [
       {
@@ -149,7 +158,6 @@ const mockRequest = {
           'event.module': 'system',
           'process.executable': '/usr/libexec/biomesyncd',
           'process.args': '/usr/libexec/biomesyncd',
-          message: 'Process biomesyncd (PID: 69516) by user yuliianaumenko STOPPED',
         },
       },
     ],
@@ -169,6 +177,13 @@ describe('chatCompleteRoute', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    license.hasAtLeast.mockReturnValue(true);
+    actionsClient.execute.mockImplementation(
+      jest.fn().mockResolvedValue(() => ({
+        data: 'mockChatCompletion',
+        status: 'ok',
+      }))
+    );
     actionsClient.getBulk.mockResolvedValue([
       {
         id: '1',
@@ -187,7 +202,7 @@ describe('chatCompleteRoute', () => {
     ]);
   });
 
-  it('returns the expected response when isEnabledKnowledgeBase=false', async () => {
+  it('returns the expected response when using the existingConversation', async () => {
     const mockRouter = {
       versioned: {
         post: jest.fn().mockImplementation(() => {
@@ -199,7 +214,7 @@ describe('chatCompleteRoute', () => {
                   ...mockRequest,
                   body: {
                     ...mockRequest.body,
-                    isEnabledKnowledgeBase: false,
+                    conversationId: existingConversation.id,
                   },
                 },
                 mockResponse
@@ -211,34 +226,9 @@ describe('chatCompleteRoute', () => {
                   data: mockActionResponse,
                   status: 'ok',
                 },
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('returns the expected response when isEnabledKnowledgeBase=true', async () => {
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              const result = await handler(mockContext, mockRequest, mockResponse);
-
-              expect(result).toEqual({
-                body: {
-                  connector_id: 'mock-connector-id',
-                  data: mockActionResponse,
-                  status: 'ok',
+                headers: {
+                  'content-type': 'application/json',
                 },
-                headers: { 'content-type': 'application/json' },
               });
             }),
           };
@@ -246,7 +236,7 @@ describe('chatCompleteRoute', () => {
       },
     };
 
-    await chatCompleteRoute(
+    chatCompleteRoute(
       mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
       mockGetElser
     );
