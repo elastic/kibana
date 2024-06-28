@@ -59,6 +59,7 @@ import {
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CreateCaseFormFieldsProps } from './form_fields';
 import { CreateCaseFormFields } from './form_fields';
+import { SECURITY_SOLUTION_OWNER } from '../../../common';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -244,7 +245,7 @@ describe('Create case', () => {
     it('renders correctly', async () => {
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -273,7 +274,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -302,7 +303,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -340,7 +341,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -389,7 +390,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -428,7 +429,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -455,7 +456,7 @@ describe('Create case', () => {
     it('should select LOW as the default severity', async () => {
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -490,7 +491,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={configurations[0]}
         >
@@ -563,7 +564,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -625,7 +626,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -662,7 +663,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -697,7 +698,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -774,7 +775,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -831,7 +832,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
-        selectedOwner={'foo'}
+        selectedOwner={SECURITY_SOLUTION_OWNER}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
         currentConfiguration={currentConfiguration}
@@ -899,7 +900,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
-        selectedOwner={'foo'}
+        selectedOwner={SECURITY_SOLUTION_OWNER}
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
         currentConfiguration={currentConfiguration}
@@ -935,7 +936,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
-        selectedOwner={'foo'}
+        selectedOwner={SECURITY_SOLUTION_OWNER}
         onSuccess={onFormSubmitSuccess}
         attachments={attachments}
         currentConfiguration={currentConfiguration}
@@ -975,7 +976,7 @@ describe('Create case', () => {
 
     appMockRender.render(
       <FormContext
-        selectedOwner={'foo'}
+        selectedOwner={SECURITY_SOLUTION_OWNER}
         currentConfiguration={currentConfiguration}
         onSuccess={onFormSubmitSuccess}
         afterCaseCreated={afterCaseCreated}
@@ -1032,7 +1033,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -1067,7 +1068,7 @@ describe('Create case', () => {
     it('should submit assignees', async () => {
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -1110,7 +1111,7 @@ describe('Create case', () => {
 
       appMockRender.render(
         <FormContext
-          selectedOwner={'foo'}
+          selectedOwner={SECURITY_SOLUTION_OWNER}
           onSuccess={onFormSubmitSuccess}
           currentConfiguration={currentConfiguration}
         >
@@ -1139,7 +1140,7 @@ describe('Create case', () => {
       it('should have session storage value same as draft comment', async () => {
         appMockRender.render(
           <FormContext
-            selectedOwner={'foo'}
+            selectedOwner={SECURITY_SOLUTION_OWNER}
             onSuccess={onFormSubmitSuccess}
             currentConfiguration={currentConfiguration}
           >
@@ -1171,7 +1172,7 @@ describe('Create case', () => {
       it('should have session storage value same as draft comment', async () => {
         appMockRender.render(
           <FormContext
-            selectedOwner={'foo'}
+            selectedOwner={SECURITY_SOLUTION_OWNER}
             onSuccess={onFormSubmitSuccess}
             currentConfiguration={currentConfiguration}
           >
@@ -1181,7 +1182,7 @@ describe('Create case', () => {
         );
 
         await waitForFormToRender(screen);
-        const descriptionInput = within(screen.getByTestId('caseDescription')).getByTestId(
+        const descriptionInput = within(await screen.findByTestId('caseDescription')).getByTestId(
           'euiMarkdownEditorTextArea'
         );
 

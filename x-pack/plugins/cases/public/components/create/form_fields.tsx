@@ -100,10 +100,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             isLoading={isSubmitting}
             setCustomFieldsOptional={true}
             isEditMode={false}
+            draftStorageKey={draftStorageKey}
           />
         ),
       }),
-      [configuration.customFields, isSubmitting]
+      [configuration.customFields, draftStorageKey, isSubmitting]
     );
 
     const thirdStep = useMemo(
@@ -122,11 +123,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             connectors={connectors}
             isLoadingConnectors={isLoading}
             isLoading={isSubmitting}
-            key={`${configurationOwner}-${configuration.connector.id}`}
+            key={configuration.id}
           />
         ),
       }),
-      [configuration.connector.id, configurationOwner, connectors, isLoading, isSubmitting]
+      [configuration.id, connectors, isLoading, isSubmitting]
     );
 
     const allSteps = useMemo(

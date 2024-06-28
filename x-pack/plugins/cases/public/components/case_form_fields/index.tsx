@@ -22,6 +22,7 @@ interface Props {
   configurationCustomFields: CasesConfigurationUI['customFields'];
   setCustomFieldsOptional?: boolean;
   isEditMode?: boolean;
+  draftStorageKey?: string;
 }
 
 const CaseFormFieldsComponent: React.FC<Props> = ({
@@ -29,6 +30,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
   configurationCustomFields,
   setCustomFieldsOptional = false,
   isEditMode,
+  draftStorageKey,
 }) => {
   const { caseAssignmentAuthorized } = useCasesFeatures();
 
@@ -39,7 +41,7 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
       <Tags isLoading={isLoading} />
       <Category isLoading={isLoading} />
       <Severity isLoading={isLoading} />
-      <Description isLoading={isLoading} />
+      <Description isLoading={isLoading} draftStorageKey={draftStorageKey} />
       <CustomFields
         isLoading={isLoading}
         setCustomFieldsOptional={setCustomFieldsOptional}
