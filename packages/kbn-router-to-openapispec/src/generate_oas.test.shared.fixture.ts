@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { z } from 'zod';
+import { schema } from '@kbn/config-schema';
+
 export const sharedOas = {
   components: {
     schemas: {},
@@ -415,3 +418,43 @@ export const sharedOas = {
     },
   ],
 };
+
+export function createSharedConfigSchema() {
+  return schema.object({
+    string: schema.string({ maxLength: 10, minLength: 1 }),
+    maybeNumber: schema.maybe(schema.number({ max: 1000, min: 1 })),
+    booleanDefault: schema.boolean({
+      defaultValue: true,
+      meta: {
+        description: 'defaults to to true',
+      },
+    }),
+    ipType: schema.ip({ versions: ['ipv4'] }),
+    literalType: schema.literal('literallythis'),
+    record: schema.recordOf(schema.string(), schema.string()),
+    union: schema.oneOf([
+      schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
+      schema.number({ min: 0, meta: { description: 'Union number' } }),
+    ]),
+    uri: schema.uri({
+      scheme: ['prototest'],
+      defaultValue: () => 'prototest://something',
+    }),
+  });
+}
+
+export function createZodSharedSchema() {
+  return z.object({
+    string: z.string().max(10).min(1),
+    maybeNumber: z.number().max(1000).min(1).optional(),
+    booleanDefault: z.boolean({ description: 'defaults to to true' }).default(true),
+    ipType: z.string().ip({ version: 'v4' }),
+    literalType: z.literal('literallythis'),
+    record: z.record(z.string(), z.string()),
+    union: z.union([
+      z.string({ description: 'Union string' }).max(1),
+      z.number({ description: 'Union number' }).min(0),
+    ]),
+    uri: z.string().url().default('prototest://something'),
+  });
+}

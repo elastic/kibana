@@ -9,10 +9,12 @@
 import { z } from 'zod';
 import { schema, Type } from '@kbn/config-schema';
 import { generateOpenApiDocument } from './generate_oas';
-import { createSharedSchema as createConfigSchemaSharedSchema } from './oas_converter/kbn_config_schema/lib.test.util';
-import { createSharedSchema as createZodSharedSchema } from './oas_converter/zod/lib.test.util';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
-import { sharedOas } from './generate_oas.test.shared.fixture';
+import {
+  sharedOas,
+  createZodSharedSchema,
+  createSharedConfigSchema,
+} from './generate_oas.test.shared.fixture';
 
 interface RecursiveType {
   name: string;
@@ -31,7 +33,7 @@ describe('generateOpenApiDocument', () => {
       const [routers, versionedRouters] = createTestRouters({
         routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
         versionedRouters: { testVersionedRouter: { routes: [{}] } },
-        bodySchema: createConfigSchemaSharedSchema(),
+        bodySchema: createSharedConfigSchema(),
       });
       expect(
         generateOpenApiDocument(

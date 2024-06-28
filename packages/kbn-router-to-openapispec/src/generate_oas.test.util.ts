@@ -55,7 +55,7 @@ export const getRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   handler: jest.fn(),
 });
 
-export const getVersionedRouterDefaults = (bodySchema?: any) => ({
+export const getVersionedRouterDefaults = (bodySchema?: RuntimeSchema) => ({
   method: 'get',
   path: '/bar',
   options: {
