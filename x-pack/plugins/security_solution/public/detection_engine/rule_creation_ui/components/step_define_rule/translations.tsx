@@ -237,7 +237,7 @@ export const EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT = i18n.translate(
 export const MACHINE_LEARNING_SUPPRESSION_DISABLED_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.machineLearningSuppressionDisabledLabel',
   {
-    defaultMessage: 'To enable alert suppression, start one or more Machine Learning jobs.',
+    defaultMessage: 'To enable alert suppression, start relevant Machine Learning jobs.',
   }
 );
 

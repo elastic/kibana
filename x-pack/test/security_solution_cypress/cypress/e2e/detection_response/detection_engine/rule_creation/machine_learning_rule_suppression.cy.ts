@@ -85,7 +85,7 @@ describe(
           cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).realHover();
           cy.get(TOOLTIP).should(
             'contain.text',
-            'To enable alert suppression, start one or more Machine Learning jobs.'
+            'To enable alert suppression, start relevant Machine Learning jobs.'
           );
         });
       });
