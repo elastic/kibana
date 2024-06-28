@@ -64,6 +64,7 @@ export const getSupportedSchemas = (
         parent: 'process.parent.entity_id',
         ancestry: 'process.Ext.ancestry',
         name: 'process.name',
+        agentId: 'agent.id',
       },
     },
     {
