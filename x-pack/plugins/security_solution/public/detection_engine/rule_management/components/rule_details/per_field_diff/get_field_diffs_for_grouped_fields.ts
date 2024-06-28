@@ -9,6 +9,8 @@ import stringify from 'json-stable-stringify';
 import type {
   AllFieldsDiff,
   RuleFieldsDiffWithDataSource,
+  RuleFieldsDiffWithEqlQuery,
+  RuleFieldsDiffWithEsqlQuery,
   RuleFieldsDiffWithKqlQuery,
 } from '../../../../../../common/api/detection_engine';
 import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
@@ -175,7 +177,9 @@ export const getFieldDiffsForKqlQuery = (
   ];
 };
 
-export const getFieldDiffsForEqlQuery = (eqlQuery: AllFieldsDiff['eql_query']): FieldDiff[] => {
+export const getFieldDiffsForEqlQuery = (
+  eqlQuery: RuleFieldsDiffWithEqlQuery['eql_query']
+): FieldDiff[] => {
   const currentQuery = sortAndStringifyJson(eqlQuery.current_version?.query);
   const targetQuery = sortAndStringifyJson(eqlQuery.target_version?.query);
 
@@ -203,7 +207,9 @@ export const getFieldDiffsForEqlQuery = (eqlQuery: AllFieldsDiff['eql_query']): 
   ];
 };
 
-export const getFieldDiffsForEsqlQuery = (esqlQuery: AllFieldsDiff['esql_query']): FieldDiff[] => {
+export const getFieldDiffsForEsqlQuery = (
+  esqlQuery: RuleFieldsDiffWithEsqlQuery['esql_query']
+): FieldDiff[] => {
   const currentQuery = sortAndStringifyJson(esqlQuery.current_version?.query);
   const targetQuery = sortAndStringifyJson(esqlQuery.target_version?.query);
 
