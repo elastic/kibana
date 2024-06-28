@@ -775,8 +775,7 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('row leading actions', () => {
-    // fix this with the new EUI flyout implementation for notes
-    it.skip(
+    it(
       'should be able to add notes using EuiFlyout',
       async () => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
@@ -835,8 +834,7 @@ describe('query tab with unified timeline', () => {
       SPECIAL_TEST_TIMEOUT
     );
 
-    // once the new EUI flyout for notes is implemented this test should be removed
-    it.skip(
+    it(
       'should be cancel adding notes',
       async () => {
         renderTestComponents();

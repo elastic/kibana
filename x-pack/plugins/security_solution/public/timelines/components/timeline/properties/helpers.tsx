@@ -14,16 +14,6 @@ import { TimelineType } from '../../../../../common/api/timeline';
 
 import * as i18n from './translations';
 
-interface NotesButtonProps {
-  ariaLabel?: string;
-  isDisabled?: boolean;
-  toggleShowNotes: () => void | ((eventId: string) => void);
-  toolTip?: string;
-  timelineType: TimelineTypeLiteral;
-  eventId?: string;
-  notesCount?: number;
-}
-
 export const NotificationDot = styled.span`
   position: absolute;
   display: block;
@@ -38,7 +28,7 @@ export const NotificationDot = styled.span`
 interface SmallNotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
-  toggleShowNotes: (eventId?: string) => void;
+  toggleShowNotes?: (eventId?: string) => void;
   timelineType: TimelineTypeLiteral;
   eventId?: string;
   /**
@@ -58,16 +48,21 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
     const isTemplate = timelineType === TimelineType.template;
     const onClick = useCallback(() => {
       if (eventId != null) {
-        toggleShowNotes(eventId);
+        toggleShowNotes?.(eventId);
       } else {
-        toggleShowNotes();
+        toggleShowNotes?.();
       }
     }, [toggleShowNotes, eventId]);
 
     return (
       <NotesButtonContainer>
         <EuiFlexItem grow={false}>
-          {notesCount > 0 ? <NotificationDot className="notes-notification-dot" /> : null}
+          {notesCount > 0 ? (
+            <NotificationDot
+              className="timeline-notes-notification-dot"
+              data-test-subj="timeline-notes-notification-dot"
+            />
+          ) : null}
           <EuiButtonIcon
             aria-label={ariaLabel}
             className={NOTES_BUTTON_CLASS_NAME}
@@ -88,7 +83,7 @@ SmallNotesButton.displayName = 'SmallNotesButton';
 interface NotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
-  toggleShowNotes: () => void | ((eventId: string) => void);
+  toggleShowNotes?: () => void | ((eventId: string) => void);
   toolTip?: string;
   timelineType: TimelineTypeLiteral;
   eventId?: string;

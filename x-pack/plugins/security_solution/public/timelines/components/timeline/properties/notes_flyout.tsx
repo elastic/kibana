@@ -22,9 +22,10 @@ import * as i18n from './translations';
 export type NotesFlyoutProps = {
   show: boolean;
   onClose: () => void;
+  eventId?: string;
 } & Pick<
   ComponentProps<typeof NoteCards>,
-  'eventId' | 'notes' | 'associateNote' | 'toggleShowAddNote' | 'timelineId'
+  'notes' | 'associateNote' | 'toggleShowAddNote' | 'timelineId' | 'onCancel'
 >;
 
 /*
@@ -37,13 +38,14 @@ export const NotesFlyoutContainer = styled(EuiFlyout)`
 `;
 
 export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutProps) {
-  const { eventId, toggleShowAddNote, show, onClose, associateNote, notes, timelineId } = props;
+  const { eventId, toggleShowAddNote, show, onClose, associateNote, notes, timelineId, onCancel } =
+    props;
 
   const notesFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'notesFlyoutTitle',
   });
 
-  if (!show) {
+  if (!show || !eventId) {
     return null;
   }
 
@@ -72,6 +74,7 @@ export const NotesFlyout = React.memo(function NotesFlyout(props: NotesFlyoutPro
           toggleShowAddNote={toggleShowAddNote}
           eventId={eventId}
           timelineId={timelineId}
+          onCancel={onCancel}
         />
       </EuiFlyoutBody>
     </NotesFlyoutContainer>

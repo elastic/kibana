@@ -11,12 +11,8 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import {
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-} from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import type {
   ColumnHeaderOptions,
@@ -73,6 +69,7 @@ interface Props {
   timelineId: string;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
+  onToggleShowNotes?: (eventId?: string) => void;
 }
 
 const emptyNotes: string[] = [];
@@ -108,15 +105,13 @@ const StatefulEventComponent: React.FC<Props> = ({
   timelineId,
   leadingControlColumns,
   trailingControlColumns,
+  onToggleShowNotes,
 }) => {
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
   const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const { openFlyout } = useExpandableFlyoutApi();
-  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesEnabled'
-  );
 
   // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
   const [activeStatefulEventContext] = useState({
@@ -188,30 +183,9 @@ const StatefulEventComponent: React.FC<Props> = ({
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const indexName = event._index!;
 
-  const onToggleShowNotes = useCallback(() => {
-    if (!expandableFlyoutDisabled && securitySolutionNotesEnabled) {
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
-        },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: timelineId,
-          },
-        },
-      });
-    } else {
+  const onToggleShowNotesHandler = useCallback(
+    (currentEventId?: string) => {
+      onToggleShowNotes?.(currentEventId);
       setFocusedNotes((prevShowNotes) => {
         if (prevShowNotes[eventId]) {
           // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
@@ -225,15 +199,9 @@ const StatefulEventComponent: React.FC<Props> = ({
 
         return { ...prevShowNotes, [eventId]: !prevShowNotes[eventId] };
       });
-    }
-  }, [
-    eventId,
-    expandableFlyoutDisabled,
-    indexName,
-    securitySolutionNotesEnabled,
-    openFlyout,
-    timelineId,
-  ]);
+    },
+    [onToggleShowNotes, eventId]
+  );
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const updatedExpandedDetail: ExpandedDetailType = {
@@ -327,7 +295,7 @@ const StatefulEventComponent: React.FC<Props> = ({
           showNotes={true}
           tabType={tabType}
           timelineId={timelineId}
-          toggleShowNotes={onToggleShowNotes}
+          toggleShowNotes={onToggleShowNotesHandler}
           leadingControlColumns={leadingControlColumns}
           trailingControlColumns={trailingControlColumns}
           setEventsLoading={setEventsLoading}

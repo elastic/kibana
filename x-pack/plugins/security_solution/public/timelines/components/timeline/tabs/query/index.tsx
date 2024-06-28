@@ -67,6 +67,8 @@ import {
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import { NotesFlyout } from '../../properties/notes_flyout';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -214,6 +216,21 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+  });
+
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
@@ -239,6 +256,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
       }
     },
     [
@@ -247,6 +269,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       securitySolutionNotesEnabled,
       selectedPatterns,
       timelineId,
+      showNotesFlyout,
+      setNotesEventId,
     ]
   );
 
@@ -325,6 +349,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           refetch={refetch}
           skip={!canQueryTimeline}
         />
+        <NotesFlyout
+          associateNote={associateNote}
+          eventId={noteEventId}
+          show={isNotesFlyoutVisible}
+          notes={notes}
+          onClose={closeNotesFlyout}
+          onCancel={closeNotesFlyout}
+          timelineId={timelineId}
+        />
 
         <UnifiedTimelineBody
           header={
@@ -373,6 +406,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
           <QueryTabHeader
@@ -406,6 +448,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 })}
                 leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={timelineEmptyTrailingControlColumns}
+                onToggleShowNotes={onToggleShowNotes}
               />
             </StyledEuiFlyoutBody>
 

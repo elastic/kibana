@@ -48,7 +48,7 @@ interface Props {
   showNotes: boolean;
   tabType?: TimelineTabs;
   timelineId: string;
-  toggleShowNotes: () => void;
+  toggleShowNotes: (eventId?: string) => void;
   leadingControlColumns: ControlColumnProps[];
   trailingControlColumns: ControlColumnProps[];
   setEventsLoading: SetEventsLoading;

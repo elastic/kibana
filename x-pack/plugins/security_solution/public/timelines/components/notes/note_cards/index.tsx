@@ -47,9 +47,10 @@ interface Props {
   className?: string;
   notes: TimelineResultNote[];
   showAddNote: boolean;
-  toggleShowAddNote: (eventId?: string) => void;
+  toggleShowAddNote?: (eventId?: string) => void;
   eventId?: string;
   timelineId: string;
+  onCancel?: () => void;
 }
 
 /** A view for entering and reviewing notes */
@@ -63,12 +64,14 @@ export const NoteCards = React.memo<Props>(
     toggleShowAddNote,
     eventId,
     timelineId,
+    onCancel,
   }) => {
     const [newNote, setNewNote] = useState('');
 
     const associateNoteAndToggleShow = useCallback(
       (noteId: string) => {
         associateNote(noteId);
+        if (!toggleShowAddNote) return;
         if (eventId != null) {
           toggleShowAddNote(eventId);
         } else {
@@ -79,12 +82,14 @@ export const NoteCards = React.memo<Props>(
     );
 
     const onCancelAddNote = useCallback(() => {
+      onCancel?.();
+      if (!toggleShowAddNote) return;
       if (eventId != null) {
         toggleShowAddNote(eventId);
       } else {
         toggleShowAddNote();
       }
-    }, [eventId, toggleShowAddNote]);
+    }, [eventId, toggleShowAddNote, onCancel]);
 
     return (
       <NoteCardsCompContainer
