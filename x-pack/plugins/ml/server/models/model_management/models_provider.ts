@@ -32,7 +32,6 @@ import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import type { ModelDownloadState, PipelineDefinition } from '../../../common/types/trained_models';
 import type { MlClient } from '../../lib/ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
-import { isRequestTimeout } from '../job_service/error_utils';
 
 export type ModelService = ReturnType<typeof modelsProvider>;
 
@@ -611,7 +610,7 @@ export class ModelsProvider {
     } catch (error) {
       // Request timeouts will usually occur when the model is being downloaded/deployed
       // Erroring out is misleading in these cases, so we return the model_id and task_type
-      if (isRequestTimeout(error)) {
+      if (error.name === 'TimeoutError') {
         return {
           model_id: modelConfig.service,
           task_type: taskType,
