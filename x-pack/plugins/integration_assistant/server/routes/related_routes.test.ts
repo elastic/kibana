@@ -8,8 +8,8 @@
 import { serverMock } from '../__mocks__/mock_server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
-import { CATEGORIZATION_GRAPH_PATH } from '../../common';
-import { registerCategorizationRoutes } from './categorization_routes';
+import { RELATED_GRAPH_PATH } from '../../common';
+import { registerRelatedRoutes } from './related_routes';
 
 const mockResult = jest.fn().mockResolvedValue({
   results: {
@@ -20,21 +20,21 @@ const mockResult = jest.fn().mockResolvedValue({
   },
 });
 
-jest.mock('../graphs/categorization', () => {
+jest.mock('../graphs/related', () => {
   return {
-    getCategorizationGraph: jest.fn().mockResolvedValue({
+    getRelatedGraph: jest.fn().mockResolvedValue({
       invoke: () => mockResult(),
     }),
   };
 });
 
-describe('registerCategorizationRoute', () => {
+describe('registerRelatedRoutes', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
 
   const req = requestMock.create({
     method: 'post',
-    path: CATEGORIZATION_GRAPH_PATH,
+    path: RELATED_GRAPH_PATH,
     body: {
       packageName: 'pack',
       dataStreamName: 'testStream',
@@ -48,10 +48,10 @@ describe('registerCategorizationRoute', () => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
-    registerCategorizationRoutes(server.router);
+    registerRelatedRoutes(server.router);
   });
 
-  it('Runs route and gets CategorizationResponse', async () => {
+  it('Runs route and gets RelatedResponse', async () => {
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.body).toEqual({
       results: { docs: [], pipeline: { processors: [{ script: { source: {} } }] } },

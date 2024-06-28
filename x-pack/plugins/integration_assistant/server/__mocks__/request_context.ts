@@ -20,8 +20,6 @@ export const createMockClients = () => {
     core,
     clusterClient: core.elasticsearch.client,
     savedObjectsClient: core.savedObjects.client,
-    config: createMockConfig(),
-    appClient: createAppClientMock(),
   };
 };
 
@@ -30,10 +28,6 @@ type MockClients = ReturnType<typeof createMockClients>;
 const convertRequestContextMock = <T extends Record<string, unknown>>(context: T) => {
   return coreMock.createCustomRequestHandlerContext(context);
 };
-
-const createMockConfig = () => ({});
-
-const createAppClientMock = () => ({});
 
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
