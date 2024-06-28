@@ -65,6 +65,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
           kibanaVersion,
           ...coreStart,
           ...pluginsStart,
+          securityService: coreStart.security,
           storage,
         }}
       >

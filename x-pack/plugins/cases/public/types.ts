@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, SecurityServiceStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
@@ -86,6 +86,10 @@ export interface CasesPublicStartDependencies {
   licensing?: LicensingPluginStart;
   contentManagement: ContentManagementPublicStart;
   security: SecurityPluginStart;
+  /**
+   *  Use the securityService field to ensure that APIs come from Core
+   */
+  securityService: SecurityServiceStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
   storage: Storage;

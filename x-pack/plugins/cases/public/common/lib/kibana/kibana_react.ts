@@ -15,4 +15,6 @@ import type { StartServices } from '../../../types';
 
 const useTypedKibana = () => useKibana<StartServices>();
 
+// FIXME use a typed KibanaContextProvider that requires StartServices
+
 export { KibanaContextProvider, useTypedKibana as useKibana, useUiSetting, useUiSetting$ };

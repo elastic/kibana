@@ -59,30 +59,15 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
 
   const toasts = useToasts();
 
-  const { security } = useKibana().services;
+  const { securityService } = useKibana().services;
 
   const fetchUser = useCallback(() => {
     let didCancel = false;
     const fetchData = async () => {
       try {
-        if (security != null) {
-          const response = await security.authc.getCurrentUser();
-          if (!didCancel) {
-            setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
-          }
-        } else {
-          setUser({
-            username: i18n.translate('xpack.cases.getCurrentUser.unknownUser', {
-              defaultMessage: 'Unknown',
-            }),
-            email: '',
-            fullName: '',
-            roles: [],
-            enabled: false,
-            authenticationRealm: { name: '', type: '' },
-            lookupRealm: { name: '', type: '' },
-            authenticationProvider: '',
-          });
+        const response = await securityService.authc.getCurrentUser();
+        if (!didCancel) {
+          setUser(convertToCamelCase<AuthenticatedUser, AuthenticatedElasticUser>(response));
         }
       } catch (error) {
         if (!didCancel) {
@@ -102,7 +87,7 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
     return () => {
       didCancel = true;
     };
-  }, [security, toasts]);
+  }, [securityService.authc, toasts]);
 
   useEffect(() => {
     fetchUser();
