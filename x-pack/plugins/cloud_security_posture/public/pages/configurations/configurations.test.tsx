@@ -64,13 +64,7 @@ describe('<Findings />', () => {
     // Loading while checking the status API
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-    await waitFor(() =>
-      expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-    );
-    // loading findings
-    await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
-
-    expect(screen.getByText(/2 findings/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
     expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
     expect(screen.getByText(finding1.resource.id)).toBeInTheDocument();
@@ -100,12 +94,6 @@ describe('<Findings />', () => {
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
-
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
       const queryInput = screen.getByTestId('queryInput');
@@ -134,12 +122,6 @@ describe('<Findings />', () => {
 
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
@@ -171,12 +153,6 @@ describe('<Findings />', () => {
 
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
@@ -213,7 +189,7 @@ describe('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
       expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
-    }, 10000);
+    });
     it('remove filter', async () => {
       const finding1 = generateCspFinding('0001', 'failed');
       const finding2 = generateCspFinding('0002', 'passed');
@@ -256,12 +232,6 @@ describe('<Findings />', () => {
 
       // Loading while checking the status API
       expect(screen.getByText(/loading/i)).toBeInTheDocument();
-
-      await waitFor(() =>
-        expect(screen.getByTestId('latest_findings_container')).toBeInTheDocument()
-      );
-      // loading findings
-      await waitFor(() => expect(screen.getByText(/loading results/i)).toBeInTheDocument());
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
