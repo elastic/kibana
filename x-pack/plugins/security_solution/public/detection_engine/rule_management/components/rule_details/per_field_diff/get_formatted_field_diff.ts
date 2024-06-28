@@ -114,7 +114,7 @@ export const getFormattedFieldDiffGroups = (
       };
     default:
       const fieldThreeWayDiff = (fields as AllFieldsDiff)[fieldName];
-      if (fieldThreeWayDiff === undefined) {
+      if (!fieldThreeWayDiff) {
         return {
           shouldShowSubtitles: false,
           fieldDiffs: [],
