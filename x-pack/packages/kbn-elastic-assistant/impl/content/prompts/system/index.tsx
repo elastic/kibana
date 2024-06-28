@@ -7,8 +7,10 @@
 
 import { Prompt } from '../../../..';
 import {
+  DEFAULT_SYSTEM_PROMPT_LABEL,
   DEFAULT_SYSTEM_PROMPT_NAME,
   DEFAULT_SYSTEM_PROMPT_NON_I18N,
+  SUPERHERO_SYSTEM_PROMPT_LABEL,
   SUPERHERO_SYSTEM_PROMPT_NAME,
   SUPERHERO_SYSTEM_PROMPT_NON_I18N,
 } from './translations';
@@ -22,11 +24,13 @@ export const BASE_SYSTEM_PROMPTS: Prompt[] = [
     content: DEFAULT_SYSTEM_PROMPT_NON_I18N,
     name: DEFAULT_SYSTEM_PROMPT_NAME,
     promptType: 'system',
+    label: DEFAULT_SYSTEM_PROMPT_LABEL,
   },
   {
     id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
     content: SUPERHERO_SYSTEM_PROMPT_NON_I18N,
     name: SUPERHERO_SYSTEM_PROMPT_NAME,
     promptType: 'system',
+    label: SUPERHERO_SYSTEM_PROMPT_LABEL,
   },
 ];

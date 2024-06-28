@@ -8,6 +8,7 @@
 import React from 'react';
 import { Prompt } from '../types';
 import { Conversation } from '../../assistant_context/types';
+import { AIConnector } from '../../connectorland/connector_selector';
 
 export interface CodeBlockDetails {
   type: QueryType;
@@ -69,6 +70,14 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
 };
 
 /**
+ * Returns the default system prompt
+ *
+ * @param allSystemPrompts All available System Prompts
+ */
+export const getDefaultNewSystemPrompt = (allSystemPrompts: Prompt[]) =>
+  allSystemPrompts.find((prompt) => prompt.isNewConversationDefault) ?? allSystemPrompts?.[0];
+
+/**
  * Returns the default system prompt for a given conversation
  *
  * @param allSystemPrompts All available System Prompts
@@ -84,7 +93,44 @@ export const getDefaultSystemPrompt = ({
   const conversationSystemPrompt = allSystemPrompts.find(
     (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
   );
-  const defaultNewSystemPrompt = allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
+  const defaultNewSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
-  return conversationSystemPrompt ?? defaultNewSystemPrompt ?? allSystemPrompts?.[0];
+  return conversationSystemPrompt ?? defaultNewSystemPrompt;
+};
+
+/**
+ * Returns the API config for a conversation
+ *
+ * @param allSystemPrompts All available System Prompts
+ * @param conversation Conversation to get the API config for
+ * @param connectors All available connectors
+ * @param defaultConnector Default connector to use
+ */
+export const getConversationApiConfig = ({
+  allSystemPrompts,
+  conversation,
+  connectors,
+  defaultConnector,
+}: {
+  allSystemPrompts: Prompt[];
+  conversation: Conversation;
+  connectors?: AIConnector[];
+  defaultConnector?: AIConnector;
+}) => {
+  const connector: AIConnector | undefined =
+    connectors?.find((c) => c.id === conversation.apiConfig?.connectorId) ?? defaultConnector;
+  const defaultSystemPrompt = getDefaultSystemPrompt({
+    allSystemPrompts,
+    conversation,
+  });
+  return connector
+    ? {
+        apiConfig: {
+          connectorId: connector.id,
+          actionTypeId: connector.actionTypeId,
+          provider: connector.apiProvider,
+          defaultSystemPromptId: defaultSystemPrompt?.id,
+        },
+      }
+    : {};
 };

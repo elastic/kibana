@@ -14,6 +14,13 @@ export const ALERTS_LABEL = i18n.translate(
   }
 );
 
+export const SEND_ALERTS_LABEL = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.sendAlertsLabel',
+  {
+    defaultMessage: 'Send Alerts',
+  }
+);
+
 export const ASK_QUESTIONS_ABOUT = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBaseSettings.askQuestionsAboutLabel',
   {

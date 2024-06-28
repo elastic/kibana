@@ -35,6 +35,7 @@ const defaultSort: SortConfig = {
 
 export interface Props {
   anonymizationFields: FindAnonymizationFieldsResponse;
+  compressed?: boolean;
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
   rawData: Record<string, string[]> | null;
   pageSize?: number;
@@ -60,6 +61,7 @@ const search: EuiSearchBarProps = {
 
 const ContextEditorComponent: React.FC<Props> = ({
   anonymizationFields,
+  compressed = true,
   onListUpdated,
   rawData,
   pageSize = DEFAULT_PAGE_SIZE,
@@ -131,7 +133,7 @@ const ContextEditorComponent: React.FC<Props> = ({
         allowNeutralSort={false}
         childrenBetween={hasUpdateAIAssistantAnonymization ? toolbar : undefined}
         columns={columns}
-        compressed={true}
+        compressed={compressed}
         data-test-subj="contextEditor"
         itemId={FIELDS.FIELD}
         items={rows}

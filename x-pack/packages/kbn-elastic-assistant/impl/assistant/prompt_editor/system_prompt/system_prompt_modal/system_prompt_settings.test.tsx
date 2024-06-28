@@ -25,6 +25,7 @@ const setConversationSettings = jest.fn().mockImplementation((fn) => {
 });
 
 const testProps = {
+  connectors: [],
   conversationSettings: {
     [welcomeConvo.title]: welcomeConvo,
   },

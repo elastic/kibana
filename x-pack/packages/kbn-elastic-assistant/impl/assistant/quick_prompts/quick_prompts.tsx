@@ -20,7 +20,7 @@ import { css } from '@emotion/react';
 import { QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
-import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
+import { QUICK_PROMPTS_TAB } from '../settings/const';
 
 export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 

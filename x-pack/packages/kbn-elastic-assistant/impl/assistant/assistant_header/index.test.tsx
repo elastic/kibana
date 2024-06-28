@@ -19,6 +19,7 @@ const mockConversations = {
   [welcomeConvo.title]: welcomeConvo,
 };
 const testProps = {
+  conversationsLoaded: true,
   currentConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {

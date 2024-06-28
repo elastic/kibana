@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
-import { CONVERSATIONS_TAB } from '../../assistant/settings/assistant_settings';
 import { ConnectorButton } from '../connector_button';
+import { CONVERSATIONS_TAB } from '../../assistant/settings/const';
 
 interface Props {
   isConnectorConfigured: boolean;

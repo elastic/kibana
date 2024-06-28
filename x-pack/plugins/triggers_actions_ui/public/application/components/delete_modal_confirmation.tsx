@@ -17,18 +17,7 @@ import {
   CANCEL_BUTTON_TEXT,
 } from '../sections/rules_list/translations';
 
-export const DeleteModalConfirmation = ({
-  idsToDelete,
-  apiDeleteCall,
-  onDeleted,
-  onCancel,
-  onErrors,
-  singleTitle,
-  multipleTitle,
-  showWarningText,
-  warningText,
-  setIsLoadingState,
-}: {
+export interface DeleteModalConfirmationProps {
   idsToDelete: string[];
   apiDeleteCall: ({
     ids,
@@ -45,7 +34,20 @@ export const DeleteModalConfirmation = ({
   setIsLoadingState: (isLoading: boolean) => void;
   showWarningText?: boolean;
   warningText?: string;
-}) => {
+}
+
+export const DeleteModalConfirmation = ({
+  idsToDelete,
+  apiDeleteCall,
+  onDeleted,
+  onCancel,
+  onErrors,
+  singleTitle,
+  multipleTitle,
+  showWarningText,
+  warningText,
+  setIsLoadingState,
+}: DeleteModalConfirmationProps) => {
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
   useEffect(() => {
@@ -102,3 +104,5 @@ export const DeleteModalConfirmation = ({
     </EuiConfirmModal>
   );
 };
+// eslint-disable-next-line import/no-default-export
+export { DeleteModalConfirmation as default };
