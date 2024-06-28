@@ -15,7 +15,6 @@ import type {
   SentinelOneDownloadAgentFileParams,
   SentinelOneGetActivitiesParams,
   SentinelOneGetActivitiesResponse,
-  SentinelOneGetAgentsParams,
   SentinelOneGetAgentsResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
@@ -30,10 +29,7 @@ import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
 import type { SentinelOneKillProcessScriptArgs, SentinelOneScriptArgs } from './types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from '../../constants';
-import type {
-  NormalizedExternalConnectorClient,
-  NormalizedExternalConnectorClientExecuteOptions,
-} from '../lib/normalized_external_connector_client';
+import type { NormalizedExternalConnectorClient } from '../lib/normalized_external_connector_client';
 import { SENTINEL_ONE_ACTIVITY_INDEX_PATTERN } from '../../../../../../common';
 import { catchAndWrapError } from '../../../../utils';
 import type {
@@ -230,30 +226,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     agentUUID: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    // FIXME:PT can results for a "short time" so that we don't keep querying the API
-
-    const executeOptions: NormalizedExternalConnectorClientExecuteOptions<
-      SentinelOneGetAgentsParams,
-      SUB_ACTION
-    > = {
-      params: {
-        subAction: SUB_ACTION.GET_AGENTS,
-        subActionParams: {
-          uuid: agentUUID,
-        },
-      },
-    };
+    // FIXME:PT We should cache the results for a "short time" so that we don't keep querying the API.
+    //        This method is sometimes called multiple times from different methods in this class, so caching it would improve performance
 
     let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
 
     try {
-      const response = (await this.connectorActionsClient.execute(
-        executeOptions
-      )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
-
-      this.log.debug(
-        `Response for SentinelOne agent id [${agentUUID}] returned:\n${stringify(response)}`
-      );
+      const response = await this.sendAction<SentinelOneGetAgentsResponse>(SUB_ACTION.GET_AGENTS, {
+        uuid: agentUUID,
+      });
 
       s1ApiResponse = response.data;
     } catch (err) {
