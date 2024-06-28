@@ -148,7 +148,6 @@ export const ConfigureStandaloneAgentStep = ({
                     <EuiCopy textToCopy={apiKey}>
                       {(copy) => (
                         <EuiButtonIcon
-                          data-test-subj="observabilityOnboardingApiKeySuccessCalloutButton"
                           iconType="copyClipboard"
                           onClick={copy}
                           color="success"
@@ -157,12 +156,9 @@ export const ConfigureStandaloneAgentStep = ({
                               borderRadius: '0 !important',
                             },
                           }}
-                          aria-label={i18n.translate(
-                            'xpack.observability_onboarding.apiKeyBanner.field.copyButton',
-                            {
-                              defaultMessage: 'Copy to clipboard',
-                            }
-                          )}
+                          aria-label={i18n.translate('xpack.fleet.apiKeyBanner.field.copyButton', {
+                            defaultMessage: 'Copy to clipboard',
+                          })}
                         />
                       )}
                     </EuiCopy>
