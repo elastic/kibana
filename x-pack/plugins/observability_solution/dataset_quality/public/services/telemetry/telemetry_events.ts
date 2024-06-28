@@ -63,21 +63,21 @@ const privilegesSchema: SchemaObject<DatasetEbtProps['privileges']> = {
 const ebtFilterObjectSchema: SchemaObject<DatasetEbtFilter> = {
   properties: {
     total: {
-      type: 'integer',
+      type: 'short',
       _meta: {
         description: 'Total number of values available to filter',
         optional: false,
       },
     },
     included: {
-      type: 'integer',
+      type: 'short',
       _meta: {
         description: 'Number of values selected to filter for',
         optional: false,
       },
     },
     excluded: {
-      type: 'integer',
+      type: 'short',
       _meta: {
         description: 'Number of values selected to filter out',
         optional: false,
@@ -100,7 +100,7 @@ const filtersSchema: SchemaObject<DatasetNavigatedEbtProps['filters']> = {
       },
     },
     query_length: {
-      type: 'integer',
+      type: 'short',
       _meta: {
         description: 'Length of the query string',
         optional: false,
@@ -183,7 +183,7 @@ const datasetDetailsOpenedEventType: DatasetQualityTelemetryEvent = {
       },
     },
     duration: {
-      type: 'integer',
+      type: 'long',
       _meta: {
         description: 'Duration in milliseconds to load the dataset details page',
       },
