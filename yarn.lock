@@ -30758,9 +30758,9 @@ undici@^5.21.2:
     "@fastify/busboy" "^2.0.0"
 
 undici@^6.12.0:
-  version "6.19.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-6.19.0.tgz#99f6e7ab4e4116dbbedf4e734e8c267f926f20a4"
-  integrity sha512-9gGwbSLgYMjp4r6M5P9bhqhx1E+RyUIHqZE0r7BmrRoqroJUG6xlVu5TXH9DnwmCPLkcaVNrcYtxUE9d3InnyQ==
+  version "6.19.2"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.19.2.tgz#231bc5de78d0dafb6260cf454b294576c2f3cd31"
+  integrity sha512-JfjKqIauur3Q6biAtHJ564e3bWa8VvT+7cSiOJHFbX4Erv6CLGDpg8z+Fmg/1OI/47RA+GI2QZaF48SSaLvyBA==
 
 unfetch@^4.2.0:
   version "4.2.0"
