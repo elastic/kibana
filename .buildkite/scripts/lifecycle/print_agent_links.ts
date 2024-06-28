@@ -20,14 +20,14 @@ import { BuildkiteClient } from '#pipeline-utils';
     const twoHours = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
 
     const METRICS_URL = [
-      `https://kibana-ops-buildkite-monitoring.kb.us-central1.gcp.cloud.es.io:9243`,
+      `https://ops.kibana.dev/s/ci`,
       `/app/metrics/link-to/host-detail/${process.env.BUILDKITE_AGENT_NAME}`,
       `?to=${twoHours.getTime()}`,
       `&from=${startTime.getTime()}`,
     ].join('');
 
     const LOGS_URL = [
-      `https://kibana-ops-buildkite-monitoring.kb.us-central1.gcp.cloud.es.io:9243`,
+      `https://ops.kibana.dev/s/ci`,
       `/app/logs/link-to/host-logs/${process.env.BUILDKITE_AGENT_NAME}`,
       `?time=${startTime.getTime()}`,
     ].join('');
