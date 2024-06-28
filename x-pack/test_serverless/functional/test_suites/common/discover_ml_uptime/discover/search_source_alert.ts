@@ -354,7 +354,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await titleElem.getAttribute('value')).to.equal(dataView);
   };
 
-  describe('Search source Alert', () => {
+  describe('Search source Alert', function () {
+    // fails on MKI, see https://github.com/elastic/kibana/issues/187069
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
