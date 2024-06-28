@@ -122,6 +122,7 @@ export interface CreateRestAPIKeyWithKibanaPrivilegesParams {
     }
   >;
 }
+
 export interface CreateCrossClusterAPIKeyParams {
   type: 'cross_cluster';
   expiration?: string;
