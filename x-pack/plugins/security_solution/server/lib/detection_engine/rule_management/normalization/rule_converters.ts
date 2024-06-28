@@ -451,13 +451,13 @@ export const convertUpdateAPIToInternalSchema = ({
   ruleUpdate,
   actionsClient,
 }: ConvertUpdateAPIToInternalSchemaProps) => {
-  const [ruleUpdateActions, ruleUpdateSystemActions] = partition(ruleUpdate.actions, (action) =>
-    actionsClient.isSystemAction(action.action_type_id)
+  const [ruleUpdateSystemActions, ruleUpdateActions] = partition(ruleUpdate.actions, (action) =>
+    actionsClient.isSystemAction(action.id)
   );
 
-  const [existingRuleUpdateActions, existingRuleUpdateSystemActions] = partition(
+  const [existingRuleUpdateSystemActions, existingRuleUpdateActions] = partition(
     existingRule.actions,
-    (action) => actionsClient.isSystemAction(action.actionTypeId)
+    (action) => actionsClient.isSystemAction(action.id)
   );
 
   const systemActions =
@@ -530,15 +530,13 @@ export const convertPatchAPIToInternalSchema = (
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
 
-  const [existingRuleActions, existingRuleSystemActions]: [
-    SanitizedRuleAction[],
-    RuleSystemAction[]
-  ] = partition(existingRule.actions, (action) =>
-    actionsClient.isSystemAction(action.actionTypeId)
-  );
+  const [existingRuleSystemActions, existingRuleActions]: [
+    RuleSystemAction[],
+    SanitizedRuleAction[]
+  ] = partition(existingRule.actions, (action) => actionsClient.isSystemAction(action.id));
 
-  const [ruleUpdateActions, ruleUpdateSystemActions] = partition(nextParams.actions, (action) =>
-    actionsClient.isSystemAction(action.action_type_id)
+  const [ruleUpdateSystemActions, ruleUpdateActions] = partition(nextParams.actions, (action) =>
+    actionsClient.isSystemAction(action.id)
   );
   const systemActions =
     ruleUpdateSystemActions?.map((action) => transformRuleToAlertAction(action)) ??
@@ -607,8 +605,14 @@ export const convertCreateAPIToInternalSchema = (
 ): InternalRuleCreate => {
   const { immutable = false, defaultEnabled = true } = options ?? {};
 
-  const [externalActions, systemActions] = partition(input.actions, (action) =>
-    actionsClient.isSystemAction(action.action_type_id)
+  const [systemActions, externalActions] = partition(input.actions, (action) =>
+    actionsClient.isSystemAction(action.id)
+  );
+
+  console.error(
+    `SYSTEM ACTIONS: ${JSON.stringify(systemActions)}\nexternalActions: ${JSON.stringify(
+      externalActions
+    )}`
   );
 
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
