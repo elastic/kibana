@@ -40,10 +40,8 @@ const useStyles = () => {
       font-weight: ${euiTheme.font.weight.semiBold};
     `,
     getImageContainer: (imageUrl: string | undefined) => css`
-      overflow: hidden;
       height: ${CARD_HEIGHT_IMAGE}px;
       width: ${CARD_HEIGHT_IMAGE}px;
-      flex-grow: 0;
       background-position: center center;
       background-repeat: no-repeat;
       background-image: url(${imageUrl ?? ''});
