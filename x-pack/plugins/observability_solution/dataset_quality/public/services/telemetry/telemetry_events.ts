@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { omit } from 'lodash';
 import { SchemaObject, SchemaValue } from '@kbn/ebt';
 import {
   DatasetEbtFilter,
@@ -212,7 +213,7 @@ const datasetDetailsOpenedEventType: DatasetQualityTelemetryEvent = {
 const datasetDetailsNavigatedEventType: DatasetQualityTelemetryEvent = {
   eventType: DatasetQualityTelemetryEventTypes.DETAILS_NAVIGATED,
   schema: {
-    ...datasetDetailsOpenedEventType.schema,
+    ...omit(datasetDetailsOpenedEventType.schema, 'duration'),
     target: {
       type: 'keyword',
       _meta: {
