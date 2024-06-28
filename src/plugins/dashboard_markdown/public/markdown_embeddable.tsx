@@ -79,14 +79,8 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
     const isEditing$ = new BehaviorSubject(false);
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
+    let isNewlyCreated: boolean = true;
     let editBackupContent: string | undefined = state.content;
-
-    const onStopEditing = () => {
-      isEditing$.next(false);
-      if (api.parentApi && apiCanFocusPanels(api.parentApi)) {
-        api.parentApi.setFocusedPanelId(undefined);
-      }
-    };
 
     const api = buildApi(
       {
@@ -121,6 +115,23 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
         ...titleComparators,
       }
     );
+
+    const onStopEditing = (isCancel = false) => {
+      isEditing$.next(false);
+      if (api.parentApi && apiCanFocusPanels(api.parentApi)) {
+        api.parentApi.setFocusedPanelId(undefined);
+      }
+
+      /**
+       * delete this panel if it's newly created, the user cancels, and there was
+       * no content before the user started editing.
+       */
+      if (isNewlyCreated && isCancel && !editBackupContent) {
+        api.parentApi?.removePanel(api.uuid);
+        return;
+      }
+      isNewlyCreated = false;
+    };
 
     const setupPlugins = () => {
       const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
@@ -179,7 +190,7 @@ export const markdownEmbeddableFactory: ReactEmbeddableFactory<
                     color="text"
                     onClick={() => {
                       if (editBackupContent) content$.next(editBackupContent);
-                      onStopEditing();
+                      onStopEditing(true);
                     }}
                   >
                     {i18n.translate('embeddableExamples.euiMarkdownEditor.cancel', {

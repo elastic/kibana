@@ -11,7 +11,7 @@ import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_MARKDOWN_ACTION_ID, MARKDOWN_ID } from './constants';
-import { MarkdownEditorSerializedState } from './types';
+import { MarkdownEditorApi, MarkdownEditorSerializedState } from './types';
 
 export const registerMarkdownActions = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
@@ -22,13 +22,17 @@ export const registerMarkdownActions = (uiActions: UiActionsStart) => {
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel<MarkdownEditorSerializedState>(
+      const markdownApi = await embeddable.addNewPanel<
+        MarkdownEditorSerializedState,
+        MarkdownEditorApi
+      >(
         {
           panelType: MARKDOWN_ID,
-          initialState: { content: '# hello world!' },
+          initialState: { content: '' },
         },
         true
       );
+      markdownApi?.onEdit();
     },
     getDisplayName: () =>
       i18n.translate('dashboardMarkdown.addDisplayName', {

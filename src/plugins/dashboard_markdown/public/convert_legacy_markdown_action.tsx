@@ -81,7 +81,7 @@ export const registerConvertLegacyMarkdownAction = (uiActions: UiActionsStart) =
       const legacyContent = embeddable.getVis().params.markdown;
       const content = convertLegacyDashboardLinks(legacyContent);
 
-      embeddable.parentApi.replacePanel(embeddable.uuid, {
+      await embeddable.parentApi.replacePanel(embeddable.uuid, {
         panelType: MARKDOWN_ID,
         initialState: {
           content,
