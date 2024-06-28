@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { apmLight } from '@kbn/shared-svg';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,13 +63,30 @@ export function AddAPMCallOut() {
           <EuiSpacer size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiButton data-test-subj="" href={core.http.basePath.prepend('/app/apm/tutorial')}>
-          {i18n.translate('xpack.apm.servicesTable.notAvailableApmMetrics.footer', {
-            defaultMessage: 'Add APM',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
+      <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <div>
+            <EuiButton data-test-subj="" href={core.http.basePath.prepend('/app/apm/tutorial')}>
+              {i18n.translate('xpack.apm.logsServiceOverview.callout.addApm', {
+                defaultMessage: 'Add APM',
+              })}
+            </EuiButton>
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="apmAddAPMCallOutLearnMoreButton"
+            iconType="popout"
+            iconSide="right"
+            idata-test-subj="apmAddAPMCallOutLearnMore"
+            href="https://www.elastic.co/observability/application-performance-monitoring"
+          >
+            {i18n.translate('xpack.apm.addAPMCallOut.linkToElasticcoButtonEmptyLabel', {
+              defaultMessage: 'Learn more',
+            })}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }

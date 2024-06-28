@@ -13,7 +13,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroupProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroupProps, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -52,6 +52,8 @@ export function LogsServiceOverview() {
     >
       <ChartPointerEventContextProvider>
         <AddAPMCallOut />
+        <EuiSpacer size="l" />
+
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
             <EuiFlexGroup direction={rowDirection} gutterSize="s" responsive={false}>
