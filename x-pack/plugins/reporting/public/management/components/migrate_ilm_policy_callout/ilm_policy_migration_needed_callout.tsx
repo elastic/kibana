@@ -14,7 +14,7 @@ import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
-import { useInternalApiClient } from '../../../lib/reporting_api_client';
+import { useInternalApiClient } from '@kbn/reporting-public';
 
 const i18nTexts = {
   title: i18n.translate('xpack.reporting.listing.ilmPolicyCallout.migrationNeededTitle', {

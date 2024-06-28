@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { getIndexPattern, DEFAULT_INDEX, CLOUD_DEFEND_INDEX, ENDPOINT_INDEX } from '.';
+import {
+  getIndexPattern,
+  DEFAULT_INDEX,
+  CLOUD_DEFEND_INDEX,
+  ENDPOINT_INDEX,
+  AUDITBEAT_INDEX,
+} from '.';
 
 const ENDPOINT_EVENT_INDEX = '.ds-logs-endpoint.events.process-default';
 const CLOUD_DEFEND_EVENT_INDEX = '.ds-logs-cloud_defend.process-default';
+const AUDITBEAT_EVENT_INDEX = '.ds-auditbeat-8-14-0-default';
 const TEST_CLUSTER = 'aws';
 
 describe('getIndexPattern', () => {
@@ -18,6 +25,10 @@ describe('getIndexPattern', () => {
 
   it('gets cloud_defend index pattern for events from cloud-defend', () => {
     expect(getIndexPattern(CLOUD_DEFEND_EVENT_INDEX)).toEqual(CLOUD_DEFEND_INDEX);
+  });
+
+  it('gets auditbeat index pattern for events from auditbeat events ', () => {
+    expect(getIndexPattern(AUDITBEAT_EVENT_INDEX)).toEqual(AUDITBEAT_INDEX);
   });
 
   it('gets logs-* for everything else', () => {

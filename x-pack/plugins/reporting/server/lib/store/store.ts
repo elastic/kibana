@@ -7,21 +7,23 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
+import { ILM_POLICY_NAME, JOB_STATUS } from '@kbn/reporting-common';
 import type {
   ExecutionError,
   ReportDocument,
   ReportOutput,
   ReportSource,
 } from '@kbn/reporting-common/types';
+import {
+  REPORTING_DATA_STREAM_ALIAS,
+  REPORTING_DATA_STREAM_COMPONENT_TEMPLATE,
+} from '@kbn/reporting-server';
 import moment from 'moment';
 import type { Report } from '.';
 import { SavedReport } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportTaskParams } from '../tasks';
 import { IlmPolicyManager } from './ilm_policy_manager';
-import { indexTimestamp } from './index_timestamp';
-import { mapping } from './mapping';
 import { MIGRATION_VERSION } from './report';
 
 type UpdateResponse<T> = estypes.UpdateResponse<T>;
@@ -70,10 +72,11 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
   return {
     ...doc,
     migration_version: MIGRATION_VERSION,
+    '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
   };
 };
 
-const esDoc = (
+const esDocForUpdate = (
   report: SavedReport,
   doc: Partial<ReportSource>
 ): Parameters<ElasticsearchClient['update']>[0] => {
@@ -82,7 +85,7 @@ const esDoc = (
     index: report._index,
     if_seq_no: report._seq_no,
     if_primary_term: report._primary_term,
-    refresh: false,
+    refresh: 'wait_for' as estypes.Refresh,
     body: { doc },
   };
 };
@@ -102,16 +105,9 @@ const jobDebugMessage = (report: Report) =>
  * - interface for downloading the report
  */
 export class ReportingStore {
-  private readonly indexPrefix: string; // config setting of index prefix in system index name
-  private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
-  config: ReportingCore['config'];
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
-    this.config = reportingCore.getConfig();
-
-    this.indexPrefix = REPORTING_SYSTEM_INDEX;
-    this.indexInterval = this.config.queue.indexInterval;
     this.logger = logger.get('store');
   }
 
@@ -123,62 +119,28 @@ export class ReportingStore {
     return this.client;
   }
 
-  private async getIlmPolicyManager() {
+  protected async createIlmPolicy() {
     const client = await this.getClient();
-    return IlmPolicyManager.create({ client });
-  }
-
-  private async createIndex(indexName: string) {
-    const client = await this.getClient();
-    const exists = await client.indices.exists({ index: indexName });
-
-    if (exists) {
-      return exists;
+    const ilmPolicyManager = IlmPolicyManager.create({ client });
+    if (await ilmPolicyManager.doesIlmPolicyExist()) {
+      this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
+    } else {
+      this.logger.info(`Creating ILM policy for reporting data stream: ${ILM_POLICY_NAME}`);
+      await ilmPolicyManager.createIlmPolicy();
     }
 
-    const indexSettings = this.config.statefulSettings.enabled
-      ? {
-          settings: {
-            number_of_shards: 1,
-            auto_expand_replicas: '0-1',
-            lifecycle: {
-              name: ILM_POLICY_NAME,
-            },
-          },
-        }
-      : {};
-
-    try {
-      await client.indices.create({
-        index: indexName,
-        body: {
-          ...indexSettings,
-          mappings: {
-            properties: mapping,
-          },
-        },
-      });
-
-      return true;
-    } catch (error) {
-      const isIndexExistsError = error.message.match(/resource_already_exists_exception/);
-      if (isIndexExistsError) {
-        // Do not fail a job if the job runner hits the race condition.
-        this.logger.warn(`Automatic index creation failed: index already exists: ${error}`);
-        return;
-      }
-
-      this.logger.error(error);
-
-      throw error;
-    }
+    this.logger.info(
+      `Linking ILM policy to reporting data stream: ${REPORTING_DATA_STREAM_ALIAS}, component template: ${REPORTING_DATA_STREAM_COMPONENT_TEMPLATE}`
+    );
+    await ilmPolicyManager.linkIlmPolicy();
   }
 
   private async indexReport(report: Report): Promise<IndexResponse> {
     const doc = {
-      index: report._index!,
+      index: REPORTING_DATA_STREAM_ALIAS,
       id: report._id,
-      refresh: false,
+      refresh: 'wait_for' as estypes.Refresh,
+      op_type: 'create' as const,
       body: {
         ...report.toReportSource(),
         ...sourceDoc({
@@ -192,52 +154,26 @@ export class ReportingStore {
     return await client.index(doc);
   }
 
-  /*
-   * Called from addReport, which handles any errors
-   */
-  private async refreshIndex(index: string) {
-    const client = await this.getClient();
-
-    return client.indices.refresh({ index });
-  }
-
   /**
    * Function to be called during plugin start phase. This ensures the environment is correctly
    * configured for storage of reports.
    */
   public async start() {
-    if (!this.config.statefulSettings.enabled) {
-      return;
-    }
-    const ilmPolicyManager = await this.getIlmPolicyManager();
+    const { statefulSettings } = this.reportingCore.getConfig();
     try {
-      if (await ilmPolicyManager.doesIlmPolicyExist()) {
-        this.logger.debug(`Found ILM policy ${ILM_POLICY_NAME}; skipping creation.`);
-        return;
+      if (statefulSettings.enabled) {
+        await this.createIlmPolicy();
       }
-      this.logger.info(`Creating ILM policy for managing reporting indices: ${ILM_POLICY_NAME}`);
-      await ilmPolicyManager.createIlmPolicy();
     } catch (e) {
       this.logger.error('Error in start phase');
-      this.logger.error(e.body?.error);
+      this.logger.error(e);
       throw e;
     }
   }
 
   public async addReport(report: Report): Promise<SavedReport> {
-    let index = report._index;
-    if (!index) {
-      const timestamp = indexTimestamp(this.indexInterval);
-      index = `${this.indexPrefix}-${timestamp}`;
-      report._index = index;
-    }
-    await this.createIndex(index);
-
     try {
       report.updateWithEsDoc(await this.indexReport(report));
-
-      await this.refreshIndex(index);
-
       return report as SavedReport;
     } catch (err) {
       this.reportingCore.getEventLogger(report).logError(err);
@@ -309,7 +245,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -341,7 +277,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -363,7 +299,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -391,7 +327,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+      body = await client.update<unknown, unknown, ReportDocument>(esDocForUpdate(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -400,9 +336,5 @@ export class ReportingStore {
     this.reportingCore.getEventLogger(report).logReportSaved();
 
     return body;
-  }
-
-  public getReportingIndexPattern(): string {
-    return `${this.indexPrefix}-*`;
   }
 }

@@ -5,6 +5,7 @@
   },
   "include": [
     "keystore/**/*",
+    "profiler/**/*",
     "serve/**/*",
     "*.js",
   ],

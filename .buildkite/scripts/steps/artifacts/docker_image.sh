@@ -17,9 +17,6 @@ KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 echo "Checking manifest for $KIBANA_IMAGE"
 if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
@@ -30,14 +27,10 @@ echo "--- Build Kibana"
 node scripts/build \
   --debug \
   --release \
+  --serverless \
   --docker-cross-compile \
-  --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="$KIBANA_IMAGE_TAG" \
-  --skip-docker-ubuntu \
-  --skip-docker-ubi \
-  --skip-docker-cloud \
-  --skip-docker-contexts
+  --docker-tag="$KIBANA_IMAGE_TAG"
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
@@ -67,8 +60,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
   docker manifest push "$KIBANA_BASE_IMAGE:latest"
 fi
 
-docker logout docker.elastic.co
-
 cat << EOF | buildkite-agent annotate --style "info" --context image
   ### Serverless Images
 
@@ -89,22 +80,27 @@ node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.c
 
 echo "--- Upload CDN assets"
 cd target
-gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_QA_KEY")
+gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
 
 CDN_ASSETS_FOLDER=$(mktemp -d)
 tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
 
-gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_COMMIT"
-gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
+gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
+gcloud auth revoke "$GCS_SA_CDN_EMAIL"
+
+echo "--- Validate CDN assets"
+ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  "$GCS_SA_CDN_URL" \
+  "$CDN_ASSETS_FOLDER"
 
 echo "--- Upload archives"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-x86_64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
-cd -
 
 # This part is related with updating the configuration of kibana-controller,
 # so that new stack instances contain the latest and greatest image of kibana,
@@ -121,6 +117,7 @@ steps:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
         SERVICE: kibana
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
+        DRY_RUN: "${DRY_RUN:-false}"
 EOF
 
 else

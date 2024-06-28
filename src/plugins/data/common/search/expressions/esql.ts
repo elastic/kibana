@@ -7,29 +7,21 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import type {
-  Datatable,
-  DatatableColumnType,
-  ExpressionFunctionDefinition,
-} from '@kbn/expressions-plugin/common';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
-import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
+import type { ISearchGeneric } from '@kbn/search-types';
+import type { ESQLSearchResponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import {
-  ESQL_ASYNC_SEARCH_STRATEGY,
-  IKibanaSearchRequest,
-  ISearchGeneric,
-  KibanaContext,
-} from '..';
-import { IKibanaSearchResponse } from '../types';
+import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
 import { UiSettingsCommon } from '../..';
 
 type Input = KibanaContext | null;
@@ -43,6 +35,12 @@ interface Arguments {
   // timezone?: string;
   timeField?: string;
   locale?: string;
+
+  /**
+   * Requests' meta for showing in Inspector
+   */
+  titleForInspector?: string;
+  descriptionForInspector?: string;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -61,21 +59,6 @@ interface EsqlStartDependencies {
   uiSettings: UiSettingsCommon;
 }
 
-function normalizeType(type: string): DatatableColumnType {
-  switch (type) {
-    case ES_FIELD_TYPES._INDEX:
-    case ES_FIELD_TYPES.GEO_POINT:
-    case ES_FIELD_TYPES.IP:
-      return KBN_FIELD_TYPES.STRING;
-    case '_version':
-      return KBN_FIELD_TYPES.NUMBER;
-    case 'datetime':
-      return KBN_FIELD_TYPES.DATE;
-    default:
-      return castEsToKbnFieldTypeName(type) as DatatableColumnType;
-  }
-}
-
 function extractTypeAndReason(attributes: any): { type?: string; reason?: string } {
   if (['type', 'reason'].every((prop) => prop in attributes)) {
     return attributes;
@@ -91,6 +74,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     name: 'esql',
     type: 'datatable',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.esql.help', {
       defaultMessage: 'Queries Elasticsearch using ES|QL.',
     }),
@@ -125,10 +109,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The locale to use.',
         }),
       },
+      titleForInspector: {
+        aliases: ['titleForInspector'],
+        types: ['string'],
+        help: i18n.translate('data.search.esql.titleForInspector.help', {
+          defaultMessage: 'The title to show in Inspector.',
+        }),
+      },
+      descriptionForInspector: {
+        aliases: ['descriptionForInspector'],
+        types: ['string'],
+        help: i18n.translate('data.search.esql.descriptionForInspector.help', {
+          defaultMessage: 'The description to show in Inspector.',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale },
+      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -175,14 +173,17 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             }
 
             const request = inspectorAdapters.requests.start(
-              i18n.translate('data.search.dataRequest.title', {
-                defaultMessage: 'Data',
-              }),
-              {
-                description: i18n.translate('data.search.es_search.dataRequest.description', {
-                  defaultMessage:
-                    'This request queries Elasticsearch to fetch the data for the visualization.',
+              titleForInspector ??
+                i18n.translate('data.search.dataRequest.title', {
+                  defaultMessage: 'Data',
                 }),
+              {
+                description:
+                  descriptionForInspector ??
+                  i18n.translate('data.search.es_search.dataRequest.description', {
+                    defaultMessage:
+                      'This request queries Elasticsearch to fetch the data for the visualization.',
+                  }),
               },
               startTime
             );
@@ -193,8 +194,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
 
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
-            IKibanaSearchResponse<ESQLSearchReponse>
-          >({ params }, { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }).pipe(
+            IKibanaSearchResponse<ESQLSearchResponse>
+          >(
+            { params: { ...params, dropNullColumns: true } },
+            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+          ).pipe(
             catchError((error) => {
               if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
@@ -237,21 +241,36 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
         }),
         map(({ rawResponse: body, warning }) => {
-          const columns =
-            body.columns?.map(({ name, type }) => ({
+          // all_columns in the response means that there is a separation between
+          // columns with data and empty columns
+          // columns contain only columns with data while all_columns everything
+          const hasEmptyColumns =
+            body.all_columns && body.all_columns?.length > body.columns.length;
+          const lookup = new Set(
+            hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []
+          );
+          const allColumns =
+            (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
               name,
-              meta: { type: normalizeType(type) },
+              meta: { type: esFieldTypeToKibanaFieldType(type), esType: type },
+              isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
-          const columnNames = columns.map(({ name }) => name);
+
+          // sort only in case of empty columns to correctly align columns to items in values array
+          if (hasEmptyColumns) {
+            allColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
+          }
+          const columnNames = allColumns?.map(({ name }) => name);
+
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
           return {
             type: 'datatable',
             meta: {
-              type: 'es_ql',
+              type: ESQL_TABLE_TYPE,
             },
-            columns,
+            columns: allColumns,
             rows,
             warning,
           } as Datatable;

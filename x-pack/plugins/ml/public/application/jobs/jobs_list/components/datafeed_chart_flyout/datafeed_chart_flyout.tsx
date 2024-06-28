@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -27,21 +28,23 @@ import {
   EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
+import type {
+  CustomAnnotationTooltip,
+  LineAnnotationDatum,
+  LineAnnotationEvent,
+  RectAnnotationDatum,
+  RectAnnotationEvent,
+} from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
   Chart,
   CurveType,
-  CustomAnnotationTooltip,
   LEGACY_LIGHT_THEME,
   LineAnnotation,
-  LineAnnotationDatum,
-  LineAnnotationEvent,
   LineSeries,
   Position,
   RectAnnotation,
-  RectAnnotationDatum,
-  RectAnnotationEvent,
   ScaleType,
   Settings,
   timeFormatter,
@@ -49,19 +52,20 @@ import {
   TooltipType,
 } from '@elastic/charts';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import {
+import type {
   CombinedJobWithStats,
   MlSummaryJob,
   ModelSnapshot,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import { JobMessage } from '../../../../../../common/types/audit_message';
-import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
+import type { JobMessage } from '../../../../../../common/types/audit_message';
+import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useCurrentThemeVars, useMlApiContext } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
-import { CHART_DIRECTION, CHART_SIZE, ChartDirectionType } from './constants';
+import type { ChartDirectionType } from './constants';
+import { CHART_DIRECTION, CHART_SIZE } from './constants';
 import { loadFullJob } from '../utils';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { type ChartDataWithNullValues, fillMissingChartData } from './fill_missing_chart_data';

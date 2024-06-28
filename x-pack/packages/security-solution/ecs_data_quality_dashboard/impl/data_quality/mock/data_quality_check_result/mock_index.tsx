@@ -23,6 +23,7 @@ export const mockDataQualityCheckResult: Record<string, DataQualityCheckResult> 
     ],
     pattern: 'auditbeat-*',
     sameFamily: 0,
+    checkedAt: 1706526408000,
   },
   'auditbeat-7.9.3-2023.02.13-000001': {
     docsCount: 2438,
@@ -39,5 +40,6 @@ export const mockDataQualityCheckResult: Record<string, DataQualityCheckResult> 
     ],
     pattern: 'auditbeat-*',
     sameFamily: 0,
+    checkedAt: 1706526408000,
   },
 };

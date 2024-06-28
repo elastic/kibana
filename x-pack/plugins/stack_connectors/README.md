@@ -41,7 +41,7 @@ Table of Contents
       - [`subActionParams (severity)`](#subactionparams-severity)
   - [Swimlane](#swimlane)
     - [`params`](#params-5)
-  - [| severity    | The severity of the incident.    | string _(optional)_ |](#-severity-----the-severity-of-the-incident-----string-optional-)
+  - [| severity | The severity of the incident. | string _(optional)_ |](#-severity-----the-severity-of-the-incident-----string-optional-)
   - [Ospgenie](#ospgenie)
     - [`params`](#params-6)
   - [PagerDuty](#pagerduty)
@@ -63,6 +63,7 @@ In addition to the documented configurations, several built in connector type of
 ## ServiceNow ITSM
 
 The [ServiceNow ITSM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+
 ### `params`
 
 | Property        | Description                                                                                        | Type   |
@@ -102,7 +103,6 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 | ---------- | ------------------------------------- | ------ |
 | externalId | The ID of the incident in ServiceNow. | string |
 
-
 #### `subActionParams (getChoices)`
 
 | Property | Description                                        | Type     |
@@ -139,7 +139,7 @@ The following table describes the properties of the `incident` object.
 | priority            | The priority in ServiceNow.                                                                                                                 | string _(optional)_               |
 | dest_ip             | A list of destination IPs related to the security incident. The IPs will be added as observables to the security incident.                  | (string \| string[]) _(optional)_ |
 | source_ip           | A list of source IPs related to the security incident. The IPs will be added as observables to the security incident.                       | (string \| string[]) _(optional)_ |
-| malware_hash        | A list of malware hashes related to the security incident. The hashes  will be added as observables to the security incident.               | (string \| string[]) _(optional)_ |
+| malware_hash        | A list of malware hashes related to the security incident. The hashes will be added as observables to the security incident.                | (string \| string[]) _(optional)_ |
 | malware_url         | A list of malware URLs related to the security incident. The URLs will be added as observables to the security incident.                    | (string \| string[]) _(optional)_ |
 | category            | The category in ServiceNow.                                                                                                                 | string _(optional)_               |
 | subcategory         | The subcategory in ServiceNow.                                                                                                              | string _(optional)_               |
@@ -156,7 +156,6 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 | ---------- | ---------------------------------------------- | ------ |
 | externalId | The ID of the security incident in ServiceNow. | string |
 
-
 #### `subActionParams (getChoices)`
 
 | Property | Description                                          | Type     |
@@ -164,9 +163,11 @@ No parameters for the `getFields` subaction. Provide an empty object `{}`.
 | fields   | An array of fields. Example: `[priority, category]`. | string[] |
 
 ---
+
 ## ServiceNow ITOM
 
 The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/en/kibana/master/servicenow-itom-action-type.html) lists configuration properties for the `addEvent` subaction. In addition, several other subaction types are available.
+
 ### `params`
 
 | Property        | Description                                                       | Type   |
@@ -175,7 +176,6 @@ The [ServiceNow ITOM user documentation `params`](https://www.elastic.co/guide/e
 | subActionParams | The parameters of the subaction.                                  | object |
 
 #### `subActionParams (addEvent)`
-
 
 | Property        | Description                                                                                                                      | Type                |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
@@ -200,9 +200,11 @@ Refer to [ServiceNow documentation](https://docs.servicenow.com/bundle/rome-it-o
 | fields   | An array of fields. Example: `[severity]`. | string[] |
 
 ---
+
 ## Jira
 
 The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/master/jira-action-type.html) lists configuration properties for the `pushToService` subaction. In addition, several other subaction types are available.
+
 ### `params`
 
 | Property        | Description                                                                                                                                | Type   |
@@ -219,15 +221,16 @@ The [Jira user documentation `params`](https://www.elastic.co/guide/en/kibana/ma
 
 The following table describes the properties of the `incident` object.
 
-| Property    | Description                                                                                             | Type                  |
-| ----------- | ------------------------------------------------------------------------------------------------------- | --------------------- |
-| summary     | The title of the issue.                                                                                 | string                |
-| description | The description of the issue.                                                                           | string _(optional)_   |
-| externalId  | The ID of the issue in Jira. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_   |
-| issueType   | The ID of the issue type in Jira.                                                                       | string _(optional)_   |
-| priority    | The name of the priority in Jira. Example: `Medium`.                                                    | string _(optional)_   |
-| labels      | An array of labels. Labels cannot contain spaces.                                                       | string[] _(optional)_ |
-| parent      | The ID or key of the parent issue. Only for `Sub-task` issue types.                                     | string _(optional)_   |
+| Property    | Description                                                                                             | Type                             |
+| ----------- | ------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| summary     | The title of the issue.                                                                                 | string                           |
+| description | The description of the issue.                                                                           | string _(optional)_              |
+| externalId  | The ID of the issue in Jira. If present, the incident is updated. Otherwise, a new incident is created. | string _(optional)_              |
+| issueType   | The ID of the issue type in Jira.                                                                       | string _(optional)_              |
+| priority    | The name of the priority in Jira. Example: `Medium`.                                                    | string _(optional)_              |
+| labels      | An array of labels. Labels cannot contain spaces.                                                       | string[] _(optional)_            |
+| parent      | The ID or key of the parent issue. Only for `Sub-task` issue types.                                     | string _(optional)_              |
+| otherFields | An object containing key-value pairs of any other fields in Jira without explicit properties.           | Record<string, any> _(optional)_ |
 
 #### `subActionParams (getIncident)`
 
@@ -304,6 +307,7 @@ No parameters for the `incidentTypes` subaction. Provide an empty object `{}`.
 No parameters for the `severity` subaction. Provide an empty object `{}`.
 
 ---
+
 ## Swimlane
 
 Refer to the [Run connector API documentation](https://www.elastic.co/guide/en/kibana/master/execute-connector-api.html#execute-connector-api-request-body)
@@ -316,14 +320,12 @@ for the full list of properties.
 | subAction       | The subaction to perform. It can be `pushToService`. | string |
 | subActionParams | The parameters of the subaction.                     | object |
 
-
 `subActionParams (pushToService)`
 
 | Property | Description                                                                                                   | Type                  |
 | -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
 | incident | The Swimlane incident.                                                                                        | object                |
 | comments | The comments of the case. A comment is of the form `{ commentId: string, version: string, comment: string }`. | object[] _(optional)_ |
-
 
 The following table describes the properties of the `incident` object.
 
@@ -335,6 +337,7 @@ The following table describes the properties of the `incident` object.
 | description | The description of the incident. | string _(optional)_ |
 | ruleName    | The rule name.                   | string _(optional)_ |
 | severity    | The severity of the incident.    | string _(optional)_ |
+
 ---
 
 ## Ospgenie
@@ -363,7 +366,7 @@ No parameters are required. For the definition of the optional parameters see th
 
 ---
 
-## PagerDuty 
+## PagerDuty
 
 The [PagerDuty user documentation `params`](https://www.elastic.co/guide/en/kibana/master/pagerduty-action-type.html) lists configuration properties for the `params`. For more details on these properties, see [PagerDuty v2 event parameters](https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTgx-send-an-alert-event) .
 

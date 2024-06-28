@@ -8,7 +8,7 @@
 import type { RegisterRuleTypesParams } from '../types';
 import { getRuleType } from './rule_type';
 
-export function register(params: RegisterRuleTypesParams) {
+export function register(params: RegisterRuleTypesParams, isServerless: boolean) {
   const { alerting, core } = params;
-  alerting.registerType(getRuleType(core));
+  alerting.registerType(getRuleType(core, isServerless));
 }

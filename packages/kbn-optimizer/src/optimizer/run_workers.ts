@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { mergeMap, toArray } from 'rxjs/operators';
+import { mergeMap, toArray } from 'rxjs';
 
 import { maybeMap } from '../common';
 

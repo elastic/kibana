@@ -24,7 +24,7 @@ import {
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const createLogStashDataView = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<{ data_view: { id: string } }> => {
   const { body } = await supertest
     .post(`/api/data_views/data_view`)
@@ -36,7 +36,7 @@ const createLogStashDataView = async (
 };
 
 const deleteLogStashDataView = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   dataViewId: string
 ): Promise<void> => {
   await supertest
@@ -62,6 +62,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const lens = getPageObject('lens');
   const listingTable = getService('listingTable');
   const toasts = getService('toasts');
+  const browser = getService('browser');
 
   const createAttachmentAndNavigate = async (attachment: AttachmentRequest) => {
     const caseData = await cases.api.createCase({
@@ -250,7 +251,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
              */
             await cases.create.createCase({ owner });
             await cases.common.expectToasterToContain('has been updated');
-            await toasts.dismissAllToastsWithChecks();
+            await toasts.dismissAllWithChecks();
           }
 
           const casesCreatedFromFlyout = await findCases({ supertest });
@@ -262,7 +263,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Modal', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/157642
+      describe.skip('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
@@ -272,6 +274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const closeModal = async () => {
           await find.clickByCssSelector('[data-test-subj="all-cases-modal"] > button');
+          await testSubjects.missingOrFail('all-cases-modal');
         };
 
         before(async () => {
@@ -279,6 +282,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             const theCase = await cases.api.createCase({ owner });
             createdCases.set(owner, theCase.id);
           }
+        });
+
+        beforeEach(async () => {
+          await browser.refresh();
         });
 
         after(async () => {
@@ -291,29 +298,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('options-filter-popover-button-owner');
 
           for (const [, currentCaseId] of createdCases.entries()) {
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+            await cases.casesTable.getCaseById(currentCaseId);
           }
 
           await closeModal();
         });
 
-        it('filters correctly', async () => {
+        it('filters correctly with owner cases', async () => {
           for (const [owner, currentCaseId] of createdCases.entries()) {
             await openModal();
-
             await cases.casesTable.filterByOwner(owner);
-            await cases.casesTable.waitForTableToFinishLoading();
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
-
+            await cases.casesTable.getCaseById(currentCaseId);
             /**
-             * We ensure that the other cases are not shown
+             * The select button matched the query of the
+             * [data-test-subj*="cases-table-row-" query
              */
-            for (const otherCaseId of createdCases.values()) {
-              if (otherCaseId !== currentCaseId) {
-                await testSubjects.missingOrFail(`cases-table-row-${otherCaseId}`);
-              }
-            }
-
+            await cases.casesTable.validateCasesTableHasNthRows(2);
             await closeModal();
           }
         });
@@ -321,16 +321,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('filters with multiple selection', async () => {
           await openModal();
 
-          let popupAlreadyOpen = false;
           for (const [owner] of createdCases.entries()) {
-            await cases.casesTable.filterByOwner(owner, { popupAlreadyOpen });
-            popupAlreadyOpen = true;
+            await cases.casesTable.filterByOwner(owner);
           }
+
           await cases.casesTable.waitForTableToFinishLoading();
 
+          /**
+           * The select button matched the query of the
+           * [data-test-subj*="cases-table-row-" query
+           */
+          await cases.casesTable.validateCasesTableHasNthRows(6);
+
           for (const caseId of createdCases.values()) {
-            await testSubjects.existOrFail(`cases-table-row-${caseId}`);
+            await cases.casesTable.getCaseById(caseId);
           }
+
           await closeModal();
         });
 
@@ -339,11 +345,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
             await openModal();
 
             await cases.casesTable.waitForTableToFinishLoading();
-            await testSubjects.existOrFail(`cases-table-row-${currentCaseId}`);
+            await cases.casesTable.getCaseById(currentCaseId);
             await testSubjects.click(`cases-table-row-select-${currentCaseId}`);
 
             await cases.common.expectToasterToContain('has been updated');
-            await toasts.dismissAllToastsWithChecks();
+            await toasts.dismissAllWithChecks();
             await ensureFirstCommentOwner(currentCaseId, owner);
           }
         });
@@ -395,7 +401,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('embeddablePanelToggleMenuIcon');
         await testSubjects.click('embeddablePanelMore-mainMenu');
-        await testSubjects.click('embeddablePanelAction-embeddable_addToNewCase');
+        await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
+        await testSubjects.click('cases-table-add-case-filter-bar');
 
         await cases.create.createCase({
           title: caseTitle,
@@ -406,7 +413,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(caseTitle);
@@ -434,7 +441,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
 
         const title = await find.byCssSelector('[data-test-subj="editable-title-header-value"]');
         expect(await title.getVisibleText()).toEqual(theCaseTitle);

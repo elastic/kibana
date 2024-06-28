@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
-import { TransformConfigUnion } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { applyFormStateToTransformConfig } from '../apply_form_state_to_transform_config';
 import { useEditTransformFlyoutContext } from '../edit_transform_flyout_state';

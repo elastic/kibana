@@ -20,12 +20,16 @@ import {
   ML_JOB_AGGREGATION,
   SPARSE_DATA_AGGREGATIONS,
 } from '@kbn/ml-anomaly-utils';
-import { Job, Datafeed, Detector } from '../../../../../../../common/types/anomaly_detection_jobs';
+import type {
+  Job,
+  Datafeed,
+  Detector,
+} from '../../../../../../../common/types/anomaly_detection_jobs';
 import { newJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import { NavigateToPath } from '../../../../../contexts/kibana';
+import type { NavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { mlJobService } from '../../../../../services/job_service';
-import { JobCreatorType } from '..';
+import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
 
 const getFieldByIdFactory = (additionalFields: Field[]) => (id: string) => {

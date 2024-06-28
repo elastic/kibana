@@ -6,16 +6,20 @@
  * Side Public License, v 1.
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  Field,
+  QueryDslFieldAndFormat,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   InferSearchResponseOf,
   AggregateOf as AggregationResultOf,
   AggregateOfMap as AggregationResultOfMap,
   SearchHit,
-  ClusterDetails,
   ESQLColumn,
   ESQLRow,
-  ESQLSearchReponse,
+  ESQLSearchResponse,
   ESQLSearchParams,
+  ChangePointType,
 } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
@@ -39,14 +43,17 @@ export type ESSearchResponse<
   TOptions extends { restTotalHitsAsInt: boolean } = { restTotalHitsAsInt: false }
 > = InferSearchResponseOf<TDocument, TSearchRequest, TOptions>;
 
+// `fields` parameter from a search request (estypes.SearchRequest)
+export type SearchField = QueryDslFieldAndFormat | Field;
+
 export type {
   InferSearchResponseOf,
   AggregationResultOf,
   AggregationResultOfMap,
   SearchHit,
-  ClusterDetails,
   ESQLColumn,
   ESQLRow,
-  ESQLSearchReponse,
+  ESQLSearchResponse,
   ESQLSearchParams,
+  ChangePointType,
 };

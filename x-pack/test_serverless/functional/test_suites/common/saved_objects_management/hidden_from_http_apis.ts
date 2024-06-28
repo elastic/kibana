@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kbnServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis'
       );
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await pageObjects.savedObjects.waitTableIsLoaded();
@@ -42,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_from_http_apis'
       );
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('APIS', () => {

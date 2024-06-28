@@ -12,7 +12,6 @@ import {
   ruleExecutionStatusValues,
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
-  filterStateStore,
 } from '../constants';
 import {
   ruleParamsSchema,
@@ -20,7 +19,6 @@ import {
   ruleExecutionStatusSchema,
   ruleLastRunSchema,
   monitoringSchema,
-  actionSchema,
   ruleSchema,
   ruleDomainSchema,
 } from '../schemas';
@@ -34,13 +32,11 @@ export type RuleExecutionStatusErrorReason =
   typeof ruleExecutionStatusErrorReason[keyof typeof ruleExecutionStatusErrorReason];
 export type RuleExecutionStatusWarningReason =
   typeof ruleExecutionStatusWarningReason[keyof typeof ruleExecutionStatusWarningReason];
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
 export type RuleLastRun = TypeOf<typeof ruleLastRunSchema>;
 export type Monitoring = TypeOf<typeof monitoringSchema>;
-export type Action = TypeOf<typeof actionSchema>;
 type RuleSchemaType = TypeOf<typeof ruleSchema>;
 type RuleDomainSchemaType = TypeOf<typeof ruleDomainSchema>;
 
@@ -62,6 +58,7 @@ export interface Rule<Params extends RuleParams = never> {
   consumer: RuleSchemaType['consumer'];
   schedule: RuleSchemaType['schedule'];
   actions: RuleSchemaType['actions'];
+  systemActions?: RuleSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleSchemaType['mapped_params'];
   scheduledTaskId?: RuleSchemaType['scheduledTaskId'];
@@ -75,7 +72,7 @@ export interface Rule<Params extends RuleParams = never> {
   muteAll: RuleSchemaType['muteAll'];
   notifyWhen?: RuleSchemaType['notifyWhen'];
   mutedInstanceIds: RuleSchemaType['mutedInstanceIds'];
-  executionStatus: RuleExecutionStatus;
+  executionStatus?: RuleExecutionStatus;
   monitoring?: RuleSchemaType['monitoring'];
   snoozeSchedule?: RuleSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleSchemaType['activeSnoozes'];
@@ -85,7 +82,8 @@ export interface Rule<Params extends RuleParams = never> {
   revision: RuleSchemaType['revision'];
   running?: RuleSchemaType['running'];
   viewInAppRelativeUrl?: RuleSchemaType['viewInAppRelativeUrl'];
-  notificationDelay?: RuleSchemaType['notificationDelay'];
+  alertDelay?: RuleSchemaType['alertDelay'];
+  legacyId?: RuleSchemaType['legacyId'];
 }
 
 export interface RuleDomain<Params extends RuleParams = never> {
@@ -97,6 +95,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   consumer: RuleDomainSchemaType['consumer'];
   schedule: RuleDomainSchemaType['schedule'];
   actions: RuleDomainSchemaType['actions'];
+  systemActions?: RuleDomainSchemaType['systemActions'];
   params: Params;
   mapped_params?: RuleDomainSchemaType['mapped_params'];
   scheduledTaskId?: RuleDomainSchemaType['scheduledTaskId'];
@@ -111,7 +110,7 @@ export interface RuleDomain<Params extends RuleParams = never> {
   muteAll: RuleDomainSchemaType['muteAll'];
   notifyWhen?: RuleDomainSchemaType['notifyWhen'];
   mutedInstanceIds: RuleDomainSchemaType['mutedInstanceIds'];
-  executionStatus: RuleExecutionStatus;
+  executionStatus?: RuleExecutionStatus;
   monitoring?: RuleDomainSchemaType['monitoring'];
   snoozeSchedule?: RuleDomainSchemaType['snoozeSchedule'];
   activeSnoozes?: RuleDomainSchemaType['activeSnoozes'];
@@ -121,5 +120,6 @@ export interface RuleDomain<Params extends RuleParams = never> {
   revision: RuleDomainSchemaType['revision'];
   running?: RuleDomainSchemaType['running'];
   viewInAppRelativeUrl?: RuleDomainSchemaType['viewInAppRelativeUrl'];
-  notificationDelay?: RuleSchemaType['notificationDelay'];
+  alertDelay?: RuleSchemaType['alertDelay'];
+  legacyId?: RuleSchemaType['legacyId'];
 }

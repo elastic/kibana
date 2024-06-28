@@ -57,7 +57,7 @@ import {
 import { SAME_FAMILY } from '../../same_family/translations';
 import { INCOMPATIBLE_FIELD_MAPPINGS_TABLE_TITLE } from '../../tabs/incompatible_tab/translations';
 import {
-  EnrichedFieldMetadata,
+  EcsBasedFieldMetadata,
   ErrorSummary,
   PatternRollup,
   UnallowedValueCount,
@@ -230,17 +230,6 @@ describe('helpers', () => {
         '| host.name.keyword | `keyword` | `--` |\n| some.field | `text` | `--` |\n| some.field.keyword | `keyword` | `--` |\n| source.ip.keyword | `keyword` | `--` |'
       );
     });
-
-    test('it returns the expected table rows when some have allowed values', () => {
-      const withAllowedValues = [
-        ...mockCustomFields,
-        eventCategory, // note: this is not a real-world use case, because custom fields don't have allowed values
-      ];
-
-      expect(getCustomMarkdownTableRows(withAllowedValues)).toEqual(
-        '| host.name.keyword | `keyword` | `--` |\n| some.field | `text` | `--` |\n| some.field.keyword | `keyword` | `--` |\n| source.ip.keyword | `keyword` | `--` |\n| event.category | `keyword` | `authentication`, `configuration`, `database`, `driver`, `email`, `file`, `host`, `iam`, `intrusion_detection`, `malware`, `network`, `package`, `process`, `registry`, `session`, `threat`, `vulnerability`, `web` |'
-      );
-    });
   });
 
   describe('getSameFamilyBadge', () => {
@@ -265,7 +254,7 @@ describe('helpers', () => {
 
   describe('getIncompatibleMappingsMarkdownTableRows', () => {
     test('it returns the expected table rows when the field is in the same family', () => {
-      const eventCategoryWithWildcard: EnrichedFieldMetadata = {
+      const eventCategoryWithWildcard: EcsBasedFieldMetadata = {
         ...eventCategory, // `event.category` is a `keyword` per the ECS spec
         indexFieldType: 'wildcard', // this index has a mapping of `wildcard` instead of `keyword`
         isInSameFamily: true, // `wildcard` and `keyword` are in the same family
@@ -282,7 +271,7 @@ describe('helpers', () => {
     });
 
     test('it returns the expected table rows when the field is NOT in the same family', () => {
-      const eventCategoryWithText: EnrichedFieldMetadata = {
+      const eventCategoryWithText: EcsBasedFieldMetadata = {
         ...eventCategory, // `event.category` is a `keyword` per the ECS spec
         indexFieldType: 'text', // this index has a mapping of `text` instead of `keyword`
         isInSameFamily: false, // `text` and `keyword` are NOT in the same family
@@ -432,7 +421,14 @@ describe('helpers', () => {
     test('it returns the expected header when isILMAvailable is false', () => {
       const isILMAvailable = false;
       expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
-        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|'
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|'
+      );
+    });
+
+    test('it returns the expected header when displayDocSize is false', () => {
+      const isILMAvailable = false;
+      expect(getSummaryTableMarkdownHeader(isILMAvailable)).toEqual(
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|'
       );
     });
   });
@@ -481,9 +477,25 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           isILMAvailable: false,
           patternDocsCount: 57410,
-          sizeInBytes: 28413,
+          sizeInBytes: undefined,
         })
-      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- | 27.7KB |\n');
+      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- |\n');
+    });
+
+    test('it returns the expected row when sizeInBytes is undefined', () => {
+      expect(
+        getSummaryTableMarkdownRow({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          incompatible: undefined, // <--
+          ilmPhase: undefined, // <--
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          patternDocsCount: 57410,
+          sizeInBytes: undefined,
+        })
+      ).toEqual('| -- | auditbeat-custom-index-1 | 4 (0.0%) | -- |\n');
     });
   });
 
@@ -517,10 +529,28 @@ describe('helpers', () => {
           isILMAvailable: false,
           partitionedFieldMetadata: mockPartitionedFieldMetadata,
           patternDocsCount: 57410,
-          sizeInBytes: 28413,
+          sizeInBytes: undefined,
         })
       ).toEqual(
-        '| Result | Index | Docs | Incompatible fields | Size |\n|--------|-------|------|---------------------|------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 | 27.7KB |\n\n'
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 |\n\n'
+      );
+    });
+
+    test('it returns the expected comment when sizeInBytes is undefined', () => {
+      expect(
+        getSummaryTableMarkdownComment({
+          docsCount: 4,
+          formatBytes,
+          formatNumber,
+          ilmPhase: 'unmanaged',
+          indexName: 'auditbeat-custom-index-1',
+          isILMAvailable: false,
+          partitionedFieldMetadata: mockPartitionedFieldMetadata,
+          patternDocsCount: 57410,
+          sizeInBytes: undefined,
+        })
+      ).toEqual(
+        '| Result | Index | Docs | Incompatible fields |\n|--------|-------|------|---------------------|\n| ❌ | auditbeat-custom-index-1 | 4 (0.0%) | 3 |\n\n'
       );
     });
   });
@@ -554,7 +584,7 @@ describe('helpers', () => {
           sizeInBytes: undefined,
         })
       ).toEqual(
-        '| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n'
+        '| Incompatible fields | Indices checked | Indices | Docs |\n|---------------------|-----------------|---------|------|\n| -- | -- | -- | 0 |\n'
       );
     });
   });
@@ -588,7 +618,7 @@ describe('helpers', () => {
           sizeInBytes: undefined,
         })
       ).toEqual(
-        '# Data quality\n\n| Incompatible fields | Indices checked | Indices | Size | Docs |\n|---------------------|-----------------|---------|------|------|\n| -- | -- | -- | -- | 0 |\n\n'
+        '# Data quality\n\n| Incompatible fields | Indices checked | Indices | Docs |\n|---------------------|-----------------|---------|------|\n| -- | -- | -- | 0 |\n\n'
       );
     });
   });

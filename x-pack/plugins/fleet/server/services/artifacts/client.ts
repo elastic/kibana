@@ -17,6 +17,7 @@ import type {
   ArtifactsClientInterface,
   NewArtifact,
   ListArtifactsProps,
+  FetchAllArtifactsOptions,
 } from './types';
 import { relativeDownloadUrlFromArtifact, uniqueIdFromId } from './mappings';
 
@@ -29,6 +30,7 @@ import {
   listArtifacts,
   bulkCreateArtifacts,
   bulkDeleteArtifacts,
+  fetchAllArtifacts,
 } from './artifacts';
 
 /**
@@ -47,6 +49,15 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
     }
 
     return artifact;
+  }
+
+  /**
+   * Creates a `kuery` string using the provided value on input that is bound to the integration package
+   * @param kuery
+   * @private
+   */
+  private buildFilter(kuery: string): string {
+    return `(package_name: "${this.packageName}")${kuery ? ` AND ${kuery}` : ''}`;
   }
 
   async getArtifact(id: string): Promise<Artifact | undefined> {
@@ -119,20 +130,37 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
   }
 
   /**
-   * Get a list of artifacts.
-   * NOTE that when using the `kuery` filtering param, that all filters property names should
-   * match the internal attribute names of the index
+   * Get a list of artifacts. A few things to note:
+   * - if wanting to get ALL artifacts, consider using instead the `fetchAll()` method instead
+   *   as it will property return data past the 10k ES limitation
+   * - when using the `kuery` filtering param, all filters property names should match the
+   *   internal attribute names in the index
    */
   async listArtifacts({ kuery, ...options }: ListArtifactsProps = {}): Promise<
     ListResult<Artifact>
   > {
-    // All filtering for artifacts should be bound to the `packageName`, so we insert
-    // that into the KQL value and use `AND` to add the defined `kuery` (if any) to it.
-    const filter = `(package_name: "${this.packageName}")${kuery ? ` AND ${kuery}` : ''}`;
-
     return listArtifacts(this.esClient, {
       ...options,
-      kuery: filter,
+      kuery: this.buildFilter(kuery),
+    });
+  }
+
+  /**
+   * Returns an `AsyncIterable` object that can be used to iterate over all artifacts
+   *
+   * @param options
+   *
+   * @example
+   * async () => {
+   *   for await (const artifacts of fleetArtifactsClient.fetchAll()) {
+   *     // artifacts === first page of items
+   *   }
+   * }
+   */
+  fetchAll({ kuery, ...options }: FetchAllArtifactsOptions = {}): AsyncIterable<Artifact[]> {
+    return fetchAllArtifacts(this.esClient, {
+      ...options,
+      kuery: this.buildFilter(kuery),
     });
   }
 

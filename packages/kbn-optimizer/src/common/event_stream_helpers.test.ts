@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { allValuesFrom } from './rxjs_helpers';
 
 import { summarizeEventStream } from './event_stream_helpers';

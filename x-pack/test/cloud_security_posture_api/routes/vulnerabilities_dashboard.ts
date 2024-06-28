@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { EcsEvent } from '@kbn/ecs';
+import { EcsEvent } from '@elastic/ecs';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   vulnerabilitiesLatestMock,
@@ -155,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
       const indexExists = await es.indices.exists({ index: VULNERABILITIES_LATEST_INDEX });
 
       if (indexExists) {
-        es.deleteByQuery({
+        await es.deleteByQuery({
           index: VULNERABILITIES_LATEST_INDEX,
           query: { match_all: {} },
           refresh: true,
@@ -167,7 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
       const indexExists = await es.indices.exists({ index: BENCHMARK_SCORES_INDEX });
 
       if (indexExists) {
-        es.deleteByQuery({
+        await es.deleteByQuery({
           index: BENCHMARK_SCORES_INDEX,
           query: { match_all: {} },
           refresh: true,

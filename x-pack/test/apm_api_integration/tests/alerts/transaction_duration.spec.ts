@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const ruleParams = {
     threshold: 3000,
@@ -68,14 +68,15 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      return synthtraceEsClient.index(events);
+      return apmSynthtraceEsClient.index(events);
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
     });
 
-    describe('create rule for opbeans-java without kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176996
+    describe.skip('create rule for opbeans-java without kql filter', () => {
       let ruleId: string;
       let actionId: string;
       let alerts: ApmAlertFields[];
@@ -187,7 +188,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('create rule for opbeans-node using kql filter', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/177061
+    describe.skip('create rule for opbeans-node using kql filter', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 

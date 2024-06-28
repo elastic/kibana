@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
 import { EuiInputPopover } from '@elastic/eui';
-import { FROM_INDEX, TO_INDEX } from '../time_utils';
-import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
+import React, { FC } from 'react';
+
+import { TimeSlice } from '../../../common/types';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';
+import { getRoundedTimeRangeBounds } from '../time_slider_selectors';
+import { FROM_INDEX, TO_INDEX } from '../time_utils';
 import { TimeSliderPopoverButton } from './time_slider_popover_button';
 import { TimeSliderPopoverContent } from './time_slider_popover_content';
 
@@ -18,7 +20,7 @@ import './index.scss';
 
 interface Props {
   formatDate: (epoch: number) => string;
-  onChange: (value?: [number, number]) => void;
+  onChange: (value?: TimeSlice) => void;
 }
 
 export const TimeSlider: FC<Props> = (props: Props) => {

@@ -22,7 +22,7 @@ export const noKibanaPrivileges: Role = {
 };
 
 export const noCasesPrivilegesSpace1: Role = {
-  name: 'no_kibana_privileges',
+  name: 'no_cases_kibana_privileges',
   privileges: {
     elasticsearch: {
       indices: [
@@ -374,6 +374,29 @@ export const securitySolutionOnlyAllSpacesRole: Role = {
   },
 };
 
+export const onlyActions: Role = {
+  name: 'only_actions',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
 export const roles = [
   noKibanaPrivileges,
   noCasesPrivilegesSpace1,
@@ -390,4 +413,5 @@ export const roles = [
   observabilityOnlyReadAlerts,
   testDisabledPluginAll,
   securitySolutionOnlyReadNoIndexAlerts,
+  onlyActions,
 ];

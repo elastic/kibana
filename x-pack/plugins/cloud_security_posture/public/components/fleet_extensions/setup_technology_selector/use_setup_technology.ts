@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 
 import { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { CLOUDBEAT_AWS } from '../../../../common/constants';
+import { CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE } from '../../../../common/constants';
 
 export const useSetupTechnology = ({
   input,
@@ -24,7 +24,10 @@ export const useSetupTechnology = ({
   isEditPage: boolean;
 }) => {
   const isCspmAws = input.type === CLOUDBEAT_AWS;
-  const isAgentlessAvailable = Boolean(isCspmAws && agentlessPolicy);
+  const isCspmGcp = input.type === CLOUDBEAT_GCP;
+  const isCspmAzure = input.type === CLOUDBEAT_AZURE;
+  const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
+  const isAgentlessAvailable = Boolean(isAgentlessSupportedForCloudProvider && agentlessPolicy);
   const agentPolicyId = agentPolicy?.id;
   const agentlessPolicyId = agentlessPolicy?.id;
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(() => {
@@ -35,8 +38,15 @@ export const useSetupTechnology = ({
     return SetupTechnology.AGENT_BASED;
   });
 
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+
+  const updateSetupTechnology = (value: SetupTechnology) => {
+    setSetupTechnology(value);
+    setIsDirty(true);
+  };
+
   useEffect(() => {
-    if (isEditPage) {
+    if (isEditPage || isDirty) {
       return;
     }
 
@@ -55,7 +65,7 @@ export const useSetupTechnology = ({
     } else {
       setSetupTechnology(SetupTechnology.AGENT_BASED);
     }
-  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable, isEditPage]);
+  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable, isDirty, isEditPage]);
 
   useEffect(() => {
     if (isEditPage) {
@@ -71,5 +81,6 @@ export const useSetupTechnology = ({
     isAgentlessAvailable,
     setupTechnology,
     setSetupTechnology,
+    updateSetupTechnology,
   };
 };

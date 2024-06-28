@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const getSessionIds = async () => {
     const sessionsBtn = await testSubjects.find('showSessionsButton');
     await sessionsBtn.click();
-    const toast = await toasts.getToastElement(1);
+    const toast = await toasts.getElementByIndex(1);
     const sessionIds = await toast.getVisibleText();
     return sessionIds.split(',');
   };
@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       afterEach(async () => {
         await testSubjects.click('clearSessionsButton');
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
 
       it('Starts on index pattern select', async () => {
@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       afterEach(async () => {
         await testSubjects.click('clearSessionsButton');
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
       });
 
       after(async () => {

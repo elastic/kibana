@@ -7,35 +7,31 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { DocTableEmbeddable, DocTableEmbeddableProps } from './doc_table_embeddable';
 
 export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps) {
   return (
-    <I18nProvider>
-      <DocTableEmbeddable
-        columns={renderProps.columns}
-        rows={renderProps.rows}
-        rowsPerPageState={renderProps.rowsPerPageState}
-        sampleSizeState={renderProps.sampleSizeState}
-        onUpdateRowsPerPage={renderProps.onUpdateRowsPerPage}
-        totalHitCount={renderProps.totalHitCount}
-        dataView={renderProps.dataView}
-        onSort={renderProps.onSort}
-        onAddColumn={renderProps.onAddColumn}
-        onMoveColumn={renderProps.onMoveColumn}
-        onRemoveColumn={renderProps.onRemoveColumn}
-        sort={renderProps.sort}
-        filters={renderProps.filters}
-        onFilter={renderProps.onFilter}
-        useNewFieldsApi={renderProps.useNewFieldsApi}
-        searchDescription={renderProps.searchDescription}
-        sharedItemTitle={renderProps.sharedItemTitle}
-        isLoading={renderProps.isLoading}
-        isPlainRecord={renderProps.isPlainRecord}
-        interceptedWarnings={renderProps.interceptedWarnings}
-        dataTestSubj="embeddedSavedSearchDocTable"
-      />
-    </I18nProvider>
+    <DocTableEmbeddable
+      columns={renderProps.columns}
+      rows={renderProps.rows}
+      rowsPerPageState={renderProps.rowsPerPageState}
+      sampleSizeState={renderProps.sampleSizeState}
+      onUpdateRowsPerPage={renderProps.onUpdateRowsPerPage}
+      totalHitCount={renderProps.totalHitCount}
+      dataView={renderProps.dataView}
+      onSort={renderProps.onSort}
+      onAddColumn={renderProps.onAddColumn}
+      onMoveColumn={renderProps.onMoveColumn}
+      onRemoveColumn={renderProps.onRemoveColumn}
+      sort={renderProps.sort}
+      filters={renderProps.filters}
+      onFilter={renderProps.onFilter}
+      useNewFieldsApi={renderProps.useNewFieldsApi}
+      searchDescription={renderProps.searchDescription}
+      sharedItemTitle={renderProps.sharedItemTitle}
+      isLoading={renderProps.isLoading}
+      isEsqlMode={renderProps.isEsqlMode}
+      interceptedWarnings={renderProps.interceptedWarnings}
+    />
   );
 }

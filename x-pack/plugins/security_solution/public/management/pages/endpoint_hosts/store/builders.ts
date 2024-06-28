@@ -11,7 +11,7 @@ import {
 } from '../../../../../common/endpoint/constants';
 import type { Immutable } from '../../../../../common/endpoint/types';
 import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
-import { createLoadedResourceState, createUninitialisedResourceState } from '../../../state';
+import { createUninitialisedResourceState } from '../../../state';
 import type { EndpointState } from '../types';
 
 export const initialEndpointPageState = (): Immutable<EndpointState> => {
@@ -41,7 +41,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     endpointsTotal: 0,
     endpointsTotalError: undefined,
     isolationRequestState: createUninitialisedResourceState(),
-    endpointPendingActions: createLoadedResourceState(new Map()),
     metadataTransformStats: createUninitialisedResourceState(),
+    isInitialized: false,
   };
 };

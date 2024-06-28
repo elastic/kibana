@@ -94,16 +94,6 @@ exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroach
       }
     },
     {
-      "cockroachdb.status.*": {
-        "mapping": {
-          "type": "object",
-          "dynamic": true
-        },
-        "match_mapping_type": "object",
-        "path_match": "cockroachdb.status.*"
-      }
-    },
-    {
       "cockroachdb.status.*.counter": {
         "mapping": {
           "type": "double"
@@ -128,6 +118,16 @@ exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroach
         },
         "match_mapping_type": "*",
         "path_match": "cockroachdb.status.*.histogram"
+      }
+    },
+    {
+      "cockroachdb.status.*": {
+        "mapping": {
+          "type": "object",
+          "dynamic": true
+        },
+        "match_mapping_type": "object",
+        "path_match": "cockroachdb.status.*"
       }
     }
   ]

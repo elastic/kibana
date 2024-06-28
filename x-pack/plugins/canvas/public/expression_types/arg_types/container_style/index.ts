@@ -6,7 +6,7 @@
  */
 
 import { ComponentType } from 'react';
-import { withHandlers } from 'recompose';
+import { withHandlers } from 'react-recompose';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
 import { templateFromReactComponent } from '../../../lib/template_from_react_component';

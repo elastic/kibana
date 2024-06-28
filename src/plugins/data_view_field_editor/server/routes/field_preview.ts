@@ -27,12 +27,24 @@ const bodySchema = schema.object({
   document: schema.object({}, { unknowns: 'allow' }),
 });
 
-const geoPoint = schema.object({
-  type: schema.literal('Point'),
-  coordinates: schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 }),
-});
+const responseSchema = () => {
+  const geoPoint = schema.object({
+    type: schema.literal('Point'),
+    coordinates: schema.arrayOf(schema.number(), { minSize: 2, maxSize: 2 }),
+  });
+  const valueSchema = schema.oneOf([schema.boolean(), schema.number(), schema.string(), geoPoint]);
 
-const valueSchema = schema.oneOf([schema.boolean(), schema.number(), schema.string(), geoPoint]);
+  return schema.object({
+    values: schema.oneOf([
+      // composite field
+      schema.recordOf(schema.string(), schema.arrayOf(valueSchema)),
+      // primitive field
+      schema.arrayOf(valueSchema),
+    ]),
+    error: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    status: schema.maybe(schema.number()),
+  });
+};
 
 export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void => {
   router.versioned.post({ path, access: 'internal' }).addVersion(
@@ -44,16 +56,7 @@ export const registerFieldPreviewRoute = ({ router }: RouteDependencies): void =
         },
         response: {
           200: {
-            body: schema.object({
-              values: schema.oneOf([
-                // composite field
-                schema.recordOf(schema.string(), schema.arrayOf(valueSchema)),
-                // primitive field
-                schema.arrayOf(valueSchema),
-              ]),
-              error: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-              status: schema.maybe(schema.number()),
-            }),
+            body: responseSchema,
           },
         },
       },

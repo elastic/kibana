@@ -7,8 +7,9 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { EuiTabbedContentTab } from '@elastic/eui';
+import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
@@ -31,7 +32,6 @@ import {
 } from '../../../../rule_management/components/rule_details/rule_details_flyout';
 import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 
@@ -84,6 +84,8 @@ export interface UpgradePrebuiltRulesTableState {
   selectedRules: RuleUpgradeInfoForReview[];
 }
 
+export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
+
 export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeOneRule: (ruleId: string) => void;
@@ -116,10 +118,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     filter: '',
     tags: [],
   });
-
-  const isJsonPrebuiltRulesDiffingEnabled = useIsExperimentalFeatureEnabled(
-    'jsonPrebuiltRulesDiffingEnabled'
-  );
 
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
@@ -268,10 +266,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
   ]);
 
   const extraTabs = useMemo<EuiTabbedContentTab[]>(() => {
-    const activeRule =
-      isJsonPrebuiltRulesDiffingEnabled &&
-      previewedRule &&
-      filteredRules.find(({ id }) => id === previewedRule.id);
+    const activeRule = previewedRule && filteredRules.find(({ id }) => id === previewedRule.id);
 
     if (!activeRule) {
       return [];
@@ -280,7 +275,24 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     return [
       {
         id: 'updates',
-        name: ruleDetailsI18n.UPDATES_TAB_LABEL,
+        name: (
+          <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION}>
+            <>{ruleDetailsI18n.UPDATES_TAB_LABEL}</>
+          </EuiToolTip>
+        ),
+        content: (
+          <TabContentPadding>
+            <PerFieldRuleDiffTab ruleDiff={activeRule.diff} />
+          </TabContentPadding>
+        ),
+      },
+      {
+        id: 'jsonViewUpdates',
+        name: (
+          <EuiToolTip position="top" content={i18n.UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION}>
+            <>{ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL}</>
+          </EuiToolTip>
+        ),
         content: (
           <TabContentPadding>
             <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
@@ -288,7 +300,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         ),
       },
     ];
-  }, [previewedRule, filteredRules, isJsonPrebuiltRulesDiffingEnabled]);
+  }, [previewedRule, filteredRules]);
 
   return (
     <UpgradePrebuiltRulesTableContext.Provider value={providerValue}>
@@ -304,7 +316,8 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         {previewedRule && (
           <RuleDetailsFlyout
             rule={previewedRule}
-            size={isJsonPrebuiltRulesDiffingEnabled ? 'l' : 'm'}
+            size="l"
+            id={PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR}
             dataTestSubj="updatePrebuiltRulePreview"
             closeFlyout={closeRulePreview}
             ruleActions={

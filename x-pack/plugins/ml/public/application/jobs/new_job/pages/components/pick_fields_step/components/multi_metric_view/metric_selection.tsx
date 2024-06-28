@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext, useEffect, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext, useEffect, useState, useMemo } from 'react';
 import type { AggFieldPair } from '@kbn/ml-anomaly-utils';
 import { JobCreatorContext } from '../../../job_creator_context';
-import { MultiMetricJobCreator } from '../../../../../common/job_creator';
-import { LineChartData } from '../../../../../common/chart_loader';
-import { DropDownLabel, DropDownProps } from '../agg_select';
+import type { MultiMetricJobCreator } from '../../../../../common/job_creator';
+import type { LineChartData } from '../../../../../common/chart_loader';
+import type { DropDownLabel, DropDownProps } from '../agg_select';
 import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { sortFields } from '../../../../../../../../../common/util/fields_utils';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';

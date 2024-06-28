@@ -14,6 +14,7 @@ import React, {
   useRef,
   useEffect,
   type FC,
+  type PropsWithChildren,
 } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -21,8 +22,9 @@ import { isEqual } from 'lodash';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { decode, encode } from '@kbn/rison';
 
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged } from 'rxjs/operators';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 export interface Dictionary<TValue> {
@@ -90,7 +92,7 @@ export const urlStateStore = createContext<UrlState>({
 
 export const { Provider } = urlStateStore;
 
-export const UrlStateProvider: FC = ({ children }) => {
+export const UrlStateProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const history = useHistory();
   const { search: searchString } = useLocation();
 

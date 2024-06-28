@@ -58,10 +58,10 @@ import type {
   PostAgentUnenrollResponse,
   CopyAgentPolicyRequest,
 } from '@kbn/fleet-plugin/common/types';
-import nodeFetch from 'node-fetch';
 import semver from 'semver';
 import axios from 'axios';
 import { userInfo } from 'os';
+import pRetry from 'p-retry';
 import { isFleetServerRunning } from './fleet_server/fleet_server_services';
 import { getEndpointPackageInfo } from '../../../common/endpoint/utils/package';
 import type { DownloadAndStoreAgentResponse } from './agent_downloads_service';
@@ -79,6 +79,7 @@ import { FleetAgentGenerator } from '../../../common/endpoint/data_generators/fl
 const fleetGenerator = new FleetAgentGenerator();
 const CURRENT_USERNAME = userInfo().username.toLowerCase();
 const DEFAULT_AGENT_POLICY_NAME = `${CURRENT_USERNAME} test policy`;
+
 /** A Fleet agent policy that includes integrations that don't actually require an agent to run on a host. Example: SenttinelOne */
 export const DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME = `${CURRENT_USERNAME} - agentless integrations`;
 
@@ -89,6 +90,12 @@ const randomAgentPolicyName = (() => {
     return `agent policy - ${fleetGenerator.randomString(10)}_${counter++}`;
   };
 })();
+
+/**
+ * Check if the given version string is a valid artifact version
+ * @param version Version string
+ */
+const isValidArtifactVersion = (version: string) => !!version.match(/^\d+\.\d+\.\d+(-SNAPSHOT)?$/);
 
 export const checkInFleetAgent = async (
   esClient: Client,
@@ -389,14 +396,36 @@ export const fetchIntegrationPolicyList = async (
  * Returns the Agent Version that matches the current stack version. Will use `SNAPSHOT` if
  * appropriate too.
  * @param kbnClient
+ * @param log
  */
 export const getAgentVersionMatchingCurrentStack = async (
-  kbnClient: KbnClient
+  kbnClient: KbnClient,
+  log: ToolingLog = createToolingLogger()
 ): Promise<string> => {
   const kbnStatus = await fetchKibanaStatus(kbnClient);
-  const agentVersions = await axios
-    .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+
+  log.debug(`Kibana status:\n`, kbnStatus);
+
+  if (!kbnStatus.version) {
+    throw new Error(
+      `Kibana status api response did not include 'version' information - possibly due to invalid credentials`
+    );
+  }
+
+  const agentVersions = await pRetry<string[]>(
+    async () => {
+      return axios
+        .get('https://artifacts-api.elastic.co/v1/versions')
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((response) =>
+          map(
+            response.data.versions.filter(isValidArtifactVersion),
+            (version) => version.split('-SNAPSHOT')[0]
+          )
+        );
+    },
+    { maxTimeout: 10000 }
+  );
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
@@ -470,16 +499,16 @@ export const getAgentDownloadUrl = async (
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
 
-  const searchResult: ElasticArtifactSearchResponse = await nodeFetch(artifactSearchUrl).then(
-    (response) => {
-      if (!response.ok) {
-        throw new Error(
-          `Failed to search elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactSearchUrl})`
-        );
-      }
-
-      return response.json();
-    }
+  const searchResult: ElasticArtifactSearchResponse = await pRetry(
+    async () => {
+      return axios
+        .get<ElasticArtifactSearchResponse>(artifactSearchUrl)
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((response) => {
+          return response.data;
+        });
+    },
+    { maxTimeout: 10000 }
   );
 
   log?.verbose(searchResult);
@@ -496,6 +525,24 @@ export const getAgentDownloadUrl = async (
 };
 
 /**
+ * Fetches the latest version of the Elastic Agent available for download
+ * @param kbnClient
+ */
+
+export const fetchFleetAvailableVersions = async (kbnClient: KbnClient): Promise<string> => {
+  return kbnClient
+    .request<{ items: string[] }>({
+      method: 'GET',
+      path: AGENT_API_ROUTES.AVAILABLE_VERSIONS_PATTERN,
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
+    })
+    .then((response) => response.data.items[0])
+    .catch(catchAxiosErrorFormatAndThrow);
+};
+
+/**
  * Given a stack version number, function will return the closest Agent download version available
  * for download. THis could be the actual version passed in or lower.
  * @param version
@@ -506,21 +553,22 @@ export const getLatestAgentDownloadVersion = async (
   log?: ToolingLog
 ): Promise<string> => {
   const artifactsUrl = 'https://artifacts-api.elastic.co/v1/versions';
-  const semverMatch = `<=${version}`;
-  const artifactVersionsResponse: { versions: string[] } = await nodeFetch(artifactsUrl).then(
-    (response) => {
-      if (!response.ok) {
-        throw new Error(
-          `Failed to retrieve list of versions from elastic's artifact repository: ${response.statusText} (HTTP ${response.status}) {URL: ${artifactsUrl})`
-        );
-      }
-
-      return response.json();
-    }
+  const semverMatch = `<=${version.replace(`-SNAPSHOT`, '')}`;
+  const artifactVersionsResponse: { versions: string[] } = await pRetry(
+    async () => {
+      return axios
+        .get<{ versions: string[] }>(artifactsUrl)
+        .catch(catchAxiosErrorFormatAndThrow)
+        .then((response) => {
+          return response.data;
+        });
+    },
+    { maxTimeout: 10000 }
   );
 
-  const stackVersionToArtifactVersion: Record<string, string> =
-    artifactVersionsResponse.versions.reduce((acc, artifactVersion) => {
+  const stackVersionToArtifactVersion: Record<string, string> = artifactVersionsResponse.versions
+    .filter(isValidArtifactVersion)
+    .reduce((acc, artifactVersion) => {
       const stackVersion = artifactVersion.split('-SNAPSHOT')[0];
       acc[stackVersion] = artifactVersion;
       return acc;
@@ -538,6 +586,8 @@ export const getLatestAgentDownloadVersion = async (
     Object.keys(stackVersionToArtifactVersion),
     semverMatch
   );
+
+  log?.verbose(`Matched [${matchedVersion}] for .maxStatisfying(${semverMatch})`);
 
   if (!matchedVersion) {
     throw new Error(`Unable to find a semver version that meets ${semverMatch}`);
@@ -959,6 +1009,7 @@ export const addSentinelOneIntegrationToAgentPolicy = async ({
     description: `Created by script: ${__filename}`,
     namespace: 'default',
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     enabled: true,
     inputs: [
       {
@@ -1186,6 +1237,7 @@ export const addEndpointIntegrationToAgentPolicy = async ({
     description: `Created by: ${__filename}`,
     namespace: 'default',
     policy_id: agentPolicyId,
+    policy_ids: [agentPolicyId],
     enabled: true,
     inputs: [
       {

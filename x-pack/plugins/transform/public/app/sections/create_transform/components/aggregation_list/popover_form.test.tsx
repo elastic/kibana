@@ -7,9 +7,9 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 import { PIVOT_SUPPORTED_AGGS } from '../../../../../../common/types/pivot_aggs';
-import { PivotAggsConfig } from '../../../../common';
+import type { PivotAggsConfig } from '../../../../common';
 import { PopoverForm } from './popover_form';
 import { I18nProvider } from '@kbn/i18n-react';
 

@@ -42,6 +42,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../detections/components/user_info';
 import { AccordionTitle } from '../../components/accordion_title';
 import { StepDefineRule, StepDefineRuleReadOnly } from '../../components/step_define_rule';
+import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepAboutRule, StepAboutRuleReadOnly } from '../../components/step_about_rule';
 import { StepScheduleRule, StepScheduleRuleReadOnly } from '../../components/step_schedule_rule';
 import {
@@ -140,7 +141,6 @@ const CreateRulePageComponent: React.FC = () => {
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
-
   const defineStepDefault = useMemo(
     () => ({
       ...stepDefineDefaultValue,
@@ -149,6 +149,7 @@ const CreateRulePageComponent: React.FC = () => {
     }),
     [indicesConfig, threatIndicesConfig]
   );
+
   const kibanaAbsoluteUrl = useMemo(
     () =>
       application.getUrlForApp(`${APP_UI_ID}`, {
@@ -209,15 +210,15 @@ const CreateRulePageComponent: React.FC = () => {
   const [isThreatQueryBarValid, setIsThreatQueryBarValid] = useState(false);
 
   const esqlQueryForAboutStep = useEsqlQueryForAboutStep({ defineStepData, activeStep });
-  const esqlIndex = useEsqlIndex(
-    defineStepData.queryBar.query.query,
-    ruleType,
-    defineStepForm.isValid
-  );
+
+  const esqlIndex = useEsqlIndex(defineStepData.queryBar.query.query, ruleType);
+
   const memoizedIndex = useMemo(
     () => (isEsqlRuleValue ? esqlIndex : defineStepData.index),
     [defineStepData.index, esqlIndex, isEsqlRuleValue]
   );
+
+  const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
   const isPreviewDisabled = getIsRulePreviewDisabled({
     ruleType,
@@ -355,10 +356,10 @@ const CreateRulePageComponent: React.FC = () => {
       const valid = await validateStep(step);
 
       if (valid) {
-        const localDefineStepData: DefineStepRule = {
+        const localDefineStepData: DefineStepRule = defineFieldsTransform({
           ...defineStepForm.getFormData(),
           eqlOptions: eqlOptionsSelected,
-        };
+        });
         const localAboutStepData = aboutStepForm.getFormData();
         const localScheduleStepData = scheduleStepForm.getFormData();
         const localActionsStepData = actionsStepForm.getFormData();
@@ -403,6 +404,7 @@ const CreateRulePageComponent: React.FC = () => {
       navigateToApp,
       ruleType,
       startMlJobs,
+      defineFieldsTransform,
     ]
   );
 

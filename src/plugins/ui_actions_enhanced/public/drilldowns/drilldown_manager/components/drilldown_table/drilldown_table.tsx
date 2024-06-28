@@ -147,8 +147,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         items={drilldowns}
         itemId="id"
         columns={columns}
-        isSelectable={true}
-        responsive={false}
+        responsiveBreakpoint={false}
         selection={{
           onSelectionChange: (selection) => {
             setSelectedDrilldowns(selection.map((drilldown) => drilldown.id));
@@ -158,7 +157,6 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         rowProps={{
           'data-test-subj': TEST_SUBJ_DRILLDOWN_ITEM,
         }}
-        hasActions={true}
         sorting={{
           sort: {
             field: 'drilldownName',

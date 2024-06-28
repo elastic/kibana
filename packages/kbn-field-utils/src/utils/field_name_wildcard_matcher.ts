@@ -43,6 +43,19 @@ export const fieldNameWildcardMatcher = (
 };
 
 /**
+ * Adapts fieldNameWildcardMatcher to combobox props.
+ * @param field
+ * @param fieldSearchHighlight
+ */
+export const comboBoxFieldOptionMatcher = ({
+  option: { name, label },
+  searchValue,
+}: {
+  option: { name?: string; label: string };
+  searchValue: string;
+}) => fieldNameWildcardMatcher({ name: name || label, displayName: label }, searchValue);
+
+/**
  * Get `highlight` string to be used together with `EuiHighlight`
  * @param displayName
  * @param fieldSearchHighlight

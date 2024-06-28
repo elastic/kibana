@@ -39,7 +39,14 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+    >
       <EuiPopoverTitle>
         {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectConnector.upgradeTitle', {
           defaultMessage: 'Upgrade to Elastic Platinum',
@@ -57,7 +64,7 @@ export const PlatinumLicensePopover: React.FC<PlatinumLicensePopoverProps> = ({
             'xpack.enterpriseSearch.content.newIndex.selectConnector.upgradeContent',
             {
               defaultMessage:
-                'To use this connector, you must update your license to Platinum or start a 30-day free trial.',
+                'Connector clients sending data to a self-managed Elasticsearch instance require at least a Platinum license.',
             }
           )}
         </p>

@@ -13,17 +13,20 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
-import { AppNavLinkStatus, type AppMountParameters } from '@kbn/core-application-browser';
+import { type AppMountParameters } from '@kbn/core-application-browser';
 import type {
   InternalApplicationSetup,
   InternalApplicationStart,
 } from '@kbn/core-application-browser-internal';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { renderApp as renderStatusApp } from './status';
 import {
   renderApp as renderErrorApp,
   setupPublicBaseUrlConfigWarning,
   setupUrlOverflowDetection,
 } from './errors';
-import { renderApp as renderStatusApp } from './status';
 
 export interface CoreAppsServiceSetupDeps {
   application: InternalApplicationSetup;
@@ -38,6 +41,9 @@ export interface CoreAppsServiceStartDeps {
   http: InternalHttpStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
 }
 
 export class CoreAppsService {
@@ -49,7 +55,7 @@ export class CoreAppsService {
     application.register(this.coreContext.coreId, {
       id: 'error',
       title: 'App Error',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount(params: AppMountParameters) {
         // Do not use an async import here in order to ensure that network failures
         // cannot prevent the error UI from displaying. This UI is tiny so an async
@@ -66,7 +72,7 @@ export class CoreAppsService {
       title: 'Server Status',
       appRoute: '/status',
       chromeless: true,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       mount(params: AppMountParameters) {
         return renderStatusApp(params, { http, notifications });
       },
@@ -79,6 +85,9 @@ export class CoreAppsService {
     http,
     notifications,
     uiSettings,
+    analytics,
+    i18n,
+    theme,
   }: CoreAppsServiceStartDeps) {
     if (!application.history) {
       return;
@@ -91,7 +100,7 @@ export class CoreAppsService {
       uiSettings,
     });
 
-    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications });
+    setupPublicBaseUrlConfigWarning({ docLinks, http, notifications, analytics, i18n, theme });
   }
 
   public stop() {

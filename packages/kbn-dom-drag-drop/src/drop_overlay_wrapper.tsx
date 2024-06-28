@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import classnames from 'classnames';
 
 /**
@@ -27,7 +27,7 @@ export interface DropOverlayWrapperProps {
  * @param otherProps
  * @constructor
  */
-export const DropOverlayWrapper: React.FC<DropOverlayWrapperProps> = ({
+export const DropOverlayWrapper: React.FC<PropsWithChildren<DropOverlayWrapperProps>> = ({
   isVisible,
   children,
   overlayProps,
@@ -35,15 +35,12 @@ export const DropOverlayWrapper: React.FC<DropOverlayWrapperProps> = ({
   ...otherProps
 }) => {
   return (
-    <div
-      className={classnames('domDragDrop__dropOverlayWrapper', className)}
-      {...(otherProps || {})}
-    >
+    <div className={classnames('domDroppable__overlayWrapper', className)} {...(otherProps || {})}>
       {children}
       {isVisible && (
         <div
-          className="domDragDrop__dropOverlay"
-          data-test-subj="domDragDrop__dropOverlay"
+          className="domDroppable_overlay"
+          data-test-subj="domDroppable_overlay"
           {...(overlayProps || {})}
         />
       )}

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
-import {
-  JobSelectorFlyoutContent,
-  JobSelectorFlyoutProps,
-} from '../../../application/components/job_selector/job_selector_flyout';
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import type { JobSelectorFlyoutProps } from '../../../application/components/job_selector/job_selector_flyout';
+import { JobSelectorFlyoutContent } from '../../../application/components/job_selector/job_selector_flyout';
 
 export const JobSelectorFlyout: FC<JobSelectorFlyoutProps> = ({
   selectedIds,

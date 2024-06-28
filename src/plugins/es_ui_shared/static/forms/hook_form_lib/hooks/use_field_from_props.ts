@@ -21,6 +21,7 @@ import { useField, InternalFieldConfig } from './use_field';
 export const useFieldFromProps = <T, FormType, I>(
   props: UseFieldProps<T, FormType, I>
 ): { field: FieldHook<T, I>; propsToForward: { [x: string]: unknown } } => {
+  // @ts-expect-error upgrade typescript v4.9.5
   const form = useFormContext<FormType>();
   const { getFieldDefaultValue, __readFieldConfigFromSchema, __updateDefaultValueAt } = form;
 
@@ -71,6 +72,7 @@ export const useFieldFromProps = <T, FormType, I>(
     return value === undefined ? ('' as unknown as T) : value;
   }, [defaultValue, path, config, readDefaultValueOnForm, getFieldDefaultValue]);
 
+  // @ts-expect-error upgrade typescript v4.9.5
   const fieldConfig = useMemo<FieldConfig<T, FormType, I> & InternalFieldConfig<T>>(
     () => ({
       ...config,

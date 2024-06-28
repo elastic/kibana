@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, Fragment, useEffect, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, Fragment, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,7 +26,7 @@ import { TIME_FORMAT } from '@kbn/ml-date-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import { useDataSource } from '../../../contexts/ml';
 import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
-import {
+import type {
   DatafeedResponse,
   JobOverride,
   JobResponse,
@@ -37,9 +38,10 @@ import {
 import { CreateResultCallout } from './components/create_result_callout';
 import { KibanaObjectList } from './components/kibana_objects';
 import { ModuleJobs } from './components/module_jobs';
-import { JobSettingsForm, JobSettingsFormValues } from './components/job_settings_form';
-import { TimeRange } from '../common/components';
-import { JobId } from '../../../../../common/types/anomaly_detection_jobs';
+import type { JobSettingsFormValues } from './components/job_settings_form';
+import { JobSettingsForm } from './components/job_settings_form';
+import type { TimeRange } from '../common/components';
+import type { JobId } from '../../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { MlPageHeader } from '../../../components/page_header';

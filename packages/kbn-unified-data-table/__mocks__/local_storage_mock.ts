@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export class LocalStorageMock {
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+
+class LocalStorageMock {
   private store: Record<string, unknown>;
   constructor(defaultStore: Record<string, unknown>) {
     this.store = defaultStore;
@@ -18,9 +20,12 @@ export class LocalStorageMock {
     return this.store[key] || null;
   }
   set(key: string, value: unknown) {
-    this.store[key] = String(value);
+    this.store[key] = value;
   }
   remove(key: string) {
     delete this.store[key];
   }
 }
+
+export const createLocalStorageMock = (defaultStore: Record<string, unknown>) =>
+  new LocalStorageMock(defaultStore) as unknown as Storage;

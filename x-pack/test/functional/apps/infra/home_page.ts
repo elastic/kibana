@@ -8,17 +8,26 @@
 import expect from '@kbn/expect';
 import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
+import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { enableInfrastructureContainerAssetView } from '@kbn/observability-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, INVENTORY_PATH } from './constants';
+import { generateDockerContainersData } from './helpers';
+import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
 const DATE_WITH_POD_WITH_DATA = DATES.metricsAndLogs.pods.withData;
+const DATE_WITH_DOCKER_DATA_FROM = '2023-03-28T18:20:00.000Z';
+const DATE_WITH_DOCKER_DATA_TO = '2023-03-28T18:21:00.000Z';
+const DATE_WITH_DOCKER_DATA = '03/28/2023 6:20:00 PM';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
+  const esClient = getService('es');
+  const infraSynthtraceKibanaClient = getService('infraSynthtraceKibanaClient');
   const pageObjects = getPageObjects([
     'common',
     'header',
@@ -37,6 +46,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const currentUrl = await browser.getCurrentUrl();
       return !!currentUrl.match(path);
     });
+
+  const setInfrastructureContainerAssetViewUiSetting = async (value: boolean = true) => {
+    await kibanaServer.uiSettings.update({ [enableInfrastructureContainerAssetView]: value });
+    await browser.refresh();
+    await pageObjects.header.waitUntilLoadingHasFinished();
+  };
 
   describe('Home page', function () {
     this.tags('includeFirefox');
@@ -129,12 +144,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // await pageObjects.infraHome.getWaffleMapTooltips(); see https://github.com/elastic/kibana/issues/137903
       });
 
-      describe('Asset Details flyout', () => {
+      describe('Asset Details flyout for a host', () => {
         before(async () => {
           await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
           await pageObjects.infraHome.getWaffleMap();
           await pageObjects.infraHome.inputAddHostNameFilter('demo-stack-nginx-01');
           await pageObjects.infraHome.clickOnNode();
+        });
+
+        after(async () => {
+          await retry.try(async () => {
+            await pageObjects.infraHome.clickCloseFlyoutButton();
+          });
         });
 
         describe('Overview Tab', () => {
@@ -146,7 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '0.8%' },
             { metric: 'normalizedLoad1m', value: '1.4%' },
             { metric: 'memoryUsage', value: '18.0%' },
-            { metric: 'diskUsage', value: '17.5%' },
+            { metric: 'diskUsage', value: '35.0%' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
@@ -158,9 +179,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             });
           });
 
-          it('should render 9 charts in the Metrics section', async () => {
-            const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
-            expect(hosts.length).to.equal(9);
+          [
+            { metric: 'cpu', chartsCount: 2 },
+            { metric: 'memory', chartsCount: 1 },
+            { metric: 'disk', chartsCount: 2 },
+            { metric: 'network', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
+              expect(hosts.length).to.equal(chartsCount);
+            });
           });
 
           it('should show alerts', async () => {
@@ -176,6 +204,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
           it('should show metadata table', async () => {
             await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
           });
         });
 
@@ -223,6 +261,134 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
+      describe('Asset Details flyout for a container', () => {
+        let synthEsClient: InfraSynthtraceEsClient;
+        before(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(true);
+          const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
+          await infraSynthtraceKibanaClient.installSystemPackage(version);
+          synthEsClient = await getInfraSynthtraceEsClient(esClient);
+          await synthEsClient.index(
+            generateDockerContainersData({
+              from: DATE_WITH_DOCKER_DATA_FROM,
+              to: DATE_WITH_DOCKER_DATA_TO,
+              count: 5,
+            })
+          );
+
+          await pageObjects.infraHome.goToContainer();
+          await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
+          await pageObjects.infraHome.clickOnFirstNode();
+        });
+
+        after(async () => {
+          await setInfrastructureContainerAssetViewUiSetting(false);
+          return await synthEsClient.clean();
+        });
+
+        describe('Overview Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickOverviewTab();
+          });
+
+          [
+            { metric: 'cpuUsage', value: '25.0%' },
+            { metric: 'memoryUsage', value: '20.0%' },
+          ].forEach(({ metric, value }) => {
+            it(`${metric} tile should show ${value}`, async () => {
+              await retry.tryForTime(3 * 1000, async () => {
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
+                expect(tileValue).to.eql(value);
+              });
+            });
+          });
+
+          [
+            { metric: 'cpu', chartsCount: 1 },
+            { metric: 'memory', chartsCount: 1 },
+          ].forEach(({ metric, chartsCount }) => {
+            it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+              const containers = await pageObjects.assetDetails.getOverviewTabDockerMetricCharts(
+                metric
+              );
+              expect(containers.length).to.equal(chartsCount);
+            });
+          });
+
+          it('should show alerts', async () => {
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            await pageObjects.assetDetails.overviewAlertsTitleExists();
+            await pageObjects.assetDetails.overviewLinkToAlertsExist();
+            await pageObjects.assetDetails.overviewOpenAlertsFlyoutExist();
+          });
+        });
+
+        describe('Metadata Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetadataTab();
+          });
+
+          it('should show metadata table', async () => {
+            await pageObjects.assetDetails.metadataTableExists();
+          });
+        });
+
+        describe('Metrics Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickMetricsTab();
+          });
+
+          it('should show metrics content', async () => {
+            await pageObjects.assetDetails.metricsChartsContentExists();
+          });
+        });
+
+        describe('Logs Tab', () => {
+          before(async () => {
+            await pageObjects.assetDetails.clickLogsTab();
+          });
+
+          after(async () => {
+            await retry.try(async () => {
+              await pageObjects.infraHome.closeFlyout();
+            });
+          });
+
+          it('should render logs tab', async () => {
+            await pageObjects.assetDetails.logsExists();
+          });
+        });
+
+        describe('APM Link Tab', () => {
+          before(async () => {
+            await pageObjects.infraHome.clickOnNode();
+            await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
+          });
+
+          it('should navigate to APM traces', async () => {
+            const url = parse(await browser.getCurrentUrl());
+            const query = decodeURIComponent(url.query ?? '');
+            const kuery = 'kuery=container.id:"container-id-4"';
+
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
+            await returnTo(INVENTORY_PATH);
+          });
+        });
+
+        it('Should show auto-refresh option', async () => {
+          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
+          expect(kibanaRefreshConfig.interval).to.equal('5');
+          expect(kibanaRefreshConfig.units).to.equal('Seconds');
+          expect(kibanaRefreshConfig.isPaused).to.equal(true);
+        });
+      });
+
       it('shows query suggestions', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.clickQueryBar();
@@ -238,12 +404,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
-            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
-            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
-            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
           ]);
         });
       });
@@ -256,12 +422,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.5, color: '#f0f4f9' },
+            { name: 'demo-stack-client-01', value: 0.6, color: '#f0f4f9' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#c2d2e6' },
-            { name: 'demo-stack-redis-01', value: 0.8, color: '#b2c7df' },
-            { name: 'demo-stack-nginx-01', value: 0.9, color: '#b2c7df' },
-            { name: 'demo-stack-mysql-01', value: 1, color: '#93b1d3' },
-            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#a2bcd9' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#93b1d3' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#82a7cd' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
           ]);
         });
       });
@@ -282,7 +448,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-apache-01', value: 1.2, color: '#6092c0' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#6092c0' },
           ]);
         });
         await pageObjects.infraHome.clearSearchTerm();
@@ -295,12 +461,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const nodesWithValue = await pageObjects.infraHome.getNodesWithValues();
           expect(nodesWithValue).to.eql([
-            { name: 'demo-stack-client-01', value: 0.5, color: '#6092c0' },
+            { name: 'demo-stack-client-01', value: 0.6, color: '#6092c0' },
             { name: 'demo-stack-haproxy-01', value: 0.8, color: '#b5c9df' },
-            { name: 'demo-stack-redis-01', value: 0.8, color: '#d0dcea' },
-            { name: 'demo-stack-nginx-01', value: 0.9, color: '#d0dcea' },
-            { name: 'demo-stack-mysql-01', value: 1, color: '#eec096' },
-            { name: 'demo-stack-apache-01', value: 1.2, color: '#e7664c' },
+            { name: 'demo-stack-redis-01', value: 1, color: '#f1d9b9' },
+            { name: 'demo-stack-nginx-01', value: 1.1, color: '#eec096' },
+            { name: 'demo-stack-mysql-01', value: 1.2, color: '#eba47a' },
+            { name: 'demo-stack-apache-01', value: 1.4, color: '#e7664c' },
           ]);
         });
       });
@@ -338,9 +504,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await returnTo(INVENTORY_PATH);
         });
 
-        it('Should redirect to Node Details page', async () => {
-          await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
+        it('Should redirect to Pod Details page', async () => {
           await pageObjects.infraHome.goToPods();
+          await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
           await pageObjects.infraHome.clickOnFirstNode();
           await pageObjects.infraHome.clickOnGoToNodeDetails();
 
@@ -352,6 +518,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           await returnTo(INVENTORY_PATH);
+        });
+
+        describe('Redirect to Container Details page', () => {
+          let synthEsClient: InfraSynthtraceEsClient;
+          before(async () => {
+            const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
+            await infraSynthtraceKibanaClient.installSystemPackage(version);
+            synthEsClient = await getInfraSynthtraceEsClient(esClient);
+            await synthEsClient.index(
+              generateDockerContainersData({
+                from: DATE_WITH_DOCKER_DATA_FROM,
+                to: DATE_WITH_DOCKER_DATA_TO,
+                count: 5,
+              })
+            );
+          });
+
+          after(async () => {
+            return await synthEsClient.clean();
+          });
+          it('Should redirect to Container Details page', async () => {
+            await pageObjects.infraHome.goToContainer();
+            await pageObjects.infraHome.goToTime(DATE_WITH_DOCKER_DATA);
+            await pageObjects.infraHome.clickOnFirstNode();
+            await pageObjects.infraHome.clickOnGoToNodeDetails();
+
+            await retry.try(async () => {
+              const documentTitle = await browser.getTitle();
+              expect(documentTitle).to.contain(
+                'container-id-4 - Inventory - Infrastructure - Observability - Elastic'
+              );
+            });
+
+            await returnTo(INVENTORY_PATH);
+          });
         });
       });
     });

@@ -30,6 +30,11 @@ export interface FleetConfigType {
       hosts?: string[];
     };
   };
+  agentless?: {
+    api: {
+      url: string;
+    };
+  };
   agentPolicies?: PreconfiguredAgentPolicy[];
   packages?: PreconfiguredPackage[];
   outputs?: PreconfiguredOutput[];
@@ -51,7 +56,6 @@ export interface FleetConfigType {
   };
   internal?: {
     disableILMPolicies: boolean;
-    disableProxies: boolean;
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;

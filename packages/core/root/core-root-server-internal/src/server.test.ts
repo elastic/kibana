@@ -27,12 +27,16 @@ import {
   mockDocLinksService,
   mockCustomBrandingService,
   mockUserSettingsService,
+  mockSecurityService,
+  mockUserProfileService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { Server } from './server';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -45,7 +49,10 @@ const logger = loggingSystemMock.create();
 const rawConfigService = rawConfigServiceMock.create({});
 
 beforeEach(() => {
-  mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
+  mockConfigService.atPath.mockReturnValue(
+    // config for `core` path, only one used with all the services being mocked
+    new BehaviorSubject({ lifecycle: { disablePreboot: false } })
+  );
   mockPluginsService.discover.mockResolvedValue({
     preboot: {
       pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
@@ -58,6 +65,11 @@ beforeEach(() => {
       uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
     },
   });
+
+  mockElasticsearchService.start.mockResolvedValue(elasticsearchServiceMock.createInternalStart());
+  mockSavedObjectsService.start.mockResolvedValue(
+    savedObjectsServiceMock.createInternalStartContract()
+  );
 });
 
 afterEach(() => {
@@ -117,6 +129,9 @@ test('sets up services on "setup"', async () => {
   expect(mockDocLinksService.setup).not.toHaveBeenCalled();
   expect(mockCustomBrandingService.setup).not.toHaveBeenCalled();
   expect(mockUserSettingsService.setup).not.toHaveBeenCalled();
+  expect(mockSecurityService.setup).not.toHaveBeenCalled();
+  expect(mockSecurityService.setup).not.toHaveBeenCalled();
+  expect(mockUserProfileService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -135,6 +150,8 @@ test('sets up services on "setup"', async () => {
   expect(mockDocLinksService.setup).toHaveBeenCalledTimes(1);
   expect(mockCustomBrandingService.setup).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.setup).toHaveBeenCalledTimes(1);
+  expect(mockSecurityService.setup).toHaveBeenCalledTimes(1);
+  expect(mockUserProfileService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -187,6 +204,8 @@ test('runs services on "start"', async () => {
   expect(mockDeprecationService.start).not.toHaveBeenCalled();
   expect(mockDocLinksService.start).not.toHaveBeenCalled();
   expect(mockCustomBrandingService.start).not.toHaveBeenCalled();
+  expect(mockSecurityService.start).not.toHaveBeenCalled();
+  expect(mockUserProfileService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -198,6 +217,9 @@ test('runs services on "start"', async () => {
   expect(mockDeprecationService.start).toHaveBeenCalledTimes(1);
   expect(mockDocLinksService.start).toHaveBeenCalledTimes(1);
   expect(mockCustomBrandingService.start).toHaveBeenCalledTimes(1);
+  expect(mockSecurityService.start).toHaveBeenCalledTimes(1);
+  expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
+  expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -225,6 +247,8 @@ test('stops services on "stop"', async () => {
   expect(mockStatusService.stop).not.toHaveBeenCalled();
   expect(mockLoggingService.stop).not.toHaveBeenCalled();
   expect(mockCustomBrandingService.stop).not.toHaveBeenCalled();
+  expect(mockSecurityService.stop).not.toHaveBeenCalled();
+  expect(mockUserProfileService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -238,6 +262,8 @@ test('stops services on "stop"', async () => {
   expect(mockStatusService.stop).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.stop).toHaveBeenCalledTimes(1);
   expect(mockCustomBrandingService.stop).toHaveBeenCalledTimes(1);
+  expect(mockSecurityService.stop).toHaveBeenCalledTimes(1);
+  expect(mockUserProfileService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't preboot core services if config validation fails`, async () => {
@@ -290,4 +316,33 @@ test('migrator-only node throws exception during start', async () => {
   expect(migrationException!.code).toBe(MIGRATION_EXCEPTION_CODE);
   expect(migrationException!.processExitCode).toBe(0);
   expect(migrationException!.cause).toBeUndefined();
+});
+
+describe('When preboot is disabled', () => {
+  beforeEach(() => {
+    mockConfigService.atPath.mockReturnValue(
+      // config for `core` path, only one used with all the services being mocked
+      new BehaviorSubject({ lifecycle: { disablePreboot: true } })
+    );
+  });
+
+  test('only preboots the mandatory services', async () => {
+    const server = new Server(rawConfigService, env, logger);
+
+    await server.preboot();
+
+    expect(mockNodeService.preboot).toHaveBeenCalledTimes(1);
+    expect(mockEnvironmentService.preboot).toHaveBeenCalledTimes(1);
+    expect(mockUiSettingsService.preboot).toHaveBeenCalledTimes(1);
+    expect(mockLoggingService.preboot).toHaveBeenCalledTimes(1);
+
+    expect(mockContextService.preboot).not.toHaveBeenCalled();
+    expect(mockHttpService.preboot).not.toHaveBeenCalled();
+    expect(mockI18nService.preboot).not.toHaveBeenCalled();
+    expect(mockElasticsearchService.preboot).not.toHaveBeenCalled();
+    expect(mockRenderingService.preboot).not.toHaveBeenCalled();
+    expect(mockPluginsService.preboot).not.toHaveBeenCalled();
+    expect(mockPrebootService.preboot).not.toHaveBeenCalled();
+    expect(mockStatusService.preboot).not.toHaveBeenCalled();
+  });
 });

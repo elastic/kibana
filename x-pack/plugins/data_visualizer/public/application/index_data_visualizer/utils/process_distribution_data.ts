@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isDefined } from '@kbn/ml-is-defined';
 import { last } from 'lodash';
 import type { Distribution } from '../../../../common/types/field_stats';
 
@@ -69,6 +70,8 @@ export const processDistributionData = (
   let numEqualValueBuckets = 0;
   for (let i = 0; i < totalBuckets; i++) {
     const bucket = percentileBuckets[i];
+
+    if (!isDefined(bucket.value)) continue;
 
     // Results from the percentiles aggregation can have precision rounding
     // artifacts e.g returning 200 and 200.000000000123, so check for equality

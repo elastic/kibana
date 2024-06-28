@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
   EuiSpacer,
+  EuiTextArea,
   EuiToolTip,
 } from '@elastic/eui';
 
 import { ContentEditorFlyoutWarningsCallOut } from './editor_flyout_warnings';
-import type { MetadataFormState, Field } from './use_metadata_form';
+import type { Field, MetadataFormState } from './use_metadata_form';
 import type { SavedObjectsReference, Services } from '../services';
 
 interface Props {
@@ -27,6 +27,7 @@ interface Props {
     isSubmitted: boolean;
   };
   isReadonly: boolean;
+  readonlyReason: string;
   tagsReferences: SavedObjectsReference[];
   TagList?: Services['TagList'];
   TagSelector?: Services['TagSelector'];
@@ -40,6 +41,8 @@ export const MetadataForm: FC<Props> = ({
   TagList,
   TagSelector,
   isReadonly,
+  readonlyReason,
+  children,
 }) => {
   const {
     title,
@@ -53,11 +56,6 @@ export const MetadataForm: FC<Props> = ({
     getErrors,
     getWarnings,
   } = form;
-
-  const readOnlyToolTip = i18n.translate(
-    'contentManagement.contentEditor.metadataForm.readOnlyToolTip',
-    { defaultMessage: 'To edit these details, contact your administrator for access.' }
-  );
 
   return (
     <EuiForm isInvalid={isSubmitted && !isValid} error={getErrors()} data-test-subj="metadataForm">
@@ -73,7 +71,7 @@ export const MetadataForm: FC<Props> = ({
       >
         <EuiToolTip
           position="top"
-          content={isReadonly ? readOnlyToolTip : undefined}
+          content={isReadonly ? readonlyReason : undefined}
           display="block"
         >
           <EuiFieldText
@@ -104,7 +102,7 @@ export const MetadataForm: FC<Props> = ({
       >
         <EuiToolTip
           position="top"
-          content={isReadonly ? readOnlyToolTip : undefined}
+          content={isReadonly ? readonlyReason : undefined}
           display="block"
         >
           <EuiTextArea
@@ -138,6 +136,13 @@ export const MetadataForm: FC<Props> = ({
         <>
           <EuiSpacer />
           <TagSelector initialSelection={tags.value} onTagsSelected={setTags} fullWidth />
+        </>
+      )}
+
+      {children && (
+        <>
+          <EuiSpacer />
+          {children}
         </>
       )}
     </EuiForm>

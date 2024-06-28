@@ -16,7 +16,6 @@ import type { CreateTestConfigOptions } from '../shared/types';
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
-
     return {
       ...svlSharedConfig.getAll(),
 
@@ -110,10 +109,16 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         maintenanceWindows: {
           pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
         },
+        fleet: {
+          pathname: '/app/fleet',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {
         directory: resolve(__dirname, 'screenshots'),
+      },
+      failureDebugging: {
+        htmlDirectory: resolve(__dirname, 'failure_debug', 'html'),
       },
       junit: options.junit,
       suiteTags: options.suiteTags,

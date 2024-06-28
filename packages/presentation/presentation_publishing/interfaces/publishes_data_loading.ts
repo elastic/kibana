@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesDataLoading {
   dataLoading: PublishingSubject<boolean | undefined>;
@@ -17,11 +17,3 @@ export const apiPublishesDataLoading = (
 ): unknownApi is PublishesDataLoading => {
   return Boolean(unknownApi && (unknownApi as PublishesDataLoading)?.dataLoading !== undefined);
 };
-
-/**
- * Gets this API's data loading state as a reactive variable which will cause re-renders on change.
- */
-export const useDataLoading = (api: Partial<PublishesDataLoading> | undefined) =>
-  useStateFromPublishingSubject<boolean | undefined, PublishesDataLoading['dataLoading']>(
-    apiPublishesDataLoading(api) ? api.dataLoading : undefined
-  );

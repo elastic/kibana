@@ -53,4 +53,8 @@ export type {
   NavigationGroupPreset,
   RootNavigationItemDefinition,
   NavigationTreeDefinitionUI,
+  SolutionNavigationDefinition,
+  SolutionNavigationDefinitions,
+  EuiSideNavItemTypeEnhanced,
+  RenderAs,
 } from './project_navigation';

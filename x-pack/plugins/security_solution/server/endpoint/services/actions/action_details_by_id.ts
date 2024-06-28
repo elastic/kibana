@@ -7,20 +7,18 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { fetchActionResponses } from './fetch_action_responses';
+import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
+import { fetchActionResponses } from './utils/fetch_action_responses';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
   formatEndpointActionResults,
-  categorizeResponseResults,
   mapToNormalizedActionRequest,
   getAgentHostNamesWithIds,
   createActionDetailsRecord,
 } from './utils';
 import type {
   ActionDetails,
-  ActivityLogActionResponse,
   EndpointActivityLogAction,
-  EndpointActivityLogActionResponse,
   LogsEndpointAction,
 } from '../../../../common/endpoint/types';
 import { catchAndWrapError } from '../../utils';
@@ -42,11 +40,11 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   let actionRequestsLogEntries: EndpointActivityLogAction[];
 
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
-  let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
+  let actionResponses: FetchActionResponsesResult;
 
   try {
     // Get both the Action Request(s) and action Response(s)
-    const [actionRequestEsSearchResults, allResponseEsHits] = await Promise.all([
+    const [actionRequestEsSearchResults, actionResponseResult] = await Promise.all([
       // Get the action request(s)
       esClient
         .search<LogsEndpointAction>(
@@ -66,9 +64,10 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
         )
         .catch(catchAndWrapError),
 
-      fetchActionResponses({ esClient, actionIds: [actionId] }).then((response) => response.data),
+      fetchActionResponses({ esClient, actionIds: [actionId] }),
     ]);
 
+    actionResponses = actionResponseResult;
     actionRequestsLogEntries = formatEndpointActionResults(
       actionRequestEsSearchResults?.hits?.hits ?? []
     );
@@ -80,10 +79,6 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
     if (actionDoc) {
       normalizedActionRequest = mapToNormalizedActionRequest(actionDoc);
     }
-
-    actionResponses = categorizeResponseResults({
-      results: allResponseEsHits,
-    });
   } catch (error) {
     throw new EndpointError(error.message, error);
   }
@@ -94,11 +89,14 @@ export const getActionDetailsById = async <T extends ActionDetails = ActionDetai
   }
 
   // get host metadata info with queried agents
-  const agentsHostInfo = await getAgentHostNamesWithIds({
-    esClient,
-    metadataService,
-    agentIds: normalizedActionRequest.agents,
-  });
+  const agentsHostInfo =
+    normalizedActionRequest.agentType === 'endpoint'
+      ? await getAgentHostNamesWithIds({
+          esClient,
+          metadataService,
+          agentIds: normalizedActionRequest.agents,
+        })
+      : {};
 
   return createActionDetailsRecord<T>(normalizedActionRequest, actionResponses, agentsHostInfo);
 };

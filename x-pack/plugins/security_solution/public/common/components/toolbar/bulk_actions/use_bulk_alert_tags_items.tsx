@@ -101,8 +101,10 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
     [TitleContent, hasIndexWrite, renderContent]
   );
 
-  return {
-    alertTagsItems,
-    alertTagsPanels,
-  };
+  return useMemo(() => {
+    return {
+      alertTagsItems,
+      alertTagsPanels,
+    };
+  }, [alertTagsItems, alertTagsPanels]);
 };

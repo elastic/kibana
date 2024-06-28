@@ -18,7 +18,6 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'supported job with aggregation field',
       jobConfig: {
         job_id: `fq_supported_aggs_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '30m',
@@ -104,7 +103,6 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'supported job with scripted field',
       jobConfig: {
         job_id: `fq_supported_script_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -178,7 +176,6 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'unsupported job with bucket_script aggregation field',
       jobConfig: {
         job_id: `fq_unsupported_aggs_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',
@@ -282,7 +279,6 @@ export default function ({ getService }: FtrProviderContext) {
       suiteTitle: 'unsupported job with partition by of a scripted field',
       jobConfig: {
         job_id: `fq_unsupported_script_${ts}`,
-        job_type: 'anomaly_detector',
         description: '',
         analysis_config: {
           bucket_span: '15m',

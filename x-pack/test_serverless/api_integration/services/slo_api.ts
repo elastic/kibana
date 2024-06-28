@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  fetchHistoricalSummaryParamsSchema,
+  FetchHistoricalSummaryResponse,
+} from '@kbn/slo-schema';
+import * as t from 'io-ts';
+import type { RoleCredentials } from '../../shared/services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
@@ -23,9 +29,15 @@ interface WindowSchema {
   actionGroup: string;
 }
 
+interface Dependency {
+  ruleId: string;
+  actionGroupsToSuppressOn: string[];
+}
+
 export interface SloBurnRateRuleParams {
   sloId: string;
   windows: WindowSchema[];
+  dependencies?: Dependency[];
 }
 
 interface SloParams {
@@ -52,41 +64,65 @@ interface SloParams {
   groupBy: string;
 }
 
+type FetchHistoricalSummaryParams = t.OutputOf<
+  typeof fetchHistoricalSummaryParamsSchema.props.body
+>;
+
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
   const retry = getService('retry');
   const requestTimeout = 30 * 1000;
   const retryTimeout = 180 * 1000;
 
   return {
-    async create(slo: SloParams) {
+    async create(slo: SloParams, roleAuthc: RoleCredentials) {
       const { body } = await supertest
         .post(`/api/observability/slos`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .send(slo);
 
       return body;
     },
 
-    async delete(sloId: string) {
+    async delete({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
       const response = await supertest
         .delete(`/api/observability/slos/${sloId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader);
       return response;
     },
 
-    async waitForSloToBeDeleted(sloId: string) {
+    async fetchHistoricalSummary(
+      params: FetchHistoricalSummaryParams,
+      roleAuthc: RoleCredentials
+    ): Promise<FetchHistoricalSummaryResponse> {
+      const { body } = await supertest
+        .post(`/internal/observability/slos/_historical_summary`)
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
+        .send(params);
+
+      return body;
+    },
+
+    async waitForSloToBeDeleted({
+      sloId,
+      roleAuthc,
+    }: {
+      sloId: string;
+      roleAuthc: RoleCredentials;
+    }) {
       if (!sloId) {
         throw new Error(`sloId is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertest
           .delete(`/api/observability/slos/${sloId}`)
-          .set('kbn-xsrf', 'foo')
-          .set('x-elastic-internal-origin', 'foo')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         if (!response.ok) {
           throw new Error(`slodId [${sloId}] was not deleted`);
@@ -95,15 +131,15 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async waitForSloCreated({ sloId }: { sloId: string }) {
+    async waitForSloCreated({ sloId, roleAuthc }: { sloId: string; roleAuthc: RoleCredentials }) {
       if (!sloId) {
         throw new Error(`'sloId is undefined`);
       }
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertest
           .get(`/api/observability/slos/${sloId}`)
-          .set('kbn-xsrf', 'foo')
-          .set('x-elastic-internal-origin', 'foo')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(roleAuthc.apiKeyHeader)
           .timeout(requestTimeout);
         if (response.body.id === undefined) {
           throw new Error(`No slo with id ${sloId} found`);
@@ -160,16 +196,14 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
     async deleteAllSLOs() {
       const response = await supertest
         .get(`/api/observability/slos/_definitions`)
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
         .send()
         .expect(200);
       await Promise.all(
         response.body.results.map(({ id }: { id: string }) => {
           return supertest
             .delete(`/api/observability/slos/${id}`)
-            .set('kbn-xsrf', 'true')
-            .set('x-elastic-internal-origin', 'foo')
+            .set(svlCommonApi.getInternalRequestHeader())
             .send()
             .expect(204);
         })

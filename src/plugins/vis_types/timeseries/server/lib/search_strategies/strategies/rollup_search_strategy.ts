@@ -8,6 +8,7 @@
 
 import { getCapabilitiesForRollupIndices } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewType } from '@kbn/data-views-plugin/common';
 import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
 import { RollupSearchCapabilities } from '../capabilities/rollup_search_capabilities';
 
@@ -30,7 +31,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     esRequests: EsSearchRequest[],
     trackedEsSearches?: TrackedEsSearches
   ) {
-    return super.search(requestContext, req, esRequests, trackedEsSearches, 'rollup');
+    return super.search(requestContext, req, esRequests, trackedEsSearches, DataViewType.ROLLUP);
   }
 
   async getRollupData(
@@ -60,7 +61,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     if (
       indexPatternString &&
       ((!indexPattern && !isIndexPatternContainsWildcard(indexPatternString)) ||
-        indexPattern?.type === 'rollup')
+        indexPattern?.type === DataViewType.ROLLUP)
     ) {
       const rollupData = await this.getRollupData(requestContext, indexPatternString);
       const rollupIndices = getRollupIndices(rollupData);
@@ -96,7 +97,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
     capabilities?: unknown
   ) {
     return super.getFieldsForWildcard(fetchedIndexPattern, indexPatternsService, capabilities, {
-      type: 'rollup',
+      type: DataViewType.ROLLUP,
       rollupIndex: fetchedIndexPattern.indexPatternString,
     });
   }

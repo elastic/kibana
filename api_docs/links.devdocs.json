@@ -112,6 +112,27 @@
           },
           {
             "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.grouping",
+            "type": "Array",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.PresentableGroup",
+                "text": "PresentableGroup"
+              },
+              "<unknown>[]"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
             "id": "def-public.LinksEmbeddable.Unnamed",
             "type": "Function",
             "tags": [],
@@ -464,8 +485,22 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ", any>, unknown>,",
-          "IProvidesPanelPlacementSettings",
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">,",
+          {
+            "pluginId": "dashboard",
+            "scope": "public",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-public.IProvidesLegacyPanelPlacementSettings",
+            "text": "IProvidesLegacyPanelPlacementSettings"
+          },
           "<",
           "LinksInput",
           ", unknown>"
@@ -551,10 +586,10 @@
                 "pluginId": "@kbn/ui-actions-browser",
                 "scope": "common",
                 "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.PresentableGrouping",
-                "text": "PresentableGrouping"
+                "section": "def-common.PresentableGroup",
+                "text": "PresentableGroup"
               },
-              "<unknown> | undefined"
+              "<unknown>[]"
             ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
@@ -641,15 +676,23 @@
           },
           {
             "parentPluginId": "links",
-            "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings",
+            "id": "def-public.LinksFactoryDefinition.getLegacyPanelPlacementSettings",
             "type": "Function",
             "tags": [],
-            "label": "getPanelPlacementSettings",
+            "label": "getLegacyPanelPlacementSettings",
             "description": [],
             "signature": [
               "(input: ",
               "LinksInput",
-              ", attributes: unknown) => { width?: undefined; height?: undefined; strategy?: undefined; } | { width: number; height: number; strategy: \"placeAtTop\"; }"
+              ", attributes: unknown) => { width?: undefined; height?: undefined; strategy?: undefined; } | { width: number; height: number; strategy: ",
+              {
+                "pluginId": "dashboard",
+                "scope": "public",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-public.PanelPlacementStrategy",
+                "text": "PanelPlacementStrategy"
+              },
+              ".placeAtTop; }"
             ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,
@@ -657,7 +700,7 @@
             "children": [
               {
                 "parentPluginId": "links",
-                "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings.$1",
+                "id": "def-public.LinksFactoryDefinition.getLegacyPanelPlacementSettings.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "input",
@@ -672,7 +715,7 @@
               },
               {
                 "parentPluginId": "links",
-                "id": "def-public.LinksFactoryDefinition.getPanelPlacementSettings.$2",
+                "id": "def-public.LinksFactoryDefinition.getLegacyPanelPlacementSettings.$2",
                 "type": "Unknown",
                 "tags": [],
                 "label": "attributes",
@@ -1120,7 +1163,15 @@
             "section": "def-public.EmbeddableOutput",
             "text": "EmbeddableOutput"
           },
-          ", any>, unknown>"
+          ", any>, ",
+          {
+            "pluginId": "savedObjectsFinder",
+            "scope": "common",
+            "docId": "kibSavedObjectsFinderPluginApi",
+            "section": "def-common.FinderAttributes",
+            "text": "FinderAttributes"
+          },
+          ">"
         ],
         "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
         "deprecated": false,

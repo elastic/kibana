@@ -1,0 +1,5 @@
+{
+    "type": "shared-common",
+    "id": "@kbn/esql-validation-autocomplete",
+    "owner": "@elastic/kibana-esql"
+  }

@@ -209,6 +209,7 @@ export const buildOSSFeatures = ({
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
+          api: ['bulkGetUserProfiles'],
         },
         read: {
           app: ['dashboards', 'kibana'],
@@ -229,6 +230,7 @@ export const buildOSSFeatures = ({
             ],
           },
           ui: ['show'],
+          api: ['bulkGetUserProfiles'],
         },
       },
       subFeatures: [
@@ -605,7 +607,7 @@ const reportingFeatures: {
           {
             id: 'download_csv_report',
             name: i18n.translate('xpack.features.ossFeatures.reporting.dashboardDownloadCSV', {
-              defaultMessage: 'Download CSV reports from Saved Search panels',
+              defaultMessage: 'Generate CSV reports from Saved Search panels',
             }),
             includeIn: 'all',
             savedObject: { all: [], read: [] },

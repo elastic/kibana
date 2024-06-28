@@ -6,14 +6,14 @@
  */
 
 import { InvokeCreator } from 'xstate';
-import { ObservabilityLogExplorerHistory } from '../../../types';
+import { ObservabilityLogsExplorerHistory } from '../../../types';
 import { OriginInterpreterContext, OriginInterpreterEvent } from './types';
 
 export const initializeFromLocationState =
   ({
     history,
   }: {
-    history: ObservabilityLogExplorerHistory;
+    history: ObservabilityLogsExplorerHistory;
   }): InvokeCreator<OriginInterpreterContext, OriginInterpreterEvent> =>
   (context, event) =>
   (callback) => {

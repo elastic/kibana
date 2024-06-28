@@ -7,12 +7,14 @@
 
 import React, { useMemo, useState } from 'react';
 
+import type {
+  DataFrameAnalyticsListAction,
+  DataFrameAnalyticsListRow,
+} from '../analytics_list/common';
 import {
   isCompletedAnalyticsJob,
   isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsRunning,
-  DataFrameAnalyticsListAction,
-  DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 import { startAnalytics } from '../../services/analytics_service';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';

@@ -14,21 +14,19 @@ import {
   PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
   PREVIEW_SECTION_TEST_ID,
 } from './test_ids';
-import { ExpandableFlyoutContextValue } from '../context';
 import { TestProvider } from '../test/provider';
+import { State } from '../state';
 
 describe('PreviewSection', () => {
   const context = {
-    panels: {
-      right: {},
-      left: {},
-      preview: [
-        {
-          id: 'key',
-        },
-      ],
-    },
-  } as unknown as ExpandableFlyoutContextValue;
+    right: {},
+    left: {},
+    preview: [
+      {
+        id: 'key',
+      },
+    ],
+  } as unknown as State;
 
   const component = <div>{'component'}</div>;
   const left = 500;
@@ -37,7 +35,7 @@ describe('PreviewSection', () => {
     const showBackButton = false;
 
     const { getByTestId } = render(
-      <TestProvider state={context.panels}>
+      <TestProvider state={context}>
         <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
       </TestProvider>
     );
@@ -49,7 +47,7 @@ describe('PreviewSection', () => {
     const showBackButton = true;
 
     const { getByTestId } = render(
-      <TestProvider state={context.panels}>
+      <TestProvider state={context}>
         <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
       </TestProvider>
     );
@@ -67,7 +65,7 @@ describe('PreviewSection', () => {
     };
 
     const { getByTestId, getByText } = render(
-      <TestProvider state={context.panels}>
+      <TestProvider state={context}>
         <PreviewSection
           component={component}
           leftPosition={left}

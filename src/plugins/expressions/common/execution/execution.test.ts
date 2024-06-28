@@ -7,7 +7,7 @@
  */
 
 import { lastValueFrom, of } from 'rxjs';
-import { scan } from 'rxjs/operators';
+import { scan } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';

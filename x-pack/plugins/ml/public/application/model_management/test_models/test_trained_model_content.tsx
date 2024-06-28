@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiTab, EuiTabs, useEuiPaddingSize } from '@elastic/eui';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SelectedModel } from './selected_model';
 import { type ModelItem } from '../models_list';
 import { INPUT_TYPE } from './models/inference_base';

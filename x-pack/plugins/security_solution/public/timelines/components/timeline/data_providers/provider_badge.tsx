@@ -201,7 +201,7 @@ export const ProviderBadge = React.memo<ProviderBadgeProps>(
             {content}
           </ProviderBadgeStyled>
 
-          {/* Add a UI feature to let users know the is one of operator doesnt work with timeline templates: 
+          {/* Add a UI feature to let users know the is one of operator doesnt work with timeline templates:
           https://github.com/elastic/kibana/issues/142437 */}
 
           {timelineType === TimelineType.template && operator !== IS_ONE_OF_OPERATOR && (

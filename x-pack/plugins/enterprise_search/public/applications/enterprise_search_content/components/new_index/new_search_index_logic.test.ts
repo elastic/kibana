@@ -22,9 +22,10 @@ jest.mock('../../../shared/kibana/kibana_logic', () => ({
 
 const DEFAULT_VALUES: NewSearchIndexValues = {
   data: undefined as any,
-  fullIndexName: 'search-',
+  fullIndexName: '',
   fullIndexNameExists: false,
   fullIndexNameIsValid: true,
+  hasPrefix: false,
   language: null,
   languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
   rawName: '',
@@ -71,7 +72,7 @@ describe('NewSearchIndexLogic', () => {
         NewSearchIndexLogic.actions.setRawName('rawname');
         expect(NewSearchIndexLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          fullIndexName: 'search-rawname',
+          fullIndexName: 'rawname',
           fullIndexNameIsValid: true,
           rawName: 'rawname',
         });
@@ -81,7 +82,7 @@ describe('NewSearchIndexLogic', () => {
         NewSearchIndexLogic.actions.setRawName('invalid/name');
         expect(NewSearchIndexLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          fullIndexName: 'search-invalid/name',
+          fullIndexName: 'invalid/name',
           fullIndexNameIsValid: false,
           rawName: 'invalid/name',
         });
@@ -94,7 +95,7 @@ describe('NewSearchIndexLogic', () => {
         jest.advanceTimersByTime(150);
         await nextTick();
         expect(NewSearchIndexLogic.actions.makeRequest).toHaveBeenCalledWith({
-          indexName: 'search-indexname',
+          indexName: 'indexname',
         });
         jest.useRealTimers();
       });
@@ -102,11 +103,11 @@ describe('NewSearchIndexLogic', () => {
     describe('apiSuccess', () => {
       it('sets correct values for existing index', () => {
         NewSearchIndexLogic.actions.setRawName('indexname');
-        IndexExistsApiLogic.actions.apiSuccess({ exists: true, indexName: 'search-indexname' });
+        IndexExistsApiLogic.actions.apiSuccess({ exists: true, indexName: 'indexname' });
         expect(NewSearchIndexLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          data: { exists: true, indexName: 'search-indexname' },
-          fullIndexName: 'search-indexname',
+          data: { exists: true, indexName: 'indexname' },
+          fullIndexName: 'indexname',
           fullIndexNameExists: true,
           rawName: 'indexname',
         });

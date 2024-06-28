@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { pick } from 'lodash';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,12 +33,11 @@ export const LogRateAnalysisPage: FC = () => {
       </MlPageHeader>
       {dataView && (
         <LogRateAnalysis
-          // Default to false for now, until page restructure work to enable smooth sticky histogram is done
-          stickyHistogram={false}
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
+            'analytics',
             'application',
             'charts',
             'data',

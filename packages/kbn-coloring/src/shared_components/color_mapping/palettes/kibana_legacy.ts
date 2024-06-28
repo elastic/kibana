@@ -23,7 +23,9 @@ export const KibanaV7LegacyPalette: ColorMapping.CategoricalPalette = {
   name: 'Kibana Legacy',
   colorCount: KIBANA_V7_LEGACY_PALETTE_COLORS.length,
   type: 'categorical',
-  getColor(valueInRange) {
-    return KIBANA_V7_LEGACY_PALETTE_COLORS[valueInRange];
+  getColor(indexInRange, isDarkMode, loop) {
+    return KIBANA_V7_LEGACY_PALETTE_COLORS[
+      loop ? indexInRange % KIBANA_V7_LEGACY_PALETTE_COLORS.length : indexInRange
+    ];
   },
 };

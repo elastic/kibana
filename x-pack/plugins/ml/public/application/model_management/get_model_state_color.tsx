@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MODEL_STATE, ModelState } from '@kbn/ml-trained-models-utils';
-import { EuiHealthProps } from '@elastic/eui';
+import type { ModelState } from '@kbn/ml-trained-models-utils';
+import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
+import type { EuiHealthProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export const getModelStateColor = (
@@ -22,7 +23,7 @@ export const getModelStateColor = (
       };
     case MODEL_STATE.DOWNLOADING:
       return {
-        color: 'warning',
+        color: 'primary',
         name: i18n.translate('xpack.ml.trainedModels.modelsList.modelState.downloadingName', {
           defaultMessage: 'Downloading...',
         }),

@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +22,21 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerCreateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.post(
     {
       path: '/{type}/{id?}',
+      options: {
+        access,
+        description: `Create a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -57,15 +63,15 @@ export const registerCreateRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'post',
         path: '/api/saved_objects/{type}/{id?}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { overwrite } = req.query;
+      const { type, id } = request.params;
+      const { overwrite } = request.query;
       const {
         attributes,
         migrationVersion,
@@ -73,10 +79,10 @@ export const registerCreateRoute = (
         typeMigrationVersion,
         references,
         initialNamespaces,
-      } = req.body;
+      } = request.body;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsCreate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsCreate({ request, types: [type] }).catch(() => {});
 
       const { savedObjects } = await context.core;
       if (!allowHttpApiAccess) {
@@ -93,7 +99,7 @@ export const registerCreateRoute = (
         migrationVersionCompatibility: 'compatible' as const,
       };
       const result = await savedObjects.client.create(type, attributes, options);
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

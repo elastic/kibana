@@ -18,7 +18,6 @@ export const defaultHandlers: IInterpreterRenderHandlers = {
   isSyncColorsEnabled: () => false,
   isSyncCursorEnabled: () => true,
   isSyncTooltipsEnabled: () => false,
-  shouldUseSizeTransitionVeil: () => false,
   isInteractive: () => true,
   getExecutionContext: () => undefined,
   done: action('done'),

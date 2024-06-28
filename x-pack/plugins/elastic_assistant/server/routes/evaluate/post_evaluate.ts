@@ -15,23 +15,29 @@ import {
   PostEvaluateBody,
   PostEvaluateRequestQuery,
   PostEvaluateResponse,
+  ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
-import { ESQL_RESOURCE } from '../knowledge_base/constants';
+import { ActionsClientLlm } from '@kbn/langchain/server';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
 import { AgentExecutorEvaluatorWithMetadata } from '../../lib/langchain/executors/types';
-import { ActionsClientLlm } from '../../lib/langchain/llm/actions_client_llm';
 import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
-import { RequestBody } from '../../lib/langchain/types';
+import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer } from './utils';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
-import { buildRouteValidationWithZod } from '../../schemas/common';
+
+/**
+ * To support additional Agent Executors from the UI, add them to this map
+ * and reference your specific AgentExecutor function
+ */
 import { AGENT_EXECUTOR_MAP } from '../../lib/langchain/executors';
+import { ElasticsearchStore } from '../../lib/langchain/elasticsearch_store/elasticsearch_store';
 
 const DEFAULT_SIZE = 20;
 
@@ -43,6 +49,7 @@ export const postEvaluateRoute = (
     .post({
       access: INTERNAL_API_ACCESS,
       path: EVALUATE,
+
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -57,7 +64,7 @@ export const postEvaluateRoute = (
           },
           response: {
             200: {
-              body: buildRouteValidationWithZod(PostEvaluateResponse),
+              body: { custom: buildRouteValidationWithZod(PostEvaluateResponse) },
             },
           },
         },
@@ -123,37 +130,54 @@ export const postEvaluateRoute = (
           });
 
           // Fetch any tools registered by the request's originating plugin
-          const assistantTools = (await context.elasticAssistant).getRegisteredTools(
-            'securitySolution'
-          );
+          const assistantTools = (await context.elasticAssistant).getRegisteredTools(pluginName);
 
           // Get a scoped esClient for passing to the agents for retrieval, and
           // writing results to the output index
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           // Default ELSER model
-          const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+          const elserId = await getElser();
 
           // Skeleton request from route to pass to the agents
           // params will be passed to the actions executor
-          const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
+          const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> = {
             ...request,
             body: {
               alertsIndexPattern: '',
               allow: [],
               allowReplacement: [],
-              params: {
-                subAction: 'invokeAI',
-                subActionParams: {
-                  messages: [],
-                },
-              },
+              subAction: 'invokeAI',
+              // The actionTypeId is irrelevant when used with the invokeAI subaction
+              actionTypeId: '.gen-ai',
               replacements: {},
               size: DEFAULT_SIZE,
               isEnabledKnowledgeBase: true,
               isEnabledRAGAlerts: true,
+              conversationId: '',
             },
           };
+
+          // Create an ElasticsearchStore for KB interactions
+          // Setup with kbDataClient if `enableKnowledgeBaseByDefault` FF is enabled
+          const enableKnowledgeBaseByDefault =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const kbDataClient = enableKnowledgeBaseByDefault
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            : undefined;
+          const kbIndex =
+            enableKnowledgeBaseByDefault && kbDataClient != null
+              ? kbDataClient.indexTemplateAndPattern.alias
+              : KNOWLEDGE_BASE_INDEX_PATTERN;
+          const esStore = new ElasticsearchStore(
+            esClient,
+            kbIndex,
+            logger,
+            telemetry,
+            elserId,
+            ESQL_RESOURCE,
+            kbDataClient
+          );
 
           // Create an array of executor functions to call in batches
           // One for each connector/model + agent combination
@@ -162,25 +186,23 @@ export const postEvaluateRoute = (
           connectorIds.forEach((connectorId) => {
             agentNames.forEach((agentName) => {
               logger.info(`Creating agent: ${connectorId} + ${agentName}`);
-              const llmType = getLlmType(connectorId, connectors);
               const connectorName =
                 getConnectorName(connectorId, connectors) ?? '[unknown connector]';
               const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
               agents.push({
-                agentEvaluator: (langChainMessages, exampleId) =>
-                  AGENT_EXECUTOR_MAP[agentName]({
+                agentEvaluator: async (langChainMessages, exampleId) => {
+                  const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                     actions,
                     isEnabledKnowledgeBase: true,
                     assistantTools,
                     connectorId,
                     esClient,
-                    elserId,
+                    esStore,
+                    isStream: false,
                     langChainMessages,
-                    llmType,
+                    llmType: 'openai',
                     logger,
                     request: skeletonRequest,
-                    kbResource: ESQL_RESOURCE,
-                    telemetry,
                     traceOptions: {
                       exampleId,
                       projectName,
@@ -191,9 +213,16 @@ export const postEvaluateRoute = (
                         ...(connectorName != null ? [connectorName] : []),
                         runName,
                       ],
-                      tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
+                      tracers: getLangSmithTracer({
+                        projectName: detailedRunName,
+                        exampleId,
+                        logger,
+                      }),
                     },
-                  }),
+                    replacements: {},
+                  });
+                  return evalResult.body;
+                },
                 metadata: {
                   connectorName,
                   runName: detailedRunName,
@@ -212,6 +241,7 @@ export const postEvaluateRoute = (
                   connectorId: evalModel,
                   request: skeletonRequest,
                   logger,
+                  model: skeletonRequest.body.model,
                 });
 
           const { evaluationResults, evaluationSummary } = await performEvaluation({

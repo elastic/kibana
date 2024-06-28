@@ -139,7 +139,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
-    // let groupSelector: ReturnType<typeof findings.groupSelector>;
 
     before(async () => {
       await kibanaServer.savedObjects.clean({
@@ -159,6 +158,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await findings.navigateToLatestFindingsPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       const groupSelector = await findings.groupSelector();
       await groupSelector.openDropDown();
       await groupSelector.setValue('None');
@@ -219,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('3 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -234,7 +235,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('4 groups');
+        expect(groupCount).to.be('4 rules');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -293,7 +294,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('2 cloud accounts');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -350,7 +351,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('2 kubernetes clusters');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -404,7 +405,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await groupSelector.setValue('Resource');
 
         // Filter bar uses the field's customLabel in the DataView
-        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
+        await filterBar.addFilter({ field: 'rule.name', operation: 'is', value: ruleName1 });
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
 
         const grouping = await findings.findingsGrouping();
@@ -413,7 +414,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 finding');
@@ -426,7 +427,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const grouping = await findings.findingsGrouping();
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('3 groups');
+        expect(groupCount).to.be('3 resources');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('4 findings');
@@ -442,7 +443,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be('1 group');
+        expect(groupCount).to.be('1 resource');
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('1 finding');
@@ -450,7 +451,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await queryBar.setQuery('');
         await queryBar.submitQuery();
 
-        expect(await grouping.getGroupCount()).to.be('3 groups');
+        expect(await grouping.getGroupCount()).to.be('3 resources');
         expect(await grouping.getUnitCount()).to.be('4 findings');
       });
     });
@@ -507,7 +508,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const grouping = await findings.findingsGrouping();
 
         const groupCount = await grouping.getGroupCount();
-        expect(groupCount).to.be(`${resourceGroupCount + 1} groups`);
+        expect(groupCount).to.be(`${resourceGroupCount + 1} resources`);
 
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be(`${findingsCount + 1} findings`);
@@ -534,7 +535,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         const groupCountAfterMute = await grouping.getGroupCount();
-        expect(groupCountAfterMute).to.be(`${resourceGroupCount} groups`);
+        expect(groupCountAfterMute).to.be(`${resourceGroupCount} resources`);
 
         const unitCountAfterMute = await grouping.getUnitCount();
         expect(unitCountAfterMute).to.be(`${findingsCount} findings`);

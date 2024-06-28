@@ -31,6 +31,7 @@ jest.mock('../kibana/assets/install');
 jest.mock('../kibana/index_pattern/install');
 jest.mock('./install');
 jest.mock('./get');
+jest.mock('./install_index_template_pipeline');
 
 jest.mock('../archive/storage');
 jest.mock('../elasticsearch/ilm/install');
@@ -41,7 +42,8 @@ import { installKibanaAssetsAndReferences } from '../kibana/assets/install';
 
 import { MAX_TIME_COMPLETE_INSTALL } from '../../../../common/constants';
 
-import { installIndexTemplatesAndPipelines, restartInstallation } from './install';
+import { restartInstallation } from './install';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
 import { _installPackage } from './_install_package';
 
@@ -138,7 +140,6 @@ describe('_installPackage', () => {
       createAppContextStartContractMock({
         internal: {
           disableILMPolicies: true,
-          disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
           retrySetupOnBoot: false,
@@ -199,7 +200,6 @@ describe('_installPackage', () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
-          disableProxies: false,
           disableILMPolicies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
@@ -277,7 +277,6 @@ describe('_installPackage', () => {
         createAppContextStartContractMock({
           internal: {
             disableILMPolicies: true,
-            disableProxies: false,
             fleetServerStandalone: false,
             onlyAllowAgentUpgradeToKnownVersions: false,
             retrySetupOnBoot: false,
@@ -326,7 +325,7 @@ describe('_installPackage', () => {
     describe('timeout not reached', () => {
       describe('force flag not provided', () => {
         it('throws concurrent installation error if force flag is not provided', async () => {
-          expect(
+          await expect(
             _installPackage({
               savedObjectsClient: soClient,
               // @ts-ignore
@@ -387,12 +386,11 @@ describe('_installPackage', () => {
     });
   });
 
-  it('surfaces saved object conflicts error', () => {
+  it('surfaces saved object conflicts error', async () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
           disableILMPolicies: false,
-          disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
           retrySetupOnBoot: false,
@@ -409,7 +407,7 @@ describe('_installPackage', () => {
       new PackageSavedObjectConflictError('test')
     );
 
-    expect(
+    await expect(
       _installPackage({
         savedObjectsClient: soClient,
         // @ts-ignore

@@ -6,11 +6,11 @@
  */
 
 import { asyncForEach } from '@kbn/std';
-import type { MapEmbeddable } from '@kbn/maps-plugin/public';
+import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import { type MapApi } from '@kbn/maps-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Query } from '@kbn/es-query';
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 
 export interface LayerResult {
@@ -26,9 +26,11 @@ export interface LayerResult {
 export class VisualizationExtractor {
   constructor() {}
 
-  public async getResultLayersFromEmbeddable(embeddable: MapEmbeddable): Promise<LayerResult[]> {
+  public async getResultLayersFromEmbeddable(
+    embeddable: MapApi & Partial<PublishesDataViews>
+  ): Promise<LayerResult[]> {
     const layers: LayerResult[] = [];
-    const dataViews: DataView[] = (embeddable.getRoot() as DashboardAPI)?.getAllDataViews() ?? [];
+    const dataViews: DataView[] = embeddable.dataViews?.value ?? [];
 
     // Keep track of geoFields for layers as they can be repeated
     const layerGeoFields: Record<string, boolean> = {};
@@ -39,8 +41,8 @@ export class VisualizationExtractor {
         ? layer.getIndexPatternIds()[0]
         : undefined;
       const layerDisplayName = await layer.getDisplayName();
-      const layerId = await layer.getId();
-      const query = await layer.getQuery();
+      const layerId = layer.getId();
+      const query = layer.getQuery();
 
       if (geoField && dataViewId && layerGeoFields[geoField] === undefined) {
         layerGeoFields[geoField] = true;

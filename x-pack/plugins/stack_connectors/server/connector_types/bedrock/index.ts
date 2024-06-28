@@ -10,7 +10,11 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  GenerativeAIForObservabilityConnectorFeatureId,
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
+  GenerativeAIForSecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
@@ -29,7 +33,11 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     secrets: SecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: configValidator }],
-  supportedFeatureIds: [GenerativeAIForSecurityConnectorFeatureId],
+  supportedFeatureIds: [
+    GenerativeAIForSecurityConnectorFeatureId,
+    GenerativeAIForObservabilityConnectorFeatureId,
+    GenerativeAIForSearchPlaygroundConnectorFeatureId,
+  ],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
 });
@@ -45,7 +53,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       i18n.translate('xpack.stackConnectors.bedrock.configurationErrorApiProvider', {
         defaultMessage: 'Error configuring Amazon Bedrock action: {err}',
         values: {
-          err,
+          err: err.toString(),
         },
       })
     );

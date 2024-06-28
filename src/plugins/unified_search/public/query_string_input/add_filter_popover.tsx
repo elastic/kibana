@@ -13,13 +13,11 @@ import {
   EuiPopover,
   EuiButtonIconProps,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Filter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
-import { popoverDragAndDropCss } from './add_filter_popover.styles';
 import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
@@ -57,7 +55,6 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
   onLocalFilterCreate,
   suggestionsAbstraction,
 }: AddFilterPopoverProps) {
-  const euiTheme = useEuiTheme();
   const [showAddFilterPopover, setShowAddFilterPopover] = useState(false);
 
   const button = (
@@ -91,11 +88,11 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         panelPaddingSize="none"
         panelProps={{
           'data-test-subj': 'addFilterPopover',
-          css: popoverDragAndDropCss(euiTheme),
         }}
         initialFocus=".filterEditor__hiddenItem"
         ownFocus
         repositionOnScroll
+        hasDragDrop
       >
         <FilterEditorWrapper
           indexPatterns={indexPatterns}

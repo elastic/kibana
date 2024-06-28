@@ -18,9 +18,9 @@ export type {
   AggregationResultOfMap,
   ESFilter,
   MaybeReadonlyArray,
-  ClusterDetails,
   ESQLColumn,
   ESQLRow,
-  ESQLSearchReponse,
+  ESQLSearchResponse,
   ESQLSearchParams,
+  SearchField,
 } from './src';

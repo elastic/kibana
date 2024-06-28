@@ -9,6 +9,7 @@ import * as React from 'react';
 import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 
 export interface PageProps {
+  children: React.ReactNode;
   title?: React.ReactNode;
 }
 

@@ -76,6 +76,7 @@ describe('store_report', () => {
           Object {
             "id": "key-user-agent:test-user-agent",
             "overwrite": true,
+            "refresh": false,
           },
         ],
       ]

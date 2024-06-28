@@ -7,13 +7,13 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import { ProgressControls } from '@kbn/aiops-components';
 import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
+import type { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
 import { useTableState } from '@kbn/ml-in-memory-table';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';

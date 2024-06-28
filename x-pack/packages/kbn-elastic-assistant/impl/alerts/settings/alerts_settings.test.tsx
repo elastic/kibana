@@ -84,22 +84,4 @@ describe('AlertsSettings', () => {
 
     expect(screen.getByTestId('alertsRange')).not.toBeDisabled();
   });
-
-  it('disables the alerts range slider when knowledgeBase.isEnabledRAGAlerts is false', () => {
-    const setUpdatedKnowledgeBaseSettings = jest.fn();
-    const knowledgeBase: KnowledgeBaseConfig = {
-      isEnabledRAGAlerts: false, // <-- false
-      isEnabledKnowledgeBase: false,
-      latestAlerts: DEFAULT_LATEST_ALERTS,
-    };
-
-    render(
-      <AlertsSettings
-        knowledgeBase={knowledgeBase}
-        setUpdatedKnowledgeBaseSettings={setUpdatedKnowledgeBaseSettings}
-      />
-    );
-
-    expect(screen.getByTestId('alertsRange')).toBeDisabled();
-  });
 });

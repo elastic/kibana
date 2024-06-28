@@ -13,25 +13,31 @@ import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getBulkActionRequest,
+  getBulkDisableRuleActionRequest,
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
 } from '../../../../routes/__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
+import {
+  createMockConfig,
+  requestContextMock,
+  serverMock,
+  requestMock,
+} from '../../../../routes/__mocks__';
 import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
-  getPerformBulkActionSchemaMock,
+  getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 
 jest.mock('../../../../../machine_learning/authz');
-jest.mock('../../../logic/crud/read_rules', () => ({ readRules: jest.fn() }));
+jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
+  let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -42,16 +48,22 @@ describe('Perform bulk action route', () => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
+    config = createMockConfig();
     ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    performBulkActionRoute(server.router, ml, logger);
+    clients.rulesClient.bulkDisableRules.mockResolvedValue({
+      rules: [mockRule],
+      errors: [],
+      total: 1,
+    });
+    performBulkActionRoute(server.router, config, ml, logger);
   });
 
   describe('status codes', () => {
     it('returns 200 when performing bulk action with all dependencies present', async () => {
       const response = await server.inject(
-        getBulkActionRequest(),
+        getBulkDisableRuleActionRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
@@ -73,7 +85,7 @@ describe('Perform bulk action route', () => {
     it("returns 200 when provided filter query doesn't match any rules", async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
       const response = await server.inject(
-        getBulkActionRequest(),
+        getBulkDisableRuleActionRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
@@ -97,7 +109,7 @@ describe('Perform bulk action route', () => {
         getFindResultWithMultiHits({ data: [], total: Infinity })
       );
       const response = await server.inject(
-        getBulkActionRequest(),
+        getBulkDisableRuleActionRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(400);
@@ -109,12 +121,22 @@ describe('Perform bulk action route', () => {
   });
 
   describe('rules execution failures', () => {
-    it('returns error if disable rule throws error', async () => {
-      clients.rulesClient.disable.mockImplementation(async () => {
-        throw new Error('Test error');
+    it('returns an error when rulesClient.bulkDisableRules fails', async () => {
+      clients.rulesClient.bulkDisableRules.mockResolvedValue({
+        rules: [],
+        errors: [
+          {
+            message: 'Test error',
+            rule: {
+              id: mockRule.id,
+              name: mockRule.name,
+            },
+          },
+        ],
+        total: 1,
       });
       const response = await server.inject(
-        getBulkActionRequest(),
+        getBulkDisableRuleActionRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);
@@ -152,7 +174,7 @@ describe('Perform bulk action route', () => {
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
       const response = await server.inject(
-        getBulkActionRequest(),
+        getBulkDisableRuleActionRequest(),
         requestContextMock.convertContext(context)
       );
 
@@ -192,7 +214,7 @@ describe('Perform bulk action route', () => {
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
       const response = await server.inject(
-        { ...getBulkActionRequest(), query: { dry_run: 'true' } },
+        { ...getBulkDisableRuleActionRequest(), query: { dry_run: 'true' } },
         requestContextMock.convertContext(context)
       );
 
@@ -294,11 +316,21 @@ describe('Perform bulk action route', () => {
     });
 
     it('return error message limited to length of 1000, to prevent large response size', async () => {
-      clients.rulesClient.disable.mockImplementation(async () => {
-        throw new Error('a'.repeat(1_300));
+      clients.rulesClient.bulkDisableRules.mockResolvedValue({
+        rules: [],
+        errors: [
+          {
+            message: 'a'.repeat(1_300),
+            rule: {
+              id: mockRule.id,
+              name: mockRule.name,
+            },
+          },
+        ],
+        total: 1,
       });
       const response = await server.inject(
-        getBulkActionRequest(),
+        getBulkDisableRuleActionRequest(),
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(500);
@@ -314,7 +346,7 @@ describe('Perform bulk action route', () => {
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
-          ...getPerformBulkActionSchemaMock(),
+          ...getBulkDisableRuleActionSchemaMock(),
           ids: [mockRule.id, 'failed-mock-id'],
           query: undefined,
         },
@@ -482,11 +514,11 @@ describe('Perform bulk action route', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { ...getPerformBulkActionSchemaMock(), action: undefined },
+        body: { ...getBulkDisableRuleActionSchemaMock(), action: undefined },
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
       );
     });
 
@@ -494,11 +526,11 @@ describe('Perform bulk action route', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { ...getPerformBulkActionSchemaMock(), action: 'unknown' },
+        body: { ...getBulkDisableRuleActionSchemaMock(), action: 'unknown' },
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
       );
     });
 
@@ -506,7 +538,7 @@ describe('Perform bulk action route', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { ...getPerformBulkActionSchemaMock(), query: undefined },
+        body: { ...getBulkDisableRuleActionSchemaMock(), query: undefined },
       });
       const result = server.validate(request);
 
@@ -517,7 +549,7 @@ describe('Perform bulk action route', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: getPerformBulkActionSchemaMock(),
+        body: getBulkDisableRuleActionSchemaMock(),
       });
       const result = server.validate(request);
 
@@ -528,11 +560,11 @@ describe('Perform bulk action route', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { ...getPerformBulkActionSchemaMock(), ids: 'test fake' },
+        body: { ...getBulkDisableRuleActionSchemaMock(), ids: 'test fake' },
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 7 more'
+        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 10 more'
       );
     });
 
@@ -541,7 +573,7 @@ describe('Perform bulk action route', () => {
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
-          ...getPerformBulkActionSchemaMock(),
+          ...getBulkDisableRuleActionSchemaMock(),
           query: undefined,
           ids: Array.from({ length: 101 }).map(() => 'fake-id'),
         },
@@ -558,7 +590,7 @@ describe('Perform bulk action route', () => {
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
-          ...getPerformBulkActionSchemaMock(),
+          ...getBulkDisableRuleActionSchemaMock(),
           query: '',
           ids: ['fake-id'],
         },
@@ -576,7 +608,7 @@ describe('Perform bulk action route', () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { ...getPerformBulkActionSchemaMock(), ids: [] },
+        body: { ...getBulkDisableRuleActionSchemaMock(), ids: [] },
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
@@ -620,9 +652,14 @@ describe('Perform bulk action route', () => {
         total: rulesNumber,
       })
     );
+    clients.rulesClient.bulkDisableRules.mockResolvedValue({
+      rules: Array.from({ length: rulesNumber }).map(() => mockRule),
+      errors: [],
+      total: rulesNumber,
+    });
 
     const response = await server.inject(
-      getBulkActionRequest(),
+      getBulkDisableRuleActionRequest(),
       requestContextMock.convertContext(context)
     );
 

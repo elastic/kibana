@@ -8,8 +8,8 @@
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
-import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
+import type { CreateLayerDescriptorParams, MapsStartApi } from '@kbn/maps-plugin/public';
 import type { Query } from '@kbn/es-query';
 import type { Field, SplitField } from '@kbn/ml-anomaly-utils';
 import { ChartLoader } from '../chart_loader';
@@ -30,7 +30,6 @@ export class MapLoader extends ChartLoader {
     geoField: Field,
     splitField: SplitField,
     fieldValues: string[],
-    filters?: any[],
     savedSearchQuery?: Query
   ) {
     const layerList: LayerDescriptor[] = [];
@@ -41,11 +40,10 @@ export class MapLoader extends ChartLoader {
           ? `${splitField.name}:${fieldValues[0]} ${query ? `and ${query}` : ''}`
           : `${query ? query : ''}`;
 
-      const params: any = {
+      const params: CreateLayerDescriptorParams = {
         indexPatternId: this._dataView.id,
         geoFieldName: geoField.name,
         geoFieldType: geoField.type as unknown as ES_GEO_FIELD_TYPE,
-        filters: filters ?? [],
         query: { query: queryString, language: 'kuery' },
       };
 

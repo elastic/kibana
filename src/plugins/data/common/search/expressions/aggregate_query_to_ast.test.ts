@@ -10,15 +10,37 @@ import { aggregateQueryToAst } from './aggregate_query_to_ast';
 
 describe('aggregateQueryToAst', () => {
   it('should return a function', () => {
-    expect(aggregateQueryToAst({ esql: 'from foo' })).toHaveProperty('type', 'function');
+    expect(aggregateQueryToAst({ query: { esql: 'from foo' } })).toHaveProperty('type', 'function');
   });
 
   it('should forward arguments', () => {
-    expect(aggregateQueryToAst({ esql: 'from foo' }, 'baz')).toHaveProperty(
+    expect(
+      aggregateQueryToAst({
+        query: { esql: 'from foo' },
+        timeField: 'baz',
+      })
+    ).toHaveProperty(
       'arguments',
       expect.objectContaining({
         query: ['from foo'],
         timeField: ['baz'],
+      })
+    );
+
+    expect(
+      aggregateQueryToAst({
+        query: { esql: 'from foo' },
+        timeField: 'baz',
+        titleForInspector: 'Custom title',
+        descriptionForInspector: 'Custom desc',
+      })
+    ).toHaveProperty(
+      'arguments',
+      expect.objectContaining({
+        query: ['from foo'],
+        timeField: ['baz'],
+        titleForInspector: ['Custom title'],
+        descriptionForInspector: ['Custom desc'],
       })
     );
   });

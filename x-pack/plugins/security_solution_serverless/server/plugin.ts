@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
-import { getProductAppFeatures } from '../common/pli/pli_features';
+import { getProductProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
 import { createConfig } from './config';
@@ -26,13 +26,15 @@ import type {
 } from './types';
 import { SecurityUsageReportingTask } from './task_manager/usage_reporting_task';
 import { cloudSecurityMetringTaskProperties } from './cloud_security/cloud_security_metering_task_config';
-import { getProductAppFeaturesConfigurator } from './app_features';
+import { getProductProductFeaturesConfigurator, getSecurityProductTier } from './product_features';
 import { METERING_TASK as ENDPOINT_METERING_TASK } from './endpoint/constants/metering';
 import {
   endpointMeteringService,
-  setEndpointPackagePolicyServerlessFlag,
+  setEndpointPackagePolicyServerlessBillingFlags,
 } from './endpoint/services';
 import { enableRuleActions } from './rules/enable_rule_actions';
+import { NLPCleanupTask } from './task_manager/nlp_cleanup_task/nlp_cleanup_task';
+import { telemetryEvents } from './telemetry/event_based_telemetry';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -46,6 +48,7 @@ export class SecuritySolutionServerlessPlugin
   private config: ServerlessSecurityConfig;
   private cloudSecurityUsageReportingTask: SecurityUsageReportingTask | undefined;
   private endpointUsageReportingTask: SecurityUsageReportingTask | undefined;
+  private nlpCleanupTask: NLPCleanupTask | undefined;
   private readonly logger: Logger;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -55,7 +58,7 @@ export class SecuritySolutionServerlessPlugin
 
   public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
-    const enabledAppFeatures = getProductAppFeatures(this.config.productTypes);
+    const enabledProductFeatures = getProductProductFeatures(this.config.productTypes);
 
     // securitySolutionEss plugin should always be disabled when securitySolutionServerless is enabled.
     // This check is an additional layer of security to prevent double registrations when
@@ -64,14 +67,20 @@ export class SecuritySolutionServerlessPlugin
     if (shouldRegister) {
       const productTypesStr = JSON.stringify(this.config.productTypes, null, 2);
       this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
-      const appFeaturesConfigurator = getProductAppFeaturesConfigurator(
-        enabledAppFeatures,
+      const productFeaturesConfigurator = getProductProductFeaturesConfigurator(
+        enabledProductFeatures,
         this.config
       );
-      pluginsSetup.securitySolution.setAppFeaturesConfigurator(appFeaturesConfigurator);
+      pluginsSetup.securitySolution.setProductFeaturesConfigurator(productFeaturesConfigurator);
     }
 
-    enableRuleActions({ actions: pluginsSetup.actions, appFeatureKeys: enabledAppFeatures });
+    // Register telemetry events
+    telemetryEvents.forEach((eventConfig) => coreSetup.analytics.registerEventType(eventConfig));
+
+    enableRuleActions({
+      actions: pluginsSetup.actions,
+      productFeatureKeys: enabledProductFeatures,
+    });
 
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
@@ -95,9 +104,13 @@ export class SecuritySolutionServerlessPlugin
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloud,
-      options: {
-        lookBackLimitMinutes: ENDPOINT_METERING_TASK.LOOK_BACK_LIMIT_MINUTES,
-      },
+    });
+
+    this.nlpCleanupTask = new NLPCleanupTask({
+      core: coreSetup,
+      logFactory: this.initializerContext.logger,
+      productTier: getSecurityProductTier(this.config, this.logger),
+      taskManager: pluginsSetup.taskManager,
     });
 
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
@@ -109,21 +122,27 @@ export class SecuritySolutionServerlessPlugin
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;
     const internalSOClient = coreStart.savedObjects.createInternalRepository();
 
-    this.cloudSecurityUsageReportingTask?.start({
-      taskManager: pluginsSetup.taskManager,
-      interval: cloudSecurityMetringTaskProperties.interval,
-    });
+    this.cloudSecurityUsageReportingTask
+      ?.start({
+        taskManager: pluginsSetup.taskManager,
+        interval: cloudSecurityMetringTaskProperties.interval,
+      })
+      .catch(() => {});
 
-    this.endpointUsageReportingTask?.start({
-      taskManager: pluginsSetup.taskManager,
-      interval: ENDPOINT_METERING_TASK.INTERVAL,
-    });
+    this.endpointUsageReportingTask
+      ?.start({
+        taskManager: pluginsSetup.taskManager,
+        interval: this.config.usageReportingTaskInterval,
+      })
+      .catch(() => {});
 
-    setEndpointPackagePolicyServerlessFlag(
+    this.nlpCleanupTask?.start({ taskManager: pluginsSetup.taskManager }).catch(() => {});
+
+    setEndpointPackagePolicyServerlessBillingFlags(
       internalSOClient,
       internalESClient,
       pluginsSetup.fleet.packagePolicyService
-    );
+    ).catch(() => {});
     return {};
   }
 

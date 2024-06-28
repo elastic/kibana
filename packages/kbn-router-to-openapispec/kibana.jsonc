@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/router-to-openapispec",
+  "owner": "@elastic/kibana-core"
+}

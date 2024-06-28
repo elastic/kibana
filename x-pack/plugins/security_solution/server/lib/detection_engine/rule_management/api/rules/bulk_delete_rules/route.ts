@@ -8,6 +8,7 @@
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
 import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   BulkCrudRulesResponse,
   BulkDeleteRulesRequestBody,
@@ -18,17 +19,16 @@ import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import {
   buildSiemResponse,
   createBulkErrorObject,
   transformBulkError,
 } from '../../../../routes/utils';
-import { deleteRules } from '../../../logic/crud/delete_rules';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
+import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 
 type Handler = RequestHandler<
   unknown,
@@ -55,6 +55,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
       const rulesClient = ctx.alerting.getRulesClient();
+      const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
 
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -75,9 +76,8 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
               return getIdBulkError({ id, ruleId });
             }
 
-            await deleteRules({
+            await detectionRulesClient.deleteRule({
               ruleId: rule.id,
-              rulesClient,
             });
 
             return transformValidateBulkError(idOrRuleIdOrUnknown, rule);
@@ -106,6 +106,9 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
     path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
       tags: ['access:securitySolution'],
+      timeout: {
+        idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
+      },
     },
   };
   const versionConfig = {

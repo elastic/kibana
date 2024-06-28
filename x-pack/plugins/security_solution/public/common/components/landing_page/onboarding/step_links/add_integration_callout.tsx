@@ -13,20 +13,34 @@ import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigati
 import classnames from 'classnames';
 import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
 import { ADD_INTEGRATIONS_STEP } from './translations';
+import type { StepId } from '../types';
 import { AddIntegrationsSteps } from '../types';
+import { useStepContext } from '../context/step_context';
+import { AddIntegrationCalloutStepLinkId } from './types';
 
-const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) => {
+const AddIntegrationsCalloutComponent = ({
+  stepName,
+  stepId,
+}: {
+  stepName?: string;
+  stepId: StepId;
+}) => {
   const { calloutWrapperStyles, calloutTitleStyles, calloutAnchorStyles } =
     useAddIntegrationsCalloutStyles();
   const { euiTheme } = useEuiTheme();
   const { navigateTo } = useNavigateTo();
+  const { onStepLinkClicked } = useStepContext();
 
-  const toggleStep = useCallback(() => {
+  const onClick = useCallback(() => {
     navigateTo({
       deepLinkId: SecurityPageName.landing,
       path: `#${AddIntegrationsSteps.connectToDataSources}`,
     });
-  }, [navigateTo]);
+    onStepLinkClicked({
+      originStepId: stepId,
+      stepLinkId: AddIntegrationCalloutStepLinkId,
+    });
+  }, [navigateTo, onStepLinkClicked, stepId]);
 
   const classNames = classnames('add-integrations-callout', calloutWrapperStyles);
 
@@ -47,7 +61,7 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
               defaultMessage="To {stepName} add integrations first {addIntegration}"
               values={{
                 addIntegration: (
-                  <EuiLink onClick={toggleStep} className={calloutAnchorStyles}>
+                  <EuiLink onClick={onClick} className={calloutAnchorStyles}>
                     {ADD_INTEGRATIONS_STEP}
                     <EuiIcon type="arrowRight" size="s" className={calloutAnchorStyles} />
                   </EuiLink>

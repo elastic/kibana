@@ -170,8 +170,15 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const dataTable = useShallowEqualSelector<DataTableModel, DataTableState>(
       (state) => getDataTable(state, id) ?? tableDefaults
     );
-    const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
-      dataTable;
+    const {
+      columns,
+      selectedEventIds,
+      showCheckboxes,
+      sort,
+      isLoading,
+      defaultColumns,
+      dataViewId,
+    } = dataTable;
 
     const columnHeaders = memoizedGetColumnHeaders(columns, browserFields, isEventRenderedView);
 
@@ -339,7 +346,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
-    const cellActionsMetadata = useMemo(() => ({ scopeId: id }), [id]);
+    const cellActionsMetadata = useMemo(() => ({ scopeId: id, dataViewId }), [dataViewId, id]);
     const cellActionsFields = useMemo<UseDataGridColumnsCellActionsProps['fields']>(
       () =>
         cellActionsTriggerId
@@ -410,10 +417,8 @@ export const DataTableComponent = React.memo<DataTableProps>(
         const ecs = pageRowIndex < data.length ? data[pageRowIndex].ecs : null;
 
         useEffect(() => {
-          const defaultStyles = { overflow: 'hidden' };
-          setCellProps({ style: { ...defaultStyles } });
           if (ecs && rowData) {
-            addBuildingBlockStyle(ecs, theme, setCellProps, defaultStyles);
+            addBuildingBlockStyle(ecs, theme, setCellProps);
           } else {
             // disable the cell when it has no data
             setCellProps({ style: { display: 'none' } });

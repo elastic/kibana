@@ -9,7 +9,6 @@ import type { FindHit } from '../../../routes/__mocks__/request_responses';
 import {
   getRuleMock,
   getFindResultWithSingleHit,
-  getEmptySavedObjectsResponse,
 } from '../../../routes/__mocks__/request_responses';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExportAll } from './get_export_all';
@@ -22,8 +21,6 @@ import {
 
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
-import type { loggingSystemMock } from '@kbn/core/server/mocks';
-import { requestContextMock } from '../../../routes/__mocks__/request_context';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { Readable } from 'stream';
@@ -54,13 +51,11 @@ const connectors = [
   },
 ];
 describe('getExportAll', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const { clients } = requestContextMock.createTools();
   const exporterMock = savedObjectsExporterMock.create();
   const requestMock = mockRouter.createKibanaRequest();
   const actionsClient = actionsClientMock.create();
+
   beforeEach(async () => {
-    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
     actionsClient.getAll.mockImplementation(async () => {
       return connectors;
     });
@@ -85,8 +80,6 @@ describe('getExportAll', () => {
     const exports = await getExportAll(
       rulesClient,
       exceptionsClient,
-      clients.savedObjectsClient,
-      logger,
       exporterMock,
       requestMock,
       actionsClient
@@ -172,8 +165,6 @@ describe('getExportAll', () => {
     const exports = await getExportAll(
       rulesClient,
       exceptionsClient,
-      clients.savedObjectsClient,
-      logger,
       exporterMock,
       requestMock,
       actionsClient
@@ -258,8 +249,6 @@ describe('getExportAll', () => {
     const exports = await getExportAll(
       rulesClient,
       exceptionsClient,
-      clients.savedObjectsClient,
-      logger,
       exporterMockWithConnector as never,
       requestMock,
       actionsClient
@@ -401,8 +390,6 @@ describe('getExportAll', () => {
     const exports = await getExportAll(
       rulesClient,
       exceptionsClient,
-      clients.savedObjectsClient,
-      logger,
       exporterMockWithConnector as never,
       requestMock,
       actionsClient

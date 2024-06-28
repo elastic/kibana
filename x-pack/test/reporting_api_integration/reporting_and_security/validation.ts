@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await reportingAPI.initEcommerce();
     });
+
     after(async () => {
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
@@ -42,7 +43,6 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params(1541.5999755859375) }
         );
-
         await retry.tryForTime(60000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
@@ -59,7 +59,7 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params('cucucachoo') }
         );
-        await retry.tryForTime(18000, async () => {
+        await retry.tryForTime(30000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           '/api/reporting/generate/printablePdfV2',
           { jobParams: createPdfV2Params(1541, 'landscape') }
         );
-        await retry.tryForTime(18000, async () => {
+        await retry.tryForTime(30000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')
@@ -90,7 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         const downloadReportPath = await reportingAPI.postJobJSON('/api/reporting/generate/pngV2', {
           jobParams: createPngV2Params('cucucachoo'),
         });
-        await retry.tryForTime(18000, async () => {
+        await retry.tryForTime(30000, async () => {
           const response: supertest.Response = await supertestSvc
             .get(downloadReportPath)
             .responseType('blob')

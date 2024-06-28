@@ -17,8 +17,8 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
 } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -26,14 +26,17 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { ThemeServiceStart } from '@kbn/core-theme-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
-interface ErrorToastProps {
+interface StartServices {
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+}
+
+interface ErrorToastProps extends StartServices {
   title: string;
   error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
-  analytics: AnalyticsServiceStart;
-  i18n: I18nStart;
-  theme: ThemeServiceStart;
 }
 
 interface RequestError extends Error {
@@ -57,9 +60,7 @@ export function showErrorDialog({
   title,
   error,
   openModal,
-  analytics,
-  i18n,
-  theme,
+  ...startServices
 }: Pick<ErrorToastProps, 'error' | 'title' | 'openModal' | 'analytics' | 'i18n' | 'theme'>) {
   let text = '';
 
@@ -74,7 +75,7 @@ export function showErrorDialog({
 
   const modal = openModal(
     mount(
-      <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
+      <KibanaRenderContextProvider {...startServices}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -107,19 +108,17 @@ export function ErrorToast({
   error,
   toastMessage,
   openModal,
-  analytics,
-  i18n,
-  theme,
+  ...startServices
 }: ErrorToastProps) {
   return (
-    <React.Fragment>
+    <KibanaRenderContextProvider {...startServices}>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
       <div className="eui-textRight">
         <EuiButton
           size="s"
           color="danger"
           data-test-subj="errorToastBtn"
-          onClick={() => showErrorDialog({ title, error, openModal, analytics, i18n, theme })}
+          onClick={() => showErrorDialog({ title, error, openModal, ...startServices })}
         >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"
@@ -127,7 +126,7 @@ export function ErrorToast({
           />
         </EuiButton>
       </div>
-    </React.Fragment>
+    </KibanaRenderContextProvider>
   );
 }
 

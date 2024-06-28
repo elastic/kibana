@@ -10,10 +10,15 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
+import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { useKibana } from '../../../lib/kibana';
 import { timelineActions } from '../../../../timelines/store';
-import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
+import { SecurityPageName } from '../../../../../common/constants';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -25,6 +30,8 @@ import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/sea
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useTourContext } from '../../guided_onboarding_tour';
+import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -69,14 +76,16 @@ const RowActionComponent = ({
   refetch,
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
-
+  const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
-  const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
-  const isExpandableFlyoutInCreateRuleEnabled = useIsExperimentalFeatureEnabled(
-    'expandableFlyoutInCreateRuleEnabled'
-  );
+  const [{ pageName }] = useRouteSpy();
+  const { activeStep, isTourShown } = useTourContext();
+  const shouldFocusOnOverviewTab =
+    (activeStep === AlertsCasesTourSteps.expandEvent ||
+      activeStep === AlertsCasesTourSteps.reviewAlertDetailsFlyout) &&
+    isTourShown(SecurityStepId.alertsCases);
 
   const columnValues = useMemo(
     () =>
@@ -93,12 +102,13 @@ const RowActionComponent = ({
     [columnHeaders, timelineNonEcsData]
   );
 
-  let showExpandableFlyout: boolean;
-  if (tableId === TableId.rulePreview) {
-    showExpandableFlyout = isSecurityFlyoutEnabled && isExpandableFlyoutInCreateRuleEnabled;
-  } else {
-    showExpandableFlyout = isSecurityFlyoutEnabled;
-  }
+  // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+  const showExpandableFlyout =
+    pageName === SecurityPageName.attackDiscovery ? true : !expandableFlyoutDisabled;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     const updatedExpandedDetail: ExpandedDetailType = {
@@ -113,12 +123,17 @@ const RowActionComponent = ({
       openFlyout({
         right: {
           id: DocumentDetailsRightPanelKey,
+          path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
           params: {
             id: eventId,
             indexName,
             scopeId: tableId,
           },
         },
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: tableId,
+        panel: 'right',
       });
     }
     // TODO remove when https://github.com/elastic/security-team/issues/7462 is merged
@@ -142,7 +157,43 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout]);
+  }, [
+    eventId,
+    indexName,
+    showExpandableFlyout,
+    tableId,
+    openFlyout,
+    shouldFocusOnOverviewTab,
+    telemetry,
+    dispatch,
+    tabType,
+  ]);
+
+  const toggleShowNotes = useCallback(
+    () =>
+      openFlyout({
+        right: {
+          id: DocumentDetailsRightPanelKey,
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+        left: {
+          id: DocumentDetailsLeftPanelKey,
+          path: {
+            tab: LeftPanelNotesTab,
+          },
+          params: {
+            id: eventId,
+            indexName,
+            scopeId: tableId,
+          },
+        },
+      }),
+    [eventId, indexName, openFlyout, tableId]
+  );
 
   const Action = controlColumn.rowCellRender;
 
@@ -173,6 +224,9 @@ const RowActionComponent = ({
           showCheckboxes={showCheckboxes}
           tabType={tabType}
           timelineId={tableId}
+          toggleShowNotes={
+            !expandableFlyoutDisabled && securitySolutionNotesEnabled ? toggleShowNotes : undefined
+          }
           width={width}
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}

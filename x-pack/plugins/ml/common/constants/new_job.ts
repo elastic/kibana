@@ -23,6 +23,7 @@ export enum CREATED_BY_LABEL {
   CATEGORIZATION = 'categorization-wizard',
   RARE = 'rare-wizard',
   GEO = 'geo-wizard',
+  GEO_FROM_LENS = 'geo-wizard-from-lens',
   APM_TRANSACTION = 'ml-module-apm-transaction',
   SINGLE_METRIC_FROM_LENS = 'single-metric-wizard-from-lens',
   MULTI_METRIC_FROM_LENS = 'multi-metric-wizard-from-lens',

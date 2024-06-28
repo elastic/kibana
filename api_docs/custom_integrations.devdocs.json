@@ -253,7 +253,7 @@
           "label": "ContextProvider",
           "description": [],
           "signature": [
-            "React.FunctionComponent<{}>"
+            "React.FunctionComponent<{ children?: React.ReactNode; }>"
           ],
           "path": "src/plugins/custom_integrations/public/types.ts",
           "deprecated": false,
@@ -1880,6 +1880,41 @@
               {
                 "parentPluginId": "customIntegrations",
                 "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.edr_xdr.parent_id",
+                "type": "string",
+                "tags": [],
+                "label": "parent_id",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cloudsecurity_cdr",
+            "type": "Object",
+            "tags": [],
+            "label": "cloudsecurity_cdr",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cloudsecurity_cdr.title",
+                "type": "string",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "path": "src/plugins/custom_integrations/common/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "customIntegrations",
+                "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.cloudsecurity_cdr.parent_id",
                 "type": "string",
                 "tags": [],
                 "label": "parent_id",

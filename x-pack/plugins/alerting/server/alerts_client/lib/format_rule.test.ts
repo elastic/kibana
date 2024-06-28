@@ -61,6 +61,7 @@ describe('formatRule', () => {
           revision: 0,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
+          alertDelay: 0,
         },
         ruleType,
       })

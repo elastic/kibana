@@ -20,7 +20,13 @@ describe('getStreamObservable', () => {
   const typedReader = mockReader as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
   const setLoading = jest.fn();
-
+  const defaultProps = {
+    actionTypeId: '.gen-ai',
+    isEnabledLangChain: false,
+    isError: false,
+    reader: typedReader,
+    setLoading,
+  };
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -69,10 +75,8 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
-      connectorTypeTitle: 'Amazon Bedrock',
-      isError: false,
-      reader: typedReader,
-      setLoading,
+      ...defaultProps,
+      actionTypeId: '.bedrock',
     });
     const emittedStates: PromptObservableState[] = [];
 
@@ -141,12 +145,7 @@ describe('getStreamObservable', () => {
         done: true,
       });
 
-    const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
-      isError: false,
-      reader: typedReader,
-      setLoading,
-    });
+    const source = getStreamObservable(defaultProps);
     const emittedStates: PromptObservableState[] = [];
 
     source.subscribe({
@@ -214,11 +213,310 @@ describe('getStreamObservable', () => {
         done: true,
       });
 
+    const source = getStreamObservable(defaultProps);
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+  it('should emit loading state and chunks for LangChain', (done) => {
+    const chunk1 = `{"payload":"","type":"content"}
+{"payload":"My","type":"content"}
+{"payload":" ","type":"content"}
+{"payload":"new","type":"content"}
+`;
+    const chunk2 = `{"payload":" mes","type":"content"}
+{"payload":"sage","type":"content"}
+`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      {
+        chunks: [],
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My ',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new mes',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new message',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable({ ...defaultProps, isEnabledLangChain: true });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+  it('should emit loading state and chunks for partial response LangChain', (done) => {
+    const chunk1 = `{"payload":"","type":"content"}
+{"payload":"My","type":"content"}
+{"payload":" ","type":"content"}
+{"payload":"new","type":"content"}
+{"payl`;
+    const chunk2 = `oad":" mes","type":"content"}
+{"payload":"sage","type":"content"}`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My ',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new mes',
+        loading: true,
+      },
+      {
+        chunks: ['My', ' ', 'new', ' mes', 'sage'],
+        message: 'My new message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable({ ...defaultProps, isEnabledLangChain: true });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+  it('should emit loading state and chunks for Gemini', (done) => {
+    const chunk1 = `data: {"candidates": [{"content":{"role":"model","parts":[{"text":"My"}]}}]}\rdata: {"candidates": [{"content":{"role":"model","parts":[{"text":" new"}]}}]}`;
+    const chunk2 = `\rdata: {"candidates": [{"content": {"role": "model","parts": [{"text": " message"}]},"finishReason": "STOP"}],"usageMetadata": {"promptTokenCount": 23,"candidatesTokenCount": 50,"totalTokenCount": 73}}`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My ',
+        loading: true,
+      },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  ',
+        loading: true,
+      },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new ',
+        loading: true,
+      },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new  message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
     const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
-      isError: false,
-      reader: typedReader,
-      setLoading,
+      ...defaultProps,
+      actionTypeId: '.gemini',
+    });
+    const emittedStates: PromptObservableState[] = [];
+
+    source.subscribe({
+      next: (state) => {
+        return emittedStates.push(state);
+      },
+      complete: () => {
+        expect(emittedStates).toEqual(expectedStates);
+        done();
+
+        completeSubject.subscribe({
+          next: () => {
+            expect(setLoading).toHaveBeenCalledWith(false);
+            expect(typedReader.cancel).toHaveBeenCalled();
+            done();
+          },
+        });
+      },
+      error: (err) => done(err),
+    });
+  });
+
+  it('should emit loading state and chunks for partial response Gemini', (done) => {
+    const chunk1 = `data: {"candidates": [{"content":{"role":"model","parts":[{"text":"My"}]}}]}\rdata: {"candidates": [{"content":{"role":"model","parts":[{"text":" new"}]}}]}`;
+    const chunk2 = `\rdata: {"candidates": [{"content": {"role": "model","parts": [{"text": " message"}]},"finishReason": "STOP"}],"usageMetadata": {"promptTokenCount": 23,"candidatesTokenCount": 50,"totalTokenCount": 73}}`;
+    const completeSubject = new Subject<void>();
+    const expectedStates: PromptObservableState[] = [
+      { chunks: [], loading: true },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My ',
+        loading: true,
+      },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  ',
+        loading: true,
+      },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new ',
+        loading: true,
+      },
+      {
+        chunks: ['My ', ' ', 'new ', ' message'],
+        message: 'My  new  message',
+        loading: false,
+      },
+    ];
+
+    mockReader.read
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk1)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode(chunk2)),
+      })
+      .mockResolvedValueOnce({
+        done: false,
+        value: new Uint8Array(new TextEncoder().encode('')),
+      })
+      .mockResolvedValue({
+        done: true,
+      });
+
+    const source = getStreamObservable({
+      ...defaultProps,
+      actionTypeId: '.gemini',
     });
     const emittedStates: PromptObservableState[] = [];
 
@@ -268,10 +566,8 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
+      ...defaultProps,
       isError: true,
-      reader: typedReader,
-      setLoading,
     });
     const emittedStates: PromptObservableState[] = [];
 
@@ -298,12 +594,7 @@ describe('getStreamObservable', () => {
     const error = new Error('Test Error');
     // Simulate an error
     mockReader.read.mockRejectedValue(error);
-    const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
-      isError: false,
-      reader: typedReader,
-      setLoading,
-    });
+    const source = getStreamObservable(defaultProps);
 
     source.subscribe({
       next: (state) => {},
@@ -329,7 +620,13 @@ function encodeBedrockResponse(completion: string) {
     body: Uint8Array.from(
       Buffer.from(
         JSON.stringify({
-          bytes: Buffer.from(JSON.stringify({ completion })).toString('base64'),
+          bytes: Buffer.from(
+            JSON.stringify({
+              type: 'content_block_delta',
+              index: 0,
+              delta: { type: 'text_delta', text: completion },
+            })
+          ).toString('base64'),
         })
       )
     ),

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 
 interface Props {
@@ -14,7 +15,12 @@ interface Props {
   loading?: boolean;
 }
 
-export const LoadingWrapper: FC<Props> = ({ hasData, loading = false, height, children }) => {
+export const LoadingWrapper: FC<PropsWithChildren<Props>> = ({
+  hasData,
+  loading = false,
+  height,
+  children,
+}) => {
   const opacity = loading === true ? (hasData === true ? 0.3 : 0) : 1;
 
   return (

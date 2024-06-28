@@ -17,10 +17,9 @@ exports[`AddData render 1`] = `
         <h2
           id="kbnOverviewDataAdd__title"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Ingest your data"
             id="kibanaOverview.addData.sectionTitle"
-            values={Object {}}
           />
         </h2>
       </EuiTitle>
@@ -37,10 +36,9 @@ exports[`AddData render 1`] = `
           iconType="visTable"
           size="xs"
         >
-          <FormattedMessage
+          <MemoizedFormattedMessage
             defaultMessage="Try our sample data"
             id="kibanaOverview.addData.sampleDataButtonLabel"
-            values={Object {}}
           />
         </EuiButtonEmpty>
       </div>

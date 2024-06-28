@@ -26,7 +26,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -57,7 +57,7 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup css-nhr7ke"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -69,7 +69,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <button
                         aria-label="Edit Text List Header"
@@ -98,7 +98,7 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup css-nhr7ke"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -111,7 +111,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
                         >
                           <button
                             aria-label="Edit Text List Header"
@@ -162,7 +162,7 @@ Object {
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <span
                           class="emotion-EuiTextColor"
@@ -234,8 +234,10 @@ Object {
         data-eui="EuiFocusTrap"
       >
         <div
+          aria-modal="true"
           class="euiModal emotion-euiModal-defaultMaxWidth"
           data-test-subj="EditModal"
+          role="dialog"
           tabindex="0"
         >
           <button
@@ -297,7 +299,7 @@ Object {
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <input
-                          class="euiFieldText euiFieldText--fullWidth"
+                          class="euiFieldText emotion-euiFieldText-fullWidth"
                           data-test-subj="editModalNameTextField"
                           id="generated-id"
                           name="name"
@@ -327,13 +329,13 @@ Object {
                     class="euiFormRow__fieldWrapper"
                   >
                     <div
-                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea"
+                      class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--euiTextArea emotion-euiTextArea"
                     >
                       <div
                         class="euiFormControlLayout__childrenWrapper"
                       >
                         <textarea
-                          class="euiTextArea euiTextArea--resizeVertical euiTextArea--fullWidth"
+                          class="euiTextArea emotion-euiTextArea-vertical-fullWidth"
                           data-test-subj="editModalDescriptionTextField"
                           id="generated-id"
                           name="description"
@@ -409,7 +411,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -440,7 +442,7 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup css-nhr7ke"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -452,7 +454,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <button
                       aria-label="Edit Text List Header"
@@ -481,7 +483,7 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup css-nhr7ke"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -494,7 +496,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <button
                           aria-label="Edit Text List Header"
@@ -545,7 +547,7 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <span
                         class="emotion-EuiTextColor"
@@ -688,7 +690,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -719,7 +721,7 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup css-nhr7ke"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -731,7 +733,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
                     >
                       <button
                         aria-label="Edit Text List Header"
@@ -760,7 +762,7 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup css-nhr7ke"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -773,7 +775,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
                         >
                           <button
                             aria-label="Edit Text List Header"
@@ -824,7 +826,7 @@ Object {
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <span
                           class="emotion-EuiTextColor"
@@ -910,7 +912,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -941,7 +943,7 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup css-nhr7ke"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -953,7 +955,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   >
                     <button
                       aria-label="Edit Text List Header"
@@ -982,7 +984,7 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup css-nhr7ke"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -995,7 +997,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <button
                           aria-label="Edit Text List Header"
@@ -1046,7 +1048,7 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <span
                         class="emotion-EuiTextColor"
@@ -1189,7 +1191,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -1220,7 +1222,7 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup css-nhr7ke"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1232,7 +1234,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
                     />
                   </div>
                 </h1>
@@ -1247,7 +1249,7 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup css-nhr7ke"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1260,7 +1262,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
                         />
                       </div>
                       <div
@@ -1297,7 +1299,7 @@ Object {
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <span
                           class="emotion-EuiTextColor"
@@ -1384,7 +1386,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -1415,7 +1417,7 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup css-nhr7ke"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1427,7 +1429,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   />
                 </div>
               </h1>
@@ -1442,7 +1444,7 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup css-nhr7ke"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1455,7 +1457,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       />
                     </div>
                     <div
@@ -1492,7 +1494,7 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <span
                         class="emotion-EuiTextColor"
@@ -1636,7 +1638,7 @@ Object {
                 >
                   <a
                     aria-current="false"
-                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                     href=""
                     rel="noreferrer"
                     title="Shared Exception Lists"
@@ -1667,7 +1669,7 @@ Object {
                   class="euiTitle emotion-euiTitle-l"
                 >
                   <div
-                    class="euiFlexGroup css-nhr7ke"
+                    class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                   >
                     <div
                       class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1679,7 +1681,7 @@ Object {
                       </span>
                     </div>
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-growZero"
                     />
                   </div>
                 </h1>
@@ -1694,7 +1696,7 @@ Object {
                       css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                     >
                       <div
-                        class="euiFlexGroup css-nhr7ke"
+                        class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                       >
                         <div
                           class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1707,7 +1709,7 @@ Object {
                           </span>
                         </div>
                         <div
-                          class="euiFlexItem emotion-EuiFlexItem"
+                          class="euiFlexItem emotion-euiFlexItem-growZero"
                         />
                       </div>
                       <div
@@ -1744,7 +1746,7 @@ Object {
                       data-test-subj="RightSideMenuItemsContainer"
                     >
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-grow-1"
                       >
                         <span
                           class="emotion-EuiTextColor"
@@ -1901,7 +1903,7 @@ Object {
               >
                 <a
                   aria-current="false"
-                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast-isInteractive"
                   href=""
                   rel="noreferrer"
                   title="Shared Exception Lists"
@@ -1932,7 +1934,7 @@ Object {
                 class="euiTitle emotion-euiTitle-l"
               >
                 <div
-                  class="euiFlexGroup css-nhr7ke"
+                  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1944,7 +1946,7 @@ Object {
                     </span>
                   </div>
                   <div
-                    class="euiFlexItem emotion-EuiFlexItem"
+                    class="euiFlexItem emotion-euiFlexItem-growZero"
                   />
                 </div>
               </h1>
@@ -1959,7 +1961,7 @@ Object {
                     css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
                   >
                     <div
-                      class="euiFlexGroup css-nhr7ke"
+                      class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-stretch-row"
                     >
                       <div
                         class="euiFlexItem emotion-euiFlexItem-grow-10"
@@ -1972,7 +1974,7 @@ Object {
                         </span>
                       </div>
                       <div
-                        class="euiFlexItem emotion-EuiFlexItem"
+                        class="euiFlexItem emotion-euiFlexItem-growZero"
                       />
                     </div>
                     <div
@@ -2009,7 +2011,7 @@ Object {
                     data-test-subj="RightSideMenuItemsContainer"
                   >
                     <div
-                      class="euiFlexItem emotion-EuiFlexItem"
+                      class="euiFlexItem emotion-euiFlexItem-grow-1"
                     >
                       <span
                         class="emotion-EuiTextColor"

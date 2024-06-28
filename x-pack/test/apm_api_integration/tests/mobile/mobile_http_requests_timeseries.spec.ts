@@ -13,7 +13,7 @@ import { generateMobileData } from './generate_mobile_data';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
   const registry = getService('registry');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2023-01-01T00:00:00.000Z').getTime();
   const end = new Date('2023-01-01T02:00:00.000Z').getTime();
@@ -62,20 +62,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     }
   );
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177390
   registry.when('Mobile HTTP requests with data loaded', { config: 'basic', archives: [] }, () => {
     before(async () => {
       await generateMobileData({
-        synthtraceEsClient,
+        apmSynthtraceEsClient,
         start,
         end,
       });
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('when data is loaded', () => {
       it('returns timeseries for http requests chart', async () => {
-        const response = await getHttpRequestsChart({ serviceName: 'synth-android', offset: '1d' });
+        const response = await getHttpRequestsChart({
+          serviceName: 'synth-android',
+          offset: '1d',
+        });
 
         expect(response.status).to.be(200);
         expect(response.body.currentPeriod.timeseries.some((item) => item.x && item.y)).to.eql(

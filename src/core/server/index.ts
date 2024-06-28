@@ -118,6 +118,38 @@ export type {
   UnauthorizedErrorHandler,
 } from '@kbn/core-elasticsearch-server';
 
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+  CoreAuditService,
+  AuditEvent,
+  AuditHttp,
+  AuditKibana,
+  AuditRequest,
+  AuditLogger,
+} from '@kbn/core-security-server';
+export type {
+  User,
+  UserRealm,
+  AuthenticatedUser,
+  AuthenticationProvider,
+} from '@kbn/core-security-common';
+
+export type {
+  UserProfileUserInfo,
+  UserProfile,
+  UserProfileUserInfoWithSecurity,
+  UserProfileWithSecurity,
+  UserProfileLabels,
+  UserProfileData,
+} from '@kbn/core-user-profile-common';
+export type {
+  UserProfileRequestHandlerContext,
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+} from '@kbn/core-user-profile-server';
+
 export { CspConfig } from '@kbn/core-http-server-internal';
 export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
@@ -153,7 +185,7 @@ export type {
   RouteValidationSpec,
   RouteValidationFunction,
   RouteValidatorOptions,
-  RouteValidatorFullConfig,
+  RouteValidatorFullConfigRequest,
   RouteValidationResultFactory,
   RouteValidationError,
   RedirectResponseOptions,
@@ -200,6 +232,7 @@ export type {
   HttpServiceStart,
   RawRequest,
   FakeRawRequest,
+  HttpProtocol,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
@@ -219,7 +252,7 @@ export type {
   AppenderConfigType,
 } from '@kbn/core-logging-server';
 export type { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from '@kbn/logging';
-export type { Ecs, EcsEvent } from '@kbn/ecs';
+export type { Ecs, EcsEvent } from '@elastic/ecs';
 
 export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
 
@@ -449,21 +482,43 @@ export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-l
 
 export type {
   AnalyticsClient,
-  Event,
-  EventContext,
-  EventType,
-  EventTypeOpts,
-  IShipper,
-  ContextProviderOpts,
-  OptInConfig,
-  ShipperClassConstructor,
-  TelemetryCounter,
-  TelemetryCounterType,
-} from '@kbn/analytics-client';
-export type {
+  AnalyticsClientInitContext,
   AnalyticsServiceSetup,
   AnalyticsServicePreboot,
   AnalyticsServiceStart,
+  // Types for the registerShipper API
+  ShipperClassConstructor,
+  RegisterShipperOpts,
+  // Types for the optIn API
+  OptInConfig,
+  OptInConfigPerType,
+  ShipperName,
+  // Types for the registerContextProvider API
+  ContextProviderOpts,
+  ContextProviderName,
+  // Types for the registerEventType API
+  EventTypeOpts,
+  // Events
+  Event,
+  EventContext,
+  EventType,
+  TelemetryCounter,
+  TelemetryCounterType,
+  // Schema
+  RootSchema,
+  SchemaObject,
+  SchemaArray,
+  SchemaChildValue,
+  SchemaMeta,
+  SchemaValue,
+  SchemaMetaOptional,
+  PossibleSchemaTypes,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaNumberTypes,
+  AllowedSchemaStringTypes,
+  AllowedSchemaTypes,
+  // Shippers
+  IShipper,
 } from '@kbn/core-analytics-server';
 export type {
   RequestHandlerContext,

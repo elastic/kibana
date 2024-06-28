@@ -1385,8 +1385,63 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.EventType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EventType",
+        "description": [],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.FieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "FieldType",
+        "description": [],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.API_USAGE_COUNTER_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_USAGE_COUNTER_TYPE",
+        "description": [],
+        "signature": [
+          "\"reportingApi\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.API_USAGE_ERROR_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "API_USAGE_ERROR_TYPE",
+        "description": [],
+        "signature": [
+          "\"reportingApiError\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/reporting-server",
         "id": "def-server.CreateJobFn",
@@ -1491,6 +1546,111 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"reporting\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_ALIAS",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_ALIAS",
+        "description": [],
+        "signature": [
+          "\".kibana-reporting\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_COMPONENT_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_COMPONENT_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"kibana-reporting@custom\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_WILDCARD",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_WILDCARD",
+        "description": [],
+        "signature": [
+          "\".kibana-reporting*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY",
+        "description": [],
+        "signature": [
+          "\".reporting-*,.kibana-reporting*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_LEGACY_INDICES",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_LEGACY_INDICES",
+        "description": [],
+        "signature": [
+          "\".reporting-*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_TRANSACTION_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_TRANSACTION_TYPE",
+        "description": [],
+        "signature": [
+          "\"reporting\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1619,6 +1779,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.UNVERSIONED_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "UNVERSIONED_VERSION",
+        "description": [],
+        "signature": [
+          "\"7.14.0\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

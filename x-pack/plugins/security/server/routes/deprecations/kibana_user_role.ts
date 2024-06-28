@@ -100,7 +100,7 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
       }
 
       const roleMappingsWithKibanaUserRole = Object.entries(roleMappings).filter(([, mapping]) =>
-        mapping.roles.includes(KIBANA_USER_ROLE_NAME)
+        mapping.roles?.includes(KIBANA_USER_ROLE_NAME)
       );
 
       if (roleMappingsWithKibanaUserRole.length === 0) {
@@ -114,7 +114,7 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
       }
 
       for (const [mappingNameToUpdate, mappingToUpdate] of roleMappingsWithKibanaUserRole) {
-        const roles = mappingToUpdate.roles.filter((role) => role !== KIBANA_USER_ROLE_NAME);
+        const roles = mappingToUpdate.roles?.filter((role) => role !== KIBANA_USER_ROLE_NAME) ?? [];
         if (!roles.includes(KIBANA_ADMIN_ROLE_NAME)) {
           roles.push(KIBANA_ADMIN_ROLE_NAME);
         }

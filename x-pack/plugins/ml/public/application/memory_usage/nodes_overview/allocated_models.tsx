@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -16,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type {
   AllocatedModel,
@@ -40,21 +41,22 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
   const columns: Array<EuiBasicTableColumn<AllocatedModel>> = [
     {
+      width: '10%',
       id: 'deployment_id',
       field: 'deployment_id',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.deploymentIdHeader', {
         defaultMessage: 'ID',
       }),
-      width: '150px',
       sortable: true,
       truncateText: false,
+      isExpander: false,
       'data-test-subj': 'mlAllocatedModelsTableDeploymentId',
     },
     {
+      width: '8%',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelRoutingStateHeader', {
         defaultMessage: 'Routing state',
       }),
-      width: '100px',
       'data-test-subj': 'mlAllocatedModelsTableRoutingState',
       render: (v: AllocatedModel) => {
         const { routing_state: routingState, reason } = v.node.routing_state;
@@ -67,32 +69,32 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       },
     },
     {
+      width: '8%',
       id: 'node_name',
       field: 'node.name',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.nodeNameHeader', {
         defaultMessage: 'Node name',
       }),
-      width: '150px',
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableNodeName',
     },
     {
+      width: '10%',
       id: 'model_id',
       field: 'model_id',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelNameHeader', {
         defaultMessage: 'Name',
       }),
-      width: '250px',
       sortable: true,
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableName',
     },
     {
+      width: '8%',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelSizeHeader', {
         defaultMessage: 'Size',
       }),
-      width: '100px',
       truncateText: true,
       'data-test-subj': 'mlAllocatedModelsTableSize',
       render: (v: AllocatedModel) => {
@@ -100,6 +102,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       },
     },
     {
+      width: '8%',
       name: (
         <EuiToolTip
           content={i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.allocationTooltip', {
@@ -114,7 +117,6 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
           </span>
         </EuiToolTip>
       ),
-      width: '100px',
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableAllocation',
       render: (v: AllocatedModel) => {
@@ -128,6 +130,7 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       },
     },
     {
+      width: '8%',
       name: (
         <EuiToolTip
           content={i18n.translate(
@@ -149,11 +152,11 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
         </EuiToolTip>
       ),
       field: 'node.throughput_last_minute',
-      width: '100px',
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableThroughput',
     },
     {
+      width: '8%',
       name: (
         <EuiToolTip
           display={'block'}
@@ -185,7 +188,6 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
           </EuiFlexGroup>
         </EuiToolTip>
       ),
-      width: '100px',
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableAvgInferenceTime',
       render: (v: AllocatedModel) => {
@@ -195,56 +197,56 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       },
     },
     {
+      width: '8%',
       name: i18n.translate(
         'xpack.ml.trainedModels.nodesList.modelsList.modelInferenceCountHeader',
         {
           defaultMessage: 'Inference count',
         }
       ),
-      width: '100px',
       'data-test-subj': 'mlAllocatedModelsTableInferenceCount',
       render: (v: AllocatedModel) => {
         return v.node.inference_count;
       },
     },
     {
+      width: '12%',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelStartTimeHeader', {
         defaultMessage: 'Start time',
       }),
-      width: '200px',
       'data-test-subj': 'mlAllocatedModelsTableStartedTime',
       render: (v: AllocatedModel) => {
         return dateFormatter(v.node.start_time);
       },
     },
     {
+      width: '12%',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.modelLastAccessHeader', {
         defaultMessage: 'Last access',
       }),
-      width: '200px',
       'data-test-subj': 'mlAllocatedModelsTableInferenceCount',
       render: (v: AllocatedModel) => {
         return v.node.last_access ? dateFormatter(v.node.last_access) : '-';
       },
     },
     {
+      width: '8%',
       name: i18n.translate(
         'xpack.ml.trainedModels.nodesList.modelsList.modelNumberOfPendingRequestsHeader',
         {
           defaultMessage: 'Pending requests',
         }
       ),
-      width: '100px',
       'data-test-subj': 'mlAllocatedModelsTableNumberOfPendingRequests',
       render: (v: AllocatedModel) => {
         return v.node.number_of_pending_requests;
       },
     },
     {
+      width: '8%',
       name: i18n.translate('xpack.ml.trainedModels.nodesList.modelsList.errorCountHeader', {
         defaultMessage: 'Errors',
       }),
-      width: '60px',
       'data-test-subj': 'mlAllocatedModelsTableErrorCount',
       render: (v: AllocatedModel) => {
         return v.node.error_count ?? 0;
@@ -254,11 +256,9 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
 
   return (
     <EuiInMemoryTable<AllocatedModel>
+      responsiveBreakpoint={'xl'}
       allowNeutralSort={false}
       columns={columns}
-      hasActions={false}
-      isExpandable={false}
-      isSelectable={false}
       items={models}
       itemId={'key'}
       rowProps={(item) => ({
@@ -266,7 +266,6 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       })}
       onTableChange={() => {}}
       data-test-subj={'mlNodesAllocatedModels'}
-      css={{ overflow: 'auto' }}
     />
   );
 };

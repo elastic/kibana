@@ -27,7 +27,13 @@ export const notifyWhenSchema = schema.oneOf(
     schema.literal(ruleNotifyWhenV1.ACTIVE),
     schema.literal(ruleNotifyWhenV1.THROTTLE),
   ],
-  { validate: validateNotifyWhenV1 }
+  {
+    validate: validateNotifyWhenV1,
+    meta: {
+      description:
+        'Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.',
+    },
+  }
 );
 
 const intervalScheduleSchema = schema.object({
@@ -66,12 +72,13 @@ const actionAlertsFilterSchema = schema.object({
 
 const actionSchema = schema.object({
   uuid: schema.maybe(schema.string()),
-  group: schema.string(),
+  group: schema.maybe(schema.string()),
   id: schema.string(),
   connector_type_id: schema.string(),
   params: actionParamsSchema,
   frequency: schema.maybe(actionFrequencySchema),
   alerts_filter: schema.maybe(actionAlertsFilterSchema),
+  use_alert_data_for_template: schema.maybe(schema.boolean()),
 });
 
 export const ruleExecutionStatusSchema = schema.object({
@@ -182,9 +189,19 @@ export const ruleSnoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const notificationDelaySchema = schema.object({
-  active: schema.number(),
-});
+export const alertDelaySchema = schema.object(
+  {
+    active: schema.number({
+      meta: { description: 'The number of consecutive runs that must meet the rule conditions.' },
+    }),
+  },
+  {
+    meta: {
+      description:
+        'Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.',
+    },
+  }
+);
 
 export const ruleResponseSchema = schema.object({
   id: schema.string(),
@@ -218,7 +235,7 @@ export const ruleResponseSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   view_in_app_relative_url: schema.maybe(schema.nullable(schema.string())),
-  notification_delay: schema.maybe(notificationDelaySchema),
+  alert_delay: schema.maybe(alertDelaySchema),
 });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

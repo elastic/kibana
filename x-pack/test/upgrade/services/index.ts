@@ -6,13 +6,13 @@
  */
 
 import { services as functionalServices } from '../../functional/services';
-import { services as reportingServices } from './reporting_upgrade_services';
 import { services as mapsUpgradeServices } from './maps_upgrade_services';
 import { services as rulesUpgradeServices } from './rules_upgrade_services';
+import { services as apiIntegrationServices } from '../../api_integration/services';
 
 export const services = {
   ...functionalServices,
-  ...reportingServices,
   ...mapsUpgradeServices,
   ...rulesUpgradeServices,
+  ...apiIntegrationServices,
 };

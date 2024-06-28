@@ -7,18 +7,16 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
   const es = getService('es');
-  const dockerServers = getService('dockerServers');
 
   const mappingsPackage = 'overrides';
   const mappingsPackageVersion = '0.1.0';
-  const server = dockerServers.get('registry');
 
   const deletePackage = async (pkg: string, version: string) =>
     supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -28,7 +26,7 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     after(async () => {
-      if (server.enabled) {
+      if (isDockerRegistryEnabledOrSkipped(providerContext)) {
         // remove the package just in case it being installed will affect other tests
         await deletePackage(mappingsPackage, mappingsPackageVersion);
       }
@@ -57,9 +55,11 @@ export default function (providerContext: FtrProviderContext) {
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
+        `logs@mappings`,
         `logs@settings`,
         `${templateName}@package`,
         `${templateName}@custom`,
+        `ecs@mappings`,
         '.fleet_globals-1',
         '.fleet_agent_id_verification-1',
       ]);
@@ -81,18 +81,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(
         body.component_templates[0].component_template.template.settings.index.lifecycle.name
       ).to.be('reference');
-
-      ({ body } = await es.transport.request(
-        {
-          method: 'GET',
-          path: `/_component_template/${templateName}@custom`,
-        },
-        { meta: true }
-      ));
-
-      // The user_settings component template is an empty/stub template at first
-      const storedTemplate = body.component_templates[0].component_template.template.settings;
-      expect(storedTemplate).to.eql({});
 
       // Update the user_settings component template
       ({ body } = await es.transport.request({
@@ -138,7 +126,7 @@ export default function (providerContext: FtrProviderContext) {
               },
               mapping: {
                 total_fields: {
-                  limit: '10000',
+                  limit: '1000',
                 },
               },
               number_of_shards: '3',

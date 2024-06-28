@@ -7,16 +7,16 @@
 
 import expect from '@kbn/expect';
 
+import { getEqlRuleForAlertTesting } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForAlertTesting,
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 
 interface Ignore {
   normal_constant?: string;
@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_ignored.ts
    * server/lib/detection_engine/signals/source_fields_merging/utils/is_eql_bug_77152.ts
    */
-  describe('@ess @serverless ignore_fields', () => {
+  describe('@ess @serverless @serverlessQA ignore_fields', () => {
     const supertest = getService('supertest');
     const esArchiver = getService('esArchiver');
     const log = getService('log');
@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('@skipInQA should ignore the field of "testing_ignored"', async () => {
+    it('@skipInServerlessMKI should ignore the field of "testing_ignored"', async () => {
       const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);
@@ -84,7 +84,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(hits).to.eql([undefined, undefined, undefined, undefined]);
     });
 
-    it('@skipInQA should ignore the field of "testing_regex"', async () => {
+    it('@skipInServerlessMKI should ignore the field of "testing_regex"', async () => {
       const rule = getEqlRuleForAlertTesting(['ignore_fields']);
 
       const { id } = await createRule(supertest, log, rule);

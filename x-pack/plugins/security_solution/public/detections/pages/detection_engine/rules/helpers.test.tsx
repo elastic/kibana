@@ -146,6 +146,8 @@ describe('rule helpers', () => {
         timestampOverride: 'event.ingested',
         timestampOverrideFallbackDisabled: false,
         investigationFields: [],
+        maxSignals: 100,
+        setup: '# this is some setup documentation',
       };
       const scheduleRuleStepData = { from: '0s', interval: '5m' };
       const ruleActionsStepData = {
@@ -156,7 +158,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
-        setup: '',
+        setup: '# this is some setup documentation',
       };
 
       expect(defineRuleData).toEqual(defineRuleStepData);
@@ -195,18 +197,18 @@ describe('rule helpers', () => {
 
   describe('determineDetailsValue', () => {
     test('returns name, description, and note as empty string if detailsView is true', () => {
-      const result: Pick<Rule, 'name' | 'description' | 'note'> = determineDetailsValue(
+      const result: Pick<Rule, 'name' | 'description' | 'note' | 'setup'> = determineDetailsValue(
         mockRuleWithEverything('test-id'),
         true
       );
-      const expected = { name: '', description: '', note: '' };
+      const expected = { name: '', description: '', note: '', setup: '' };
 
       expect(result).toEqual(expected);
     });
 
     test('returns name, description, and note values if detailsView is false', () => {
       const mockedRule = mockRuleWithEverything('test-id');
-      const result: Pick<Rule, 'name' | 'description' | 'note'> = determineDetailsValue(
+      const result: Pick<Rule, 'name' | 'description' | 'note' | 'setup'> = determineDetailsValue(
         mockedRule,
         false
       );
@@ -214,6 +216,7 @@ describe('rule helpers', () => {
         name: mockedRule.name,
         description: mockedRule.description,
         note: mockedRule.note,
+        setup: mockedRule.setup,
       };
 
       expect(result).toEqual(expected);
@@ -222,11 +225,16 @@ describe('rule helpers', () => {
     test('returns note as empty string if property does not exist on rule', () => {
       const mockedRule = mockRuleWithEverything('test-id');
       delete mockedRule.note;
-      const result: Pick<Rule, 'name' | 'description' | 'note'> = determineDetailsValue(
+      const result: Pick<Rule, 'name' | 'description' | 'note' | 'setup'> = determineDetailsValue(
         mockedRule,
         false
       );
-      const expected = { name: mockedRule.name, description: mockedRule.description, note: '' };
+      const expected = {
+        name: mockedRule.name,
+        description: mockedRule.description,
+        note: '',
+        setup: mockedRule.setup,
+      };
 
       expect(result).toEqual(expected);
     });
@@ -418,7 +426,7 @@ describe('rule helpers', () => {
       const aboutRuleDataDetailsData = {
         note: '# this is some markdown documentation',
         description: '24/7',
-        setup: '',
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(aboutRuleDataDetailsData);
@@ -431,7 +439,7 @@ describe('rule helpers', () => {
       const aboutRuleDetailsData = {
         note: '',
         description: mockRuleWithoutNote.description,
-        setup: '',
+        setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(aboutRuleDetailsData);

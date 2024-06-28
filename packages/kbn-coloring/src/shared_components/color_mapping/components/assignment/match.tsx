@@ -15,7 +15,6 @@ import { ColorMapping } from '../../config';
 
 export const Match: React.FC<{
   index: number;
-  editable: boolean;
   rule:
     | ColorMapping.RuleAuto
     | ColorMapping.RuleMatchExactly
@@ -25,7 +24,7 @@ export const Match: React.FC<{
   options: Array<string | string[]>;
   specialTokens: Map<unknown, string>;
   assignmentValuesCounter: Map<string | string[], number>;
-}> = ({ index, rule, updateValue, editable, options, specialTokens, assignmentValuesCounter }) => {
+}> = ({ index, rule, updateValue, options, specialTokens, assignmentValuesCounter }) => {
   const duplicateWarning = i18n.translate(
     'coloring.colorMapping.assignments.duplicateCategoryWarning',
     {
@@ -75,7 +74,6 @@ export const Match: React.FC<{
     <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
       <EuiComboBox
         data-test-subj={`lns-colorMapping-assignmentsItem${index}`}
-        isDisabled={!editable}
         fullWidth={true}
         aria-label={i18n.translate('coloring.colorMapping.assignments.autoAssignedTermAriaLabel', {
           defaultMessage:
@@ -100,10 +98,11 @@ export const Match: React.FC<{
           );
         }}
         onCreateOption={(label) => {
-          if (selectedOptions.findIndex((option) => option.label.toLowerCase() === label) === -1) {
+          if (selectedOptions.findIndex((option) => option.label === label) === -1) {
             updateValue([...selectedOptions, { label, value: label }].map((d) => d.value));
           }
         }}
+        isCaseSensitive
         isClearable={false}
         compressed
       />

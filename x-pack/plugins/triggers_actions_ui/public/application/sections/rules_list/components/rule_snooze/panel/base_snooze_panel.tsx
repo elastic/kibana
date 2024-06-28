@@ -430,7 +430,7 @@ export const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               id="xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules"
               defaultMessage="Remove {count, plural, one {schedule} other {# schedules}}?"
               values={{
-                count: scheduledSnoozes.length,
+                count: scheduledSnoozes.filter((s) => s.id).length,
               }}
             />
           }

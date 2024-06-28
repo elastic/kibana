@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { SecurityService } from '../../../../../test/common/services/security/security';
+
+export interface RoleCredentials {
+  apiKey: { id: string; name: string };
+  apiKeyHeader: { Authorization: string };
+  cookieHeader: { Cookie: string };
+}
 
 export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
   Promise.all([
@@ -43,15 +50,17 @@ export const addIndex = async <T>(es: Client, findingsMock: T[], indexName: stri
 };
 
 export async function createPackagePolicy(
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   agentPolicyId: string,
   policyTemplate: string,
   input: string,
   deployment: string,
   posture: string,
-  packageName: string = 'cloud_security_posture-1'
+  packageName: string = 'cloud_security_posture-1',
+  roleAuthc?: RoleCredentials,
+  internalRequestHeader?: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string }
 ) {
-  const version = '1.3.0';
+  const version = CLOUD_SECURITY_PLUGIN_VERSION;
   const title = 'Security Posture Management';
   const streams = [
     {
@@ -71,35 +80,67 @@ export async function createPackagePolicy(
 
   const inputs = posture === 'vuln_mgmt' ? { ...inputTemplate, streams } : { ...inputTemplate };
 
-  const { body: postPackageResponse } = await supertest
-    .post(`/api/fleet/package_policies`)
-    .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-    .set('kbn-xsrf', 'xxxx')
-    .send({
-      force: true,
-      name: packageName,
-      description: '',
-      namespace: 'default',
-      policy_id: agentPolicyId,
-      enabled: true,
-      inputs: [inputs],
-      package: {
-        name: 'cloud_security_posture',
-        title,
-        version,
-      },
-      vars: {
-        deployment: {
-          value: deployment,
-          type: 'text',
-        },
-        posture: {
-          value: posture,
-          type: 'text',
-        },
-      },
-    })
-    .expect(200);
+  const { body: postPackageResponse } =
+    roleAuthc && internalRequestHeader
+      ? await supertest
+          .post(`/api/fleet/package_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader)
+          .send({
+            force: true,
+            name: packageName,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [inputs],
+            package: {
+              name: 'cloud_security_posture',
+              title,
+              version,
+            },
+            vars: {
+              deployment: {
+                value: deployment,
+                type: 'text',
+              },
+              posture: {
+                value: posture,
+                type: 'text',
+              },
+            },
+          })
+          .expect(200)
+      : await supertest
+          .post(`/api/fleet/package_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            force: true,
+            name: packageName,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [inputs],
+            package: {
+              name: 'cloud_security_posture',
+              title,
+              version,
+            },
+            vars: {
+              deployment: {
+                value: deployment,
+                type: 'text',
+              },
+              posture: {
+                value: posture,
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
 
   return postPackageResponse.item;
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { share } from 'rxjs/operators';
+import { share } from 'rxjs';
 import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';

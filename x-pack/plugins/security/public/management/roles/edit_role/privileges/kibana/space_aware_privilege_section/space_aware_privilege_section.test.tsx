@@ -94,6 +94,27 @@ describe('<SpaceAwarePrivilegeSection>', () => {
     expect(wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]')).toHaveLength(0);
   });
 
+  it('hides privilege buttons if role has a base wildcard privilege', () => {
+    const props = buildProps({
+      role: {
+        elasticsearch: {
+          cluster: ['manage'],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: ['*'],
+            feature: {},
+          },
+        ],
+      },
+    });
+
+    const wrapper = mountWithIntl(<SpaceAwarePrivilegeSection {...props} />);
+    expect(wrapper.find('button[data-test-subj="addSpacePrivilegeButton"]')).toHaveLength(0);
+    expect(wrapper.find('button[data-test-subj="privilegeSummaryButton"]')).toHaveLength(0);
+  });
+
   it('Renders flyout after clicking "Add space privilege" button', () => {
     const props = buildProps({
       role: {

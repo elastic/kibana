@@ -15,10 +15,10 @@ describe('useSorting', () => {
   });
 
   it('should return the sorted columns and the callback function to call when sort changes', () => {
-    const { result } = renderHook(() => useSorting(onSortChange));
+    const { result } = renderHook(() => useSorting(onSortChange, ['@timestamp']));
     expect(result.current.sortingColumns).toStrictEqual([
       {
-        direction: 'asc',
+        direction: 'desc',
         id: '@timestamp',
       },
     ]);
@@ -26,13 +26,43 @@ describe('useSorting', () => {
   });
 
   it('should change the columns when `onSort` is called', () => {
-    const { result } = renderHook(() => useSorting(onSortChange));
+    const { result } = renderHook(() => useSorting(onSortChange, ['@timestamp', 'field']));
 
     act(() => {
       result.current.onSort([{ id: 'field', direction: 'asc' }]);
     });
 
-    expect(onSortChange).toHaveBeenCalledWith([{ direction: 'asc', id: 'field' }]);
+    expect(onSortChange).toHaveBeenCalledWith(
+      expect.arrayContaining([{ direction: 'asc', id: 'field' }])
+    );
     expect(result.current.sortingColumns).toStrictEqual([{ direction: 'asc', id: 'field' }]);
+  });
+
+  it('should exclude any inactive column from the final sort configuration', () => {
+    const { result } = renderHook(() =>
+      useSorting(
+        onSortChange,
+        ['@timestamp'],
+        [
+          {
+            '@timestamp': {
+              order: 'desc',
+            },
+          },
+          {
+            'kibana.alert.start': {
+              order: 'desc',
+            },
+          },
+        ]
+      )
+    );
+    expect(result.current.sortingColumns).toStrictEqual([
+      {
+        id: '@timestamp',
+        direction: 'desc',
+      },
+    ]);
+    expect(result.current.onSort).toBeDefined();
   });
 });

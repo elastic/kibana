@@ -41,6 +41,7 @@ export const toSavedSearchAttributes = (
   viewMode: savedSearch.viewMode,
   hideAggregatedPreview: savedSearch.hideAggregatedPreview,
   rowHeight: savedSearch.rowHeight,
+  headerRowHeight: savedSearch.headerRowHeight,
   isTextBasedQuery: savedSearch.isTextBasedQuery ?? false,
   usesAdHocDataView: savedSearch.usesAdHocDataView,
   timeRestore: savedSearch.timeRestore ?? false,
@@ -49,4 +50,5 @@ export const toSavedSearchAttributes = (
   rowsPerPage: savedSearch.rowsPerPage,
   sampleSize: savedSearch.sampleSize,
   breakdownField: savedSearch.breakdownField,
+  visContext: savedSearch.visContext,
 });

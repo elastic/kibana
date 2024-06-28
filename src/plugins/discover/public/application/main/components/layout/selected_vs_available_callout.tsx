@@ -9,33 +9,34 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut } from '@elastic/eui';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 interface SelectedVSAvailableCallout {
-  isPlainRecord: boolean;
   selectedColumns: string[];
-  textBasedQueryColumns?: DatatableColumn[];
+  esqlQueryColumns?: DatatableColumn[];
 }
 
 export const SelectedVSAvailableCallout = ({
-  isPlainRecord,
-  textBasedQueryColumns,
+  esqlQueryColumns,
   selectedColumns,
 }: SelectedVSAvailableCallout) => {
+  const isEsqlMode = useIsEsqlMode();
+
   return (
     <>
-      {isPlainRecord &&
-        textBasedQueryColumns &&
+      {isEsqlMode &&
+        esqlQueryColumns &&
         selectedColumns.length > 0 &&
-        selectedColumns.length < textBasedQueryColumns.length && (
+        selectedColumns.length < esqlQueryColumns.length && (
           <EuiCallOut
             color="primary"
             data-test-subj="dscSelectedColumnsCallout"
             iconType="iInCircle"
-            title={i18n.translate('discover.textBasedMode.selectedColumnsCallout', {
+            title={i18n.translate('discover.esqlMode.selectedColumnsCallout', {
               defaultMessage:
-                'Displaying {selectedColumnsNumber} of {textBasedQueryColumnsNumber} fields. Add more from the Available fields list.',
+                'Displaying {selectedColumnsNumber} of {esqlQueryColumnsNumber} fields. Add more from the Available fields list.',
               values: {
-                textBasedQueryColumnsNumber: textBasedQueryColumns.length,
+                esqlQueryColumnsNumber: esqlQueryColumns.length,
                 selectedColumnsNumber: selectedColumns.length,
               },
             })}

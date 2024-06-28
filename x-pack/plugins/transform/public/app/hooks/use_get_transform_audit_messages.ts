@@ -11,7 +11,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { GetTransformsAuditMessagesResponseSchema } from '../../../common/api_schemas/audit_messages';
 import { addInternalBasePath, TRANSFORM_REACT_QUERY_KEYS } from '../../../common/constants';
-import { TransformMessage } from '../../../common/types/messages';
+import type { TransformMessage } from '../../../common/types/messages';
 
 import { useAppDependencies } from '../app_dependencies';
 

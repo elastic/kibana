@@ -1,6 +1,6 @@
 post:
-  summary: Creates a data view.
-  operationId: createDataView
+  summary: Create a data view in the default space
+  operationId: createDataViewDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
@@ -29,4 +29,3 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
-

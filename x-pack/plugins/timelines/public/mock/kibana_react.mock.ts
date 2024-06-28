@@ -7,17 +7,15 @@
 
 import React from 'react';
 
-import { RecursivePartial } from '@elastic/eui/src/components/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 
-export const mockGetCreateCaseFlyout = jest.fn();
-export const mockGetAllCasesSelectorModal = jest.fn();
-export const mockNavigateToApp = jest.fn();
+const mockGetCreateCaseFlyout = jest.fn();
+const mockGetAllCasesSelectorModal = jest.fn();
+const mockNavigateToApp = jest.fn();
 
-export const createStartServicesMock = (): CoreStart => {
+const createStartServicesMock = (): CoreStart => {
   const coreServices = coreMock.createStart();
   return {
     ...coreServices,
@@ -37,15 +35,6 @@ export const createStartServicesMock = (): CoreStart => {
   } as unknown as CoreStart;
 };
 
-export const createWithKibanaMock = () => {
-  const services = createStartServicesMock();
-
-  // eslint-disable-next-line react/display-name
-  return (Component: unknown) => (props: unknown) => {
-    return React.createElement(Component as string, { ...(props as object), kibana: { services } });
-  };
-};
-
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
 
@@ -53,6 +42,3 @@ export const createKibanaContextProviderMock = () => {
   return ({ children }: { children: React.ReactNode }) =>
     React.createElement(KibanaContextProvider, { services }, children);
 };
-
-export const getMockTheme = (partialTheme: RecursivePartial<EuiTheme>): EuiTheme =>
-  partialTheme as EuiTheme;

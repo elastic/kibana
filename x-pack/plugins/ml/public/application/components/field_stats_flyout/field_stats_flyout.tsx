@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, FC } from 'react';
+import type { FC } from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {

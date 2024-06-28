@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  DeleteListItemRequestQuery,
+  DeleteListItemResponse,
+} from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import {
-  deleteListItemArrayResponse,
-  deleteListItemRequestQuery,
-  deleteListItemResponse,
-} from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const deleteListItemRoute = (router: ListsPluginRouter): void => {
@@ -31,7 +30,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            query: buildRouteValidation(deleteListItemRequestQuery),
+            query: buildRouteValidationWithZod(DeleteListItemRequestQuery),
           },
         },
         version: '2023-10-31',
@@ -39,22 +38,18 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         try {
-          const { id, list_id: listId, value } = request.query;
+          const { id, list_id: listId, value, refresh } = request.query;
+          const shouldRefresh = refresh === 'true' ? true : false;
           const lists = await getListClient(context);
           if (id != null) {
-            const deleted = await lists.deleteListItem({ id });
+            const deleted = await lists.deleteListItem({ id, refresh: shouldRefresh });
             if (deleted == null) {
               return siemResponse.error({
                 body: `list item with id: "${id}" not found`,
                 statusCode: 404,
               });
             } else {
-              const [validated, errors] = validate(deleted, deleteListItemResponse);
-              if (errors != null) {
-                return siemResponse.error({ body: errors, statusCode: 500 });
-              } else {
-                return response.ok({ body: validated ?? {} });
-              }
+              return response.ok({ body: DeleteListItemResponse.parse(deleted) });
             }
           } else if (listId != null && value != null) {
             const list = await lists.getList({ id: listId });
@@ -66,6 +61,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
             } else {
               const deleted = await lists.deleteListItemByValue({
                 listId,
+                refresh: shouldRefresh,
                 type: list.type,
                 value,
               });
@@ -75,12 +71,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
                   statusCode: 404,
                 });
               } else {
-                const [validated, errors] = validate(deleted, deleteListItemArrayResponse);
-                if (errors != null) {
-                  return siemResponse.error({ body: errors, statusCode: 500 });
-                } else {
-                  return response.ok({ body: validated ?? {} });
-                }
+                return response.ok({ body: DeleteListItemResponse.parse(deleted) });
               }
             }
           } else {

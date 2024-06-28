@@ -12,7 +12,7 @@ import { errors } from '@elastic/elasticsearch';
 
 import { updateConnectorScheduling } from './update_connector_scheduling';
 
-describe('addConnector lib function', () => {
+describe('updateConnectorScheduling lib function', () => {
   const mockClient = {
     transport: {
       request: jest.fn(),

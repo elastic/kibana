@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs/operators';
+import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
@@ -121,7 +121,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   }
 
   if (browserBinaryPath) {
-    options.setChromeBinaryPath(browserBinaryPath);
+    options.setBinaryPath(browserBinaryPath);
   }
 
   if (noCache === '1') {

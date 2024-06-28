@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '../../../../common/types/anomaly_detection_jobs';
 import { isTimeSeriesViewDetector } from '../../../../common/util/job_utils';
 
 export interface ViewableDetector {

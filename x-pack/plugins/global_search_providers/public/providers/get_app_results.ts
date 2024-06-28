@@ -33,7 +33,7 @@ export const getAppResults = (
       .flatMap((app) =>
         term.length > 0
           ? flattenDeepLinks(app)
-          : app.searchable
+          : app.visibleIn.includes('globalSearch')
           ? [
               {
                 id: app.id,
@@ -122,7 +122,7 @@ export const appToResult = (appLink: AppLink, score: number): GlobalSearchProvid
 const flattenDeepLinks = (app: PublicAppInfo, deepLink?: PublicAppDeepLinkInfo): AppLink[] => {
   if (!deepLink) {
     return [
-      ...(app.searchable
+      ...(app.visibleIn.includes('globalSearch')
         ? [
             {
               id: app.id,
@@ -137,7 +137,7 @@ const flattenDeepLinks = (app: PublicAppInfo, deepLink?: PublicAppDeepLinkInfo):
     ];
   }
   return [
-    ...(deepLink.path && deepLink.searchable
+    ...(deepLink.path && deepLink.visibleIn.includes('globalSearch')
       ? [
           {
             ...deepLink,

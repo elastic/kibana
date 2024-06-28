@@ -33,3 +33,5 @@ export * from './use_fleet_server_hosts_for_policy';
 export * from './use_fleet_server_standalone';
 export * from './use_locator';
 export * from './use_agent_version';
+export * from './use_fleet_server_agents';
+export * from './use_multiple_agent_policies';

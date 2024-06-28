@@ -9,23 +9,32 @@
 import React, { useEffect, useRef } from 'react';
 import * as ReactDOM from 'react-dom';
 import { keys, EuiText } from '@elastic/eui';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import './_ui_ace_keyboard_mode.scss';
+import type { AnalyticsServiceStart, I18nStart, ThemeServiceStart } from '@kbn/core/public';
 
-const OverlayText = () => (
+interface StartServices {
+  analytics: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  i18n: I18nStart;
+  theme: Pick<ThemeServiceStart, 'theme$'>;
+}
+
+const OverlayText = (startServices: StartServices) => (
   // The point of this element is for accessibility purposes, so ignore eslint error
   // in this case
   //
-  <>
+  <KibanaRenderContextProvider {...startServices}>
     <EuiText size="s" data-test-subj="a11y-overlay">
       Press Enter to start editing.
     </EuiText>
     <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
-  </>
+  </KibanaRenderContextProvider>
 );
 
 export function useUIAceKeyboardMode(
   aceTextAreaElement: HTMLTextAreaElement | null,
+  startServices: StartServices,
   isAccessibilityOverlayEnabled: boolean = true
 ) {
   const overlayMountNode = useRef<HTMLDivElement | null>(null);
@@ -75,7 +84,7 @@ export function useUIAceKeyboardMode(
       overlayMountNode.current.addEventListener('focus', enableOverlay);
       overlayMountNode.current.addEventListener('keydown', onDismissOverlay);
 
-      ReactDOM.render(<OverlayText />, overlayMountNode.current);
+      ReactDOM.render(<OverlayText {...startServices} />, overlayMountNode.current);
 
       aceTextAreaElement.parentElement!.insertBefore(overlayMountNode.current, aceTextAreaElement);
       aceTextAreaElement.setAttribute('tabindex', '-1');
@@ -99,5 +108,5 @@ export function useUIAceKeyboardMode(
         }
       }
     };
-  }, [aceTextAreaElement, isAccessibilityOverlayEnabled]);
+  }, [aceTextAreaElement, startServices, isAccessibilityOverlayEnabled]);
 }

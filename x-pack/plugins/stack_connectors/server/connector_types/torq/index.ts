@@ -88,11 +88,12 @@ export function getActionType(): TorqActionType {
 }
 
 function renderParameterTemplates(
+  logger: Logger,
   params: ActionParamsType,
   variables: Record<string, unknown>
 ): ActionParamsType {
   if (!params.body) return params;
-  return renderMustacheObject(params, variables);
+  return renderMustacheObject(logger, params, variables);
 }
 
 function validateActionTypeConfig(
@@ -108,7 +109,7 @@ function validateActionTypeConfig(
       i18n.translate('xpack.stackConnectors.torq.torqConfigurationErrorNoHostname', {
         defaultMessage: 'error configuring send to Torq action: unable to parse url: {err}',
         values: {
-          err,
+          err: err.toString(),
         },
       })
     );

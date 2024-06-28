@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { map, reduce } from 'rxjs/operators';
+import { map, reduce } from 'rxjs';
 import { Plugin, CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { lastValueFrom } from 'rxjs';
 import {

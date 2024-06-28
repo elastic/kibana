@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { memoize } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export const createTrycloudOption1 = () => ({
+export const createTrycloudOption1 = memoize(() => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option1.title', {
     defaultMessage: 'Option 1: Try in Elastic Cloud',
   }),
@@ -27,9 +28,9 @@ To create a cluster, in Elastic Cloud console:\n\
       link: 'https://www.elastic.co/cloud/as-a-service/signup?blade=kib',
     },
   }),
-});
+}));
 
-export const createTrycloudOption2 = () => ({
+export const createTrycloudOption2 = memoize(() => ({
   title: i18n.translate('home.tutorials.common.premCloudInstructions.option2.title', {
     defaultMessage: 'Option 2: Connect local Kibana to a Cloud instance',
   }),
@@ -43,4 +44,4 @@ Save the **Elasticsearch** endpoint as {urlTemplate} and the cluster **Password*
       passwordTemplate: '`<password>`',
     },
   }),
-});
+}));

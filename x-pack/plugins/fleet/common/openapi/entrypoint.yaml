@@ -10,8 +10,8 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: 'http://localhost:5601/api/fleet'
-    description: local
+  - url: 'http://KIBANA_HOST:5601/api/fleet'
+    description: Public and supported Fleet API
 paths:
   # Fleet internals
   /health_check:
@@ -20,6 +20,11 @@ paths:
     $ref: paths/setup.yaml
   /settings:
     $ref: paths/settings.yaml
+  /settings/enrollment:
+    servers:
+      - url: 'http://KIBANA_HOST:5601/internal/fleet'
+        description: Used for Fleet internals and not supported
+    $ref: paths/settings_enrollment.yaml
   /service-tokens:
     $ref: paths/service_tokens_deprecated.yaml
   /service_tokens:
@@ -42,6 +47,8 @@ paths:
     $ref: 'paths/epm@packages@{pkgkey}_deprecated.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}':
     $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}.yaml'
+  '/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize':
+    $ref: 'paths/epm@packages@{pkg_name}@{pkg_version}@transforms@authorize.yaml'
   '/epm/packages/{pkgName}/{pkgVersion}/{filePath}':
     $ref: paths/epm@get_file.yaml
   '/epm/packages/{pkgName}/stats':
@@ -70,8 +77,10 @@ paths:
     $ref: 'paths/agents@{agent_id}@actions.yaml'
   '/agents/{agentId}/actions/{actionId}/cancel':
     $ref: 'paths/agents@{agent_id}@actions@{action_id}@cancel.yaml'
-  '/agents/files@{fileId}@{fileName}':
+  '/agents/files/{fileId}/{fileName}':
     $ref: 'paths/agents@files@{file_id}@{file_name}.yaml'
+  '/agents/files/{fileId}':
+    $ref: 'paths/agents@files@{file_id}.yaml'
   '/agents/{agentId}/reassign':
     $ref: 'paths/agents@{agent_id}@reassign.yaml'
   '/agents/{agentId}/unenroll':

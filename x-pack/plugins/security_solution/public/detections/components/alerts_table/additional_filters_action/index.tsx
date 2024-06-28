@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiCheckbox } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCheckbox, EuiNotificationBadge } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { UtilityBarAction } from '../../../../common/components/utility_bar';
@@ -23,6 +23,10 @@ const AdditionalFiltersItem = styled(EuiFlexItem)`
 
 const BuildingBlockContainer = styled(AdditionalFiltersItem)`
   background: ${({ theme }) => theme.eui.euiColorHighlight};
+`;
+
+const CenterText = styled.span`
+  text-align: center;
 `;
 
 export const AdditionalFiltersAction = ({
@@ -79,6 +83,9 @@ export const AdditionalFiltersAction = ({
     ]
   );
 
+  const additionalFilterCount =
+    (showBuildingBlockAlerts ? 1 : 0) + (showOnlyThreatIndicatorAlerts ? 1 : 0);
+
   return (
     <UtilityBarAction
       dataTestSubj="additionalFilters"
@@ -88,7 +95,18 @@ export const AdditionalFiltersAction = ({
       ownFocus
       popoverContent={UtilityBarAdditionalFiltersContent}
     >
-      {i18n.ADDITIONAL_FILTERS_ACTIONS}
+      <CenterText>
+        {i18n.ADDITIONAL_FILTERS_ACTIONS}
+        {additionalFilterCount > 0 && (
+          <>
+            &nbsp;
+            <EuiNotificationBadge
+              data-test-subj="additionalFiltersCountBadge"
+              color="subdued"
+            >{`${additionalFilterCount}`}</EuiNotificationBadge>
+          </>
+        )}
+      </CenterText>
     </UtilityBarAction>
   );
 };

@@ -30,6 +30,7 @@ import {
   VerticalAlignment,
   XYChartSeriesIdentifier,
   Tooltip,
+  LegendValue,
 } from '@elastic/charts';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
@@ -130,7 +131,6 @@ describe('XYChart component', () => {
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
       setChartSize: jest.fn(),
-      shouldUseVeil: false,
     };
   });
 
@@ -732,18 +732,24 @@ describe('XYChart component', () => {
     });
   });
 
-  test('disabled legend extra by default', () => {
+  test('disabled legend values by default', () => {
     const { args } = sampleArgs();
     const component = shallow(<XYChart {...defaultProps} args={args} />);
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('ignores legend extra for ordinal chart', () => {
     const { args } = sampleArgs();
     const component = shallow(
-      <XYChart {...defaultProps} args={{ ...args, valuesInLegend: true }} />
+      <XYChart
+        {...defaultProps}
+        args={{
+          ...args,
+          legend: { ...args.legend, legendStats: [LegendValue.CurrentAndLastValue] },
+        }}
+      />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(false);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([]);
   });
 
   test('shows legend extra for histogram chart', () => {
@@ -753,12 +759,17 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
+          legend: {
+            ...args.legend,
+            legendStats: [LegendValue.CurrentAndLastValue],
+          },
           layers: [dateHistogramLayer],
-          valuesInLegend: true,
         }}
       />
     );
-    expect(component.find(Settings).at(0).prop('showLegendExtra')).toEqual(true);
+    expect(component.find(Settings).at(0).prop('legendValues')).toEqual([
+      LegendValue.CurrentAndLastValue,
+    ]);
   });
 
   test('applies the mark size ratio', () => {

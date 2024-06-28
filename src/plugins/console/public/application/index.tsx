@@ -8,17 +8,10 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Observable } from 'rxjs';
-import {
-  HttpSetup,
-  NotificationsSetup,
-  I18nStart,
-  CoreTheme,
-  DocLinksStart,
-} from '@kbn/core/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   createStorage,
   createHistory,
@@ -32,29 +25,29 @@ import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
 import { ServicesContextProvider, EditorContextProvider, RequestContextProvider } from './contexts';
 import { createApi, createEsHostService } from './lib';
+import { ConsoleStartServices } from '../types';
 
-export interface BootDependencies {
+export interface BootDependencies extends ConsoleStartServices {
   http: HttpSetup;
   docLinkVersion: string;
-  I18nContext: I18nStart['Context'];
   notifications: NotificationsSetup;
   usageCollection?: UsageCollectionSetup;
   element: HTMLElement;
-  theme$: Observable<CoreTheme>;
   docLinks: DocLinksStart['links'];
   autocompleteInfo: AutocompleteInfo;
+  isMonacoEnabled: boolean;
 }
 
 export async function renderApp({
-  I18nContext,
   notifications,
   docLinkVersion,
   usageCollection,
   element,
   http,
-  theme$,
   docLinks,
   autocompleteInfo,
+  isMonacoEnabled,
+  ...startServices
 }: BootDependencies) {
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_app');
@@ -74,34 +67,35 @@ export async function renderApp({
   autocompleteInfo.mapping.setup(http, settings);
 
   render(
-    <I18nContext>
-      <KibanaThemeProvider theme={{ theme$ }}>
-        <ServicesContextProvider
-          value={{
-            docLinkVersion,
-            docLinks,
-            services: {
-              esHostService,
-              storage,
-              history,
-              settings,
-              notifications,
-              trackUiMetric,
-              objectStorageClient,
-              http,
-              autocompleteInfo,
-            },
-            theme$,
-          }}
-        >
-          <RequestContextProvider>
-            <EditorContextProvider settings={settings.toJSON()}>
-              <Main />
-            </EditorContextProvider>
-          </RequestContextProvider>
-        </ServicesContextProvider>
-      </KibanaThemeProvider>
-    </I18nContext>,
+    <KibanaRenderContextProvider {...startServices}>
+      <ServicesContextProvider
+        value={{
+          ...startServices,
+          docLinkVersion,
+          docLinks,
+          services: {
+            esHostService,
+            storage,
+            history,
+            settings,
+            notifications,
+            trackUiMetric,
+            objectStorageClient,
+            http,
+            autocompleteInfo,
+          },
+          config: {
+            isMonacoEnabled,
+          },
+        }}
+      >
+        <RequestContextProvider>
+          <EditorContextProvider settings={settings.toJSON()}>
+            <Main />
+          </EditorContextProvider>
+        </RequestContextProvider>
+      </ServicesContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  AppNavLinkStatus,
-} from '@kbn/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { AppPluginSetupDependencies, AppPluginStartDependencies } from './types';
 import { MetricsTracking } from './services';
 import { PLUGIN_NAME } from '../common';
@@ -33,7 +27,7 @@ export class ScreenshotModeExamplePlugin implements Plugin<void, void> {
     core.application.register({
       id: 'screenshotModeExample',
       title: PLUGIN_NAME,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

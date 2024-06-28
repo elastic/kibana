@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  CoreStart,
-  Plugin,
-  CoreSetup,
-  AppMountParameters,
-  AppNavLinkStatus,
-} from '@kbn/core/public';
+import { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { getServices } from './services';
 
@@ -25,7 +19,7 @@ export class RoutingExamplePlugin implements Plugin<{}, {}, SetupDeps, {}> {
     core.application.register({
       id: 'routingExample',
       title: 'Routing',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         const startServices = getServices(coreStart);

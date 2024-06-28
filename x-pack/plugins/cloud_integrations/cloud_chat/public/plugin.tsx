@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
@@ -57,8 +57,8 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
     );
   }
 
-  public start(core: CoreStart, { cloud }: CloudChatStartDeps) {
-    const CloudChatContextProvider: FC = ({ children }) => {
+  public start(core: CoreStart) {
+    const CloudChatContextProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
       // There's a risk that the request for chat config will take too much time to complete, and the provider
       // will maintain a stale value.  To avoid this, we'll use an Observable.
       const chatConfig = useObservable(this.chatConfig$, undefined);
@@ -67,7 +67,7 @@ export class CloudChatPlugin implements Plugin<void, void, CloudChatSetupDeps, C
     function ConnectedChat(props: { chatVariant: ChatVariant }) {
       return (
         <CloudChatContextProvider>
-          <KibanaRenderContextProvider theme={core.theme} i18n={core.i18n}>
+          <KibanaRenderContextProvider {...core}>
             <ChatExperimentSwitcher
               location$={core.application.currentLocation$}
               variant={props.chatVariant}

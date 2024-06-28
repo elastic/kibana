@@ -15,15 +15,33 @@ import { untrackRuleAlerts, updateMeta, migrateLegacyActions } from '../lib';
 import { RuleAttributes } from '../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
-export async function disable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
+export async function disable(
+  context: RulesClientContext,
+  {
+    id,
+    untrack = false,
+  }: {
+    id: string;
+    untrack?: boolean;
+  }
+): Promise<void> {
   return await retryIfConflicts(
     context.logger,
     `rulesClient.disable('${id}')`,
-    async () => await disableWithOCC(context, { id })
+    async () => await disableWithOCC(context, { id, untrack })
   );
 }
 
-async function disableWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function disableWithOCC(
+  context: RulesClientContext,
+  {
+    id,
+    untrack = false,
+  }: {
+    id: string;
+    untrack?: boolean;
+  }
+) {
   let attributes: RawRule;
   let version: string | undefined;
   let references: SavedObjectReference[];
@@ -70,7 +88,9 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     throw error;
   }
 
-  await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+  if (untrack) {
+    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+  }
 
   context.auditLogger?.log(
     ruleAuditEvent({

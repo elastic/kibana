@@ -135,13 +135,21 @@ export function FilterItem({
 
   const onHandleOperator = useCallback(
     (selectedOperator: Operator) => {
+      const preservedParams =
+        params && selectedOperator.getParamsFromPrevOperator?.(operator, params);
+      setMultiValueFilterParams(Array.isArray(preservedParams) ? preservedParams : []);
       setOperator(selectedOperator);
       dispatch({
         type: 'updateFilter',
-        payload: { dest: { path, index }, field, operator: selectedOperator },
+        payload: {
+          dest: { path, index },
+          field,
+          operator: selectedOperator,
+          params: params && selectedOperator.getParamsFromPrevOperator?.(operator, params),
+        },
       });
     },
-    [dispatch, path, index, field]
+    [dispatch, path, index, field, operator, params]
   );
 
   const onHandleParamsChange = useCallback(

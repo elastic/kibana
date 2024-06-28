@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should change the color of the metric when tweaking the values in the panel', async () => {
-      await PageObjects.lens.openPalettePanel('lnsLegacyMetric');
+      await PageObjects.lens.openPalettePanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_1', '21000', {
         clearWithKeyboard: true,

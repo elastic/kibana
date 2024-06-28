@@ -22,10 +22,10 @@ export function MachineLearningJobWizardAdvancedProvider(
   return {
     async getValueOrPlaceholder(inputLocator: string): Promise<string> {
       const value = await testSubjects.getAttribute(inputLocator, 'value');
-      if (value !== '') {
-        return value;
+      if (!value) {
+        return (await testSubjects.getAttribute(inputLocator, 'placeholder')) ?? '';
       } else {
-        return await testSubjects.getAttribute(inputLocator, 'placeholder');
+        return value;
       }
     },
 

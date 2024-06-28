@@ -36,6 +36,11 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
   types: Record<string, ExpressionType>;
 
   /**
+   * Allow caching in the current execution.
+   */
+  allowCache?: boolean;
+
+  /**
    * Adds ability to abort current execution.
    */
   abortSignal: AbortSignal;
@@ -71,11 +76,6 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
    * Returns the state (true|false) of the sync tooltips across panels switch.
    */
   isSyncTooltipsEnabled?: () => boolean;
-
-  /**
-   * Returns whether or not to use the size transition veil when resizing visualizations.
-   */
-  shouldUseSizeTransitionVeil?: () => boolean;
 
   /**
    * Contains the meta-data about the source of the expression.

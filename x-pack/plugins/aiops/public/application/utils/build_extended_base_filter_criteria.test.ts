@@ -6,8 +6,7 @@
  */
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-
-import type { GroupTableItem } from '../../components/log_rate_analysis_results_table/types';
+import type { GroupTableItem } from '@kbn/aiops-log-rate-analysis/state';
 
 import { buildExtendedBaseFilterCriteria } from './build_extended_base_filter_criteria';
 
@@ -119,7 +118,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
       ]);
     });
 
@@ -142,7 +140,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         { term: { 'meta.cloud.instance_id.keyword': '1234' } },
       ]);
     });
@@ -167,7 +164,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         { bool: { must_not: [{ term: { 'meta.cloud.instance_id.keyword': '1234' } }] } },
       ]);
     });
@@ -193,7 +189,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         {
           term: {
             'error.message': 'rate limit exceeded',
@@ -248,7 +243,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         {
           bool: {
             must_not: [

@@ -5,18 +5,30 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import { StartDeps, SetupDeps } from './types';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import type { StartDeps, SetupDeps } from './types';
 import { registerWithCustomIntegrations } from './register_custom_integration';
+import { routes } from './routes';
+import type { ConfigSchema } from '../common/app';
 
 export class DataVisualizerPlugin implements Plugin {
-  constructor() {}
+  private readonly _logger: Logger;
+
+  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+    this._logger = initializerContext.logger.get();
+  }
 
   setup(coreSetup: CoreSetup<StartDeps, unknown>, plugins: SetupDeps) {
-    // home-plugin required
     if (plugins.home && plugins.customIntegrations) {
       registerWithCustomIntegrations(plugins.customIntegrations);
     }
+    routes(coreSetup, this._logger);
   }
 
   start(core: CoreStart) {}

@@ -8,11 +8,12 @@
 
 import { subj } from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/tooling-log';
-import { Page } from 'playwright';
+import { ElementHandle, Page } from 'playwright';
 import { Retry } from '..';
 
 interface WaitForRenderArgs {
   expectedItemsCount: number;
+  parentLocator?: string;
   itemLocator: string;
   checkAttribute: string;
   timeout: number;
@@ -46,19 +47,35 @@ export class KibanaPage {
 
   async waitForRender({
     expectedItemsCount,
+    parentLocator,
     itemLocator,
     checkAttribute,
     timeout,
   }: WaitForRenderArgs) {
     // we can't use `page.waitForFunction` because of CSP while testing on Cloud
     await this.retry.waitForWithTimeout(
-      `rendering of ${expectedItemsCount} elements with selector ${itemLocator} is completed`,
+      `rendering of ${expectedItemsCount} elements with selector ${itemLocator} ${
+        parentLocator ? `and ${parentLocator} parent selector` : ''
+      } is completed`,
       timeout,
       async () => {
-        const renderingItems = await this.page.$$(itemLocator);
-        if (renderingItems.length === expectedItemsCount) {
+        const loadingItems: ElementHandle[] = [];
+        if (parentLocator) {
+          const parentElement = await this.page.$(parentLocator);
+          if (parentElement) {
+            loadingItems.push(...(await parentElement.$$(itemLocator)));
+          } else {
+            this.log.debug(`waitForRender: Can't locate ${parentLocator} element`);
+            return false;
+          }
+        } else {
+          loadingItems.push(...(await this.page.$$(itemLocator)));
+        }
+        // check if loading items count is matching the input
+        if (loadingItems.length === expectedItemsCount) {
+          // check if all loaded items are rendered
           const renderStatuses = await Promise.all(
-            renderingItems.map(async (item) => {
+            loadingItems.map(async (item) => {
               return (await item.getAttribute(checkAttribute)) === 'true';
             })
           );
@@ -70,7 +87,7 @@ export class KibanaPage {
         } else {
           // not all components are loaded yet
           this.log.debug(
-            `waitForRender: ${renderingItems.length} out of ${expectedItemsCount} are loaded...`
+            `waitForRender: ${loadingItems.length} out of ${expectedItemsCount} are loaded...`
           );
           return false;
         }
@@ -94,15 +111,18 @@ export class KibanaPage {
   }
 
   async waitForCharts({
+    parentLocator,
     count,
     timeout = this.defaultTimeout,
   }: {
+    parentLocator?: string;
     count: number;
     timeout?: number;
   }) {
     await this.waitForRender({
       expectedItemsCount: count,
-      itemLocator: '.echChartStatus',
+      parentLocator,
+      itemLocator: 'div.echChartStatus',
       checkAttribute: 'data-ech-render-complete',
       timeout,
     });

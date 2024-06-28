@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ClassNames } from '@emotion/react';
 import React, { useState, useEffect } from 'react';
 import {
   EuiInMemoryTable,
@@ -25,9 +24,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -54,30 +53,29 @@ import { CreateConnectorFlyout } from '../../action_connector_form/create_connec
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
+import { routeToConnectors } from '../../../constants';
 
-const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
+interface EditConnectorProps {
+  initialConnector?: ActionConnector;
+  tab?: EditConnectorTabs;
+  isFix?: boolean;
+}
+
+const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
-    <ClassNames>
-      {({ css }) => (
-        <EuiIconTip
-          anchorClassName={css({
-            /**
-             * Adds some spacing to the left of the warning icon for deprecated connectors
-             */
-            marginLeft: theme.eui.euiSizeS,
-            marginBottom: '0 !important',
-          })}
-          aria-label="Warning"
-          size="m"
-          type="warning"
-          color="warning"
-          content={connectorDeprecatedMessage}
-          position="right"
-        />
-      )}
-    </ClassNames>
+    <EuiIconTip
+      aria-label="Warning"
+      size="m"
+      type="warning"
+      color="warning"
+      content={connectorDeprecatedMessage}
+      position="right"
+      iconProps={{
+        style: { verticalAlign: 'text-top' },
+      }}
+    />
   );
-});
+};
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
@@ -89,6 +87,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     chrome,
     docLinks,
   } = useKibana().services;
+  const { connectorId } = useParams<{ connectorId?: string }>();
+  const history = useHistory();
+  const location = useLocation();
   const canDelete = hasDeleteActionsCapability(capabilities);
   const canSave = hasSaveActionsCapability(capabilities);
 
@@ -97,13 +98,9 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
   const [pageIndex, setPageIndex] = useState<number>(0);
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
-  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
+  const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
-  const [editConnectorProps, setEditConnectorProps] = useState<{
-    initialConnector?: ActionConnector;
-    tab?: EditConnectorTabs;
-    isFix?: boolean;
-  }>({});
+  const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [connectorsToDelete, setConnectorsToDelete] = useState<string[]>([]);
   useEffect(() => {
     loadActions();
@@ -164,6 +161,19 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         .sort((a, b) => a.name.localeCompare(b.name))
     : [];
 
+  useEffect(() => {
+    if (connectorId && !isLoadingActions) {
+      const connector = actions.find((action) => action.id === connectorId);
+      if (connector) {
+        editItem(connector, EditConnectorTabs.Configuration);
+      }
+
+      const linkToConnectors = history.createHref({ pathname: routeToConnectors });
+
+      window.history.replaceState(null, '', linkToConnectors);
+    }
+  }, [actions, connectorId, history, isLoadingActions, location]);
+
   function setDeleteConnectorWarning(connectors: string[]) {
     const show = connectors.some((c) => {
       const action = actions.find((a) => a.id === c);
@@ -197,11 +207,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
     }
   }
 
-  async function editItem(
-    actionConnector: ActionConnector,
-    tab: EditConnectorTabs,
-    isFix?: boolean
-  ) {
+  function editItem(actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) {
     setEditConnectorProps({ initialConnector: actionConnector, tab, isFix: isFix ?? false });
   }
 
@@ -230,30 +236,41 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         const name = getConnectorName(value, item);
 
         const link = (
-          <>
-            <EuiLink
-              data-test-subj={`edit${item.id}`}
-              title={name}
-              onClick={() => editItem(item, EditConnectorTabs.Configuration)}
-              key={item.id}
-              disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
-            >
-              {name}
-            </EuiLink>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                data-test-subj={`edit${item.id}`}
+                title={name}
+                onClick={() => editItem(item, EditConnectorTabs.Configuration)}
+                key={item.id}
+                disabled={actionTypesIndex ? !actionTypesIndex[item.actionTypeId]?.enabled : true}
+              >
+                {name}
+              </EuiLink>
+            </EuiFlexItem>
             {item.isMissingSecrets ? (
-              <EuiIconTip
-                iconProps={{ 'data-test-subj': `missingSecrets_${item.id}` }}
-                type="warning"
-                color="warning"
-                content={i18n.translate(
-                  'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
-                  { defaultMessage: 'Sensitive information was not imported' }
-                )}
-                position="right"
-              />
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  iconProps={{
+                    'data-test-subj': `missingSecrets_${item.id}`,
+                    style: { verticalAlign: 'text-top' },
+                  }}
+                  type="warning"
+                  color="warning"
+                  content={i18n.translate(
+                    'xpack.triggersActionsUI.sections.actionsConnectorsList.connectorsListTable.columns.actions.missingSecretsDescription',
+                    { defaultMessage: 'Sensitive information was not imported' }
+                  )}
+                  position="right"
+                />
+              </EuiFlexItem>
             ) : null}
-            {showDeprecatedTooltip && <ConnectorIconTipWithSpacing />}
-          </>
+            {showDeprecatedTooltip && (
+              <EuiFlexItem grow={false}>
+                <ConnectorIconTipWithSpacing />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         );
 
         return checkEnabledResult.isEnabled ? (

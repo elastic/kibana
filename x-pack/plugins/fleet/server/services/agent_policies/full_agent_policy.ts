@@ -10,6 +10,7 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { safeLoad } from 'js-yaml';
 import deepMerge from 'deepmerge';
+import { set } from '@kbn/safer-lodash-set';
 
 import {
   getDefaultPresetForEsOutput,
@@ -31,9 +32,13 @@ import type {
   PackageInfo,
 } from '../../../common/types';
 import { agentPolicyService } from '../agent_policy';
-import { dataTypes, kafkaCompressionType, outputType } from '../../../common/constants';
-import { DEFAULT_OUTPUT } from '../../constants';
-
+import {
+  dataTypes,
+  DEFAULT_OUTPUT,
+  kafkaCompressionType,
+  outputType,
+} from '../../../common/constants';
+import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
@@ -80,7 +85,6 @@ export async function getFullAgentPolicy(
     downloadSourceUri,
     downloadSourceProxyUri,
   } = await fetchRelatedSavedObjects(soClient, agentPolicy);
-
   // Build up an in-memory object for looking up Package Info, so we don't have
   // call `getPackageInfo` for every single policy, which incurs performance costs
   const packageInfoCache = new Map<string, PackageInfo>();
@@ -113,7 +117,8 @@ export async function getFullAgentPolicy(
     agentPolicy.package_policies as PackagePolicy[],
     packageInfoCache,
     getOutputIdForAgentPolicy(dataOutput),
-    agentPolicy.namespace
+    agentPolicy.namespace,
+    agentPolicy.global_data_tags
   );
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
     acc[name] = featureConfig;
@@ -187,6 +192,10 @@ export async function getFullAgentPolicy(
     },
   };
 
+  if (agentPolicy.space_id) {
+    fullAgentPolicy.namespaces = [agentPolicy.space_id];
+  }
+
   const dataPermissions =
     (await storedPackagePoliciesToAgentPermissions(
       packageInfoCache,
@@ -237,6 +246,14 @@ export async function getFullAgentPolicy(
   if (!standalone && fleetServerHosts) {
     fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
   }
+
+  const settingsValues = getSettingsValuesForAgentPolicy(
+    'AGENT_POLICY_ADVANCED_SETTINGS',
+    agentPolicy
+  );
+  Object.entries(settingsValues).forEach(([settingsKey, settingValue]) => {
+    set(fullAgentPolicy, settingsKey, settingValue);
+  });
 
   // populate protection and signed properties
   const messageSigningService = appContextService.getMessageSigningService();
@@ -354,12 +371,15 @@ export function transformOutputToFullPolicyOutput(
       random,
       round_robin,
       hash,
+      topic,
       topics,
       headers,
       timeout,
       broker_timeout,
       required_acks,
     } = output;
+
+    const kafkaTopic = topic ? topic : topics?.filter((t) => !t.when)?.[0]?.topic;
 
     const transformPartition = () => {
       if (!partition) return {};
@@ -397,26 +417,7 @@ export function transformOutputToFullPolicyOutput(
       ...(password ? { password } : {}),
       ...(sasl ? { sasl } : {}),
       partition: transformPartition(),
-      topics: (topics ?? []).map((topic) => {
-        const { topic: topicName, ...rest } = topic;
-        const whenKeys = Object.keys(rest);
-
-        if (whenKeys.length === 0) {
-          return { topic: topicName };
-        }
-        if (rest.when && rest.when.condition) {
-          const [keyName, value] = rest.when.condition.split(':');
-
-          return {
-            topic: topicName,
-            when: {
-              [rest.when.type as string]: {
-                [keyName.replace(/\s/g, '')]: value,
-              },
-            },
-          };
-        }
-      }),
+      topic: kafkaTopic,
       headers: (headers ?? []).filter((item) => item.key !== '' || item.value !== ''),
       timeout,
       broker_timeout,
@@ -510,10 +511,9 @@ export function transformOutputToFullPolicyOutput(
  * we use "default" for the default policy to avoid breaking changes
  */
 function getOutputIdForAgentPolicy(output: Output) {
-  if (output.is_default) {
+  if (output.is_default && output.type === outputType.Elasticsearch) {
     return DEFAULT_OUTPUT.name;
   }
-
   return output.id;
 }
 

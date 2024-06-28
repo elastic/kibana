@@ -234,7 +234,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       soDoc = result.saved_objects[0];
       break;
     }
-    finder.close();
+    await finder.close();
 
     if (soDoc?.error) {
       throw soDoc.error;

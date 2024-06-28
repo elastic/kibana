@@ -25,7 +25,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
-import { DragDrop, useDragDropContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -43,7 +43,6 @@ import {
   UserMessage,
   UserMessagesGetter,
   AddUserMessages,
-  isMessageRemovable,
   VisualizationDisplayOptions,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
@@ -267,9 +266,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         }
 
         if (requestWarnings.length) {
-          removeSearchWarningMessagesRef.current = addUserMessages(
-            requestWarnings.filter(isMessageRemovable)
-          );
+          removeSearchWarningMessagesRef.current = addUserMessages(requestWarnings);
         } else if (removeSearchWarningMessagesRef.current) {
           removeSearchWarningMessagesRef.current();
           removeSearchWarningMessagesRef.current = undefined;
@@ -638,19 +635,18 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       : renderDragDropPrompt;
 
     return (
-      <DragDrop
+      <Droppable
         className={classNames('lnsWorkspacePanel__dragDrop', {
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
         })}
         dataTestSubj="lnsWorkspace"
-        draggable={false}
         dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
         onDrop={onDrop}
         value={dropProps.value}
         order={dropProps.order}
       >
         <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
-      </DragDrop>
+      </Droppable>
     );
   };
 
@@ -773,15 +769,16 @@ export const VisualizationWrapper = ({
         className="lnsExpressionRenderer__component"
         padding={displayOptions?.noPadding ? undefined : 'm'}
         expression={expression!}
+        allowCache={true}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}
         hasCompatibleActions={hasCompatibleActions}
+        // @ts-expect-error upgrade typescript v4.9.5
         onData$={onData$}
         onRender$={onRenderHandler}
         inspectorAdapters={lensInspector.adapters}
         executionContext={executionContext}
-        shouldUseSizeTransitionVeil={true}
         renderMode="edit"
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const errorsFromRequest = getOriginalRequestErrorMessages(error || null);

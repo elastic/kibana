@@ -36,7 +36,7 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
   // TODO: https://github.com/elastic/kibana/issues/161539
   describe(
     'enabled threat intel module',
-    { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+    { tags: ['@ess', '@serverless', '@skipInServerless'] },
     () => {
       before(() => {
         // illegal_argument_exception: unknown setting [index.lifecycle.name]
@@ -48,7 +48,7 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       after(() => {
-        cy.task('esArchiverUnload', 'threat_indicator');
+        cy.task('esArchiverUnload', { archiveName: 'threat_indicator' });
       });
 
       it('renders disabled dashboard module as expected when there are no events in the selected time period', () => {

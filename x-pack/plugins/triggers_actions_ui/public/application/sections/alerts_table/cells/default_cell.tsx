@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import { CellComponentProps } from '../types';
 
 const DefaultCellComponent: React.FC<CellComponentProps> = ({ columnId, alert }) => {
-  const value = alert[columnId] ?? [];
+  const value = (alert && alert[columnId]) ?? [];
 
   if (Array.isArray(value)) {
     return <>{value.length ? value.join(', ') : '--'}</>;

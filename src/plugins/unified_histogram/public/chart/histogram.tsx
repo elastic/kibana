@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
 import type {
@@ -30,14 +30,15 @@ import {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramInputMessage,
+  UnifiedHistogramVisContext,
 } from '../types';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
-import { useStableCallback } from './hooks/use_stable_callback';
+import { useStableCallback } from '../hooks/use_stable_callback';
 import { useLensProps } from './hooks/use_lens_props';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
+  abortController?: AbortController;
   services: UnifiedHistogramServices;
   dataView: DataView;
   request?: UnifiedHistogramRequestContext;
@@ -47,7 +48,7 @@ export interface HistogramProps {
   hasLensSuggestions: boolean;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  lensAttributesContext: LensAttributesContext;
+  visContext: UnifiedHistogramVisContext;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
@@ -94,7 +95,7 @@ export function Histogram({
   hasLensSuggestions,
   getTimeRange,
   refetch$,
-  lensAttributesContext: attributesContext,
+  visContext,
   disableTriggers,
   disabledActions,
   onTotalHitsChange,
@@ -102,6 +103,7 @@ export function Histogram({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  abortController,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const [chartSize, setChartSize] = useState('100%');
@@ -115,7 +117,7 @@ export function Histogram({
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
-  const { attributes } = attributesContext;
+  const { attributes } = visContext;
 
   useEffect(() => {
     if (attributes.visualizationType === 'lnsMetric') {
@@ -176,7 +178,7 @@ export function Histogram({
     request,
     getTimeRange,
     refetch$,
-    attributesContext,
+    visContext,
     onLoad,
   });
 
@@ -218,11 +220,13 @@ export function Histogram({
         data-test-subj="unifiedHistogramChart"
         data-time-range={timeRangeText}
         data-request-data={requestData}
+        data-suggestion-type={visContext.suggestionType}
         css={chartCss}
         ref={chartRef}
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          abortController={abortController}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           onFilter={onFilter}

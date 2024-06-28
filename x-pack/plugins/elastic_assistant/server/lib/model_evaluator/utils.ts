@@ -7,7 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { ToolingLog } from '@kbn/tooling-log';
-import { BaseMessage } from 'langchain/schema';
+import { BaseMessage } from '@langchain/core/messages';
 import { ResponseBody } from '../langchain/types';
 import { AgentExecutorEvaluator } from '../langchain/executors/types';
 
@@ -59,33 +59,9 @@ export const getMessageFromLangChainResponse = (
   response: PromiseSettledResult<ResponseBody>
 ): string => {
   if (response.status === 'fulfilled' && response.value.data != null) {
-    return getFormattedMessageContent(response.value.data);
+    return response.value.data;
   }
   return 'error';
-};
-
-/**
- * Lifted from `x-pack/packages/kbn-elastic-assistant/impl/assistant/helpers.ts`
- * TODO: Move this to a shared location
- *
- * When `content` is a JSON string, prefixed with "```json\n"
- * and suffixed with "\n```", this function will attempt to parse it and return
- * the `action_input` property if it exists.
- */
-export const getFormattedMessageContent = (content: string): string => {
-  const formattedContentMatch = content.match(/```json\n([\s\S]+)\n```/);
-
-  if (formattedContentMatch) {
-    try {
-      const parsedContent = JSON.parse(formattedContentMatch[1]);
-
-      return parsedContent.action_input ?? content;
-    } catch {
-      // we don't want to throw an error here, so we'll fall back to the original content
-    }
-  }
-
-  return content;
 };
 
 /**

@@ -6,7 +6,6 @@
  */
 
 import { navigateToAlertsList } from '../../screens/alerts';
-import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { closeAllToasts } from '../../tasks/toasts';
 import { fillUpNewRule } from '../../tasks/response_actions';
 import { login, ROLE } from '../../tasks/login';
@@ -26,7 +25,7 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     it('response actions are disabled', () => {
       fillUpNewRule(ruleName, ruleDescription);
       cy.getByTestSubj('response-actions-wrapper').within(() => {
-        cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+        cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
           'be.disabled'
         );
       });
@@ -39,7 +38,6 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
     beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
       indexEndpointRuleAlerts({
         endpointAgentId,
         endpointHostname,
@@ -73,8 +71,8 @@ describe('No License', { tags: '@ess', env: { ftrConfig: { license: 'basic' } } 
       navigateToAlertsList(`query=(language:kuery,query:'agent.id: "${endpointAgentId}" ')`);
       closeAllToasts();
       cy.getByTestSubj('expand-event').first().click();
-      cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-      cy.getByTestSubj('responseActionsViewTab').click();
+      cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+      cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
       cy.contains('Permission denied');
       cy.contains(
         'To access these results, ask your administrator for Elastic Defend Kibana privileges.'

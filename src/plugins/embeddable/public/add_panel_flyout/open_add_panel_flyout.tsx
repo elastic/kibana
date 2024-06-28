@@ -10,9 +10,9 @@ import React, { Suspense } from 'react';
 
 import { OverlayRef } from '@kbn/core/public';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
-import { IContainer } from '../lib';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { core } from '../kibana_services';
 
 const LazyAddPanelFlyout = React.lazy(async () => {
@@ -25,7 +25,7 @@ export const openAddPanelFlyout = ({
   onAddPanel,
   onClose,
 }: {
-  container: IContainer;
+  container: PresentationContainer;
   onAddPanel?: (id: string) => void;
   onClose?: () => void;
 }): OverlayRef => {
@@ -35,7 +35,7 @@ export const openAddPanelFlyout = ({
       <Suspense fallback={<EuiLoadingSpinner />}>
         <LazyAddPanelFlyout container={container} onAddPanel={onAddPanel} />
       </Suspense>,
-      { theme$: core.theme.theme$ }
+      core
     ),
     {
       'data-test-subj': 'dashboardAddPanel',

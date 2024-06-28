@@ -6,10 +6,12 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 import { EuiSpacer, EuiDescriptionList, EuiCallOut } from '@elastic/eui';
-import { DocFailure, Failures } from './failures';
+import type { DocFailure } from './failures';
+import { Failures } from './failures';
 
 interface Props {
   index: string;

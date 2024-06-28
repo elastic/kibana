@@ -23,6 +23,7 @@ import {
   SERVICE_KEY,
   SERVICE_KEY_LEGACY,
   INITIAL_REST_VERSION,
+  CREATE_DATA_VIEW_DESCRIPTION,
 } from '../../constants';
 import { DataViewSpecRestResponse } from '../route_types';
 
@@ -40,15 +41,14 @@ export const createDataView = async ({
   usageCollection,
   spec,
   override,
-  refreshFields,
   counterName,
 }: CreateDataViewArgs) => {
   usageCollection?.incrementCounter({ counterName });
-  return dataViewsService.createAndSave(spec, override, !refreshFields);
+  return dataViewsService.createAndSaveDataViewLazy(spec, override);
 };
 
 const registerCreateDataViewRouteFactory =
-  (path: string, serviceKey: string) =>
+  (path: string, serviceKey: string, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -57,7 +57,7 @@ const registerCreateDataViewRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -72,9 +72,10 @@ const registerCreateDataViewRouteFactory =
           },
           response: {
             200: {
-              body: schema.object({
-                [serviceKey]: dataViewSpecSchema,
-              }),
+              body: () =>
+                schema.object({
+                  [serviceKey]: dataViewSpecSchema,
+                }),
             },
           },
         },
@@ -104,9 +105,12 @@ const registerCreateDataViewRouteFactory =
             counterName: `${req.route.method} ${path}`,
           });
 
+          const toSpecParams =
+            body.refresh_fields === false ? {} : { fieldParams: { fieldName: ['*'] } };
+
           const responseBody: Record<string, DataViewSpecRestResponse> = {
             [serviceKey]: {
-              ...dataView.toSpec(),
+              ...(await dataView.toSpec(toSpecParams)),
               namespaces: dataView.namespaces,
             },
           };
@@ -124,7 +128,8 @@ const registerCreateDataViewRouteFactory =
 
 export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(
   DATA_VIEW_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  CREATE_DATA_VIEW_DESCRIPTION
 );
 
 export const registerCreateDataViewRouteLegacy = registerCreateDataViewRouteFactory(

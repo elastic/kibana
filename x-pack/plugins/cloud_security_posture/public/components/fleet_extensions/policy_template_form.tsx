@@ -30,7 +30,6 @@ import type {
 import { PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
 import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types_old';
@@ -58,9 +57,10 @@ import {
   PolicyTemplateVarsForm,
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { gcpField, getInputVarsFields } from './gcp_credential_form';
+import { gcpField, getInputVarsFields } from './gcp_credentials_form/gcp_credential_form';
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
+import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -110,12 +110,14 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
           defaultMessage: 'Supported from integration version 1.5.0 and above',
         })
       : undefined,
+    testId: 'awsOrganizationTestId',
   },
   {
     id: AWS_SINGLE_ACCOUNT,
     label: i18n.translate('xpack.csp.fleetIntegration.awsAccountType.singleAccountLabel', {
       defaultMessage: 'Single Account',
     }),
+    testId: 'awsSingleTestId',
   },
 ];
 
@@ -150,6 +152,7 @@ const getAzureAccountTypeOptions = (
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.azureOrganizationLabel', {
       defaultMessage: 'Azure Organization',
     }),
+    testId: 'azureOrganizationAccountTestId',
     disabled: isAzureOrganizationDisabled,
     tooltip: isAzureOrganizationDisabled
       ? i18n.translate(
@@ -165,6 +168,7 @@ const getAzureAccountTypeOptions = (
     label: i18n.translate('xpack.csp.fleetIntegration.azureAccountType.singleAccountLabel', {
       defaultMessage: 'Single Subscription',
     }),
+    testId: 'azureSingleAccountTestId',
   },
 ];
 
@@ -425,18 +429,21 @@ const AzureAccountTypeSelect = ({
   updatePolicy,
   disabled,
   packageInfo,
+  setupTechnology,
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
   updatePolicy: (updatedPolicy: NewPackagePolicy) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
+  setupTechnology: SetupTechnology;
 }) => {
   const isAzureOrganizationDisabled = isBelowMinVersion(
     packageInfo.version,
     AZURE_ORG_MINIMUM_PACKAGE_VERSION
   );
   const azureAccountTypeOptions = getAzureAccountTypeOptions(isAzureOrganizationDisabled);
+  const isAgentless = setupTechnology === SetupTechnology.AGENTLESS;
 
   useEffect(() => {
     if (!getAzureAccountType(input)) {
@@ -447,7 +454,9 @@ const AzureAccountTypeSelect = ({
             type: 'text',
           },
           'azure.credentials.type': {
-            value: AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE,
+            value: isAgentless
+              ? AZURE_CREDENTIALS_TYPE.SERVICE_PRINCIPAL_WITH_CLIENT_SECRET
+              : AZURE_CREDENTIALS_TYPE.ARM_TEMPLATE,
             type: 'text',
           },
         })
@@ -540,7 +549,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const input = getSelectedOption(newPolicy.inputs, integration);
-    const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
+    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
       input,
       agentPolicy,
       agentlessPolicy,
@@ -743,6 +752,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
             updatePolicy={updatePolicy}
             packageInfo={packageInfo}
             disabled={isEditPage}
+            setupTechnology={setupTechnology}
           />
         )}
 
@@ -757,7 +767,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           <SetupTechnologySelector
             disabled={isEditPage}
             setupTechnology={setupTechnology}
-            onSetupTechnologyChange={setSetupTechnology}
+            onSetupTechnologyChange={updateSetupTechnology}
           />
         )}
 

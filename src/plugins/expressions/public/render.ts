@@ -8,7 +8,7 @@
 
 import * as Rx from 'rxjs';
 import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter } from 'rxjs';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
@@ -33,7 +33,6 @@ export interface ExpressionRenderHandlerParams {
   syncCursor?: boolean;
   syncTooltips?: boolean;
   interactive?: boolean;
-  shouldUseSizeTransitionVeil?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
   getCompatibleCellValueActions?: (data: object[]) => Promise<unknown[]>;
   executionContext?: KibanaExecutionContext;
@@ -63,7 +62,6 @@ export class ExpressionRenderHandler {
       syncColors,
       syncTooltips,
       syncCursor,
-      shouldUseSizeTransitionVeil,
       interactive,
       hasCompatibleActions = async () => false,
       getCompatibleCellValueActions = async () => [],
@@ -114,9 +112,6 @@ export class ExpressionRenderHandler {
       },
       isSyncCursorEnabled: () => {
         return syncCursor || true;
-      },
-      shouldUseSizeTransitionVeil: () => {
-        return Boolean(shouldUseSizeTransitionVeil);
       },
       isInteractive: () => {
         return interactive ?? true;

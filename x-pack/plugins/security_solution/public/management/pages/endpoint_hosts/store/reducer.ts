@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EndpointPackageInfoStateChanged,
-  EndpointPendingActionsStateChanged,
-  MetadataTransformStatsChanged,
-} from './action';
+import type { EndpointPackageInfoStateChanged, MetadataTransformStatsChanged } from './action';
 import {
   getCurrentIsolationRequestState,
   hasSelectedEndpoint,
@@ -28,19 +24,6 @@ type CaseReducer<T extends AppAction> = (
   state: Immutable<EndpointState>,
   action: Immutable<T>
 ) => Immutable<EndpointState>;
-
-const handleEndpointPendingActionsStateChanged: CaseReducer<EndpointPendingActionsStateChanged> = (
-  state,
-  action
-) => {
-  if (isOnEndpointPage(state)) {
-    return {
-      ...state,
-      endpointPendingActions: action.payload,
-    };
-  }
-  return state;
-};
 
 const handleEndpointPackageInfoStateChanged: CaseReducer<EndpointPackageInfoStateChanged> = (
   state,
@@ -109,8 +92,6 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...state,
       patternsError: action.payload,
     };
-  } else if (action.type === 'endpointPendingActionsStateChanged') {
-    return handleEndpointPendingActionsStateChanged(state, action);
   } else if (action.type === 'serverReturnedPoliciesForOnboarding') {
     return {
       ...state,
@@ -137,6 +118,11 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
     return {
       ...state,
       policyItemsLoading: false,
+    };
+  } else if (action.type === 'serverFinishedInitialization') {
+    return {
+      ...state,
+      isInitialized: action.payload,
     };
   } else if (action.type === 'endpointPackageInfoStateChanged') {
     return handleEndpointPackageInfoStateChanged(state, action);

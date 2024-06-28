@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/public';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import type { EventEnrichmentRequestOptions } from '../../../api/search_strategy';
 
 import type { CtiEnrichment } from '.';

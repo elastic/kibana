@@ -2,50 +2,43 @@
 === CSV
 
 [float]
-==== Job parameters
-If integrating with Reporting via a custom UI, the following job parameters must be Rison encoded and posted to
-the aforementioned generate job url:
+==== Job parameters of CsvSearchSource
+The export type to generate CSV reports and is available in Discover uses "search source" objects. This export type is called
+`csv_searchsource` in the code. A configuration for a CSV report job is represented with an interface that includes the
+`BaseParams` and the following fields. To create a request for a CSV report, these required job parameters are Rison encoded into
+a query string variable of the report generation URL:
 
 ----
-interface jobParameters {
-  type: string;
-  title: string;
-  searchRequest: {
-    index: string;
-    body: object;
-  };
-  fields: string[];
-  metaFields: string[];
-  conflictedTypesFields: string[];
-  indexPatternId: string;
-}
+interface JobParamsCSV {
+  searchSource: SerializedSearchSourceFields; <1>
+  columns?: string[]; <2>
+};
 ----
-
-The `searchRequest.body` should abide by the {ref}/search-search.html[Elasticsearch Search Request Body] syntax
+<1> An object of serialized data that internally represents a search object in Kibana. It will contain a reference to a DataView
+saved object.
+<2> An array of field names to include as columns in the CSV report.
 
 [float]
-==== `export-config` Directive
-If integrating with Reporting via the `export-config` directive, the AngularJS controller that contains the directive should expose
-the following methods and the `export-config` directive will POST them to the reporting API:
+==== Job parameters of CsvFromSavedObject
+A newer export type to generate CSV reports is available, currently only by API. This export type is called `csv_v2` in the code.
 
 ----
-interface sharingData {
-  searchRequest: {
-    index: string;
-    body: object;
-  };
-  fields: string[];
-  metaFields: string[];
-  conflictedTypesFields: string[];
-  indexPatternId: string;
+interface JobParamsCsvFromSavedObject {
+  locatorParams: LocatorParams[]; <1>
+};
+----
+<1> The `locatorParams` value is controlled by the Discover application and identifies a search loaded in Discover, including the
+selection of DataView, columns and filters. Only a single value in the array is permitted in the `createJob` method.
+
+[float]
+==== Job payload
+After the job parameters are received by the route handler for the report generation URL, an additional field is automatically
+added to the fields from job parameters:
+
+----
+interface TaskPayloadCSV {
+  pagingStrategy: 'scan' | 'pit' <1>
 }
-
-function getSharingData(): sharingData;
-
-function getSharingType(): string;
-
-function getSharingTitle() string;
-
 ----
-
-The `sharingData.searchRequest.body` should abide by the {ref}/search-search.html[{es} Search Request Body] syntax
+<1> The `pagingStrategy` value is taken from the value of the `xpack.reporting.csv.scroll.strategy` setting in kibana.yml and used
+to control how the `runTask` method pages through all of the data.

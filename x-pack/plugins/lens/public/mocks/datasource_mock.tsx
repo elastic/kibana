@@ -12,7 +12,7 @@ export type DatasourceMock = jest.Mocked<Datasource> & {
 };
 
 export function createMockDatasource(
-  id: string,
+  id = 'testDatasource',
   customPublicApi: Partial<DatasourcePublicAPI> = {}
 ): DatasourceMock {
   const publicAPIMock = {
@@ -51,7 +51,7 @@ export function createMockDatasource(
     removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
     cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
     removeColumn: jest.fn((props) => {}),
-    getLayers: jest.fn((_state) => []),
+    getLayers: jest.fn((_state) => ['a']),
     uniqueLabels: jest.fn((_state, dataViews) => ({})),
     getDropProps: jest.fn(),
     onDrop: jest.fn(),
@@ -78,7 +78,7 @@ export function createMockDatasource(
 }
 
 export function mockDatasourceMap() {
-  const datasource = createMockDatasource('testDatasource');
+  const datasource = createMockDatasource();
   datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
     {
       state: {},

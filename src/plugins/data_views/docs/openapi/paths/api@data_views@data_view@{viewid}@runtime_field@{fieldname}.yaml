@@ -1,6 +1,6 @@
 get:
-  summary: Retrieves a runtime field.
-  operationId: getRuntimeField
+  summary: Get a runtime field in the default space
+  operationId: getRuntimeFieldDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
@@ -33,8 +33,8 @@ get:
             $ref: '../components/schemas/404_response.yaml'
 
 delete:
-  summary: Delete a runtime field from a data view.
-  operationId: deleteRuntimeField
+  summary: Delete a runtime field from a data view in the default space
+  operationId: deleteRuntimeFieldDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:
@@ -53,8 +53,8 @@ delete:
             $ref: '../components/schemas/404_response.yaml'
 
 post:
-  summary: Update an existing runtime field.
-  operationId: updateRuntimeField
+  summary: Update a runtime field in the default space
+  operationId: updateRuntimeFieldDefault
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
   tags:

@@ -15,9 +15,10 @@ interface AddConnectorValue {
 
 export interface AddConnectorApiLogicArgs {
   deleteExistingConnector?: boolean;
-  indexName: string;
+  indexName?: string;
   isNative: boolean;
   language: string | null;
+  name: string;
   serviceType?: string;
 }
 
@@ -29,6 +30,7 @@ export interface AddConnectorApiLogicResponse {
 export const addConnector = async ({
   deleteExistingConnector,
   indexName,
+  name,
   isNative,
   language,
   serviceType,
@@ -43,6 +45,7 @@ export const addConnector = async ({
     index_name: indexName,
     is_native: isNative,
     language,
+    name,
     service_type: serviceType,
   };
   const result = await HttpLogic.values.http.post<AddConnectorValue>(route, {

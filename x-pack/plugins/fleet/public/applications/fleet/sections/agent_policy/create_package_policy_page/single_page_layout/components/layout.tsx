@@ -17,7 +17,10 @@ import {
   EuiDescriptionListDescription,
   EuiButtonEmpty,
   EuiSpacer,
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
+
+import { useAgentless } from '../hooks/setup_technology';
 
 import { WithHeaderLayout } from '../../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
@@ -45,6 +48,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
     isSelected: boolean;
     onClick: React.ReactEventHandler;
   }>;
+  children: React.ReactNode;
 }> = memo(
   ({
     from,
@@ -230,22 +234,26 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiFlexGroup>
     );
 
-    const rightColumn =
-      agentPolicy && (isAdd || isEdit) ? (
-        <EuiDescriptionList className="eui-textRight" textStyle="reverse">
-          <EuiDescriptionListTitle>
-            <FormattedMessage
-              id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
-              defaultMessage="Agent policy"
-            />
-          </EuiDescriptionListTitle>
-          <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
-            {agentPolicy?.name || '-'}
-          </AgentPolicyName>
-        </EuiDescriptionList>
-      ) : undefined;
+    const { isAgentlessAgentPolicy } = useAgentless();
+    const hasAgentBasedPolicyId = !isAgentlessAgentPolicy(agentPolicy);
+    const showAgentPolicyName = agentPolicy && (isAdd || isEdit) && hasAgentBasedPolicyId;
 
-    const maxWidth = 770;
+    const rightColumn = showAgentPolicyName ? (
+      <EuiDescriptionList className="eui-textRight" textStyle="reverse">
+        <EuiDescriptionListTitle>
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.agentPolicyNameLabel"
+            defaultMessage="Agent policy"
+          />
+        </EuiDescriptionListTitle>
+        <AgentPolicyName className="eui-textBreakWord" title={agentPolicy?.name || '-'}>
+          {agentPolicy?.name || '-'}
+        </AgentPolicyName>
+      </EuiDescriptionList>
+    ) : undefined;
+
+    const isBiggerScreen = useIsWithinMinBreakpoint('xxl');
+    const maxWidth = isBiggerScreen ? 1200 : 800;
     return (
       <WithHeaderLayout
         restrictHeaderWidth={maxWidth}

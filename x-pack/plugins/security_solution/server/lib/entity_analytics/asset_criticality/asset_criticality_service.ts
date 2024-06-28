@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import { isEmpty } from 'lodash/fp';
-import type { ExperimentalFeatures } from '../../../../common';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '../../../../common/constants';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import type { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
@@ -23,7 +24,7 @@ export interface AssetCriticalityService {
   getCriticalitiesByIdentifiers: (
     identifiers: CriticalityIdentifier[]
   ) => Promise<AssetCriticalityRecord[]>;
-  isEnabled: () => boolean;
+  isEnabled: () => Promise<boolean>;
 }
 
 const isCriticalityIdentifierValid = (identifier: CriticalityIdentifier): boolean =>
@@ -88,14 +89,14 @@ const getCriticalitiesByIdentifiers = async ({
 
 interface AssetCriticalityServiceFactoryOptions {
   assetCriticalityDataClient: AssetCriticalityDataClient;
-  experimentalFeatures: ExperimentalFeatures;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export const assetCriticalityServiceFactory = ({
   assetCriticalityDataClient,
-  experimentalFeatures,
+  uiSettingsClient,
 }: AssetCriticalityServiceFactoryOptions): AssetCriticalityService => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
     getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
-  isEnabled: () => experimentalFeatures.entityAnalyticsAssetCriticalityEnabled,
+  isEnabled: () => uiSettingsClient.get<boolean>(ENABLE_ASSET_CRITICALITY_SETTING),
 });

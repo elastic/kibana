@@ -8,7 +8,7 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { pipe } from 'fp-ts/lib/pipeable';
+import { pipe } from 'fp-ts/lib/function';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ElasticsearchClient,
@@ -49,6 +49,7 @@ export interface CreateIndexParams {
   esCapabilities: ElasticsearchCapabilities;
   aliases?: string[];
   timeout?: string;
+  waitForIndexStatusTimeout?: string;
 }
 
 export type CreateIndexSuccessResponse = 'create_index_succeeded' | 'index_already_exists';
@@ -70,6 +71,7 @@ export const createIndex = ({
   esCapabilities,
   aliases = [],
   timeout = DEFAULT_TIMEOUT,
+  waitForIndexStatusTimeout = DEFAULT_TIMEOUT,
 }: CreateIndexParams): TaskEither.TaskEither<
   RetryableEsClientError | IndexNotGreenTimeout | ClusterShardLimitExceeded,
   CreateIndexSuccessResponse
@@ -150,7 +152,7 @@ export const createIndex = ({
         waitForIndexStatus({
           client,
           index: indexName,
-          timeout: DEFAULT_TIMEOUT,
+          timeout: waitForIndexStatusTimeout,
           status: 'green',
         }),
         TaskEither.map(() => res)

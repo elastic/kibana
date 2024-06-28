@@ -14,7 +14,7 @@ import { enableMapSet } from 'immer';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
-import { sourcererReducer, sourcererModel } from './sourcerer';
+import { sourcererReducer, sourcererModel } from '../../sourcerer/store';
 
 import type { HostsPluginReducer } from '../../explore/hosts/store';
 import type { NetworkPluginReducer } from '../../explore/network/store';
@@ -25,16 +25,22 @@ import type { SecuritySubPlugins } from '../../app/types';
 import type { ManagementPluginReducer } from '../../management';
 import type { State } from './types';
 import type { AppAction } from './actions';
-import type { SourcererModel } from './sourcerer/model';
-import { initDataView, SourcererScopeName } from './sourcerer/model';
+import type { SourcererModel } from '../../sourcerer/store/model';
+import { initDataView, SourcererScopeName } from '../../sourcerer/store/model';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from './sourcerer/helpers';
+import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
 import { globalUrlParamReducer, initialGlobalUrlParam } from './global_url_param';
 import { groupsReducer } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import { analyzerReducer } from '../../resolver/store/reducer';
 import { securitySolutionDiscoverReducer } from './discover/reducer';
 import type { AnalyzerState } from '../../resolver/types';
+import {
+  type DataviewPickerState,
+  reducer as dataviewPickerReducer,
+} from '../../sourcerer/experimental/redux/reducer';
+import type { NotesState } from '../../notes/store/notes.slice';
+import { notesReducer } from '../../notes/store/notes.slice';
 
 enableMapSet();
 
@@ -55,16 +61,20 @@ export const createInitialState = (
     defaultDataView,
     kibanaDataViews,
     signalIndexName,
+    signalIndexMappingOutdated,
     enableExperimental,
   }: {
     defaultDataView: SourcererModel['defaultDataView'];
     kibanaDataViews: SourcererModel['kibanaDataViews'];
     signalIndexName: SourcererModel['signalIndexName'];
+    signalIndexMappingOutdated: SourcererModel['signalIndexMappingOutdated'];
     enableExperimental: ExperimentalFeatures;
   },
   dataTableState: DataTableState,
   groupsState: GroupState,
-  analyzerState: AnalyzerState
+  analyzerState: AnalyzerState,
+  dataviewPickerState: DataviewPickerState,
+  notesState: NotesState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -115,6 +125,7 @@ export const createInitialState = (
       defaultDataView,
       kibanaDataViews: kibanaDataViews.map((dataView) => ({ ...initDataView, ...dataView })),
       signalIndexName,
+      signalIndexMappingOutdated,
     },
     globalUrlParam: initialGlobalUrlParam,
     dataTable: dataTableState.dataTable,
@@ -125,6 +136,8 @@ export const createInitialState = (
       internal: undefined,
       savedSearch: undefined,
     },
+    dataViewPicker: dataviewPickerState,
+    notes: notesState,
   };
 
   return preloadedState;
@@ -143,8 +156,10 @@ export const createReducer: (
     sourcerer: sourcererReducer,
     globalUrlParam: globalUrlParamReducer,
     dataTable: dataTableReducer,
+    dataViewPicker: dataviewPickerReducer,
     groups: groupsReducer,
     analyzer: analyzerReducer,
     discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
+    notes: notesReducer,
   });

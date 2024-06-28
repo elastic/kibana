@@ -30,7 +30,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
     before(() => {
@@ -66,13 +66,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      return synthtraceEsClient.index(events);
+      return apmSynthtraceEsClient.index(events);
     });
 
     after(async () => {
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/177104
     describe('create rule without kql query', () => {
       let ruleId: string;
       let actionId: string;
@@ -196,6 +197,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/177108
     describe('create rule with kql query', () => {
       let ruleId: string;
       let alerts: ApmAlertFields[];

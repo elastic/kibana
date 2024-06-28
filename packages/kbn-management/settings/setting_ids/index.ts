@@ -73,7 +73,7 @@ export const CONTEXT_DEFAULT_SIZE_ID = 'context:defaultSize';
 export const CONTEXT_STEP_ID = 'context:step';
 export const CONTEXT_TIE_BREAKER_FIELDS_ID = 'context:tieBreakerFields';
 export const DEFAULT_COLUMNS_ID = 'defaultColumns';
-export const DISCOVER_ENABLE_SQL_ID = 'discover:enableSql';
+export const ENABLE_ESQL_ID = 'enableESQL';
 export const DISCOVER_MAX_DOC_FIELDS_DISPLAYED_ID = 'discover:maxDocFieldsDisplayed';
 export const DISCOVER_MODIFY_COLUMNS_ON_SWITCH_ID = 'discover:modifyColumnsOnSwitch';
 export const DISCOVER_ROW_HEIGHT_OPTION_ID = 'discover:rowHeightOption';
@@ -123,6 +123,10 @@ export const OBSERVABILITY_ENABLE_COMPARISON_BY_DEFAULT_ID =
   'observability:enableComparisonByDefault';
 export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID =
   'observability:enableInfrastructureHostsView';
+export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID =
+  'observability:enableInfrastructureContainerAssetView';
+export const OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID =
+  'observability:enableInfrastructureAssetCustomDashboards';
 export const OBSERVABILITY_ENABLE_INSPECT_ES_QUERIES_ID = 'observability:enableInspectEsQueries';
 export const OBSERVABILITY_MAX_SUGGESTIONS_ID = 'observability:maxSuggestions';
 export const OBSERVABILITY_PROFILING_ELASTICSEARCH_PLUGIN_ID =
@@ -132,8 +136,12 @@ export const OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID =
   'observability:apmEnableContinuousRollups';
 export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
   'observability:apmEnableProfilingIntegration';
-
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
+export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
+  'observability:apmEnableServiceInventoryTableSearchBar';
+export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
+  'observability:logsExplorer:allowedDataViews';
+export const OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL = 'observability:apmEnableMultiSignal';
 
 // Reporting settings
 export const XPACK_REPORTING_CUSTOM_PDF_LOGO_ID = 'xpackReporting:customPdfLogo';
@@ -166,12 +174,12 @@ export const SECURITY_SOLUTION_ENABLE_CCS_WARNING_ID = 'securitySolution:enableC
 export const SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID =
   'securitySolution:showRelatedIntegrations';
 export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertTags' as const;
-/** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
-export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
-  'securitySolution:enableExpandableFlyout' as const;
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
 export const SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
+/** This Kibana Advanced Setting allows users to enable/disable the Asset Criticality feature */
+export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
+  'securitySolution:enableAssetCriticality' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

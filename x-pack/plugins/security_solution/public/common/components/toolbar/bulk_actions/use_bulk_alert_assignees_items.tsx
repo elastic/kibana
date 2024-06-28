@@ -151,8 +151,10 @@ export const useBulkAlertAssigneesItems = ({
     [TitleContent, hasIndexWrite, isPlatinumPlus, renderContent]
   );
 
-  return {
-    alertAssigneesItems,
-    alertAssigneesPanels,
-  };
+  return useMemo(() => {
+    return {
+      alertAssigneesItems,
+      alertAssigneesPanels,
+    };
+  }, [alertAssigneesItems, alertAssigneesPanels]);
 };

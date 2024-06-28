@@ -9,10 +9,10 @@ import { EuiEmptyPrompt, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 
-import type { AppFeatureKeyType } from '@kbn/security-solution-features';
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import { getProductTypeByPLI } from '../hooks/use_product_type_by_pli';
 
-const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: AppFeatureKeyType }> =
+const OsqueryResponseActionsUpsellingSection: React.FC<{ requiredPLI: ProductFeatureKeyType }> =
   React.memo(({ requiredPLI }) => {
     const productTypeRequired = getProductTypeByPLI(requiredPLI);
 

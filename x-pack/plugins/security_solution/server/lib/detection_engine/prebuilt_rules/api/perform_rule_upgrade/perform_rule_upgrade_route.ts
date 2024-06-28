@@ -21,7 +21,6 @@ import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
-import { internalRuleToAPIResponse } from '../../../rule_management/normalization/rule_converters';
 import { aggregatePrebuiltRuleErrors } from '../../logic/aggregate_prebuilt_rule_errors';
 import { performTimelinesInstallation } from '../../logic/perform_timelines_installation';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
@@ -30,6 +29,7 @@ import { upgradePrebuiltRules } from '../../logic/rule_objects/upgrade_prebuilt_
 import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { getVersionBuckets } from '../../model/rule_versions/get_version_buckets';
+import { PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS } from '../../constants';
 
 export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -38,6 +38,9 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
       path: PERFORM_RULE_UPGRADE_URL,
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          idleSocket: PREBUILT_RULES_OPERATION_SOCKET_TIMEOUT_MS,
+        },
       },
     })
     .addVersion(
@@ -56,6 +59,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
           const ctx = await context.resolve(['core', 'alerting', 'securitySolution']);
           const soClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
+          const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
           const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
           const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
@@ -152,7 +156,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
 
           // Perform the upgrade
           const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
-            rulesClient,
+            detectionRulesClient,
             targetRules
           );
           const ruleErrors = [...fetchErrors, ...installationErrors];
@@ -177,7 +181,7 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
               failed: ruleErrors.length,
             },
             results: {
-              updated: updatedRules.map(({ result }) => internalRuleToAPIResponse(result)),
+              updated: updatedRules.map(({ result }) => result),
               skipped: skippedRules,
             },
             errors: allErrors,

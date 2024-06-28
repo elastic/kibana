@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable, combineLatest, Subscription } from 'rxjs';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 
-import { map } from 'rxjs/operators';
-import { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
+import { map } from 'rxjs';
+import type { SupportedPytorchTasksType } from '@kbn/ml-trained-models-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { MLHttpFetchError } from '@kbn/ml-error-utils';
-import { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
+import type { trainedModelsApiProvider } from '../../../services/ml_api_service/trained_models';
 import { getInferenceInfoComponent } from './inference_info';
 
 export type InferenceType =

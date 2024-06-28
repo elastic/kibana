@@ -99,7 +99,7 @@ describe('heatmap', () => {
 
   describe('#getConfiguration', () => {
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
@@ -378,7 +378,7 @@ describe('heatmap', () => {
     let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
@@ -493,7 +493,7 @@ describe('heatmap', () => {
     let datasourceLayers: DatasourceLayers;
 
     beforeEach(() => {
-      const mockDatasource = createMockDatasource('testDatasource');
+      const mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
         dataType: 'string',
@@ -626,6 +626,7 @@ describe('heatmap', () => {
             "longMessage": "Configuration for the horizontal axis is missing.",
             "severity": "error",
             "shortMessage": "Missing Horizontal axis.",
+            "uniqueId": "heatmap_x_missing_axis",
           },
         ]
       `);
@@ -633,7 +634,7 @@ describe('heatmap', () => {
 
     describe('warnings', () => {
       beforeEach(() => {
-        const mockDatasource = createMockDatasource('testDatasource');
+        const mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
           dataType: 'string',

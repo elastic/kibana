@@ -9,16 +9,9 @@ import { navTabsUsersDetails } from './nav_tabs';
 
 describe('navTabsUsersDetails', () => {
   test('it should not display anomalies tab if user has no ml permission', () => {
-    const tabs = navTabsUsersDetails('username', false, true);
+    const tabs = navTabsUsersDetails('username', false);
 
     expect(tabs).not.toHaveProperty(UsersTableType.anomalies);
     expect(tabs).toHaveProperty(UsersTableType.risk);
-  });
-
-  test('it should not display risk tab if isRiskyUserEnabled disabled', () => {
-    const tabs = navTabsUsersDetails('username', true, false);
-    // expect(tabs).toHaveProperty(UsersTableType.allUsers);
-    expect(tabs).toHaveProperty(UsersTableType.anomalies);
-    expect(tabs).not.toHaveProperty(UsersTableType.risk);
   });
 });

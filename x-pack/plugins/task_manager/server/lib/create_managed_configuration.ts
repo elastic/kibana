@@ -6,7 +6,7 @@
  */
 
 import { interval, merge, of, Observable } from 'rxjs';
-import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs/operators';
+import { filter, mergeScan, map, scan, distinctUntilChanged, startWith } from 'rxjs';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';

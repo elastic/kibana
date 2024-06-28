@@ -8,7 +8,7 @@
 import { encode } from 'gpt-tokenizer';
 
 export interface InvokeBody {
-  prompt: string;
+  prompt?: string;
 }
 
 /**
@@ -21,14 +21,24 @@ export interface InvokeBody {
 export async function getTokenCountFromBedrockInvoke({
   response,
   body,
+  usage,
 }: {
   response: string;
   body: string;
+  usage?: { input_tokens: number; output_tokens: number };
 }): Promise<{
   total: number;
   prompt: number;
   completion: number;
 }> {
+  if (usage != null) {
+    return {
+      prompt: usage.input_tokens,
+      completion: usage.output_tokens,
+      total: usage.input_tokens + usage.output_tokens,
+    };
+  }
+  // deprecated API will not have usage object, but will have the deprecated prompt field to calculate from still
   const chatCompletionRequest = JSON.parse(body) as InvokeBody;
 
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb

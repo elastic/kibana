@@ -3,8 +3,14 @@ $mediumControl: $euiSize * 25;
 $largeControl: $euiSize * 50;
 $controlMinWidth: $euiSize * 14;
 
-.controlGroup {
+.controlsWrapper {
+  display: flex;
+  align-items: center;
   min-height: $euiSize * 4;
+
+  .controlGroup--endButtonGroup {
+    align-self: end;
+  }
 }
 
 .controlsWrapper--twoLine {
@@ -78,14 +84,14 @@ $controlMinWidth: $euiSize * 14;
   flex-basis: auto;
   position: relative;
 
-  .controlFrame__labelToolTip {
-    max-width: 40%;
+  &:not(.controlFrameWrapper-isEditable) {
+    .controlFrame--twoLine {
+      border-radius: $euiFormControlBorderRadius !important;
+    }
   }
 
-  &-isEditable {
-    .controlFrame__formControlLayoutLabel {
-      padding-left: 0;
-    }
+  .controlFrame__labelToolTip {
+    max-width: 40%;
   }
 
   .controlFrame__formControlLayout {
@@ -93,9 +99,10 @@ $controlMinWidth: $euiSize * 14;
     min-width: $controlMinWidth;
     transition: background-color .1s, color .1s;
 
-    &Label {
+    .controlFrame__formControlLayoutLabel {
       @include euiTextTruncate;
       border-radius: $euiBorderRadius;
+      padding-left: 0;
     }
 
     &:not(.controlFrame__formControlLayout-clone) {
@@ -197,5 +204,14 @@ $controlMinWidth: $euiSize * 14;
 
   &--twoLine {
     top: (-$euiSizeXS) !important;
+  }
+}
+
+.controlGroup--invalidSelectionsTour {
+  .controlGroup--suppressTourCheckbox {
+    height: 22px;
+    &Label {
+      font-weight: $euiFontWeightMedium;
+    }
   }
 }

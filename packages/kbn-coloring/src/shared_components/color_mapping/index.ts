@@ -14,6 +14,7 @@ export * from './color/color_handling';
 export { SPECIAL_TOKENS_STRING_CONVERTION } from './color/rule_matching';
 export {
   DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_OTHER_ASSIGNMENT_INDEX,
   getPaletteColors,
   getColorsFromMapping,
 } from './config/default_color_mapping';

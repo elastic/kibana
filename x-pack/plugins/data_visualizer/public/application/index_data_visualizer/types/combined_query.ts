@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 
 export interface CombinedQuery {
   searchString: Query['query'];

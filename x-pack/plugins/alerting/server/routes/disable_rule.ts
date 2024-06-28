@@ -15,6 +15,14 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
+const bodySchema = schema.nullable(
+  schema.maybe(
+    schema.object({
+      untrack: schema.maybe(schema.boolean({ defaultValue: false })),
+    })
+  )
+);
+
 export const disableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
@@ -22,16 +30,22 @@ export const disableRuleRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_disable`,
+      options: {
+        access: 'public',
+        summary: `Disable a rule`,
+      },
       validate: {
         params: paramSchema,
+        body: bodySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
+        const { untrack = false } = req.body || {};
         try {
-          await rulesClient.disable({ id });
+          await rulesClient.disable({ id, untrack });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

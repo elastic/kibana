@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { PreviewTelemetryEventsSender } from '../../../../telemetry/preview_sender';
 import type { ITelemetryReceiver } from '../../../../telemetry/receiver';
+import { PreviewTaskMetricsService } from '../../../../telemetry/preview_task_metrics';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { createTelemetryEndpointTaskConfig } from '../../../../telemetry/tasks/endpoint';
 import { parseNdjson } from './parse_ndjson';
@@ -28,14 +29,17 @@ export const getEndpointPreview = async ({
   };
 
   const taskSender = new PreviewTelemetryEventsSender(logger, telemetrySender);
+  const taskMetricsService = new PreviewTaskMetricsService(logger, taskSender);
   const task = createTelemetryEndpointTaskConfig(1000);
   await task.runTask(
     'endpoint-preview',
     logger,
     telemetryReceiver,
     taskSender,
+    taskMetricsService,
     taskExecutionPeriod
   );
   const messages = taskSender.getSentMessages();
-  return parseNdjson(messages);
+  const taskMetrics = taskMetricsService.getSentMessages();
+  return parseNdjson([...messages, ...taskMetrics]);
 };

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { PLUGIN_ID } from '../../common/constants/app';
 
 export function spacesUtilsProvider(

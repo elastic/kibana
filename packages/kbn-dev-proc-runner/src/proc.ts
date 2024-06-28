@@ -13,7 +13,7 @@ import stripAnsi from 'strip-ansi';
 
 import execa from 'execa';
 import * as Rx from 'rxjs';
-import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs/operators';
+import { tap, share, take, mergeMap, map, ignoreElements, filter } from 'rxjs';
 import chalk from 'chalk';
 import treeKill from 'tree-kill';
 import { ToolingLog } from '@kbn/tooling-log';

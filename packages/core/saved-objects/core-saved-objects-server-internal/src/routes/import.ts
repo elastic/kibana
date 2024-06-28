@@ -36,6 +36,8 @@ export const registerImportRoute = (
     {
       path: '/_import',
       options: {
+        access: 'public',
+        description: `Import saved objects`,
         body: {
           maxBytes: maxImportPayloadBytes,
           output: 'stream',
@@ -66,31 +68,31 @@ export const registerImportRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
-      const { overwrite, createNewCopies, compatibilityMode } = req.query;
+    catchAndReturnBoomErrors(async (context, request, response) => {
+      const { overwrite, createNewCopies, compatibilityMode } = request.query;
       const { getClient, getImporter, typeRegistry } = (await context.core).savedObjects;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient
         .incrementSavedObjectsImport({
-          request: req,
+          request,
           createNewCopies,
           overwrite,
           compatibilityMode,
         })
         .catch(() => {});
 
-      const file = req.body.file as FileStream;
+      const file = request.body.file as FileStream;
       const fileExtension = extname(file.hapi.filename).toLowerCase();
       if (fileExtension !== '.ndjson') {
-        return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
+        return response.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
       let readStream: Readable;
       try {
         readStream = await createSavedObjectsStreamFromNdJson(file);
       } catch (e) {
-        return res.badRequest({
+        return response.badRequest({
           body: e,
         });
       }
@@ -112,10 +114,10 @@ export const registerImportRoute = (
           compatibilityMode,
         });
 
-        return res.ok({ body: result });
+        return response.ok({ body: result });
       } catch (e) {
         if (e instanceof SavedObjectsImportError) {
-          return res.badRequest({
+          return response.badRequest({
             body: {
               message: e.message,
               attributes: e.attributes,

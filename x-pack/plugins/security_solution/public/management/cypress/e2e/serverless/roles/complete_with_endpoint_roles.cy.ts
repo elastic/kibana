@@ -33,7 +33,7 @@ import {
 describe(
   'User Roles for Security Complete PLI with Endpoint Complete addon',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [

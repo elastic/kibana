@@ -80,6 +80,9 @@ module.exports = {
           from: 'react-intl',
           to: '@kbn/i18n-react',
           disallowedMessage: `import from @kbn/i18n-react instead`,
+          exclude: [
+            /packages[\/\\]kbn-i18n-react[\/\\]/,
+          ]
         },
         {
           from: 'styled-components',
@@ -273,6 +276,7 @@ module.exports = {
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
+    '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
     '@kbn/imports/uniform_imports': 'error',
     '@kbn/imports/no_unused_imports': 'error',

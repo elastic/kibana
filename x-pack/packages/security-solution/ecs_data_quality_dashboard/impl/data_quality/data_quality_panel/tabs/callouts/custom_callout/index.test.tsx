@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -23,7 +23,7 @@ describe('CustomCallout', () => {
   beforeEach(() => {
     render(
       <TestProviders>
-        <CustomCallout enrichedFieldMetadata={[hostNameKeyword, someField]}>
+        <CustomCallout customFieldMetadata={[hostNameKeyword, someField]}>
           <div data-test-subj="children">{content}</div>
         </CustomCallout>
       </TestProviders>

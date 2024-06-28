@@ -19,6 +19,7 @@ export const getILMExplainRoute = (router: IRouter, logger: Logger) => {
     .get({
       path: GET_ILM_EXPLAIN,
       access: 'internal',
+      options: { tags: ['access:securitySolution'] },
     })
     .addVersion(
       {

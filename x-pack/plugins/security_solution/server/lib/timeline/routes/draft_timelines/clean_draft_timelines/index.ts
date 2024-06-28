@@ -56,7 +56,7 @@ export const cleanDraftTimelinesRoute = (
           if (draftTimeline?.savedObjectId) {
             await resetTimeline(
               frameworkRequest,
-              [draftTimeline.savedObjectId],
+              draftTimeline.savedObjectId,
               request.body.timelineType
             );
             const cleanedDraftTimeline = await getTimeline(

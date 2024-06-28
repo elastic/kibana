@@ -5,20 +5,42 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { ComponentType, MouseEventHandler } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-
-/**
- * EmbeddableConsoleProps are optional props used when rendering the embeddable developer console.
- */
-export interface EmbeddableConsoleProps {
-  /**
-   * The default height of the content area.
-   */
-  size?: 's' | 'm' | 'l';
-}
+import type { Dispatch } from 'react';
 
 export interface EmbeddableConsoleDependencies {
   core: CoreStart;
   usageCollection?: UsageCollectionStart;
+  setDispatch: (dispatch: Dispatch<EmbeddedConsoleAction> | null) => void;
+  alternateView?: EmbeddedConsoleView;
+  isMonacoEnabled: boolean;
+  getConsoleHeight: () => string | undefined;
+  setConsoleHeight: (value: string) => void;
+}
+
+export type EmbeddedConsoleAction =
+  | { type: 'open'; payload?: { content?: string; alternateView?: boolean } }
+  | { type: 'close' };
+
+export enum EmbeddableConsoleView {
+  Closed,
+  Console,
+  Alternate,
+}
+
+export interface EmbeddedConsoleStore {
+  consoleHasBeenOpened: boolean;
+  view: EmbeddableConsoleView;
+  loadFromContent?: string;
+}
+
+export interface EmbeddedConsoleViewButtonProps {
+  activeView: boolean;
+  onClick: MouseEventHandler<HTMLButtonElement>;
+}
+export interface EmbeddedConsoleView {
+  ActivationButton: ComponentType<EmbeddedConsoleViewButtonProps>;
+  ViewContent: ComponentType<{}>;
 }

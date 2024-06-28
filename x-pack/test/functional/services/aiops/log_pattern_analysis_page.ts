@@ -76,6 +76,17 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async assertTotalCategoriesFoundDiscover(expectedMinimumCategoryCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const actualText = await testSubjects.getVisibleText('dscViewModePatternAnalysisButton');
+        const actualCount = Number(actualText.match(/Patterns \((.+)\)/)![1]);
+        expect(actualCount + 1).to.greaterThan(
+          expectedMinimumCategoryCount,
+          `Expected patterns found count to be >= '${expectedMinimumCategoryCount}' (got '${actualCount}')`
+        );
+      });
+    },
+
     async assertCategoryTableRows(expectedMinimumCategoryCount: number) {
       await retry.tryForTime(5000, async () => {
         const tableListContainer = await testSubjects.find('aiopsLogPatternsTable');
@@ -148,6 +159,17 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async assertDiscoverDocCountGreaterThan(expectedDocCount: number) {
+      await retry.tryForTime(5000, async () => {
+        const docCount = await testSubjects.getVisibleText('discoverQueryHits');
+        const formattedDocCount = docCount.replaceAll(',', '');
+        expect(formattedDocCount).to.above(
+          expectedDocCount,
+          `Expected discover document count to be above '${expectedDocCount}' (got '${formattedDocCount}')`
+        );
+      });
+    },
+
     async clickDiscoverField(fieldName: string) {
       await testSubjects.clickWhenNotDisabled(`dscFieldListPanelField-${fieldName}`, {
         timeout: 5000,
@@ -159,9 +181,19 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       });
     },
 
+    async clickPatternsTab() {
+      await testSubjects.click('dscViewModePatternAnalysisButton');
+    },
+
     async assertLogPatternAnalysisFlyoutExists() {
       await retry.tryForTime(30 * 1000, async () => {
         await testSubjects.existOrFail('mlJobSelectorFlyoutBody');
+      });
+    },
+
+    async assertLogPatternAnalysisTabContentsExists() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.existOrFail('aiopsLogPatternsTable');
       });
     },
 
@@ -196,6 +228,24 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
         await testSubjects.click(option);
 
         await testSubjects.clickWhenNotDisabled('aiopsLogPatternAnalysisShowSamplingOptionsButton');
+        await testSubjects.missingOrFail('aiopsRandomSamplerOptionsFormRow', { timeout: 1000 });
+      });
+    },
+
+    async setRandomSamplingOptionDiscover(option: RandomSamplerOption) {
+      await retry.tryForTime(20000, async () => {
+        await testSubjects.existOrFail('aiopsEmbeddableMenuOptionsButton');
+        await testSubjects.clickWhenNotDisabled('aiopsEmbeddableMenuOptionsButton');
+
+        await testSubjects.clickWhenNotDisabled('aiopsRandomSamplerOptionsSelect');
+
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOff', { timeout: 1000 });
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOnManual', { timeout: 1000 });
+        await testSubjects.existOrFail('aiopsRandomSamplerOptionOnAutomatic', { timeout: 1000 });
+
+        await testSubjects.click(option);
+
+        await testSubjects.clickWhenNotDisabled('aiopsEmbeddableMenuOptionsButton');
         await testSubjects.missingOrFail('aiopsRandomSamplerOptionsFormRow', { timeout: 1000 });
       });
     },

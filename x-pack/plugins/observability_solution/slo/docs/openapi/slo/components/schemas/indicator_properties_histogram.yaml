@@ -1,0 +1,97 @@
+title: Histogram indicator
+required:
+  - type
+  - params
+description: Defines properties for a histogram indicator type
+type: object
+properties:
+  params:
+    description: An object containing the indicator parameters.
+    type: object
+    nullable: false
+    required:
+      - index
+      - timestampField
+      - good
+      - total
+    properties:
+      index:
+        description: The index or index pattern to use
+        type: string
+        example: my-service-*
+      dataViewId:
+        description: The kibana data view id to use, primarily used to include data view runtime mappings.
+          Make sure to save SLO again if you add/update run time fields to the data view and if those fields are being used in slo queries.
+        type: string
+        example: '03b80ab3-003d-498b-881c-3beedbaf1162'
+      filter:
+        description: the KQL query to filter the documents with.
+        type: string
+        example: 'field.environment : "production" and service.name : "my-service"'
+      timestampField:
+        description: >
+          The timestamp field used in the source indice.
+        type: string
+        example: timestamp
+      good:
+        description: >
+          An object defining the "good" events
+        type: object
+        required:
+          - aggregation
+          - field
+        properties:
+          field:
+            description: The field use to aggregate the good events.
+            type: string
+            example: processor.latency
+          aggregation:
+            description: The type of aggregation to use.
+            type: string
+            example: value_count
+            enum: [value_count, range]
+          filter:
+            description: The filter for good events.
+            type: string
+            example: "processor.outcome: \"success\""
+          from:
+            description: The starting value of the range. Only required for "range" aggregations.
+            type: number
+            example: 0
+          to:
+            description: The ending value of the range. Only required for "range" aggregations.
+            type: number
+            example: 100
+      total:
+        description: >
+          An object defining the "total" events
+        type: object
+        required:
+          - aggregation
+          - field
+        properties:
+          field:
+            description: The field use to aggregate the good events.
+            type: string
+            example: processor.latency
+          aggregation:
+            description: The type of aggregation to use.
+            type: string
+            example: value_count
+            enum: [value_count, range]
+          filter:
+            description: The filter for total events.
+            type: string
+            example: "processor.outcome : *"
+          from:
+            description: The starting value of the range. Only required for "range" aggregations.
+            type: number
+            example: 0
+          to:
+            description: The ending value of the range. Only required for "range" aggregations.
+            type: number
+            example: 100
+  type:
+    description: The type of indicator.
+    type: string
+    example: sli.histogram.custom

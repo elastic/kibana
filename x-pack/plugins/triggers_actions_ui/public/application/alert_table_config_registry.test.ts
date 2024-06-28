@@ -112,7 +112,7 @@ describe('update()', () => {
         "id": "test-alert-table-config",
       }
     `);
-    expect(alertTableConfigRegistry.getActions('test-alert-table-config').toggleColumn).toEqual(
+    expect(alertTableConfigRegistry.getActions('test-alert-table-config')?.toggleColumn).toEqual(
       toggleColumn
     );
   });
@@ -169,16 +169,16 @@ describe('getAlertConfigIdPerRuleTypes()', () => {
       'o11y-metric-threshold',
       'ml-alerts-table',
     ]);
-    expect(configId).toEqual('stackAlerts-generic-alert-table');
+    expect(configId).toEqual('stackAlerts-generic-alerts-table');
   });
 
   test('should return the generic config ID if empty ruleTypeIds match with a configuration', () => {
     const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleTypes([]);
-    expect(configId).toEqual('stackAlerts-generic-alert-table');
+    expect(configId).toEqual('stackAlerts-generic-alerts-table');
   });
 
   test('should return the generic config ID if an unknown ruleTypeId match with NO configuration', () => {
     const configId = alertTableConfigRegistry.getAlertConfigIdPerRuleTypes(['unknown-threshold']);
-    expect(configId).toEqual('stackAlerts-generic-alert-table');
+    expect(configId).toEqual('stackAlerts-generic-alerts-table');
   });
 });

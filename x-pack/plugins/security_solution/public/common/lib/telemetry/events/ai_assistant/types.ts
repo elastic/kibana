@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/public';
 import type { TelemetryEventTypes } from '../../constants';
 
 export interface ReportAssistantInvokedParams {
@@ -18,6 +18,9 @@ export interface ReportAssistantMessageSentParams {
   role: string;
   isEnabledKnowledgeBase: boolean;
   isEnabledRAGAlerts: boolean;
+  actionTypeId: string;
+  provider?: string;
+  model?: string;
 }
 
 export interface ReportAssistantQuickPromptParams {
@@ -28,6 +31,7 @@ export interface ReportAssistantQuickPromptParams {
 export interface ReportAssistantSettingToggledParams {
   isEnabledKnowledgeBase?: boolean;
   isEnabledRAGAlerts?: boolean;
+  assistantStreamingEnabled?: boolean;
 }
 
 export type ReportAssistantTelemetryEventParams =

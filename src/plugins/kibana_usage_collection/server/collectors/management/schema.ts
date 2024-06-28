@@ -110,7 +110,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'securitySolution:enableExpandableFlyout': {
+  'securitySolution:enableAssetCriticality': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -460,6 +460,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableServiceInventoryTableSearchBar': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmEnableMultiSignal': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -467,6 +475,29 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'observability:apmAWSLambdaRequestCostPerMillion': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:aiAssistantLogsIndexPattern': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:aiAssistantResponseLanguage': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:aiAssistantSimulatedFunctionCalling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:aiAssistantSearchConnectorIndexPattern': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:logsExplorer:allowedDataViews': {
+    type: 'array',
+    items: {
+      type: 'keyword',
+      _meta: { description: 'Non-default value of setting.' },
+    },
   },
   'banners:placement': {
     type: 'keyword',
@@ -504,10 +535,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'labs:dashboard:linksPanel': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'discover:showFieldStatistics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -516,7 +543,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'discover:enableESQL': {
+  enableESQL: {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -568,6 +595,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableTransactionProfiling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingShowErrorFrames': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:profilingPerVCPUWattX86': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
@@ -592,7 +627,15 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureContainerAssetView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:enableInfrastructureProfilingIntegration': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureAssetCustomDashboards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -620,8 +663,24 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:profilingAzureCostDiscountRate': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'data_views:fields_excluded_data_tiers': {
     type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'devTools:enablePersistentConsole': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'aiAssistant:preferredAIAssistantType': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:profilingFetchTopNFunctionsFromStacktraces': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

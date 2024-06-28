@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import type { ClusterDetails } from '@kbn/es-types';
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { ShardsView } from './shards_view';
 import { OpenShardFailureFlyoutButton } from './shards_view';
 
 interface Props {
-  clusterDetails: ClusterDetails;
+  clusterDetails: estypes.ClusterDetails;
 }
 
 export function ClusterView({ clusterDetails }: Props) {
@@ -26,7 +26,7 @@ export function ClusterView({ clusterDetails }: Props) {
   });
 
   return (
-    <EuiText style={{ width: '100%' }} size="xs">
+    <EuiText style={{ width: '100%' }} size="xs" data-test-subj="inspectorRequestClustersDetails">
       {clusterDetails.timed_out ? (
         <EuiCallOut
           size="s"

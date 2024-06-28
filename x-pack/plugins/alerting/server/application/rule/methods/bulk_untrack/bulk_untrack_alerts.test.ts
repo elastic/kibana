@@ -22,6 +22,8 @@ import { AlertingAuthorization } from '../../../../authorization/alerting_author
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -60,12 +62,17 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
 };
 
 describe('bulkUntrackAlerts()', () => {
   let rulesClient: RulesClient;
+
   beforeEach(async () => {
+    jest.clearAllMocks();
     rulesClient = new RulesClient(rulesClientParams);
   });
 
@@ -79,6 +86,7 @@ describe('bulkUntrackAlerts()', () => {
     ]);
 
     await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
       indices: [
         'she had them apple bottom jeans (jeans)',
         'boots with the fur (with the fur)',
@@ -160,6 +168,7 @@ describe('bulkUntrackAlerts()', () => {
     ]);
 
     await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
       indices: ["honestly who cares we're not even testing the index right now"],
       alertUuids: [mockAlertUuid],
     });
@@ -231,6 +240,63 @@ describe('bulkUntrackAlerts()', () => {
             "taskType": "once told me the world was gonna roll me i ain't the sharpest tool in the shed",
           },
         ],
+      }
+    `);
+  });
+
+  it('should not call bulkUpdateState with no taskIds', async () => {
+    alertsService.setAlertsToUntracked.mockResolvedValueOnce([]);
+
+    await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
+      indices: ['test-index'],
+      alertUuids: ['my-uuid'],
+    });
+
+    expect(alertsService.setAlertsToUntracked).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalledWith();
+  });
+
+  it('filters out undefined rule uuids', async () => {
+    alertsService.setAlertsToUntracked.mockResolvedValueOnce([{}, { foo: 'bar' }]);
+
+    await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
+      indices: ['test-index'],
+      alertUuids: ['my-uuid'],
+    });
+
+    expect(alertsService.setAlertsToUntracked).toHaveBeenCalledTimes(1);
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalledWith();
+  });
+
+  it('should audit log success with no taskIds', async () => {
+    alertsService.setAlertsToUntracked.mockResolvedValueOnce([]);
+
+    await rulesClient.bulkUntrackAlerts({
+      isUsingQuery: true,
+      indices: ['test-index'],
+      alertUuids: ['my-uuid'],
+    });
+
+    expect(taskManager.bulkUpdateState).not.toHaveBeenCalledWith();
+    expect(auditLogger.log.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "rule_alert_untrack",
+          "category": Array [
+            "database",
+          ],
+          "outcome": "success",
+          "type": Array [
+            "change",
+          ],
+        },
+        "kibana": Object {
+          "saved_object": undefined,
+        },
+        "message": "User has untracked a rule",
       }
     `);
   });

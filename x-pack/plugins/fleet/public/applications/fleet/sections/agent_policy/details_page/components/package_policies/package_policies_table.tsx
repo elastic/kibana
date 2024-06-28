@@ -61,8 +61,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
-  const canReadIntegrationPolicies = useAuthz().integrations.readIntegrationPolicies;
+  const authz = useAuthz();
+  const canWriteIntegrationPolicies = authz.integrations.writeIntegrationPolicies;
+  const canReadIntegrationPolicies = authz.integrations.readIntegrationPolicies;
   const { isPackagePolicyUpgradable } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
 
@@ -248,7 +249,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             render: (packagePolicy: InMemoryPackagePolicy) => {
               return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
-                  agentPolicy={agentPolicy}
+                  agentPolicies={[agentPolicy]}
                   from={'fleet-policy-list'}
                   packagePolicy={packagePolicy}
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {
@@ -334,7 +335,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           },
         ],
       }}
-      isSelectable={false}
     />
   );
 };

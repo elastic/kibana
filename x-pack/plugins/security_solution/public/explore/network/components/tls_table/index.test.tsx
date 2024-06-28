@@ -10,17 +10,8 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import '../../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
+import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import { networkModel } from '../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
@@ -29,7 +20,6 @@ jest.mock('../../../../common/lib/kibana');
 
 describe('Tls Table Component', () => {
   const loadPage = jest.fn();
-  const state: State = mockGlobalState;
   const defaultProps = {
     data: mockTlsData.edges,
     fakeTotalCount: getOr(50, 'fakeTotalCount', mockTlsData.pageInfo),
@@ -42,12 +32,11 @@ describe('Tls Table Component', () => {
     totalCount: 1,
     type: networkModel.NetworkType.details,
   };
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  let store = createMockStore();
   const mount = useMountAppended();
 
   beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    store = createMockStore();
   });
 
   describe('Rendering', () => {

@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../../services/ml_api_service';
-import { ToastNotificationService } from '../../../../../services/toast_notification_service';
+import type { ToastNotificationService } from '../../../../../services/toast_notification_service';
 
 import { refreshAnalyticsList$, REFRESH_ANALYTICS_LIST_STATE } from '../../../../common';
 
-import { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
+import type { DataFrameAnalyticsListRow } from '../../components/analytics_list/common';
 
 export const startAnalytics = async (
   d: DataFrameAnalyticsListRow,

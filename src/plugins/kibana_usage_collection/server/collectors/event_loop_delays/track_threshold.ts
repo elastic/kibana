@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { takeUntil, finalize } from 'rxjs/operators';
+import { takeUntil, finalize } from 'rxjs';
 import { Observable, timer } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';

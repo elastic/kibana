@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { TSESTree } from '@typescript-eslint/typescript-estree';
+import type { TSESTree, TSNode } from '@typescript-eslint/typescript-estree';
 import type { Rule } from 'eslint';
 import { getI18nIdentifierFromFilePath } from '../helpers/get_i18n_identifier_from_file_path';
 import { getFunctionName } from '../helpers/get_function_name';
@@ -22,7 +22,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
     fixable: 'code',
   },
   create(context) {
-    const { cwd, filename, getScope, sourceCode, report } = context;
+    const { cwd, filename, sourceCode, report } = context;
 
     return {
       CallExpression: (node: TSESTree.CallExpression) => {
@@ -47,7 +47,8 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
           node.arguments[0].value;
 
         const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
-        const functionDeclaration = getScope().block as TSESTree.FunctionDeclaration;
+        const functionDeclaration = sourceCode.getScope(node as TSNode)
+          .block as TSESTree.FunctionDeclaration;
         const functionName = getFunctionName(functionDeclaration);
 
         // Check if i18n has already been imported into the file
@@ -57,7 +58,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
             translationFunction: 'i18n.translate',
           });
 
-        if (!identifier || (identifier && !identifier.startsWith(`${i18nAppId}.`))) {
+        if (!identifier) {
           report({
             node: node as any,
             message: RULE_WARNING_MESSAGE,
@@ -67,6 +68,40 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
                   node.range,
                   `i18n.translate('${i18nAppId}.${functionName}.', { defaultMessage: '' })`
                 ),
+                !hasI18nImportLine && rangeToAddI18nImportLine
+                  ? replaceMode === 'replace'
+                    ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)
+                    : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
+                  : null,
+              ].filter(isTruthy);
+            },
+          });
+        }
+
+        if (identifier && !identifier.startsWith(`${i18nAppId}.`)) {
+          const i18nIdentifierRange = node.arguments[0].range;
+
+          const oldI18nIdentifierArray = identifier.split('.');
+          const correctI18nIdentifier =
+            oldI18nIdentifierArray[0] === 'xpack'
+              ? `${i18nAppId}.${oldI18nIdentifierArray.slice(2).join('.')}`
+              : `${i18nAppId}.${oldI18nIdentifierArray.slice(1).join('.')}`;
+
+          const hasExistingOpts = node.arguments.length > 1;
+
+          report({
+            node: node as any,
+            message: RULE_WARNING_MESSAGE,
+            fix(fixer) {
+              return [
+                hasExistingOpts
+                  ? // if there are existing options, only replace the i18n identifier and keep the options
+                    fixer.replaceTextRange(i18nIdentifierRange, `\'${correctI18nIdentifier}\'`)
+                  : // if there are no existing options, add an options object with an empty default message
+                    fixer.replaceTextRange(
+                      i18nIdentifierRange,
+                      `\'${correctI18nIdentifier}\', { defaultMessage: '' }`
+                    ),
                 !hasI18nImportLine && rangeToAddI18nImportLine
                   ? replaceMode === 'replace'
                     ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)

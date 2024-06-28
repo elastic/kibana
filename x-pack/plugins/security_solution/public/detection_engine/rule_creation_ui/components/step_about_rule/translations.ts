@@ -90,3 +90,10 @@ export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
     defaultMessage: 'Add rule investigation guide...',
   }
 );
+
+export const ADD_RULE_SETUP_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.setupHelpText',
+  {
+    defaultMessage: 'Add rule setup guide...',
+  }
+);

@@ -33,12 +33,15 @@ import { AgentRequestDiagnosticsModal } from '../components/agent_request_diagno
 
 import type { SelectionMode } from './components/types';
 
-import { AgentTableHeader } from './components/table_header';
-import { SearchAndFilterBar } from './components/search_and_filter_bar';
-import { TagsAddRemove } from './components/tags_add_remove';
-import { AgentActivityFlyout, AgentSoftLimitCallout } from './components';
-import { TableRowActions } from './components/table_row_actions';
-import { AgentListTable } from './components/agent_list_table';
+import {
+  AgentListTable,
+  AgentSoftLimitCallout,
+  AgentTableHeader,
+  SearchAndFilterBar,
+  TableRowActions,
+  TagsAddRemove,
+} from './components';
+import { AgentActivityFlyout } from './components/agent_activity_flyout';
 import { useAgentSoftLimit, useMissingEncryptionKeyCallout, useFetchAgentsData } from './hooks';
 
 export const AgentListPage: React.FunctionComponent<{}> = () => {
@@ -49,16 +52,40 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [selectedAgents, setSelectedAgents] = useState<Agent[]>([]);
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('manual');
 
+  // Agent enrollment flyout state
+  const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
+    isOpen: boolean;
+    selectedPolicyId?: string;
+  }>({
+    isOpen: false,
+  });
+  const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
+  const flyoutContext = useFlyoutContext();
+
+  // Agent actions states
+  const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
+  const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
+  const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
+    undefined
+  );
+  const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
+  const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
+  const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
+    undefined
+  );
+
+  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+
   const {
     allTags,
     agentsOnCurrentPage,
     agentsStatus,
     isLoading,
-    shownAgents,
-    inactiveShownAgents,
+    nAgentsInTable,
     totalInactiveAgents,
     totalManagedAgentIds,
-    inactiveManagedAgentIds,
     managedAgentsOnCurrentPage,
     showUpgradeable,
     setShowUpgradeable,
@@ -85,6 +112,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setDraftKuery,
     fetchData,
     currentRequestRef,
+    latestAgentActionErrors,
+    setLatestAgentActionErrors,
   } = useFetchAgentsData();
 
   const onSubmitSearch = useCallback(
@@ -121,31 +150,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedTags,
     setShowUpgradeable,
   ]);
-
-  // Agent enrollment flyout state
-  const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
-    isOpen: boolean;
-    selectedPolicyId?: string;
-  }>({
-    isOpen: false,
-  });
-  const [isAgentActivityFlyoutOpen, setAgentActivityFlyoutOpen] = useState(false);
-  const flyoutContext = useFlyoutContext();
-
-  // Agent actions states
-  const [agentToReassign, setAgentToReassign] = useState<Agent | undefined>(undefined);
-  const [agentToUnenroll, setAgentToUnenroll] = useState<Agent | undefined>(undefined);
-  const [agentToGetUninstallCommand, setAgentToGetUninstallCommand] = useState<Agent | undefined>(
-    undefined
-  );
-  const [agentToUpgrade, setAgentToUpgrade] = useState<Agent | undefined>(undefined);
-  const [agentToAddRemoveTags, setAgentToAddRemoveTags] = useState<Agent | undefined>(undefined);
-  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
-  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
-  const [agentToRequestDiagnostics, setAgentToRequestDiagnostics] = useState<Agent | undefined>(
-    undefined
-  );
-  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
 
   const onTableChange = ({
     page,
@@ -213,12 +217,26 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         differenceBy(selectedAgents, agentsOnCurrentPage, 'id').length === 0;
       if (!areSelectedAgentsStillVisible) {
         // force selecting all agents on current page if staying in query mode
-        return setSelectedAgents(agentsOnCurrentPage);
+        return setSelectedAgents(agentsOnCurrentPage.filter((agent) => isAgentSelectable(agent)));
       } else {
         setSelectionMode('manual');
       }
     }
     setSelectedAgents(newAgents);
+  };
+
+  const onSelectedStatusChange = (status: string[]) => {
+    if (selectionMode === 'query') {
+      setSelectionMode('manual');
+    }
+    setSelectedStatus(status);
+  };
+
+  const onSelectedAgentPoliciesChange = (policies: string[]) => {
+    if (selectionMode === 'query') {
+      setSelectionMode('manual');
+    }
+    setSelectedAgentPolicies(policies);
   };
 
   const agentToUnenrollHasFleetServer = useMemo(() => {
@@ -252,7 +270,8 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const onClickAgentActivity = useCallback(() => {
     setAgentActivityFlyoutOpen(true);
-  }, [setAgentActivityFlyoutOpen]);
+    setLatestAgentActionErrors([]);
+  }, [setAgentActivityFlyoutOpen, setLatestAgentActionErrors]);
 
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
     fetchData({ refreshTags });
@@ -271,6 +290,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
             setSelectedStatus={setSelectedStatus}
+            agentPolicies={agentPolicies}
           />
         </EuiPortal>
       ) : null}
@@ -390,34 +410,33 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onDraftKueryChange={setDraftKuery}
         onSubmitSearch={onSubmitSearch}
         selectedAgentPolicies={selectedAgentPolicies}
-        onSelectedAgentPoliciesChange={setSelectedAgentPolicies}
+        onSelectedAgentPoliciesChange={onSelectedAgentPoliciesChange}
         selectedStatus={selectedStatus}
-        onSelectedStatusChange={setSelectedStatus}
+        onSelectedStatusChange={onSelectedStatusChange}
         showUpgradeable={showUpgradeable}
         onShowUpgradeableChange={setShowUpgradeable}
         tags={allTags ?? []}
         selectedTags={selectedTags}
         onSelectedTagsChange={setSelectedTags}
-        shownAgents={shownAgents}
-        inactiveShownAgents={inactiveShownAgents}
+        nAgentsInTable={nAgentsInTable}
         totalInactiveAgents={totalInactiveAgents}
         totalManagedAgentIds={totalManagedAgentIds}
-        inactiveManagedAgentIds={inactiveManagedAgentIds}
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
         onClickAddFleetServer={onClickAddFleetServer}
-        visibleAgents={agentsOnCurrentPage}
+        agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
         showAgentActivityTour={showAgentActivityTour}
+        latestAgentActionErrors={latestAgentActionErrors.length}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         showInactive={showInactive}
-        totalAgents={shownAgents}
+        totalAgents={nAgentsInTable}
         agentStatus={agentsStatus}
         selectableAgents={agentsOnCurrentPage?.filter(isAgentSelectable).length || 0}
         managedAgentsOnCurrentPage={managedAgentsOnCurrentPage}
@@ -446,7 +465,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
         pagination={pagination}
-        totalAgents={Math.min(shownAgents, SO_SEARCH_LIMIT)}
+        totalAgents={Math.min(nAgentsInTable, SO_SEARCH_LIMIT)}
         isUsingFilter={isUsingFilter}
         setEnrollmentFlyoutState={setEnrollmentFlyoutState}
         clearFilters={clearFilters}

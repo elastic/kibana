@@ -11,11 +11,10 @@ import { omit } from 'lodash/fp';
 
 import {
   eventCategory,
-  someField,
   timestamp,
 } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { mockPartitionedFieldMetadata } from '../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { mockStatsGreenIndex } from '../../mock/stats/mock_stats_green_index';
+import { mockStatsAuditbeatIndex } from '../../mock/stats/mock_stats_packetbeat_index';
 import {
   getEcsCompliantColor,
   getMissingTimestampComment,
@@ -38,11 +37,11 @@ describe('helpers', () => {
     });
 
     test('it returns false when `enrichedFieldMetadata` contains an @timestamp field', () => {
-      expect(showMissingTimestampCallout([timestamp, eventCategory, someField])).toBe(false);
+      expect(showMissingTimestampCallout([timestamp, eventCategory])).toBe(false);
     });
 
     test('it returns true when `enrichedFieldMetadata` does NOT contain an @timestamp field', () => {
-      expect(showMissingTimestampCallout([eventCategory, someField])).toBe(true);
+      expect(showMissingTimestampCallout([eventCategory])).toBe(true);
     });
   });
 
@@ -83,7 +82,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
           setSelectedTabId: jest.fn(),
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
           baseTheme: DARK_THEME,
         }).map((x) => omit(['append', 'content'], x))
       ).toEqual([

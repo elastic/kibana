@@ -5,11 +5,24 @@
  * 2.0.
  */
 
-import { CreateSLOInput, FindSLODefinitionsResponse } from '@kbn/slo-schema';
+import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '@kbn/slo-plugin/common/constants';
+import {
+  CreateSLOInput,
+  fetchHistoricalSummaryParamsSchema,
+  FetchHistoricalSummaryResponse,
+  FindSLODefinitionsResponse,
+} from '@kbn/slo-schema';
+import * as t from 'io-ts';
+import { waitForIndexToBeEmpty } from '../apis/slos/helper/wait_for_index_state';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+type FetchHistoricalSummaryParams = t.OutputOf<
+  typeof fetchHistoricalSummaryParamsSchema.props.body
+>;
 
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esClient = getService('es');
 
   return {
     async create(params: CreateSLOInput) {
@@ -37,15 +50,25 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
-      await Promise.all(
-        (response.body as FindSLODefinitionsResponse).results.map(({ id }) => {
-          return supertest
-            .delete(`/api/observability/slos/${id}`)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
-        })
-      );
+      for (const { id } of (response.body as FindSLODefinitionsResponse).results) {
+        await supertest
+          .delete(`/api/observability/slos/${id}`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(204);
+      }
+      await waitForIndexToBeEmpty({ esClient, indexName: SLO_SUMMARY_DESTINATION_INDEX_NAME });
+    },
+    async fetchHistoricalSummary(
+      params: FetchHistoricalSummaryParams
+    ): Promise<FetchHistoricalSummaryResponse> {
+      const { body } = await supertest
+        .post(`/internal/observability/slos/_historical_summary`)
+        .set('kbn-xsrf', 'foo')
+        .set('elastic-api-version', '1')
+        .send(params);
+
+      return body;
     },
   };
 }

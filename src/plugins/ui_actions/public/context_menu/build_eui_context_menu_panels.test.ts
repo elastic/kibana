@@ -13,13 +13,13 @@ import { PresentableGrouping } from '@kbn/ui-actions-browser';
 
 const createTestAction = ({
   type,
-  dispayName,
+  displayName,
   order,
   grouping = undefined,
   disabled,
 }: {
   type?: string;
-  dispayName: string;
+  displayName: string;
   order?: number;
   grouping?: PresentableGrouping;
   disabled?: boolean;
@@ -27,7 +27,7 @@ const createTestAction = ({
   createAction({
     id: type as string,
     type,
-    getDisplayName: () => dispayName,
+    getDisplayName: () => displayName,
     order,
     execute: async () => {},
     grouping,
@@ -47,27 +47,27 @@ test('sorts items in DESC order by "order" field first, then by display name', a
     createTestAction({
       order: 1,
       type: 'foo',
-      dispayName: 'a-1',
+      displayName: 'a-1',
     }),
     createTestAction({
       order: 2,
       type: 'foo',
-      dispayName: 'a-2',
+      displayName: 'a-2',
     }),
     createTestAction({
       order: 3,
       type: 'foo',
-      dispayName: 'a-3',
+      displayName: 'a-3',
     }),
     createTestAction({
       order: 2,
       type: 'foo',
-      dispayName: 'b-2',
+      displayName: 'b-2',
     }),
     createTestAction({
       order: 2,
       type: 'foo',
-      dispayName: 'c-2',
+      displayName: 'c-2',
     }),
   ].sort(() => 0.5 - Math.random());
 
@@ -133,7 +133,7 @@ test('can build menu with one action', async () => {
     actions: [
       {
         action: createTestAction({
-          dispayName: 'Foo',
+          displayName: 'Foo',
         }),
         context: {},
         trigger: {
@@ -162,11 +162,11 @@ test('orders items according to "order" field', async () => {
   const actions = [
     createTestAction({
       order: 1,
-      dispayName: 'Foo',
+      displayName: 'Foo',
     }),
     createTestAction({
       order: 2,
-      dispayName: 'Bar',
+      displayName: 'Bar',
     }),
   ];
   const menu = await buildContextMenuForActions({
@@ -179,11 +179,11 @@ test('orders items according to "order" field', async () => {
   const actions2 = [
     createTestAction({
       order: 2,
-      dispayName: 'Bar',
+      displayName: 'Bar',
     }),
     createTestAction({
       order: 1,
-      dispayName: 'Foo',
+      displayName: 'Foo',
     }),
   ];
   const menu2 = await buildContextMenuForActions({
@@ -197,19 +197,19 @@ test('orders items according to "order" field', async () => {
 test('hides items behind in "More" submenu if there are more than 4 actions', async () => {
   const actions = [
     createTestAction({
-      dispayName: 'Foo 1',
+      displayName: 'Foo 1',
     }),
     createTestAction({
-      dispayName: 'Foo 2',
+      displayName: 'Foo 2',
     }),
     createTestAction({
-      dispayName: 'Foo 3',
+      displayName: 'Foo 3',
     }),
     createTestAction({
-      dispayName: 'Foo 4',
+      displayName: 'Foo 4',
     }),
     createTestAction({
-      dispayName: 'Foo 5',
+      displayName: 'Foo 5',
     }),
   ];
   const menu = await buildContextMenuForActions({
@@ -257,16 +257,16 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
 test('separates grouped items from main items with a separator', async () => {
   const actions = [
     createTestAction({
-      dispayName: 'Foo 1',
+      displayName: 'Foo 1',
     }),
     createTestAction({
-      dispayName: 'Foo 2',
+      displayName: 'Foo 2',
     }),
     createTestAction({
-      dispayName: 'Foo 3',
+      displayName: 'Foo 3',
     }),
     createTestAction({
-      dispayName: 'Foo 4',
+      displayName: 'Foo 4',
       grouping: [
         {
           id: 'testGroup',
@@ -319,16 +319,16 @@ test('separates grouped items from main items with a separator', async () => {
 test('separates multiple groups each with its own separator', async () => {
   const actions = [
     createTestAction({
-      dispayName: 'Foo 1',
+      displayName: 'Foo 1',
     }),
     createTestAction({
-      dispayName: 'Foo 2',
+      displayName: 'Foo 2',
     }),
     createTestAction({
-      dispayName: 'Foo 3',
+      displayName: 'Foo 3',
     }),
     createTestAction({
-      dispayName: 'Foo 4',
+      displayName: 'Foo 4',
       grouping: [
         {
           id: 'testGroup',
@@ -337,7 +337,7 @@ test('separates multiple groups each with its own separator', async () => {
       ],
     }),
     createTestAction({
-      dispayName: 'Foo 5',
+      displayName: 'Foo 5',
       grouping: [
         {
           id: 'testGroup2',
@@ -405,7 +405,7 @@ test('separates multiple groups each with its own separator', async () => {
 test('does not add separator for first grouping if there are no main items', async () => {
   const actions = [
     createTestAction({
-      dispayName: 'Foo 4',
+      displayName: 'Foo 4',
       grouping: [
         {
           id: 'testGroup',
@@ -414,7 +414,7 @@ test('does not add separator for first grouping if there are no main items', asy
       ],
     }),
     createTestAction({
-      dispayName: 'Foo 5',
+      displayName: 'Foo 5',
       grouping: [
         {
           id: 'testGroup2',
@@ -467,11 +467,11 @@ test('does not add separator for first grouping if there are no main items', asy
 test('it creates disabled actions', async () => {
   const actions = [
     createTestAction({
-      dispayName: 'Foo 4',
+      displayName: 'Foo 4',
       disabled: true,
     }),
     createTestAction({
-      dispayName: 'Foo 5',
+      displayName: 'Foo 5',
     }),
   ];
   const menu = await buildContextMenuForActions({

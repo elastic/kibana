@@ -6,7 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import { debounceTime, first, map, switchMap } from 'rxjs/operators';
+import { debounceTime, first, map, switchMap } from 'rxjs';
 import { getLayerList, getMapZoom } from '../../../selectors/map_selectors';
 import { MapStore } from '../../../reducers/store';
 

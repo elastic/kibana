@@ -52,8 +52,11 @@ export interface IntegrationCardItem {
   isReauthorizationRequired?: boolean;
   isUnverified?: boolean;
   isUpdateAvailable?: boolean;
+  isQuickstart?: boolean;
   showLabels?: boolean;
   extraLabelsBadges?: React.ReactNode[];
+  onCardClick?: () => void;
+  isCollectionCard?: boolean;
 }
 
 export const mapToCard = ({

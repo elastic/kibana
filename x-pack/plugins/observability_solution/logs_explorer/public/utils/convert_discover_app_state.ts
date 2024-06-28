@@ -10,21 +10,28 @@ import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import { ExistsFilter, Filter, FILTERS, PhrasesFilter } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { cloneDeep } from 'lodash';
+import { CONTENT_FIELD, RESOURCE_FIELD, SMART_FALLBACK_FIELDS } from '../../common/constants';
 import {
   ChartDisplayOptions,
   DisplayOptions,
   GridColumnDisplayOptions,
   GridRowsDisplayOptions,
 } from '../../common';
-import { ControlOptions, OptionsListControlOption } from '../controller';
+import type { ControlOptions, OptionsListControl } from '../controller';
 
 export const getGridColumnDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
 ): GridColumnDisplayOptions[] | undefined =>
-  discoverAppState.columns?.map((field) => ({
-    field,
-    width: discoverAppState.grid?.columns?.[field]?.width,
-  }));
+  discoverAppState.columns?.map((field) => {
+    if (field === CONTENT_FIELD || field === RESOURCE_FIELD) {
+      return SMART_FALLBACK_FIELDS[field];
+    }
+    return {
+      type: 'document-field',
+      field,
+      width: discoverAppState.grid?.columns?.[field]?.width,
+    };
+  });
 
 export const getGridRowsDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
@@ -58,18 +65,32 @@ export const getDiscoverAppStateFromContext = (
   filters: cloneDeep(displayOptions.filters),
 });
 
+export const getDiscoverColumnsWithFallbackFieldsFromDisplayOptions = (
+  displayOptions: DisplayOptions
+): DiscoverAppState['columns'] =>
+  displayOptions.grid.columns.flatMap((column) => {
+    return column.type === 'document-field'
+      ? column.field
+      : SMART_FALLBACK_FIELDS[column.smartField].fallbackFields;
+  });
+
 export const getDiscoverColumnsFromDisplayOptions = (
   displayOptions: DisplayOptions
-): DiscoverAppState['columns'] => displayOptions.grid.columns.map(({ field }) => field);
+): DiscoverAppState['columns'] =>
+  displayOptions.grid.columns.flatMap((column) => {
+    return column.type === 'document-field' ? column.field : column.smartField;
+  });
 
 export const getDiscoverGridFromDisplayOptions = (
   displayOptions: DisplayOptions
 ): DiscoverAppState['grid'] => ({
   columns: displayOptions.grid.columns.reduce<
     NonNullable<NonNullable<DiscoverAppState['grid']>['columns']>
-  >((gridColumns, { field, width }) => {
-    if (width != null) {
-      gridColumns[field] = { width };
+  >((gridColumns, column) => {
+    const key = column.type === 'document-field' ? column.field : column.smartField;
+
+    if (column.width != null) {
+      gridColumns[key] = { width: column.width };
     }
     return gridColumns;
   }, {}),
@@ -79,55 +100,78 @@ const createDiscoverPhrasesFilter = ({
   key,
   values,
   negate,
+  index,
 }: {
-  values: PhraseFilterValue[];
+  index: string;
   key: string;
+  values: PhraseFilterValue[];
   negate?: boolean;
-}): PhrasesFilter =>
-  ({
-    meta: {
-      key,
-      negate,
-      type: FILTERS.PHRASES,
-      params: values,
+}): PhrasesFilter => ({
+  meta: {
+    index,
+    type: FILTERS.PHRASES,
+    key,
+    params: values.map((value) => value.toString()),
+    negate,
+  },
+  query: {
+    bool: {
+      should: values.map((value) => ({ match_phrase: { [key]: value.toString() } })),
+      minimum_should_match: 1,
     },
-    query: {
-      bool: {
-        should: values.map((value) => ({ match_phrase: { [key]: value.toString() } })),
-        minimum_should_match: 1,
-      },
-    },
-  } as PhrasesFilter);
+  },
+});
 
 const createDiscoverExistsFilter = ({
+  index,
   key,
   negate,
 }: {
   key: string;
+  index: string;
   negate?: boolean;
 }): ExistsFilter => ({
   meta: {
+    index,
+    type: FILTERS.EXISTS,
+    value: FILTERS.EXISTS, // Required for the filter to be displayed correctly in FilterBadge
     key,
     negate,
-    type: FILTERS.EXISTS,
   },
   query: { exists: { field: key } },
 });
 
-export const getDiscoverFiltersFromState = (filters: Filter[] = [], controls?: ControlOptions) => [
-  ...filters,
-  ...(controls
-    ? (Object.keys(controls) as Array<keyof ControlOptions>).map((key) =>
-        controls[key as keyof ControlOptions]?.selection.type === 'exists'
-          ? createDiscoverExistsFilter({
-              key,
-              negate: controls[key]?.mode === 'exclude',
-            })
-          : createDiscoverPhrasesFilter({
-              key,
-              values: (controls[key]?.selection as OptionsListControlOption).selectedOptions,
-              negate: controls[key]?.mode === 'exclude',
-            })
-      )
-    : []),
-];
+export const getDiscoverFiltersFromState = (
+  index: string,
+  filters: Filter[] = [],
+  controls?: ControlOptions
+) => {
+  return [
+    ...filters,
+    ...(controls
+      ? (Object.entries(controls) as Array<[keyof ControlOptions, OptionsListControl]>).reduce<
+          Filter[]
+        >((acc, [key, control]) => {
+          if (control.selection.type === 'exists') {
+            acc.push(
+              createDiscoverExistsFilter({
+                index,
+                key,
+                negate: control.mode === 'exclude',
+              })
+            );
+          } else if (control.selection.selectedOptions.length > 0) {
+            acc.push(
+              createDiscoverPhrasesFilter({
+                index,
+                key,
+                values: control.selection.selectedOptions,
+                negate: control.mode === 'exclude',
+              })
+            );
+          }
+          return acc;
+        }, [])
+      : []),
+  ];
+};

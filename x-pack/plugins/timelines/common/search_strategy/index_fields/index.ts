@@ -6,8 +6,9 @@
  */
 
 import type { IFieldSubType } from '@kbn/es-query';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IEsSearchRequest, IEsSearchResponse, FieldSpec } from '@kbn/data-plugin/common';
+import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
 
 import type { Maybe } from '../common';
@@ -75,17 +76,14 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  */
 export interface BrowserField {
   aggregatable: boolean;
-  category: string;
-  description: string | null;
-  example: string | number | null;
-  fields: Record<string, Partial<BrowserField>>;
+  fields: Record<string, Partial<BrowserField>>; // FIXME: missing in FieldSpec
   format: string;
-  indexes: string[];
+  indexes: string[]; // FIXME: missing in FieldSpec
   name: string;
   searchable: boolean;
   type: string;
   esTypes?: string[];
-  subType?: IFieldSubType;
+  subType?: IFieldSubType; // not sure
   readFromDocValues: boolean;
   runtimeField?: RuntimeField;
 }

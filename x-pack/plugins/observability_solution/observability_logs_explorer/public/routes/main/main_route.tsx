@@ -7,49 +7,61 @@
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
-  LogExplorerController,
-  LogExplorerPluginStart,
+  LogsExplorerController,
+  LogsExplorerPluginStart,
 } from '@kbn/logs-explorer-plugin/public';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
-import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
-import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
-import { createLogExplorerControllerWithCustomizations } from '../../log_explorer_customizations';
+import { LogsExplorerTopNavMenu } from '../../components/logs_explorer_top_nav_menu';
+import { ObservabilityLogsExplorerPageTemplate } from '../../components/page_template';
+import { createLogsExplorerControllerWithCustomizations } from '../../logs_explorer_customizations';
 import {
-  ObservabilityLogExplorerPageStateProvider,
-  useObservabilityLogExplorerPageStateContext,
-} from '../../state_machines/observability_log_explorer/src';
+  ObservabilityLogsExplorerPageStateProvider,
+  useObservabilityLogsExplorerPageStateContext,
+} from '../../state_machines/observability_logs_explorer/src';
 import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
-import { ObservabilityLogExplorerHistory } from '../../types';
+import { ObservabilityLogsExplorerHistory } from '../../types';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
-export const ObservabilityLogExplorerMainRoute = () => {
+export const ObservabilityLogsExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
-  const { logsExplorer, serverless, chrome, notifications, appParams } = services;
+  const { logsExplorer, serverless, chrome, notifications, appParams, analytics, i18n, theme } =
+    services;
   const { history } = appParams;
 
   useBreadcrumbs(noBreadcrumbs, chrome, serverless);
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
-  const createLogExplorerController = useMemo(
-    () => createLogExplorerControllerWithCustomizations(logsExplorer.createLogExplorerController),
-    [logsExplorer.createLogExplorerController]
+  const createLogsExplorerController = useMemo(
+    () =>
+      createLogsExplorerControllerWithCustomizations(
+        logsExplorer.createLogsExplorerController,
+        services
+      ),
+    [logsExplorer.createLogsExplorerController, services]
   );
 
   return (
-    <ObservabilityLogExplorerPageStateProvider
-      createLogExplorerController={createLogExplorerController}
+    <ObservabilityLogsExplorerPageStateProvider
+      createLogsExplorerController={createLogsExplorerController}
       toasts={notifications.toasts}
       urlStateStorageContainer={urlStateStorageContainer}
       timeFilterService={services.data.query.timefilter.timefilter}
+      analytics={services.analytics}
     >
-      <LogExplorerTopNavMenu />
-      <LazyOriginInterpreter history={history} toasts={notifications.toasts} />
+      <LogsExplorerTopNavMenu />
+      <LazyOriginInterpreter
+        history={history}
+        toasts={notifications.toasts}
+        analytics={analytics}
+        i18n={i18n}
+        theme={theme}
+      />
       <ConnectedContent />
-    </ObservabilityLogExplorerPageStateProvider>
+    </ObservabilityLogsExplorerPageStateProvider>
   );
 };
 
@@ -61,14 +73,14 @@ const ConnectedContent = React.memo(() => {
     },
   } = useKibanaContextForPlugin();
 
-  const [state] = useActor(useObservabilityLogExplorerPageStateContext());
+  const [state] = useActor(useObservabilityLogsExplorerPageStateContext());
 
   if (state.matches('initialized')) {
     return (
       <InitializedContent
-        logExplorerController={state.context.controller}
+        logsExplorerController={state.context.controller}
         history={history}
-        logExplorer={logsExplorer}
+        logsExplorer={logsExplorer}
       />
     );
   } else {
@@ -77,7 +89,7 @@ const ConnectedContent = React.memo(() => {
 });
 
 const InitializingContent = React.memo(() => (
-  <ObservabilityLogExplorerPageTemplate>
+  <ObservabilityLogsExplorerPageTemplate>
     <EuiEmptyPrompt
       icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
       title={
@@ -87,23 +99,23 @@ const InitializingContent = React.memo(() => (
         />
       }
     />
-  </ObservabilityLogExplorerPageTemplate>
+  </ObservabilityLogsExplorerPageTemplate>
 ));
 
 const InitializedContent = React.memo(
   ({
     history,
-    logExplorer,
-    logExplorerController,
+    logsExplorer,
+    logsExplorerController,
   }: {
-    history: ObservabilityLogExplorerHistory;
-    logExplorer: LogExplorerPluginStart;
-    logExplorerController: LogExplorerController;
+    history: ObservabilityLogsExplorerHistory;
+    logsExplorer: LogsExplorerPluginStart;
+    logsExplorerController: LogsExplorerController;
   }) => {
     return (
-      <ObservabilityLogExplorerPageTemplate>
-        <logExplorer.LogExplorer controller={logExplorerController} scopedHistory={history} />
-      </ObservabilityLogExplorerPageTemplate>
+      <ObservabilityLogsExplorerPageTemplate>
+        <logsExplorer.LogsExplorer controller={logsExplorerController} scopedHistory={history} />
+      </ObservabilityLogsExplorerPageTemplate>
     );
   }
 );

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { PUBLIC_ROUTES } from '@kbn/reporting-common';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../..';
-import { PUBLIC_ROUTES } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../common';
 import { commonJobsRouteHandlerFactory } from '../common/jobs';
 

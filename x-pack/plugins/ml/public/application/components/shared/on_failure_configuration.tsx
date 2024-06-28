@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useState, memo } from 'react';
+import type { FC } from 'react';
+import React, { useState, memo } from 'react';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCode,
@@ -17,7 +19,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';

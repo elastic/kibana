@@ -9,7 +9,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, CoreStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import { IEsError } from './types';
 import { EsError } from './es_error';
 import { PainlessError } from './painless_error';
@@ -34,7 +34,7 @@ export function createEsError(
   err: IEsError,
   openInInspector: () => void,
   services: Services,
-  dataView?: DataView
+  dataView?: AbstractDataView
 ) {
   const rootCauses = err.attributes?.error ? getNestedCauses(err.attributes?.error) : [];
 

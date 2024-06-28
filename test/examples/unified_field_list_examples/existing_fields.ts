@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const TEST_START_TIME = 'Jan 2, 2021 @ 00:00:00.000';
 const TEST_END_TIME = 'Jan 2, 2022 @ 00:00:00.000';
-const metaFields = ['_id', '_index', '_score'];
+const metaFields = ['_id', '_index', '_score', '_ignored'];
 
 const fieldsWithData = [
   'ts',
@@ -73,7 +73,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.timePicker.setAbsoluteRange(TEST_START_TIME, TEST_END_TIME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-      await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
+      await PageObjects.unifiedFieldList.openSidebarSection('meta');
     });
 
     after(async () => {

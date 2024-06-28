@@ -11,6 +11,7 @@ import {
   BrowserUnexpectedlyClosedError,
   InvalidLayoutParametersError,
   UnknownError,
+  VisualReportingSoftDisabledError,
 } from '@kbn/reporting-common';
 import { mapToReportingError } from './map_to_reporting_error';
 import { errors } from '@kbn/screenshotting-plugin/common';
@@ -35,6 +36,33 @@ describe('mapToReportingError', () => {
     expect(mapToReportingError(new errors.FailedToSpawnBrowserError())).toBeInstanceOf(
       BrowserCouldNotLaunchError
     );
+    expect(
+      mapToReportingError(new errors.InsufficientMemoryAvailableOnCloudError())
+    ).toBeInstanceOf(VisualReportingSoftDisabledError);
+  });
+
+  test("Screenshoting errors shouldn't rely on instanceof", () => {
+    const createCustomError = (name: string) => {
+      const e = new Error('Test error msg');
+      e.name = name;
+      return e;
+    };
+
+    expect(mapToReportingError(createCustomError('InvalidLayoutParametersError'))).toBeInstanceOf(
+      InvalidLayoutParametersError
+    );
+    expect(mapToReportingError(createCustomError('BrowserClosedUnexpectedly'))).toBeInstanceOf(
+      BrowserUnexpectedlyClosedError
+    );
+    expect(mapToReportingError(createCustomError('FailedToCaptureScreenshot'))).toBeInstanceOf(
+      BrowserScreenshotError
+    );
+    expect(mapToReportingError(createCustomError('FailedToSpawnBrowserError'))).toBeInstanceOf(
+      BrowserCouldNotLaunchError
+    );
+    expect(
+      mapToReportingError(createCustomError('InsufficientMemoryAvailableOnCloudError'))
+    ).toBeInstanceOf(VisualReportingSoftDisabledError);
   });
 
   test('unknown error', () => {

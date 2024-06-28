@@ -93,9 +93,12 @@ describe('CaseActionBar', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).prop('value')).toBe(
-      basicCase.createdAt
-    );
+    expect(
+      wrapper
+        .find(`[data-test-subj="case-action-bar-status-date"]`)
+        .find('FormattedRelativePreferenceDate')
+        .prop('value')
+    ).toBe(basicCase.createdAt);
   });
 
   it('invalidates the queryClient cache onRefresh', () => {

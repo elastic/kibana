@@ -15,7 +15,6 @@ import { EventsByDataset } from '../../../overview/components/events_by_dataset'
 import { SignalsByCategory } from '../../../overview/components/signals_by_category';
 import type { InputsModelId } from '../../store/inputs/constants';
 import type { TimelineEventsType } from '../../../../common/types/timeline';
-import { useSourcererDataView } from '../../containers/sourcerer';
 import type { TopNOption } from './helpers';
 import { getSourcererScopeName, removeIgnoredAlertFilters } from './helpers';
 import * as i18n from './translations';
@@ -45,7 +44,7 @@ const TopNContent = styled.div`
 `;
 
 export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
-  combinedQueries?: string;
+  filterQuery?: string;
   defaultView: TimelineEventsType;
   field: AlertsStackByField;
   filters: Filter[];
@@ -54,14 +53,14 @@ export interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery
   paddingSize?: 's' | 'm' | 'l' | 'none';
   query: Query;
   setAbsoluteRangeDatePickerTarget: InputsModelId;
-  showLegend?: boolean;
   scopeId?: string;
   toggleTopN: () => void;
   onFilterAdded?: () => void; // eslint-disable-line react/no-unused-prop-types
+  applyGlobalQueriesAndFilters?: boolean;
 }
 
 const TopNComponent: React.FC<Props> = ({
-  combinedQueries,
+  filterQuery,
   defaultView,
   deleteQuery,
   filters,
@@ -71,12 +70,12 @@ const TopNComponent: React.FC<Props> = ({
   options,
   paddingSize,
   query,
-  showLegend,
   setAbsoluteRangeDatePickerTarget,
   setQuery,
   scopeId,
   to,
   toggleTopN,
+  applyGlobalQueriesAndFilters,
 }) => {
   const [view, setView] = useState<TimelineEventsType>(defaultView);
   const onViewSelected = useCallback(
@@ -84,7 +83,6 @@ const TopNComponent: React.FC<Props> = ({
     [setView]
   );
   const sourcererScopeId = getSourcererScopeName({ scopeId, view });
-  const { selectedPatterns, runtimeMappings } = useSourcererDataView(sourcererScopeId);
 
   useEffect(() => {
     setView(defaultView);
@@ -115,39 +113,31 @@ const TopNComponent: React.FC<Props> = ({
       <TopNContent>
         {view === 'raw' || view === 'all' ? (
           <EventsByDataset
-            combinedQueries={combinedQueries}
+            filterQuery={filterQuery}
             deleteQuery={deleteQuery}
             filters={applicableFilters}
             from={from}
             headerChildren={headerChildren}
             indexPattern={indexPattern}
-            indexNames={selectedPatterns}
-            runtimeMappings={runtimeMappings}
             onlyField={field}
             paddingSize={paddingSize}
             query={query}
             queryType="topN"
-            showLegend={showLegend}
-            setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
             setQuery={setQuery}
             showSpacer={false}
             toggleTopN={toggleTopN}
-            scopeId={scopeId}
             sourcererScopeId={sourcererScopeId}
             to={to}
             hideQueryToggle
+            applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
           />
         ) : (
           <SignalsByCategory
-            combinedQueries={combinedQueries}
             filters={applicableFilters}
             headerChildren={headerChildren}
             onlyField={field}
             paddingSize={paddingSize}
-            query={query}
-            showLegend={showLegend}
             setAbsoluteRangeDatePickerTarget={setAbsoluteRangeDatePickerTarget}
-            runtimeMappings={runtimeMappings}
             hideQueryToggle
           />
         )}

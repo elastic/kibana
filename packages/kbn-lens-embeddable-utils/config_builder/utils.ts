@@ -8,11 +8,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
-import type {
-  DataViewSpec,
-  DataView,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
+import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/public';
 import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
@@ -22,7 +18,9 @@ import type {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DataViewsCommon } from './config_builder';
 import {
   FormulaValueConfig,
   LensAnnotationLayer,
@@ -87,7 +85,7 @@ export function buildReferences(dataviews: Record<string, DataView>) {
 const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   return {
     [dataView.id ?? uuidv4()]: {
-      ...dataView.toSpec(),
+      ...dataView.toSpec(false),
     },
   };
 };
@@ -125,7 +123,7 @@ export function isFormulaDataset(dataset?: LensDataset) {
  */
 export async function getDataView(
   index: string,
-  dataViewsAPI: DataViewsPublicPluginStart,
+  dataViewsAPI: DataViewsCommon,
   timeField?: string
 ) {
   let dataView: DataView;
@@ -225,7 +223,7 @@ export const buildDatasourceStates = async (
     dataView: DataView
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
-  dataViewsAPI: DataViewsPublicPluginStart
+  dataViewsAPI: DataViewsCommon
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 

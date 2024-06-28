@@ -33,8 +33,8 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'users');
-    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', { archiveName: 'users' });
+    cy.task('esArchiverUnload', { archiveName: 'risk_users' });
   });
 
   describe('Users page tabs', () => {
@@ -68,7 +68,8 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
-    it(`renders users risk tab`, () => {
+    // https://github.com/elastic/kibana/issues/184201
+    it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
       waitForTabToBeLoaded(RISK_SCORE_TAB);
 
       cy.get(RISK_SCORE_TAB_CONTENT).should('exist');

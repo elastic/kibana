@@ -6,33 +6,110 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
+import { uniqBy } from 'lodash';
 
-import { FLEET_SERVER_SERVERS_INDEX } from '../../constants';
-import { getAgentVersionsForAgentPolicyIds } from '../agents';
-
+import type { AgentPolicy } from '../../../common/types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../common/constants';
+import { SO_SEARCH_LIMIT } from '../../constants';
+import { getAgentsByKuery, getAgentStatusById } from '../agents';
 import { packagePolicyService } from '../package_policy';
+import { agentPolicyService } from '../agent_policy';
+import { getAgentStatusForAgentPolicy } from '../agents';
+import { appContextService } from '..';
+
 /**
- * Check if at least one fleet server is connected
+ * Retrieve all agent policies which has a Fleet Server package policy
  */
-export async function hasFleetServers(esClient: ElasticsearchClient) {
-  const res = await esClient.search<{}, {}>({
-    index: FLEET_SERVER_SERVERS_INDEX,
-    ignore_unavailable: true,
-    filter_path: 'hits.total',
-    track_total_hits: true,
-    rest_total_hits_as_int: true,
+export const getFleetServerPolicies = async (
+  soClient: SavedObjectsClientContract
+): Promise<AgentPolicy[]> => {
+  const fleetServerPackagePolicies = await packagePolicyService.list(soClient, {
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
+    spaceId: '*',
   });
 
-  return (res.hits.total as number) > 0;
+  // Extract associated fleet server agent policy IDs
+  const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) =>
+    p.policy_ids?.map((id) => ({ id, spaceId: p.spaceId } ?? []))
+  );
+
+  // Retrieve associated agent policies
+  const fleetServerAgentPolicies = fleetServerAgentPolicyIds.length
+    ? await agentPolicyService.getByIDs(
+        soClient,
+        uniqBy(fleetServerAgentPolicyIds, (p) => `${p?.spaceId ?? ''}:${p.id}`)
+      )
+    : [];
+
+  return fleetServerAgentPolicies;
+};
+
+/**
+ * Check if there is at least one agent enrolled into the given agent policies.
+ * Assumes that `agentPolicyIds` contains list of Fleet Server agent policies.
+ * `activeOnly` flag can be used to filter only active agents.
+ */
+export const hasFleetServersForPolicies = async (
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'space_id'>>,
+  activeOnly: boolean = false
+): Promise<boolean> => {
+  if (agentPolicies.length > 0) {
+    const agentStatusesRes = await getAgentStatusForAgentPolicy(
+      esClient,
+      soClient,
+      undefined,
+      agentPolicies
+        .map(({ id, space_id: spaceId }) => {
+          const space =
+            spaceId && spaceId !== DEFAULT_SPACE_ID
+              ? `namespaces:"${spaceId}"`
+              : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
+
+          return `(policy_id:${id} and (${space}))`;
+        })
+        .join(' or ')
+    );
+
+    return activeOnly
+      ? agentStatusesRes.online > 0 || agentStatusesRes.updating > 0
+      : agentStatusesRes.all > 0;
+  }
+  return false;
+};
+
+/**
+ * Check if at least one fleet server agent exists, regardless of its online status
+ */
+export async function hasFleetServers(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+) {
+  return await hasFleetServersForPolicies(
+    esClient,
+    soClient,
+    await getFleetServerPolicies(soClient)
+  );
 }
 
-export async function allFleetServerVersionsAreAtLeast(
+/**
+ * This function checks if all Fleet Server agents are running at least a given version, but with
+ * some important caveats related to enabling the secrets storage feature:
+ *
+ * 1. Any unenrolled agents are ignored if they are running an outdated version
+ * 2. Managed agents in an inactive state are ignored if they are running an outdated version.
+ */
+export async function checkFleetServerVersionsForSecretsStorage(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   version: string
 ): Promise<boolean> {
+  const logger = appContextService.getLogger();
+
   let hasMore = true;
   const policyIds = new Set<string>();
   let page = 1;
@@ -44,7 +121,7 @@ export async function allFleetServerVersionsAreAtLeast(
     });
 
     for (const item of res.items) {
-      policyIds.add(item.policy_id);
+      item.policy_ids.forEach((id) => policyIds.add(id));
     }
 
     if (res.items.length === 0) {
@@ -52,17 +129,67 @@ export async function allFleetServerVersionsAreAtLeast(
     }
   }
 
-  const versionCounts = await getAgentVersionsForAgentPolicyIds(esClient, [...policyIds]);
-  const versions = Object.keys(versionCounts);
+  const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
+  const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
+    showInactive: true,
+    perPage: SO_SEARCH_LIMIT,
+  });
 
-  // there must be at least one fleet server agent for this check to pass
-  if (versions.length === 0) {
+  if (fleetServerAgents.agents.length === 0) {
     return false;
   }
 
-  return _allVersionsAreAtLeast(version, versions);
-}
+  let result = true;
 
-function _allVersionsAreAtLeast(version: string, versions: string[]) {
-  return versions.every((v) => semverGte(semverCoerce(v)!, version));
+  for (const fleetServerAgent of fleetServerAgents.agents) {
+    const agentVersion = fleetServerAgent.local_metadata?.elastic?.agent?.version;
+
+    if (!agentVersion) {
+      continue;
+    }
+
+    const isNewerVersion = semverGte(semverCoerce(agentVersion)!, version);
+
+    if (!isNewerVersion) {
+      const agentStatus = await getAgentStatusById(esClient, soClient, fleetServerAgent.id);
+
+      // Any unenrolled Fleet Server agents can be ignored
+      if (
+        agentStatus === 'unenrolled' ||
+        fleetServerAgent.status === 'unenrolling' ||
+        fleetServerAgent.unenrolled_at
+      ) {
+        logger.debug(
+          `Found unenrolled Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring`
+        );
+        continue;
+      }
+
+      const isManagedAgentPolicy = managedAgentPolicies.some(
+        (managedPolicy) => managedPolicy.id === fleetServerAgent.policy_id
+      );
+
+      // If this is an agent enrolled in a managed policy, and it is no longer active then we ignore it if it's
+      // running on an outdated version. This prevents users with offline Elastic Agent on Cloud policies from
+      // being stuck when it comes to enabling secrets, as agents can't be unenrolled from managed policies via Fleet UI.
+      if (
+        (isManagedAgentPolicy && ['offline', 'inactive'].includes(agentStatus)) ||
+        !fleetServerAgent.active
+      ) {
+        logger.debug(
+          `Found outdated managed Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
+        );
+        continue;
+      }
+
+      logger.debug(
+        `Found outdated Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} - secrets won't be enabled until all Fleet Server agents are running at least ${version}`
+      );
+
+      result = false;
+      break;
+    }
+  }
+
+  return result;
 }

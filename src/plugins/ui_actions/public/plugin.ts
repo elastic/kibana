@@ -12,9 +12,10 @@ import {
   rowClickTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
+  addPanelMenuTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from './service';
-import { setTheme } from './services';
+import { setAnalytics, setI18n, setTheme } from './services';
 
 export type UiActionsPublicSetup = Pick<
   UiActionsService,
@@ -47,15 +48,18 @@ export class UiActionsPlugin
 
   constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): UiActionsPublicSetup {
-    setTheme(core.theme);
+  public setup(_core: CoreSetup): UiActionsPublicSetup {
+    this.service.registerTrigger(addPanelMenuTrigger);
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);
     return this.service;
   }
 
-  public start(_core: CoreStart): UiActionsPublicStart {
+  public start(core: CoreStart): UiActionsPublicStart {
+    setAnalytics(core.analytics);
+    setI18n(core.i18n);
+    setTheme(core.theme);
     return this.service;
   }
 

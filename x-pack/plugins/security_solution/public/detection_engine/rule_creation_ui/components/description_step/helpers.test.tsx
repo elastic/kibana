@@ -28,6 +28,7 @@ import {
   buildNoteDescription,
   buildRuleTypeDescription,
   buildHighlightedFieldsOverrideDescription,
+  getQueryLabel,
 } from './helpers';
 import type { ListItems } from './types';
 
@@ -531,6 +532,37 @@ describe('helpers', () => {
       const result: ListItems[] = buildHighlightedFieldsOverrideDescription('Test label', []);
 
       expect(result).toHaveLength(0);
+    });
+  });
+
+  describe('getQueryLabel', () => {
+    test('returns query label for unknown rule type', () => {
+      const label = getQueryLabel(undefined);
+      expect(label).toEqual(i18n.QUERY_LABEL);
+    });
+    test('returns query label for query rule type', () => {
+      const label = getQueryLabel('query');
+      expect(label).toEqual(i18n.QUERY_LABEL);
+    });
+    test('returns query label for eql rule type', () => {
+      const label = getQueryLabel('eql');
+      expect(label).toEqual(i18n.EQL_QUERY_LABEL);
+    });
+    test('returns query label for saved_query rule type', () => {
+      const label = getQueryLabel('saved_query');
+      expect(label).toEqual(i18n.SAVED_QUERY_LABEL);
+    });
+    test('returns query label for threshold rule type', () => {
+      const label = getQueryLabel('threshold');
+      expect(label).toEqual(i18n.QUERY_LABEL);
+    });
+    test('returns query label for new_terms rule type', () => {
+      const label = getQueryLabel('new_terms');
+      expect(label).toEqual(i18n.QUERY_LABEL);
+    });
+    test('returns query label for esql rule type', () => {
+      const label = getQueryLabel('esql');
+      expect(label).toEqual(i18n.ESQL_QUERY_LABEL);
     });
   });
 });

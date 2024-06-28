@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { sortBy } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
+import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { getNewSelectedPromptContext } from '../../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 
@@ -19,21 +20,21 @@ const PillButton = styled(EuiButton)`
 `;
 
 interface Props {
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
+  anonymizationFields: FindAnonymizationFieldsResponse;
   promptContexts: Record<string, PromptContext>;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   setSelectedPromptContexts: React.Dispatch<
     React.SetStateAction<Record<string, SelectedPromptContext>>
   >;
+  isFlyoutMode: boolean;
 }
 
 const ContextPillsComponent: React.FC<Props> = ({
-  defaultAllow,
-  defaultAllowReplacement,
+  anonymizationFields,
   promptContexts,
   selectedPromptContexts,
   setSelectedPromptContexts,
+  isFlyoutMode,
 }) => {
   const sortedPromptContexts = useMemo(
     () => sortBy('description', Object.values(promptContexts)),
@@ -42,10 +43,9 @@ const ContextPillsComponent: React.FC<Props> = ({
 
   const selectPromptContext = useCallback(
     async (id: string) => {
-      if (selectedPromptContexts[id] == null && promptContexts[id] != null) {
+      if (selectedPromptContexts[id] == null && promptContexts[id] != null && anonymizationFields) {
         const newSelectedPromptContext = await getNewSelectedPromptContext({
-          defaultAllow,
-          defaultAllowReplacement,
+          anonymizationFields,
           promptContext: promptContexts[id],
         });
 
@@ -55,21 +55,26 @@ const ContextPillsComponent: React.FC<Props> = ({
         }));
       }
     },
-    [
-      defaultAllow,
-      defaultAllowReplacement,
-      promptContexts,
-      selectedPromptContexts,
-      setSelectedPromptContexts,
-    ]
+    [anonymizationFields, promptContexts, selectedPromptContexts, setSelectedPromptContexts]
   );
 
   return (
     <EuiFlexGroup gutterSize="none" wrap>
-      {sortedPromptContexts.map(({ description, id, getPromptContext, tooltip }) => {
+      {sortedPromptContexts.map(({ description, id, tooltip }) => {
         // Workaround for known issue where tooltip won't dismiss after button state is changed once clicked
         // See: https://github.com/elastic/eui/issues/6488#issuecomment-1379656704
-        const button = (
+        const button = isFlyoutMode ? (
+          <EuiButtonEmpty
+            data-test-subj={`pillButton-${id}`}
+            disabled={selectedPromptContexts[id] != null}
+            iconSide="left"
+            iconType="plusInCircle"
+            size="s"
+            onClick={() => selectPromptContext(id)}
+          >
+            {description}
+          </EuiButtonEmpty>
+        ) : (
           <PillButton
             data-test-subj={`pillButton-${id}`}
             disabled={selectedPromptContexts[id] != null}

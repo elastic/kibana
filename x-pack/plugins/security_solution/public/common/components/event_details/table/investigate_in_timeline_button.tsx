@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useCallback } from 'react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { sourcererSelectors } from '../../../store';
 import { InputsModelId } from '../../../store/inputs/constants';
@@ -17,13 +18,12 @@ import type { TimeRange } from '../../../store/inputs/model';
 import { inputsActions } from '../../../store/inputs';
 import { updateProviders, setFilters } from '../../../../timelines/store/actions';
 import { sourcererActions } from '../../../store/actions';
-import { SourcererScopeName } from '../../../store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../../common/types';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { useDeepEqualSelector } from '../../../hooks/use_selector';
 
 export interface InvestigateInTimelineButtonProps {
   asEmptyButton: boolean;
@@ -33,10 +33,11 @@ export interface InvestigateInTimelineButtonProps {
   keepDataView?: boolean;
   isDisabled?: boolean;
   iconType?: IconType;
+  children?: React.ReactNode;
 }
 
-export const InvestigateInTimelineButton: React.FunctionComponent<
-  InvestigateInTimelineButtonProps
+export const InvestigateInTimelineButton: FC<
+  PropsWithChildren<InvestigateInTimelineButtonProps>
 > = ({
   asEmptyButton,
   children,
@@ -49,13 +50,8 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
 }) => {
   const dispatch = useDispatch();
 
-  const getDataViewsSelector = useMemo(
-    () => sourcererSelectors.getSourcererDataViewsSelector(),
-    []
-  );
-  const { defaultDataView, signalIndexName } = useDeepEqualSelector((state) =>
-    getDataViewsSelector(state)
-  );
+  const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
+  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
 
   const hasTemplateProviders =
     dataProviders && dataProviders.find((provider) => provider.type === 'template');
@@ -65,15 +61,15 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
     timelineType: hasTemplateProviders ? TimelineType.template : TimelineType.default,
   });
 
-  const configureAndOpenTimeline = useCallback(() => {
+  const configureAndOpenTimeline = useCallback(async () => {
     if (dataProviders || filters) {
       // Reset the current timeline
       if (timeRange) {
-        clearTimeline({
+        await clearTimeline({
           timeRange,
         });
       } else {
-        clearTimeline();
+        await clearTimeline();
       }
       if (dataProviders) {
         // Update the timeline's providers to match the current prevalence field query

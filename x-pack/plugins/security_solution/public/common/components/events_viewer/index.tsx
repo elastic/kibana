@@ -49,8 +49,8 @@ import { inputsActions } from '../../store/actions';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
 import { eventsViewerSelector } from './selectors';
-import type { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { useKibana } from '../../lib/kibana';
 import { GraphOverlay } from '../../../timelines/components/graph_overlay';
@@ -59,7 +59,7 @@ import { useFieldBrowserOptions } from '../../../timelines/components/fields_bro
 import {
   useSessionViewNavigation,
   useSessionView,
-} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
+} from '../../../timelines/components/timeline/tabs/session/use_session_view';
 import {
   EventsContainerLoading,
   FullScreenContainer,

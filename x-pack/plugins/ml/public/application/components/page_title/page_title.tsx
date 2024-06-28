@@ -6,7 +6,8 @@
  */
 
 import { css } from '@emotion/react';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 
 const cssPageTitle = css({
   minWidth: '300px',

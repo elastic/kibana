@@ -10,3 +10,4 @@ export { getDefaultCapabilities as getDefaultMlCapabilities } from './types/capa
 export { DATAFEED_STATE, JOB_STATE } from './constants/states';
 export type { MlSummaryJob, SummaryJobState } from './types/anomaly_detection_jobs';
 export { ML_ALERT_TYPES } from './constants/alerts';
+export type { Job, Datafeed } from './types/anomaly_detection_jobs';

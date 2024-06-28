@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceSetup } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CoreSetup } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 // for cleanup esFilters need to fix the issue https://github.com/elastic/kibana/issues/131292
 import { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
@@ -38,7 +38,7 @@ async function isCompatible(context: ApplyGlobalFilterActionContext) {
 export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
-  theme: ThemeServiceSetup,
+  core: CoreSetup,
   id: string = ACTION_GLOBAL_APPLY_FILTER,
   type: string = ACTION_GLOBAL_APPLY_FILTER
 ): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
@@ -65,6 +65,7 @@ export function createFilterAction(
       let selectedFilters: Filter[] = filters;
 
       if (selectedFilters.length > 1) {
+        const [coreStart] = await core.getStartServices();
         const indexPatterns = await Promise.all(
           filters.map((filter) => {
             return getIndexPatterns().get(filter.meta.index!);
@@ -86,7 +87,7 @@ export function createFilterAction(
                   resolve(filterSelection);
                 }
               ),
-              { theme$: theme.theme$ }
+              coreStart
             ),
             {
               'data-test-subj': 'test',

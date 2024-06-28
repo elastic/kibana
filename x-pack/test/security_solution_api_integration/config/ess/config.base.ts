@@ -7,7 +7,8 @@
 
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, kbnTestConfig, kibanaTestUser } from '@kbn/test';
-import { services } from '../../../api_integration/services';
+import { services } from './services';
+import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -79,25 +80,14 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'previewTelemetryUrlEnabled',
+            'alertSuppressionForEsqlRuleEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
-            'entityAnalyticsAssetCriticalityEnabled',
+            'bulkCustomHighlightedFieldsEnabled',
+            'manualRuleRunEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',
-          `--xpack.actions.preconfigured=${JSON.stringify({
-            'my-test-email': {
-              actionTypeId: '.email',
-              name: 'TestEmail#xyz',
-              config: {
-                from: 'me@test.com',
-                service: '__json',
-              },
-              secrets: {
-                user: 'user',
-                password: 'password',
-              },
-            },
-          })}`,
+          `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
@@ -107,7 +97,7 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
         ],
       },
       mochaOpts: {
-        grep: '/^(?!.*@brokenInEss).*@ess.*/',
+        grep: '/^(?!.*@skipInEss).*@ess.*/',
       },
     };
   };

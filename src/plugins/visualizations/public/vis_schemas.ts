@@ -14,7 +14,7 @@ import {
 } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import { Vis, VisToExpressionAstParams } from './types';
-import { SchemaConfig } from '../common/types';
+import { SchemaConfig, VisParams } from '../common/types';
 import { convertToSchemaConfig } from '../common';
 
 const { isDateHistogramBucketAggConfig } = search.aggs;
@@ -76,7 +76,7 @@ const createSchemaConfig = (
   return { ...convertToSchemaConfig(updatedAgg), accessor };
 };
 
-export const getVisSchemas = <TVisParams>(
+export const getVisSchemas = <TVisParams extends VisParams>(
   vis: Vis<TVisParams>,
   params: VisToExpressionAstParams
 ): Schemas => {

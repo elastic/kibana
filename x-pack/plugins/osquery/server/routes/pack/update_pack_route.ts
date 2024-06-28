@@ -112,7 +112,17 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           )
         );
 
-        const policiesList = getInitialPolicies(packagePolicies, policy_ids, shards);
+        const { policiesList, invalidPolicies } = getInitialPolicies(
+          packagePolicies,
+          policy_ids,
+          shards
+        );
+
+        if (invalidPolicies?.length) {
+          return response.badRequest({
+            body: `The following policy ids are invalid: ${invalidPolicies.join(', ')}`,
+          });
+        }
 
         const agentPolicies = await agentPolicyService?.getByIds(
           internalSavedObjectsClient,
@@ -286,8 +296,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_id]
-                          ? policyShards[packagePolicy.policy_id]
+                        shard: policyShards[packagePolicy.policy_ids[0]] // TODO
+                          ? policyShards[packagePolicy.policy_ids[0]]
                           : 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }
@@ -302,7 +312,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
           await Promise.all(
             agentPolicyIdsToAdd.map((agentPolicyId) => {
-              const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
+              const packagePolicy = packagePolicies.find((policy) =>
+                policy.policy_ids.includes(agentPolicyId)
+              );
 
               if (packagePolicy) {
                 return packagePolicyService?.update(
@@ -319,8 +331,8 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                       draft,
                       `inputs[0].config.osquery.value.packs.${updatedPackSO.attributes.name}`,
                       {
-                        shard: policyShards[packagePolicy.policy_id]
-                          ? policyShards[packagePolicy.policy_id]
+                        shard: policyShards[packagePolicy.policy_ids[0]] // TODO
+                          ? policyShards[packagePolicy.policy_ids[0]]
                           : 100,
                         queries: convertSOQueriesToPackConfig(updatedPackSO.attributes.queries),
                       }

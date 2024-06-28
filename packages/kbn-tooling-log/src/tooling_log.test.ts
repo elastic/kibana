@@ -7,7 +7,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, takeUntil } from 'rxjs/operators';
+import { toArray, takeUntil } from 'rxjs';
 
 import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 

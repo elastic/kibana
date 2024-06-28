@@ -8,11 +8,8 @@
 
 export type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-export type {
-  DataViewsPublicPluginStart,
-  DataView,
-  DataViewField,
-} from '@kbn/data-views-plugin/public';
+export type { DataViewsPublicPluginStart, DataViewField } from '@kbn/data-views-plugin/public';
+export { DataView } from '@kbn/data-views-plugin/public';
 export type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 export type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
@@ -24,10 +21,13 @@ export type {
   RuntimeFieldSubField,
   RuntimeFieldSubFields,
   RuntimePrimitiveTypes,
+  DataViewLazy,
 } from '@kbn/data-views-plugin/common';
 export { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
-export { createKibanaReactContext, toMountPoint } from '@kbn/kibana-react-plugin/public';
+export { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+
+export { toMountPoint } from '@kbn/react-kibana-mount';
 
 export { CodeEditor } from '@kbn/code-editor';
 
@@ -56,6 +56,7 @@ export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   TextField,
+  TextAreaField,
   ToggleField,
   NumericField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';

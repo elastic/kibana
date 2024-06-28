@@ -15,7 +15,6 @@ import type {
   WordCloudElementEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBadge } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
@@ -39,7 +38,12 @@ import * as i18n from '../index_properties/translations';
 import { SameFamilyTab } from './same_family_tab';
 import { SummaryTab } from './summary_tab';
 import { getFillColor } from './summary_tab/helpers';
-import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../types';
+import type {
+  EcsBasedFieldMetadata,
+  IlmPhase,
+  MeteringStatsIndex,
+  PartitionedFieldMetadata,
+} from '../../types';
 
 export const getMissingTimestampComment = (): string =>
   getMarkdownComment({
@@ -52,8 +56,8 @@ ${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
   });
 
 export const showMissingTimestampCallout = (
-  enrichedFieldMetadata: EnrichedFieldMetadata[]
-): boolean => !enrichedFieldMetadata.some((x) => x.name === '@timestamp');
+  ecsBasedFieldMetadata: EcsBasedFieldMetadata[]
+): boolean => !ecsBasedFieldMetadata.some((x) => x.name === '@timestamp');
 
 export const getEcsCompliantColor = (partitionedFieldMetadata: PartitionedFieldMetadata): string =>
   showMissingTimestampCallout(partitionedFieldMetadata.ecsCompliant)
@@ -105,7 +109,7 @@ export const getTabs = ({
   pattern: string;
   patternDocsCount: number;
   setSelectedTabId: (tabId: string) => void;
-  stats: Record<string, IndicesStatsIndicesStats> | null;
+  stats: Record<string, MeteringStatsIndex> | null;
   theme?: PartialTheme;
   baseTheme: Theme;
 }) => [

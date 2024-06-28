@@ -9,6 +9,7 @@
 export type {
   BoolQuery,
   DataViewBase,
+  DataViewBaseNoFields,
   DataViewFieldBase,
   EsQueryConfig,
   EsQueryFiltersConfig,
@@ -53,11 +54,7 @@ export {
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
   getLanguageDisplayName,
-  cleanupESQLQueryForLensSuggestions,
 } from './src/es_query';
 
 export {
@@ -121,6 +118,8 @@ export {
   toElasticsearchQuery,
   escapeKuery,
   escapeQuotes,
+  getKqlFieldNames,
+  getKqlFieldNamesFromExpression,
 } from './src/kuery';
 
 export {

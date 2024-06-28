@@ -29,24 +29,29 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
-    baseImage: 'none' | 'ubi' | 'ubuntu';
+    baseImage: 'none' | 'wolfi' | 'ubi' | 'ubuntu';
     context: boolean;
     image: boolean;
     ironbank?: boolean;
     cloud?: boolean;
     serverless?: boolean;
     dockerBuildDate?: string;
+    fips?: boolean;
   }
 ) {
   let baseImageName = '';
   if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
   if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
+  if (flags.baseImage === 'wolfi')
+    baseImageName = 'docker.elastic.co/wolfi/chainguard-base:20230214';
 
   let imageFlavor = '';
   if (flags.baseImage === 'ubi') imageFlavor += `-ubi`;
+  if (flags.baseImage === 'wolfi') imageFlavor += `-wolfi`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
+  if (flags.fips) imageFlavor += '-fips';
 
   // General docker var config
   const license = 'Elastic License';
@@ -59,7 +64,9 @@ export async function runDockerGenerator(
   const imageTag = `docker.elastic.co/${imageNamespace}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactPrefix = `kibana-${version}-linux`;
+  let artifactVariant = '';
+  if (flags.serverless) artifactVariant = '-serverless';
+  const artifactPrefix = `kibana${artifactVariant}-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
   const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
   const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;
@@ -111,6 +118,7 @@ export async function runDockerGenerator(
     architecture: flags.architecture,
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
+    fips: flags.fips,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -147,6 +155,14 @@ export async function runDockerGenerator(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
+
+  // Copy fips related resources
+  if (flags.fips) {
+    await copyAll(
+      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/fips'),
+      dockerBuildDir
+    );
+  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we

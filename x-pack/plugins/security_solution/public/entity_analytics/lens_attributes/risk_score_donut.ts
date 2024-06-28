@@ -74,10 +74,10 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = (
                       },
                       {
                         input: {
-                          query: `${stackByField}.risk.calculated_level : \"Moderiate\"`,
+                          query: `${stackByField}.risk.calculated_level : \"Moderate\"`,
                           language: 'kuery',
                         },
-                        label: 'Moderiate',
+                        label: 'Moderate',
                       },
                       {
                         input: {

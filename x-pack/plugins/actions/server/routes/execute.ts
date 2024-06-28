@@ -39,6 +39,12 @@ export const executeActionRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id}/_execute`,
+      options: {
+        access: 'public',
+        summary: `Run a connector`,
+        description:
+          'You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges. If you use an index connector, you must also have `all`, `create`, `index`, or `write` indices privileges.',
+      },
       validate: {
         body: bodySchema,
         params: paramSchema,
@@ -49,12 +55,18 @@ export const executeActionRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const { params } = req.body;
         const { id } = req.params;
+
+        if (actionsClient.isSystemAction(id)) {
+          return res.badRequest({ body: 'Execution of system action is not allowed' });
+        }
+
         const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
           params,
           actionId: id,
           source: asHttpRequestExecutionSource(req),
           relatedSavedObjects: [],
         });
+
         return body
           ? res.ok({
               body: rewriteBodyRes(body),

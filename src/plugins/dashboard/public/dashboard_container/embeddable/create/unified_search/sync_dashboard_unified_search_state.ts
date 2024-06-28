@@ -8,7 +8,7 @@
 
 import { Subject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
+import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs';
 
 import type { Filter, Query } from '@kbn/es-query';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';

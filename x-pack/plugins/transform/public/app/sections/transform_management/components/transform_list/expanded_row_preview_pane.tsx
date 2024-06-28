@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, FC } from 'react';
+import type { FC } from 'react';
+import React, { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataGrid } from '@kbn/ml-data-grid';
 
-import { TransformConfigUnion } from '../../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { useToastNotifications } from '../../../../app_dependencies';
 import { getTransformConfigQuery } from '../../../../common';
 import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { SearchItems } from '../../../../hooks/use_search_items';
+import type { SearchItems } from '../../../../hooks/use_search_items';
 
 import {
   applyTransformConfigToDefineState,

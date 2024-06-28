@@ -66,10 +66,6 @@ export const TreeNav = () => {
     [logicalTreeViewPrefix, treeNavTypePrefix]
   );
 
-  const selectedLabel = useMemo(() => {
-    return options.find((opt) => opt.id === toggleIdSelected)!.label;
-  }, [options, toggleIdSelected]);
-
   const handleTreeViewSwitch = useCallback(
     (id: string, value: TreeViewKind) => {
       setToggleIdSelected(id);
@@ -124,7 +120,6 @@ export const TreeNav = () => {
           <DynamicTreeView
             query={filterQueryWithTimeRange}
             tree={tree}
-            aria-label={selectedLabel}
             selected={selected}
             onSelect={(selectionDepth, type, key, clusterName) => {
               const newSelectionDepth = {

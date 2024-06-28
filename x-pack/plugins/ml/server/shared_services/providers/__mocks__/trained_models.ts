@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TrainedModels } from '../../../shared';
+import type { TrainedModels } from '../../../shared';
 
 const trainedModelsServiceMock = {
   getTrainedModels: jest.fn().mockResolvedValue([]),

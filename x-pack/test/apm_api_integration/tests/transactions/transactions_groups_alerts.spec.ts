@@ -25,7 +25,7 @@ type TransactionsGroupsMainStatistics =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const supertest = getService('supertest');
   const es = getService('es');
   const serviceName = 'synth-go';
@@ -72,6 +72,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body as TransactionsGroupsMainStatistics;
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177617
   registry.when('when data is loaded', { config: 'basic', archives: [] }, () => {
     describe('Alerts', () => {
       const transactions = [
@@ -106,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
 
-        await synthtraceEsClient.index([
+        await apmSynthtraceEsClient.index([
           timerange(start, end)
             .interval('1m')
             .rate(1)
@@ -134,7 +135,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      after(() => synthtraceEsClient.clean());
+      after(() => apmSynthtraceEsClient.clean());
 
       describe('Transaction groups with avg transaction duration alerts', () => {
         let ruleId: string;

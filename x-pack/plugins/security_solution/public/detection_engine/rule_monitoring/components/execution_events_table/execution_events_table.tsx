@@ -123,7 +123,6 @@ const ExecutionEventsTableComponent: React.FC<ExecutionEventsTableProps> = ({ ru
         items={items}
         itemId={getItemId}
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
-        isExpandable={true}
         loading={executionEvents.isFetching}
         sorting={sorting.state}
         pagination={pagination.state}

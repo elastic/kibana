@@ -65,6 +65,10 @@ interface ResetAction {
   type: 'reset';
 }
 
+interface DragEndAction {
+  type: 'dragEnd';
+}
+
 interface RegisterDraggingItemHeightAction {
   type: 'registerDraggingItemHeight';
   payload: number;
@@ -90,6 +94,7 @@ interface SetReorderedItemsAction {
 }
 
 type ReorderAction =
+  | DragEndAction
   | ResetAction
   | RegisterDraggingItemHeightAction
   | RegisterReorderedItemHeightAction
@@ -98,6 +103,8 @@ type ReorderAction =
 
 const reorderReducer = (state: ReorderState, action: ReorderAction) => {
   switch (action.type) {
+    case 'dragEnd':
+      return { ...state, reorderedItems: [], isReorderOn: false };
     case 'reset':
       return { ...state, reorderedItems: [] };
     case 'registerDraggingItemHeight':
@@ -110,7 +117,11 @@ const reorderReducer = (state: ReorderState, action: ReorderAction) => {
         ),
       };
     case 'setIsReorderOn':
-      return { ...state, isReorderOn: action.payload };
+      return {
+        ...state,
+        isReorderOn: action.payload,
+        reorderedItems: action.payload ? state.reorderedItems : [],
+      };
     case 'setReorderedItems':
       const { items, draggingIndex, droppingIndex } = action.payload;
       return draggingIndex < droppingIndex
@@ -146,7 +157,7 @@ export function ReorderProvider({
   return (
     <div
       data-test-subj={`${dataTestSubj}-reorderableGroup`}
-      className={classNames(className, {
+      className={classNames(className, 'domDragDrop-group', {
         'domDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
       })}
     >

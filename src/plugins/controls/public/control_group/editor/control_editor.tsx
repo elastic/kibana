@@ -6,14 +6,6 @@
  * Side Public License, v 1.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
- */
-
 import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
@@ -129,7 +121,10 @@ export const ControlEditor = ({
       if (!mounted) return;
 
       const initialId =
-        embeddable?.getInput().dataViewId ?? getRelevantDataViewId?.() ?? (await getDefaultId());
+        embeddable?.getInput().dataViewId ??
+        controlGroup.getOutput().dataViewIds?.[0] ??
+        getRelevantDataViewId?.() ??
+        (await getDefaultId());
       if (initialId) {
         setSelectedDataViewId(initialId);
         startingInput.current = { ...startingInput.current, dataViewId: initialId };
@@ -182,7 +177,7 @@ export const ControlEditor = ({
 
           const disabled =
             fieldRegistry && selectedField
-              ? !fieldRegistry[selectedField].compatibleControlTypes.includes(controlType)
+              ? !fieldRegistry[selectedField]?.compatibleControlTypes.includes(controlType)
               : true;
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
@@ -245,6 +240,7 @@ export const ControlEditor = ({
           onChange={(settings) => setCustomSettings(settings)}
           initialInput={embeddable?.getInput()}
           fieldType={fieldRegistry[selectedField].field.type}
+          setControlEditorValid={setControlEditorValid}
         />
       </EuiDescribedFormGroup>
     );
@@ -273,11 +269,11 @@ export const ControlEditor = ({
                 <DataViewPicker
                   dataViews={dataViewListItems}
                   selectedDataViewId={selectedDataViewId}
-                  onChangeDataViewId={(dataViewId) => {
-                    setLastUsedDataViewId?.(dataViewId);
-                    if (dataViewId === selectedDataViewId) return;
+                  onChangeDataViewId={(newDataViewId) => {
+                    setLastUsedDataViewId?.(newDataViewId);
+                    if (newDataViewId === selectedDataViewId) return;
                     setSelectedField(undefined);
-                    setSelectedDataViewId(dataViewId);
+                    setSelectedDataViewId(newDataViewId);
                   }}
                   trigger={{
                     label:
@@ -300,9 +296,7 @@ export const ControlEditor = ({
                   const newDefaultTitle = field.displayName ?? field.name;
                   setDefaultTitle(newDefaultTitle);
                   setSelectedField(field.name);
-                  setSelectedControlType(
-                    fieldRegistry?.[field.displayName].compatibleControlTypes[0]
-                  );
+                  setSelectedControlType(fieldRegistry?.[field.name]?.compatibleControlTypes[0]);
                   if (!currentTitle || currentTitle === defaultTitle) {
                     setCurrentTitle(newDefaultTitle);
                   }

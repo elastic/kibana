@@ -12,9 +12,12 @@ import type {
   RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
+  HttpResponsePayload,
+  ResponseError,
 } from '@kbn/core/server';
 
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import { RuleResponseValidationError } from '../rule_management/logic/detection_rules_client/utils';
 
 export interface OutputError {
   message: string;
@@ -114,6 +117,12 @@ export const transformBulkError = (
       statusCode: 400,
       message: err.message,
     });
+  } else if (err instanceof RuleResponseValidationError) {
+    return createBulkErrorObject({
+      ruleId: err.ruleId,
+      statusCode: 500,
+      message: err.message,
+    });
   } else {
     return createBulkErrorObject({
       ruleId,
@@ -160,7 +169,11 @@ const statusToErrorMessage = (statusCode: number) => {
 export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
-  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+  error<T extends HttpResponsePayload | ResponseError>({
+    statusCode,
+    body,
+    headers,
+  }: CustomHttpResponseOptions<T>) {
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
     };

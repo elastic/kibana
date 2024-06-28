@@ -67,6 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 bar: {
                   count: 456,
+                  customDescription: 'desc',
                 },
               },
             });
@@ -75,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response2.body[config.serviceKey].fieldAttrs.foo.count).to.be(123);
           expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('test');
           expect(response2.body[config.serviceKey].fieldAttrs.bar.count).to.be(456);
+          expect(response2.body[config.serviceKey].fieldAttrs.bar.customDescription).to.be('desc');
 
           const response3 = await supertest.get(
             `${config.path}/${response1.body[config.serviceKey].id}`
@@ -84,6 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response3.body[config.serviceKey].fieldAttrs.foo.count).to.be(123);
           expect(response3.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('test');
           expect(response3.body[config.serviceKey].fieldAttrs.bar.count).to.be(456);
+          expect(response3.body[config.serviceKey].fieldAttrs.bar.customDescription).to.be('desc');
         });
 
         describe('count', () => {
@@ -194,126 +197,146 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        describe('customLabel', () => {
-          it('can set field "customLabel" attribute on non-existing field', async () => {
-            const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest.post(config.path).send({
-              [config.serviceKey]: {
-                title,
-              },
+        ['customLabel', 'customDescription'].forEach((customStringAttribute) => {
+          describe(`can set optional ${customStringAttribute}`, () => {
+            it(`can set field "${customStringAttribute}" attribute on non-existing field`, async () => {
+              const title = `foo-${Date.now()}-${Math.random()}*`;
+              const response1 = await supertest.post(config.path).send({
+                [config.serviceKey]: {
+                  title,
+                },
+              });
+
+              expect(response1.status).to.be(200);
+              expect(response1.body[config.serviceKey].fieldAttrs.foo).to.be(undefined);
+
+              const response2 = await supertest
+                .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
+                .send({
+                  fields: {
+                    foo: {
+                      [customStringAttribute]: 'foo',
+                    },
+                  },
+                });
+
+              expect(response2.status).to.be(200);
+              expect(response2.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                'foo'
+              );
+
+              const response3 = await supertest.get(
+                `${config.path}/${response1.body[config.serviceKey].id}`
+              );
+
+              expect(response3.status).to.be(200);
+              expect(response3.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                'foo'
+              );
             });
 
-            expect(response1.status).to.be(200);
-            expect(response1.body[config.serviceKey].fieldAttrs.foo).to.be(undefined);
-
-            const response2 = await supertest
-              .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
-              .send({
-                fields: {
-                  foo: {
-                    customLabel: 'foo',
+            it(`can update "${customStringAttribute}" attribute in index_pattern attribute map`, async () => {
+              const title = `foo-${Date.now()}-${Math.random()}*`;
+              const response1 = await supertest.post(config.path).send({
+                [config.serviceKey]: {
+                  title,
+                  fieldAttrs: {
+                    foo: {
+                      [customStringAttribute]: 'foo',
+                    },
                   },
                 },
               });
 
-            expect(response2.status).to.be(200);
-            expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('foo');
+              expect(response1.status).to.be(200);
+              expect(response1.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                'foo'
+              );
 
-            const response3 = await supertest.get(
-              `${config.path}/${response1.body[config.serviceKey].id}`
-            );
-
-            expect(response3.status).to.be(200);
-            expect(response3.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('foo');
-          });
-
-          it('can update "customLabel" attribute in index_pattern attribute map', async () => {
-            const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest.post(config.path).send({
-              [config.serviceKey]: {
-                title,
-                fieldAttrs: {
-                  foo: {
-                    customLabel: 'foo',
+              const response2 = await supertest
+                .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
+                .send({
+                  fields: {
+                    foo: {
+                      [customStringAttribute]: 'bar',
+                    },
                   },
-                },
-              },
+                });
+
+              expect(response2.status).to.be(200);
+              expect(response2.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                'bar'
+              );
+
+              const response3 = await supertest.get(
+                `${config.path}/${response1.body[config.serviceKey].id}`
+              );
+
+              expect(response3.status).to.be(200);
+              expect(response3.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                'bar'
+              );
             });
 
-            expect(response1.status).to.be(200);
-            expect(response1.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('foo');
-
-            const response2 = await supertest
-              .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
-              .send({
-                fields: {
-                  foo: {
-                    customLabel: 'bar',
+            it(`can delete "${customStringAttribute}" attribute from index_pattern attribute map`, async () => {
+              const title = `foo-${Date.now()}-${Math.random()}*`;
+              const response1 = await supertest.post(config.path).send({
+                [config.serviceKey]: {
+                  title,
+                  fieldAttrs: {
+                    foo: {
+                      [customStringAttribute]: 'foo',
+                    },
                   },
                 },
               });
 
-            expect(response2.status).to.be(200);
-            expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('bar');
+              expect(response1.status).to.be(200);
+              expect(response1.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                'foo'
+              );
 
-            const response3 = await supertest.get(
-              `${config.path}/${response1.body[config.serviceKey].id}`
-            );
-
-            expect(response3.status).to.be(200);
-            expect(response3.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('bar');
-          });
-
-          it('can delete "customLabel" attribute from index_pattern attribute map', async () => {
-            const title = `foo-${Date.now()}-${Math.random()}*`;
-            const response1 = await supertest.post(config.path).send({
-              [config.serviceKey]: {
-                title,
-                fieldAttrs: {
-                  foo: {
-                    customLabel: 'foo',
+              const response2 = await supertest
+                .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
+                .send({
+                  fields: {
+                    foo: {
+                      [customStringAttribute]: null,
+                    },
                   },
-                },
-              },
+                });
+
+              expect(response2.status).to.be(200);
+              expect(response2.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                undefined
+              );
+
+              const response3 = await supertest.get(
+                `${config.path}/${response1.body[config.serviceKey].id}`
+              );
+
+              expect(response3.status).to.be(200);
+              expect(response3.body[config.serviceKey].fieldAttrs.foo[customStringAttribute]).to.be(
+                undefined
+              );
             });
 
-            expect(response1.status).to.be(200);
-            expect(response1.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be('foo');
-
-            const response2 = await supertest
-              .post(`${config.path}/${response1.body[config.serviceKey].id}/fields`)
-              .send({
+            it(`can set field "${customStringAttribute}" attribute on an existing field`, async () => {
+              await supertest.post(`${config.path}/${indexPattern.id}/fields`).send({
                 fields: {
                   foo: {
-                    customLabel: null,
+                    [customStringAttribute]: 'baz',
                   },
                 },
               });
 
-            expect(response2.status).to.be(200);
-            expect(response2.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be(undefined);
+              const response1 = await supertest.get(`${config.path}/${indexPattern.id}`);
 
-            const response3 = await supertest.get(
-              `${config.path}/${response1.body[config.serviceKey].id}`
-            );
-
-            expect(response3.status).to.be(200);
-            expect(response3.body[config.serviceKey].fieldAttrs.foo.customLabel).to.be(undefined);
-          });
-
-          it('can set field "customLabel" attribute on an existing field', async () => {
-            await supertest.post(`${config.path}/${indexPattern.id}/fields`).send({
-              fields: {
-                foo: {
-                  customLabel: 'baz',
-                },
-              },
+              expect(response1.status).to.be(200);
+              expect(response1.body[config.serviceKey].fields.foo[customStringAttribute]).to.be(
+                'baz'
+              );
             });
-
-            const response1 = await supertest.get(`${config.path}/${indexPattern.id}`);
-
-            expect(response1.status).to.be(200);
-            expect(response1.body[config.serviceKey].fields.foo.customLabel).to.be('baz');
           });
         });
 

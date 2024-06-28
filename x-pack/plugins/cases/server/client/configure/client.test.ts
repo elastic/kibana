@@ -333,7 +333,7 @@ describe('client', () => {
             customFields: [
               {
                 key: 'wrong_type_key',
-                label: 'text',
+                label: 'text label',
                 type: CustomFieldTypes.TEXT,
                 required: false,
               },
@@ -343,7 +343,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: wrong_type_key'
+        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following labels: "text label"'
       );
     });
   });

@@ -7,7 +7,8 @@
 
 import React, { useCallback, useEffect, useRef } from 'react';
 import moment from 'moment';
-import { KibanaContextProvider, KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useMlKibana } from '../kibana';
 import { JobSelectorFlyout } from '../../../embeddables/common/components/job_selector_flyout';
 import { getInitialGroupsMap } from '../../components/job_selector/job_selector';

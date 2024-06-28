@@ -17,7 +17,7 @@ import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 
-export const copyTimelineRoute = async (
+export const copyTimelineRoute = (
   router: SecuritySolutionPluginRouter,
   _: ConfigType,
   security: SetupPlugins['security']

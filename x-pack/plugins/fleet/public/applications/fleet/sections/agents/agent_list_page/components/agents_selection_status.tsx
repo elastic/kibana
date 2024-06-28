@@ -88,9 +88,13 @@ export const AgentsSelectionStatus: React.FunctionComponent<{
               <EuiText size="xs" color="subdued" data-test-subj="selectedAgentCountLabel">
                 <FormattedMessage
                   id="xpack.fleet.agentBulkActions.agentsSelected"
-                  defaultMessage="{count, plural, one {# agent} other {# agents} =all {All agents}} selected"
+                  defaultMessage="{selectionMode, select,
+                    manual { {count, plural, one {# agent} other {# agents}} }
+                    other {All agents}
+                  } selected"
                   values={{
-                    count: selectionMode === 'manual' ? selectedAgents.length : 'all',
+                    selectionMode,
+                    count: selectedAgents.length,
                   }}
                 />
               </EuiText>

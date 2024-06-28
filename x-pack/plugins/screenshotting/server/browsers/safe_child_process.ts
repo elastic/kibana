@@ -6,7 +6,7 @@
  */
 
 import { fromEvent, merge, Observable } from 'rxjs';
-import { take, share, mapTo, delay, tap } from 'rxjs/operators';
+import { take, share, mapTo, delay, tap } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 
 interface IChild {

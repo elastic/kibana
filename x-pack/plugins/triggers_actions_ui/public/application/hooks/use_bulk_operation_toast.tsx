@@ -7,7 +7,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
 import { useKibana } from '../../common/lib/kibana';
 import {
@@ -48,6 +48,8 @@ export const useBulkOperationToast = ({
   onSearchPopulate?: (filter: string) => void;
 }) => {
   const {
+    i18n,
+    theme,
     notifications: { toasts },
   } = useKibana().services;
 
@@ -120,7 +122,7 @@ export const useBulkOperationToast = ({
             SINGLE_RULE_TITLE,
             MULTIPLE_RULE_TITLE
           ),
-          text: toMountPoint(renderToastErrorBody(errors, 'danger')),
+          text: toMountPoint(renderToastErrorBody(errors, 'danger'), { i18n, theme }),
         });
         return;
       }
@@ -133,10 +135,10 @@ export const useBulkOperationToast = ({
           SINGLE_RULE_TITLE,
           MULTIPLE_RULE_TITLE
         ),
-        text: toMountPoint(renderToastErrorBody(errors, 'warning')),
+        text: toMountPoint(renderToastErrorBody(errors, 'warning'), { i18n, theme }),
       });
     },
-    [toasts, renderToastErrorBody]
+    [i18n, theme, toasts, renderToastErrorBody]
   );
 
   return useMemo(() => {

@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 const LINE_CLAMP = 3;
 
-const Text = styled.span`
+const getTextCss = css`
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: ${LINE_CLAMP};
@@ -24,7 +24,11 @@ interface Props {
 }
 
 const TruncatedTextComponent: React.FC<Props> = ({ text }) => {
-  return <Text title={text}>{text}</Text>;
+  return (
+    <span css={getTextCss} title={text}>
+      {text}
+    </span>
+  );
 };
 TruncatedTextComponent.displayName = 'TruncatedText';
 

@@ -142,6 +142,13 @@ describe('Output form validation', () => {
 
       expect(res).toBeUndefined();
     });
+
+    it('should work with hostnames using uppercase letters', () => {
+      const res = validateLogstashHosts(['tEsT.fr:9200', 'TEST2.fr:9200', 'teSt.fR:9999']);
+
+      expect(res).toBeUndefined();
+    });
+
     it('should throw for invalid hosts starting with http', () => {
       const res = validateLogstashHosts(['https://test.fr:5044']);
 

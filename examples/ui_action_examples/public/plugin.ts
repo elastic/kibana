@@ -29,14 +29,14 @@ export class UiActionExamplesPlugin
   ) {
     uiActions.registerTrigger(helloWorldTrigger);
 
-    const helloWorldAction = createHelloWorldActionDefinition(async () => ({
-      openModal: (await core.getStartServices())[0].overlays.openModal,
-    }));
+    const helloWorldAction = createHelloWorldActionDefinition(
+      async () => (await core.getStartServices())[0]
+    );
 
     uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
   }
 
-  public start(core: CoreStart, plugins: UiActionExamplesStartDependencies) {}
+  public start(_core: CoreStart, _plugins: UiActionExamplesStartDependencies) {}
 
   public stop() {}
 }

@@ -10,6 +10,7 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { Readable } from 'stream';
 import type { TransportRequestOptions } from '@elastic/transport';
+import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 import type { HapiReadableStream } from '../../../types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
@@ -23,7 +24,6 @@ import {
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
-import type { actionCreateService } from '..';
 
 export const createActionRequestsEsSearchResultsMock = (
   agentIds?: string[],
@@ -105,26 +105,22 @@ export const applyActionsEsSearchMock = (
     LogsEndpointActionResponse | EndpointActionResponse
   > = createActionResponsesEsSearchResultsMock()
 ) => {
-  const priorSearchMockImplementation = esClient.search.getMockImplementation();
+  applyEsClientSearchMock({
+    esClientMock: esClient,
+    index: ENDPOINT_ACTIONS_INDEX,
+    response: actionRequests,
+  });
 
-  esClient.search.mockImplementation(async (...args) => {
-    const params = args[0] ?? {};
-    const indexes = Array.isArray(params.index) ? params.index : [params.index];
+  applyEsClientSearchMock({
+    esClientMock: esClient,
+    index: AGENT_ACTIONS_RESULTS_INDEX,
+    response: actionResponses,
+  });
 
-    if (indexes.includes(ENDPOINT_ACTIONS_INDEX)) {
-      return actionRequests;
-    } else if (
-      indexes.includes(AGENT_ACTIONS_RESULTS_INDEX) ||
-      indexes.includes(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN)
-    ) {
-      return actionResponses;
-    }
-
-    if (priorSearchMockImplementation) {
-      return priorSearchMockImplementation(...args);
-    }
-
-    return new EndpointActionGenerator().toEsSearchResponse([]);
+  applyEsClientSearchMock({
+    esClientMock: esClient,
+    index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+    response: actionResponses,
   });
 };
 
@@ -240,15 +236,4 @@ export const createHapiReadableStreamMock = (): HapiReadableStream => {
   };
 
   return readable;
-};
-
-export const createActionCreateServiceMock = (): jest.Mocked<
-  ReturnType<typeof actionCreateService>
-> => {
-  const createdActionMock = new EndpointActionGenerator('seed').generateActionDetails();
-
-  return {
-    createAction: jest.fn().mockResolvedValue(createdActionMock),
-    createActionFromAlert: jest.fn().mockResolvedValue(createdActionMock),
-  };
 };

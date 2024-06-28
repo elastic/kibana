@@ -25,7 +25,7 @@ import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
-    timelineId: unionWithNullType(runtimeTypes.string),
+    timelineId: runtimeTypes.string,
   }),
   runtimeTypes.partial({
     eventId: unionWithNullType(runtimeTypes.string),
@@ -50,9 +50,6 @@ export const NoteRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
     noteId: runtimeTypes.string,
     version: runtimeTypes.string,
-  }),
-  runtimeTypes.partial({
-    timelineVersion: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
@@ -265,6 +262,8 @@ export enum RowRendererId {
   threat_match = 'threat_match',
   zeek = 'zeek',
 }
+
+export const RowRendererCount = Object.keys(RowRendererId).length;
 
 const RowRendererIdRuntimeType = stringEnum(RowRendererId, 'RowRendererId');
 

@@ -165,5 +165,22 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(child).not.toHaveProperty('subType');
       });
     });
+
+    it('sets default field formatter', () => {
+      const fields = readFieldCapsResponse({
+        fields: {
+          seconds: {
+            long: {
+              searchable: true,
+              aggregatable: true,
+              meta: {
+                unit: ['s'],
+              },
+            },
+          },
+        },
+      });
+      expect(fields[0].defaultFormatter).toEqual('s');
+    });
   });
 });

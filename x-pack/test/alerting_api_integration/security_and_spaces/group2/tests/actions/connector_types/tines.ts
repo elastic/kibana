@@ -210,7 +210,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${tinesActionId}. Connector name: Tines. Connector type: .tines`,
           });
         });
@@ -249,7 +249,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            errorSource: TaskErrorSource.USER,
+            errorSource: TaskErrorSource.FRAMEWORK,
             service_message:
               'Invalid subActionsParams: [webhook] or [webhookUrl] expected but got none',
           });
@@ -503,7 +503,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });
@@ -525,7 +525,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });
@@ -545,7 +545,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               message: 'an error occurred while running the action',
               retry: true,
               connector_id: tinesActionId,
-              errorSource: TaskErrorSource.USER,
+              errorSource: TaskErrorSource.FRAMEWORK,
               service_message: 'Status code: 422. Message: API Error: Unprocessable Entity',
             });
           });

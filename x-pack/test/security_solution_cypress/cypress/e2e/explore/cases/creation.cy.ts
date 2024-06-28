@@ -39,7 +39,7 @@ import { TIMELINE_QUERY, TIMELINE_TITLE } from '../../../screens/timeline';
 import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/overview';
 
 import { goToCaseDetails, goToCreateNewCase } from '../../../tasks/all_cases';
-import { createTimeline } from '../../../tasks/api_calls/timelines';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { openCaseTimeline } from '../../../tasks/case_details';
 import {
   attachTimeline,
@@ -48,15 +48,28 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
-import { ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
+import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../env_var_names_constants';
+import { deleteCases } from '../../../tasks/api_calls/cases';
+import { login } from '../../../tasks/login';
+
+const isServerless = Cypress.env(IS_SERVERLESS);
+const getUsername = () => {
+  if (isServerless) {
+    return cy.task('getFullname');
+  } else {
+    return cy.wrap(Cypress.env(ELASTICSEARCH_USERNAME));
+  }
+};
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
+  beforeEach(() => {
+    deleteTimelines();
+    deleteCases();
+
     createTimeline(getCase1().timeline).then((response) =>
       cy
         .wrap({
@@ -78,6 +91,7 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     attachTimeline(this.mycase);
     createCase();
     backToCases();
+
     filterStatusOpen();
 
     cy.get(ALL_CASES_PAGE_TITLE).should('have.text', 'Cases');
@@ -100,16 +114,17 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(CASE_DETAILS_PAGE_TITLE).should('have.text', this.mycase.name);
     cy.get(CASE_DETAILS_STATUS).should('have.text', 'Open');
     cy.get(CASE_DETAILS_USER_ACTION_DESCRIPTION_EVENT).should('have.text', 'Description');
+
     cy.get(CASE_DETAILS_DESCRIPTION).should(
       'have.text',
       `${this.mycase.description} ${this.mycase.timeline.title}`
     );
-    cy.get(CASE_DETAILS_USERNAMES)
-      .eq(REPORTER)
-      .should('contain', Cypress.env(ELASTICSEARCH_USERNAME));
-    cy.get(CASE_DETAILS_USERNAMES)
-      .eq(PARTICIPANTS)
-      .should('contain', Cypress.env(ELASTICSEARCH_USERNAME));
+
+    getUsername().then((username) => {
+      cy.get(CASE_DETAILS_USERNAMES).eq(REPORTER).should('contain', username);
+      cy.get(CASE_DETAILS_USERNAMES).eq(PARTICIPANTS).should('contain', username);
+    });
+
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
 
     EXPECTED_METRICS.forEach((metric) => {

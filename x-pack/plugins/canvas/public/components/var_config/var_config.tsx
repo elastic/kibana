@@ -212,7 +212,6 @@ export const VarConfig: FC<Props> = ({
                 className="canvasVarConfig__list"
                 items={variables}
                 columns={varColumns}
-                hasActions={true}
                 pagination={false}
                 sorting={true}
                 compressed

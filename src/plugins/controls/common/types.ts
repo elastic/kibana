@@ -12,6 +12,8 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/common/types';
 export type ControlWidth = 'small' | 'medium' | 'large';
 export type ControlStyle = 'twoLine' | 'oneLine';
 
+export type TimeSlice = [number, number];
+
 export interface ParentIgnoreSettings {
   ignoreFilters?: boolean;
   ignoreQuery?: boolean;
@@ -23,7 +25,7 @@ export type ControlInput = EmbeddableInput & {
   query?: Query;
   filters?: Filter[];
   timeRange?: TimeRange;
-  timeslice?: [number, number];
+  timeslice?: TimeSlice;
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
 };

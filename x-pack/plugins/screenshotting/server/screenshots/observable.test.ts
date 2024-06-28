@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { interval, lastValueFrom, of, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import { createMockBrowserDriver } from '../browsers/mock';
 import type { ConfigType } from '../config';
 import { createMockLayout } from '../layouts/mock';

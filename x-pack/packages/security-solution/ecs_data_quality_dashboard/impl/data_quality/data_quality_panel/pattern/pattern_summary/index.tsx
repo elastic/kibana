@@ -21,7 +21,7 @@ interface Props {
   indicesChecked: number | undefined;
   pattern: string;
   patternDocsCount: number;
-  patternSizeInBytes: number;
+  patternSizeInBytes: number | undefined;
 }
 
 const PatternSummaryComponent: React.FC<Props> = ({

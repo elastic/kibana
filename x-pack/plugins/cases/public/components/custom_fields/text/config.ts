@@ -15,9 +15,11 @@ const { emptyField } = fieldValidators;
 export const getTextFieldConfig = ({
   required,
   label,
+  defaultValue,
 }: {
   required: boolean;
   label: string;
+  defaultValue?: string | null;
 }): FieldConfig<string> => {
   const validators = [];
 
@@ -28,6 +30,7 @@ export const getTextFieldConfig = ({
   }
 
   return {
+    ...(defaultValue && { defaultValue }),
     validations: [
       ...validators,
       {

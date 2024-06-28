@@ -6,7 +6,7 @@
  */
 
 import { from } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap } from 'rxjs';
 import type {
   CoreSetup,
   CoreStart,

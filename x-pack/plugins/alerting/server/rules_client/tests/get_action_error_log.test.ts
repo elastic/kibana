@@ -26,7 +26,9 @@ import { SavedObject } from '@kbn/core/server';
 import { RawRule } from '../../types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -61,9 +63,12 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  isSystemAction: jest.fn(),
 };
 
 beforeEach(() => {
@@ -502,9 +507,9 @@ describe('getActionErrorLog()', () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.findEventsBySavedObjectIds.mockRejectedValueOnce(new Error('OMG 3!'));
 
-    expect(rulesClient.getActionErrorLog(getActionErrorLogParams())).rejects.toMatchInlineSnapshot(
-      `[Error: OMG 3!]`
-    );
+    await expect(
+      rulesClient.getActionErrorLog(getActionErrorLogParams())
+    ).rejects.toMatchInlineSnapshot(`[Error: OMG 3!]`);
   });
   describe('authorization', () => {
     beforeEach(() => {

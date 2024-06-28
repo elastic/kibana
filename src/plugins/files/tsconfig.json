@@ -26,7 +26,6 @@
     "@kbn/std",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-logging-server-mocks",
-    "@kbn/ecs",
     "@kbn/safer-lodash-set",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-server-mocks",

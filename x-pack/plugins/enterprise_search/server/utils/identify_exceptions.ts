@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ElasticsearchErrorDetails, isResponseError } from '@kbn/es-errors';
+import { i18n } from '@kbn/i18n';
+
 import { ErrorCode } from '../../common/types/error_codes';
 
 export interface ElasticsearchResponseError {
@@ -67,3 +70,28 @@ export const isExpensiveQueriesNotAllowedException = (error: ElasticsearchRespon
     error.meta?.body?.error?.caused_by?.reason?.includes('search.allow_expensive_queries')
   );
 };
+
+export function getErrorMessage(payload?: unknown): string {
+  if (!payload) {
+    throw new Error('expected error message to be provided');
+  }
+  if (typeof payload === 'string') return payload;
+  // Elasticsearch response errors contain nested error messages
+  if (isResponseError(payload)) {
+    return `[${payload.message}]: ${
+      (payload.meta.body as ElasticsearchErrorDetails)?.error?.reason
+    }`;
+  }
+
+  if ((payload as { message: unknown }).message) {
+    return getErrorMessage((payload as { message: unknown }).message);
+  }
+  try {
+    return JSON.stringify(payload);
+  } catch (error) {
+    // If all else fails, we return a generic error
+    return i18n.translate('xpack.enterpriseSearch.server.errorIdentifyingException', {
+      defaultMessage: 'Internal server error: could not parse error message',
+    });
+  }
+}

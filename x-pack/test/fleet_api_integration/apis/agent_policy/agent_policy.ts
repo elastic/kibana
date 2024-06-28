@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -58,11 +58,13 @@ export default function (providerContext: FtrProviderContext) {
             namespace: 'default',
           })
           .expect(200);
-        const { body: responseBody } = await supertest
+        const { body } = await supertest
           .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.name:TEST`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
-        expect(responseBody.items.length).to.eql(1);
+        expect(body.items.length).to.eql(1);
+        const { id, updated_at: updatedAt, version, ...rest } = body.items[0];
+        expectSnapshot(rest).toMatch();
       });
 
       it('should return 200 even if the passed kuery does not have prefix ingest-agent-policies', async () => {
@@ -80,14 +82,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should return 400 if passed kuery is not correct', async () => {
+      it('with enableStrictKQLValidation should return 400 if passed kuery is not correct', async () => {
         await supertest
           .get(`/api/fleet/agent_policies?kuery=ingest-agent-policies.non_existent_parameter:test`)
           .set('kbn-xsrf', 'xxxx')
           .expect(400);
       });
 
-      it('should return 400 if passed kuery is invalid', async () => {
+      it('with enableStrictKQLValidation should return 400 if passed kuery is invalid', async () => {
         await supertest
           .get(`/api/fleet/agent_policies?kuery='test%3A'`)
           .set('kbn-xsrf', 'xxxx')
@@ -230,6 +232,32 @@ export default function (providerContext: FtrProviderContext) {
             enabled: true,
           },
         });
+      });
+
+      it('should create .fleet-policies document with inputs', async () => {
+        const res = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-policy-with-system',
+            namespace: 'default',
+            force: true, // using force to bypass package verification error
+          })
+          .expect(200);
+
+        const policyDocRes = await es.search({
+          index: '.fleet-policies',
+          query: {
+            term: {
+              policy_id: res.body.item.id,
+            },
+          },
+        });
+
+        expect(policyDocRes?.hits?.hits.length).to.eql(1);
+        const source = policyDocRes?.hits?.hits[0]?._source as any;
+        expect(source?.revision_idx).to.eql(1);
+        expect(source?.data?.inputs.length).to.eql(3);
       });
 
       it('should return a 400 with an empty namespace', async () => {
@@ -409,6 +437,40 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(policy.package_policies[0].name).be('system-457');
       });
+
+      it('should create policy with global data tags given valid tags', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'global data tag test',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName2', value: 123 },
+            ],
+          })
+          .expect(200);
+
+        let res = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`).expect(200);
+        expect(res.body.item.global_data_tags).to.eql([
+          { name: 'testName', value: 'testValue' },
+          { name: 'testName2', value: 123 },
+        ]);
+
+        res = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}/full`).expect(200);
+        for (const input of res.body.item.inputs) {
+          expect(input.processors).not.to.equal(undefined);
+          expect(input.processors.length).to.equal(1);
+          const addFields = input.processors[0].add_fields;
+          expect(addFields).to.eql({
+            fields: { testName: 'testValue', testName2: 123 },
+            target: '',
+          });
+        }
+      });
     });
 
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
@@ -455,7 +517,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = item;
+        const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',
@@ -810,6 +872,33 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(409);
       });
+
+      it('should copy global data tags', async () => {
+        const {
+          body: { item: policyWithGlobalDataTags },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Global Data Tag Test',
+            namespace: 'default',
+            global_data_tags: [{ name: 'testName', value: 'testValue' }],
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithGlobalDataTags.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Global Data Tag Test Copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        expect(newPolicy.global_data_tags).to.eql([{ name: 'testName', value: 'testValue' }]);
+      });
     });
 
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
@@ -858,7 +947,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -972,8 +1061,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      // Skipped as cannot force install the system and agent integrations as part of policy creation https://github.com/elastic/kibana/issues/137450
-      it.skip('should return a 200 if updating monitoring_enabled on a policy', async () => {
+      it('should return a 200 if updating monitoring_enabled on a policy', async () => {
         const fetchPackageList = async () => {
           const response = await supertest
             .get('/api/fleet/epm/packages')
@@ -1005,7 +1093,6 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         expect(installedPackages.length).to.be(0);
-
         agentPolicyId = originalPolicy.id;
         const {
           body: { item: updatedPolicy },
@@ -1017,10 +1104,11 @@ export default function (providerContext: FtrProviderContext) {
             description: 'Updated description',
             namespace: 'default',
             monitoring_enabled: ['logs', 'metrics'],
+            force: true,
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
         createdPolicyIds.push(updatedPolicy.id);
 
         expect(newPolicy).to.eql({
@@ -1029,6 +1117,7 @@ export default function (providerContext: FtrProviderContext) {
           description: 'Updated description',
           namespace: 'default',
           is_managed: false,
+          is_protected: false,
           revision: 2,
           schema_version: FLEET_AGENT_POLICIES_SCHEMA_VERSION,
           updated_by: 'elastic',
@@ -1079,7 +1168,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
@@ -1129,6 +1218,38 @@ export default function (providerContext: FtrProviderContext) {
             },
           })
           .expect(400);
+      });
+
+      it('should overwrite global data tags if provided with valid input', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies?sys_monitoring=true`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName2', value: 123 },
+            ],
+          })
+          .expect(200);
+        createdPolicyIds.push(originalPolicy.id as string);
+
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: originalPolicy.name,
+            namespace: 'default',
+            global_data_tags: [{ name: 'newTag', value: 'newValue' }],
+          })
+          .expect(200);
+
+        expect(updatedPolicy.global_data_tags).to.eql([{ name: 'newTag', value: 'newValue' }]);
       });
     });
 
@@ -1184,6 +1305,100 @@ export default function (providerContext: FtrProviderContext) {
         expect(body).to.eql({
           id: regularPolicy.id,
           name: 'Regular policy',
+        });
+      });
+
+      it('should allow hosted policy delete with force flag', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Hosted policy',
+            namespace: 'default',
+            is_managed: true,
+          })
+          .expect(200);
+        hostedPolicy = createdPolicy;
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxx')
+          .send({ agentPolicyId: hostedPolicy.id, force: true })
+          .expect(200);
+
+        await supertest.get(`/api/fleet/agent_policies/${hostedPolicy.id}`).expect(404);
+      });
+
+      describe('Errors when trying to delete', () => {
+        it('should prevent policies having agents from being deleted', async () => {
+          const {
+            body: { item: policyWithAgents },
+          } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Policy with agents',
+              namespace: 'default',
+            })
+            .expect(200);
+          await generateAgent(providerContext, 'healhty', 'agent-healthy-1', policyWithAgents.id);
+          const { body } = await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: policyWithAgents.id })
+            .expect(400);
+
+          expect(body.message).to.contain(
+            'Cannot delete an agent policy that is assigned to any active or inactive agents'
+          );
+          await supertest
+            .delete(`/api/fleet/agents/agent-healthy-1`)
+            .set('kbn-xsrf', 'xx')
+            .expect(200);
+        });
+
+        it('should prevent policies having inactive agents from being deleted', async () => {
+          const {
+            body: { item: policyWithInactiveAgents },
+          } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Policy with inactive agents',
+              namespace: 'default',
+            })
+            .expect(200);
+          await generateAgent(
+            providerContext,
+            'inactive',
+            'agent-inactive-1',
+            policyWithInactiveAgents.id
+          );
+
+          // inactive agents are included in agent policy agents count
+          const {
+            body: {
+              item: { agents: agentsCount },
+            },
+          } = await supertest
+            .get(`/api/fleet/agent_policies/${policyWithInactiveAgents.id}`)
+            .expect(200);
+          expect(agentsCount).to.equal(1);
+
+          const { body } = await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxx')
+            .send({ agentPolicyId: policyWithInactiveAgents.id })
+            .expect(400);
+
+          expect(body.message).to.contain(
+            'Cannot delete an agent policy that is assigned to any active or inactive agents'
+          );
+          await supertest
+            .delete(`/api/fleet/agents/agent-inactive-1`)
+            .set('kbn-xsrf', 'xx')
+            .expect(200);
         });
       });
     });
@@ -1254,6 +1469,32 @@ export default function (providerContext: FtrProviderContext) {
         expect(items[0].package_policies.length).equal(1);
         expect(items[0].package_policies[0]).to.have.property('package');
         expect(items[0].package_policies[0].package.name).equal('system');
+        const {
+          package_policies: packagePolicies,
+          id,
+          updated_at: updatedAt,
+          version: policyVersion,
+          ...rest
+        } = items[0];
+        expectSnapshot({
+          ...rest,
+          package_policies: packagePolicies.map(
+            ({
+              inputs,
+              id: ppId,
+              policy_id: ppPolicyId,
+              policy_ids: ppPolicyIds,
+              created_at: ppcreatedAt,
+              updated_at: ppupdatedAt,
+              version,
+              package: { version: pkgVersion, ...pkgRest },
+              ...ppRest
+            }: any) => ({
+              ...ppRest,
+              package: pkgRest,
+            })
+          ),
+        }).toMatch();
       });
 
       it('should return a 404 with invalid ids', async () => {

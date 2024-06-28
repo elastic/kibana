@@ -15,7 +15,7 @@ import {
 } from '@kbn/core/server';
 import { IClusterClient } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
-import { throttleTime, tap, map } from 'rxjs/operators';
+import { throttleTime, tap, map } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { MonitoringStats } from '../monitoring';
 import { TaskManagerConfig } from '../config';

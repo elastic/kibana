@@ -7,13 +7,11 @@
 
 import React, { useMemo, useState } from 'react';
 
-import {
-  isTransformListRowWithStats,
-  TransformListRowWithStats,
-} from '../../../../common/transform_list';
+import type { TransformListRowWithStats } from '../../../../common/transform_list';
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import { TransformListAction, TransformListRow } from '../../../../common';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities, useResetTransforms } from '../../../../hooks';
 
 import {

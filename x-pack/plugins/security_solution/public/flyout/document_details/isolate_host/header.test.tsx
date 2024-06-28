@@ -6,37 +6,97 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import type { IsolateHostPanelContext } from './context';
 import { useIsolateHostPanelContext } from './context';
 import { PanelHeader } from './header';
-import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer, endpointAlertDataMock } from '../../../common/mock/endpoint';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
+import { ISOLATE_HOST, UNISOLATE_HOST } from '../../../common/components/endpoint/host_isolation';
+import { TECHNICAL_PREVIEW } from '../../../common/translations';
 
 jest.mock('./context');
 
-const renderPanelHeader = () =>
-  render(
-    <IntlProvider locale="en">
-      <PanelHeader />
-    </IntlProvider>
+describe('Isolation Flyout PanelHeader', () => {
+  let render: () => ReturnType<AppContextTestRender['render']>;
+
+  const setUseIsolateHostPanelContext = (data: Partial<IsolateHostPanelContext> = {}) => {
+    const panelContextMock: IsolateHostPanelContext = {
+      eventId: 'some-even-1',
+      indexName: 'some-index-name',
+      scopeId: 'some-scope-id',
+      dataFormattedForFieldBrowser: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
+      isolateAction: 'isolateHost',
+      ...data,
+    };
+
+    (useIsolateHostPanelContext as jest.Mock).mockReturnValue(panelContextMock);
+  };
+
+  beforeEach(() => {
+    const appContextMock = createAppRootMockRenderer();
+
+    appContextMock.setExperimentalFlag({
+      responseActionsSentinelOneV1Enabled: true,
+      responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+    });
+
+    render = () => appContextMock.render(<PanelHeader />);
+
+    setUseIsolateHostPanelContext({
+      isolateAction: 'isolateHost',
+      dataFormattedForFieldBrowser: endpointAlertDataMock.generateEndpointAlertDetailsItemData(),
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const testConditions: Array<{
+    action: IsolateHostPanelContext['isolateAction'];
+    agentType: ResponseActionAgentType;
+    title: string;
+    // if `expectedBadgeText` is `undefined`, then it validates that the badge is not displayed
+    expectedBadgeText: string | undefined;
+  }> = [];
+
+  for (const agentType of RESPONSE_ACTION_AGENT_TYPE) {
+    (['isolateHost', 'unisolateHost'] as Array<IsolateHostPanelContext['isolateAction']>).forEach(
+      (action) => {
+        testConditions.push({
+          action,
+          agentType,
+          title: action === 'isolateHost' ? ISOLATE_HOST : UNISOLATE_HOST,
+          expectedBadgeText:
+            agentType === 'crowdstrike' || agentType === 'sentinel_one'
+              ? TECHNICAL_PREVIEW
+              : undefined,
+        });
+      }
+    );
+  }
+
+  it.each(testConditions)(
+    'should display correct flyout header title for $action on agentType $agentType',
+    ({ action, agentType, title, expectedBadgeText }) => {
+      setUseIsolateHostPanelContext({
+        isolateAction: action,
+        dataFormattedForFieldBrowser:
+          endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType),
+      });
+      const { getByTestId, queryByTestId } = render();
+
+      expect(getByTestId('flyoutHostIsolationHeaderTitle')).toHaveTextContent(title);
+
+      if (expectedBadgeText) {
+        expect(getByTestId('flyoutHostIsolationHeaderBadge')).toHaveTextContent(expectedBadgeText);
+      } else {
+        expect(queryByTestId('flyoutHostIsolationHeaderBadge')).toBeNull();
+      }
+
+      expect(getByTestId('flyoutHostIsolationHeaderIntegration'));
+    }
   );
-
-describe('<PanelHeader />', () => {
-  (useIsolateHostPanelContext as jest.Mock).mockReturnValue({ isolateAction: 'isolateHost' });
-
-  it('should display isolate host message', () => {
-    const { getByTestId } = renderPanelHeader();
-
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Isolate host');
-  });
-
-  it('should display release host message', () => {
-    (useIsolateHostPanelContext as jest.Mock).mockReturnValue({ isolateAction: 'unisolateHost' });
-
-    const { getByTestId } = renderPanelHeader();
-
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Release host');
-  });
 });

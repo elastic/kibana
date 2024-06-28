@@ -16,4 +16,11 @@ export * from './expression_functions';
 export * from './convert_to_lens';
 export { convertToSchemaConfig } from './vis_schemas';
 
-export { LegendSize, LegendSizeToPixels, DEFAULT_LEGEND_SIZE } from './constants';
+export {
+  LegendSize,
+  LegendSizeToPixels,
+  DEFAULT_LEGEND_SIZE,
+  LegendLayout,
+  type XYLegendValue,
+  type PartitionLegendValue,
+} from './constants';

@@ -15,7 +15,7 @@ import { getSavedSearchUrl, SavedSearch } from '@kbn/saved-search-plugin/public'
 interface SavedSearchAliasMatchRedirectProps {
   savedSearch?: SavedSearch;
   spaces?: SpacesApi;
-  history: () => History;
+  history: History;
 }
 
 export const useSavedSearchAliasMatchRedirect = ({
@@ -31,7 +31,7 @@ export const useSavedSearchAliasMatchRedirect = ({
 
         if (spaces && aliasTargetId && outcome === 'aliasMatch') {
           await spaces.ui.redirectLegacyUrl({
-            path: `${getSavedSearchUrl(aliasTargetId)}${history().location.search}`,
+            path: `${getSavedSearchUrl(aliasTargetId)}${history.location.search}`,
             aliasPurpose,
             objectNoun: i18n.translate('discover.savedSearchAliasMatchRedirect.objectNoun', {
               defaultMessage: '{savedSearch} search',

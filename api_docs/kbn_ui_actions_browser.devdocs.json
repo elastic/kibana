@@ -326,56 +326,6 @@
       },
       {
         "parentPluginId": "@kbn/ui-actions-browser",
-        "id": "def-common.RowClickContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "RowClickContext",
-        "description": [],
-        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.RowClickContext.embeddable",
-            "type": "Unknown",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-actions-browser",
-            "id": "def-common.RowClickContext.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "{ rowIndex: number; table: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              "; columns?: string[] | undefined; }"
-            ],
-            "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ui-actions-browser",
         "id": "def-common.Trigger",
         "type": "Interface",
         "tags": [],
@@ -469,6 +419,37 @@
         "description": [],
         "signature": [
           "\"ROW_CLICK_TRIGGER\""
+        ],
+        "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ui-actions-browser",
+        "id": "def-common.RowClickContext",
+        "type": "Type",
+        "tags": [],
+        "label": "RowClickContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { rowIndex: number; table: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          "; columns?: string[] | undefined; }; }"
         ],
         "path": "packages/kbn-ui-actions-browser/src/triggers/row_click_trigger.ts",
         "deprecated": false,

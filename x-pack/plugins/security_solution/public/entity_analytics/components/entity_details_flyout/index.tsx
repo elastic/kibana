@@ -20,7 +20,7 @@ export const getRiskInputTab = ({ entityType, entityName }: RiskInputsTabProps) 
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
-      defaultMessage="Risk Inputs"
+      defaultMessage="Risk contributions"
     />
   ),
   content: <RiskInputsTab entityType={entityType} entityName={entityName} />,

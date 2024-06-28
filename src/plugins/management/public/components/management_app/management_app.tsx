@@ -10,13 +10,13 @@ import './management_app.scss';
 import React, { useState, useEffect, useCallback } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { reactRouterNavigate, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
 import { AppContextProvider } from './management_context';
@@ -32,7 +32,6 @@ import { SectionsServiceStart, NavigationCardsSubject } from '../../types';
 interface ManagementAppProps {
   appBasePath: string;
   history: AppMountParameters['history'];
-  theme$: AppMountParameters['theme$'];
   dependencies: ManagementAppDependencies;
 }
 
@@ -45,13 +44,8 @@ export interface ManagementAppDependencies {
   cardsNavigationConfig$: BehaviorSubject<NavigationCardsSubject>;
 }
 
-export const ManagementApp = ({
-  dependencies,
-  history,
-  theme$,
-  appBasePath,
-}: ManagementAppProps) => {
-  const { setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$ } = dependencies;
+export const ManagementApp = ({ dependencies, history, appBasePath }: ManagementAppProps) => {
+  const { coreStart, setBreadcrumbs, isSidebarEnabled$, cardsNavigationConfig$ } = dependencies;
   const [selectedId, setSelectedId] = useState<string>('');
   const [sections, setSections] = useState<ManagementSection[]>();
   const isSidebarEnabled = useObservable(isSidebarEnabled$);
@@ -114,30 +108,28 @@ export const ManagementApp = ({
   };
 
   return (
-    <RedirectAppLinks coreStart={dependencies.coreStart}>
-      <I18nProvider>
+    <KibanaRenderContextProvider i18n={coreStart.i18n} theme={coreStart.theme}>
+      <RedirectAppLinks coreStart={dependencies.coreStart}>
         <AppContextProvider value={contextDependencies}>
-          <KibanaThemeProvider theme$={theme$}>
-            <KibanaPageTemplate
-              restrictWidth={false}
-              solutionNav={solution}
-              // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
-              // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
-              mainProps={{ paddingSize: 'l' }}
-              panelled
-            >
-              <ManagementRouter
-                history={history}
-                theme$={theme$}
-                setBreadcrumbs={setBreadcrumbsScoped}
-                onAppMounted={onAppMounted}
-                sections={sections}
-                analytics={dependencies.coreStart.analytics}
-              />
-            </KibanaPageTemplate>
-          </KibanaThemeProvider>
+          <KibanaPageTemplate
+            restrictWidth={false}
+            solutionNav={solution}
+            // @ts-expect-error Techincally `paddingSize` isn't supported but it is passed through,
+            // this is a stop-gap for Stack managmement specifically until page components can be converted to template components
+            mainProps={{ paddingSize: 'l' }}
+            panelled
+          >
+            <ManagementRouter
+              history={history}
+              theme={coreStart.theme}
+              setBreadcrumbs={setBreadcrumbsScoped}
+              onAppMounted={onAppMounted}
+              sections={sections}
+              analytics={coreStart.analytics}
+            />
+          </KibanaPageTemplate>
         </AppContextProvider>
-      </I18nProvider>
-    </RedirectAppLinks>
+      </RedirectAppLinks>
+    </KibanaRenderContextProvider>
   );
 };

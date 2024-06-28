@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useMemo } from 'react';
 import { loadRuleTypes } from '../lib/rule_api/rule_types';
 import { useKibana } from '../../common/lib/kibana';
@@ -73,11 +73,11 @@ export const useLoadRuleTypesQuery = ({
   const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
   const authorizedRuleTypes = useMemo(() => [...filteredIndex.values()], [filteredIndex]);
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
+    (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
   );
   const authorizedToReadAnyRules =
     authorizedToCreateAnyRules ||
-    authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.read);
+    authorizedRuleTypes.some((ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.read);
 
   return {
     ruleTypesState: {

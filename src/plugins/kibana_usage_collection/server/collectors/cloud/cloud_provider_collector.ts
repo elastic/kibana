@@ -27,7 +27,7 @@ export function registerCloudProviderUsageCollector(
 
   const cloudDetector = new CloudDetector();
   // determine the cloud service in the background
-  cloudDetector.detectCloudService(ac.signal);
+  cloudDetector.detectCloudService(ac.signal).catch(() => {});
 
   const collector = usageCollection.makeUsageCollector<Usage | undefined>({
     type: 'cloud_provider',

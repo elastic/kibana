@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { ComponentType } from 'react';
+import type { ComponentType, MouseEventHandler } from 'react';
 import type { Location } from 'history';
-import type { EuiThemeSizes, IconType } from '@elastic/eui';
+import type { EuiSideNavItemType, EuiThemeSizes, IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
@@ -20,11 +20,23 @@ import type {
   AppId as ManagementApp,
   DeepLinkId as ManagementLink,
 } from '@kbn/deeplinks-management';
-import type { AppId as SearchApp, DeepLinkId as SearchLink } from '@kbn/deeplinks-search';
+import type {
+  EnterpriseSearchApp,
+  EnterpriseSearchContentApp,
+  EnterpriseSearchApplicationsApp,
+  EnterpriseSearchAnalyticsApp,
+  EnterpriseSearchAppsearchApp,
+  EnterpriseSearchWorkplaceSearchApp,
+  ServerlessSearchApp,
+  DeepLinkId as SearchLink,
+} from '@kbn/deeplinks-search';
 import type {
   AppId as ObservabilityApp,
   DeepLinkId as ObservabilityLink,
 } from '@kbn/deeplinks-observability';
+import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
+import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
+import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
@@ -36,8 +48,17 @@ export type AppId =
   | AnalyticsApp
   | MlApp
   | ManagementApp
-  | SearchApp
-  | ObservabilityApp;
+  | EnterpriseSearchApp
+  | EnterpriseSearchContentApp
+  | EnterpriseSearchApplicationsApp
+  | EnterpriseSearchAnalyticsApp
+  | EnterpriseSearchAppsearchApp
+  | EnterpriseSearchWorkplaceSearchApp
+  | ServerlessSearchApp
+  | ObservabilityApp
+  | SecurityApp
+  | FleetApp
+  | SharedApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -46,14 +67,26 @@ export type AppDeepLinkId =
   | MlLink
   | ManagementLink
   | SearchLink
-  | ObservabilityLink;
+  | ObservabilityLink
+  | SecurityLink
+  | FleetLink
+  | SharedLink;
 
 /** @public */
-export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+export type CloudLinkId =
+  | 'userAndRoles'
+  | 'performance'
+  | 'billingAndSub'
+  | 'deployment'
+  | 'deployments'
+  | 'projects';
 
 export interface CloudURLs {
+  baseUrl?: string;
   billingUrl?: string;
+  deploymentsUrl?: string;
   deploymentUrl?: string;
+  projectsUrl?: string;
   performanceUrl?: string;
   usersAndRolesUrl?: string;
 }
@@ -95,6 +128,10 @@ interface NodeDefinitionBase {
    * href for absolute links only. Internal links should use "link".
    */
   href?: string;
+  /**
+   * Custom handler to execute when clicking on the node. This handler takes precedence over the "link" or "href" props.
+   */
+  onClick?: MouseEventHandler<HTMLButtonElement | HTMLElement>;
   /**
    * Optional status to indicate if the breadcrumb should be hidden when this node is active.
    * @default 'visible'
@@ -373,3 +410,43 @@ export interface NavigationTreeDefinitionUI {
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }
+
+/**
+ * @public
+ *
+ * Definition for a solution navigation in stateful Kibana.
+ *
+ * This definition is used to register a solution navigation in the Chrome service
+ * for the side navigation evolution to align with the Serverless UX.
+ */
+
+export interface SolutionNavigationDefinition<LinkId extends AppDeepLinkId = AppDeepLinkId> {
+  /** Unique id for the solution navigation. */
+  id: string;
+  /** Title for the solution navigation. */
+  title: string;
+  /** The navigation tree definition */
+  navigationTree$: Observable<NavigationTreeDefinition<LinkId>>;
+  /** Optional icon for the solution navigation to render in the select dropdown. */
+  icon?: IconType;
+  /** React component to render in the side nav for the navigation */
+  sideNavComponent?: SideNavComponent;
+  /** The page to navigate to when switching to this solution navigation. */
+  homePage?: LinkId;
+}
+
+export interface SolutionNavigationDefinitions {
+  [id: string]: SolutionNavigationDefinition;
+}
+
+/**
+ * Temporary helper interface while we have to maintain both the legacy side navigation
+ * and the new "solution view" one. The legacy uses EuiSideNavItemType and its properties are not fully compatible
+ * with the NodeDefinition. Solution teams declare their "classic" navigation using the EuiSideNavItemType.
+ * Converting those to the `NodeDefinition` require some additional props.
+ */
+export type EuiSideNavItemTypeEnhanced<T = unknown> = Omit<EuiSideNavItemType<T>, 'items'> & {
+  items?: Array<EuiSideNavItemTypeEnhanced<unknown>>;
+  iconToString?: string;
+  nameToString?: string;
+};

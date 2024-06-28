@@ -46,11 +46,11 @@ interface Props {
   exampleLinks: ExampleLink[];
 }
 
-export const StateContainersExamplesPage: React.FC<Props> = ({
+export const StateContainersExamplesPage: React.FC<PropsWithChildren<Props>> = ({
   navigateToApp,
   children,
   exampleLinks,
-}: PropsWithChildren<Props>) => {
+}) => {
   return (
     <EuiPage>
       <EuiPageTemplate.Sidebar>

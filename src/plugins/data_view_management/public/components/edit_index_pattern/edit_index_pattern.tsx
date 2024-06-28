@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataView, DataViewField, RuntimeField } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField, DataViewType, RuntimeField } from '@kbn/data-views-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -31,6 +31,7 @@ import {
 import { pickBy } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type * as CSS from 'csstype';
+import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -80,6 +81,7 @@ export const EditIndexPattern = withRouter(
       IndexPatternEditor,
       savedObjectsManagement,
       application,
+      ...startServices
     } = useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [compositeRuntimeFields, setCompositeRuntimeFields] = useState<
@@ -167,10 +169,11 @@ export const EditIndexPattern = withRouter(
       onDelete: () => {
         history.push('');
       },
+      startServices,
     });
 
     const isRollup =
-      new URLSearchParams(useLocation().search).get('type') === 'rollup' &&
+      new URLSearchParams(useLocation().search).get('type') === DataViewType.ROLLUP &&
       dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
@@ -290,6 +293,10 @@ export const EditIndexPattern = withRouter(
                   >
                     {tag.name}
                   </EuiBadge>
+                ) : tag.key === 'rollup' ? (
+                  <RollupDeprecationTooltip>
+                    <EuiBadge color="warning">{tag.name}</EuiBadge>
+                  </RollupDeprecationTooltip>
                 ) : (
                   <EuiBadge color="hollow">{tag.name}</EuiBadge>
                 )}

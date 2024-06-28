@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { ServiceStatusLevelId, ServiceStatus, CoreStatus } from '@kbn/core-status-common';
 import type { OpsMetrics } from '@kbn/core-metrics-server';
 
@@ -34,6 +35,7 @@ export interface ServerVersion {
   build_hash: string;
   build_number: number;
   build_snapshot: boolean;
+  build_flavor: BuildFlavor;
   build_date: string;
 }
 

@@ -8,12 +8,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type {
-  IEsSearchResponse,
-  IKibanaSearchResponse,
-  ISearchClient,
-  ISearchSource,
-} from '@kbn/data-plugin/common';
+import type { ISearchClient, IKibanaSearchResponse, IEsSearchResponse } from '@kbn/search-types';
+import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { CsvExportSettings } from './get_export_settings';
 
 export interface SearchCursorClients {
@@ -23,7 +19,7 @@ export interface SearchCursorClients {
 
 export type SearchCursorSettings = Pick<
   CsvExportSettings,
-  'scroll' | 'includeFrozen' | 'maxConcurrentShardRequests'
+  'scroll' | 'includeFrozen' | 'maxConcurrentShardRequests' | 'taskInstanceFields'
 >;
 
 export abstract class SearchCursor {
@@ -33,6 +29,7 @@ export abstract class SearchCursor {
     protected indexPatternTitle: string,
     protected settings: SearchCursorSettings,
     protected clients: SearchCursorClients,
+    protected abortController: AbortController,
     protected logger: Logger
   ) {}
 

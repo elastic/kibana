@@ -9,13 +9,14 @@ import { RuleDomain, Rule, RuleParams } from '../types';
 
 interface TransformRuleDomainToRuleOptions {
   isPublic?: boolean;
+  includeLegacyId?: boolean;
 }
 
 export const transformRuleDomainToRule = <Params extends RuleParams = never>(
   ruleDomain: RuleDomain<Params>,
   options?: TransformRuleDomainToRuleOptions
 ): Rule<Params> => {
-  const { isPublic = false } = options || {};
+  const { isPublic = false, includeLegacyId = false } = options || {};
 
   const rule: Rule<Params> = {
     id: ruleDomain.id,
@@ -26,6 +27,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     consumer: ruleDomain.consumer,
     schedule: ruleDomain.schedule,
     actions: ruleDomain.actions,
+    systemActions: ruleDomain.systemActions,
     params: ruleDomain.params,
     mapped_params: ruleDomain.mapped_params,
     scheduledTaskId: ruleDomain.scheduledTaskId,
@@ -49,7 +51,8 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     revision: ruleDomain.revision,
     running: ruleDomain.running,
     viewInAppRelativeUrl: ruleDomain.viewInAppRelativeUrl,
-    notificationDelay: ruleDomain.notificationDelay,
+    alertDelay: ruleDomain.alertDelay,
+    legacyId: ruleDomain.legacyId,
   };
 
   if (isPublic) {
@@ -58,6 +61,10 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     delete rule.isSnoozedUntil;
     delete rule.monitoring;
     delete rule.viewInAppRelativeUrl;
+  }
+
+  if (!includeLegacyId) {
+    delete rule.legacyId;
   }
 
   // Remove all undefined keys to clean up the object

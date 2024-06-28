@@ -7,6 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
@@ -25,6 +26,7 @@ export interface BulkEditRulesArguments {
   filter?: string;
   ids?: string[];
   mlAuthz: MlAuthz;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 /**
@@ -40,6 +42,7 @@ export const bulkEditRules = async ({
   actions,
   filter,
   mlAuthz,
+  experimentalFeatures,
 }: BulkEditRulesArguments) => {
   const { attributesActions, paramsActions } = splitBulkEditActions(actions);
   const operations = attributesActions.map(bulkEditActionToRulesClientOperation).flat();
@@ -53,7 +56,7 @@ export const bulkEditRules = async ({
         edit: actions,
         immutable: ruleParams.immutable,
       });
-      return ruleParamsModifier(ruleParams, paramsActions);
+      return ruleParamsModifier(ruleParams, paramsActions, experimentalFeatures);
     },
   });
 

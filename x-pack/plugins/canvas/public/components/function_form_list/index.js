@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compose, withProps } from 'recompose';
+import { compose, withProps } from 'react-recompose';
 import { get } from 'lodash';
 import { toExpression } from '@kbn/interpreter';
 import { pluginServices } from '../../services';

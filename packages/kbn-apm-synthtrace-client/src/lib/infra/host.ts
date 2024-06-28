@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 /* eslint-disable max-classes-per-file */
-import { HostAsset } from '../assets';
 import { Entity, Fields } from '../entity';
 import { Serializable } from '../serializable';
 import { pod } from './pod';
@@ -17,6 +15,8 @@ interface HostDocument extends Fields {
   'host.hostname': string;
   'host.name': string;
   'metricset.name'?: string;
+  'event.module'?: string;
+  'service.name'?: string;
 }
 
 class Host extends Entity<HostDocument> {
@@ -89,15 +89,6 @@ class Host extends Entity<HostDocument> {
     });
   }
 
-  asset() {
-    return new HostAsset({
-      'asset.kind': 'host',
-      'asset.id': this.fields['host.hostname'],
-      'asset.name': this.fields['host.hostname'],
-      'asset.ean': `host:${this.fields['host.hostname']}`,
-    });
-  }
-
   pod(uid: string) {
     return pod(uid, this.fields['host.hostname']);
   }
@@ -131,6 +122,7 @@ class HostMetrics extends Serializable<HostMetricsDocument> {}
 
 export function host(name: string): Host {
   return new Host({
+    'event.module': 'system',
     'agent.id': 'synthtrace',
     'host.hostname': name,
     'host.name': name,

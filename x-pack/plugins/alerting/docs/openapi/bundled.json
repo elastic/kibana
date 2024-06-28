@@ -67,6 +67,9 @@
                 },
                 "createIndexThresholdRuleRequest": {
                   "$ref": "#/components/examples/create_index_threshold_rule_request"
+                },
+                "createTrackingContainmentRuleRequest": {
+                  "$ref": "#/components/examples/create_tracking_containment_rule_request"
                 }
               }
             }
@@ -92,6 +95,9 @@
                   },
                   "createIndexThresholdRuleResponse": {
                     "$ref": "#/components/examples/create_index_threshold_rule_response"
+                  },
+                  "createTrackingContainmentRuleResponse": {
+                    "$ref": "#/components/examples/create_tracking_containment_rule_response"
                   }
                 }
               }
@@ -2592,6 +2598,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -2641,6 +2650,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -2692,6 +2704,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -2739,6 +2754,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -2788,6 +2806,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -2835,6 +2856,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -2884,6 +2908,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -2931,6 +2958,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -2982,6 +3012,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -3030,6 +3063,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -3076,6 +3112,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -3126,6 +3165,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -3224,6 +3266,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -4322,6 +4367,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -4369,6 +4417,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -4419,6 +4470,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -4517,6 +4571,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -4567,6 +4624,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
           },
@@ -4616,6 +4676,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "consumer": {
             "$ref": "#/components/schemas/consumer"
@@ -4706,7 +4769,7 @@
           }
         }
       },
-      "notify_when": {
+      "notify_when_action": {
         "type": "string",
         "description": "Indicates how often alerts generate actions. Valid values include: `onActionGroupChange`: Actions run when the alert status changes; `onActiveAlert`: Actions run when the alert becomes active and at each check interval while the rule conditions are met; `onThrottleInterval`: Actions run when the alert becomes active and at the interval specified in the throttle property while the rule conditions are met. NOTE: You cannot specify `notify_when` at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
         "enum": [
@@ -4718,7 +4781,7 @@
           "onActiveAlert"
         ]
       },
-      "throttle": {
+      "throttle_action": {
         "type": [
           "string",
           "null"
@@ -4832,14 +4895,14 @@
               ],
               "properties": {
                 "notify_when": {
-                  "$ref": "#/components/schemas/notify_when"
+                  "$ref": "#/components/schemas/notify_when_action"
                 },
                 "summary": {
                   "type": "boolean",
                   "description": "Indicates whether the action is a summary."
                 },
                 "throttle": {
-                  "$ref": "#/components/schemas/throttle"
+                  "$ref": "#/components/schemas/throttle_action"
                 }
               }
             },
@@ -4872,6 +4935,20 @@
           }
         }
       },
+      "alert_delay": {
+        "type": "object",
+        "description": "Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.",
+        "required": [
+          "active"
+        ],
+        "properties": {
+          "active": {
+            "type": "number",
+            "description": "The number of consecutive runs that must meet the rule conditions.",
+            "example": 3
+          }
+        }
+      },
       "consumer": {
         "type": "string",
         "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.\n"
@@ -4883,6 +4960,19 @@
       "name_rule": {
         "type": "string",
         "description": "The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.\n"
+      },
+      "notify_when": {
+        "type": "string",
+        "description": "Deprecated in 8.13.0. Use the `notify_when` property in the action `frequency` object instead. Indicates how often alerts generate actions. NOTE: You cannot specify `notify_when` at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
+        "enum": [
+          "onActionGroupChange",
+          "onActiveAlert",
+          "onThrottleInterval"
+        ],
+        "deprecated": true,
+        "examples": [
+          "onActiveAlert"
+        ]
       },
       "schedule": {
         "type": "object",
@@ -4903,6 +4993,18 @@
           "type": "string"
         },
         "default": []
+      },
+      "throttle": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Deprecated in 8.13.0. Use the `throttle` property in the action `frequency` object instead. The throttle interval, which defines how often an alert generates repeated actions. NOTE: You cannot specify the throttle interval at both the rule and action level. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.\n",
+        "default": null,
+        "deprecated": true,
+        "examples": [
+          "10m"
+        ]
       },
       "params_property_apm_anomaly": {
         "required": [
@@ -6566,6 +6668,9 @@
           "actions": {
             "$ref": "#/components/schemas/actions"
           },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
+          },
           "api_key_created_by_user": {
             "type": "boolean",
             "description": "Indicates whether the API key that is associated with the rule was created by the user.",
@@ -6856,6 +6961,9 @@
         "properties": {
           "actions": {
             "$ref": "#/components/schemas/actions"
+          },
+          "alert_delay": {
+            "$ref": "#/components/schemas/alert_delay"
           },
           "name": {
             "type": "string",
@@ -7254,6 +7362,9 @@
               }
             }
           ],
+          "alert_delay": {
+            "active": 3
+          },
           "consumer": "alerts",
           "name": "my rule",
           "params": {
@@ -7280,6 +7391,29 @@
           "tags": [
             "cpu"
           ]
+        }
+      },
+      "create_tracking_containment_rule_request": {
+        "summary": "Create a tracking containment rule.",
+        "value": {
+          "consumer": "alerts",
+          "name": "my tracking rule",
+          "params": {
+            "index": "kibana_sample_data_logs",
+            "dateField\"": "@timestamp",
+            "geoField": "geo.coordinates",
+            "entity": "agent.keyword",
+            "boundaryType": "entireIndex",
+            "boundaryIndexTitle": "boundary*",
+            "boundaryGeoField": "location",
+            "boundaryNameField": "name",
+            "indexId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+            "boundaryIndexId": "0cd90abf-abe7-44c7-909a-f621bbbcfefc"
+          },
+          "rule_type_id": ".geo-containment",
+          "schedule": {
+            "interval": "1h"
+          }
         }
       },
       "create_es_query_esql_rule_response": {
@@ -7500,6 +7634,9 @@
               }
             }
           ],
+          "alert_delay": {
+            "active": 3
+          },
           "api_key_created_by_user": false,
           "api_key_owner": "elastic",
           "consumer": "alerts",
@@ -7545,6 +7682,64 @@
           "throttle": null,
           "updated_at": "2022-06-08T17:20:31.632Z",
           "updated_by": "elastic"
+        }
+      },
+      "create_tracking_containment_rule_response": {
+        "summary": "The create rule API returns a JSON object that contains details about the rule.",
+        "value": {
+          "id": "b6883f9d-5f70-4758-a66e-369d7c26012f",
+          "name": "my tracking rule",
+          "tags": [],
+          "enabled": true,
+          "consumer": "alerts",
+          "throttle": null,
+          "revision": 1,
+          "running": false,
+          "schedule": {
+            "interval": "1h"
+          },
+          "params": {
+            "index": "kibana_sample_data_logs",
+            "dateField": "@timestamp",
+            "geoField": "geo.coordinates",
+            "entity": "agent.keyword",
+            "boundaryType": "entireIndex",
+            "boundaryIndexTitle": "boundary*",
+            "boundaryGeoField": "location",
+            "boundaryNameField": "name",
+            "indexId": "90943e30-9a47-11e8-b64d-95841ca0b247",
+            "boundaryIndexId": "0cd90abf-abe7-44c7-909a-f621bbbcfefc"
+          },
+          "rule_type_id": ".geo-containment",
+          "created_by": "elastic",
+          "updated_by": "elastic",
+          "created_at": "2024-02-14T19:52:55.920Z",
+          "updated_at": "2024-02-15T03:24:32.574Z",
+          "api_key_owner": "elastic",
+          "notify_when": null,
+          "mute_all": false,
+          "muted_alert_ids": [],
+          "scheduled_task_id": "b6883f9d-5f70-4758-a66e-369d7c26012f",
+          "execution_status": {
+            "status": "ok",
+            "last_execution_date": "2024-02-15T03:25:38.125Z",
+            "last_duration": 74
+          },
+          "actions": [],
+          "last_run": {
+            "alerts_count": {
+              "active": 0,
+              "new": 0,
+              "recovered": 0,
+              "ignored": 0
+            },
+            "outcome_msg": null,
+            "outcome_order": 0,
+            "outcome": "succeeded",
+            "warning": null
+          },
+          "next_run": "2024-02-15T03:26:38.033Z",
+          "api_key_created_by_user": false
         }
       },
       "get_rule_response": {
@@ -7648,7 +7843,7 @@
             "aggField": "sheet.version",
             "aggType": "avg",
             "index": [
-              ".test-index"
+              ".updated-index"
             ],
             "groupBy": "top",
             "termField": "name.keyword",
@@ -7665,8 +7860,7 @@
           "schedule": {
             "interval": "1m"
           },
-          "tags": [],
-          "throttle": null
+          "tags": []
         }
       },
       "update_rule_response": {
@@ -7681,7 +7875,7 @@
           "revision": 1,
           "running": false,
           "schedule": {
-            "interval": "10m"
+            "interval": "1m"
           },
           "params": {
             "index": [
@@ -7705,13 +7899,13 @@
           "updated_by": "elastic",
           "rule_type_id": ".index-threshold",
           "scheduled_task_id": "4c5eda00-e74f-11ec-b72f-5b18752ff9ea",
-          "created_at": "2023-01-31T23:03:33.127Z",
-          "updated_at": "2023-01-31T23:55:27.314Z",
+          "created_at": "2024-03-26T23:13:20.985Z",
+          "updated_at": "2024-03-26T23:22:59.949Z",
           "mute_all": false,
           "muted_alert_ids": [],
           "execution_status": {
             "status": "ok",
-            "last_execution_date": "2023-01-31T23:48:42.499Z",
+            "last_execution_date": "2024-03-26T23:22:51.390Z",
             "last_duration": 52
           },
           "actions": [
@@ -7742,7 +7936,7 @@
             "warning": null,
             "outcome": "succeeded"
           },
-          "next_run": "2023-01-31T23:49:42.432Z",
+          "next_run": "2024-03-26T23:23:51.316Z",
           "api_key_created_by_user": false
         }
       },

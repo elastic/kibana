@@ -28,7 +28,7 @@ export const rubyDefinition: LanguageDefinition = {
   },
   iconType: 'ruby.svg',
   id: Languages.RUBY,
-  ingestData: `documents = [
+  ingestData: ({ ingestPipeline }) => `documents = [
   { index: { _index: 'books', data: {name: "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470} } },
   { index: { _index: 'books', data: {name: "Revelation Space", "author": "Alastair Reynolds", "release_date": "2000-03-15", "page_count": 585} } },
   { index: { _index: 'books', data: {name: "1984", "author": "George Orwell", "release_date": "1985-06-01", "page_count": 328} } },
@@ -36,8 +36,13 @@ export const rubyDefinition: LanguageDefinition = {
   { index: { _index: 'books', data: {name: "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268} } },
   { index: { _index: 'books', data: {name: "The Handmaid's Tale", "author": "Margaret Atwood", "release_date": "1985-06-01", "page_count": 311} } }
 ]
-client.bulk(body: documents)`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `client = ElasticsearchServerless::Client.new(
+client.bulk(body: documents${ingestPipeline ? `, pipeline: "${ingestPipeline}"` : ''})`,
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+    ingestPipeline,
+  }) => `client = ElasticsearchServerless::Client.new(
   api_key: '${apiKey}',
   url: '${url}'
 )
@@ -47,7 +52,7 @@ documents = [
     indexName ?? INDEX_NAME_PLACEHOLDER
   }', data: {name: "foo", "title": "bar"} } },
 ]
-client.bulk(body: documents)
+client.bulk(body: documents${ingestPipeline ? `, pipeline: "${ingestPipeline}"` : ''})
 `,
   installClient: `# Requires Ruby version 3.0 or higher
 

@@ -13,6 +13,7 @@ import {
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { SessionViewDetailPanel } from '.';
 import { useDateFormat } from '../../hooks';
+import { ENDPOINT_INDEX } from '../../methods';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;
@@ -23,6 +24,7 @@ describe('SessionView component', () => {
   let mockedContext: AppContextTestRender;
 
   const props = {
+    index: ENDPOINT_INDEX,
     alerts: [],
     alertsCount: 0,
     selectedProcess: sessionViewBasicProcessMock,

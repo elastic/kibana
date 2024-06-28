@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -26,7 +26,7 @@ import {
   type UseIndexDataReturnType,
 } from '@kbn/ml-data-grid';
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 import {
   useColorRange,

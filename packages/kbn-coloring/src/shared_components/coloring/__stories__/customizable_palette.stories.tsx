@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiForm } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
 import { CustomizablePalette, CustomizablePaletteProps } from '../palette_configuration';
@@ -18,7 +18,7 @@ export default {
   decorators: [(story: Function) => <EuiForm>{story()}</EuiForm>],
 };
 
-const Template: ComponentStory<FC<CustomizablePaletteProps>> = (args) => (
+const Template: ComponentStory<FC<PropsWithChildren<CustomizablePaletteProps>>> = (args) => (
   <CustomizablePalette {...args} />
 );
 

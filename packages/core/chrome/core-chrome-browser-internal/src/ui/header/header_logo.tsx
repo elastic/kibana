@@ -44,12 +44,6 @@ function onClick(
     return;
   }
 
-  const navLink = navLinks.find((item) => item.href === anchor.href);
-  if (navLink && navLink.disabled) {
-    event.preventDefault();
-    return;
-  }
-
   if (event.isDefaultPrevented() || event.altKey || event.metaKey || event.ctrlKey) {
     return;
   }

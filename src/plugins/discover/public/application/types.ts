@@ -19,23 +19,10 @@ export enum FetchStatus {
   ERROR = 'error',
 }
 
-export type DiscoverDisplayMode = 'embedded' | 'standalone';
-
-export interface DiscoverCustomizationContext {
-  /*
-   * Display mode in which discover is running
-   */
-  displayMode: DiscoverDisplayMode;
-  /**
-   * Whether or not to show the Log Explorer tabs
-   */
-  showLogExplorerTabs: boolean;
-}
-
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
-  textBasedQueryColumns?: DatatableColumn[];
-  textBasedHeaderWarning?: string;
+  esqlQueryColumns?: DatatableColumn[];
+  esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
 }
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationMap } from '@kbn/core/server';
+import type { SavedObjectMigrationMap } from '@kbn/core/server';
 
 export const migrations: SavedObjectMigrationMap = {
   '7.9.0': (doc) => doc,

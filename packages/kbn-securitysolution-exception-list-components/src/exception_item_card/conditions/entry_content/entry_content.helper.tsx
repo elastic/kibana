@@ -6,22 +6,38 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { ElementType } from 'react';
+import { css } from '@emotion/css';
 import { EuiExpression, EuiBadge } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ValueWithSpaceWarning } from '../../../..';
 import { OPERATOR_TYPE_LABELS_EXCLUDED, OPERATOR_TYPE_LABELS_INCLUDED } from '../conditions.config';
 import type { Entry } from '../types';
 
-const getEntryValue = (type: string, value?: string | string[]) => {
+const entryValueWrapStyle = css`
+  white-space: pre-wrap;
+`;
+
+const EntryValueWrap = ({ children }: { children: React.ReactNode }) => (
+  <span className={entryValueWrapStyle}>{children}</span>
+);
+
+const getEntryValue = (type: string, value: string | string[], showValueListModal: ElementType) => {
+  const ShowValueListModal = showValueListModal;
   if (type === 'match_any' && Array.isArray(value)) {
     return value.map((currentValue, index) => (
       <EuiBadge key={index} data-test-subj={`matchAnyBadge${index}`} color="hollow">
-        {currentValue}
+        <EntryValueWrap>{currentValue}</EntryValueWrap>
       </EuiBadge>
     ));
+  } else if (type === 'list' && value) {
+    return (
+      <ShowValueListModal shouldShowContentIfModalNotAvailable listId={value.toString()}>
+        {value}
+      </ShowValueListModal>
+    );
   }
-  return value ?? '';
+  return <EntryValueWrap>{value}</EntryValueWrap> ?? '';
 };
 
 export const getEntryOperator = (type: ListOperatorTypeEnum, operator: string) => {
@@ -40,12 +56,13 @@ export const getValue = (entry: Entry) => {
 export const getValueExpression = (
   type: ListOperatorTypeEnum,
   operator: string,
-  value: string | string[]
+  value: string | string[],
+  showValueListModal: ElementType
 ) => (
   <>
     <EuiExpression
       description={getEntryOperator(type, operator)}
-      value={getEntryValue(type, value)}
+      value={getEntryValue(type, value, showValueListModal)}
       data-test-subj="entryValueExpression"
     />
     <ValueWithSpaceWarning value={value} />

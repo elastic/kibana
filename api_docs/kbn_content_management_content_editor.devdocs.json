@@ -29,9 +29,9 @@
           "\nKibana-specific Provider that maps to known dependency types."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "ContentEditorKibanaDependencies",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/content-management/content_editor/src/services.tsx",
         "deprecated": false,
@@ -42,12 +42,12 @@
             "id": "def-common.ContentEditorKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...services\n}",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "ContentEditorKibanaDependencies",
-              ">"
+              ">>"
             ],
             "path": "packages/content-management/content_editor/src/services.tsx",
             "deprecated": false,
@@ -68,9 +68,9 @@
           "\nAbstract external service Provider."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
           "Services",
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/content-management/content_editor/src/services.tsx",
         "deprecated": false,
@@ -81,12 +81,12 @@
             "id": "def-common.ContentEditorProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               "Services",
-              ">"
+              ">>"
             ],
             "path": "packages/content-management/content_editor/src/services.tsx",
             "deprecated": false,
@@ -184,9 +184,9 @@
         "signature": [
           "{ onSave?: ((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined; item: ",
           "Item",
-          "; isReadonly?: boolean | undefined; entityName: string; customValidators?: ",
+          "; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; entityName: string; customValidators?: ",
           "CustomValidators",
-          " | undefined; }"
+          " | undefined; showActivityView?: boolean | undefined; }"
         ],
         "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
         "deprecated": false,

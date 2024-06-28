@@ -10,6 +10,7 @@ properties:
       - $ref: 'run_connector_params_documents.yaml'
       - $ref: 'run_connector_params_message_email.yaml'
       - $ref: 'run_connector_params_message_serverlog.yaml'
+      - $ref: 'run_connector_params_message_slack.yaml'
       - $ref: 'run_connector_params_trigger_pagerduty.yaml'
       - title: Subaction parameters
         description: Test an action that involves a subaction.
@@ -25,7 +26,9 @@ properties:
           - $ref: 'run_connector_subaction_issue.yaml'
           - $ref: 'run_connector_subaction_issues.yaml'
           - $ref: 'run_connector_subaction_issuetypes.yaml'
+          - $ref: 'run_connector_subaction_postmessage.yaml'
           - $ref: 'run_connector_subaction_pushtoservice.yaml'
+          - $ref: 'run_connector_subaction_validchannelid.yaml'
         discriminator:
           propertyName: subAction
           mapping:

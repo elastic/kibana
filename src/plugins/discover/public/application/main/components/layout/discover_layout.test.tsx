@@ -11,7 +11,6 @@ import { BehaviorSubject, of } from 'rxjs';
 import { EuiPageSidebar } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverLayout } from './discover_layout';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -26,8 +25,7 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-  RecordRawType,
-} from '../../services/discover_data_state_container';
+} from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -36,27 +34,24 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
-import { DiscoverMainProvider } from '../../services/discover_state_provider';
+import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
 }));
 
-setHeaderActionMenuMounter(jest.fn());
-
 async function mountComponent(
   dataView: DataView,
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
   query?: Query | AggregateQuery,
-  isPlainRecord?: boolean,
   main$: DataMain$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$
 ) {
@@ -109,7 +104,11 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.appState.update({ index: dataView.id, interval: 'auto', query });
+  stateContainer.appState.update({
+    dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+    interval: 'auto',
+    query,
+  });
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props = {
@@ -183,10 +182,8 @@ describe('Discover component', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
       new BehaviorSubject({
         fetchStatus: FetchStatus.ERROR,
-        recordRawType: RecordRawType.DOCUMENT,
         foundDocuments: false,
         error: new Error('No results'),
       }) as DataMain$

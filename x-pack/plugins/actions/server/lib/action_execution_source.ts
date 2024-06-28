@@ -11,6 +11,7 @@ export enum ActionExecutionSourceType {
   SAVED_OBJECT = 'SAVED_OBJECT',
   HTTP_REQUEST = 'HTTP_REQUEST',
   NOTIFICATION = 'NOTIFICATION',
+  BACKGROUND_TASK = 'BACKGROUND_TASK',
 }
 
 export interface ActionExecutionSource<T> {
@@ -20,6 +21,11 @@ export interface ActionExecutionSource<T> {
 export type HttpRequestExecutionSource = ActionExecutionSource<KibanaRequest>;
 export type SavedObjectExecutionSource = ActionExecutionSource<Omit<SavedObjectReference, 'name'>>;
 
+export interface BackgroundTaskSource {
+  taskId: string;
+  taskType: string;
+}
+export type BackgroundTaskExecutionSource = ActionExecutionSource<BackgroundTaskSource>;
 export interface NotificationSource {
   requesterId: string;
   connectorId: string;
@@ -58,6 +64,15 @@ export function asNotificationExecutionSource(
   };
 }
 
+export function asBackgroundTaskExecutionSource(
+  source: BackgroundTaskSource
+): BackgroundTaskExecutionSource {
+  return {
+    type: ActionExecutionSourceType.BACKGROUND_TASK,
+    source,
+  };
+}
+
 export function isHttpRequestExecutionSource(
   executionSource?: ActionExecutionSource<unknown>
 ): executionSource is HttpRequestExecutionSource {
@@ -74,4 +89,10 @@ export function isNotificationExecutionSource(
   executionSource?: ActionExecutionSource<unknown>
 ): executionSource is NotificationExecutionSource {
   return executionSource?.type === ActionExecutionSourceType.NOTIFICATION;
+}
+
+export function isBackgroundTaskExecutionSource(
+  executionSource?: ActionExecutionSource<unknown>
+): executionSource is BackgroundTaskExecutionSource {
+  return executionSource?.type === ActionExecutionSourceType.BACKGROUND_TASK;
 }

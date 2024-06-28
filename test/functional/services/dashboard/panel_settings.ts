@@ -64,6 +64,10 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
           );
         }
       });
+
+      await retry.waitFor('superDatePickerToggleQuickMenuButton to be present', async () => {
+        return Boolean(await this.findDatePickerQuickMenuButton());
+      });
     }
 
     public async disableCustomTimeRange() {
@@ -120,6 +124,11 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       await testSubjects.click('customEmbeddablePanelHideTitleSwitch');
     }
 
+    public async getCustomPanelTitle() {
+      log.debug('getCustomPanelTitle');
+      return (await testSubjects.find('customEmbeddablePanelTitleInput')).getAttribute('value');
+    }
+
     public async setCustomPanelTitle(customTitle: string) {
       log.debug('setCustomPanelTitle');
       await testSubjects.setValue('customEmbeddablePanelTitleInput', customTitle, {
@@ -130,6 +139,13 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async resetCustomPanelTitle() {
       log.debug('resetCustomPanelTitle');
       await testSubjects.click('resetCustomEmbeddablePanelTitleButton');
+    }
+
+    public async getCustomPanelDescription() {
+      log.debug('getCustomPanelDescription');
+      return (await testSubjects.find('customEmbeddablePanelDescriptionInput')).getAttribute(
+        'value'
+      );
     }
 
     public async setCustomPanelDescription(customDescription: string) {
@@ -147,7 +163,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
     public async clickSaveButton() {
       log.debug('clickSaveButton');
       await retry.try(async () => {
-        await toasts.dismissAllToasts();
+        await toasts.dismissAll();
         await testSubjects.click('saveCustomizePanelButton');
         await testSubjects.waitForDeleted('saveCustomizePanelButton');
       });

@@ -27,18 +27,29 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
     mockVisualizationEmbeddable(props),
 }));
 
+const mockUseUiSetting = jest.fn().mockReturnValue([false]);
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...original,
+    useUiSetting$: () => mockUseUiSetting(),
+  };
+});
+
 describe('RiskSummary', () => {
   beforeEach(() => {
     mockVisualizationEmbeddable.mockClear();
   });
 
-  it('renders risk summary table', () => {
-    const { getByTestId } = render(
+  it('renders risk summary table with alerts only', () => {
+    const { getByTestId, queryByTestId } = render(
       <TestProviders>
         <RiskSummary
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -47,26 +58,43 @@ describe('RiskSummary', () => {
 
     // Alerts
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
-    );
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     // Context
-    expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
+    expect(getByTestId('risk-summary-table')).not.toHaveTextContent(
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_2_count}`
     );
+
+    // Result row doesn't exist if alerts are the only category
+    expect(queryByTestId('risk-summary-result-count')).not.toBeInTheDocument();
+    expect(queryByTestId('risk-summary-result-score')).not.toBeInTheDocument();
+  });
+
+  it('renders risk summary table with context and totals', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+
+    // Alerts
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
-      `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     // Result
     expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
-      `${
-        (mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0) +
-        (mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0)
-      }`
+      `${mockHostRiskScoreState.data?.[0].host.risk.category_1_count}`
     );
 
     expect(getByTestId('risk-summary-result-score')).toHaveTextContent(
@@ -84,10 +112,43 @@ describe('RiskSummary', () => {
           riskScoreData={{ ...mockHostRiskScoreState, data: undefined }}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+  });
+
+  it('risk summary header does not render link when riskScoreData is loading', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
+  });
+
+  it('risk summary header does not render expand icon when in preview mode', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={{ ...mockHostRiskScoreState, data: undefined, loading: true }}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('riskInputsTitleLink')).not.toBeInTheDocument();
+    expect(queryByTestId('riskInputsTitleIcon')).not.toBeInTheDocument();
   });
 
   it('renders visualization embeddable', () => {
@@ -97,6 +158,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -111,6 +173,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -125,6 +188,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -151,6 +215,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockHostRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -172,6 +237,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );
@@ -193,6 +259,7 @@ describe('RiskSummary', () => {
           riskScoreData={mockUserRiskScoreState}
           queryId={'testQuery'}
           openDetailsPanel={() => {}}
+          recalculatingScore={false}
         />
       </TestProviders>
     );

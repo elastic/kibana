@@ -49,6 +49,9 @@ describe('TelemetryService', () => {
       expect(telemetry).toHaveProperty('reportAlertsGroupingChanged');
       expect(telemetry).toHaveProperty('reportAlertsGroupingToggled');
       expect(telemetry).toHaveProperty('reportAlertsGroupingTakeAction');
+
+      expect(telemetry).toHaveProperty('reportDetailsFlyoutOpened');
+      expect(telemetry).toHaveProperty('reportDetailsFlyoutTabClicked');
     });
   });
 

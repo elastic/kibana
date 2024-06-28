@@ -1,0 +1,35 @@
+---
+elasticsearch:
+  installKibanaUser: false
+
+kibana:
+  installAssets: false
+
+indexing:
+  eventsPerCycle: 1000
+  dataset: "fake_logs"
+
+schedule:
+  # Start with normal logs
+  - template: "good"
+    start: "now-10m"
+    end: "now+1m"
+    randomness: 0.1
+    eventsPerCycle: 1000
+  # Progresively change into a new number of logs
+  - template: "good"
+    start: "now+1m"
+    end: "now+5m"
+    randomness: 0.1
+    eventsPerCycle:
+      start: 1000
+      end: 5000
+      method: "linear"
+  # Stay at the new number of logs
+  - template: "good"
+    start: "now+5m"
+    end: "now+10m"
+    randomness: 0.1
+    eventsPerCycle: 5000
+
+

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
 import {
@@ -17,7 +18,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
 import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
 

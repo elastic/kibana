@@ -26,7 +26,7 @@ const onSaveContent = jest.fn();
 
 const newValue = 'Hello from Tehas';
 const hyperlink = `[hyperlink](http://elastic.co)`;
-const draftStorageKey = `cases.testAppId.caseId.markdown-id.markdownEditor`;
+const draftStorageKey = `cases.securitySolution.caseId.markdown-id.markdownEditor`;
 const content = `A link to a timeline ${hyperlink}`;
 const maxLength = 5000;
 
@@ -61,7 +61,8 @@ const defaultProps = {
   editorRef,
 };
 
-describe('EditableMarkdown', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171177
+describe.skip('EditableMarkdown', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

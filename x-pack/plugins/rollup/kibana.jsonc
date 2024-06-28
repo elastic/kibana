@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/rollup-plugin",
-  "owner": "@elastic/platform-deployment-management",
+  "owner": "@elastic/kibana-management",
   "plugin": {
     "id": "rollup",
     "server": true,

@@ -16,7 +16,6 @@ import {
   EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 interface SettingsPanelProps {
   description: string;
@@ -45,23 +44,19 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
       <EuiSpacer />
       <EuiText size="s">
         <p>{description}</p>
-        <p>
-          {i18n.translate(
-            'xpack.enterpriseSearch.content.settings.contentExtraction.descriptionTwo',
-            {
-              defaultMessage:
-                'You can also enable or disable this feature for a specific index on the index’s configuration page.',
-            }
-          )}
-        </p>
       </EuiText>
+      {link && (
+        <>
+          <EuiSpacer />
+          <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+        </>
+      )}
     </EuiSplitPanel.Inner>
     <EuiSplitPanel.Inner grow={false} color="subdued">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <EuiSwitch checked={value} label={label} onChange={onChange} />
         </EuiFlexItem>
-        {link && <EuiFlexItem grow={false}>{link}</EuiFlexItem>}
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>
   </EuiSplitPanel.Outer>

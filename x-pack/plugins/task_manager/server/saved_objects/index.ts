@@ -12,6 +12,7 @@ import { getMigrations } from './migrations';
 import { TaskManagerConfig } from '../config';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
+import { taskModelVersions } from './model_versions';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
@@ -72,5 +73,6 @@ export function setupSavedObjects(
         },
       } as estypes.QueryDslQueryContainer;
     },
+    modelVersions: taskModelVersions,
   });
 }

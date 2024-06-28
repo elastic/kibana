@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
+import { CustomControlColumnConfiguration } from '@kbn/unified-data-table';
 
 export interface DataTableCustomization {
   id: 'data_table';
-  customCellRenderer?: CustomCellRenderer;
-  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  logsEnabled: boolean; // TODO / NOTE: Just temporary until Discover's data type contextual awareness lands.
+  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
 }

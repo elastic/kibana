@@ -9,6 +9,7 @@
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, IgnoredReason } from '@kbn/discover-utils/types';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
@@ -34,7 +35,13 @@ export interface DocViewRenderProps {
    * If not provided, types will be derived by default from the dataView field types.
    * For displaying text-based search results, define column types (which are available separately in the fetch request) here.
    */
-  columnTypes?: Record<string, string>;
+  columnsMeta?: Record<
+    string,
+    {
+      type: DatatableColumnMeta['type'];
+      esType?: DatatableColumnMeta['esType'];
+    }
+  >;
   query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;
@@ -42,6 +49,7 @@ export interface DocViewRenderProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
   docViewsRegistry?: DocViewsRegistry | ((prevRegistry: DocViewsRegistry) => DocViewsRegistry);
+  decreaseAvailableHeightBy?: number;
 }
 export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
@@ -53,6 +61,7 @@ export interface BaseDocViewInput {
   id: string;
   order: number;
   title: string;
+  enabled?: boolean;
 }
 
 export interface RenderDocViewInput extends BaseDocViewInput {
@@ -75,7 +84,7 @@ export interface FieldRecordLegacy {
   action: {
     isActive: boolean;
     onFilter?: DocViewFilterFn;
-    onToggleColumn: (field: string) => void;
+    onToggleColumn: ((field: string) => void) | undefined;
     flattenedField: unknown;
   };
   field: {

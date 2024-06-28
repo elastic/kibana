@@ -6,7 +6,7 @@
  */
 
 import { merge, Observable, timer, throwError, EMPTY } from 'rxjs';
-import { map, takeUntil, catchError } from 'rxjs/operators';
+import { map, takeUntil, catchError } from 'rxjs';
 import { uniq } from 'lodash';
 import { duration } from 'moment';
 import { i18n } from '@kbn/i18n';

@@ -9,7 +9,11 @@ components:
       type: object
       required: [pinnedEventId, eventId, timelineId, version]
       properties:
-        pinnedEventId:
+        columns:
+          $ref: '#/components/schemas/ColumnHeaderResult'
+        created:
+          type: number
+        createdBy:
           type: string
         eventId:
           type: string
@@ -79,9 +83,6 @@ components:
               type: string
             version:
               type: string
-            timelineVersion:
-              nullable: true
-              type: string
     GlobalNote:
       type: object
       required: [noteId, version]
@@ -90,9 +91,6 @@ components:
           type: string
         version:
           type: string
-        timelineVersion:
-          type: string
-          nullable: true
         note:
           type: string
           nullable: true
@@ -110,20 +108,15 @@ components:
           nullable: true
         updatedBy:
           type: string
-          nullable: true
-    TimelineStatus:
-      type: string
-      enum:
-        - active
-        - draft
-        - immutable
-      description: The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
-    DataProviderType:
-      type: string
-      enum:
-        - default
-        - template
-      description: The type of data provider to create. Valid values are `default` and `template`.
+      Note:
+      allOf:
+        - $ref: '#/components/schemas/BareNote'
+        - type: object
+          properties:
+            noteId:
+              type: string
+            version:
+              type: string
     RowRendererId:
       type: string
       enum:
@@ -176,10 +169,6 @@ components:
         type:
           $ref: '#/components/schemas/DataProviderType'
     DataProviderResult:
-      x-recursive: true
-      x-recursive-prop: and
-      x-recursive-value: DataProviderResult[]
-      x-base-type: BaseDataProviderResult
       allOf:
         - $ref: '#/components/schemas/BaseDataProviderResult'
         - type: object

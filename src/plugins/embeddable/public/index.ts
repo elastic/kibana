@@ -41,6 +41,7 @@ export {
   panelBadgeTrigger,
   panelHoverTrigger,
   PanelNotFoundError,
+  PanelIncompatibleError,
   panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_HOVER_TRIGGER,
@@ -60,7 +61,6 @@ export type {
   ChartActionContext,
   ContainerInput,
   ContainerOutput,
-  EmbeddableAppContext,
   EmbeddableContainerSettings,
   EmbeddableContext,
   EmbeddableEditorState,
@@ -79,6 +79,7 @@ export type {
   PanelState,
   PropertySpec,
   RangeSelectContext,
+  ReactEmbeddableSavedObject,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
   SelfStyledEmbeddable,
@@ -92,9 +93,20 @@ export type {
   EmbeddableStartDependencies,
 } from './plugin';
 export type { EnhancementRegistryDefinition } from './types';
-export type { EmbeddableComponentFactory } from './registry/types';
-export { CreateEmbeddableComponent } from './registry/create_embeddable_component';
+
+export {
+  ReactEmbeddableRenderer,
+  type DefaultEmbeddableApi,
+  type ReactEmbeddableFactory,
+} from './react_embeddable_system';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
+
+export {
+  embeddableInputToSubject,
+  embeddableOutputToSubject,
+} from './lib/embeddables/compatibility/embeddable_compatibility_utils';
+
+export { COMMON_EMBEDDABLE_GROUPING } from './lib/embeddables/common/constants';

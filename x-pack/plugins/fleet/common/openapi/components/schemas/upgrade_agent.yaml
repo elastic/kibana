@@ -8,5 +8,8 @@ properties:
   force:
     type: boolean
     description: Force upgrade, skipping validation (should be used with caution)
+  skipRateLimitCheck:
+    type: boolean
+    description: Skip rate limit check for upgrade  
 required:
   - version

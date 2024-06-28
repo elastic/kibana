@@ -31,6 +31,7 @@ export interface ControlGroupInput extends EmbeddableInput, ControlInput {
   defaultControlGrow?: boolean;
   controlStyle: ControlStyle;
   panels: ControlsPanels;
+  showApplySelections?: boolean;
 }
 
 /**
@@ -39,9 +40,9 @@ export interface ControlGroupInput extends EmbeddableInput, ControlInput {
 export const persistableControlGroupInputKeys: Array<
   keyof Pick<
     ControlGroupInput,
-    'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings'
+    'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings' | 'showApplySelections'
   >
-> = ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings'];
+> = ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings', 'showApplySelections'];
 export type PersistableControlGroupInput = Pick<
   ControlGroupInput,
   typeof persistableControlGroupInputKeys[number]

@@ -58,8 +58,9 @@ export function searchHitToAgent(
       }))
     : undefined;
   const agent: Agent = {
-    id: hit._id,
+    id: hit._id!,
     type: hit._source?.type!,
+    namespaces: hit._source?.namespaces,
     active: hit._source?.active!,
     enrolled_at: hit._source?.enrolled_at!,
     unenrolled_at: hit._source?.unenrolled_at!,
@@ -92,6 +93,7 @@ export function searchHitToAgent(
     // key-value pairs
     user_provided_metadata: hit._source?.user_provided_metadata!,
     local_metadata: hit._source?.local_metadata!,
+    unhealthy_reason: hit._source?.unhealthy_reason,
   };
 
   if (!hit.fields?.status?.length) {

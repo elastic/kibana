@@ -9,7 +9,8 @@ import { useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isDataView } from '../../../../common/types/data_view';
 import { useAppDependencies } from '../../app_dependencies';
-import { createSearchItems, getDataViewIdByTitle, loadDataViews, SearchItems } from './common';
+import type { SearchItems } from './common';
+import { createSearchItems } from './common';
 
 export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
   const [savedObjectId, setSavedObjectId] = useState(defaultSavedObjectId);
@@ -72,8 +73,6 @@ export const useSearchItems = (defaultSavedObjectId: string | undefined) => {
 
   return {
     error,
-    getDataViewIdByTitle,
-    loadDataViews,
     searchItems,
     setSavedObjectId,
   };

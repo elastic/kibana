@@ -8,12 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import { mlResultsService } from '../services/results_service';
-import { ToastNotificationService } from '../services/toast_notification_service';
+import { type MlResultsService } from '../services/results_service';
+import type { ToastNotificationService } from '../services/toast_notification_service';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
+import type { MlEntity } from '../../embeddables';
 
 export function isMetricDetector(selectedJob: CombinedJob, selectedDetectorIndex: number) {
   const detectors = getViewableDetectors(selectedJob);
@@ -37,11 +38,12 @@ export const getFunctionDescription = async (
     selectedJob,
   }: {
     selectedDetectorIndex: number;
-    selectedEntities: Record<string, any>;
+    selectedEntities: MlEntity | undefined;
     selectedJobId: string;
     selectedJob: CombinedJob;
   },
-  toastNotificationService: ToastNotificationService
+  toastNotificationService: ToastNotificationService,
+  mlResultsService: MlResultsService
 ) => {
   // if the detector's function is metric, fetch the highest scoring anomaly record
   // and set to plot the function_description (avg/min/max) of that record by default

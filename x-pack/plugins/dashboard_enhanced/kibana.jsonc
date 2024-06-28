@@ -18,10 +18,10 @@
     "requiredBundles": [
       "embeddable",
       "embeddableEnhanced",
-      "kibanaReact",
       "kibanaUtils",
       "imageEmbeddable",
-      "presentationUtil"
+      "presentationUtil",
+      "uiActions"
     ]
   }
 }

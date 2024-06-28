@@ -38,13 +38,17 @@ if (showHelp) {
         --all-platforms                      {dim Produce archives for all platforms, not just this one}
         --rpm                                {dim Only build the rpm packages}
         --deb                                {dim Only build the deb packages}
+        --serverless                         {dim Only build the serverless packages}
         --docker-images                      {dim Only build the Docker images}
         --docker-context-use-local-artifact  {dim Use a local artifact when building the Docker context}
         --docker-cross-compile               {dim Produce arm64 and amd64 Docker images}
         --docker-contexts                    {dim Only build the Docker build contexts}
         --skip-canvas-shareable-runtime      {dim Don't build the Canvas shareable runtime}
+        --skip-cdn-assets                    {dim Don't build CDN assets}
         --skip-docker-ubi                    {dim Don't build the docker ubi image}
         --skip-docker-ubuntu                 {dim Don't build the docker ubuntu image}
+        --skip-docker-wolfi                  {dim Don't build the docker wolfi image}
+        --skip-docker-fips                   {dim Don't build the docker fips image}
         --release                            {dim Produce a release-ready distributable}
         --version-qualifier                  {dim Suffix version with a qualifier}
         --skip-node-download                 {dim Reuse existing downloads of node.js}

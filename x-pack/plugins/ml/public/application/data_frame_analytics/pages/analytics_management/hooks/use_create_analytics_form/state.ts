@@ -16,12 +16,12 @@ import {
   type DataFrameAnalysisConfigType,
   type FeatureProcessor,
 } from '@kbn/ml-data-frame-analytics-utils';
-import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
+import type { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
 
 import { defaultSearchQuery } from '../../../../common/analytics';
-import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
+import type { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
 
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
@@ -51,7 +51,7 @@ export interface State {
   disableSwitchToForm: boolean;
   form: {
     alpha: undefined | number;
-    computeFeatureInfluence: string;
+    computeFeatureInfluence: boolean;
     createDataView: boolean;
     classAssignmentObjective: undefined | string;
     dependentVariable: DependentVariable;
@@ -111,7 +111,7 @@ export interface State {
     sourceIndexNameValid: boolean;
     sourceIndexContainsNumericalFields: boolean;
     sourceIndexFieldsCheckFailed: boolean;
-    standardizationEnabled: undefined | string;
+    standardizationEnabled: undefined | boolean;
     timeFieldName: undefined | string;
     trainingPercent: number;
     useEstimatedMml: boolean;
@@ -137,7 +137,7 @@ export const getInitialState = (): State => ({
   disableSwitchToForm: false,
   form: {
     alpha: undefined,
-    computeFeatureInfluence: 'true',
+    computeFeatureInfluence: true,
     createDataView: true,
     classAssignmentObjective: undefined,
     dependentVariable: '',
@@ -197,7 +197,7 @@ export const getInitialState = (): State => ({
     sourceIndexNameValid: false,
     sourceIndexContainsNumericalFields: true,
     sourceIndexFieldsCheckFailed: false,
-    standardizationEnabled: 'true',
+    standardizationEnabled: true,
     timeFieldName: undefined,
     trainingPercent: 80,
     useEstimatedMml: true,

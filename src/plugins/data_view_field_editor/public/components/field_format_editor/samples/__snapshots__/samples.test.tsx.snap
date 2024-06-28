@@ -7,10 +7,9 @@ exports[`FormatEditorSamples should render normally 1`] = `
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
   label={
-    <FormattedMessage
+    <Memo(MemoizedFormattedMessage)
       defaultMessage="Samples"
       id="indexPatternFieldEditor.samplesHeader"
-      values={Object {}}
     />
   }
   labelType="label"
@@ -57,7 +56,6 @@ exports[`FormatEditorSamples should render normally 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
 </EuiFormRow>

@@ -81,7 +81,7 @@
                 "id": "def-public.InspectorPublicPlugin.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "initializerContext",
+                "label": "_initializerContext",
                 "description": [],
                 "signature": [
                   {
@@ -109,7 +109,7 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(core: ",
+              "(_core: ",
               {
                 "pluginId": "@kbn/core-lifecycle-browser",
                 "scope": "common",
@@ -138,7 +138,7 @@
                 "id": "def-public.InspectorPublicPlugin.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "core",
+                "label": "_core",
                 "description": [],
                 "signature": [
                   {

@@ -23,6 +23,7 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getNumberOfActiveAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfRecoveredAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toBe(0);
+    expect(ruleRunMetricsStore.getNumberOfDelayedAlerts()).toBe(0);
     expect(ruleRunMetricsStore.getStatusByConnectorType('any')).toBe(undefined);
     expect(ruleRunMetricsStore.getHasReachedAlertLimit()).toBe(false);
     expect(ruleRunMetricsStore.getHasReachedQueuedActionsLimit()).toBe(false);
@@ -68,6 +69,11 @@ describe('RuleRunMetricsStore', () => {
     expect(ruleRunMetricsStore.getNumberOfNewAlerts()).toBe(12);
   });
 
+  test('sets and returns getNumberOfDelayedAlerts', () => {
+    ruleRunMetricsStore.setNumberOfDelayedAlerts(7);
+    expect(ruleRunMetricsStore.getNumberOfDelayedAlerts()).toBe(7);
+  });
+
   test('sets and returns triggeredActionsStatusByConnectorType', () => {
     ruleRunMetricsStore.setTriggeredActionsStatusByConnectorType({
       actionTypeId: testConnectorId,
@@ -111,6 +117,7 @@ describe('RuleRunMetricsStore', () => {
       numberOfNewAlerts: 12,
       numberOfRecoveredAlerts: 11,
       numberOfTriggeredActions: 5,
+      numberOfDelayedAlerts: 7,
       totalSearchDurationMs: 2,
       hasReachedAlertLimit: true,
       hasReachedQueuedActionsLimit: true,

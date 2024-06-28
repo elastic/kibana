@@ -38,7 +38,8 @@ export type PersistenceAlertService = <T>(
       _id: string;
       _source: T;
     }>
-  >
+  >,
+  currentTimeOverride?: Date
 ) => Promise<PersistenceAlertServiceResult<T>>;
 
 export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
@@ -51,8 +52,14 @@ export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
     alerts: Array<{ _id: string; _source: T }>,
     params: { spaceId: string }
   ) => Promise<Array<{ _id: string; _source: T }>>,
-  currentTimeOverride?: Date
-) => Promise<Omit<PersistenceAlertServiceResult<T>, 'alertsWereTruncated'>>;
+  currentTimeOverride?: Date,
+  isRuleExecutionOnly?: boolean,
+  maxAlerts?: number
+) => Promise<SuppressedAlertServiceResult<T>>;
+
+export interface SuppressedAlertServiceResult<T> extends PersistenceAlertServiceResult<T> {
+  suppressedAlerts: Array<{ _id: string; _source: T }>;
+}
 
 export interface PersistenceAlertServiceResult<T> {
   createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;

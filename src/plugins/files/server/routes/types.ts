@@ -7,22 +7,22 @@
  */
 
 import type {
-  RequestHandlerContext,
-  IRouter,
-  RequestHandler,
-  RouteMethod,
-  KibanaResponseFactory,
+  HttpResponsePayload,
   IKibanaResponse,
+  IRouter,
+  KibanaResponseFactory,
   Logger,
+  RequestHandler,
+  RequestHandlerContext,
+  ResponseError,
+  RouteMethod,
 } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FileServiceStart } from '../file_service';
 import { Counters } from '../usage';
 import { AnyEndpoint } from './api_routes';
 
 export interface FilesRequestHandlerContext extends RequestHandlerContext {
   files: Promise<{
-    security?: SecurityPluginStart;
     fileService: {
       asCurrentUser: () => FileServiceStart;
       asInternalUser: () => FileServiceStart;
@@ -41,7 +41,9 @@ export type FilesRequestHandler<
   Method extends RouteMethod = any
 > = RequestHandler<P, Q, B, FilesRequestHandlerContext, Method, KibanaResponseFactory>;
 
-export type AsyncResponse<T> = Promise<IKibanaResponse<T>>;
+export type AsyncResponse<T extends HttpResponsePayload | ResponseError = any> = Promise<
+  IKibanaResponse<T>
+>;
 
 export type CreateHandler<E extends AnyEndpoint> = FilesRequestHandler<
   E['inputs']['params'],

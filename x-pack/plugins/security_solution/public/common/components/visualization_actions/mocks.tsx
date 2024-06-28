@@ -7,15 +7,7 @@
 import React from 'react';
 import { cloneDeep } from 'lodash/fp';
 
-import {
-  TestProviders,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../mock';
-import type { State } from '../../store';
-import { createStore } from '../../store';
+import { TestProviders, mockGlobalState, createMockStore } from '../../mock';
 import type { LensAttributes } from './types';
 
 export const queryFromSearchBar = {
@@ -43,13 +35,8 @@ export const filterFromSearchBar = [
   },
 ];
 
-export const mockCreateStoreWithQueryFilters = () => {
-  const { storage } = createSecuritySolutionStorageMock();
-
-  const state: State = mockGlobalState;
-
-  const myState = cloneDeep(state);
-
+const mockCreateStoreWithQueryFilters = () => {
+  const myState = cloneDeep(mockGlobalState);
   myState.inputs = {
     ...myState.inputs,
     global: {
@@ -58,7 +45,7 @@ export const mockCreateStoreWithQueryFilters = () => {
       filters: filterFromSearchBar,
     },
   };
-  return createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  return createMockStore(myState);
 };
 
 export const wrapper = ({ children }: { children: React.ReactElement }) => (

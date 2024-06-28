@@ -7,9 +7,10 @@
 
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { PREVALENCE_TEST_ID } from './test_ids';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
@@ -21,7 +22,7 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../shared/hooks/use_prevalence');
@@ -42,12 +43,12 @@ jest.mock('@kbn/expandable-flyout', () => ({
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
-const renderPrevalenceOverview = (contextValue: RightPanelContext = mockContextValue) =>
+const renderPrevalenceOverview = (contextValue: DocumentDetailsContext = mockContextValue) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <PrevalenceOverview />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 

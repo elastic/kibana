@@ -10,7 +10,7 @@ import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../screens/search_bar';
 import { DATA_PROVIDERS } from '../../../screens/timeline';
 
 import { login } from '../../../tasks/login';
-import { visit } from '../../../tasks/navigation';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { networkUrl } from '../../../urls/navigation';
 import {
   clickOnAddToTimeline,
@@ -25,8 +25,7 @@ import { openTimelineUsingToggle } from '../../../tasks/security_main';
 
 const testDomain = 'myTest';
 
-// tracked by https://github.com/elastic/kibana/issues/161874
-describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
+describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   const onBeforeLoadCallback = (win: Cypress.AUTWindow) => {
     // avoid cypress being held by windows prompt and timeout
     cy.stub(win, 'prompt').returns(true);
@@ -37,12 +36,14 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'network');
+    cy.task('esArchiverUnload', { archiveName: 'network' });
   });
 
   beforeEach(() => {
     login();
-    visit(networkUrl('flows'), { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });
+    visitWithTimeRange(networkUrl('flows'), {
+      visitOptions: { onBeforeLoad: onBeforeLoadCallback },
+    });
     openHoverActions();
     mouseoverOnToOverflowItem();
   });

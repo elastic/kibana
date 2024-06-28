@@ -64,7 +64,7 @@ import { RulesClientFactory } from './rules_client_factory';
 import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTS_FEATURE_ID, RuleAlertData } from './types';
+import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -77,7 +77,11 @@ import {
 } from './types';
 import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
-import { setupSavedObjects, getLatestRuleVersion, RULE_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  setupSavedObjects,
+  RULE_SAVED_OBJECT_TYPE,
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
@@ -99,14 +103,18 @@ import {
 } from './alerts_service';
 import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
+import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
+import { BackfillClient } from './backfill_client/backfill_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
   execute: 'execute',
   executeStart: 'execute-start',
   executeAction: 'execute-action',
+  executeBackfill: 'execute-backfill',
   newInstance: 'new-instance',
   recoveredInstance: 'recovered-instance',
   activeInstance: 'active-instance',
@@ -118,6 +126,12 @@ export const LEGACY_EVENT_LOG_ACTIONS = {
 };
 
 export interface PluginSetupContract {
+  registerConnectorAdapter<
+    RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+    ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+  >(
+    adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+  ): void;
   registerType<
     Params extends RuleTypeParams = RuleTypeParams,
     ExtractedParams extends RuleTypeParams = RuleTypeParams,
@@ -215,7 +229,9 @@ export class AlertingPlugin {
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
+  private backfillClient?: BackfillClient;
   private nodeRoles: PluginInitializerContext['node']['roles'];
+  private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get();
@@ -267,6 +283,17 @@ export class AlertingPlugin {
       );
     }
 
+    const taskManagerStartPromise = core
+      .getStartServices()
+      .then(([_, alertingStart]) => alertingStart.taskManager);
+
+    this.backfillClient = new BackfillClient({
+      logger: this.logger,
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise,
+      taskRunnerFactory: this.taskRunnerFactory,
+    });
+
     this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
@@ -305,22 +332,18 @@ export class AlertingPlugin {
       alertsService: this.alertsService,
       minimumScheduleInterval: this.config.rules.minimumScheduleInterval,
       inMemoryMetrics: this.inMemoryMetrics,
-      latestRuleVersion: getLatestRuleVersion(),
     });
     this.ruleTypeRegistry = ruleTypeRegistry;
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      registerAlertingUsageCollector(
-        usageCollection,
-        core.getStartServices().then(([_, { taskManager }]) => taskManager)
-      );
+      registerAlertingUsageCollector(usageCollection, taskManagerStartPromise);
       const eventLogIndex = this.eventLogService.getIndexPattern();
       initializeAlertingTelemetry(this.telemetryLogger, core, plugins.taskManager, eventLogIndex);
     }
 
     // Usage counter for telemetry
-    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTS_FEATURE_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ALERTING_FEATURE_ID);
 
     const getSearchSourceMigrations = plugins.data.search.searchSource.getAllMigrations.bind(
       plugins.data.search.searchSource
@@ -378,6 +401,14 @@ export class AlertingPlugin {
     });
 
     return {
+      registerConnectorAdapter: <
+        RuleActionParams extends ConnectorAdapterParams = ConnectorAdapterParams,
+        ConnectorParams extends ConnectorAdapterParams = ConnectorAdapterParams
+      >(
+        adapter: ConnectorAdapter<RuleActionParams, ConnectorParams>
+      ) => {
+        this.connectorAdapterRegistry.register(adapter);
+      },
       registerType: <
         Params extends RuleTypeParams = never,
         ExtractedParams extends RuleTypeParams = never,
@@ -425,7 +456,7 @@ export class AlertingPlugin {
       },
       getConfig: () => {
         return {
-          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute']),
+          ...pick(this.config.rules, ['minimumScheduleInterval', 'maxScheduledPerMinute', 'run']),
           isUsingSecurity: this.licenseState ? !!this.licenseState.getIsSecurityEnabled() : false,
         };
       },
@@ -462,7 +493,7 @@ export class AlertingPlugin {
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -507,6 +538,8 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
+      backfillClient: this.backfillClient!,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
     });
 
@@ -521,6 +554,7 @@ export class AlertingPlugin {
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityPluginStart: plugins.security,
+      uiSettings: core.uiSettings,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {
@@ -558,9 +592,6 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       eventLogger: this.eventLogger!,
-      internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
-        RULE_SAVED_OBJECT_TYPE,
-      ]),
       executionContext: core.executionContext,
       ruleTypeRegistry: this.ruleTypeRegistry!,
       alertsService: this.alertsService,
@@ -573,6 +604,8 @@ export class AlertingPlugin {
       usageCounter: this.usageCounter,
       getRulesSettingsClientWithRequest,
       getMaintenanceWindowClientWithRequest,
+      backfillClient: this.backfillClient!,
+      connectorAdapterRegistry: this.connectorAdapterRegistry,
     });
 
     this.eventLogService!.registerSavedObjectProvider(RULE_SAVED_OBJECT_TYPE, (request) => {
@@ -583,12 +616,16 @@ export class AlertingPlugin {
           : Promise.resolve([]);
     });
 
-    this.eventLogService!.isEsContextReady().then(() => {
-      scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
-    });
+    this.eventLogService!.isEsContextReady()
+      .then(() => {
+        scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
+      })
+      .catch(() => {}); // it shouldn't reject, but just in case
 
-    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
-    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
+    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager).catch(() => {}); // it shouldn't reject, but just in case
+    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager).catch(
+      () => {}
+    ); // it shouldn't reject, but just in case
 
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),

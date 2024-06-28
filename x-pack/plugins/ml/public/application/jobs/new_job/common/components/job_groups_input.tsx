@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { Validation } from '../job_validator';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import type { Validation } from '../job_validator';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
 import { Description } from '../../pages/components/job_details_step/components/groups/description';
 

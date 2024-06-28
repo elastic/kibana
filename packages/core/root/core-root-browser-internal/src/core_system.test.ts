@@ -44,6 +44,10 @@ import {
   MockSettingsService,
   MockCustomBrandingService,
   CustomBrandingServiceConstructor,
+  MockSecurityService,
+  SecurityServiceConstructor,
+  MockUserProfileService,
+  UserProfileServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -78,6 +82,11 @@ const defaultCoreSystemParams = {
       packageInfo: {
         dist: false,
         version: '1.2.3',
+      },
+    },
+    logging: {
+      root: {
+        level: 'debug',
       },
     },
     version: 'version',
@@ -145,6 +154,8 @@ describe('constructor', () => {
     expect(AnalyticsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
     expect(CustomBrandingServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(SecurityServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(UserProfileServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -192,40 +203,27 @@ describe('constructor', () => {
   });
 
   describe('logging system', () => {
-    it('instantiate the logging system with the correct level when in dev mode', () => {
+    it('instantiate the logging system with the correct level', () => {
       const envMode: EnvironmentMode = {
         name: 'development',
         dev: true,
         prod: false,
       };
-      const injectedMetadata = { env: { mode: envMode } } as any;
+      const injectedMetadata = {
+        ...defaultCoreSystemParams.injectedMetadata,
+        env: { mode: envMode },
+      } as any;
 
       createCoreSystem({
         injectedMetadata,
       });
 
       expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
-      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
-        logLevel: 'all',
-      });
+      expect(LoggingSystemConstructor).toHaveBeenCalledWith(
+        defaultCoreSystemParams.injectedMetadata.logging
+      );
     });
-    it('instantiate the logging system with the correct level when in production mode', () => {
-      const envMode: EnvironmentMode = {
-        name: 'production',
-        dev: false,
-        prod: true,
-      };
-      const injectedMetadata = { env: { mode: envMode } } as any;
 
-      createCoreSystem({
-        injectedMetadata,
-      });
-
-      expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
-      expect(LoggingSystemConstructor).toHaveBeenCalledWith({
-        logLevel: 'warn',
-      });
-    });
     it('retrieves the logger factory from the logging system', () => {
       createCoreSystem({});
       expect(MockLoggingSystem.asLoggerFactory).toHaveBeenCalledTimes(1);
@@ -316,6 +314,16 @@ describe('#setup()', () => {
   it('calls chrome#setup()', async () => {
     await setupCore();
     expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls security#setup()', async () => {
+    await setupCore();
+    expect(MockSecurityService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls userProfile#setup()', async () => {
+    await setupCore();
+    expect(MockUserProfileService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -502,6 +510,16 @@ describe('#start()', () => {
   it('calls theme#start()', async () => {
     await startCore();
     expect(MockThemeService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls security#start()', async () => {
+    await startCore();
+    expect(MockSecurityService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls userProfile#start()', async () => {
+    await startCore();
+    expect(MockUserProfileService.start).toHaveBeenCalledTimes(1);
   });
 });
 

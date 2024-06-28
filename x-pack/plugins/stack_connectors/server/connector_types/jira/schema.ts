@@ -6,6 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { MAX_OTHER_FIELDS_LENGTH } from '../../../common/jira/constants';
+import { validateRecordMaxKeys } from '../lib/validators';
+import { validateOtherFieldsKeys } from './validators';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
@@ -25,24 +28,44 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
   ExternalIncidentServiceSecretConfiguration
 );
 
+const incidentSchemaObject = {
+  summary: schema.string(),
+  description: schema.nullable(schema.string()),
+  externalId: schema.nullable(schema.string()),
+  issueType: schema.nullable(schema.string()),
+  priority: schema.nullable(schema.string()),
+  labels: schema.nullable(
+    schema.arrayOf(
+      schema.string({
+        validate: (label) =>
+          // Matches any space, tab or newline character.
+          label.match(/\s/g) ? `The label ${label} cannot contain spaces` : undefined,
+      })
+    )
+  ),
+  parent: schema.nullable(schema.string()),
+  otherFields: schema.nullable(
+    schema.recordOf(
+      schema.string({
+        validate: (value) => validateOtherFieldsKeys(value),
+      }),
+      schema.any(),
+      {
+        validate: (value) =>
+          validateRecordMaxKeys({
+            record: value,
+            maxNumberOfFields: MAX_OTHER_FIELDS_LENGTH,
+            fieldName: 'otherFields',
+          }),
+      }
+    )
+  ),
+};
+
+export const incidentSchemaObjectProperties = Object.keys(incidentSchemaObject);
+
 export const ExecutorSubActionPushParamsSchema = schema.object({
-  incident: schema.object({
-    summary: schema.string(),
-    description: schema.nullable(schema.string()),
-    externalId: schema.nullable(schema.string()),
-    issueType: schema.nullable(schema.string()),
-    priority: schema.nullable(schema.string()),
-    labels: schema.nullable(
-      schema.arrayOf(
-        schema.string({
-          validate: (label) =>
-            // Matches any space, tab or newline character.
-            label.match(/\s/g) ? `The label ${label} cannot contain spaces` : undefined,
-        })
-      )
-    ),
-    parent: schema.nullable(schema.string()),
-  }),
+  incident: schema.object(incidentSchemaObject),
   comments: schema.nullable(
     schema.arrayOf(
       schema.object({

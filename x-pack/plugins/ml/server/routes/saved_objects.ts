@@ -7,7 +7,7 @@
 
 import { ML_EXTERNAL_BASE_PATH, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization, SavedObjectsRouteDeps } from '../types';
+import type { RouteInitialization, SavedObjectsRouteDeps } from '../types';
 import { checksFactory, syncSavedObjectsFactory } from '../saved_objects';
 import {
   updateJobsSpaces,
@@ -78,6 +78,7 @@ export function savedObjectsRoutes(
     .get({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       access: 'public',
+      summary: 'Synchronize machine learning saved objects',
       options: {
         tags: [
           'access:ml:canCreateJob',

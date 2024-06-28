@@ -19,6 +19,7 @@ import { ruleReferences } from '../mocks/rule_references.mock';
 import { Pagination } from '@elastic/eui';
 import { mockGetFormattedComments } from '../mocks/comments.mock';
 import { securityLinkAnchorComponentMock } from '../mocks/security_link_component.mock';
+import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
 
 const onCreateExceptionListItem = jest.fn();
 const onDeleteException = jest.fn();
@@ -47,6 +48,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('emptyViewerState')).toBeInTheDocument();
@@ -71,6 +73,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('emptySearchViewerState')).toBeInTheDocument();
@@ -96,6 +99,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -124,6 +128,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeTruthy();
@@ -151,6 +156,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -187,6 +193,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={exceptionsUtilityComponent}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -224,6 +231,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={formattedDateComponent}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={() => []}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();
@@ -255,6 +263,7 @@ describe('ExceptionsViewerItems', () => {
           formattedDateComponent={() => null}
           exceptionsUtilityComponent={() => null}
           getFormattedComments={mockGetFormattedComments}
+          showValueListModal={MockedShowValueListModal}
         />
       );
       expect(wrapper.getByTestId('exceptionsContainer')).toBeInTheDocument();

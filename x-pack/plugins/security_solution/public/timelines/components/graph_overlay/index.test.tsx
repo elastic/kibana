@@ -13,19 +13,10 @@ import {
   useGlobalFullScreen,
   useTimelineFullScreen,
 } from '../../../common/containers/use_full_screen';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  mockIndexNames,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../common/mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
 import { GraphOverlay } from '.';
-import { createStore } from '../../../common/store';
 import { useStateSyncingActions } from '../../../resolver/view/use_state_syncing_actions';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/containers/use_full_screen', () => ({
@@ -73,7 +64,6 @@ jest.mock('react-redux', () => {
 });
 
 describe('GraphOverlay', () => {
-  const { storage } = createSecuritySolutionStorageMock();
   beforeEach(() => {
     jest.clearAllMocks();
     (useGlobalFullScreen as jest.Mock).mockReturnValue({
@@ -121,30 +111,25 @@ describe('GraphOverlay', () => {
     test('it gets index pattern from default data view', () => {
       render(
         <TestProviders
-          store={createStore(
-            {
-              ...mockGlobalState,
-              timeline: {
-                ...mockGlobalState.timeline,
-                timelineById: {
-                  [TimelineId.test]: {
-                    ...mockGlobalState.timeline.timelineById[TimelineId.test],
-                    graphEventId: 'definitely-not-null',
-                  },
+          store={createMockStore({
+            ...mockGlobalState,
+            timeline: {
+              ...mockGlobalState.timeline,
+              timelineById: {
+                [TimelineId.test]: {
+                  ...mockGlobalState.timeline.timelineById[TimelineId.test],
+                  graphEventId: 'definitely-not-null',
                 },
               },
             },
-            SUB_PLUGINS_REDUCER,
-            kibanaObservable,
-            storage
-          )}
+          })}
         >
           <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={TableId.test} />
         </TestProviders>
       );
 
       expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(
-        mockGlobalState.sourcerer.defaultDataView.patternList
+        mockGlobalState.sourcerer.sourcererScopes.analyzer.selectedPatterns
       );
     });
   });
@@ -186,52 +171,6 @@ describe('GraphOverlay', () => {
       expect(overlayContainer).toHaveStyleRule('width', '100%');
     });
 
-    test('it gets index pattern from Timeline data view', () => {
-      const mockedDefaultDataViewPattern = 'default-dataview-pattern';
-      render(
-        <TestProviders
-          store={createStore(
-            {
-              ...mockGlobalState,
-              timeline: {
-                ...mockGlobalState.timeline,
-                timelineById: {
-                  [timelineId]: {
-                    ...mockGlobalState.timeline.timelineById[timelineId],
-                    graphEventId: 'definitely-not-null',
-                  },
-                },
-              },
-              sourcerer: {
-                ...mockGlobalState.sourcerer,
-                defaultDataView: {
-                  ...mockGlobalState.sourcerer.defaultDataView,
-                  patternList: [mockedDefaultDataViewPattern],
-                },
-                sourcererScopes: {
-                  ...mockGlobalState.sourcerer.sourcererScopes,
-                  [SourcererScopeName.timeline]: {
-                    ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-                    selectedPatterns: mockIndexNames,
-                  },
-                },
-              },
-            },
-            SUB_PLUGINS_REDUCER,
-            kibanaObservable,
-            storage
-          )}
-        >
-          <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
-        </TestProviders>
-      );
-
-      expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual([
-        ...mockIndexNames.sort(),
-        mockedDefaultDataViewPattern,
-      ]);
-    });
-
     test('it renders session view controls', () => {
       (useGlobalFullScreen as jest.Mock).mockReturnValue({
         globalFullScreen: false,
@@ -244,27 +183,22 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders
-          store={createStore(
-            {
-              ...mockGlobalState,
-              timeline: {
-                ...mockGlobalState.timeline,
-                timelineById: {
-                  [timelineId]: {
-                    ...mockGlobalState.timeline.timelineById[timelineId],
-                    sessionViewConfig: {
-                      index: 'logs-endpoint.events.process*',
-                      sessionEntityId: 'testId',
-                      sessionStartTime: '2021-10-14T08:05:34.853Z',
-                    },
+          store={createMockStore({
+            ...mockGlobalState,
+            timeline: {
+              ...mockGlobalState.timeline,
+              timelineById: {
+                [timelineId]: {
+                  ...mockGlobalState.timeline.timelineById[timelineId],
+                  sessionViewConfig: {
+                    index: 'logs-endpoint.events.process*',
+                    sessionEntityId: 'testId',
+                    sessionStartTime: '2021-10-14T08:05:34.853Z',
                   },
                 },
               },
             },
-            SUB_PLUGINS_REDUCER,
-            kibanaObservable,
-            storage
-          )}
+          })}
         >
           <GraphOverlay
             SessionView={<div />}
@@ -289,23 +223,18 @@ describe('GraphOverlay', () => {
 
       const wrapper = render(
         <TestProviders
-          store={createStore(
-            {
-              ...mockGlobalState,
-              timeline: {
-                ...mockGlobalState.timeline,
-                timelineById: {
-                  [timelineId]: {
-                    ...mockGlobalState.timeline.timelineById[timelineId],
-                    graphEventId: 'test_id',
-                  },
+          store={createMockStore({
+            ...mockGlobalState,
+            timeline: {
+              ...mockGlobalState.timeline,
+              timelineById: {
+                [timelineId]: {
+                  ...mockGlobalState.timeline.timelineById[timelineId],
+                  graphEventId: 'test_id',
                 },
               },
             },
-            SUB_PLUGINS_REDUCER,
-            kibanaObservable,
-            storage
-          )}
+          })}
         >
           <GraphOverlay SessionView={<div />} Navigation={<div />} scopeId={timelineId} />
         </TestProviders>

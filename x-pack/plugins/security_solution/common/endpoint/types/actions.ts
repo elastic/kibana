@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { EcsError } from '@kbn/ecs';
+import type { EcsError } from '@elastic/ecs';
 import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type { ResponseActionBodySchema, UploadActionApiRequestBody } from '../../api/endpoint';
 import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
@@ -90,6 +90,10 @@ export interface ResponseActionExecuteOutputContent {
   output_file_stderr_truncated: boolean;
 }
 
+export interface ResponseActionScanOutputContent {
+  code: string;
+}
+
 export const ActivityLogItemTypes = {
   ACTION: 'action' as const,
   RESPONSE: 'response' as const,
@@ -120,7 +124,11 @@ interface ActionResponseFields {
  * An endpoint Action created in the Endpoint's `.logs-endpoint.actions-default` index.
  * @since v7.16
  */
-export interface LogsEndpointAction {
+export interface LogsEndpointAction<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
   '@timestamp': string;
   agent: {
     id: string | string[];
@@ -134,6 +142,8 @@ export interface LogsEndpointAction {
     id: string;
     name: string;
   };
+  /** Area to store any additional metadata  */
+  meta?: TMeta;
 }
 
 export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
@@ -150,7 +160,8 @@ export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
  * @since v7.16
  */
 export interface LogsEndpointActionResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
 > {
   '@timestamp': string;
   agent: {
@@ -163,6 +174,8 @@ export interface LogsEndpointActionResponse<
     input_type: ResponseActionAgentType;
   };
   error?: EcsError;
+  /** Area to store any other metadata for the action response */
+  meta?: TMeta;
 }
 
 interface ResponseActionParametersWithPid {
@@ -188,12 +201,17 @@ export interface ResponseActionsExecuteParameters {
   timeout?: number;
 }
 
+export interface ResponseActionScanParameters {
+  path: string;
+}
+
 export type EndpointActionDataParameterTypes =
   | undefined
   | ResponseActionParametersWithPidOrEntityId
   | ResponseActionsExecuteParameters
   | ResponseActionGetFileParameters
-  | ResponseActionUploadParameters;
+  | ResponseActionUploadParameters
+  | ResponseActionScanParameters;
 
 /** Output content of the different response actions */
 export type EndpointActionResponseDataOutput =
@@ -203,8 +221,12 @@ export type EndpointActionResponseDataOutput =
   | ResponseActionUploadOutputContent
   | GetProcessesActionOutputContent
   | SuspendProcessActionOutputContent
-  | KillProcessActionOutputContent;
+  | KillProcessActionOutputContent
+  | ResponseActionScanOutputContent;
 
+/**
+ * The data stored with each Response Action under `EndpointActions.data` property
+ */
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
@@ -213,6 +235,12 @@ export interface EndpointActionData<
   comment?: string;
   parameters?: TParameters;
   output?: ActionResponseOutput<TOutputContent>;
+  /**
+   * If `alert_id` is defined, then action request is of type `automated`
+   *
+   * **IMPORTANT**: should be used only when response actions are created from a Rule (automated response actions)
+   *                as this property is used to determine if an action is of type `automated`
+   */
   alert_id?: string[];
   hosts?: Record<string, { name: string }>;
 }
@@ -510,6 +538,7 @@ export type UploadedFileInfo = Pick<
 > & {
   actionId: string;
   agentId: string;
+  agentType: ResponseActionAgentType;
 };
 
 export interface ActionFileInfoApiResponse {

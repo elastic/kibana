@@ -9,9 +9,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import {
   ES_SEARCH_STRATEGY,
-  type IEsSearchResponse,
   type ISearchSource,
   type SearchRequest,
 } from '@kbn/data-plugin/common';
@@ -23,46 +23,53 @@ export class SearchCursorScroll extends SearchCursor {
     indexPatternTitle: string,
     settings: SearchCursorSettings,
     clients: SearchCursorClients,
+    abortController: AbortController,
     logger: Logger
   ) {
-    super(indexPatternTitle, settings, clients, logger);
+    super(indexPatternTitle, settings, clients, abortController, logger);
   }
 
   // The first search query begins the scroll context in ES
   public async initialize() {}
 
   private async scan(searchBody: SearchRequest) {
-    const { includeFrozen, maxConcurrentShardRequests, scroll } = this.settings;
+    const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
+
+    // maxConcurrentShardRequests=0 is not supported
+    const effectiveMaxConcurrentShardRequests =
+      maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined;
 
     const searchParamsScan = {
       params: {
         body: searchBody,
         index: this.indexPatternTitle,
-        scroll: scroll.duration,
+        scroll: scroll.duration(taskInstanceFields),
         size: scroll.size,
         ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
-        max_concurrent_shard_requests: maxConcurrentShardRequests,
+        max_concurrent_shard_requests: effectiveMaxConcurrentShardRequests,
       },
     };
 
     return await lastValueFrom(
       this.clients.data.search(searchParamsScan, {
         strategy: ES_SEARCH_STRATEGY,
+        abortSignal: this.abortController.signal,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-          requestTimeout: scroll.duration,
+          requestTimeout: scroll.duration(taskInstanceFields),
         },
       })
     );
   }
 
   private async scroll() {
-    const { duration } = this.settings.scroll;
+    const { scroll, taskInstanceFields } = this.settings;
     return await this.clients.es.asCurrentUser.scroll(
-      { scroll: duration, scroll_id: this.cursorId },
+      { scroll: scroll.duration(taskInstanceFields), scroll_id: this.cursorId },
       {
+        signal: this.abortController.signal,
         maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-        requestTimeout: duration,
+        requestTimeout: scroll.duration(taskInstanceFields),
       }
     );
   }

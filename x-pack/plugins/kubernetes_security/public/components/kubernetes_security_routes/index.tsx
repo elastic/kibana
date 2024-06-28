@@ -47,6 +47,7 @@ import {
 import { ContainerNameWidget } from '../container_name_widget';
 
 const KubernetesSecurityRoutesComponent = ({
+  dataViewId,
   filter,
   indexPattern,
   globalFilter,
@@ -158,6 +159,7 @@ const KubernetesSecurityRoutesComponent = ({
                 <EuiFlexGroup css={styles.widgetsBottomSpacing}>
                   <EuiFlexItem>
                     <PercentWidget
+                      dataViewId={dataViewId}
                       title={
                         <>
                           <EuiText size="xs" css={styles.percentageChartTitle}>
@@ -250,6 +252,7 @@ const KubernetesSecurityRoutesComponent = ({
                           shouldHideFilter: true,
                         },
                       }}
+                      dataViewId={dataViewId}
                       groupedBy={ENTRY_LEADER_USER_ID}
                       countBy={ENTRY_LEADER_ENTITY_ID}
                       onReduce={onReduceRootAggs}
@@ -259,6 +262,7 @@ const KubernetesSecurityRoutesComponent = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false} css={styles.rightWidgetsGroup}>
                 <ContainerNameWidget
+                  dataViewId={dataViewId}
                   widgetKey="containerNameSessions"
                   indexPattern={indexPattern}
                   globalFilter={globalFilter}

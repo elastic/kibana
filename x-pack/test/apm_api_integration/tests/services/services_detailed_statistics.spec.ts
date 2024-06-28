@@ -23,7 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const apmApiClient = getService('apmApiClient');
 
-  const synthtrace = getService('synthtraceEsClient');
+  const synthtrace = getService('apmSynthtraceEsClient');
 
   const start = '2021-01-01T00:00:00.000Z';
   const end = '2021-01-01T00:59:59.999Z';
@@ -90,6 +90,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     return response.body;
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177511
   registry.when(
     'Services detailed statistics when data is generated',
     { config: 'basic', archives: [] },

@@ -57,7 +57,7 @@ export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
-      Actions.init({
+      Actions.fetchIndices({
         client,
         indices: [`${context.indexPrefix}_*`],
       }),
@@ -65,6 +65,7 @@ export const nextActionMap = (context: MigratorContext) => {
       Actions.createIndex({
         client,
         indexName: state.currentIndex,
+        aliases: state.creationAliases,
         mappings: state.indexMappings,
         esCapabilities: context.esCapabilities,
       }),

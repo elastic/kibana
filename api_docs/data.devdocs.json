@@ -504,9 +504,9 @@
               },
               ", options?: ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
@@ -546,9 +546,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "@kbn/search-types",
                     "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
+                    "docId": "kibKbnSearchTypesPluginApi",
                     "section": "def-common.ISearchOptions",
                     "text": "ISearchOptions"
                   },
@@ -2208,17 +2208,17 @@
             "signature": [
               "(response: ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchResponse",
                 "text": "IEsSearchResponse"
               },
               "<any>) => ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchResponse",
                 "text": "IEsSearchResponse"
               },
@@ -2237,9 +2237,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "@kbn/search-types",
                     "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
+                    "docId": "kibKbnSearchTypesPluginApi",
                     "section": "def-common.IEsSearchResponse",
                     "text": "IEsSearchResponse"
                   },
@@ -2385,9 +2385,9 @@
               },
               ", options?: ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
@@ -2427,9 +2427,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "data",
+                    "pluginId": "@kbn/search-types",
                     "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
+                    "docId": "kibKbnSearchTypesPluginApi",
                     "section": "def-common.ISearchOptions",
                     "text": "ISearchOptions"
                   },
@@ -3374,58 +3374,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.SearchSource.setFields",
-            "type": "Function",
-            "tags": [
-              "private"
-            ],
-            "label": "setFields",
-            "description": [
-              "\nInternal, do not use. Overrides all search source fields with the new field array.\n"
-            ],
-            "signature": [
-              "(newFields: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ") => this"
-            ],
-            "path": "src/plugins/data/common/search/search_source/search_source.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-public.SearchSource.setFields.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "newFields",
-                "description": [
-                  "New field array."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "data",
-                    "scope": "common",
-                    "docId": "kibDataSearchPluginApi",
-                    "section": "def-common.SearchSourceFields",
-                    "text": "SearchSourceFields"
-                  }
-                ],
-                "path": "src/plugins/data/common/search/search_source/search_source.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.SearchSource.getId",
             "type": "Function",
             "tags": [],
@@ -3837,9 +3785,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
@@ -3910,6 +3858,10 @@
               {
                 "plugin": "stackAlerts",
                 "path": "x-pack/plugins/stack_alerts/server/rule_types/es_query/lib/fetch_search_source_query.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/lib/wrap_search_source_client.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -4097,6 +4049,60 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SearchSource.loadDataViewFields",
+            "type": "Function",
+            "tags": [],
+            "label": "loadDataViewFields",
+            "description": [],
+            "signature": [
+              "(dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/search_source/search_source.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.SearchSource.loadDataViewFields.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewLazy",
+                    "text": "DataViewLazy"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/search_source/search_source.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -4594,9 +4600,9 @@
           },
           "; }) => ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.ISearchRequestParams",
             "text": "ISearchRequestParams"
           }
@@ -4950,9 +4956,9 @@
         "signature": [
           "(response?: ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
@@ -4971,9 +4977,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
@@ -7165,7 +7171,9 @@
             "label": "createFiltersFromRangeSelectAction",
             "description": [],
             "signature": [
-              "(event: RangeSelectDataContext) => Promise<",
+              "(event: ",
+              "RangeSelectDataContext",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -7419,20 +7427,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.GetFieldsOptions.lookBack",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "lookBack",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-public.GetFieldsOptions.metaFields",
             "type": "Array",
             "tags": [],
@@ -7543,485 +7537,32 @@
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.IEsSearchRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "IEsSearchRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchRequest",
-            "text": "IEsSearchRequest"
           },
-          "<T> extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-public.IEsSearchRequest.indexType",
-            "type": "string",
+            "id": "def-public.GetFieldsOptions.fieldTypes",
+            "type": "Array",
             "tags": [],
-            "label": "indexType",
+            "label": "fieldTypes",
             "description": [],
             "signature": [
-              "string | undefined"
+              "string[] | undefined"
             ],
-            "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.IKibanaSearchRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "IKibanaSearchRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<Params>"
-        ],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchRequest.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nAn id can be used to uniquely identify this request."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchRequest.params",
-            "type": "Uncategorized",
+            "id": "def-public.GetFieldsOptions.includeEmptyFields",
+            "type": "CompoundType",
             "tags": [],
-            "label": "params",
+            "label": "includeEmptyFields",
             "description": [],
             "signature": [
-              "Params | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.IKibanaSearchResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "IKibanaSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<RawResponse>"
-        ],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [
-              "\nSome responses may contain a unique id to identify the request this response came from."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.total",
-            "type": "number",
-            "tags": [],
-            "label": "total",
-            "description": [
-              "\nIf relevant to the search strategy, return a total number\nthat represents how progress is indicated."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.loaded",
-            "type": "number",
-            "tags": [],
-            "label": "loaded",
-            "description": [
-              "\nIf relevant to the search strategy, return a loaded number\nthat represents how progress is indicated."
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isRunning",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRunning",
-            "description": [
-              "\nIndicates whether search is still in flight"
-            ],
-            "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isPartial",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isPartial",
-            "description": [
-              "\nIndicates whether the results returned are complete or partial"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isRestored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRestored",
-            "description": [
-              "\nIndicates whether the results returned are from the async-search index"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.isStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isStored",
-            "description": [
-              "\nIndicates whether the search has been saved to a search-session object and long keepAlive was set"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.warning",
-            "type": "string",
-            "tags": [],
-            "label": "warning",
-            "description": [
-              "\nOptional warnings returned from Elasticsearch (for example, deprecation warnings)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.rawResponse",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "rawResponse",
-            "description": [
-              "\nThe raw response returned by the internal search method (usually the raw ES response)"
-            ],
-            "signature": [
-              "RawResponse"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.IKibanaSearchResponse.requestParams",
-            "type": "Object",
-            "tags": [],
-            "label": "requestParams",
-            "description": [
-              "\nHTTP request parameters from elasticsearch transport client t"
-            ],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SanitizedConnectionRequestParams",
-                "text": "SanitizedConnectionRequestParams"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-public.ISearchOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "ISearchOptions",
-        "description": [],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.abortSignal",
-            "type": "Object",
-            "tags": [],
-            "label": "abortSignal",
-            "description": [
-              "\nAn `AbortSignal` that allows the caller of `search` to abort a search request."
-            ],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.strategy",
-            "type": "string",
-            "tags": [],
-            "label": "strategy",
-            "description": [
-              "\nUse this option to force using a specific server side search strategy. Leave empty to use the default strategy."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.legacyHitsTotal",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "legacyHitsTotal",
-            "description": [
-              "\nRequest the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to\nsomething other than `true`, this should be set to `false`."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.sessionId",
-            "type": "string",
-            "tags": [],
-            "label": "sessionId",
-            "description": [
-              "\nA session ID, grouping multiple search requests into a single session."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.isStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isStored",
-            "description": [
-              "\nWhether the session is already saved (i.e. sent to background)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.isSearchStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isSearchStored",
-            "description": [
-              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.isRestore",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRestore",
-            "description": [
-              "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [
-              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [
-              "\nIndex pattern reference is used for better error messages"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchOptions.transport",
-            "type": "Object",
-            "tags": [],
-            "label": "transport",
-            "description": [
-              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
-            ],
-            "signature": [
-              "Omit<",
-              "TransportRequestOptions",
-              ", \"signal\"> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -8102,6 +7643,61 @@
               {
                 "parentPluginId": "data",
                 "id": "def-public.ISearchStartSearchSource.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "fields",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.SerializedSearchSourceFields",
+                    "text": "SerializedSearchSourceFields"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/plugins/data/common/search/search_source/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchStartSearchSource.createLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "createLazy",
+            "description": [],
+            "signature": [
+              "(fields?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStartSearchSource.createLazy.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "fields",
@@ -8291,7 +7887,7 @@
             "tags": [],
             "label": "type",
             "description": [
-              " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
+              " The type of Saved Object. Each plugin can define its own custom Saved Object types."
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
@@ -8331,12 +7927,44 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.SavedObject.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
+            "description": [
+              "The ID of the user who created this object."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.SavedObject.updated_at",
             "type": "string",
             "tags": [],
             "label": "updated_at",
             "description": [
               "Timestamp of the last time this document had been updated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
             ],
             "signature": [
               "string | undefined"
@@ -9246,15 +8874,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ type: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IAggType",
-            "text": "IAggType"
-          },
-          "; id?: string | undefined; params?: {} | ",
+          "{ params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -9262,7 +8882,15 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
+          " | undefined; id?: string | undefined; type: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IAggType",
+            "text": "IAggType"
+          },
+          "; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -9878,32 +9506,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.IEsSearchResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "IEsSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<",
-          "SearchResponse",
-          "<Source, Record<string, ",
-          "AggregationsAggregate",
-          ">>>"
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.IFieldParamType",
         "type": "Type",
         "tags": [],
@@ -9993,109 +9595,6 @@
       },
       {
         "parentPluginId": "data",
-        "id": "def-public.ISearchGeneric",
-        "type": "Type",
-        "tags": [],
-        "label": "ISearchGeneric",
-        "description": [],
-        "signature": [
-          "<SearchStrategyRequest extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<any> = ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchRequest",
-            "text": "IEsSearchRequest"
-          },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchRequestParams",
-            "text": "ISearchRequestParams"
-          },
-          ">, SearchStrategyResponse extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<any> = ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchResponse",
-            "text": "IEsSearchResponse"
-          },
-          "<any>>(request: SearchStrategyRequest, options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
-          },
-          " | undefined) => ",
-          "Observable",
-          "<SearchStrategyResponse>"
-        ],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchGeneric.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "request",
-            "description": [],
-            "signature": [
-              "SearchStrategyRequest"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-public.ISearchGeneric.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.ISearchOptions",
-                "text": "ISearchOptions"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
         "id": "def-public.ISearchSource",
         "type": "Type",
         "tags": [],
@@ -10112,19 +9611,7 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; fetch: (options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">>>; history: ",
+          "; history: ",
           "SearchRequest",
           "[]; setField: <K extends keyof ",
           {
@@ -10159,22 +9646,6 @@
             "text": "SearchSourceFields"
           },
           ">(field: K) => ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSource",
-            "text": "SearchSource"
-          },
-          "; setFields: (newFields: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceFields",
-            "text": "SearchSourceFields"
-          },
-          ") => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10282,9 +9753,9 @@
           "Observable",
           "<",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IKibanaSearchResponse",
             "text": "IKibanaSearchResponse"
           },
@@ -10292,7 +9763,19 @@
           "SearchResponse",
           "<T, Record<string, ",
           "AggregationsAggregate",
-          ">>>>; onRequestStart: (handler: (searchSource: ",
+          ">>>>; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ") => Promise<",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10308,7 +9791,23 @@
             "section": "def-common.SearchSourceSearchOptions",
             "text": "SearchSourceSearchOptions"
           },
-          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+          " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          ") => Promise<Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ">>; getSerializedFields: (recurse?: boolean) => ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12193,6 +11692,10 @@
           "trackAdoption": false,
           "references": [
             {
+              "plugin": "graph",
+              "path": "x-pack/plugins/graph/public/plugin.ts"
+            },
+            {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/data_view_select.tsx"
             },
@@ -12211,10 +11714,6 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/plugins/stack_alerts/public/rule_types/geo_containment/rule_form/entity_form.tsx"
-            },
-            {
-              "plugin": "graph",
-              "path": "x-pack/plugins/graph/public/plugin.ts"
             },
             {
               "plugin": "inputControlVis",
@@ -12519,7 +12018,7 @@
                 "section": "def-server.DataPluginStart",
                 "text": "DataPluginStart"
               },
-              ">, { bfetch, expressions, usageCollection, fieldFormats, security }: ",
+              ">, { bfetch, expressions, usageCollection, fieldFormats }: ",
               "DataPluginSetupDependencies",
               ") => { search: ",
               "ISearchSetup",
@@ -12576,7 +12075,7 @@
                 "id": "def-server.DataServerPlugin.setup.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{ bfetch, expressions, usageCollection, fieldFormats, security }",
+                "label": "{ bfetch, expressions, usageCollection, fieldFormats }",
                 "description": [],
                 "signature": [
                   "DataPluginSetupDependencies"
@@ -12613,25 +12112,25 @@
               "ISearchStart",
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchRequest",
                 "text": "IEsSearchRequest"
               },
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.ISearchRequestParams",
                 "text": "ISearchRequestParams"
               },
               ">, ",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IEsSearchResponse",
                 "text": "IEsSearchResponse"
               },
@@ -12733,7 +12232,13 @@
             "text": "DataView"
           },
           " extends ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           " implements ",
           {
             "pluginId": "@kbn/es-query",
@@ -12877,6 +12382,24 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataView.getScriptedFieldsForQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getScriptedFieldsForQuery",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              "ScriptField",
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataView.getEtag",
             "type": "Function",
             "tags": [],
@@ -12998,7 +12521,7 @@
               "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
             ],
             "signature": [
-              "() => Omit<",
+              "(params?: { keepFieldAttrs?: (\"customLabel\" | \"customDescription\")[] | undefined; } | undefined) => Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13011,7 +12534,35 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.toMinimalSpec.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataView.toMinimalSpec.$1.keepFieldAttrs",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "keepFieldAttrs",
+                    "description": [],
+                    "signature": [
+                      "(\"customLabel\" | \"customDescription\")[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           },
           {
@@ -13034,7 +12585,11 @@
             "references": [
               {
                 "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/delete_scripted_field.ts"
+                "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -13047,6 +12602,18 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/delete_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.test.ts"
               }
             ],
             "children": [
@@ -13097,12 +12664,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -13174,6 +12741,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
@@ -13475,58 +13046,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-server.DataView.replaceAllRuntimeFields",
-            "type": "Function",
-            "tags": [],
-            "label": "replaceAllRuntimeFields",
-            "description": [
-              "\nReplaces all existing runtime fields with new fields."
-            ],
-            "signature": [
-              "(newFields: Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeField",
-                "text": "RuntimeField"
-              },
-              ">) => void"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-server.DataView.replaceAllRuntimeFields.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "newFields",
-                "description": [
-                  "Map of runtime field definitions by field name"
-                ],
-                "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.RuntimeField",
-                    "text": "RuntimeField"
-                  },
-                  ">"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-server.DataView.removeRuntimeField",
             "type": "Function",
             "tags": [],
@@ -13621,6 +13140,59 @@
                 "label": "customLabel",
                 "description": [
                   "custom label value. If undefined, custom label is removed"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataView.setFieldCustomDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomDescription",
+            "description": [
+              "\nSet field custom description"
+            ],
+            "signature": [
+              "(fieldName: string, customDescription: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.setFieldCustomDescription.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [
+                  "name of field to set custom label on"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataView.setFieldCustomDescription.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customDescription",
+                "description": [
+                  "custom description value. If undefined, custom description is removed"
                 ],
                 "signature": [
                   "string | null | undefined"
@@ -14000,6 +13572,46 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getAllDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllDataViewLazy",
+            "description": [],
+            "signature": [
+              "(refresh?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.getAllDataViewLazy.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "refresh",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.clearCache",
             "type": "Function",
             "tags": [],
@@ -14210,6 +13822,38 @@
             ],
             "signature": [
               "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14632,6 +14276,46 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazy",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.getDataViewLazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.get",
             "type": "Function",
             "tags": [],
@@ -14802,6 +14486,139 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.createDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "createDataViewLazy",
+            "description": [
+              "\nCreate data view lazy instance."
+            ],
+            "signature": [
+              "(spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.createDataViewLazy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "DataViewLazy"
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.createAndSaveDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "createAndSaveDataViewLazy",
+            "description": [
+              "\nCreate a new data view lazy and save it right away."
+            ],
+            "signature": [
+              "(spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", overwrite?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.createAndSaveDataViewLazy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.createAndSaveDataViewLazy.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "overwrite",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.createAndSave",
             "type": "Function",
             "tags": [],
@@ -14922,18 +14739,10 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               },
-              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">"
+              ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14953,8 +14762,8 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -14969,23 +14778,6 @@
                 "tags": [],
                 "label": "overwrite",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-server.DataViewsService.createSavedObject.$3",
-                "type": "boolean",
-                "tags": [],
-                "label": "displayErrors",
-                "description": [
-                  "- If set false, API consumer is responsible for displaying and handling errors."
-                ],
                 "signature": [
                   "boolean"
                 ],
@@ -15012,18 +14804,10 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">"
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -15041,8 +14825,8 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -15156,6 +14940,34 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-server.DataViewsService.getDefaultDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultDataViewLazy",
+            "description": [
+              "\nReturns the default data view as a DataViewLazy.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | null>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "default data view lazy"
+            ]
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-server.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -15223,6 +15035,114 @@
             "returnComment": [
               "default data view"
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.toDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "toDataView",
+            "description": [],
+            "signature": [
+              "(dataViewLazy: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.toDataView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataViewLazy",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewLazy",
+                    "text": "DataViewLazy"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.DataViewsService.toDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "toDataViewLazy",
+            "description": [],
+            "signature": [
+              "(dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-server.DataViewsService.toDataViewLazy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -15276,32 +15196,17 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.IndexPatternsFetcher.Unnamed.$2",
-                "type": "boolean",
+                "type": "Object",
                 "tags": [],
-                "label": "allowNoIndices",
+                "label": "optionalParams",
                 "description": [],
                 "signature": [
-                  "boolean"
+                  "IndexPatternsFetcherOptionalParams | undefined"
                 ],
                 "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-server.IndexPatternsFetcher.Unnamed.$3",
-                "type": "boolean",
-                "tags": [],
-                "label": "rollupsEnabled",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -15322,7 +15227,7 @@
             "signature": [
               "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean | undefined; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; indexFilter?: ",
               "QueryDslQueryContainer",
-              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; }) => Promise<{ fields: ",
+              " | undefined; fields?: string[] | undefined; allowHidden?: boolean | undefined; fieldTypes?: string[] | undefined; includeEmptyFields?: boolean | undefined; }) => Promise<{ fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -15452,6 +15357,34 @@
                     "type": "CompoundType",
                     "tags": [],
                     "label": "allowHidden",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.fieldTypes",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "fieldTypes",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.includeEmptyFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "includeEmptyFields",
                     "description": [],
                     "signature": [
                       "boolean | undefined"
@@ -15999,7 +15932,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; search: { <TDocument = unknown, TAggregations = Record<string, ",
+                  ">; }; helpers: ",
+                  "default",
+                  "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
                   ">>(this: That, params?: ",
                   "SearchRequest",
@@ -16031,9 +15966,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; helpers: ",
-                  "default",
-                  "; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kQueryRuleset]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -16236,6 +16169,8 @@
                   ">; }; enrich: ",
                   "default",
                   "; eql: ",
+                  "default",
+                  "; esql: ",
                   "default",
                   "; exists: { (this: That, params: ",
                   "ExistsRequest",
@@ -16488,6 +16423,8 @@
                   " | undefined): Promise<",
                   "WriteResponseBase",
                   ">; }; indices: ",
+                  "default",
+                  "; inference: ",
                   "default",
                   "; info: { (this: That, params?: ",
                   "InfoRequest",
@@ -16743,7 +16680,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "AcknowledgedResponseBase",
-                  ">; }; rankEval: { (this: That, params: ",
+                  ">; }; queryRuleset: ",
+                  "default",
+                  "; rankEval: { (this: That, params: ",
                   "RankEvalRequest",
                   " | ",
                   "RankEvalRequest",
@@ -17339,240 +17278,18 @@
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.IEsSearchRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "IEsSearchRequest",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IEsSearchRequest",
-            "text": "IEsSearchRequest"
           },
-          "<T> extends ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchRequest",
-            "text": "IKibanaSearchRequest"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
           {
             "parentPluginId": "data",
-            "id": "def-server.IEsSearchRequest.indexType",
+            "id": "def-server.FieldDescriptor.defaultFormatter",
             "type": "string",
             "tags": [],
-            "label": "indexType",
+            "label": "defaultFormatter",
             "description": [],
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.ISearchOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "ISearchOptions",
-        "description": [],
-        "path": "src/plugins/data/common/search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.abortSignal",
-            "type": "Object",
-            "tags": [],
-            "label": "abortSignal",
-            "description": [
-              "\nAn `AbortSignal` that allows the caller of `search` to abort a search request."
-            ],
-            "signature": [
-              "AbortSignal | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.strategy",
-            "type": "string",
-            "tags": [],
-            "label": "strategy",
-            "description": [
-              "\nUse this option to force using a specific server side search strategy. Leave empty to use the default strategy."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.legacyHitsTotal",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "legacyHitsTotal",
-            "description": [
-              "\nRequest the legacy format for the total number of hits. If sending `rest_total_hits_as_int` to\nsomething other than `true`, this should be set to `false`."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.sessionId",
-            "type": "string",
-            "tags": [],
-            "label": "sessionId",
-            "description": [
-              "\nA session ID, grouping multiple search requests into a single session."
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.isStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isStored",
-            "description": [
-              "\nWhether the session is already saved (i.e. sent to background)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.isSearchStored",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isSearchStored",
-            "description": [
-              "\nWhether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.isRestore",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isRestore",
-            "description": [
-              "\nWhether the session is restored (i.e. search requests should re-use the stored search IDs,\nrather than starting from scratch)"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.executionContext",
-            "type": "Object",
-            "tags": [],
-            "label": "executionContext",
-            "description": [
-              "\nRepresents a meta-information about a Kibana entity intitating a saerch request."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.indexPattern",
-            "type": "Object",
-            "tags": [],
-            "label": "indexPattern",
-            "description": [
-              "\nIndex pattern reference is used for better error messages"
-            ],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              " | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
-            "id": "def-server.ISearchOptions.transport",
-            "type": "Object",
-            "tags": [],
-            "label": "transport",
-            "description": [
-              "\nTransportRequestOptions, other than `signal`, to pass through to the ES client.\nTo pass an abort signal, use {@link ISearchOptions.abortSignal}"
-            ],
-            "signature": [
-              "Omit<",
-              "TransportRequestOptions",
-              ", \"signal\"> | undefined"
-            ],
-            "path": "src/plugins/data/common/search/types.ts",
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -17643,32 +17360,6 @@
         "description": [],
         "signature": [
           "\"es\""
-        ],
-        "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "data",
-        "id": "def-server.IEsSearchResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "IEsSearchResponse",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.IKibanaSearchResponse",
-            "text": "IKibanaSearchResponse"
-          },
-          "<",
-          "SearchResponse",
-          "<Source, Record<string, ",
-          "AggregationsAggregate",
-          ">>>"
         ],
         "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
         "deprecated": false,
@@ -18066,25 +17757,25 @@
             "ISearchStart",
             "<",
             {
-              "pluginId": "data",
+              "pluginId": "@kbn/search-types",
               "scope": "common",
-              "docId": "kibDataSearchPluginApi",
+              "docId": "kibKbnSearchTypesPluginApi",
               "section": "def-common.IEsSearchRequest",
               "text": "IEsSearchRequest"
             },
             "<",
             {
-              "pluginId": "data",
+              "pluginId": "@kbn/search-types",
               "scope": "common",
-              "docId": "kibDataSearchPluginApi",
+              "docId": "kibKbnSearchTypesPluginApi",
               "section": "def-common.ISearchRequestParams",
               "text": "ISearchRequestParams"
             },
             ">, ",
             {
-              "pluginId": "data",
+              "pluginId": "@kbn/search-types",
               "scope": "common",
-              "docId": "kibDataSearchPluginApi",
+              "docId": "kibKbnSearchTypesPluginApi",
               "section": "def-common.IEsSearchResponse",
               "text": "IEsSearchResponse"
             },
@@ -18957,7 +18648,13 @@
             "text": "DataView"
           },
           " extends ",
-          "AbstractDataView",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
           " implements ",
           {
             "pluginId": "@kbn/es-query",
@@ -19101,6 +18798,24 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataView.getScriptedFieldsForQuery",
+            "type": "Function",
+            "tags": [],
+            "label": "getScriptedFieldsForQuery",
+            "description": [],
+            "signature": [
+              "() => Record<string, ",
+              "ScriptField",
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataView.getEtag",
             "type": "Function",
             "tags": [],
@@ -19222,7 +18937,7 @@
               "\nCreates a minimal static representation of the data view. Fields and popularity scores will be omitted."
             ],
             "signature": [
-              "() => Omit<",
+              "(params?: { keepFieldAttrs?: (\"customLabel\" | \"customDescription\")[] | undefined; } | undefined) => Omit<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -19235,7 +18950,35 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.toMinimalSpec.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataView.toMinimalSpec.$1.keepFieldAttrs",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "keepFieldAttrs",
+                    "description": [],
+                    "signature": [
+                      "(\"customLabel\" | \"customDescription\")[] | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
             "returnComment": []
           },
           {
@@ -19258,7 +19001,11 @@
             "references": [
               {
                 "plugin": "dataViews",
-                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/delete_scripted_field.ts"
+                "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts"
               },
               {
                 "plugin": "dataViewManagement",
@@ -19271,6 +19018,18 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.test.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/public/scripted_fields/delete_scripted_field.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view_lazy.test.ts"
               }
             ],
             "children": [
@@ -19321,12 +19080,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
-              },
-              {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
               },
               {
                 "plugin": "graph",
@@ -19398,6 +19157,10 @@
             "deprecated": true,
             "trackAdoption": false,
             "references": [
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/common/data_views/data_view.ts"
+              },
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
@@ -19699,58 +19462,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.DataView.replaceAllRuntimeFields",
-            "type": "Function",
-            "tags": [],
-            "label": "replaceAllRuntimeFields",
-            "description": [
-              "\nReplaces all existing runtime fields with new fields."
-            ],
-            "signature": [
-              "(newFields: Record<string, ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeField",
-                "text": "RuntimeField"
-              },
-              ">) => void"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "data",
-                "id": "def-common.DataView.replaceAllRuntimeFields.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "newFields",
-                "description": [
-                  "Map of runtime field definitions by field name"
-                ],
-                "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "common",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.RuntimeField",
-                    "text": "RuntimeField"
-                  },
-                  ">"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.DataView.removeRuntimeField",
             "type": "Function",
             "tags": [],
@@ -19845,6 +19556,59 @@
                 "label": "customLabel",
                 "description": [
                   "custom label value. If undefined, custom label is removed"
+                ],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataView.setFieldCustomDescription",
+            "type": "Function",
+            "tags": [],
+            "label": "setFieldCustomDescription",
+            "description": [
+              "\nSet field custom description"
+            ],
+            "signature": [
+              "(fieldName: string, customDescription: string | null | undefined) => void"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_view.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.setFieldCustomDescription.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [
+                  "name of field to set custom label on"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_view.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataView.setFieldCustomDescription.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "customDescription",
+                "description": [
+                  "custom description value. If undefined, custom description is removed"
                 ],
                 "signature": [
                   "string | null | undefined"
@@ -20020,7 +19784,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20030,7 +19794,7 @@
               },
               " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
               "MappingTimeSeriesMetricType",
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -20101,6 +19865,20 @@
             "label": "count",
             "description": [
               "\nSet count, which is used for field popularity in discover."
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.defaultFormatter",
+            "type": "string",
+            "tags": [],
+            "label": "defaultFormatter",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -20240,6 +20018,38 @@
             "label": "customLabel",
             "description": [
               "\nSets custom label for field, or unsets if passed undefined."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.customDescription",
+            "type": "string",
+            "tags": [],
+            "label": "customDescription",
+            "description": [
+              "\nReturns custom description if set, otherwise undefined."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.customDescription",
+            "type": "string",
+            "tags": [],
+            "label": "customDescription",
+            "description": [
+              "\nSets custom description for field, or unsets if passed undefined."
             ],
             "signature": [
               "string | undefined"
@@ -20558,6 +20368,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewField.isNull",
+            "type": "boolean",
+            "tags": [],
+            "label": "isNull",
+            "description": [
+              "\nReturns true if field is Empty"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewField.isSubtypeNested",
             "type": "Function",
             "tags": [],
@@ -20680,7 +20503,7 @@
                 "section": "def-common.IFieldSubType",
                 "text": "IFieldSubType"
               },
-              " | undefined; customLabel: string | undefined; }"
+              " | undefined; customLabel: string | undefined; customDescription: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -21095,6 +20918,46 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getAllDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllDataViewLazy",
+            "description": [],
+            "signature": [
+              "(refresh?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.getAllDataViewLazy.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "refresh",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.clearCache",
             "type": "Function",
             "tags": [],
@@ -21305,6 +21168,38 @@
             ],
             "signature": [
               "() => Promise<boolean>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getMetaFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getMetaFields",
+            "description": [],
+            "signature": [
+              "() => Promise<string[] | undefined>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getShortDotsEnable",
+            "type": "Function",
+            "tags": [],
+            "label": "getShortDotsEnable",
+            "description": [],
+            "signature": [
+              "() => Promise<boolean | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -21727,6 +21622,46 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "getDataViewLazy",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.getDataViewLazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.get",
             "type": "Function",
             "tags": [],
@@ -21897,6 +21832,139 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.createDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "createDataViewLazy",
+            "description": [
+              "\nCreate data view lazy instance."
+            ],
+            "signature": [
+              "(spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.createDataViewLazy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "DataViewLazy"
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.createAndSaveDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "createAndSaveDataViewLazy",
+            "description": [
+              "\nCreate a new data view lazy and save it right away."
+            ],
+            "signature": [
+              "(spec: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewSpec",
+                "text": "DataViewSpec"
+              },
+              ", overwrite?: boolean) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.createAndSaveDataViewLazy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "spec",
+                "description": [
+                  "data view spec"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewSpec",
+                    "text": "DataViewSpec"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.createAndSaveDataViewLazy.$2",
+                "type": "boolean",
+                "tags": [],
+                "label": "overwrite",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.createAndSave",
             "type": "Function",
             "tags": [],
@@ -22017,18 +22085,10 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               },
-              ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">"
+              ", overwrite?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -22048,8 +22108,8 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -22064,23 +22124,6 @@
                 "tags": [],
                 "label": "overwrite",
                 "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_views.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "data",
-                "id": "def-common.DataViewsService.createSavedObject.$3",
-                "type": "boolean",
-                "tags": [],
-                "label": "displayErrors",
-                "description": [
-                  "- If set false, API consumer is responsible for displaying and handling errors."
-                ],
                 "signature": [
                   "boolean"
                 ],
@@ -22107,18 +22150,10 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
               },
-              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataView",
-                "text": "DataView"
-              },
-              ">"
+              ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -22136,8 +22171,8 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataView",
-                    "text": "DataView"
+                    "section": "def-common.AbstractDataView",
+                    "text": "AbstractDataView"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
@@ -22251,6 +22286,34 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewsService.getDefaultDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "getDefaultDataViewLazy",
+            "description": [
+              "\nReturns the default data view as a DataViewLazy.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              " | null>"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "default data view lazy"
+            ]
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewsService.getDefaultDataView",
             "type": "Function",
             "tags": [],
@@ -22318,6 +22381,114 @@
             "returnComment": [
               "default data view"
             ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.toDataView",
+            "type": "Function",
+            "tags": [],
+            "label": "toDataView",
+            "description": [],
+            "signature": [
+              "(dataViewLazy: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.toDataView.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataViewLazy",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewLazy",
+                    "text": "DataViewLazy"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewsService.toDataViewLazy",
+            "type": "Function",
+            "tags": [],
+            "label": "toDataViewLazy",
+            "description": [],
+            "signature": [
+              "(dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ">"
+            ],
+            "path": "src/plugins/data_views/common/data_views/data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.DataViewsService.toDataViewLazy.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -23626,20 +23797,6 @@
           },
           {
             "parentPluginId": "data",
-            "id": "def-common.GetFieldsOptions.lookBack",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "lookBack",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "data",
             "id": "def-common.GetFieldsOptions.metaFields",
             "type": "Array",
             "tags": [],
@@ -23743,6 +23900,34 @@
             "type": "CompoundType",
             "tags": [],
             "label": "forceRefresh",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.fieldTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.includeEmptyFields",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeEmptyFields",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -24047,7 +24232,7 @@
             "tags": [],
             "label": "type",
             "description": [
-              " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
+              " The type of Saved Object. Each plugin can define its own custom Saved Object types."
             ],
             "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
             "deprecated": false,
@@ -24087,12 +24272,44 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.SavedObject.created_by",
+            "type": "string",
+            "tags": [],
+            "label": "created_by",
+            "description": [
+              "The ID of the user who created this object."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.SavedObject.updated_at",
             "type": "string",
             "tags": [],
             "label": "updated_at",
             "description": [
               "Timestamp of the last time this document had been updated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/server_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.SavedObject.updated_by",
+            "type": "string",
+            "tags": [],
+            "label": "updated_by",
+            "description": [
+              "The ID of the user who last updated this object."
             ],
             "signature": [
               "string | undefined"
@@ -24797,6 +25014,14 @@
             "section": "def-common.DataViewListItem",
             "text": "DataViewListItem"
           },
+          "[]>; getAllDataViewLazy: (refresh?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
           "[]>; clearCache: () => void; clearInstanceCache: (id?: string | undefined) => void; getCache: () => Promise<",
           {
             "pluginId": "@kbn/core-saved-objects-common",
@@ -24821,7 +25046,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getMetaFields: () => Promise<string[] | undefined>; getShortDotsEnable: () => Promise<boolean | undefined>; getFieldsForWildcard: (options: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24925,7 +25150,47 @@
             "section": "def-common.DataViewSpec",
             "text": "DataViewSpec"
           },
-          "; createAndSave: (spec: ",
+          "; getDataViewLazy: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          ">; createDataViewLazy: (spec: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          ">; createAndSaveDataViewLazy: (spec: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ", overwrite?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          ">; createAndSave: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24946,10 +25211,26 @@
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
           },
-          ", overwrite?: boolean, displayErrors?: boolean) => Promise<",
+          ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.AbstractDataView",
+            "text": "AbstractDataView"
+          },
+          ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          " | null>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24957,7 +25238,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; updateSavedObject: (indexPattern: ",
+          " | null>; toDataView: (dataViewLazy: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
+          },
+          ") => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24965,7 +25254,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void | Error | ",
+          ">; toDataViewLazy: (dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24973,15 +25262,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; defaultDataViewExists: () => Promise<boolean>; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
+          ") => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
+            "section": "def-common.DataViewLazy",
+            "text": "DataViewLazy"
           },
-          " | null>; }"
+          ">; }"
         ],
         "path": "src/plugins/data_views/common/data_views/data_views.ts",
         "deprecated": false,
@@ -25111,7 +25400,7 @@
           "\nField attributes that are stored on the data view"
         ],
         "signature": [
-          "{ customLabel?: string | undefined; count?: number | undefined; }"
+          "{ customLabel?: string | undefined; customDescription?: string | undefined; count?: number | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -25151,7 +25440,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; customDescription?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25161,7 +25450,7 @@
           },
           " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
           "MappingTimeSeriesMetricType",
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

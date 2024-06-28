@@ -41,6 +41,7 @@ export interface Field {
   default_field?: boolean;
   runtime?: boolean | string;
   subobjects?: boolean;
+  store?: boolean;
 
   // Fields specific of the aggregate_metric_double type
   metrics?: string[];
@@ -289,13 +290,25 @@ export const isFields = (path: string) => {
   return path.includes('/fields/');
 };
 
+export const filterForTransformAssets = (transformName: string) => {
+  return function isTransformAssets(path: string) {
+    return path.includes(`/transform/${transformName}`);
+  };
+};
+
+function combineFilter(...filters: Array<(path: string) => boolean>) {
+  return function filterAsset(path: string) {
+    return filters.every((filter) => filter(path));
+  };
+}
+
 /**
  * loadFieldsFromYaml
  *
  * Gets all field files, optionally filtered by dataset, extracts .yml files, merges them together
  */
 
-export const loadFieldsFromYaml = (
+export const loadDatastreamsFieldsFromYaml = (
   packageInstallContext: PackageInstallContext,
   datasetName?: string
 ): Field[] => {
@@ -305,6 +318,29 @@ export const loadFieldsFromYaml = (
     packageInstallContext.assetsMap,
     isFields,
     datasetName
+  );
+  return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
+    // Make sure it is defined as it is optional. Should never happen.
+    if (file.buffer) {
+      const tmpFields = safeLoad(file.buffer.toString());
+      // safeLoad() returns undefined for empty files, we don't want that
+      if (tmpFields) {
+        acc = acc.concat(tmpFields);
+      }
+    }
+    return acc;
+  }, []);
+};
+
+export const loadTransformFieldsFromYaml = (
+  packageInstallContext: PackageInstallContext,
+  transformName: string
+): Field[] => {
+  // Fetch all field definition files
+  const fieldDefinitionFiles = getAssetsDataFromAssetsMap(
+    packageInstallContext.packageInfo,
+    packageInstallContext.assetsMap,
+    combineFilter(isFields, filterForTransformAssets(transformName))
   );
   return fieldDefinitionFiles.reduce<Field[]>((acc, file) => {
     // Make sure it is defined as it is optional. Should never happen.

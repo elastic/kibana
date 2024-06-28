@@ -6,7 +6,9 @@ The editor accepts the following properties:
 - onTextLangQueryChange: callback that is called every time the query is updated
 - expandCodeEditor: flag that opens the editor on the expanded mode
 - errors: array of `Error`.
+- warning: A string for visualizing warnings
 - onTextLangQuerySubmit: callback that is called when the user submits the query
+- isLoading: As the editor is not responsible for the data fetching request, the consumer could update this property when the data are being fetched. If this property is defined, the query history component will be rendered
 ```
 
 To use it on your application, you need to add the textBasedLanguages to your requiredBundles and the @kbn/text-based-languages to your tsconfig.json and use the component like that:
@@ -32,3 +34,9 @@ textBasedLanguages: ['ESQL'],
 ```
 
 om the dataViewPickerProps property.
+
+It is also part of the:
+- Lens inline editing component
+- Maps new ES|QL layer
+- ML data visualizer
+- Alerts

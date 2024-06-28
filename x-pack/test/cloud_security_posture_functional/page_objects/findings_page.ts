@@ -106,7 +106,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const createNotInstalledObject = (notInstalledSubject: string) => ({
     getElement() {
-      return testSubjects.find(notInstalledSubject);
+      return testSubjects.find(notInstalledSubject, 15 * 1000);
     },
 
     async navigateToAction(actionTestSubject: string) {
@@ -134,9 +134,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getColumnIndex(columnName: string) {
       const element = await this.getElement();
-      const columnIndex = await (
+      const columnIndexAttr = await (
         await element.findByCssSelector(`[data-gridcell-column-id="${columnName}"]`)
       ).getAttribute('data-gridcell-column-index');
+      expect(columnIndexAttr).to.not.be(null);
+      const columnIndex = parseInt(columnIndexAttr ?? '-1', 10);
       expect(columnIndex).to.be.greaterThan(-1);
       return columnIndex;
     },
@@ -291,17 +293,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
   const misconfigurationsFlyout = createFlyoutObject('findings_flyout');
 
-  const toastMessage = async (testSubj = 'csp:toast-success') => ({
-    async getElement() {
-      return await testSubjects.find(testSubj);
-    },
-    async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
-      const element = await this.getElement();
-      const link = await element.findByTestSubject(linkTestSubj);
-      await link.click();
-    },
-  });
-
   const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {
       return await testSubjects.find(testSubj);
@@ -346,6 +337,10 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     return trueOrFalse;
   };
 
+  const getUnprivilegedPrompt = async () => {
+    return await testSubjects.find('status-api-unprivileged');
+  };
+
   return {
     navigateToLatestFindingsPage,
     navigateToLatestVulnerabilitiesPage,
@@ -360,11 +355,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     distributionBar,
     vulnerabilityDataGrid,
     misconfigurationsFlyout,
-    toastMessage,
     detectionRuleApi,
     groupSelector,
     findingsGrouping,
     createDataTableObject,
     isLatestFindingsTableThere,
+    getUnprivilegedPrompt,
   };
 }

@@ -1098,8 +1098,12 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-browser",
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
@@ -1112,6 +1116,18 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-api-server",
+            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
+          },
+          {
+            "plugin": "@kbn/core-saved-objects-browser-internal",
+            "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -2040,15 +2056,19 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
           },
           {
             "plugin": "lens",
@@ -2125,6 +2145,22 @@
           {
             "plugin": "lens",
             "path": "x-pack/plugins/lens/public/types.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/load_from_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/save_to_library.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/routes/map_page/saved_map/save_to_library.ts"
           },
           {
             "plugin": "graph",
@@ -2347,54 +2383,6 @@
             "path": "src/plugins/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
           },
           {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
-            "plugin": "controls",
-            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
-          },
-          {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
           },
@@ -2495,32 +2483,52 @@
             "path": "x-pack/plugins/lens/common/embeddable_factory/index.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/options_list/options_list_persistable_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/range_slider/range_slider_persistable_state.ts"
           },
           {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/map_attribute_service.ts"
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/time_slider/time_slider_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
           },
           {
             "plugin": "canvas",
@@ -2529,6 +2537,26 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/common/migrations/references.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/common/migrations/references.ts"
           },
           {
             "plugin": "canvas",

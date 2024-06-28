@@ -48,6 +48,10 @@
     "@kbn/usage-collection-plugin",
     "@kbn/react-field",
     "@kbn/code-editor",
+    "@kbn/esql-utils",
+    "@kbn/data-view-utils",
+    "@kbn/search-types",
+    "@kbn/alerting-comparators"
   ],
   "exclude": [
     "target/**/*",

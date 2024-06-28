@@ -12,14 +12,18 @@ import { AggConfigs, BucketAggParam, IAggConfig, IAggConfigs } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { metricOnly, threeTermBuckets } from './fixtures/fake_hierarchical_data';
 import { isSamplingEnabled } from '../aggs/utils/sampler';
+import { timeOffsetFiltersWithZeroDocCountResponse } from './fixtures/fake_timeoffset_data';
 
 describe('tabifyAggResponse Integration', () => {
   const typesRegistry = mockAggTypesRegistry();
 
   for (const probability of [1, 0.5, undefined]) {
     function getTitlePostfix() {
-      if (!isSamplingEnabled(probability)) {
+      if (probability == null) {
         return '';
+      }
+      if (probability === 1) {
+        return ` - with no sampling (probability = 1)`;
       }
       return ` - with sampling (probability = ${probability})`;
     }
@@ -241,6 +245,21 @@ describe('tabifyAggResponse Integration', () => {
             expectAvgBytes,
           ]);
         });
+      });
+    });
+
+    describe(`edge cases${getTitlePostfix()}`, () => {
+      test('it should correctly report zero doc count for unshifted bucket', () => {
+        const aggConfigs = createAggConfigs([
+          mockAggConfig({ type: 'count', schema: 'metric' }),
+          mockAggConfig({ type: 'count', schema: 'metric', params: { timeShift: '1d' } }),
+        ]);
+
+        // no need to wrap with sampling as count is not affected by it
+        const tabbed = tabifyAggResponse(aggConfigs, timeOffsetFiltersWithZeroDocCountResponse, {
+          metricsAtAllLevels: false,
+        });
+        expect(tabbed.rows[0]).toEqual({ 'col-0-1': 0, 'col-1-2': 234 });
       });
     });
   }

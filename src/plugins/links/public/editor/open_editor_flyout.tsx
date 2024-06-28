@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import { skip, take } from 'rxjs/operators';
+import { skip, take } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
 

@@ -8,7 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
+import type { PivotGroupByConfig } from '../../../../common';
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';
 
 import { GroupByLabelForm } from './group_by_label_form';
 

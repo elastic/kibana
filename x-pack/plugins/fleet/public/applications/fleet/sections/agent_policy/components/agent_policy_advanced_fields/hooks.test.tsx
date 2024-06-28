@@ -11,7 +11,7 @@ import { useLicense } from '../../../../../../hooks/use_license';
 import type { LicenseService } from '../../../../services';
 import type { AgentPolicy } from '../../../../types';
 
-import { useOutputOptions } from './hooks';
+import { useOutputOptions, useFleetServerHostsOptions } from './hooks';
 
 jest.mock('../../../../../../hooks/use_license');
 
@@ -153,6 +153,35 @@ const mockApiCallsWithInternalOutputs = (http: MockedFleetStartServices['http'])
   });
 };
 
+const mockApiCallsWithInternalFleetServerHost = (http: MockedFleetStartServices['http']) => {
+  http.get.mockImplementation(async (path) => {
+    if (typeof path !== 'string') {
+      throw new Error('Invalid request');
+    }
+    if (path === '/api/fleet/fleet_server_hosts') {
+      return {
+        data: {
+          items: [
+            {
+              id: 'default-host',
+              name: 'Default',
+              is_default: true,
+            },
+            {
+              id: 'internal-output',
+              name: 'Internal',
+              is_default: false,
+              is_internal: true,
+            },
+          ],
+        },
+      };
+    }
+
+    return defaultHttpClientGetImplementation(path);
+  });
+};
+
 describe('useOutputOptions', () => {
   it('should generate enabled options if the licence is platinium', async () => {
     const testRenderer = createFleetTestRendererMock();
@@ -187,7 +216,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -214,7 +243,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -241,7 +270,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -315,7 +344,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -342,7 +371,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -369,7 +398,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -498,7 +527,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisableOutputTypeText"
                 values={
@@ -530,7 +559,7 @@ describe('useOutputOptions', () => {
             <EuiText
               size="s"
             >
-              <FormattedMessage
+              <Memo(MemoizedFormattedMessage)
                 defaultMessage="{outputType} output for agent integration is not supported for Fleet Server, Synthetics or APM."
                 id="xpack.fleet.agentPolicyForm.outputOptionDisabledTypeNotSupportedText"
                 values={
@@ -626,6 +655,33 @@ describe('useOutputOptions', () => {
           "disabled": false,
           "inputDisplay": "Default",
           "value": "default-output",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Internal",
+          "value": "internal-output",
+        },
+      ]
+    `);
+  });
+});
+
+describe('useFleetServerHostsOptions', () => {
+  it('should not enable internal fleet server hosts', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockApiCallsWithInternalFleetServerHost(testRenderer.startServices.http);
+    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+      useFleetServerHostsOptions({} as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+
+    await waitForNextUpdate();
+    expect(result.current.fleetServerHostsOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": undefined,
+          "inputDisplay": "Default (currently Default)",
+          "value": "@@##DEFAULT_SELECT##@@",
         },
         Object {
           "disabled": true,

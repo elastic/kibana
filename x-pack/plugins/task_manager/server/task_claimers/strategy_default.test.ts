@@ -7,9 +7,9 @@
 
 import _ from 'lodash';
 import { v1 as uuidv1, v4 as uuidv4 } from 'uuid';
-import { filter, take, toArray } from 'rxjs/operators';
+import { filter, take, toArray } from 'rxjs';
 
-import { TaskStatus, ConcreteTaskInstance } from '../task';
+import { TaskStatus, ConcreteTaskInstance, TaskPriority } from '../task';
 import { SearchOpts, StoreOpts, UpdateByQueryOpts, UpdateByQuerySearchOpts } from '../task_store';
 import { asTaskClaimEvent, TaskEvent } from '../task_events';
 import { asOk, isOk, unwrap } from '../lib/result_type';
@@ -105,7 +105,7 @@ describe('TaskClaiming', () => {
       store.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
 
       if (hits.length === 1) {
-        store.fetch.mockResolvedValue({ docs: hits[0] });
+        store.fetch.mockResolvedValue({ docs: hits[0], versionMap: new Map() });
         store.updateByQuery.mockResolvedValue({
           updated: hits[0].length,
           version_conflicts: versionConflicts,
@@ -113,7 +113,7 @@ describe('TaskClaiming', () => {
         });
       } else {
         for (const docs of hits) {
-          store.fetch.mockResolvedValueOnce({ docs });
+          store.fetch.mockResolvedValueOnce({ docs, versionMap: new Map() });
           store.updateByQuery.mockResolvedValueOnce({
             updated: docs.length,
             version_conflicts: versionConflicts,
@@ -255,6 +255,7 @@ describe('TaskClaiming', () => {
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
+          priority: TaskPriority.Low,
           createTaskRunner: jest.fn(),
         },
         bar: {
@@ -351,6 +352,28 @@ describe('TaskClaiming', () => {
         },
       });
       expect(sort).toMatchObject([
+        {
+          _script: {
+            type: 'number',
+            order: 'desc',
+            script: {
+              lang: 'painless',
+              params: {
+                priority_map: {
+                  foo: 1,
+                },
+              },
+              source: `
+          String taskType = doc['task.taskType'].value;
+          if (params.priority_map.containsKey(taskType)) {
+            return params.priority_map[taskType];
+          } else {
+            return 50;
+          }
+        `,
+            },
+          },
+        },
         {
           _script: {
             type: 'number',
@@ -1204,7 +1227,7 @@ if (doc['task.runAt'].size()!=0) {
       const taskStore = taskStoreMock.create({ taskManagerId });
       taskStore.convertToSavedObjectIds.mockImplementation((ids) => ids.map((id) => `task:${id}`));
       for (const docs of taskCycles) {
-        taskStore.fetch.mockResolvedValueOnce({ docs });
+        taskStore.fetch.mockResolvedValueOnce({ docs, versionMap: new Map() });
         taskStore.updateByQuery.mockResolvedValueOnce({
           updated: docs.length,
           version_conflicts: 0,
@@ -1212,7 +1235,7 @@ if (doc['task.runAt'].size()!=0) {
         });
       }
 
-      taskStore.fetch.mockResolvedValue({ docs: [] });
+      taskStore.fetch.mockResolvedValue({ docs: [], versionMap: new Map() });
       taskStore.updateByQuery.mockResolvedValue({
         updated: 0,
         version_conflicts: 0,

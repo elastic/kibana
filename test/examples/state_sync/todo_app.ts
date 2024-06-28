@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('links are rendered correctly and state is preserved in links', async () => {
         const getHrefByLinkTestSubj = async (linkTestSubj: string) =>
-          (await testSubjects.find(linkTestSubj)).getAttribute('href');
+          (await (await testSubjects.find(linkTestSubj)).getAttribute('href')) ?? '';
 
         await expectPathname(await getHrefByLinkTestSubj('filterLinkCompleted'), '/completed');
         await expectPathname(
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       it('Links are rendered correctly and state is preserved in links', async () => {
         const getHrefByLinkTestSubj = async (linkTestSubj: string) =>
-          (await testSubjects.find(linkTestSubj)).getAttribute('href');
+          (await (await testSubjects.find(linkTestSubj)).getAttribute('href')) ?? '';
         await expectHashPathname(await getHrefByLinkTestSubj('filterLinkCompleted'), '/completed');
         await expectHashPathname(
           await getHrefByLinkTestSubj('filterLinkNotCompleted'),

@@ -32,6 +32,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/field-utils",
     "@kbn/calculate-width-from-char-count",
-    "@kbn/visualization-utils"
+    "@kbn/visualization-utils",
+    "@kbn/shared-ux-button-toolbar"
   ],
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsFlat, EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
@@ -39,12 +39,13 @@ import {
   getSameFamilyFields,
 } from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
-import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
+import type { IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
 import { useDataQualityContext } from '../data_quality_context';
-import { getSizeInBytes, postResult } from '../../helpers';
+import { formatStorageResult, postStorageResult, getSizeInBytes } from '../../helpers';
+import { EcsFlatTyped } from '../../constants';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -109,7 +110,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   const requestItems = useMemo(
     () =>
       getUnallowedValueRequestItems({
-        ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
+        ecsMetadata: EcsFlatTyped,
         indexName,
       }),
     [indexName]
@@ -134,7 +135,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   const partitionedFieldMetadata: PartitionedFieldMetadata | null = useMemo(
     () =>
       getSortedPartitionedFieldMetadata({
-        ecsMetadata: EcsFlat as unknown as Record<string, EcsMetadata>,
+        ecsMetadata: EcsFlatTyped,
         loadingMappings,
         mappingsProperties,
         unallowedValues,
@@ -249,6 +250,8 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               })
             : EMPTY_MARKDOWN_COMMENTS;
 
+        const checkedAt = partitionedFieldMetadata ? Date.now() : undefined;
+
         const updatedRollup = {
           ...patternRollup,
           results: {
@@ -262,13 +265,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               markdownComments,
               pattern,
               sameFamily: indexSameFamily,
+              checkedAt,
             },
           },
         };
         updatePatternRollup(updatedRollup);
 
-        if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
-          const checkMetadata = {
+        if (indexName && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
+          const report = {
             batchId: uuidv4(),
             ecsVersion: EcsVersion,
             errorCount: error ? 1 : 0,
@@ -294,10 +298,13 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               partitionedFieldMetadata.incompatible
             ),
           };
-          telemetryEvents.reportDataQualityIndexChecked?.(checkMetadata);
+          telemetryEvents.reportDataQualityIndexChecked?.(report);
 
-          const result = { meta: checkMetadata, rollup: updatedRollup };
-          postResult({ result, httpFetch, toasts, abortController: new AbortController() });
+          const result = updatedRollup.results[indexName];
+          if (result) {
+            const storageResult = formatStorageResult({ result, report, partitionedFieldMetadata });
+            postStorageResult({ storageResult, httpFetch, toasts });
+          }
         }
       }
     }

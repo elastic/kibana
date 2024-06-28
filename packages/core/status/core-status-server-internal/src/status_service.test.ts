@@ -10,7 +10,7 @@ import { of, BehaviorSubject, firstValueFrom, Observable } from 'rxjs';
 
 import { type ServiceStatus, ServiceStatusLevels, type CoreStatus } from '@kbn/core-status-common';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
-import { first, take, toArray } from 'rxjs/operators';
+import { first, take, toArray } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';

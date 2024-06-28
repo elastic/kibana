@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { INVESTIGATION_TAB_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/test_ids';
-import { INVESTIGATION_TAB_CONTENT_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
-export const DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB =
-  getDataTestSubjectSelector(INVESTIGATION_TAB_TEST_ID);
+export const DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB = getDataTestSubjectSelector(
+  'securitySolutionFlyoutInvestigationTab'
+);
 export const DOCUMENT_DETAILS_FLYOUT_INVESTIGATION_TAB_CONTENT = getDataTestSubjectSelector(
-  INVESTIGATION_TAB_CONTENT_TEST_ID
+  'securitySolutionFlyoutInvestigationsTabContent'
 );

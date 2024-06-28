@@ -6,7 +6,7 @@
  */
 
 import type { MutableRefObject } from 'react';
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -19,13 +19,11 @@ import type { Refetch } from '../../store/inputs/model';
 interface UseRefetchByRestartingSessionProps {
   inputId?: InputsModelId;
   queryId: string;
-  skip?: boolean;
 }
 
 export const useRefetchByRestartingSession = ({
   inputId,
   queryId,
-  skip,
 }: UseRefetchByRestartingSessionProps): {
   session: MutableRefObject<ISessionService>;
   refetchByRestartingSession: Refetch;
@@ -36,8 +34,8 @@ export const useRefetchByRestartingSession = ({
 
   const session = useRef(data.search.session);
 
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
+  const getGlobalQuery = useMemo(() => inputsSelectors.globalQueryByIdSelector(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
   const { selectedInspectIndex } = useDeepEqualSelector((state) =>
     inputId === InputsModelId.global
       ? getGlobalQuery(state, queryId)
@@ -56,10 +54,10 @@ export const useRefetchByRestartingSession = ({
          * like most of our components, it refetches when receiving a new search
          * session ID.
          **/
-        searchSessionId: skip ? undefined : searchSessionId,
+        searchSessionId,
       })
     );
-  }, [dispatch, queryId, selectedInspectIndex, skip]);
+  }, [dispatch, queryId, selectedInspectIndex]);
 
   /**
    * This is for refetching alert index when the first rule just created

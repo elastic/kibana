@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     // https://github.com/elastic/kibana/issues/144953
     it.skip('a11y test on save rule without connectors panel', async () => {
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await testSubjects.click('saveRuleButton');
       await a11y.testAppSnapshot();
     });

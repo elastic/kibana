@@ -47,6 +47,25 @@ const ManagedPipelineCallout = () => (
   </EuiCallOut>
 );
 
+const DeprecatedPipelineCallout = () => (
+  <EuiCallOut
+    color="warning"
+    iconType="warning"
+    data-test-subj="deprecatedPipelineCallout"
+    title={
+      <FormattedMessage
+        id="xpack.ingestPipelines.edit.deprecatedCalloutTitle"
+        defaultMessage="This pipeline is deprecated"
+      />
+    }
+  >
+    <FormattedMessage
+      id="xpack.ingestPipelines.edit.deprecatedCalloutDescription"
+      defaultMessage="This pipeline is no longer supported and might be removed in a future release. Instead, use one of the other pipelines available or create a new one."
+    />
+  </EuiCallOut>
+);
+
 export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
     params: { name },
@@ -112,7 +131,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           <h2>
             <FormattedMessage
               id="xpack.ingestPipelines.edit.fetchPipelineError"
-              defaultMessage="Unable to load '{name}'"
+              defaultMessage="Unable to load ''{name}''"
               values={{ name: decodedPipelineName }}
             />
           </h2>
@@ -138,7 +157,7 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           <span data-test-subj="pageTitle">
             <FormattedMessage
               id="xpack.ingestPipelines.edit.pageTitle"
-              defaultMessage="Edit pipeline '{name}'"
+              defaultMessage="Edit pipeline ''{name}''"
               values={{ name: decodedPipelineName }}
             />
           </span>
@@ -167,6 +186,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           <EuiSpacer size="l" />
         </>
       )}
+      {pipeline?.deprecated && (
+        <>
+          <DeprecatedPipelineCallout />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <PipelineForm
         onSave={onSave}
@@ -176,6 +201,9 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
         defaultValue={pipeline as Pipeline}
         isEditing={true}
       />
+      {services.consolePlugin?.EmbeddableConsole ? (
+        <services.consolePlugin.EmbeddableConsole />
+      ) : null}
     </>
   );
 };

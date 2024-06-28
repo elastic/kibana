@@ -8,7 +8,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { skip, take } from 'rxjs/operators';
+import { skip, take } from 'rxjs';
 import { Embeddable } from './embeddable';
 import { EmbeddableOutput, EmbeddableInput } from './i_embeddable';
 import { ViewMode } from '../types';
@@ -118,7 +118,7 @@ test('updating output state retains instance information', async () => {
 test('fires phase events when output changes', async () => {
   const phaseEventTest = new PhaseTestEmbeddable();
   let phaseEventCount = 0;
-  phaseEventTest.onPhaseChange.subscribe((event) => {
+  phaseEventTest.phase$.subscribe((event) => {
     if (event) {
       phaseEventCount++;
     }

@@ -17,37 +17,26 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 
 jest.mock('../../lib/kibana/kibana_react');
 
-const mockedUseKibana = mockUseKibana();
-const mockGetUseCasesAddToNewCaseFlyout = jest.fn();
-const mockCanUseCases = jest.fn();
-
-jest.mock('../../lib/kibana', () => {
-  const original = jest.requireActual('../../lib/kibana');
-
-  return {
-    ...original,
-    useKibana: () => ({
-      ...mockedUseKibana,
-      services: {
-        ...mockedUseKibana.services,
-        cases: {
-          hooks: {
-            useCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
-          },
-          helpers: { canUseCases: mockCanUseCases },
-        },
-      },
-    }),
-  };
-});
+jest.mock('../../lib/kibana');
 
 describe('useAddToNewCase', () => {
+  const mockedUseKibana = mockUseKibana();
+  const mockCanUseCases = jest.fn();
+  const mockGetUseCasesAddToNewCaseFlyout = jest.fn().mockReturnValue({
+    open: jest.fn(),
+    close: jest.fn(),
+  });
+
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
     to: '2022-03-07T15:59:59.999Z',
   };
+
   beforeEach(() => {
     mockCanUseCases.mockReturnValue(allCasesPermissions());
+    mockedUseKibana.services.cases.hooks.useCasesAddToNewCaseFlyout =
+      mockGetUseCasesAddToNewCaseFlyout;
+    mockedUseKibana.services.cases.helpers.canUseCases = mockCanUseCases;
   });
 
   it('useCasesAddToNewCaseFlyout with attachments', () => {

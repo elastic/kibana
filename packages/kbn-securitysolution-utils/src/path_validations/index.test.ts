@@ -11,9 +11,10 @@ import {
   hasSimpleExecutableName,
   OperatingSystem,
   ConditionEntryField,
+  validateWildcardInput,
+  validateHasWildcardWithWrongOperator,
   validatePotentialWildcardInput,
   validateFilePathInput,
-  validateWildcardInput,
   WILDCARD_WARNING,
   FILEPATH_WARNING,
 } from '.';
@@ -125,6 +126,29 @@ describe('validateFilePathInput', () => {
       expect(validateFilePathInput({ os, value: 'w12efdfa' })).toEqual(FILEPATH_WARNING);
       expect(validateFilePathInput({ os, value: '/folder/' })).toEqual(FILEPATH_WARNING);
     });
+  });
+});
+
+describe('Wildcard and invalid operator', () => {
+  it('should return TRUE when operator is not "WILDCARD" and value contains a wildcard', () => {
+    expect(validateHasWildcardWithWrongOperator({ operator: 'match', value: 'asdf*' })).toEqual(
+      true
+    );
+  });
+  it('should return FALSE when operator is not "WILDCARD" and value does not contain a wildcard', () => {
+    expect(validateHasWildcardWithWrongOperator({ operator: 'match', value: 'asdf' })).toEqual(
+      false
+    );
+  });
+  it('should return FALSE when operator is "WILDCARD" and value contains a wildcard', () => {
+    expect(validateHasWildcardWithWrongOperator({ operator: 'wildcard', value: 'asdf*' })).toEqual(
+      false
+    );
+  });
+  it('should return FALSE when operator is "WILDCARD" and value does not contain a wildcard', () => {
+    expect(validateHasWildcardWithWrongOperator({ operator: 'wildcard', value: 'asdf' })).toEqual(
+      false
+    );
   });
 });
 

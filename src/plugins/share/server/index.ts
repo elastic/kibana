@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { ConfigSchema, configSchema } from '../common/config';
 
 export type {
   SharePublicSetup as SharePluginSetup,
@@ -19,3 +20,10 @@ export async function plugin(initializerContext: PluginInitializerContext) {
   const { SharePlugin } = await import('./plugin');
   return new SharePlugin(initializerContext);
 }
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    new_version: { enabled: true },
+  },
+  schema: configSchema,
+};

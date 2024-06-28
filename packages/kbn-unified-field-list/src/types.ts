@@ -15,6 +15,7 @@ export interface BucketedAggregation<KeyType = string> {
     key: KeyType;
     count: number;
   }>;
+  areExamples?: boolean; // whether `topValues` holds examples in buckets rather than top values
 }
 
 export interface NumberSummary {
@@ -58,6 +59,7 @@ export enum FieldsGroupNames {
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
+  SmartFields = 'SmartFields',
 }
 
 export interface FieldsGroupDetails {
@@ -81,6 +83,11 @@ export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails
 export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
+
+export interface AdditionalFieldGroups<T extends FieldListItem = FieldListItem> {
+  smartFields?: FieldsGroup<T>['fields'];
+  fallbackFields?: Record<string, string[]>;
+}
 
 export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;
 

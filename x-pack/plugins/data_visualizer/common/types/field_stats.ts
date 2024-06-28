@@ -7,10 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Query } from '@kbn/es-query';
-import type { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { TimeBucketsInterval } from '../services/time_buckets';
+import type { TimeBucketsInterval } from '@kbn/ml-time-buckets';
 
 export interface RandomSamplingOption {
   mode: 'random_sampling';
@@ -72,26 +72,35 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
   return isPopulatedObject(arg, ['rawResponse']);
 };
 
-export interface NumericFieldStats {
+export interface NonSampledNumericFieldStats {
   fieldName: string;
   count?: number;
   min?: number;
   max?: number;
   avg?: number;
+  median?: number;
+  distribution?: Distribution;
+}
+
+export interface NumericFieldStats extends NonSampledNumericFieldStats {
   isTopValuesSampled: boolean;
   topValues: Bucket[];
   topValuesSampleSize: number;
   topValuesSamplerShardSize: number;
-  median?: number;
-  distribution?: Distribution;
 }
 
 export interface StringFieldStats {
   fieldName: string;
   isTopValuesSampled: boolean;
   topValues: Bucket[];
-  topValuesSampleSize: number;
-  topValuesSamplerShardSize: number;
+  sampledValues?: Bucket[];
+  topValuesSampleSize?: number;
+  topValuesSamplerShardSize?: number;
+  /**
+   * Approximate: true for when the terms are from a random subset of the source data
+   * such that result/count for each term is not deterministic every time
+   */
+  approximate?: boolean;
 }
 
 export interface DateFieldStats {
@@ -178,6 +187,7 @@ export type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
 export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
 
 export type BatchStats =
+  | NonSampledNumericFieldStats
   | NumericFieldStats
   | StringFieldStats
   | BooleanFieldStats
@@ -186,6 +196,7 @@ export type BatchStats =
   | FieldExamples;
 
 export type FieldStats =
+  | NonSampledNumericFieldStats
   | NumericFieldStats
   | StringFieldStats
   | BooleanFieldStats
@@ -199,7 +210,6 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 
 export interface FieldStatsCommonRequestParams {
   index: string;
-  samplerShardSize: number;
   timeFieldName?: string;
   earliestMs?: number | undefined;
   latestMs?: number | undefined;
@@ -222,7 +232,6 @@ export interface OverallStatsSearchStrategyParams {
   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
   searchQuery: Query['query'];
-  samplerShardSize: number;
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;

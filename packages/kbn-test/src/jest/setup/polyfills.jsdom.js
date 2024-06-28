@@ -32,3 +32,42 @@ global.Blob = require('blob-polyfill').Blob;
 if (!global.hasOwnProperty('ResizeObserver')) {
   global.ResizeObserver = require('resize-observer-polyfill');
 }
+
+if (!global.hasOwnProperty('Worker')) {
+  class Worker {
+    constructor(stringUrl) {
+      this.url = stringUrl;
+      this.onmessage = () => {};
+    }
+
+    postMessage(msg) {
+      this.onmessage(msg);
+    }
+  }
+
+  global.Worker = Worker;
+
+  // Mocking matchMedia to resolve TypeError: window.matchMedia is not a function
+  // For more info, see https://jestjs.io/docs/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
+  if (!global.hasOwnProperty('matchMedia')) {
+    Object.defineProperty(global, 'matchMedia', {
+      writable: true,
+      // eslint-disable-next-line no-undef
+      value: jest.fn().mockImplementation((query) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        // eslint-disable-next-line no-undef
+        addListener: jest.fn(), // deprecated
+        // eslint-disable-next-line no-undef
+        removeListener: jest.fn(), // deprecated
+        // eslint-disable-next-line no-undef
+        addEventListener: jest.fn(),
+        // eslint-disable-next-line no-undef
+        removeEventListener: jest.fn(),
+        // eslint-disable-next-line no-undef
+        dispatchEvent: jest.fn(),
+      })),
+    });
+  }
+}

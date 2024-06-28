@@ -8,7 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { DeleteActionName, DeleteActionNameProps } from './delete_action_name';
+import type { DeleteActionNameProps } from './delete_action_name';
+import { DeleteActionName } from './delete_action_name';
 
 jest.mock('../../../../../shared_imports');
 jest.mock('../../../../app_dependencies');

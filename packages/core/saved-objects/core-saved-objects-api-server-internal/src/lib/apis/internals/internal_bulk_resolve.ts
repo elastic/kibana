@@ -123,7 +123,7 @@ export async function internalBulkResolve<T>(
     });
     const aliasDoc = aliasDocs[i];
     if (aliasDoc?.found) {
-      const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source[LEGACY_URL_ALIAS_TYPE];
+      const legacyUrlAlias: LegacyUrlAlias = aliasDoc._source![LEGACY_URL_ALIAS_TYPE];
       if (!legacyUrlAlias.disabled) {
         docsToBulkGet.push({
           // also attempt to find a match for the legacy URL alias target ID

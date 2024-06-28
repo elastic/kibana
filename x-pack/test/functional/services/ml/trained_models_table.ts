@@ -582,6 +582,7 @@ export function TrainedModelsTableProvider(
       await mlCommonUI.assertLastToastHeader(
         `Deployment for "${modelId}" has been stopped successfully.`
       );
+      await mlCommonUI.waitForRefreshButtonEnabled();
     }
 
     public async openStartDeploymentModal(modelId: string) {
@@ -667,6 +668,12 @@ export function TrainedModelsTableProvider(
       await retry.tryForTime(5 * 1000, async () => {
         await testSubjects.clickWhenNotDisabled('analyzeDataDriftWithoutSavingButton');
         await testSubjects.existOrFail('mlDataDriftTable');
+      });
+    }
+
+    public async assertSpaceAwareWarningMessage(): Promise<void> {
+      await testSubjects.existOrFail('mlDeleteSpaceAwareItemCheckModalOverlay', {
+        timeout: 3_000,
       });
     }
   })();

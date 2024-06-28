@@ -31,7 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Infra pages', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {
@@ -97,8 +97,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('Should redirect to Node Details page', async () => {
-            await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
             await pageObjects.infraHome.goToPods();
+            await pageObjects.infraHome.goToTime(DATE_WITH_POD_WITH_DATA);
             await pageObjects.infraHome.clickOnFirstNode();
             await pageObjects.infraHome.clickOnGoToNodeDetails();
 

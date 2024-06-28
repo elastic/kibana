@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiSearchBar,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  SearchFilterConfig,
-  EuiSearchBarProps,
-  Query,
-} from '@elastic/eui';
+import type { SearchFilterConfig, EuiSearchBarProps, Query } from '@elastic/eui';
+import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { JobGroup } from '../job_group';

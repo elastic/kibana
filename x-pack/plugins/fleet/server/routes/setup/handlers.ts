@@ -12,16 +12,19 @@ import { hasFleetServers } from '../../services/fleet_server';
 import { defaultFleetErrorHandler } from '../../errors';
 import type { FleetRequestHandler } from '../../types';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
+import { isSecretStorageEnabled } from '../../services/secrets';
 
 export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
+  const coreContext = await context.core;
+
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const soClient = appContextService.getInternalUserSOClientWithoutSpaceExtension();
+
   try {
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const coreContext = await context.core;
-    const isFleetServerMissing = !(await hasFleetServers(
-      coreContext.elasticsearch.client.asInternalUser
-    ));
+    const isFleetServerMissing = !(await hasFleetServers(esClient, soClient));
 
     const isFleetServerStandalone =
       appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
@@ -40,10 +43,13 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
       missingOptionalFeatures.push('encrypted_saved_object_encryption_key_required');
     }
 
+    const useSecretsStorage = await isSecretStorageEnabled(esClient, soClient);
+
     const body: GetFleetStatusResponse = {
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
       missing_optional_features: missingOptionalFeatures,
+      is_secrets_storage_enabled: useSecretsStorage,
     };
 
     const packageVerificationKeyId = await getGpgKeyIdOrUndefined();

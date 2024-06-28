@@ -28,8 +28,8 @@ const MarkdownVisComponent = ({
     <div className="mkdVis" style={{ fontSize: `${fontSize}pt` }}>
       <Markdown
         data-test-subj="markdownBody"
-        markdown={markdown}
         openLinksInNewTab={openLinksInNewTab}
+        markdown={markdown}
       />
     </div>
   );

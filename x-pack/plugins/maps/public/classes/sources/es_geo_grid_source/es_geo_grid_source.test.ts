@@ -37,7 +37,11 @@ export class MockSearchSource {
   setField = jest.fn();
   setParent() {}
   getSearchRequestBody() {
-    return { scripted_fields: 'shouldNotGetAddedToTileUrl', fields: this.setField.mock.calls };
+    return {
+      aggs: {},
+      scripted_fields: 'shouldNotGetAddedToTileUrl',
+      fields: this.setField.mock.calls,
+    };
   }
 }
 
@@ -330,8 +334,7 @@ describe('ESGeoGridSource', () => {
         hasLabels: 'false',
         index: 'foo-*',
         renderAs: 'heatmap',
-        requestBody:
-          "(fields:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':()),'7':('0':filter,'1':!((meta:(),query:(exists:(field:bar)))))))",
+        requestBody: '(aggs:())',
         token: '1234',
       });
     });

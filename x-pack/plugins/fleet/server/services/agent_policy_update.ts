@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { unenrollForAgentPolicyId } from './agents';
@@ -29,22 +29,26 @@ const fakeRequest = {
 } as unknown as KibanaRequest;
 
 export async function agentPolicyUpdateEventHandler(
-  soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   action: string,
-  agentPolicyId: string
+  agentPolicyId: string,
+  options?: { skipDeploy?: boolean; spaceId?: string }
 ) {
   // `soClient` from ingest `appContextService` is used to create policy change actions
   // to ensure encrypted SOs are handled correctly
-  const internalSoClient = appContextService.getInternalUserSOClient(fakeRequest);
+  const internalSoClient = options?.spaceId
+    ? appContextService.getInternalUserSOClientForSpaceId(options?.spaceId)
+    : appContextService.getInternalUserSOClient(fakeRequest);
 
   if (action === 'created') {
-    await generateEnrollmentAPIKey(soClient, esClient, {
+    await generateEnrollmentAPIKey(internalSoClient, esClient, {
       name: 'Default',
       agentPolicyId,
       forceRecreate: true,
     });
-    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+    if (!options?.skipDeploy) {
+      await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
+    }
   }
 
   if (action === 'updated') {
@@ -52,7 +56,7 @@ export async function agentPolicyUpdateEventHandler(
   }
 
   if (action === 'deleted') {
-    await unenrollForAgentPolicyId(soClient, esClient, agentPolicyId);
+    await unenrollForAgentPolicyId(internalSoClient, esClient, agentPolicyId);
     await deleteEnrollmentApiKeyForAgentPolicyId(esClient, agentPolicyId);
   }
 }

@@ -18,7 +18,6 @@ import { i18n } from '@kbn/i18n';
 import {
   ENTERPRISE_SEARCH_CONTENT_PLUGIN,
   ENTERPRISE_SEARCH_ELASTICSEARCH_URL,
-  INGESTION_METHOD_IDS,
 } from '../../../../../common/constants';
 
 import apiLogo from '../../../../assets/images/api_image.png';
@@ -31,7 +30,7 @@ import languageClientsLogo from '../../../../assets/images/search_language_clien
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
 import {
   NEW_API_PATH,
-  NEW_INDEX_METHOD_PATH,
+  NEW_CRAWLER_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../../enterprise_search_content/routes';
 import { HttpLogic } from '../../../shared/http/http_logic';
@@ -91,9 +90,7 @@ export const IngestionSelector: React.FC = () => {
                     'Discover, extract, and index searchable content from websites and knowledge bases.',
                 }
               )}
-              href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_METHOD_PATH, {
-                type: INGESTION_METHOD_IDS.CRAWLER,
-              })}
+              href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_CRAWLER_PATH)}
               isDisabled={crawlerDisabled}
               logo={crawlerLogo}
               title={i18n.translate('xpack.enterpriseSearch.ingestSelector.method.crawler', {

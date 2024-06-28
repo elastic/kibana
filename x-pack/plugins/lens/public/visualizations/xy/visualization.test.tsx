@@ -6,7 +6,7 @@
  */
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
-import { Position } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
 import {
   Operation,
   OperationDescriptor,
@@ -22,13 +22,9 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
-  XYPersistedState,
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
@@ -57,6 +53,13 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import {
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedState,
+} from './persistence';
+import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -221,7 +224,24 @@ describe('xy_visualization', () => {
           "layers": Array [
             Object {
               "accessors": Array [],
-              "colorMapping": undefined,
+              "colorMapping": Object {
+                "assignments": Array [],
+                "colorMode": Object {
+                  "type": "categorical",
+                },
+                "paletteId": "eui_amsterdam_color_blind",
+                "specialAssignments": Array [
+                  Object {
+                    "color": Object {
+                      "type": "loop",
+                    },
+                    "rule": Object {
+                      "type": "other",
+                    },
+                    "touched": false,
+                  },
+                ],
+              },
               "layerId": "l1",
               "layerType": "data",
               "palette": undefined,
@@ -584,6 +604,53 @@ describe('xy_visualization', () => {
         )
       ).toHaveLength(1);
     });
+
+    describe('transforming to legend stats', () => {
+      it('loads a xy chart with `legendStats` property', () => {
+        const persistedState: XYPersistedState = {
+          ...exampleState(),
+          legend: {
+            ...exampleState().legend,
+            legendStats: [LegendValue.CurrentAndLastValue],
+          },
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+      it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: false,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual([]);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with `valuesInLegend` property equal to true and transforms to legendStats: [`values`]', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: true,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with deprecated undefined `valuesInLegend` and transforms to legendStats: [`values`]', () => {
+        const transformedState = xyVisualization.initialize(() => 'first', exampleState());
+
+        expect(transformedState.legend.legendStats).toEqual(undefined);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+    });
   });
 
   describe('#removeLayer', () => {
@@ -687,7 +754,7 @@ describe('xy_visualization', () => {
       let frame: ReturnType<typeof createMockFramePublicAPI>;
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
@@ -756,7 +823,7 @@ describe('xy_visualization', () => {
           indexPatterns: { indexPattern1: createMockedIndexPattern() },
         }),
       });
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -778,6 +845,7 @@ describe('xy_visualization', () => {
           },
         },
         dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+        absDateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -1566,7 +1634,7 @@ describe('xy_visualization', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -1666,7 +1734,7 @@ describe('xy_visualization', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -2334,7 +2402,7 @@ describe('xy_visualization', () => {
     describe('annotations', () => {
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
@@ -2578,7 +2646,7 @@ describe('xy_visualization', () => {
 
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
           dataType: 'string',
@@ -2765,6 +2833,48 @@ describe('xy_visualization', () => {
           {
             shortMessage: 'Missing Vertical axis.',
             longMessage: 'Layers 2, 3 require a field for the Vertical axis.',
+          },
+        ]);
+      });
+      it('should return an error with batched messages for the same error with the correct index for multiple layers', () => {
+        expect(
+          getErrorMessages(xyVisualization, {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'referenceLine',
+                layerType: layerTypes.REFERENCELINE,
+                accessors: [],
+              },
+              {
+                layerId: 'first',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'second',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'third',
+                layerType: layerTypes.DATA,
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          })
+        ).toEqual([
+          {
+            shortMessage: 'Missing Vertical axis.',
+            longMessage: 'Layers 3, 4 require a field for the Vertical axis.',
           },
         ]);
       });
@@ -2977,7 +3087,7 @@ describe('xy_visualization', () => {
         }
 
         function getFrameMock() {
-          const datasourceMock = createMockDatasource('testDatasource');
+          const datasourceMock = createMockDatasource();
           datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
             id === DATE_HISTORGRAM_COLUMN_ID
               ? ({
@@ -3033,6 +3143,7 @@ describe('xy_visualization', () => {
                 "longMessage": "",
                 "severity": "error",
                 "shortMessage": "Annotations require a time based chart to work. Add a date histogram.",
+                "uniqueId": "annotation_missing_date_histogram",
               },
             ]
           `);
@@ -3120,7 +3231,7 @@ describe('xy_visualization', () => {
 
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
           { columnId: 'd', fields: [] },
@@ -3184,7 +3295,7 @@ describe('xy_visualization', () => {
               },
             ],
             "fixableInEditor": true,
-            "longMessage": <FormattedMessage
+            "longMessage": <Memo(MemoizedFormattedMessage)
               defaultMessage="{label} contains array values. Your visualization may not render as expected."
               id="xpack.lens.xyVisualization.arrayValues"
               values={
@@ -3197,6 +3308,7 @@ describe('xy_visualization', () => {
             />,
             "severity": "warning",
             "shortMessage": "",
+            "uniqueId": "xy_rendering_values_array",
           }
         `);
       });
@@ -3232,7 +3344,7 @@ describe('xy_visualization', () => {
         } as XYState;
       }
       function getFrameMock() {
-        const datasourceMock = createMockDatasource('testDatasource');
+        const datasourceMock = createMockDatasource();
         datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
           id === DATE_HISTORGRAM_COLUMN_ID
             ? ({
@@ -3301,7 +3413,7 @@ describe('xy_visualization', () => {
             fixableInEditor: false,
             severity: 'info',
             shortMessage: 'Layers ignoring global filters',
-            uniqueId: 'ignoring-global-filters-layers',
+            uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
           })
         );
       });

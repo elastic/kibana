@@ -9,7 +9,7 @@
 import { merge } from 'lodash';
 import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
-import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
+import indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import { SearchStrategyDependencies } from '../../types';
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
 import { createSearchSessionsClientMock } from '../../mocks';
@@ -258,7 +258,7 @@ describe('SQL search strategy', () => {
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
-      expect(err?.errBody).toBe(indexNotFoundException);
+      expect(err?.errBody).toEqual(indexNotFoundException);
     });
 
     it('throws normalized error if Error is thrown', async () => {

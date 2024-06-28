@@ -216,7 +216,7 @@ export function MachineLearningCommonUIProvider({
       const slider = await testSubjects.find(testDataSubj);
 
       await retry.tryForTime(60 * 1000, async () => {
-        const currentValue = await slider.getAttribute('value');
+        const currentValue = (await slider.getAttribute('value')) ?? '';
         const currentDiff = +currentValue - +value;
 
         if (currentDiff === 0) {
@@ -389,15 +389,13 @@ export function MachineLearningCommonUIProvider({
 
     async assertLastToastHeader(expectedHeader: string, timeout: number = 5000) {
       await retry.tryForTime(timeout, async () => {
-        const resultToast = await toasts.getToastElement(1);
-        const titleElement = await testSubjects.findDescendant('euiToastHeader', resultToast);
-        const title: string = await titleElement.getVisibleText();
+        const title: string = await toasts.getTitleByIndex(1);
         expect(title).to.eql(
           expectedHeader,
           `Expected the toast header to equal "${expectedHeader}" (got "${title}")`
         );
       });
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
     },
 
     async ensureAllMenuPopoversClosed() {
@@ -439,6 +437,19 @@ export function MachineLearningCommonUIProvider({
           await testSubjects.click(`${rowSelector} > ${actionTestSubject}`);
         }
       });
+    },
+
+    async assertDatePickerDataTierOptionsVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonDataTierOptions';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
+    async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
+      await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
     },
   };
 }

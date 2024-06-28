@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { first } from 'rxjs/operators';
+import { first } from 'rxjs';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';

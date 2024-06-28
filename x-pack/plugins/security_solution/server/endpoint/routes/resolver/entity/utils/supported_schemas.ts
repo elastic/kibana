@@ -35,10 +35,18 @@ export const getSupportedSchemas = (
   experimentalFeatures: ExperimentalFeatures | undefined
 ): SupportedSchema[] => {
   const sentinelOneDataInAnalyzerEnabled = experimentalFeatures?.sentinelOneDataInAnalyzerEnabled;
+  const crowdstrikeDataInAnalyzerEnabled = experimentalFeatures?.crowdstrikeDataInAnalyzerEnabled;
+  const jamfDataInAnalyzerEnabled = experimentalFeatures?.jamfDataInAnalyzerEnabled;
 
   const supportedFileBeatDataSets = [
     ...(sentinelOneDataInAnalyzerEnabled
       ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
+      : []),
+    ...(crowdstrikeDataInAnalyzerEnabled
+      ? ['crowdstrike.falcon', 'crowdstrike.fdr', 'crowdstrike.alert']
+      : []),
+    ...(jamfDataInAnalyzerEnabled
+      ? ['jamf_protect.alerts', 'jamf_protect.web-threat-events', 'jamf_protect.web-traffic-events']
       : []),
   ];
 
@@ -56,6 +64,7 @@ export const getSupportedSchemas = (
         parent: 'process.parent.entity_id',
         ancestry: 'process.Ext.ancestry',
         name: 'process.name',
+        agentId: 'agent.id',
       },
     },
     {

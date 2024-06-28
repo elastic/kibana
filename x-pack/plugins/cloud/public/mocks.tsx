@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 
 import type { CloudSetup, CloudStart } from './types';
 
@@ -26,6 +26,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     isElasticStaffOwned: true,
     trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
+    onboarding: {},
     isServerlessEnabled: false,
     serverless: {
       projectId: undefined,
@@ -35,7 +36,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
   };
 }
 
-const getContextProvider: () => React.FC =
+const getContextProvider: () => FC<PropsWithChildren<unknown>> =
   () =>
   ({ children }) =>
     <>{children}</>;

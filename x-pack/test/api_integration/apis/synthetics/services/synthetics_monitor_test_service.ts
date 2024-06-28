@@ -160,4 +160,17 @@ export class SyntheticsMonitorTestService {
 
     return { username, password, SPACE_ID };
   }
+
+  async deleteMonitor(monitorId?: string | string[], statusCode = 200, spaceId?: string) {
+    const deleteResponse = await this.supertest
+      .delete(
+        spaceId
+          ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`
+          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
+      )
+      .send({ ids: Array.isArray(monitorId) ? monitorId : [monitorId] })
+      .set('kbn-xsrf', 'true');
+    expect(deleteResponse.status).to.eql(statusCode);
+    return deleteResponse;
+  }
 }

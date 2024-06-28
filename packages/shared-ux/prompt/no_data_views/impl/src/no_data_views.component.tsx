@@ -9,17 +9,13 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 import { DocumentationLink } from './documentation_link';
-
-const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewText', {
-  defaultMessage: 'Create data view',
-});
+import { NoDataButtonLink } from './actions';
 
 // Using raw value because it is content dependent
 const MAX_WIDTH = 830;
@@ -31,19 +27,10 @@ export const NoDataViewsPrompt = ({
   onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
+  onTryESQL,
+  esqlDocLink,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
-  const actions = canCreateNewDataView && (
-    <EuiButton
-      onClick={onClickCreate}
-      iconType="plusInCircle"
-      fill={true}
-      data-test-subj="createDataViewButton"
-    >
-      {createDataViewText}
-    </EuiButton>
-  );
-
   const title = canCreateNewDataView ? (
     <h2>
       <FormattedMessage
@@ -94,6 +81,9 @@ export const NoDataViewsPrompt = ({
   );
 
   const icon = <Illustration />;
+  const actions = (
+    <NoDataButtonLink {...{ onClickCreate, canCreateNewDataView, onTryESQL, esqlDocLink }} />
+  );
 
   return (
     <EuiEmptyPrompt

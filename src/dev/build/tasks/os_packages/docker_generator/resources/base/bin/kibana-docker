@@ -39,6 +39,7 @@ kibana_vars=(
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
+    csp.report_only.form_action
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     data.search.asyncSearch.waitForCompletion
@@ -116,6 +117,7 @@ kibana_vars=(
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.kibana.collection.enabled
     monitoring.kibana.collection.interval
+    monitoring.ui.ccs.enabled
     monitoring.ui.container.elasticsearch.enabled
     monitoring.ui.container.logstash.enabled
     monitoring.ui.elasticsearch.hosts
@@ -136,12 +138,14 @@ kibana_vars=(
     ops.interval
     path.data
     pid.file
+    profiler.signal
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
     savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
+    server.cdn.url
     server.compression.enabled
     server.compression.referrerWhitelist
     server.cors
@@ -152,11 +156,13 @@ kibana_vars=(
     server.customResponseHeaders
     server.defaultRoute
     server.host
+    server.http2.allowUnsecure
     server.keepAliveTimeout
     server.maxPayload
     server.maxPayloadBytes
     server.name
     server.port
+    server.protocol
     server.publicBaseUrl
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist
@@ -357,6 +363,7 @@ kibana_vars=(
     xpack.reporting.roles.allow
     xpack.reporting.roles.enabled
     xpack.ruleRegistry.write.enabled
+    xpack.screenshotting.browser.chromium.disableSandbox
     xpack.security.accessAgreement.message
     xpack.security.audit.appender.fileName
     xpack.security.audit.appender.layout.highlight

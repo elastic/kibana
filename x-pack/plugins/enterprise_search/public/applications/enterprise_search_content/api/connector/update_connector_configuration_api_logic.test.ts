@@ -24,14 +24,13 @@ describe('updateConnectorConfigurationLogic', () => {
       const result = postConnectorConfiguration({
         configuration,
         connectorId: 'anIndexId',
-        indexName: 'anIndexName',
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/connectors/anIndexId/configuration',
         { body: JSON.stringify(configuration) }
       );
-      await expect(result).resolves.toEqual({ configuration: 'result', indexName: 'anIndexName' });
+      await expect(result).resolves.toEqual({ configuration: 'result' });
     });
   });
 });

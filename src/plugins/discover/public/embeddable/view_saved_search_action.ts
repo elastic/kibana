@@ -6,23 +6,42 @@
  * Side Public License, v 1.
  */
 
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Action } from '@kbn/ui-actions-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import type { SavedSearchEmbeddable } from './saved_search_embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import {
+  apiCanAccessViewMode,
+  apiHasType,
+  apiIsOfType,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  HasType,
+} from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+
 import type { DiscoverAppLocator } from '../../common';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { apiHasSavedSearch, HasSavedSearch } from './types';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
-export interface ViewSearchContext {
-  embeddable: IEmbeddable;
-}
+type ViewSavedSearchActionApi = CanAccessViewMode & HasType & HasSavedSearch;
 
-export class ViewSavedSearchAction implements Action<ViewSearchContext> {
+const compatibilityCheck = (
+  api: EmbeddableApiContext['embeddable']
+): api is ViewSavedSearchActionApi => {
+  return (
+    apiCanAccessViewMode(api) &&
+    getInheritedViewMode(api) === ViewMode.VIEW &&
+    apiHasType(api) &&
+    apiIsOfType(api, SEARCH_EMBEDDABLE_TYPE) &&
+    apiHasSavedSearch(api)
+  );
+};
+
+export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   public id = ACTION_VIEW_SAVED_SEARCH;
   public readonly type = ACTION_VIEW_SAVED_SEARCH;
 
@@ -31,38 +50,29 @@ export class ViewSavedSearchAction implements Action<ViewSearchContext> {
     private readonly locator: DiscoverAppLocator
   ) {}
 
-  async execute(context: ActionExecutionContext<ViewSearchContext>): Promise<void> {
-    const embeddable = context.embeddable as SavedSearchEmbeddable;
-    const savedSearch = embeddable.getSavedSearch();
-    if (!savedSearch) {
+  async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
+    if (!compatibilityCheck(embeddable)) {
       return;
     }
-    const locatorParams = getDiscoverLocatorParams({
-      input: embeddable.getInput(),
-      savedSearch,
-    });
+
+    const locatorParams = getDiscoverLocatorParams(embeddable);
     await this.locator.navigate(locatorParams);
   }
 
-  getDisplayName(context: ActionExecutionContext<ViewSearchContext>): string {
+  getDisplayName(): string {
     return i18n.translate('discover.savedSearchEmbeddable.action.viewSavedSearch.displayName', {
       defaultMessage: 'Open in Discover',
     });
   }
 
-  getIconType(context: ActionExecutionContext<ViewSearchContext>): string | undefined {
+  getIconType(): string | undefined {
     return 'inspect';
   }
 
-  async isCompatible(context: ActionExecutionContext<ViewSearchContext>) {
-    const { embeddable } = context;
+  async isCompatible({ embeddable }: EmbeddableApiContext) {
     const { capabilities } = this.application;
     const hasDiscoverPermissions =
       (capabilities.discover.show as boolean) || (capabilities.discover.save as boolean);
-    return Boolean(
-      embeddable.type === SEARCH_EMBEDDABLE_TYPE &&
-        embeddable.getInput().viewMode === ViewMode.VIEW &&
-        hasDiscoverPermissions
-    );
+    return compatibilityCheck(embeddable) && hasDiscoverPermissions;
   }
 }

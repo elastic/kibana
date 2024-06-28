@@ -38,7 +38,7 @@ export const getMockPresentationPanelCompatibleComponent = <
 ): Promise<PanelCompatibleComponent> =>
   Promise.resolve(
     React.forwardRef((_, apiRef) => {
-      useImperativeHandle(apiRef, () => api ?? {});
+      useImperativeHandle(apiRef, () => api ?? { uuid: 'test' });
       return (
         <div data-test-subj="testPresentationPanelInternalComponent">This is a test component</div>
       );

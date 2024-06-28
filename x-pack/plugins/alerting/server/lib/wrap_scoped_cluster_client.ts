@@ -32,6 +32,7 @@ interface WrapScopedClusterClientFactoryOpts {
   rule: RuleInfo;
   logger: Logger;
   abortController: AbortController;
+  requestTimeout?: number;
 }
 
 type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
@@ -48,7 +49,14 @@ interface LogSearchMetricsOpts {
 }
 type LogSearchMetricsFn = (metrics: LogSearchMetricsOpts) => void;
 
-export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterClientFactoryOpts) {
+export interface WrappedScopedClusterClient {
+  client: () => IScopedClusterClient;
+  getMetrics: () => SearchMetrics;
+}
+
+export function createWrappedScopedClusterClientFactory(
+  opts: WrapScopedClusterClientFactoryOpts
+): WrappedScopedClusterClient {
   let numSearches: number = 0;
   let esSearchDurationMs: number = 0;
   let totalSearchDurationMs: number = 0;
@@ -73,18 +81,47 @@ export function createWrappedScopedClusterClientFactory(opts: WrapScopedClusterC
   };
 }
 
+class WrappedScopedClusterClientImpl implements IScopedClusterClient {
+  #asInternalUser?: ElasticsearchClient;
+  #asCurrentUser?: ElasticsearchClient;
+  #asSecondaryAuthUser?: ElasticsearchClient;
+
+  constructor(private readonly opts: WrapScopedClusterClientOpts) {}
+
+  public get asInternalUser() {
+    if (this.#asInternalUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asInternalUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asInternalUser,
+      });
+    }
+    return this.#asInternalUser;
+  }
+  public get asCurrentUser() {
+    if (this.#asCurrentUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asCurrentUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asCurrentUser,
+      });
+    }
+    return this.#asCurrentUser;
+  }
+  public get asSecondaryAuthUser() {
+    if (this.#asSecondaryAuthUser === undefined) {
+      const { scopedClusterClient, ...rest } = this.opts;
+      this.#asSecondaryAuthUser = wrapEsClient({
+        ...rest,
+        esClient: scopedClusterClient.asSecondaryAuthUser,
+      });
+    }
+    return this.#asSecondaryAuthUser;
+  }
+}
+
 function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClusterClient {
-  const { scopedClusterClient, ...rest } = opts;
-  return {
-    asInternalUser: wrapEsClient({
-      ...rest,
-      esClient: scopedClusterClient.asInternalUser,
-    }),
-    asCurrentUser: wrapEsClient({
-      ...rest,
-      esClient: scopedClusterClient.asCurrentUser,
-    }),
-  };
+  return new WrappedScopedClusterClientImpl(opts);
 }
 
 function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
@@ -105,6 +142,7 @@ function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
 
 function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
   const originalRequestFn = opts.esClient.transport.request;
+  const requestTimeout = opts.requestTimeout;
 
   // A bunch of overloads to make TypeScript happy
   async function request<TResponse = unknown>(
@@ -124,17 +162,24 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     options?: TransportRequestOptions
   ): Promise<TResponse | TransportResult<TResponse, TContext>> {
     // Wrap ES|QL requests with an abort signal
-    if (params.method === 'POST' && params.path === '/_esql') {
+    if (params.method === 'POST' && params.path === '/_query') {
       try {
         const requestOptions = options ?? {};
         const start = Date.now();
         opts.logger.debug(
           `executing ES|QL query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
             opts.rule.spaceId
-          } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}`
+          } - ${JSON.stringify(params)} - with options ${JSON.stringify(requestOptions)}${
+            requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+          }`
         );
         const result = (await originalRequestFn.call(opts.esClient.transport, params, {
           ...requestOptions,
+          ...(requestTimeout
+            ? {
+                requestTimeout,
+              }
+            : {}),
           signal: opts.abortController.signal,
         })) as Promise<TResponse> | TransportResult<TResponse, TContext>;
 
@@ -152,11 +197,14 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     }
 
     // No wrap
-    return (await originalRequestFn.call(
-      opts.esClient.transport,
-      params,
-      options
-    )) as Promise<TResponse>;
+    return (await originalRequestFn.call(opts.esClient.transport, params, {
+      ...options,
+      ...(requestTimeout
+        ? {
+            requestTimeout,
+          }
+        : {}),
+    })) as Promise<TResponse>;
   }
 
   return request;
@@ -164,6 +212,7 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
 
 function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
   const originalEqlSearch = opts.esClient.eql.search;
+  const requestTimeout = opts.requestTimeout;
 
   // A bunch of overloads to make TypeScript happy
   async function search<TEvent = unknown>(
@@ -188,10 +237,17 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
       opts.logger.debug(
         `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
           opts.rule.spaceId
-        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        }`
       );
       const result = (await originalEqlSearch.call(opts.esClient, params, {
         ...searchOptions,
+        ...(requestTimeout
+          ? {
+              requestTimeout,
+            }
+          : {}),
         signal: opts.abortController.signal,
       })) as TransportResult<EqlSearchResponse<TEvent>, unknown> | EqlSearchResponse<TEvent>;
 
@@ -222,6 +278,7 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
 
 function getWrappedSearchFn(opts: WrapEsClientOpts) {
   const originalSearch = opts.esClient.search;
+  const requestTimeout = opts.requestTimeout;
 
   // A bunch of overloads to make TypeScript happy
   async function search<
@@ -261,10 +318,17 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
       opts.logger.debug(
         `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
           opts.rule.spaceId
-        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+        }`
       );
       const result = (await originalSearch.call(opts.esClient, params, {
         ...searchOptions,
+        ...(requestTimeout
+          ? {
+              requestTimeout,
+            }
+          : {}),
         signal: opts.abortController.signal,
       })) as
         | TransportResult<SearchResponse<TDocument, TAggregations>, unknown>

@@ -6,13 +6,20 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { alertConvo, emptyWelcomeConvo } from '../../mock/conversation';
+import { alertConvo, emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { mockConnectors } from '../../mock/connectors';
 
+const onConversationSelected = jest.fn();
+const mockConversations = {
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
+};
 const testProps = {
-  currentConversation: emptyWelcomeConvo,
+  currentConversation: welcomeConvo,
   title: 'Test Title',
   docLinks: {
     ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
@@ -20,15 +27,46 @@ const testProps = {
   },
   isDisabled: false,
   isSettingsModalVisible: false,
-  onConversationSelected: jest.fn(),
+  onConversationSelected,
   onToggleShowAnonymizedValues: jest.fn(),
   selectedConversationId: emptyWelcomeConvo.id,
   setIsSettingsModalVisible: jest.fn(),
-  setSelectedConversationId: jest.fn(),
+  onConversationDeleted: jest.fn(),
   showAnonymizedValues: false,
+  conversations: mockConversations,
+  refetchConversationsState: jest.fn(),
+  anonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
+  refetchAnonymizationFieldsResults: jest.fn(),
 };
 
+jest.mock('../../connectorland/use_load_connectors', () => ({
+  useLoadConnectors: jest.fn(() => {
+    return {
+      data: [],
+      error: null,
+      isSuccess: true,
+    };
+  }),
+}));
+
+(useLoadConnectors as jest.Mock).mockReturnValue({
+  data: mockConnectors,
+  error: null,
+  isSuccess: true,
+});
+const mockSetApiConfig = alertConvo;
+jest.mock('../use_conversation', () => ({
+  useConversation: jest.fn(() => {
+    return {
+      setApiConfig: jest.fn().mockReturnValue(mockSetApiConfig),
+    };
+  }),
+}));
+
 describe('AssistantHeader', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('showAnonymizedValues is not checked when currentConversation.replacements is null', () => {
     const { getByText, getByTestId } = render(<AssistantHeader {...testProps} />, {
       wrapper: TestProviders,
@@ -53,11 +91,7 @@ describe('AssistantHeader', () => {
 
   it('showAnonymizedValues is not checked when currentConversation.replacements has values and showAnonymizedValues is false', () => {
     const { getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        currentConversation={alertConvo}
-        selectedConversationId={alertConvo.id}
-      />,
+      <AssistantHeader {...testProps} currentConversation={alertConvo} />,
       {
         wrapper: TestProviders,
       }
@@ -67,16 +101,27 @@ describe('AssistantHeader', () => {
 
   it('showAnonymizedValues is checked when currentConversation.replacements has values and showAnonymizedValues is true', () => {
     const { getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        currentConversation={alertConvo}
-        selectedConversationId={alertConvo.id}
-        showAnonymizedValues
-      />,
+      <AssistantHeader {...testProps} currentConversation={alertConvo} showAnonymizedValues />,
       {
         wrapper: TestProviders,
       }
     );
     expect(getByTestId('showAnonymizedValues')).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('Conversation is updated when connector change occurs', async () => {
+    const { getByTestId } = render(<AssistantHeader {...testProps} />, {
+      wrapper: TestProviders,
+    });
+    fireEvent.click(getByTestId('connectorSelectorPlaceholderButton'));
+    fireEvent.click(getByTestId('connector-selector'));
+
+    await act(async () => {
+      fireEvent.click(getByTestId('connectorId'));
+    });
+    expect(onConversationSelected).toHaveBeenCalledWith({
+      cId: alertConvo.id,
+      cTitle: alertConvo.title,
+    });
   });
 });

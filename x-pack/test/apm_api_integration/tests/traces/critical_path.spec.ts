@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = new Date('2022-01-01T00:00:00.000Z').getTime();
   const end = new Date('2022-01-01T00:15:00.000Z').getTime() - 1;
@@ -63,7 +63,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
     const traceIds = compact(uniq(serialized.map((event) => event['trace.id'])));
 
-    await synthtraceEsClient.index(Readable.from(unserialized));
+    await apmSynthtraceEsClient.index(Readable.from(unserialized));
 
     return apmApiClient
       .readUser({
@@ -104,6 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177542
   registry.when('Aggregated critical path', { config: 'basic', archives: [] }, () => {
     it('builds up the correct tree for a single transaction', async () => {
       const java = apm
@@ -270,7 +271,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         fn: () => generateTrace(),
       });
 
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
 
       const { rootNodes: filteredRootNodes } = await fetchAndBuildCriticalPathTree({
         fn: () => generateTrace(),
@@ -410,7 +411,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         },
       ]);
 
-      await synthtraceEsClient.clean();
+      await apmSynthtraceEsClient.clean();
 
       const { rootNodes: filteredRootNodes } = await fetchAndBuildCriticalPathTree({
         fn: () => generateTrace(),
@@ -427,6 +428,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       ]);
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
   });
 }

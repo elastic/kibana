@@ -7,12 +7,8 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import type { ExperimentalFeatures } from '../../../../../common';
 import { RISK_SCORE_PREVIEW_URL } from '../../../../../common/constants';
-import {
-  RiskCategories,
-  RiskWeightTypes,
-} from '../../../../../common/entity_analytics/risk_engine';
+import { RiskWeightTypes } from '../../../../../common/entity_analytics/risk_engine';
 import {
   serverMock,
   requestContextMock,
@@ -49,7 +45,7 @@ describe('POST risk_engine/preview route', () => {
     clients.appClient.getAlertsIndex.mockReturnValue('default-alerts-index');
     (riskScoreServiceFactory as jest.Mock).mockReturnValue(mockRiskScoreService);
 
-    riskScorePreviewRoute(server.router, logger, {} as ExperimentalFeatures);
+    riskScorePreviewRoute(server.router, logger);
   });
 
   const buildRequest = (body: object = {}) =>
@@ -68,9 +64,7 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({ data_view_id: undefined });
         const result = await server.validate(request);
 
-        expect(result.badRequest).toHaveBeenCalledWith(
-          'Invalid value "undefined" supplied to "data_view_id"'
-        );
+        expect(result.badRequest).toHaveBeenCalledWith('data_view_id: Required');
       });
 
       it('respects the provided dataview', async () => {
@@ -128,7 +122,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('Invalid value "undefined" supplied to "range,start"')
+          expect.stringContaining('range.start: Required')
         );
       });
     });
@@ -174,8 +168,7 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({
           weights: [
             {
-              type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.category_1,
+              type: RiskWeightTypes.global,
               host: 0.1,
               user: 0.2,
             },
@@ -189,8 +182,7 @@ describe('POST risk_engine/preview route', () => {
           expect.objectContaining({
             weights: [
               {
-                type: RiskWeightTypes.riskCategory,
-                value: RiskCategories.category_1,
+                type: RiskWeightTypes.global,
                 host: 0.1,
                 user: 0.2,
               },
@@ -203,8 +195,7 @@ describe('POST risk_engine/preview route', () => {
         const request = buildRequest({
           weights: [
             {
-              type: RiskWeightTypes.riskCategory,
-              value: RiskCategories.category_1,
+              type: RiskWeightTypes.global,
               host: 1.1,
             },
           ],
@@ -212,7 +203,7 @@ describe('POST risk_engine/preview route', () => {
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          expect.stringContaining('Invalid value "1.1" supplied to "weights,host"')
+          expect.stringContaining('weights.0.host: Number must be less than or equal to 1')
         );
       });
 
@@ -221,14 +212,15 @@ describe('POST risk_engine/preview route', () => {
           weights: [
             {
               type: 'something new',
-              host: 1.1,
+              host: 0.1,
+              user: 0.2,
             },
           ],
         });
 
         const result = await server.validate(request);
         expect(result.badRequest).toHaveBeenCalledWith(
-          'Invalid value "{"type":"something new","host":1.1}" supplied to "weights"'
+          expect.stringContaining('weights.0.type: Invalid literal value')
         );
       });
     });
@@ -246,7 +238,7 @@ describe('POST risk_engine/preview route', () => {
         );
       });
 
-      it('rejects an invalid after_key', async () => {
+      it('remove invalid after_key property', async () => {
         const request = buildRequest({
           after_keys: {
             bad: 'key',
@@ -254,7 +246,8 @@ describe('POST risk_engine/preview route', () => {
         });
 
         const result = await server.validate(request);
-        expect(result.badRequest).toHaveBeenCalledWith('invalid keys "bad"');
+
+        expect(result.ok).toHaveBeenCalledWith(expect.objectContaining({ after_keys: {} }));
       });
     });
   });

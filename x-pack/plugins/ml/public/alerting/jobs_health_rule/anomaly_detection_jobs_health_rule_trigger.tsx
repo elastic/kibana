@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
-import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { HttpService } from '../../application/services/http_service';

@@ -12,6 +12,12 @@ test('`schema` creates correct schema with defaults.', () => {
   expect(config.schema.validate({})).toMatchInlineSnapshot(`
     Object {
       "appenders": Map {},
+      "browser": Object {
+        "loggers": Array [],
+        "root": Object {
+          "level": "info",
+        },
+      },
       "loggers": Array [],
       "root": Object {
         "appenders": Array [
@@ -158,6 +164,36 @@ test('correctly fills in custom `loggers` config.', () => {
     name: 'http',
     level: 'error',
   });
+});
+
+test('correctly fills in custom browser-side `loggers` config.', () => {
+  const configValue = config.schema.validate({
+    browser: {
+      loggers: [
+        {
+          name: 'plugins',
+          level: 'warn',
+        },
+        {
+          name: 'http',
+          level: 'error',
+        },
+      ],
+    },
+  });
+
+  expect(configValue.browser.loggers).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "level": "warn",
+        "name": "plugins",
+      },
+      Object {
+        "level": "error",
+        "name": "http",
+      },
+    ]
+  `);
 });
 
 test('fails if loggers use unknown appenders.', () => {

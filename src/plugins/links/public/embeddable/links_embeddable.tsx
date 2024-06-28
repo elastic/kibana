@@ -11,12 +11,13 @@ import React, { createContext } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { distinctUntilChanged, skip, Subject, Subscription, switchMap } from 'rxjs';
 
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
   AttributeService,
   Embeddable,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
+  COMMON_EMBEDDABLE_GROUPING,
 } from '@kbn/embeddable-plugin/public';
 
 import { CONTENT_ID } from '../../common';
@@ -43,6 +44,8 @@ export class LinksEmbeddable
 
   public attributes?: LinksAttributes;
   public attributes$ = new Subject<LinksAttributes>();
+
+  public grouping = [COMMON_EMBEDDABLE_GROUPING.annotation];
 
   constructor(
     config: LinksConfig,

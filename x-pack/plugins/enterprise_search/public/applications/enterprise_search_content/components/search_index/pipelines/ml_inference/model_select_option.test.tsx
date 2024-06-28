@@ -34,6 +34,9 @@ const DEFAULT_PROPS: EuiSelectableOption<MlModel> = {
   threadsPerAllocation: 0,
   isPlaceholder: false,
   hasStats: false,
+  types: ['pytorch', 'ner'],
+  inputFieldNames: ['title'],
+  version: '1',
 };
 
 describe('ModelSelectOption', () => {

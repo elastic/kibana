@@ -149,8 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/174066
-    describe.skip('edit index pattern', () => {
+    describe('edit index pattern', () => {
       it('on edit click', async () => {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
@@ -186,6 +185,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('indexPatternTitle')).to.contain(`Index Star`);
         });
       });
+
+      it('prefills the form with previously saved values', async () => {
+        await PageObjects.settings.editIndexPattern('logs*', 'utc_time', 'Logs UTC', true);
+
+        await PageObjects.settings.clickEditIndexButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('time field', async () => {
+          const timeFieldInput = await PageObjects.settings.getTimeFieldNameField();
+          return (await timeFieldInput.getAttribute('value')) === 'utc_time';
+        });
+        expect(await (await PageObjects.settings.getNameField()).getAttribute('value')).to.be(
+          'Logs UTC'
+        );
+        expect(
+          await (await PageObjects.settings.getIndexPatternField()).getAttribute('value')
+        ).to.be('logs*');
+
+        await testSubjects.click('closeFlyoutButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await testSubjects.getVisibleText('currentIndexPatternTimeField')).to.be('utc_time');
+
+        await PageObjects.settings.editIndexPattern(
+          'logstash-*',
+          PageObjects.settings.noTimeFieldOption,
+          'Just logs',
+          true
+        );
+
+        await PageObjects.settings.clickEditIndexButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.waitFor('time field', async () => {
+          const timeFieldInput = await PageObjects.settings.getTimeFieldNameField();
+          return (
+            (await timeFieldInput.getAttribute('value')) === PageObjects.settings.noTimeFieldOption
+          );
+        });
+        expect(await (await PageObjects.settings.getNameField()).getAttribute('value')).to.be(
+          'Just logs'
+        );
+        expect(
+          await (await PageObjects.settings.getIndexPatternField()).getAttribute('value')
+        ).to.be('logstash-*');
+
+        await testSubjects.click('closeFlyoutButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('currentIndexPatternTimeField');
+      });
     });
 
     describe('index pattern edit', function () {
@@ -205,7 +253,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', undefined, true);
         await retry.try(async () => {
           // verify updated field list
-          expect(await testSubjects.exists('field-name-agent')).to.be(true);
+          expect(await testSubjects.exists('field-name-@message')).to.be(true);
         });
       });
 

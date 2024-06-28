@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 
-import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
+import type { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
 import { Messages } from '../shared';
 import { ANALYTICS_STEPS } from '../../page';
 import { useCanCreateDataView } from '../../hooks/use_can_create_data_view';

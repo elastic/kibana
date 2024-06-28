@@ -47,9 +47,9 @@ export const captureURLApp = Object.freeze({
         try {
           // This is an async import because it requires `url`, which is a sizable dependency.
           // Otherwise this becomes part of the "page load bundle".
-          const { parseNext } = await import('../../../common/parse_next');
+          const { parseNextURL } = await import('@kbn/std');
           const url = new URL(
-            parseNext(window.location.href, http.basePath.serverBasePath),
+            parseNextURL(window.location.href, http.basePath.serverBasePath),
             window.location.origin
           );
           url.searchParams.append(AUTH_URL_HASH_QUERY_STRING_PARAMETER, window.location.hash);

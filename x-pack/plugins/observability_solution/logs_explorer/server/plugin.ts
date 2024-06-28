@@ -7,26 +7,30 @@
 
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
-import type { LogExplorerSetupDeps } from './types';
+import { LogsExplorerLocatorDefinition, LogsExplorerLocators } from '../common/locators';
+import { uiSettings } from '../common/ui_settings';
+import type { LogsExplorerSetupDeps } from './types';
 
-export class LogExplorerServerPlugin implements Plugin {
-  private locators?: LogExplorerLocators;
+export class LogsExplorerServerPlugin implements Plugin {
+  private locators?: LogsExplorerLocators;
 
-  setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {
+  setup(core: CoreSetup, plugins: LogsExplorerSetupDeps) {
     const { share } = plugins;
+
+    core.uiSettings.register(uiSettings);
+
     const discoverAppLocator =
       share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     // Register Locators
-    const logExplorerLocator = share.url.locators.create(
-      new LogExplorerLocatorDefinition({
+    const logsExplorerLocator = share.url.locators.create(
+      new LogsExplorerLocatorDefinition({
         discoverAppLocator,
       })
     );
 
     this.locators = {
-      logExplorerLocator,
+      logsExplorerLocator,
     };
 
     return {

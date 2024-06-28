@@ -18,11 +18,6 @@ import {
 } from '../../../mocks';
 
 import { mockDataPlugin, mountWithProvider } from '../../../mocks';
-jest.mock('../../../debounced_component', () => {
-  return {
-    debouncedComponent: (fn: unknown) => fn,
-  };
-});
 
 import { WorkspacePanel } from './workspace_panel';
 import { ReactWrapper } from 'enzyme';
@@ -62,7 +57,7 @@ function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
 
 const mockVisualization = createMockVisualization();
 const mockVisualization2 = createMockVisualization();
-const mockDatasource = createMockDatasource('testDatasource');
+const mockDatasource = createMockDatasource();
 
 let expressionRendererMock = createExpressionRendererMock();
 const trigger = { exec: jest.fn() } as unknown as jest.Mocked<TriggerContract>;
@@ -673,6 +668,7 @@ describe('workspace_panel', () => {
     it('should show configuration error messages if present', async () => {
       const messages: UserMessage[] = [
         {
+          uniqueId: 'unique_id_1',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
@@ -680,6 +676,7 @@ describe('workspace_panel', () => {
           longMessage: "i'm an error",
         },
         {
+          uniqueId: 'unique_id_2',
           severity: 'error',
           fixableInEditor: true,
           displayLocations: [{ id: 'visualization' }],
@@ -941,14 +938,12 @@ describe('workspace_panel', () => {
           datasourceState: {},
         }),
       });
-      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDragDrop-isDropTarget');
+      expect(screen.getByTestId('lnsWorkspace').classList).toContain('domDroppable--active');
     });
 
     it('should refuse to drop if there are no suggestions', () => {
       renderWithDndAndRedux();
-      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain(
-        'domDragDrop-isDropTarget'
-      );
+      expect(screen.getByTestId('lnsWorkspace').classList).not.toContain('domDroppable--active');
     });
   });
 });

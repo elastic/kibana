@@ -331,7 +331,7 @@ describe('File HTTP API', () => {
         .expect(200);
 
       expect(header['content-type']).toEqual('application/pdf');
-      expect(header['content-disposition']).toEqual('attachment; filename="myfilename.pdf"');
+      expect(header['content-disposition']).toEqual('attachment; filename=myfilename.pdf');
       expect(buffer.toString('utf8')).toEqual('test');
     });
   });

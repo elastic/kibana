@@ -6,7 +6,7 @@
  */
 
 import { CaseConfigureRequestParamsRt } from '../../../../common/types/api';
-import { decodeWithExcessOrThrow } from '../../../../common/api';
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { CASE_CONFIGURE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
@@ -15,6 +15,10 @@ import type { configureApiV1 } from '../../../../common/types/api';
 export const patchCaseConfigureRoute = createCasesRoute({
   method: 'patch',
   path: CASE_CONFIGURE_DETAILS_URL,
+  routerOptions: {
+    access: 'public',
+    summary: `Update case settings`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const params = decodeWithExcessOrThrow(CaseConfigureRequestParamsRt)(request.params);

@@ -7,14 +7,16 @@
 
 import expect from 'expect';
 import {
-  deleteAllRules,
-  deleteAllAlerts,
   getPreviewAlerts,
-  getRuleForAlertTesting,
   previewRule,
   dataGeneratorFactory,
   enhanceDocument,
 } from '../../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({
@@ -56,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  describe('@ess @serverless Non ECS fields in alert document source', () => {
+  describe('@ess @serverless @serverlessQA Non ECS fields in alert document source', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'

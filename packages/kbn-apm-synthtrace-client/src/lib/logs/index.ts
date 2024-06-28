@@ -23,12 +23,16 @@ export type LogDocument = Fields &
     'event.dataset': string;
     'log.level'?: string;
     'host.name'?: string;
+    'container.id'?: string;
     'trace.id'?: string;
+    'transaction.id'?: string;
     'agent.id'?: string;
     'agent.name'?: string;
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
+    'kubernetes.pod.uid'?: string;
+    'aws.s3.bucket.name'?: string;
     'orchestrator.namespace'?: string;
     'container.name'?: string;
     'cloud.provider'?: string;
@@ -36,11 +40,25 @@ export type LogDocument = Fields &
     'cloud.availability_zone'?: string;
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
+    'error.stack_trace'?: string;
+    'error.exception.stacktrace'?: string;
+    'error.log.stacktrace'?: string;
+    'log.custom': Record<string, unknown>;
   }>;
 
 class Log extends Serializable<LogDocument> {
   service(name: string) {
     this.fields['service.name'] = name;
+    return this;
+  }
+
+  hostName(name: string) {
+    this.fields['host.name'] = name;
+    return this;
+  }
+
+  containerId(id: string) {
+    this.fields['container.id'] = id;
     return this;
   }
 

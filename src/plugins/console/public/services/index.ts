@@ -16,3 +16,4 @@ export {
   setAutocompleteInfo,
   ENTITIES,
 } from './autocomplete';
+export { EmbeddableConsoleInfo } from './embeddable_console';

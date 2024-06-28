@@ -13,11 +13,9 @@ import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type TaskPayloadCSV } from '@kbn/reporting-export-types-csv-common';
-import type { ClientConfigType } from '@kbn/reporting-public';
+import type { ClientConfigType, Job, KibanaContext } from '@kbn/reporting-public';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 
-import type { Job } from '../../../lib/job';
-import type { KibanaContext } from '../../../types';
 import { getPitApiTextForConsole } from './get_console_text_pit';
 import { getScrollApiTextForConsole } from './get_console_text_scroll';
 

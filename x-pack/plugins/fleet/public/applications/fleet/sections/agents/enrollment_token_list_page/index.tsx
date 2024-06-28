@@ -245,6 +245,8 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
         <EuiFlexItem>
           <SearchBar
             value={search}
+            indexPattern={ENROLLMENT_API_KEYS_INDEX}
+            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
             onChange={(newSearch) => {
               setPagination({
                 ...pagination,
@@ -252,8 +254,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
               });
               setSearch(newSearch);
             }}
-            indexPattern={ENROLLMENT_API_KEYS_INDEX}
-            fieldPrefix={FLEET_ENROLLMENT_API_PREFIX}
             dataTestSubj="enrollmentKeysList.queryInput"
           />
         </EuiFlexItem>
@@ -275,7 +275,6 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
       <EuiBasicTable<EnrollmentAPIKey>
         data-test-subj="enrollmentTokenListTable"
         loading={isLoading}
-        hasActions={true}
         noItemsMessage={
           isLoading ? (
             <FormattedMessage

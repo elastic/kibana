@@ -8,10 +8,9 @@
 import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
 import {
-  pingAction,
+  ping,
   type AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/stream_reducer';
 
 import type { LogDebugMessage } from './log_debug_message';
 import type { StateHandler } from './state_handler';
@@ -24,16 +23,16 @@ const PING_FREQUENCY = 10000;
  * This is implemented as a factory that receives the necessary dependencies
  * which then returns the actual helper function.
  */
-export const streamPushPingWithTimeoutFactory = <T extends ApiVersion>(
+export const streamPushPingWithTimeoutFactory = (
   stateHandler: StateHandler,
-  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
+  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction>['push'],
   logDebugMessage: LogDebugMessage
 ) => {
   return function pushPingWithTimeout() {
     setTimeout(() => {
       if (stateHandler.isRunning()) {
         logDebugMessage('Ping message.');
-        push(pingAction());
+        push(ping());
         pushPingWithTimeout();
       }
     }, PING_FREQUENCY);

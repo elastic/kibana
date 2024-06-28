@@ -18,6 +18,11 @@ export const OUTPUT_MESSAGES = Object.freeze({
       defaultMessage: `{command} completed successfully`,
       values: { command },
     }),
+  submittedSuccessfully: (command: string) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.item.submittedSuccessfully', {
+      defaultMessage: `{command} submitted successfully`,
+      values: { command },
+    }),
   isPending: (command: string) =>
     i18n.translate('xpack.securitySolution.responseActionsList.list.item.isPending', {
       defaultMessage: `{command} is pending`,
@@ -75,6 +80,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
       'xpack.securitySolution.responseActionsList.list.item.expandSection.hostname',
       {
         defaultMessage: 'Hostname',
+      }
+    ),
+    agentType: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.agentType',
+      {
+        defaultMessage: 'Agent type',
       }
     ),
   },
@@ -185,6 +196,15 @@ export const FILTER_NAMES = Object.freeze({
   actions: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.actions', {
     defaultMessage: 'Actions',
   }),
+  actionTypes: i18n.translate(
+    'xpack.securitySolution.responseActionsList.list.filter.actionTypes',
+    {
+      defaultMessage: 'Action types',
+    }
+  ),
+  agentTypes: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.agentTypes', {
+    defaultMessage: 'Agent types',
+  }),
   hosts: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.Hosts', {
     defaultMessage: 'Hosts',
   }),
@@ -194,9 +214,17 @@ export const FILTER_NAMES = Object.freeze({
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
     defaultMessage: 'Filter by username',
   }),
-  type: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.type', {
-    defaultMessage: 'Type',
-  }),
+  // TODO: change it to just a value instead of a function
+  //  when responseActionsSentinelOneV1Enabled is enabled/removed
+  types: (countOfTypes: number) =>
+    i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {
+      defaultMessage: `{countOfTypes, plural, one {Type} other {Types}}`,
+      values: { countOfTypes },
+    }),
+  // replace above with:
+  // types: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.types', {
+  //   defaultMessage: 'Types',
+  // }),
 });
 
 export const ARIA_LABELS = Object.freeze({

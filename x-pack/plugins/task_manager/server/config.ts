@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { getTaskClaimer } from './task_claimers';
 
 export const MAX_WORKERS_LIMIT = 100;
 export const DEFAULT_MAX_WORKERS = 10;
@@ -27,6 +26,7 @@ export const DEFAULT_METRICS_RESET_INTERVAL = 30 * 1000; // 30 seconds
 export const DEFAULT_WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW = 5;
 
 export const CLAIM_STRATEGY_DEFAULT = 'default';
+export const CLAIM_STRATEGY_MGET = 'unsafe_mget';
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -56,10 +56,9 @@ const eventLoopDelaySchema = schema.object({
   }),
 });
 
-const requeueInvalidTasksConfig = schema.object({
-  delay: schema.number({ defaultValue: 3000, min: 0 }),
-  enabled: schema.boolean({ defaultValue: false }),
-  max_attempts: schema.number({ defaultValue: 100, min: 1, max: 500 }),
+const requestTimeoutsConfig = schema.object({
+  /* The request timeout config for task manager's updateByQuery default:30s, min:10s, max:10m */
+  update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
 
 export const configSchema = schema.object(
@@ -138,7 +137,6 @@ export const configSchema = schema.object(
       defaultValue: 1000,
       min: 1,
     }),
-    requeue_invalid_tasks: requeueInvalidTasksConfig,
     /* These are not designed to be used by most users. Please use caution when changing these */
     unsafe: schema.object({
       authenticate_background_task_utilization: schema.boolean({ defaultValue: true }),
@@ -156,6 +154,7 @@ export const configSchema = schema.object(
       min: 1,
     }),
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_DEFAULT }),
+    request_timeouts: requestTimeoutsConfig,
   },
   {
     validate: (config) => {
@@ -166,16 +165,11 @@ export const configSchema = schema.object(
       ) {
         return `The specified monitored_stats_required_freshness (${config.monitored_stats_required_freshness}) is invalid, as it is below the poll_interval (${config.poll_interval})`;
       }
-      try {
-        getTaskClaimer(config.claim_strategy);
-      } catch (err) {
-        return `The claim strategy is invalid: ${err.message}`;
-      }
     },
   }
 );
 
-export type RequeueInvalidTasksConfig = TypeOf<typeof requeueInvalidTasksConfig>;
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
+export type RequestTimeoutsConfig = TypeOf<typeof requestTimeoutsConfig>;

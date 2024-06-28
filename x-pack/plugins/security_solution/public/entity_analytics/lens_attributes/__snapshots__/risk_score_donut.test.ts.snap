@@ -62,9 +62,9 @@ Object {
                     Object {
                       "input": Object {
                         "language": "kuery",
-                        "query": "host.risk.calculated_level : \\"Moderiate\\"",
+                        "query": "host.risk.calculated_level : \\"Moderate\\"",
                       },
-                      "label": "Moderiate",
+                      "label": "Moderate",
                     },
                     Object {
                       "input": Object {

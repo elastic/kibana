@@ -13,7 +13,7 @@ import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, MAX_DATA_RETENTION } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 import { notificationService } from '../../../public/application/services/notification';
@@ -164,6 +164,12 @@ describe('Data Streams tab', () => {
           name: 'dataStream2',
           storageSize: '1kb',
           storageSizeBytes: 1000,
+          lifecycle: {
+            enabled: true,
+            data_retention: '7d',
+            effective_retention: '5d',
+            retention_determined_by: MAX_DATA_RETENTION,
+          },
         }),
       ]);
 
@@ -192,8 +198,14 @@ describe('Data Streams tab', () => {
 
       expect(tableCellsValues).toEqual([
         ['', 'dataStream1', 'green', '1', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', '1', '7 days', 'Delete'],
+        ['', 'dataStream2', 'green', '1', '5 days ', 'Delete'],
       ]);
+    });
+
+    test('highlights datastreams who are using max retention', async () => {
+      const { exists } = testBed;
+
+      expect(exists('usingMaxRetention')).toBe(true);
     });
 
     test('has a button to reload the data streams', async () => {
@@ -247,7 +259,7 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
-          '7 days',
+          '5 days ',
           'Delete',
         ],
       ]);
@@ -285,20 +297,20 @@ describe('Data Streams tab', () => {
           'December 31st, 1969 7:00:00 PM',
           '1kb',
           '1',
-          '7 days',
+          '5 days ',
           'Delete',
         ],
       ]);
     });
 
-    test('hides Storage size column from stats if enableDataStreamsStorageColumn===false', async () => {
+    test('hides stats toggle if enableDataStreamStats===false', async () => {
       testBed = await setup(httpSetup, {
         config: {
-          enableDataStreamsStorageColumn: false,
+          enableDataStreamStats: false,
         },
       });
 
-      const { actions, component, table } = testBed;
+      const { actions, component, exists } = testBed;
 
       await act(async () => {
         actions.goToDataStreamsList();
@@ -306,18 +318,7 @@ describe('Data Streams tab', () => {
 
       component.update();
 
-      // Switching the stats on
-      await act(async () => {
-        actions.clickIncludeStatsSwitch();
-      });
-      component.update();
-
-      // The table renders with the stats columns except the Storage size column
-      const { tableCellsValues } = table.getMetaData('dataStreamTable');
-      expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7 days', 'Delete'],
-        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1', '7 days', 'Delete'],
-      ]);
+      expect(exists('includeStatsSwitch')).toBeFalsy();
     });
 
     test('clicking the indices count navigates to the backing indices', async () => {

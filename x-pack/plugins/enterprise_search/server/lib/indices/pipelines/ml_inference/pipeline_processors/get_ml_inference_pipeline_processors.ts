@@ -19,6 +19,7 @@ import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_i
 
 export type InferencePipelineData = InferencePipeline & {
   trainedModelName: string;
+  sourceFields: string[];
 };
 
 export const fetchMlInferencePipelines = async (client: ElasticsearchClient) => {
@@ -84,15 +85,22 @@ export const fetchPipelineProcessorInferenceData = async (
 
   return Object.keys(mlInferencePipelineProcessorConfigs).reduce(
     (pipelineProcessorData, pipelineProcessorName) => {
-      // Get the processors for the current pipeline processor of the ML Inference Processor.
+      // Get the processors for the current pipeline processor of the ML Inference Processor
       const subProcessors =
         mlInferencePipelineProcessorConfigs[pipelineProcessorName].processors || [];
 
-      // Find the inference processor, which we can assume there will only be one.
-      const inferenceProcessor = subProcessors.find((obj) => obj.hasOwnProperty('inference'));
+      // Get the inference processors; there is one per configured field, but they share the same model ID
+      const inferenceProcessors = subProcessors.filter((processor) =>
+        processor.hasOwnProperty('inference')
+      );
 
-      const trainedModelName = inferenceProcessor?.inference?.model_id;
-      if (trainedModelName)
+      const trainedModelName = inferenceProcessors[0]?.inference?.model_id;
+      if (trainedModelName) {
+        // Extract source fields from field mappings
+        const sourceFields = inferenceProcessors.flatMap((processor) =>
+          Object.keys(processor.inference?.field_map ?? {})
+        );
+
         pipelineProcessorData.push({
           modelId: trainedModelName,
           modelState: TrainedModelState.NotDeployed,
@@ -100,7 +108,9 @@ export const fetchPipelineProcessorInferenceData = async (
           pipelineReferences: pipelineProcessorsMap?.[pipelineProcessorName] ?? [],
           trainedModelName,
           types: [],
+          sourceFields,
         });
+      }
 
       return pipelineProcessorData;
     },
@@ -136,6 +146,7 @@ export const getMlModelConfigsForModelIds = async (
         pipelineReferences: [],
         trainedModelName,
         types: getMlModelTypesForModelConfig(trainedModelData),
+        sourceFields: [],
       };
     }
   });

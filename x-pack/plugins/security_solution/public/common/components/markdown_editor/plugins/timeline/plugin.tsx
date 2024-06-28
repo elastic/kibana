@@ -75,18 +75,25 @@ const TimelineEditorComponent: React.FC<TimelineEditorProps> = ({ onClosePopover
 
 const TimelineEditor = memo(TimelineEditorComponent);
 
-export const plugin: EuiMarkdownEditorUiPlugin = {
-  name: ID,
-  button: {
-    label: i18n.INSERT_TIMELINE,
-    iconType: 'timeline',
-  },
-  helpText: (
-    <EuiCodeBlock language="md" paddingSize="s" fontSize="l">
-      {'[title](url)'}
-    </EuiCodeBlock>
-  ),
-  editor: function editor({ node, onSave, onCancel }) {
-    return <TimelineEditor onClosePopover={onCancel} onInsert={onSave} />;
-  },
+export const plugin = ({
+  interactionsUpsellingMessage,
+}: {
+  interactionsUpsellingMessage: string | null;
+}): EuiMarkdownEditorUiPlugin => {
+  return {
+    name: ID,
+    button: {
+      label: interactionsUpsellingMessage ?? i18n.INSERT_TIMELINE,
+      iconType: 'timeline',
+      isDisabled: !!interactionsUpsellingMessage,
+    },
+    helpText: (
+      <EuiCodeBlock language="md" paddingSize="s" fontSize="l">
+        {'[title](url)'}
+      </EuiCodeBlock>
+    ),
+    editor: function editor({ node, onSave, onCancel }) {
+      return <TimelineEditor onClosePopover={onCancel} onInsert={onSave} />;
+    },
+  };
 };

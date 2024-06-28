@@ -2,11 +2,4 @@ $embeddableConsoleBackground: lightOrDarkTheme($euiColorDarkestShade, $euiColorI
 $embeddableConsoleText: lighten(makeHighContrastColor($euiColorLightestShade, $embeddableConsoleBackground), 20%);
 $embeddableConsoleBorderColor: transparentize($euiColorGhost, .8);
 $embeddableConsoleInitialHeight: $euiSizeXXL;
-$embeddableConsoleMaxHeight: calc(100vh - #{$euiSize * 5});
-
-// Pixel heights ensure no blurriness caused by half pixel offsets
-$embeddableConsoleHeights: (
-  s: $euiSize * 30,
-  m: $euiSize * 50,
-  l: 100vh,
-);
+$embeddableConsoleMaxHeight: calc(100vh - var(--euiFixedHeadersOffset, 0) - $euiSize);

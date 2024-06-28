@@ -130,7 +130,7 @@ export function TimeShift({
           defaultMessage: 'Enter the time shift number and unit',
         })}
         error={
-          warnings[0] ||
+          warnings[0] ??
           (isLocalValueInvalid &&
             i18n.translate('xpack.lens.indexPattern.timeShift.genericInvalidHelp', {
               defaultMessage: 'Time shift value is not valid.',
@@ -155,7 +155,7 @@ export function TimeShift({
                 );
               })}
               selectedOptions={getSelectedOption()}
-              singleSelection={{ asPlainText: true }}
+              singleSelection={{ asPlainText: false }}
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);

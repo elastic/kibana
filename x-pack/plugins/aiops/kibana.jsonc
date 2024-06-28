@@ -17,21 +17,20 @@
       "presentationUtil",
       "dashboard",
       "fieldFormats",
-      "unifiedSearch"
+      "unifiedSearch",
+      "share"
     ],
     "optionalPlugins": [
       "cases",
       "usageCollection"
     ],
     "requiredBundles": [
+      "dataViews",
       "fieldFormats",
       "kibanaReact",
       "kibanaUtils",
       "embeddable",
-      "cases"
-    ],
-    "extraPublicDirs": [
-      "common"
+      "cases",
     ]
   }
 }

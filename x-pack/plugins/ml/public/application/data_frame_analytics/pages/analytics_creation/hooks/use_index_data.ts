@@ -8,9 +8,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '@kbn/ml-agg-utils';
 import {
@@ -21,6 +21,7 @@ import {
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { EsSorting, UseIndexDataReturnType } from '@kbn/ml-data-grid';
 import {
   getFieldType,
   getDataGridSchemaFromKibanaFieldType,
@@ -29,8 +30,6 @@ import {
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
   useRenderCellValue,
-  EsSorting,
-  UseIndexDataReturnType,
   getProcessedFields,
   INDEX_STATUS,
 } from '@kbn/ml-data-grid';

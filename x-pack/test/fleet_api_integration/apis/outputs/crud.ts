@@ -6,10 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { CreateAgentPolicyResponse, GetOneAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,
 } from '@kbn/fleet-plugin/common/constants';
+import { v4 as uuidV4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -133,6 +135,51 @@ export default function (providerContext: FtrProviderContext) {
     }
   };
 
+  const createAgentPolicy = async (spaceId?: string): Promise<CreateAgentPolicyResponse> => {
+    const { body: testPolicyRes } = await supertest
+      .post(spaceId ? `/s/${spaceId}/api/fleet/agent_policies` : `/api/fleet/agent_policies`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({
+        name: `test ${uuidV4()}`,
+        description: '',
+        namespace: 'default',
+      })
+      .expect(200);
+
+    return testPolicyRes;
+  };
+
+  const deleteAgentPolicy = async (agentPolicyId: string, spaceId?: string) => {
+    await supertest
+      .post(
+        spaceId
+          ? `/s/${spaceId}/api/fleet/agent_policies/delete`
+          : `/api/fleet/agent_policies/delete`
+      )
+      .send({
+        agentPolicyId,
+      })
+      .set('kbn-xsrf', 'xxxx')
+      .expect(200);
+  };
+
+  const getAgentPolicy = async (
+    policyId: string,
+    spaceId?: string
+  ): Promise<GetOneAgentPolicyResponse> => {
+    const { body: testPolicyRes } = await supertest
+      .get(
+        spaceId
+          ? `/s/${spaceId}/api/fleet/agent_policies/${policyId}`
+          : `/api/fleet/agent_policies/${policyId}`
+      )
+      .expect(200);
+
+    return testPolicyRes;
+  };
+
+  const TEST_SPACE_ID = 'testspaceoutputs';
+
   describe('fleet_outputs_crud', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
@@ -149,6 +196,12 @@ export default function (providerContext: FtrProviderContext) {
     before(async function () {
       await enableSecrets();
       await enableOutputSecrets();
+      await kibanaServer.spaces
+        .create({
+          id: TEST_SPACE_ID,
+          name: TEST_SPACE_ID,
+        })
+        .catch((err) => {});
       // we must first force install the fleet_server package to override package verification error on policy create
       // https://github.com/elastic/kibana/issues/137450
       const getPkRes = await supertest
@@ -274,7 +327,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             state: 'HEALTHY',
             message: '',
-            '@timestamp': '' + Date.parse('2023-11-29T14:25:31Z'),
+            '@timestamp': new Date(Date.now() - 1).toISOString(),
             output: defaultOutputId,
           },
         });
@@ -285,7 +338,7 @@ export default function (providerContext: FtrProviderContext) {
           document: {
             state: 'DEGRADED',
             message: 'connection error',
-            '@timestamp': '' + Date.parse('2023-11-30T14:25:31Z'),
+            '@timestamp': new Date().toISOString(),
             output: defaultOutputId,
           },
         });
@@ -297,7 +350,7 @@ export default function (providerContext: FtrProviderContext) {
             state: 'HEALTHY',
             message: '',
             '@timestamp': '' + Date.parse('2023-11-31T14:25:31Z'),
-            output: 'remote2',
+            output: ESOutputId,
           },
         });
       });
@@ -309,6 +362,13 @@ export default function (providerContext: FtrProviderContext) {
         expect(outputHealth.state).to.equal('DEGRADED');
         expect(outputHealth.message).to.equal('connection error');
         expect(outputHealth.timestamp).not.to.be.empty();
+      });
+      it('should not return output health if older than output last updated time', async () => {
+        const { body: outputHealth } = await supertest
+          .get(`/api/fleet/outputs/${ESOutputId}/health`)
+          .expect(200);
+
+        expect(outputHealth.state).to.equal('UNKNOWN');
       });
     });
 
@@ -717,6 +777,40 @@ export default function (providerContext: FtrProviderContext) {
         } catch (e) {
           // not found
         }
+      });
+
+      it('should bump all policies in all spaces if updating the default output', async () => {
+        const [policy1, policy2, policy3] = await Promise.all([
+          createAgentPolicy(),
+          createAgentPolicy(),
+          createAgentPolicy(TEST_SPACE_ID),
+        ]);
+
+        await supertest
+          .put(`/api/fleet/outputs/${defaultOutputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Updated Default ES Output',
+            type: 'elasticsearch',
+            hosts: ['http://test.fr:443'],
+          })
+          .expect(200);
+
+        const [updatedPolicy1, updatedPolicy2, updatedPolicy3] = await Promise.all([
+          getAgentPolicy(policy1.item.id),
+          getAgentPolicy(policy2.item.id),
+          getAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+        ]);
+        expect(updatedPolicy1.item.revision).to.eql(policy1.item.revision + 1);
+        expect(updatedPolicy2.item.revision).to.eql(policy2.item.revision + 1);
+        expect(updatedPolicy3.item.revision).to.eql(policy3.item.revision + 1);
+
+        // cleanup
+        await Promise.all([
+          deleteAgentPolicy(policy1.item.id),
+          deleteAgentPolicy(policy2.item.id),
+          deleteAgentPolicy(policy3.item.id, TEST_SPACE_ID),
+        ]);
       });
     });
 

@@ -12,7 +12,7 @@ import {
   type PackageInstallContext,
 } from '../../../../../common/types/models';
 import type { EsAssetReference, RegistryDataStream } from '../../../../../common/types/models';
-import { updateEsAssetReferences } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getAssetFromAssetsMap } from '../../archive';
 
 import { getESAssetMetadata } from '../meta';

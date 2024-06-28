@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LogExplorerLocator } from './log_explorer/log_explorer_locator';
+import { LogsExplorerLocator } from './logs_explorer/logs_explorer_locator';
 
-export * from './log_explorer';
+export * from './logs_explorer';
 
-export interface LogExplorerLocators {
-  logExplorerLocator: LogExplorerLocator;
+export interface LogsExplorerLocators {
+  logsExplorerLocator: LogsExplorerLocator;
 }

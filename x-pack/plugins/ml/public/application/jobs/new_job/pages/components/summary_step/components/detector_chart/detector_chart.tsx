@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useContext } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useContext } from 'react';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { SingleMetricView } from '../../../pick_fields_step/components/single_metric_view';

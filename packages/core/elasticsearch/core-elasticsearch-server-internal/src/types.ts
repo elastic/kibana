@@ -31,7 +31,17 @@ export interface InternalElasticsearchServiceSetup extends ElasticsearchServiceS
 /**
  * @internal
  */
-export type InternalElasticsearchServiceStart = ElasticsearchServiceStart;
+export interface InternalElasticsearchServiceStart extends ElasticsearchServiceStart {
+  metrics: {
+    /**
+     * The number of milliseconds we had to wait until ES was ready.
+     *
+     * Technically, this is the amount of time spent within the `isValidConnection` check of
+     * the ES service's start method.
+     */
+    elasticsearchWaitTime: number;
+  };
+}
 
 /** @internal */
 export interface ElasticsearchStatusMeta {

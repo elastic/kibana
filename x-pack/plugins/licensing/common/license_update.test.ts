@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom, Subject } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { take, toArray } from 'rxjs';
 
 import { ILicense } from './types';
 import { createLicenseUpdate } from './license_update';

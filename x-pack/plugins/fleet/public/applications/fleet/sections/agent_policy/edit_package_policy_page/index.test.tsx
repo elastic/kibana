@@ -13,11 +13,16 @@ import { createFleetTestRendererMock } from '../../../../../mock';
 
 import {
   useUIExtension,
+  sendGetAgentStatus,
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
   sendUpgradePackagePolicyDryRun,
   sendUpdatePackagePolicy,
   useStartServices,
+  sendCreateAgentPolicy,
+  sendBulkGetAgentPolicies,
+  useGetAgentPolicies,
+  useMultipleAgentPolicies,
 } from '../../../hooks';
 import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
@@ -28,11 +33,12 @@ type MockFn = jest.MockedFunction<any>;
 jest.mock('../../../hooks', () => {
   return {
     ...jest.requireActual('../../../hooks'),
-    sendGetAgentStatus: jest.fn().mockResolvedValue({ data: { results: { total: 0 } } }),
+    sendGetAgentStatus: jest.fn(),
     sendUpdatePackagePolicy: jest.fn(),
     sendGetOnePackagePolicy: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
     sendUpgradePackagePolicyDryRun: jest.fn(),
+    useMultipleAgentPolicies: jest.fn(),
     sendGetPackageInfoByKey: jest.fn().mockImplementation((name, version) =>
       Promise.resolve({
         data: {
@@ -124,6 +130,10 @@ jest.mock('../../../hooks', () => {
       },
     }),
     useLink: jest.fn().mockReturnValue({ getHref: jest.fn().mockReturnValue('/navigate/path') }),
+    useGetAgentPolicies: jest.fn(),
+    sendCreateAgentPolicy: jest.fn(),
+    sendBulkGetAgentPolicies: jest.fn(),
+    sendBulkInstallPackages: jest.fn(),
   };
 });
 
@@ -140,6 +150,7 @@ jest.mock('react-router-dom', () => ({
   useRouteMatch: jest.fn().mockReturnValue({
     params: {
       packagePolicyId: 'nginx-1',
+      policyId: 'agent-policy-1',
     },
   }),
 }));
@@ -152,6 +163,7 @@ const mockPackagePolicy = {
   package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
   enabled: true,
   policy_id: 'agent-policy-1',
+  policy_ids: ['agent-policy-1'],
   inputs: [
     {
       type: 'logfile',
@@ -176,6 +188,11 @@ const mockPackagePolicyNewVersion = {
   package: { name: 'nginx', title: 'Nginx', version: '1.4.0' },
 };
 
+const mockPackagePolicyAgentless = {
+  ...mockPackagePolicy,
+  policy_id: 'agentless',
+};
+
 const TestComponent = async () => {
   return {
     default: () => {
@@ -183,6 +200,10 @@ const TestComponent = async () => {
     },
   };
 };
+
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+  typeof useMultipleAgentPolicies
+>;
 
 describe('edit package policy page', () => {
   let testRenderer: TestRenderer;
@@ -215,6 +236,25 @@ describe('edit package policy page', () => {
     (sendUpdatePackagePolicy as MockFn).mockResolvedValue({});
     (useStartServices().application.navigateToUrl as MockFn).mockReset();
     (useStartServices().notifications.toasts.addError as MockFn).mockReset();
+    (sendGetAgentStatus as MockFn).mockResolvedValue({ data: { results: { total: 0 } } });
+    (sendBulkGetAgentPolicies as MockFn).mockResolvedValue({
+      data: { items: [{ id: 'agent-policy-1', name: 'Agent policy 1' }] },
+    });
+    (sendCreateAgentPolicy as MockFn).mockResolvedValue({
+      data: { item: { id: 'agent-policy-2' } },
+    });
+    (useGetAgentPolicies as MockFn).mockReturnValue({
+      data: {
+        items: [
+          { id: 'agent-policy-1', name: 'Agent policy 1' },
+          { id: 'fleet-server-policy', name: 'Fleet Server Policy' },
+        ],
+      },
+      error: undefined,
+      isLoading: false,
+      resendRequest: jest.fn(),
+    });
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
   });
 
   it('should disable submit button on invalid form with empty package var', async () => {
@@ -227,7 +267,7 @@ describe('edit package policy page', () => {
     });
 
     await act(async () => {
-      fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+      fireEvent.click(renderResult.getByText('Change defaults'));
     });
 
     await act(async () => {
@@ -349,7 +389,7 @@ describe('edit package policy page', () => {
     render();
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('euiErrorBoundary')).toBeVisible();
+      expect(renderResult.getByTestId('errorBoundaryFatalHeader')).toBeVisible();
     });
   });
 
@@ -414,6 +454,90 @@ describe('edit package policy page', () => {
 
     await waitFor(() => {
       expect(renderResult.getByText('Review field conflicts')).toBeInTheDocument();
+    });
+  });
+
+  it('should not show confirmation modal if package is on agentless policy', async () => {
+    (sendGetAgentStatus as MockFn).mockResolvedValue({ data: { results: { total: 1 } } });
+    (useGetOnePackagePolicy as MockFn).mockReturnValue({
+      data: {
+        item: mockPackagePolicyAgentless,
+      },
+    });
+    (sendGetOnePackagePolicy as MockFn).mockResolvedValue({
+      data: {
+        item: mockPackagePolicyAgentless,
+      },
+    });
+    (sendGetOneAgentPolicy as MockFn).mockResolvedValue({
+      data: { item: { id: 'agentless', name: 'Agentless policy', namespace: 'default' } },
+    });
+
+    render();
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    });
+    act(() => {
+      fireEvent.click(renderResult.getByRole('switch'));
+    });
+
+    await act(async () => {
+      fireEvent.click(renderResult.getByText('Save integration').closest('button')!);
+    });
+
+    expect(sendUpdatePackagePolicy).toHaveBeenCalled();
+  });
+
+  describe('modify agent policies', () => {
+    beforeEach(() => {
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
+
+      (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValue({
+        data: { results: { total: 0 } },
+      });
+    });
+
+    it('should create agent policy with sys monitoring when new hosts is selected', async () => {
+      await act(async () => {
+        render();
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('agentPolicyMultiItem')).toHaveAttribute(
+          'title',
+          'Agent policy 1'
+        );
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByTestId('newHostsTab'));
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText(/Save integration/).closest('button')!);
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
+      });
+      expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
+        {
+          description: '',
+          monitoring_enabled: ['logs', 'metrics'],
+          name: 'Agent policy 2',
+          namespace: 'default',
+          inactivity_timeout: 1209600,
+          is_protected: false,
+        },
+        { withSysMonitoring: true }
+      );
+      expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+        'nginx-1',
+        expect.objectContaining({
+          policy_ids: ['agent-policy-1', 'agent-policy-2'],
+        })
+      );
     });
   });
 });

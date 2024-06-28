@@ -15,7 +15,7 @@ import {
 import { rRuleSchema } from '../../r_rule/schemas';
 import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
-import { actionDomainSchema, actionSchema } from './action_schemas';
+import { actionSchema, systemActionSchema } from './action_schemas';
 
 export const ruleParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
@@ -132,7 +132,7 @@ export const snoozeScheduleSchema = schema.object({
   skipRecurrences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export const notificationDelaySchema = schema.object({
+export const alertDelaySchema = schema.object({
   active: schema.number(),
 });
 
@@ -147,7 +147,8 @@ export const ruleDomainSchema = schema.object({
   alertTypeId: schema.string(),
   consumer: schema.string(),
   schedule: intervalScheduleSchema,
-  actions: schema.arrayOf(actionDomainSchema),
+  actions: schema.arrayOf(actionSchema),
+  systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduledTaskId: schema.maybe(schema.string()),
@@ -172,7 +173,8 @@ export const ruleDomainSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
-  notificationDelay: schema.maybe(notificationDelaySchema),
+  alertDelay: schema.maybe(alertDelaySchema),
+  legacyId: schema.maybe(schema.nullable(schema.string())),
 });
 
 /**
@@ -187,6 +189,7 @@ export const ruleSchema = schema.object({
   consumer: schema.string(),
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
+  systemActions: schema.maybe(schema.arrayOf(systemActionSchema)),
   params: ruleParamsSchema,
   mapped_params: schema.maybe(mappedParamsSchema),
   scheduledTaskId: schema.maybe(schema.string()),
@@ -210,5 +213,6 @@ export const ruleSchema = schema.object({
   revision: schema.number(),
   running: schema.maybe(schema.nullable(schema.boolean())),
   viewInAppRelativeUrl: schema.maybe(schema.nullable(schema.string())),
-  notificationDelay: schema.maybe(notificationDelaySchema),
+  alertDelay: schema.maybe(alertDelaySchema),
+  legacyId: schema.maybe(schema.nullable(schema.string())),
 });

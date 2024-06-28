@@ -32,11 +32,23 @@ test('ErrorEmbeddable renders an embeddable with markdown message', async () => 
   await waitFor(() => getByTestId('errorMessageMarkdown')); // wait for lazy markdown component
   expect(getByText(/some link/i)).toMatchInlineSnapshot(`
     <a
+      class="euiLink emotion-euiLink-primary"
       href="http://localhost:5601/takeMeThere"
       rel="noopener noreferrer"
       target="_blank"
     >
       some link
+      <span
+        class="emotion-EuiExternalLinkIcon"
+        data-euiicon-type="popout"
+      >
+        External link
+      </span>
+      <span
+        class="emotion-euiScreenReaderOnly"
+      >
+        (opens in a new tab or window)
+      </span>
     </a>
   `);
 });

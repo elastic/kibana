@@ -8,8 +8,9 @@
 
 import { Logger } from '../cli/logger';
 
-export function list(keystore, options = {}) {
+export async function list(keystore, options = {}) {
   const logger = new Logger(options);
+  await keystore.load();
 
   if (!keystore.exists()) {
     return logger.error("ERROR: Kibana keystore not found. Use 'create' command to create one.");

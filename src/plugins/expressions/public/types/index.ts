@@ -40,7 +40,6 @@ export interface IExpressionLoaderParams {
   variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
   debug?: boolean;
-  disableCaching?: boolean;
   customFunctions?: [];
   customRenderers?: [];
   uiState?: unknown;
@@ -52,14 +51,10 @@ export interface IExpressionLoaderParams {
   syncColors?: boolean;
   syncCursor?: boolean;
   syncTooltips?: boolean;
-  // if this is set to true, a veil will be shown when resizing visualizations in response
-  // to a chart resize event (see src/plugins/chart_expressions/common/chart_size_transition_veil.tsx).
-  // This should be only set to true if the client will be responding to the resize events
-  shouldUseSizeTransitionVeil?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   getCompatibleCellValueActions?: ExpressionRenderHandlerParams['getCompatibleCellValueActions'];
   executionContext?: KibanaExecutionContext;
-
+  abortController?: AbortController;
   /**
    * The flag to toggle on emitting partial results.
    * By default, the partial results are disabled.
@@ -71,6 +66,8 @@ export interface IExpressionLoaderParams {
    * By default, it equals 1000.
    */
   throttle?: number;
+
+  allowCache?: boolean;
 }
 
 export interface ExpressionRenderError extends Error {

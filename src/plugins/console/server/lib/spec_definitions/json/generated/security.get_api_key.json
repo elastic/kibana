@@ -10,7 +10,9 @@
       "owner": "__flag__",
       "realm_name": "",
       "username": "",
-      "with_limited_by": "__flag__"
+      "with_limited_by": "__flag__",
+      "active_only": "__flag__",
+      "with_profile_uid": "__flag__"
     },
     "methods": [
       "GET"

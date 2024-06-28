@@ -9,6 +9,7 @@ import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { type DragDropAction, DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import {
   DatasourceMap,
@@ -68,6 +69,10 @@ export function EditorFrame(props: EditorFrameProps) {
     selectFramePublicAPI(state, datasourceMap)
   );
 
+  framePublicAPI.absDateRange = getAbsoluteDateRange(
+    props.plugins.data.query.timefilter.timefilter
+  );
+
   // Using a ref to prevent rerenders in the child components while keeping the latest state
   const getSuggestionForField = useRef<(field: DragDropIdentifier) => Suggestion | undefined>();
   getSuggestionForField.current = (field: DragDropIdentifier) => {
@@ -115,7 +120,10 @@ export function EditorFrame(props: EditorFrameProps) {
   }, []);
 
   return (
-    <RootDragDropProvider dataTestSubj="lnsDragDrop" customMiddleware={telemetryMiddleware}>
+    <RootDragDropProvider
+      initialState={{ dataTestSubjPrefix: 'lnsDragDrop' }}
+      customMiddleware={telemetryMiddleware}
+    >
       <FrameLayout
         bannerMessages={
           bannerMessages.length ? (

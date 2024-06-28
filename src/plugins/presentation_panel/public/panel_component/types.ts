@@ -8,14 +8,13 @@
 
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
-  PhaseEvent,
+  HasParentApi,
+  HasUniqueId,
+  PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesBlockingError,
-  HasUniqueId,
   PublishesPanelDescription,
   PublishesPanelTitle,
-  HasParentApi,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
@@ -37,13 +36,12 @@ export interface PresentationPanelInternalProps<
   componentProps?: Omit<React.ComponentProps<PanelCompatibleComponent<ApiType, PropsType>>, 'ref'>;
 
   showShadow?: boolean;
+  showBorder?: boolean;
   showBadges?: boolean;
   showNotifications?: boolean;
 
   hideHeader?: boolean;
   hideInspector?: boolean;
-
-  onPanelStatusChange?: (info: PhaseEvent) => void;
 
   // TODO remove these in favour of a more generic action management system
   actionPredicate?: (actionId: string) => boolean;
@@ -56,22 +54,27 @@ export interface PresentationPanelInternalProps<
   index?: number;
 }
 
-export type DefaultPresentationPanelApi = Partial<
-  HasUniqueId &
-    PublishesPanelTitle &
-    PublishesDataLoading &
-    PublishesBlockingError &
-    PublishesPanelDescription &
-    PublishesDisabledActionIds &
-    HasParentApi<
-      PresentationContainer &
-        Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
-    >
->;
+/**
+ * The API that any component passed to the `Component` prop of `PresentationPanel` should implement.
+ * Everything in this API is Partial because it is valid for a component to implement none of these methods.
+ */
+export interface DefaultPresentationPanelApi
+  extends HasUniqueId,
+    Partial<
+      PublishesPanelTitle &
+        PublishesDataLoading &
+        PublishesBlockingError &
+        PublishesPanelDescription &
+        PublishesDisabledActionIds &
+        HasParentApi<
+          PresentationContainer &
+            Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
+        >
+    > {}
 
 export type PresentationPanelProps<
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
   PropsType extends {} = {}
 > = Omit<PresentationPanelInternalProps<ApiType, PropsType>, 'Component'> & {
-  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType>>;
+  Component: MaybePromise<PanelCompatibleComponent<ApiType, PropsType> | null>;
 };

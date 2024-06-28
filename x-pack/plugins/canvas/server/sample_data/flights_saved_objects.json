@@ -60,7 +60,7 @@
                 "height": 99,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(DISTINCT OriginAirportID) as total_airports\nFROM kibana_sample_data_flights\"\n| math \"total_airports\"\n| metric \"AIRPORTS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#43988F\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#43988F\" weight=\"normal\" underline=false italic=false}\n| render\n"
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT COUNT(DISTINCT OriginAirportID) as total_airports\nFROM kibana_sample_data_flights\"\n| math \"total_airports\"\n| metric \"AIRPORTS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#43988F\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#43988F\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-096136f5-279d-4d29-a784-1bd33243db29",
@@ -71,7 +71,7 @@
                 "height": 33,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"### LONGEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=10 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| demodata\n| markdown \"### LONGEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=10 align=\"left\" color=\"#FFFFFF\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -83,7 +83,7 @@
                 "height": 92.812409153891,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT MAX(DistanceMiles) as max_distance\nFROM kibana_sample_data_flights\nWHERE DistanceMiles > 0\"\n| math \"max_distance\"\n| formatNumber \"00.0a\"\n| metric \"MILES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT MAX(DistanceMiles) as max_distance\nFROM kibana_sample_data_flights\nWHERE DistanceMiles > 0\"\n| math \"max_distance\"\n| formatNumber \"00.0a\"\n| metric \"MILES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -151,7 +151,7 @@
                 "height": 44,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"TIME IN AIR\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=36 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| demodata\n| markdown \"TIME IN AIR\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=36 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -187,7 +187,7 @@
                 "height": 65,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as total_hours\nFROM kibana_sample_data_flights\"\n| math \"total_hours\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT FLOOR((SUM(FlightTimeMin) % 1440) / 60) as total_hours\nFROM kibana_sample_data_flights\"\n| math \"total_hours\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -199,7 +199,7 @@
                 "height": 39,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"DAYS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n"
+              "expression": "\nkibana\n| selectFilter\n| demodata\n| markdown \"DAYS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-b253908c-b8bd-4ea1-a35f-eae5eb1ae63a",
@@ -210,7 +210,7 @@
                 "height": 65,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT FLOOR(SUM(FlightTimeMin)/1440) as total_days\nFROM kibana_sample_data_flights\"\n| math \"total_days\"\n| formatNumber \"00a\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT FLOOR(SUM(FlightTimeMin)/1440) as total_days\nFROM kibana_sample_data_flights\"\n| math \"total_days\"\n| formatNumber \"00a\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -222,7 +222,7 @@
                 "height": 54,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as total_minutes\nFROM kibana_sample_data_flights\"\n| math \"total_minutes\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT ((SUM(FlightTimeMin) % 1440) / 60 ) as total_minutes\nFROM kibana_sample_data_flights\"\n| math \"total_minutes\"\n| formatNumber \"00\"\n| metric\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=48 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -234,7 +234,7 @@
                 "height": 39,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"HOURS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| demodata\n| markdown \"HOURS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -246,7 +246,7 @@
                 "height": 39,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"MINS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| demodata\n| markdown \"MINS\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"center\" color=\"#48A8E0\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -280,7 +280,7 @@
                 "height": 99,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql query=\"SELECT COUNT(*) as total_flights\nFROM kibana_sample_data_flights\"\n| math \"total_flights\"\n| formatNumber \"0a]\"\n| metric \"FLIGHTS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#4184A5\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#4184A5\" weight=\"normal\" underline=false italic=false}\n| render\n"
+              "expression": "\nkibana\n| selectFilter\n| essql query=\"SELECT COUNT(*) as total_flights\nFROM kibana_sample_data_flights\"\n| math \"total_flights\"\n| formatNumber \"0a]\"\n| metric \"FLIGHTS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#4184A5\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#4184A5\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-e162c0b4-9393-43f9-8324-0263f40b4b85",
@@ -302,7 +302,7 @@
                 "height": 100,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT MIN(DistanceMiles) as min_distance\nFROM kibana_sample_data_flights\nWHERE DistanceMiles > 0\"\n| math \"min_distance\"\n| formatNumber \"00.0a\"\n| metric \"MILES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT MIN(DistanceMiles) as min_distance\nFROM kibana_sample_data_flights\nWHERE DistanceMiles > 0\"\n| math \"min_distance\"\n| formatNumber \"00.0a\"\n| metric \"MILES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -325,7 +325,7 @@
                 "height": 30.5,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"SHORTEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\n| render\n"
+              "expression": "\nkibana\n| selectFilter\n| demodata\n| markdown \"SHORTEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#7EA030\" weight=\"normal\" underline=false italic=false}\n| render\n"
             },
             {
               "id": "element-79393fba-8da9-4884-a280-e2a87e163f1a",
@@ -347,7 +347,7 @@
                 "height": 30.5,
                 "angle": 0
               },
-              "expression": "\nfilters\n| demodata\n| markdown \"LONGEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| demodata\n| markdown \"LONGEST FLIGHT\"\nfont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"left\" color=\"#EFB341\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -382,7 +382,7 @@
                 "height": 96.687590846109,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(*) as total_cancellations\nFROM kibana_sample_data_flights\nWHERE Cancelled = true\"\n| math \"total_cancellations\"\n| formatNumber \"0a\"\n| metric \"CANCELLATIONS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#D88734\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#D88734\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT COUNT(*) as total_cancellations\nFROM kibana_sample_data_flights\nWHERE Cancelled = true\"\n| math \"total_cancellations\"\n| formatNumber \"0a\"\n| metric \"CANCELLATIONS\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#D88734\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#D88734\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {
@@ -406,7 +406,7 @@
                 "height": 105,
                 "angle": 0
               },
-              "expression": "\nfilters\n| essql\nquery=\"SELECT COUNT(DISTINCT OriginCountry) as total_countries\nFROM kibana_sample_data_flights\"\n| math \"total_countries\"\n| metric \"COUNTRIES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#CB3072\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#CB3072\" weight=\"normal\" underline=false italic=false}\n| render\n",
+              "expression": "\nkibana\n| selectFilter\n| essql\nquery=\"SELECT COUNT(DISTINCT OriginCountry) as total_countries\nFROM kibana_sample_data_flights\"\n| math \"total_countries\"\n| metric \"COUNTRIES\"\nmetricFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=60 align=\"right\" color=\"#CB3072\" weight=\"normal\" underline=false italic=false}\nlabelFont={font family=\"'Open Sans', Helvetica, Arial, sans-serif\" size=24 align=\"right\" color=\"#CB3072\" weight=\"normal\" underline=false italic=false}\n| render\n",
               "filter": null
             },
             {

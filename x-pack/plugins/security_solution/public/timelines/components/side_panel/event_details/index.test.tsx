@@ -7,7 +7,6 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { EventDetailsPanel } from '.';
-import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -47,21 +46,15 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
-  return {
-    isIsolationSupported: jest.fn().mockReturnValue(true),
-  };
-});
-
 jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn().mockReturnValue('testSpace'),
 }));
 
 jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
+  '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',
   () => {
     return {
-      useHostIsolationStatus: jest.fn().mockReturnValue({
+      useEndpointHostIsolationStatus: jest.fn().mockReturnValue({
         loading: false,
         isIsolated: false,
         agentStatus: 'healthy',
@@ -98,12 +91,6 @@ jest.mock(
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
 
-jest.mock('../../../../common/utils/endpoint_alert_check', () => {
-  return {
-    isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
-    isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
-  };
-});
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => {

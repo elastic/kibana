@@ -79,7 +79,7 @@ interface CustomEditorConfig {
  * A visualization type definition representing a spec of one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
  */
-export interface VisTypeDefinition<TVisParams> {
+export interface VisTypeDefinition<TVisParams extends VisParams> {
   /**
    * Visualization unique name
    */
@@ -217,4 +217,6 @@ export interface VisTypeDefinition<TVisParams> {
    * have incosistencies in legacy visLib visualizations
    */
   readonly visConfig: Record<string, any>;
+
+  readonly order?: number;
 }

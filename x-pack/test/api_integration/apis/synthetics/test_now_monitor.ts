@@ -12,6 +12,7 @@ import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('RunTestManually', function () {
@@ -38,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
       const resp = await monitorTestService.addMonitor(newMonitor);
 
       const res = await supertest
-        .get(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${resp.id}`)
+        .post(SYNTHETICS_API_URLS.TRIGGER_MONITOR + `/${resp.id}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
 
@@ -46,22 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof result.testRunId).to.eql('string');
       expect(typeof result.configId).to.eql('string');
       expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-      expect(result.locations).to.eql([
-        {
-          id: 'eu-west-01',
-          label: 'Europe East',
-          geo: { lat: 33.2343132435, lon: 73.2342343434 },
-          url: 'https://example-url.com',
-          isServiceManaged: true,
-        },
-        {
-          id: 'eu-west-02',
-          label: 'Europe West',
-          geo: { lat: 33.2343132435, lon: 73.2342343434 },
-          url: 'https://example-url.com',
-          isServiceManaged: true,
-        },
-      ]);
+      expect(result.locations).to.eql([LOCAL_LOCATION]);
 
       expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
         omit(newMonitor, ['id', 'config_id'])
@@ -79,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const res = await supertest
-        .get(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/${resp.body.id}`)
+        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.TRIGGER_MONITOR}/${resp.body.id}`)
         .set('kbn-xsrf', 'true')
         .expect(200);
 
@@ -87,22 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof result.testRunId).to.eql('string');
       expect(typeof result.configId).to.eql('string');
       expect(result.schedule).to.eql({ number: '5', unit: 'm' });
-      expect(result.locations).to.eql([
-        {
-          id: 'eu-west-01',
-          label: 'Europe East',
-          geo: { lat: 33.2343132435, lon: 73.2342343434 },
-          url: 'https://example-url.com',
-          isServiceManaged: true,
-        },
-        {
-          id: 'eu-west-02',
-          label: 'Europe West',
-          geo: { lat: 33.2343132435, lon: 73.2342343434 },
-          url: 'https://example-url.com',
-          isServiceManaged: true,
-        },
-      ]);
+      expect(result.locations).to.eql([LOCAL_LOCATION]);
 
       expect(omit(result.monitor, ['id', 'config_id'])).to.eql(
         omit(newMonitor, ['id', 'config_id'])

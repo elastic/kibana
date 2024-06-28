@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import type { TransformPivotConfig } from '../../../../../../common/types/transform';
 
 export const getTransformConfigMock = (): TransformPivotConfig => ({
   id: 'the-transform-id',

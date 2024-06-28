@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
@@ -15,7 +16,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { DeleteAction } from './use_delete_action';
+import type { DeleteAction } from './use_delete_action';
 
 export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,

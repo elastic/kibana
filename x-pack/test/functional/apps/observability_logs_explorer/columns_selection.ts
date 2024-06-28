@@ -58,9 +58,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               mode: 'absolute',
             },
             columns: [
-              { field: 'resource' },
-              { field: 'content' },
-              { field: 'data_stream.namespace' },
+              {
+                smartField: 'resource',
+                type: 'smart-field',
+                fallbackFields: ['host.name', 'service.name'],
+              },
+              {
+                smartField: 'content',
+                type: 'smart-field',
+                fallbackFields: ['message'],
+              },
+              { field: 'data_stream.namespace', type: 'document-field' },
             ],
           },
         });
@@ -122,9 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(cellValue.includes('error.message')).to.be(false);
           expect(cellValue.includes('event.original')).to.be(false);
 
-          const cellAttribute = await cellElement.findByTestSubject(
-            'logsExplorerCellDescriptionList'
-          );
+          const cellAttribute = await cellElement.findByTestSubject('discoverCellDescriptionList');
           expect(cellAttribute).not.to.be.empty();
         });
       });

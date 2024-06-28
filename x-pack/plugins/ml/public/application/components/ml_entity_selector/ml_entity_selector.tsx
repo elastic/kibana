@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useState, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiComboBox,
   type EuiComboBoxOptionOption,

@@ -26,6 +26,8 @@
 
 import './index.scss';
 
+import 'reflect-metadata';
+
 export type { DocLinksStart } from '@kbn/core-doc-links-browser';
 export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 export type { I18nStart } from '@kbn/core-i18n-browser';
@@ -94,26 +96,53 @@ export type {
   UiSettingsType,
 } from '@kbn/core-ui-settings-common';
 
-export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 export type {
   AnalyticsClient,
+  AnalyticsClientInitContext,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  KbnAnalyticsWindowApi,
+  // Types for the registerShipper API
+  ShipperClassConstructor,
+  RegisterShipperOpts,
+  // Types for the optIn API
+  OptInConfig,
+  OptInConfigPerType,
+  ShipperName,
+  // Types for the registerContextProvider API
+  ContextProviderOpts,
+  ContextProviderName,
+  // Types for the registerEventType API
+  EventTypeOpts,
+  // Events
   Event,
   EventContext,
   EventType,
-  EventTypeOpts,
-  IShipper,
-  ShipperClassConstructor,
-  OptInConfig,
-  ContextProviderOpts,
   TelemetryCounter,
   TelemetryCounterType,
-} from '@kbn/analytics-client';
+  // Schema
+  RootSchema,
+  SchemaObject,
+  SchemaArray,
+  SchemaChildValue,
+  SchemaMeta,
+  SchemaValue,
+  SchemaMetaOptional,
+  PossibleSchemaTypes,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaNumberTypes,
+  AllowedSchemaStringTypes,
+  AllowedSchemaTypes,
+  // Shippers
+  IShipper,
+} from '@kbn/core-analytics-browser';
 
-export { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
+export { AppStatus } from '@kbn/core-application-browser';
 export type {
   ApplicationSetup,
   ApplicationStart,
   App,
+  AppDeepLinkLocations,
   AppMount,
   AppUnmount,
   AppMountParameters,
@@ -196,6 +225,34 @@ export type {
 } from '@kbn/core-http-browser';
 
 export type { IHttpFetchError } from '@kbn/core-http-browser';
+
+export type {
+  AuthenticatedUser,
+  User,
+  AuthenticationProvider,
+  UserRealm,
+} from '@kbn/core-security-common';
+export type {
+  SecurityServiceSetup,
+  SecurityServiceStart,
+  CoreAuthenticationService,
+  CoreSecurityDelegateContract,
+} from '@kbn/core-security-browser';
+
+export type {
+  UserProfile,
+  UserProfileLabels,
+  UserProfileWithSecurity,
+  UserProfileUserInfoWithSecurity,
+  UserProfileUserInfo,
+  UserProfileData,
+} from '@kbn/core-user-profile-common';
+export type {
+  UserProfileServiceSetup,
+  UserProfileServiceStart,
+  UserProfileService,
+  CoreUserProfileDelegateContract,
+} from '@kbn/core-user-profile-browser';
 
 export type {
   OverlayStart,

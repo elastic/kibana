@@ -11,3 +11,4 @@ export * from './search_bar_customization';
 export * from './top_nav_customization';
 export * from './histogram_customization';
 export * from './data_table_customisation';
+export * from './field_list_customisation';

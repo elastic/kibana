@@ -28,7 +28,7 @@ export const dashboardReadonlyBadge = {
 export const dashboardManagedBadge = {
   getTooltip: () =>
     i18n.translate('dashboard.badge.managed.tooltip', {
-      defaultMessage: 'This dashboard is system managed. Clone this dashboard to make changes.',
+      defaultMessage: 'Elastic manages this dashboard. Clone it to make changes.',
     }),
 };
 
@@ -99,13 +99,17 @@ export const getNewDashboardTitle = () =>
     defaultMessage: 'New Dashboard',
   });
 
-export const getPanelAddedSuccessString = (savedObjectName: string) =>
-  i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
-    defaultMessage: '{savedObjectName} was added',
-    values: {
-      savedObjectName,
-    },
-  });
+export const getPanelAddedSuccessString = (savedObjectName?: string) =>
+  savedObjectName
+    ? i18n.translate('dashboard.addPanel.newEmbeddableAddedSuccessMessageTitle', {
+        defaultMessage: '{savedObjectName} was added',
+        values: {
+          savedObjectName,
+        },
+      })
+    : i18n.translate('dashboard.addPanel.newEmbeddableWithNoTitleAddedSuccessMessageTitle', {
+        defaultMessage: 'A panel was added',
+      });
 
 export const getPanelTooOldErrorString = () =>
   i18n.translate('dashboard.loadURLError.PanelTooOld', {
@@ -185,11 +189,11 @@ export const topNavStrings = {
       defaultMessage: 'Quick save your dashboard without any prompts',
     }),
   },
-  saveAs: {
-    label: i18n.translate('dashboard.topNave.saveAsButtonAriaLabel', {
+  editModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.editModeInteractiveSaveButtonAriaLabel', {
       defaultMessage: 'save as',
     }),
-    description: i18n.translate('dashboard.topNave.saveAsConfigDescription', {
+    description: i18n.translate('dashboard.topNave.editModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
     }),
   },
@@ -225,11 +229,11 @@ export const topNavStrings = {
       defaultMessage: 'Open dashboard settings',
     }),
   },
-  clone: {
-    label: i18n.translate('dashboard.topNave.cloneButtonAriaLabel', {
-      defaultMessage: 'clone',
+  viewModeInteractiveSave: {
+    label: i18n.translate('dashboard.topNave.viewModeInteractiveSaveButtonAriaLabel', {
+      defaultMessage: 'duplicate',
     }),
-    description: i18n.translate('dashboard.topNave.cloneConfigDescription', {
+    description: i18n.translate('dashboard.topNave.viewModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },

@@ -41,23 +41,28 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
         data-test-subj={getTestId('badArgument')}
       >
         <div data-test-subj={getTestId('badArgument-message')}>{store.errorMessage}</div>
-        <EuiSpacer size="s" />
-        <CommandInputUsage commandDef={command.commandDefinition} />
-        <ConsoleCodeBlock>
-          <EuiSpacer size="m" />
-          <FormattedMessage
-            id="xpack.securitySolution.console.badArgument.helpMessage"
-            defaultMessage="Enter {helpCmd} for further assistance."
-            values={{
-              helpCmd: (
-                <ConsoleCodeBlock
-                  bold
-                  inline
-                >{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
-              ),
-            }}
-          />
-        </ConsoleCodeBlock>
+
+        {!command.commandDefinition.helpHidden && (
+          <div data-test-subj={getTestId('badArgument-commandUsage')}>
+            <EuiSpacer size="s" />
+            <CommandInputUsage commandDef={command.commandDefinition} />
+            <ConsoleCodeBlock>
+              <EuiSpacer size="m" />
+              <FormattedMessage
+                id="xpack.securitySolution.console.badArgument.helpMessage"
+                defaultMessage="Enter {helpCmd} for further assistance."
+                values={{
+                  helpCmd: (
+                    <ConsoleCodeBlock
+                      bold
+                      inline
+                    >{`${command.commandDefinition.name} --help`}</ConsoleCodeBlock>
+                  ),
+                }}
+              />
+            </ConsoleCodeBlock>
+          </div>
+        )}
       </UnsupportedMessageCallout>
     );
   }

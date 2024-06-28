@@ -14,16 +14,7 @@ import {
   Subject,
   type Subscription,
 } from 'rxjs';
-import {
-  map,
-  distinctUntilChanged,
-  filter,
-  tap,
-  debounceTime,
-  takeUntil,
-  delay,
-} from 'rxjs/operators';
-import { sortBy } from 'lodash';
+import { map, distinctUntilChanged, filter, tap, debounceTime, takeUntil, delay } from 'rxjs';
 import { isDeepStrictEqual } from 'util';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels, type CoreStatus, type ServiceStatus } from '@kbn/core-status-common';
@@ -45,7 +36,6 @@ export interface Deps {
 interface PluginData {
   [name: PluginName]: {
     name: PluginName;
-    depth: number; // depth of this plugin in the dependency tree (root plugins will have depth = 1)
     dependencies: PluginName[];
     reverseDependencies: PluginName[];
     reportedStatus?: PluginStatus;
@@ -81,7 +71,8 @@ export class PluginsStatusService {
   constructor(deps: Deps, private readonly statusTimeoutMs: number = STATUS_TIMEOUT_MS) {
     this.pluginData = this.initPluginData(deps.pluginDependencies);
     this.rootPlugins = this.getRootPlugins();
-    this.orderedPluginNames = this.getOrderedPluginNames();
+    // plugin dependencies keys are already sorted
+    this.orderedPluginNames = [...deps.pluginDependencies.keys()];
 
     this.coreSubscription = deps.core$
       .pipe(
@@ -216,23 +207,20 @@ export class PluginsStatusService {
   private initPluginData(pluginDependencies: ReadonlyMap<PluginName, PluginName[]>): PluginData {
     const pluginData: PluginData = {};
 
-    if (pluginDependencies) {
-      pluginDependencies.forEach((dependencies, name) => {
-        pluginData[name] = {
-          name,
-          depth: 0,
-          dependencies,
-          reverseDependencies: [],
-          derivedStatus: defaultStatus,
-        };
-      });
+    pluginDependencies.forEach((dependencies, name) => {
+      pluginData[name] = {
+        name,
+        dependencies,
+        reverseDependencies: [],
+        derivedStatus: defaultStatus,
+      };
+    });
 
-      pluginDependencies.forEach((dependencies, name) => {
-        dependencies.forEach((dependency) => {
-          pluginData[dependency].reverseDependencies.push(name);
-        });
+    pluginDependencies.forEach((dependencies, name) => {
+      dependencies.forEach((dependency) => {
+        pluginData[dependency].reverseDependencies.push(name);
       });
-    }
+    });
 
     return pluginData;
   }
@@ -245,36 +233,6 @@ export class PluginsStatusService {
   private getRootPlugins(): PluginName[] {
     return Object.keys(this.pluginData).filter(
       (plugin) => this.pluginData[plugin].dependencies.length === 0
-    );
-  }
-
-  /**
-   * Obtain a list of plugins names, ordered by depth.
-   * @see {calculateDepthRecursive}
-   * @returns {PluginName[]} a list of plugins, ordered by depth + name
-   */
-  private getOrderedPluginNames(): PluginName[] {
-    this.rootPlugins.forEach((plugin) => {
-      this.calculateDepthRecursive(plugin, 1);
-    });
-
-    return sortBy(Object.values(this.pluginData), ['depth', 'name']).map(({ name }) => name);
-  }
-
-  /**
-   * Calculate the depth of the given plugin, knowing that it's has at least the specified depth
-   * The depth of a plugin is determined by how many levels of dependencies the plugin has above it.
-   * We define root plugins as depth = 1, plugins that only depend on root plugins will have depth = 2
-   * and so on so forth
-   * @param {PluginName} plugin the name of the plugin whose depth must be calculated
-   * @param {number} depth the minimum depth that we know for sure this plugin has
-   */
-  private calculateDepthRecursive(plugin: PluginName, depth: number): void {
-    const pluginData = this.pluginData[plugin];
-    pluginData.depth = Math.max(pluginData.depth, depth);
-    const newDepth = depth + 1;
-    pluginData.reverseDependencies.forEach((revDep) =>
-      this.calculateDepthRecursive(revDep, newDepth)
     );
   }
 

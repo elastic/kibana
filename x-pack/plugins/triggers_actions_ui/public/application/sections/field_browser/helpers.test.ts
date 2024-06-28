@@ -16,7 +16,7 @@ import {
   filterSelectedBrowserFields,
 } from './helpers';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 
 describe('helpers', () => {
   describe('getCategory', () => {

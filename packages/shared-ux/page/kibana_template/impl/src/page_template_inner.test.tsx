@@ -48,11 +48,22 @@ describe('KibanaPageTemplateInner', () => {
       );
       expect(component).toMatchSnapshot();
     });
+
+    test('no pageHeader, isEmptyState, emptyPageBody', () => {
+      const component = shallow(
+        <KibanaPageTemplateInner
+          isEmptyState={true}
+          pageHeader={undefined}
+          emptyPageBody={<div>{'custom empty page body'}</div>}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    });
   });
 
   test('page sidebar', () => {
     const component = shallow(<KibanaPageTemplateInner pageSideBar={<>Test</>} />);
     expect(component).toMatchSnapshot();
-    expect(component.find('EuiPageSidebar')).toHaveLength(1);
+    expect(component.find('_EuiPageSidebar')).toHaveLength(1);
   });
 });

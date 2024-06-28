@@ -11,9 +11,10 @@ export interface Tag {
   name: string;
   description: string;
   color: string;
+  managed: boolean;
 }
 
-export type TableRowAction = 'delete';
+export type TableRowAction = 'delete' | 'edit';
 
 export type RowActions = {
   [action in TableRowAction]?: {

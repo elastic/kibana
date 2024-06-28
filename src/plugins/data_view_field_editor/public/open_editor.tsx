@@ -15,13 +15,14 @@ import { euiFlyoutClassname } from './constants';
 import type { ApiService } from './lib/api';
 import type {
   DataPublicPluginStart,
-  DataView,
   UsageCollectionStart,
   RuntimeType,
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   DataViewField,
+  DataViewLazy,
 } from './shared_imports';
+import { DataView } from './shared_imports';
 import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';
 
@@ -34,7 +35,7 @@ export interface OpenFieldEditorOptions {
    * context containing the data view the field belongs to
    */
   ctx: {
-    dataView: DataView;
+    dataView: DataView | DataViewLazy;
   };
   /**
    * action to take after field is saved
@@ -72,7 +73,7 @@ export const getFieldEditorOpener =
     usageCollection,
     apiService,
   }: Dependencies) =>
-  (options: OpenFieldEditorOptions): CloseEditor => {
+  async (options: OpenFieldEditorOptions): Promise<CloseEditor> => {
     const { uiSettings, overlays, docLinks, notifications, settings, theme } = core;
     const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
       uiSettings,
@@ -91,12 +92,12 @@ export const getFieldEditorOpener =
       canCloseValidator.current = args.canCloseValidator;
     };
 
-    const openEditor = ({
+    const openEditor = async ({
       onSave,
       fieldName: fieldNameToEdit,
       fieldToCreate,
-      ctx: { dataView },
-    }: OpenFieldEditorOptions): CloseEditor => {
+      ctx: { dataView: dataViewLazyOrNot },
+    }: OpenFieldEditorOptions): Promise<CloseEditor> => {
       const closeEditor = () => {
         if (overlayRef) {
           overlayRef.close();
@@ -113,7 +114,7 @@ export const getFieldEditorOpener =
       };
 
       const getRuntimeField = (name: string) => {
-        const fld = dataView.getAllRuntimeFields()[name];
+        const fld = dataViewLazyOrNot.getAllRuntimeFields()[name];
         return {
           name,
           runtimeField: fld,
@@ -121,6 +122,7 @@ export const getFieldEditorOpener =
           esTypes: [],
           type: undefined,
           customLabel: undefined,
+          customDescription: undefined,
           count: undefined,
           spec: {
             parentName: undefined,
@@ -128,13 +130,18 @@ export const getFieldEditorOpener =
         };
       };
 
+      const dataView =
+        dataViewLazyOrNot instanceof DataView
+          ? dataViewLazyOrNot
+          : await dataViews.toDataView(dataViewLazyOrNot);
+
       const dataViewField = fieldNameToEdit
         ? dataView.getFieldByName(fieldNameToEdit) || getRuntimeField(fieldNameToEdit)
         : undefined;
 
       if (fieldNameToEdit && !dataViewField) {
         const err = i18n.translate('indexPatternFieldEditor.noSuchFieldName', {
-          defaultMessage: "Field named '{fieldName}' not found on index pattern",
+          defaultMessage: "Field named ''{fieldName}'' not found on index pattern",
           values: { fieldName: fieldNameToEdit },
         });
         notifications.toasts.addDanger(err);
@@ -159,6 +166,7 @@ export const getFieldEditorOpener =
           field = {
             name: fieldNameToEdit!,
             customLabel: dataViewField.customLabel,
+            customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
             format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             ...dataView.getRuntimeField(fieldNameToEdit!)!,
@@ -169,6 +177,7 @@ export const getFieldEditorOpener =
             name: fieldNameToEdit!,
             type: (dataViewField?.esTypes ? dataViewField.esTypes[0] : 'keyword') as RuntimeType,
             customLabel: dataViewField.customLabel,
+            customDescription: dataViewField.customDescription,
             popularity: dataViewField.count,
             format: dataView.getFormatterForFieldNoDefault(fieldNameToEdit!)?.toJSON(),
             parentName: dataViewField.spec.parentName,
@@ -197,7 +206,7 @@ export const getFieldEditorOpener =
               uiSettings={uiSettings}
             />
           </KibanaReactContextProvider>,
-          { theme: core.theme, i18n: core.i18n }
+          core
         ),
         {
           className: euiFlyoutClassname,
@@ -223,6 +232,8 @@ export const getFieldEditorOpener =
           },
           maskProps: {
             className: 'indexPatternFieldEditorMaskOverlay',
+            // // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+            style: 'z-index: 1003', // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
           },
         }
       );

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { MutableRefObject } from 'react';
-import { CellActionExecutionContext } from '../types';
+import type { MutableRefObject } from 'react';
+import type { CellActionExecutionContext } from '../types';
 
 export const makeAction = (actionsName: string, icon: string = 'icon', order?: number) => ({
   id: actionsName,
@@ -39,6 +39,6 @@ export const makeActionContext = (
     },
   ],
   nodeRef: {} as MutableRefObject<HTMLElement>,
-  metadata: undefined,
+  metadata: { dataViewId: 'mockDataViewId' },
   ...override,
 });

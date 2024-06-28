@@ -10,20 +10,19 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AGGREGATION_PRECISION_THRESHOLD,
   ASSETS_SAMPLE_GRANULARITY,
-  CLOUD_DEFEND,
   CLOUD_SECURITY_TASK_TYPE,
   CNVM,
   CSPM,
   KSPM,
   METERING_CONFIGS,
   THRESHOLD_MINUTES,
+  BILLABLE_ASSETS_CONFIG,
 } from './constants';
 import type { Tier, UsageRecord } from '../types';
 import type {
   CloudSecurityMeteringCallbackInput,
   CloudSecuritySolutions,
   AssetCountAggregation,
-  CloudDefendAssetCountAggregation,
 } from './types';
 
 export const getUsageRecords = (
@@ -48,20 +47,22 @@ export const getUsageRecords = (
       assetCountAggregation.min_timestamp.value_as_string
     ).toISOString();
 
-    const creationTimestamp = new Date().toISOString();
-
-    const subType =
-      cloudSecuritySolution === CLOUD_DEFEND
-        ? `${CLOUD_DEFEND}_block_action_enabled_${assetCountAggregation.key_as_string}`
-        : cloudSecuritySolution;
+    const creationTimestamp = new Date();
+    const minutes = creationTimestamp.getMinutes();
+    if (minutes >= 30) {
+      creationTimestamp.setMinutes(30, 0, 0);
+    } else {
+      creationTimestamp.setMinutes(0, 0, 0);
+    }
+    const roundedCreationTimestamp = creationTimestamp.toISOString();
 
     const usageRecord: UsageRecord = {
-      id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${creationTimestamp}`,
+      id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
       usage_timestamp: minTimestamp,
-      creation_timestamp: creationTimestamp,
+      creation_timestamp: creationTimestamp.toISOString(),
       usage: {
         type: CLOUD_SECURITY_TASK_TYPE,
-        sub_type: subType,
+        sub_type: cloudSecuritySolution,
         quantity: assetCount,
         period_seconds: periodSeconds,
       },
@@ -80,28 +81,6 @@ export const getUsageRecords = (
 export const getAggregationByCloudSecuritySolution = (
   cloudSecuritySolution: CloudSecuritySolutions
 ) => {
-  if (cloudSecuritySolution === CLOUD_DEFEND) {
-    return {
-      asset_count_groups: {
-        terms: {
-          field: 'cloud_defend.block_action_enabled',
-        },
-        aggs: {
-          unique_assets: {
-            cardinality: {
-              field: METERING_CONFIGS[cloudSecuritySolution].assets_identifier,
-            },
-          },
-          min_timestamp: {
-            min: {
-              field: '@timestamp',
-            },
-          },
-        },
-      },
-    };
-  }
-
   return {
     unique_assets: {
       cardinality: {
@@ -123,16 +102,6 @@ export const getSearchQueryByCloudSecuritySolution = (
 ) => {
   const mustFilters = [];
 
-  if (cloudSecuritySolution === CLOUD_DEFEND) {
-    mustFilters.push({
-      range: {
-        '@timestamp': {
-          gt: searchFrom.toISOString(),
-        },
-      },
-    });
-  }
-
   if (
     cloudSecuritySolution === CSPM ||
     cloudSecuritySolution === KSPM ||
@@ -148,9 +117,18 @@ export const getSearchQueryByCloudSecuritySolution = (
   }
 
   if (cloudSecuritySolution === CSPM || cloudSecuritySolution === KSPM) {
+    const billableAssetsConfig = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution];
+
     mustFilters.push({
       term: {
         'rule.benchmark.posture_type': cloudSecuritySolution,
+      },
+    });
+
+    // filter in only billable assets
+    mustFilters.push({
+      terms: {
+        [billableAssetsConfig.filter_attribute]: billableAssetsConfig.values,
       },
     });
   }
@@ -183,16 +161,6 @@ export const getAssetAggByCloudSecuritySolution = async (
   searchFrom: Date
 ): Promise<AssetCountAggregation[]> => {
   const assetsAggQuery = getAssetAggQueryByCloudSecuritySolution(cloudSecuritySolution, searchFrom);
-
-  if (cloudSecuritySolution === CLOUD_DEFEND) {
-    const response = await esClient.search<unknown, CloudDefendAssetCountAggregation>(
-      assetsAggQuery
-    );
-
-    if (!response.aggregations || !response.aggregations.asset_count_groups.buckets.length)
-      return [];
-    return response.aggregations.asset_count_groups.buckets;
-  }
 
   const response = await esClient.search<unknown, AssetCountAggregation>(assetsAggQuery);
   if (!response.aggregations) return [];
@@ -248,7 +216,8 @@ export const getCloudSecurityUsageRecord = async ({
 
     if (!(await indexHasDataInDateRange(esClient, cloudSecuritySolution, searchFrom))) return;
 
-    const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
+    // const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
+    const periodSeconds = 1800; // Workaround to prevent overbilling by charging for a constant time window. The issue should be resolved in https://github.com/elastic/security-team/issues/9424.
 
     const assetCountAggregations = await getAssetAggByCloudSecuritySolution(
       esClient,

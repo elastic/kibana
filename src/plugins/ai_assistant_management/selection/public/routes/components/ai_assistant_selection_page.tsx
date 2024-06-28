@@ -25,6 +25,7 @@ export function AiAssistantSelectionPage() {
   const { capabilities, setBreadcrumbs, navigateToApp } = useAppContext();
 
   const observabilityAIAssistantEnabled = capabilities.observabilityAIAssistant.show;
+  const securityAIAssistantEnabled = capabilities.securitySolutionAssistant?.['ai-assistant'];
 
   useEffect(() => {
     setBreadcrumbs([
@@ -74,7 +75,7 @@ export function AiAssistantSelectionPage() {
                     <EuiCallOut
                       iconType="warning"
                       title={i18n.translate(
-                        'aiAssistantManagementSelection.aiAssistantSelectionPage.thisFeatureIsDisabledCallOutLabel',
+                        'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityAi.thisFeatureIsDisabledCallOutLabel',
                         {
                           defaultMessage:
                             'This feature is disabled. It can be enabled from Spaces > Features.',
@@ -109,7 +110,56 @@ export function AiAssistantSelectionPage() {
             )}
             titleSize="xs"
             onClick={() =>
-              navigateToApp('management', { path: 'kibana/aiAssistantManagementObservability' })
+              navigateToApp('management', { path: 'kibana/observabilityAiAssistantManagement' })
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiCard
+            description={
+              <div>
+                {!securityAIAssistantEnabled ? (
+                  <>
+                    <EuiSpacer size="s" />
+                    <EuiCallOut
+                      iconType="warning"
+                      title={i18n.translate(
+                        'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAi.thisFeatureIsDisabledCallOutLabel',
+                        {
+                          defaultMessage:
+                            'This feature is disabled. It can be enabled from Spaces > Features.',
+                        }
+                      )}
+                      size="s"
+                    />
+                    <EuiSpacer size="s" />
+                  </>
+                ) : null}
+                <EuiLink
+                  data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
+                  external
+                  target="_blank"
+                  href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                >
+                  {i18n.translate(
+                    'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
+                    { defaultMessage: 'Documentation' }
+                  )}
+                </EuiLink>
+              </div>
+            }
+            display="plain"
+            hasBorder
+            icon={<EuiIcon size="l" type="logoSecurity" />}
+            isDisabled={!securityAIAssistantEnabled}
+            layout="horizontal"
+            title={i18n.translate(
+              'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',
+              { defaultMessage: 'Elastic AI Assistant for Security' }
+            )}
+            titleSize="xs"
+            onClick={() =>
+              navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
             }
           />
         </EuiFlexItem>

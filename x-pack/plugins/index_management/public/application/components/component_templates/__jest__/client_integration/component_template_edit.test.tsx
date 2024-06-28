@@ -74,6 +74,7 @@ describe('<ComponentTemplateEdit />', () => {
   const COMPONENT_TEMPLATE_NAME = 'comp-1';
   const COMPONENT_TEMPLATE_TO_EDIT = {
     name: COMPONENT_TEMPLATE_NAME,
+    deprecated: true,
     template: {
       settings: { number_of_shards: 1 },
     },
@@ -106,6 +107,7 @@ describe('<ComponentTemplateEdit />', () => {
     const { exists, find } = testBed;
 
     expect(exists('pageTitle')).toBe(true);
+    expect(exists('deprecatedTemplateCallout')).toBe(true);
     expect(find('pageTitle').text()).toEqual(
       `Edit component template '${COMPONENT_TEMPLATE_NAME}'`
     );

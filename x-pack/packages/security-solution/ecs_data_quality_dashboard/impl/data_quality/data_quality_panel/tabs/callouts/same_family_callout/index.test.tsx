@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsVersion } from '@kbn/ecs';
+import { EcsVersion } from '@elastic/ecs';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
@@ -21,7 +21,7 @@ describe('SameFamilyCallout', () => {
     render(
       <TestProviders>
         <SameFamilyCallout
-          enrichedFieldMetadata={mockPartitionedFieldMetadataWithSameFamily.sameFamily}
+          ecsBasedFieldMetadata={mockPartitionedFieldMetadataWithSameFamily.sameFamily}
         >
           <div data-test-subj="children">{content}</div>
         </SameFamilyCallout>

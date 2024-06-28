@@ -17,47 +17,128 @@ import {
   closeRightPanelAction,
   previousPreviewPanelAction,
   openPreviewPanelAction,
+  urlChangedAction,
 } from './actions';
 import { initialState } from './state';
 
 export const reducer = createReducer(initialState, (builder) => {
-  builder.addCase(openPanelsAction, (state, { payload: { preview, left, right } }) => {
-    state.preview = preview ? [preview] : [];
-    state.right = right;
-    state.left = left;
+  builder.addCase(openPanelsAction, (state, { payload: { preview, left, right, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = right;
+      state.byId[id].left = left;
+      state.byId[id].preview = preview ? [preview] : undefined;
+    } else {
+      state.byId[id] = {
+        left,
+        right,
+        preview: preview ? [preview] : undefined,
+      };
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(openLeftPanelAction, (state, { payload }) => {
-    state.left = payload;
+  builder.addCase(openLeftPanelAction, (state, { payload: { left, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].left = left;
+    } else {
+      state.byId[id] = {
+        left,
+        right: undefined,
+        preview: undefined,
+      };
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(openRightPanelAction, (state, { payload }) => {
-    state.right = payload;
+  builder.addCase(openRightPanelAction, (state, { payload: { right, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = right;
+    } else {
+      state.byId[id] = {
+        right,
+        left: undefined,
+        preview: undefined,
+      };
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(openPreviewPanelAction, (state, { payload }) => {
-    state.preview.push(payload);
+  builder.addCase(openPreviewPanelAction, (state, { payload: { preview, id } }) => {
+    if (id in state.byId) {
+      if (state.byId[id].preview) {
+        state.byId[id].preview?.push(preview);
+      } else {
+        state.byId[id].preview = preview ? [preview] : undefined;
+      }
+    } else {
+      state.byId[id] = {
+        right: undefined,
+        left: undefined,
+        preview: preview ? [preview] : undefined,
+      };
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(previousPreviewPanelAction, (state) => {
-    state.preview.pop();
+  builder.addCase(previousPreviewPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].preview?.pop();
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(closePanelsAction, (state) => {
-    state.preview = [];
-    state.right = undefined;
-    state.left = undefined;
+  builder.addCase(closePanelsAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = undefined;
+      state.byId[id].left = undefined;
+      state.byId[id].preview = undefined;
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(closeLeftPanelAction, (state) => {
-    state.left = undefined;
+  builder.addCase(closeLeftPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].left = undefined;
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(closeRightPanelAction, (state) => {
-    state.right = undefined;
+  builder.addCase(closeRightPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = undefined;
+    }
+
+    state.needsSync = true;
   });
 
-  builder.addCase(closePreviewPanelAction, (state) => {
-    state.preview = [];
+  builder.addCase(closePreviewPanelAction, (state, { payload: { id } }) => {
+    if (id in state.byId) {
+      state.byId[id].preview = undefined;
+    }
+
+    state.needsSync = true;
+  });
+
+  builder.addCase(urlChangedAction, (state, { payload: { preview, left, right, id } }) => {
+    if (id in state.byId) {
+      state.byId[id].right = right;
+      state.byId[id].left = left;
+      state.byId[id].preview = preview ? [preview] : undefined;
+    } else {
+      state.byId[id] = {
+        right,
+        left,
+        preview: preview ? [preview] : undefined,
+      };
+    }
+
+    state.needsSync = false;
   });
 });

@@ -17,6 +17,7 @@ export interface FieldProps extends FieldBaseProps {
   placeholder: string;
   acceptsCustomOptions?: boolean;
   showMappingConflicts?: boolean;
+  'aria-label'?: string;
 }
 export interface FieldBaseProps {
   indexPattern: DataViewBase | undefined;

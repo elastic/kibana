@@ -11,6 +11,7 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_FLAPPING,
   ALERT_INSTANCE_ID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
@@ -24,6 +25,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   TAGS,
+  ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { omit, padStart } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -34,11 +36,18 @@ import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
 } from './helpers/alerting_wait_for_helpers';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAdmin: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Summary actions', function () {
     const RULE_TYPE_ID = '.es-query';
@@ -54,13 +63,20 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.alert.maintenance_window_ids',
       'kibana.alert.reason',
       'kibana.alert.rule.execution.uuid',
+      'kibana.alert.rule.execution.timestamp',
       'kibana.alert.rule.duration',
       'kibana.alert.start',
       'kibana.alert.time_range',
       'kibana.alert.uuid',
       'kibana.alert.url',
       'kibana.version',
+      'kibana.alert.consecutive_matches',
     ];
+
+    before(async () => {
+      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
 
     afterEach(async () => {
       await supertest
@@ -76,17 +92,25 @@ export default function ({ getService }: FtrProviderContext) {
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
     });
 
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+    });
+
     it('should schedule actions for summary of alerts per rule run', async () => {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -172,6 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -204,14 +229,18 @@ export default function ({ getService }: FtrProviderContext) {
     it('should filter alerts by kql', async () => {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -297,6 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_SEVERITY_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -338,14 +368,18 @@ export default function ({ getService }: FtrProviderContext) {
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -410,14 +444,18 @@ export default function ({ getService }: FtrProviderContext) {
     it('should schedule actions for summary of alerts on a custom interval', async () => {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -512,6 +550,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
+        [ALERT_PREVIOUS_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
         [ALERT_STATUS]: 'active',

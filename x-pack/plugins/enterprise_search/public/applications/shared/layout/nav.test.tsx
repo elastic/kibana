@@ -9,6 +9,10 @@ jest.mock('./nav_link_helpers', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
 
+jest.mock('../../enterprise_search_content/components/search_index/indices/indices_nav', () => ({
+  useIndicesNav: () => [],
+}));
+
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { EuiSideNavItemType } from '@elastic/eui';
@@ -38,7 +42,7 @@ const baseNavItems = [
       {
         href: '/app/enterprise_search/content/search_indices',
         id: 'search_indices',
-        items: undefined,
+        items: [],
         name: 'Indices',
       },
       {
@@ -53,18 +57,18 @@ const baseNavItems = [
         items: undefined,
         name: 'Web crawlers',
       },
-      {
-        href: '/app/enterprise_search/content/settings',
-        id: 'settings',
-        items: undefined,
-        name: 'Settings',
-      },
     ],
     name: 'Content',
   },
   {
-    id: 'applications',
+    id: 'build',
     items: [
+      {
+        href: '/app/enterprise_search/applications/playground',
+        id: 'playground',
+        items: undefined,
+        name: 'Playground',
+      },
       {
         href: '/app/enterprise_search/applications/search_applications',
         id: 'searchApplications',
@@ -78,7 +82,19 @@ const baseNavItems = [
         name: 'Behavioral Analytics',
       },
     ],
-    name: 'Applications',
+    name: 'Build',
+  },
+  {
+    id: 'relevance',
+    items: [
+      {
+        href: '/app/enterprise_search/relevance/inference_endpoints',
+        id: 'inference_endpoints',
+        items: undefined,
+        name: 'Inference Endpoints',
+      },
+    ],
+    name: 'Relevance',
   },
   {
     id: 'es_getting_started',
@@ -239,11 +255,12 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(navItems![0].id).toEqual('home');
     expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
       'Content',
-      'Applications',
+      'Build',
+      'Relevance',
       'Getting started',
       'Enterprise Search',
     ]);
-    const searchItem = navItems?.find((ni) => ni.id === 'applications');
+    const searchItem = navItems?.find((ni) => ni.id === 'build');
     expect(searchItem).not.toBeUndefined();
     expect(searchItem!.items).not.toBeUndefined();
     // @ts-ignore
@@ -269,6 +286,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+            "iconToString": undefined,
             "id": "enterpriseSearchApplicationsContent",
             "items": undefined,
             "name": <EuiFlexGroup
@@ -277,6 +295,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             >
               Content
             </EuiFlexGroup>,
+            "nameToString": "Content",
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/connect",
@@ -296,11 +315,12 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(navItems![0].id).toEqual('home');
     expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
       'Content',
-      'Applications',
+      'Build',
+      'Relevance',
       'Getting started',
       'Enterprise Search',
     ]);
-    const searchItem = navItems?.find((ni) => ni.id === 'applications');
+    const searchItem = navItems?.find((ni) => ni.id === 'build');
     expect(searchItem).not.toBeUndefined();
     expect(searchItem!.items).not.toBeUndefined();
     // @ts-ignore
@@ -326,7 +346,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
 
     // @ts-ignore
     const engineItem = navItems
-      .find((ni: EuiSideNavItemType<unknown>) => ni.id === 'applications')
+      .find((ni: EuiSideNavItemType<unknown>) => ni.id === 'build')
       .items.find((ni: EuiSideNavItemType<unknown>) => ni.id === 'searchApplications')
       .items[0].items.find(
         (ni: EuiSideNavItemType<unknown>) => ni.id === 'enterpriseSearchApplicationsContent'
@@ -335,6 +355,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(engineItem).toMatchInlineSnapshot(`
       Object {
         "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+        "iconToString": "warning",
         "id": "enterpriseSearchApplicationsContent",
         "items": undefined,
         "name": <EuiFlexGroup
@@ -347,6 +368,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             type="warning"
           />
         </EuiFlexGroup>,
+        "nameToString": "Content",
       }
     `);
   });
@@ -362,15 +384,12 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
 
   it('returns basic nav all params are empty', () => {
     const navItems = useEnterpriseSearchAnalyticsNav();
-    // filter out settings item because we're setting hasDefaultIngestPipeline to false
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
           ? {
               ...item,
-              items: item.items?.filter(
-                (contentItem: { id: string }) => contentItem.id !== 'settings'
-              ),
+              items: item.items,
             }
           : item
       )
@@ -378,16 +397,13 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
   });
 
   it('returns basic nav if only name provided', () => {
-    // filter out settings item because we're setting hasDefaultIngestPipeline to false
     const navItems = useEnterpriseSearchAnalyticsNav('my-test-collection');
     expect(navItems).toEqual(
       baseNavItems.map((item) =>
         item.id === 'content'
           ? {
               ...item,
-              items: item.items?.filter(
-                (contentItem: { id: string }) => contentItem.id !== 'settings'
-              ),
+              items: item.items,
             }
           : item
       )
@@ -400,9 +416,9 @@ describe('useEnterpriseSearchAnalyticsNav', () => {
       integration: '/integration-path',
       overview: '/overview-path',
     });
-    const applicationsNav = navItems?.find((item) => item.id === 'applications');
+    const applicationsNav = navItems?.find((item) => item.id === 'build');
     expect(applicationsNav).not.toBeUndefined();
-    const analyticsNav = applicationsNav?.items?.[1];
+    const analyticsNav = applicationsNav?.items?.[2];
     expect(analyticsNav).not.toBeUndefined();
     expect(analyticsNav).toEqual({
       href: '/app/enterprise_search/analytics',

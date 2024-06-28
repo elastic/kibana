@@ -1075,19 +1075,7 @@
                 "section": "def-common.SearchSource",
                 "text": "SearchSource"
               },
-              "; fetch: (options?: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceSearchOptions",
-                "text": "SearchSourceSearchOptions"
-              },
-              ") => Promise<",
-              "SearchResponse",
-              "<unknown, Record<string, ",
-              "AggregationsAggregate",
-              ">>>; history: ",
+              "; history: ",
               "SearchRequest",
               "[]; setField: <K extends keyof ",
               {
@@ -1122,22 +1110,6 @@
                 "text": "SearchSourceFields"
               },
               ">(field: K) => ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
-              },
-              "; setFields: (newFields: ",
-              {
-                "pluginId": "data",
-                "scope": "common",
-                "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
-              },
-              ") => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1245,9 +1217,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "data",
+                "pluginId": "@kbn/search-types",
                 "scope": "common",
-                "docId": "kibDataSearchPluginApi",
+                "docId": "kibKbnSearchTypesPluginApi",
                 "section": "def-common.IKibanaSearchResponse",
                 "text": "IKibanaSearchResponse"
               },
@@ -1255,7 +1227,19 @@
               "SearchResponse",
               "<T, Record<string, ",
               "AggregationsAggregate",
-              ">>>>; onRequestStart: (handler: (searchSource: ",
+              ">>>>; fetch: (options?: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.SearchSourceSearchOptions",
+                "text": "SearchSourceSearchOptions"
+              },
+              ") => Promise<",
+              "SearchResponse",
+              "<unknown, Record<string, ",
+              "AggregationsAggregate",
+              ">>>; onRequestStart: (handler: (searchSource: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1271,7 +1255,23 @@
                 "section": "def-common.SearchSourceSearchOptions",
                 "text": "SearchSourceSearchOptions"
               },
-              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; getSerializedFields: (recurse?: boolean) => ",
+              " | undefined) => Promise<unknown>) => void; getSearchRequestBody: () => any; destroy: () => void; loadDataViewFields: (dataView: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewLazy",
+                "text": "DataViewLazy"
+              },
+              ") => Promise<Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ">>; getSerializedFields: (recurse?: boolean) => ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1472,6 +1472,20 @@
           },
           {
             "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.headerRowHeight",
+            "type": "number",
+            "tags": [],
+            "label": "headerRowHeight",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
             "id": "def-common.SavedSearch.isTextBasedQuery",
             "type": "CompoundType",
             "tags": [],
@@ -1591,6 +1605,21 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "src/plugins/saved_search/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.SavedSearch.visContext",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visContext",
+            "description": [],
+            "signature": [
+              "VisContextUnmapped",
+              " | undefined"
             ],
             "path": "src/plugins/saved_search/common/types.ts",
             "deprecated": false,

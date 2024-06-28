@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import type {
+  AxisStyle,
+  LineAnnotationStyle,
+  LineAnnotationDatum,
+  PartialTheme,
+  RecursivePartial,
+} from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
-  AxisStyle,
   Chart,
   LineAnnotation,
-  LineAnnotationStyle,
-  LineAnnotationDatum,
   LineSeries,
-  PartialTheme,
   Position,
-  RecursivePartial,
   ScaleType,
   Settings,
   LEGACY_LIGHT_THEME,
@@ -150,7 +152,7 @@ export const DecisionPathChart = ({
           title={i18n.translate(
             'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
             {
-              defaultMessage: "{xAxisLabel} for '{predictionFieldName}'",
+              defaultMessage: "{xAxisLabel} for ''{predictionFieldName}''",
               values: { predictionFieldName, xAxisLabel },
             }
           )}

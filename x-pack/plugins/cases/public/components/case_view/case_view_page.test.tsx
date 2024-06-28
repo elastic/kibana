@@ -9,12 +9,10 @@ import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import '../../common/mock/match_media';
 import { useUrlParams } from '../../common/navigation/hooks';
 import { CaseViewPage } from './case_view_page';
 import { caseData, caseViewProps } from './mocks';
 import type { CaseViewPageProps } from './types';
-import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 
 jest.mock('../../common/navigation/hooks');
@@ -99,35 +97,5 @@ describe('CaseViewPage', () => {
     await waitFor(() => {
       expect(useCasesTitleBreadcrumbsMock).toHaveBeenCalledWith(caseProps.caseData.title);
     });
-  });
-
-  it('should call onComponentInitialized on mount', async () => {
-    const onComponentInitialized = jest.fn();
-
-    appMockRenderer.render(
-      <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
-    );
-
-    await waitFor(() => {
-      expect(onComponentInitialized).toHaveBeenCalled();
-    });
-  });
-
-  it('should call onComponentInitialized only once', async () => {
-    const onComponentInitialized = jest.fn();
-
-    const { rerender } = appMockRenderer.render(
-      <CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />
-    );
-
-    await waitFor(() => {
-      expect(onComponentInitialized).toHaveBeenCalled();
-    });
-
-    rerender(<CaseViewPage {...caseProps} onComponentInitialized={onComponentInitialized} />);
-
-    await waitForComponentToUpdate();
-
-    expect(onComponentInitialized).toBeCalledTimes(1);
   });
 });

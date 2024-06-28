@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'timePicker']);
 
-  describe('gauge chart', function indexPatternCreation() {
+  // FLAKY: https://github.com/elastic/kibana/issues/181883
+  describe.skip('gauge chart', function indexPatternCreation() {
     before(async () => {
       await PageObjects.visualize.initTests();
     });
@@ -96,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should add machine.os.raw:win 8 filter by click on the first Gauge', async () => {
         await PageObjects.visChart.clickOnGaugeByLabel('win 8');
+        await PageObjects.visChart.waitForVisualizationRenderingStabilized();
         const hasFilter = await filterBar.hasFilter('machine.os.raw', 'win 8');
 
         expect(hasFilter).to.eql(true);

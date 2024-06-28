@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 export const Loading: React.FunctionComponent<{}> = () => (
   <EuiFlexGroup justifyContent="spaceAround">
     <EuiFlexItem grow={false}>
-      <EuiLoadingSpinner size="xl" />
+      <EuiLoadingSpinner size="xl" data-test-subj="loading" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );

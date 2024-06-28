@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { InPortal, OutPortal } from 'react-reverse-portal';
 import { EuiSkeletonText } from '@elastic/eui';
 import { MlPageControlsContext } from '../ml_page/ml_page';
@@ -13,7 +14,7 @@ import { MlPageControlsContext } from '../ml_page/ml_page';
 /**
  * Component for setting the page header content.
  */
-export const MlPageHeader: FC = ({ children }) => {
+export const MlPageHeader: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const { headerPortal, setIsHeaderMounted } = useContext(MlPageControlsContext);
 
   useEffect(() => {

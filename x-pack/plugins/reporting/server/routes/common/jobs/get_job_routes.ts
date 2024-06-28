@@ -61,6 +61,13 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
       };
 
       if (filename) {
+        // event tracking of the downloaded file, if
+        // the report job was completed successfully
+        // and a file is available
+        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
+        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
+        eventTracker?.downloadReport({ timeSinceCreation });
+
         return res.file({ body, headers, filename });
       }
 
@@ -108,6 +115,11 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
         });
 
         await jobsQuery.delete(docIndex, docId);
+
+        // event tracking of the deleted report
+        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
+        const timeSinceCreation = Date.now() - new Date(doc.created_at).valueOf();
+        eventTracker?.deleteReport({ timeSinceCreation });
 
         return res.ok({
           body: { deleted: true },

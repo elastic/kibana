@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { RouteAccess } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsUpdateOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
@@ -22,16 +23,21 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerUpdateRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.put(
     {
       path: '/{type}/{id}',
+      options: {
+        access,
+        description: `Update a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -53,15 +59,15 @@ export const registerUpdateRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
-      const { attributes, version, references, upsert } = req.body;
+      const { type, id } = request.params;
+      const { attributes, version, references, upsert } = request.body;
       const options: SavedObjectsUpdateOptions = {
         version,
         references,
@@ -70,13 +76,13 @@ export const registerUpdateRoute = (
       };
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsUpdate({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsUpdate({ request, types: [type] }).catch(() => {});
       const { savedObjects } = await context.core;
       if (!allowHttpApiAccess) {
         throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
       }
       const result = await savedObjects.client.update(type, id, attributes, options);
-      return res.ok({ body: result });
+      return response.ok({ body: result });
     })
   );
 };

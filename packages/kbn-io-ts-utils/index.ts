@@ -9,12 +9,14 @@
 export type { IndexPattern } from './src/index_pattern_rt';
 export type { NonEmptyString, NonEmptyStringBrand } from './src/non_empty_string_rt';
 
+export { arrayToStringRt } from './src/array_to_string_rt';
 export { deepExactRt } from './src/deep_exact_rt';
 export { indexPatternRt } from './src/index_pattern_rt';
 export { jsonRt } from './src/json_rt';
 export { mergeRt } from './src/merge_rt';
 export { strictKeysRt } from './src/strict_keys_rt';
 export { isoToEpochRt } from './src/iso_to_epoch_rt';
+export { isoToEpochSecsRt } from './src/iso_to_epoch_secs_rt';
 export { toNumberRt } from './src/to_number_rt';
 export { toBooleanRt } from './src/to_boolean_rt';
 export { toJsonSchema } from './src/to_json_schema';

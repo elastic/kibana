@@ -9,7 +9,7 @@ import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 
 import { OBSERVED_USER_QUERY_ID } from '../../../explore/users/containers/users/observed_details';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
@@ -29,10 +29,13 @@ interface UserPanelContentProps {
   observedUser: ObservedEntityData<UserItem>;
   managedUser: ManagedUserData;
   riskScoreState: RiskScoreState<RiskScoreEntity.user>;
+  recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
   isDraggable: boolean;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  onAssetCriticalityChange: () => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
 export const UserPanelContent = ({
@@ -40,10 +43,13 @@ export const UserPanelContent = ({
   observedUser,
   managedUser,
   riskScoreState,
+  recalculatingScore,
   contextID,
   scopeId,
   isDraggable,
   openDetailsPanel,
+  onAssetCriticalityChange,
+  isPreviewMode,
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
@@ -54,13 +60,18 @@ export const UserPanelContent = ({
         <>
           <RiskSummary
             riskScoreData={riskScoreState}
+            recalculatingScore={recalculatingScore}
             queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
+            isPreviewMode={isPreviewMode}
           />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalitySelector entity={{ name: userName, type: 'user' }} />
+      <AssetCriticalityAccordion
+        entity={{ name: userName, type: 'user' }}
+        onChange={onAssetCriticalityChange}
+      />
       <ObservedEntity
         observedData={observedUser}
         contextID={contextID}

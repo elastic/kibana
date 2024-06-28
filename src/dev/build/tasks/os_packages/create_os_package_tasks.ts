@@ -80,6 +80,27 @@ export const CreateDockerUbuntu: Task = {
   },
 };
 
+export const CreateDockerWolfi: Task = {
+  description: 'Creating Docker Wolfi image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      architecture: 'aarch64',
+      baseImage: 'wolfi',
+      context: false,
+      image: true,
+      dockerBuildDate,
+    });
+  },
+};
+
 export const CreateDockerServerless: Task = {
   description: 'Creating Docker Serverless image',
 
@@ -137,12 +158,32 @@ export const CreateDockerCloud: Task = {
   },
 };
 
+export const CreateDockerFIPS: Task = {
+  description: 'Creating Docker FIPS image',
+
+  async run(config, log, build) {
+    await runDockerGenerator(config, log, build, {
+      architecture: 'x64',
+      baseImage: 'ubi',
+      context: false,
+      image: true,
+      fips: true,
+    });
+  },
+};
+
 export const CreateDockerContexts: Task = {
   description: 'Creating Docker build contexts',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       baseImage: 'ubuntu',
+      context: true,
+      image: false,
+      dockerBuildDate,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'wolfi',
       context: true,
       image: false,
       dockerBuildDate,
@@ -169,6 +210,12 @@ export const CreateDockerContexts: Task = {
       serverless: true,
       context: true,
       image: false,
+    });
+    await runDockerGenerator(config, log, build, {
+      baseImage: 'ubi',
+      context: true,
+      image: false,
+      fips: true,
     });
   },
 };

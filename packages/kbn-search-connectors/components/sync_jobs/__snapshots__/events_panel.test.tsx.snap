@@ -54,7 +54,6 @@ exports[`EventsPanel renders 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
 </FlyoutPanel>
@@ -110,7 +109,6 @@ exports[`EventsPanel renders with some values missing 1`] = `
         token="euiBasicTable.noItemsMessage"
       />
     }
-    responsive={true}
     tableLayout="fixed"
   />
 </FlyoutPanel>

@@ -88,7 +88,7 @@ export class Journey<CtxExt extends object> {
 
   /**
    * Create a Journey which should be exported from a file in the
-   * x-pack/performance/journeys directory.
+   * x-pack/performance/journeys_e2e directory.
    */
   constructor(opts?: JourneyConfigOptions<CtxExt>) {
     const path = callsites().at(1)?.getFileName();

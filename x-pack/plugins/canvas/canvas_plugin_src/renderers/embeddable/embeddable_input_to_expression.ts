@@ -21,17 +21,27 @@ export const inputToExpressionTypeMap = {
 /*
   Take the input from an embeddable and the type of embeddable and convert it into an expression
 */
-export function embeddableInputToExpression(
-  input: EmbeddableInput,
+export function embeddableInputToExpression<
+  UseGenericEmbeddable extends boolean,
+  ConditionalReturnType = UseGenericEmbeddable extends true ? string : string | undefined
+>(
+  input: Omit<EmbeddableInput, 'id'>,
   embeddableType: string,
-  palettes: PaletteRegistry,
-  useGenericEmbeddable?: boolean
-): string | undefined {
+  palettes?: PaletteRegistry,
+  useGenericEmbeddable?: UseGenericEmbeddable
+): ConditionalReturnType {
+  // if `useGenericEmbeddable` is `true`, it **always** returns a string
   if (useGenericEmbeddable) {
-    return genericToExpression(input, embeddableType);
+    return genericToExpression(input, embeddableType) as ConditionalReturnType;
   }
 
+  // otherwise, depending on if the embeddable type is defined, it might return undefined
   if (inputToExpressionTypeMap[embeddableType]) {
-    return inputToExpressionTypeMap[embeddableType](input as any, palettes);
+    return inputToExpressionTypeMap[embeddableType](
+      input as any,
+      palettes
+    ) as ConditionalReturnType;
   }
+
+  return undefined as ConditionalReturnType;
 }

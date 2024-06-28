@@ -8,13 +8,13 @@
 import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map as mapOptional } from 'fp-ts/lib/Option';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_DEFAULT } from './config';
 
 import {
   TaskMarkRunning,
@@ -154,15 +154,18 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    const { poll_interval: pollInterval } = config;
+    const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
 
-    const pollIntervalDelay$ = delayOnClaimConflicts(
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
-      this.events$,
-      config.version_conflict_threshold,
-      config.monitored_stats_running_average_window
-    ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+    let pollIntervalDelay$: Observable<number> | undefined;
+    if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
+      pollIntervalDelay$ = delayOnClaimConflicts(
+        maxWorkersConfiguration$,
+        pollIntervalConfiguration$,
+        this.events$,
+        config.version_conflict_threshold,
+        config.monitored_stats_running_average_window
+      ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+    }
 
     const poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
@@ -173,7 +176,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         const capacity = this.pool.availableWorkers;
         if (!capacity) {
           // if there isn't capacity, emit a load event so that we can expose how often
-          // high load causes the poller to skip work (work isn'tcalled when there is no capacity)
+          // high load causes the poller to skip work (work isn't called when there is no capacity)
           this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.workerLoad)));
 
           // Emit event indicating task manager utilization
@@ -217,7 +220,6 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
       eventLoopDelayConfig: { ...this.config.event_loop_delay },
-      requeueInvalidTasksConfig: this.config.requeue_invalid_tasks,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
     });
   };

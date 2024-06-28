@@ -16,9 +16,26 @@ import { endpointSourceSchema, winlogSourceSchema } from '../../mocks/tree_schem
 import type { NewResolverTree, ResolverSchema } from '../../../../common/endpoint/types';
 import { ancestorsWithAncestryField, descendantsLimit } from '../../models/resolver_tree';
 import { EMPTY_RESOLVER } from '../helpers';
-import { serverReturnedResolverData } from './action';
+import { serverReturnedResolverData, userOverrodeDateRange } from './action';
+import { appReceivedNewExternalProperties } from '../actions';
 
 type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: string };
+
+jest.mock('../../../common/utils/default_date_settings', () => {
+  const original = jest.requireActual('../../../common/utils/default_date_settings');
+  return {
+    ...original,
+    getTimeRangeSettings: () => ({ to: '', from: '' }),
+  };
+});
+
+jest.mock('../../../common/utils/normalize_time_range', () => {
+  const original = jest.requireActual('../../../common/utils/normalize_time_range');
+  return {
+    ...original,
+    normalizeTimeRange: () => original.normalizeTimeRange(false),
+  };
+});
 
 /**
  * Test the data reducer and selector.
@@ -56,6 +73,7 @@ describe('Resolver Data Middleware', () => {
             databaseDocumentID: '',
             indices: [],
             filters: {},
+            agentId: '',
           },
           detectedBounds,
         })
@@ -184,6 +202,41 @@ describe('Resolver Data Middleware', () => {
 
       it('should indicate that there were no more generations to retrieve', () => {
         expect(selectors.hasMoreGenerations(store.getState()[id].data)).toBeFalsy();
+      });
+    });
+
+    describe('when a user sets a custom time range', () => {
+      beforeEach(() => {
+        const from = 'Sep 21, 2024 @ 20:49:13.452';
+        const to = 'Sep 21, 2024 @ 20:49:13.452';
+        dispatchTree(generatedTreeMetadata.formattedTree, winlogSourceSchema);
+        store.dispatch(
+          appReceivedNewExternalProperties({
+            id,
+            resolverComponentInstanceID: id,
+            locationSearch: '',
+            databaseDocumentID: id,
+            filters: {},
+            indices: ['index1'],
+            shouldUpdate: false,
+          })
+        );
+        store.dispatch(
+          userOverrodeDateRange({
+            id,
+            timeRange: { from, to },
+          })
+        );
+      });
+      it('should use that time over anything else', () => {
+        const params = selectors.treeParametersToFetch(store.getState()[id].data);
+        if (params?.filters !== undefined) {
+          const {
+            filters: { from, to },
+          } = params;
+          expect(from).toEqual('Sep 21, 2024 @ 20:49:13.452');
+          expect(to).toEqual('Sep 21, 2024 @ 20:49:13.452');
+        }
       });
     });
 

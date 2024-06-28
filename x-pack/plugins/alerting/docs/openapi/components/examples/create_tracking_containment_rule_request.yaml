@@ -1,0 +1,18 @@
+summary: Create a tracking containment rule.
+value:
+  consumer: alerts
+  name: my tracking rule
+  params:
+    index: kibana_sample_data_logs
+    dateField": '@timestamp'
+    geoField: geo.coordinates
+    entity: agent.keyword
+    boundaryType: entireIndex
+    boundaryIndexTitle: boundary*
+    boundaryGeoField: location
+    boundaryNameField: name
+    indexId: 90943e30-9a47-11e8-b64d-95841ca0b247
+    boundaryIndexId: 0cd90abf-abe7-44c7-909a-f621bbbcfefc
+  rule_type_id: .geo-containment
+  schedule:
+    interval: 1h

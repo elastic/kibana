@@ -11,12 +11,12 @@
 import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
-import { mergeScan } from 'rxjs/operators';
+import { mergeScan } from 'rxjs';
 import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { TaskClaimerOpts, ClaimOwnershipResult } from '.';
+import { TaskClaimerOpts, ClaimOwnershipResult, getEmptyClaimOwnershipResult } from '.';
 import { ConcreteTaskInstance } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
@@ -28,7 +28,7 @@ import {
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  SortByRunAtAndRetryAt,
+  getClaimSort,
   tasksClaimedByOwner,
   tasksOfType,
   EnabledTask,
@@ -104,11 +104,12 @@ export function claimAvailableTasksDefault(
 async function executeClaimAvailableTasks(
   opts: OwnershipClaimingOpts
 ): Promise<ClaimOwnershipResult> {
-  const { taskStore, size, taskTypes, events$ } = opts;
+  const { taskStore, size, taskTypes, events$, definitions } = opts;
   const { updated: tasksUpdated, version_conflicts: tasksConflicted } =
     await markAvailableTasksAsClaimed(opts);
 
-  const docs = tasksUpdated > 0 ? await sweepForClaimedTasks(taskStore, taskTypes, size) : [];
+  const docs =
+    tasksUpdated > 0 ? await sweepForClaimedTasks(taskStore, taskTypes, size, definitions) : [];
 
   emitEvents(
     events$,
@@ -166,7 +167,7 @@ async function markAvailableTasksAsClaimed({
     shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
   );
 
-  const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
+  const sort: NonNullable<SearchOpts['sort']> = getClaimSort(definitions);
   const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
   const script = updateFieldsAndMarkAsFailed({
     fieldUpdates: {
@@ -206,7 +207,8 @@ async function markAvailableTasksAsClaimed({
 async function sweepForClaimedTasks(
   taskStore: TaskStore,
   taskTypes: Set<string>,
-  size: number
+  size: number,
+  definitions: TaskTypeDictionary
 ): Promise<ConcreteTaskInstance[]> {
   const claimedTasksQuery = tasksClaimedByOwner(
     taskStore.taskManagerId,
@@ -215,27 +217,15 @@ async function sweepForClaimedTasks(
   const { docs } = await taskStore.fetch({
     query: claimedTasksQuery,
     size,
-    sort: SortByRunAtAndRetryAt,
+    sort: getClaimSort(definitions),
     seq_no_primary_term: true,
   });
 
   return docs;
 }
 
-function emptyClaimOwnershipResult() {
-  return {
-    stats: {
-      tasksUpdated: 0,
-      tasksConflicted: 0,
-      tasksClaimed: 0,
-      tasksRejected: 0,
-    },
-    docs: [],
-  };
-}
-
 function accumulateClaimOwnershipResults(
-  prev: ClaimOwnershipResult = emptyClaimOwnershipResult(),
+  prev: ClaimOwnershipResult = getEmptyClaimOwnershipResult(),
   next?: ClaimOwnershipResult
 ) {
   if (next) {

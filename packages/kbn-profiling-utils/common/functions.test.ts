@@ -12,8 +12,10 @@ import { decodeStackTraceResponse } from '..';
 import { stacktraces } from './__fixtures__/stacktraces';
 
 describe('TopN function operations', () => {
-  const { events, stackTraces, stackFrames, executables, samplingRate } =
-    decodeStackTraceResponse(stacktraces);
+  const { events, stackTraces, stackFrames, executables, samplingRate } = decodeStackTraceResponse(
+    stacktraces,
+    false
+  );
   const maxTopN = 5;
   const topNFunctions = createTopNFunctions({
     events,
@@ -23,6 +25,7 @@ describe('TopN function operations', () => {
     startIndex: 0,
     endIndex: maxTopN,
     samplingRate,
+    showErrorFrames: false,
   });
   const exclusiveCounts = topNFunctions.TopN.map((value) => value.CountExclusive);
 

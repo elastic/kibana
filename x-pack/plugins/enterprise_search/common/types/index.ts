@@ -69,5 +69,6 @@ export interface ClientConfigType {
   };
 }
 
+export type { ConnectorStats } from './connector_stats';
 export type { ElasticsearchIndexWithPrivileges } from './indices';
 export type { KibanaDeps } from './kibana_deps';

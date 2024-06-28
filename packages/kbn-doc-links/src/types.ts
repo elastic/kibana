@@ -11,6 +11,7 @@
  */
 export interface DocLinksMeta {
   version: string;
+  ecs_version: string;
   elasticWebsiteUrl: string;
   elasticGithubUrl: string;
   docsWebsiteUrl: string;
@@ -122,6 +123,8 @@ export interface DocLinks {
     readonly bulkApi: string;
     readonly configuration: string;
     readonly connectors: string;
+    readonly connectorsClientDeploy: string;
+    readonly connectorsMappings: string;
     readonly connectorsAzureBlobStorage: string;
     readonly connectorsBox: string;
     readonly connectorsClients: string;
@@ -138,10 +141,12 @@ export interface DocLinks {
     readonly connectorsMySQL: string;
     readonly connectorsNative: string;
     readonly connectorsNetworkDrive: string;
+    readonly connectorsNotion: string;
     readonly connectorsOneDrive: string;
     readonly connectorsOracle: string;
     readonly connectorsOutlook: string;
     readonly connectorsPostgreSQL: string;
+    readonly connectorsRedis: string;
     readonly connectorsS3: string;
     readonly connectorsSalesforce: string;
     readonly connectorsServiceNow: string;
@@ -178,6 +183,7 @@ export interface DocLinks {
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
+    readonly syncRulesAdvanced: string;
     readonly trainedModels: string;
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
@@ -348,12 +354,15 @@ export interface DocLinks {
     };
     readonly privileges: string;
     readonly manageDetectionRules: string;
+    readonly createDetectionRules: string;
     readonly createEsqlRuleType: string;
+    readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
       readonly riskScorePrerequisites: string;
       readonly hostRiskScore: string;
       readonly userRiskScore: string;
       readonly entityRiskScoring: string;
+      readonly assetCriticality: string;
     };
     readonly detectionEngineOverview: string;
   };
@@ -434,7 +443,10 @@ export interface DocLinks {
   readonly alerting: Readonly<{
     guide: string;
     actionTypes: string;
-    apmRules: string;
+    apmRulesErrorCount: string;
+    apmRulesTransactionDuration: string;
+    apmRulesTransactionError: string;
+    apmRulesAnomaly: string;
     emailAction: string;
     emailActionConfig: string;
     emailExchangeClientSecretConfig: string;
@@ -522,6 +534,7 @@ export interface DocLinks {
     datastreamsManualRollover: string;
     datastreamsTSDS: string;
     datastreamsTSDSMetrics: string;
+    datastreamsDownsampling: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
     packageSignatures: string;
@@ -538,9 +551,16 @@ export interface DocLinks {
     policySecrets: string;
     remoteESOoutput: string;
     performancePresets: string;
+    scalingKubernetesResourcesAndLimits: string;
+    roleAndPrivileges: string;
+    proxiesSettings: string;
   }>;
+  readonly integrationDeveloper: {
+    upload: string;
+  };
   readonly ecs: {
     readonly guide: string;
+    readonly dataStreams: string;
   };
   readonly clients: {
     readonly guide: string;
@@ -636,6 +656,13 @@ export interface DocLinks {
   };
   readonly telemetry: {
     readonly settings: string;
+  };
+  readonly playground: {
+    readonly chatPlayground: string;
+    readonly retrievalOptimize: string;
+    readonly retrieval: string;
+    readonly context: string;
+    readonly hiddenFields: string;
   };
 }
 

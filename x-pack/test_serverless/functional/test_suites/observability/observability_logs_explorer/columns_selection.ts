@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2023-12-27T10:25:14.091Z';
   const TEST_TIMEOUT = 10 * 1000; // 10 secs
 
-  const navigateToLogExplorer = () =>
+  const navigateToLogsExplorer = () =>
     PageObjects.observabilityLogsExplorer.navigateTo({
       pageState: {
         time: {
@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
-      await PageObjects.svlCommonPage.login();
-      await navigateToLogExplorer();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await navigateToLogsExplorer();
     });
 
     after(async () => {
@@ -60,9 +60,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               mode: 'absolute',
             },
             columns: [
-              { field: 'resource' },
-              { field: 'content' },
-              { field: 'data_stream.namespace' },
+              {
+                smartField: 'resource',
+                type: 'smart-field',
+                fallbackFields: ['host.name', 'service.name'],
+              },
+              {
+                smartField: 'content',
+                type: 'smart-field',
+                fallbackFields: ['message'],
+              },
+              { field: 'data_stream.namespace', type: 'document-field' },
             ],
           },
         });
@@ -124,9 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(cellValue.includes('error.message')).to.be(false);
           expect(cellValue.includes('event.original')).to.be(false);
 
-          const cellAttribute = await cellElement.findByTestSubject(
-            'logsExplorerCellDescriptionList'
-          );
+          const cellAttribute = await cellElement.findByTestSubject('discoverCellDescriptionList');
           expect(cellAttribute).not.to.be.empty();
         });
       });
@@ -139,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('on cell expansion with message field should open regular popover', async () => {
-        await navigateToLogExplorer();
+        await navigateToLogsExplorer();
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           await dataGrid.clickCellExpandButton(3, 4);
           await testSubjects.existOrFail('euiDataGridExpansionPopover');
@@ -160,7 +166,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('virtual column cell actions', async () => {
       beforeEach(async () => {
-        await navigateToLogExplorer();
+        await navigateToLogsExplorer();
       });
       it('should render a popover with cell actions when a chip on content column is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {

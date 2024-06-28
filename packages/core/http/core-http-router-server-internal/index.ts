@@ -7,14 +7,22 @@
  */
 
 export { filterHeaders } from './src/headers';
-export { Router, type RouterOptions } from './src/router';
-export type { HandlerResolutionStrategy } from './src/versioned_router';
+export {
+  versionHandlerResolvers,
+  CoreVersionedRouter,
+  ALLOWED_PUBLIC_VERSION,
+  unwrapVersionedResponseBodyValidation,
+  type VersionedRouterRoute,
+  type HandlerResolutionStrategy,
+} from './src/versioned_router';
+export { Router } from './src/router';
+export type {
+  RouterOptions,
+  InternalRegistrar,
+  InternalRegistrarOptions,
+  InternalRouterRoute,
+} from './src/router';
 export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './src/request';
 export { isSafeMethod } from './src/route';
 export { HapiResponseAdapter } from './src/response_adapter';
-export {
-  kibanaResponseFactory,
-  lifecycleResponseFactory,
-  isKibanaResponse,
-  KibanaResponse,
-} from './src/response';
+export { kibanaResponseFactory, lifecycleResponseFactory, KibanaResponse } from './src/response';

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 
-import { EuiCallOutProps } from '@elastic/eui';
+import type { EuiCallOutProps } from '@elastic/eui';
 import { useMlNodeAvailableCheck } from './hooks';
 import { Warning } from './warning';
 

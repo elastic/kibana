@@ -40,6 +40,7 @@ export default function (ftrContext: FtrProviderContext) {
               id: 'default-space-tag-1',
               name: 'tag-1',
               description: 'Tag 1 in default space',
+              managed: false,
               color: '#FF00FF',
             },
           });

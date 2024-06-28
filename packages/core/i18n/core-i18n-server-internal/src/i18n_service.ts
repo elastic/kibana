@@ -7,6 +7,8 @@
  */
 
 import { firstValueFrom } from 'rxjs';
+import { createHash } from 'crypto';
+import { i18n, Translation } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -30,29 +32,42 @@ export interface SetupDeps {
   pluginPaths: string[];
 }
 
+export interface InternalI18nServicePreboot {
+  getTranslationHash(): string;
+}
+
 export class I18nService {
   private readonly log: Logger;
   private readonly configService: IConfigService;
 
-  constructor(coreContext: CoreContext) {
+  constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('i18n');
     this.configService = coreContext.configService;
   }
 
-  public async preboot({ pluginPaths, http }: PrebootDeps) {
-    const { locale } = await this.initTranslations(pluginPaths);
-    http.registerRoutes('', (router) => registerRoutes({ router, locale }));
+  public async preboot({ pluginPaths, http }: PrebootDeps): Promise<InternalI18nServicePreboot> {
+    const { locale, translationHash } = await this.initTranslations(pluginPaths);
+    const { dist: isDist } = this.coreContext.env.packageInfo;
+    http.registerRoutes('', (router) =>
+      registerRoutes({ router, locale, isDist, translationHash })
+    );
+
+    return {
+      getTranslationHash: () => translationHash,
+    };
   }
 
   public async setup({ pluginPaths, http }: SetupDeps): Promise<I18nServiceSetup> {
-    const { locale, translationFiles } = await this.initTranslations(pluginPaths);
+    const { locale, translationFiles, translationHash } = await this.initTranslations(pluginPaths);
 
     const router = http.createRouter('');
-    registerRoutes({ router, locale });
+    const { dist: isDist } = this.coreContext.env.packageInfo;
+    registerRoutes({ router, locale, isDist, translationHash });
 
     return {
       getLocale: () => locale,
       getTranslationFiles: () => translationFiles,
+      getTranslationHash: () => translationHash,
     };
   }
 
@@ -69,6 +84,13 @@ export class I18nService {
     this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
     await initTranslations(locale, translationFiles);
 
-    return { locale, translationFiles };
+    const translationHash = getTranslationHash(i18n.getTranslation());
+
+    return { locale, translationFiles, translationHash };
   }
 }
+
+const getTranslationHash = (translations: Translation) => {
+  const serialized = JSON.stringify(translations);
+  return createHash('sha256').update(serialized).digest('hex').slice(0, 12);
+};

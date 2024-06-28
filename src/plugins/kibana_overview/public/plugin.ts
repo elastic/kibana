@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
-import { distinct, map, switchMap } from 'rxjs/operators';
+import { distinct, map, switchMap } from 'rxjs';
 import {
   AppMountParameters,
   CoreSetup,
@@ -16,7 +16,6 @@ import {
   Plugin,
   DEFAULT_APP_CATEGORIES,
   AppStatus,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
 import {
   KibanaOverviewPluginSetup,
@@ -49,7 +48,8 @@ export class KibanaOverviewPlugin
       map((navLinks) => {
         const hasKibanaApp = Boolean(
           navLinks.find(
-            ({ id, category, hidden }) => !hidden && category?.id === 'kibana' && id !== PLUGIN_ID
+            ({ id, category, visibleIn }) =>
+              visibleIn.length > 0 && category?.id === 'kibana' && id !== PLUGIN_ID
           )
         );
 
@@ -58,11 +58,7 @@ export class KibanaOverviewPlugin
       distinct(),
       map((hasKibanaApp) => {
         return () => {
-          if (!hasKibanaApp) {
-            return { status: AppStatus.inaccessible, navLinkStatus: AppNavLinkStatus.hidden };
-          } else {
-            return { status: AppStatus.accessible, navLinkStatus: AppNavLinkStatus.default };
-          }
+          return { status: hasKibanaApp ? AppStatus.accessible : AppStatus.inaccessible };
         };
       })
     );
@@ -76,6 +72,7 @@ export class KibanaOverviewPlugin
       order: 1,
       updater$: appUpdater$,
       appRoute: PLUGIN_PATH,
+      visibleIn: ['globalSearch', 'home', 'sideNav'],
       async mount(params: AppMountParameters) {
         // Load application bundle
         const { renderApp } = await import('./application');

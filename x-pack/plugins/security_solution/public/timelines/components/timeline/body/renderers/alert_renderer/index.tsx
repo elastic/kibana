@@ -8,7 +8,6 @@
 import { get } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { AlertField } from './alert_field';
 import type { RowRenderer } from '../../../../../../../common/types';
@@ -52,10 +51,6 @@ export const ALERT_RENDERER_FIELDS = [
   USER_NAME,
 ];
 
-const AlertRendererFlexGroup = styled(EuiFlexGroup)`
-  gap: ${({ theme }) => theme.eui.euiSizeXS};
-`;
-
 export const alertRenderer: RowRenderer = {
   id: RowRendererId.alert,
   isInstance: (ecs) => eventKindMatches(get('event.kind', ecs)),
@@ -77,12 +72,7 @@ export const alertRenderer: RowRenderer = {
     return (
       <RowRendererContainer>
         <Details data-test-subj="alertRenderer">
-          <AlertRendererFlexGroup
-            alignItems="center"
-            gutterSize="none"
-            justifyContent="center"
-            wrap={true}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="xs" justifyContent="center" wrap={true}>
             <AlertField
               contextId={contextId}
               data-test-subj={EVENT_CATEGORY}
@@ -232,7 +222,7 @@ export const alertRenderer: RowRenderer = {
               scopeId={scopeId}
               values={kibanaAlertRuleName}
             />
-          </AlertRendererFlexGroup>
+          </EuiFlexGroup>
         </Details>
       </RowRendererContainer>
     );

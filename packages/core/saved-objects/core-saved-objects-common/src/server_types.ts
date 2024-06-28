@@ -66,14 +66,18 @@ export interface SavedObjectReference {
 export interface SavedObject<T = unknown> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
-  /**  The type of Saved Object. Each plugin can define it's own custom Saved Object types. */
+  /**  The type of Saved Object. Each plugin can define its own custom Saved Object types. */
   type: string;
   /** An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control. */
   version?: string;
   /** Timestamp of the time this document had been created.  */
   created_at?: string;
+  /** The ID of the user who created this object. */
+  created_by?: string;
   /** Timestamp of the last time this document had been updated.  */
   updated_at?: string;
+  /** The ID of the user who last updated this object. */
+  updated_by?: string;
   /** Error associated with this object, populated if an operation failed for this object.  */
   error?: SavedObjectError;
   /** The data for a Saved Object is stored as an object in the `attributes` property. **/

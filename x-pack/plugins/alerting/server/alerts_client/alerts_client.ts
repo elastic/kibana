@@ -45,7 +45,6 @@ import {
   UpdateableAlert,
   GetSummarizedAlertsParams,
   GetMaintenanceWindowScopedQueryAlertsParams,
-  UpdateAlertsMaintenanceWindowIdByScopedQueryParams,
   ScopedQueryAggregationResult,
 } from './types';
 import {
@@ -59,9 +58,15 @@ import {
   getLifecycleAlertsQueries,
   getMaintenanceWindowAlertsQuery,
   getContinualAlertsQuery,
+  isAlertImproving,
 } from './lib';
 import { isValidAlertIndexName } from '../alerts_service';
 import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import {
+  filterMaintenanceWindows,
+  filterMaintenanceWindowsIds,
+} from '../task_runner/get_maintenance_windows';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -99,6 +104,7 @@ export class AlertsClient<
   };
 
   private startedAtString: string | null = null;
+  private runTimestampString: string | undefined;
   private rule: AlertRule;
   private ruleType: UntypedNormalizedRuleType;
 
@@ -128,6 +134,9 @@ export class AlertsClient<
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
     this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
+    if (opts.runTimestamp) {
+      this.runTimestampString = opts.runTimestamp.toISOString();
+    }
     await this.legacyAlertsClient.initializeExecution(opts);
 
     if (!this.ruleType.alerts?.shouldWrite) {
@@ -273,6 +282,10 @@ export class AlertsClient<
     }
   }
 
+  public isTrackedAlert(id: string) {
+    return this.legacyAlertsClient.isTrackedAlert(id);
+  }
+
   public hasReachedAlertLimit(): boolean {
     return this.legacyAlertsClient.hasReachedAlertLimit();
   }
@@ -299,7 +312,99 @@ export class AlertsClient<
     return this.legacyAlertsClient.getProcessedAlerts(type);
   }
 
-  public async persistAlerts() {
+  public async persistAlerts(maintenanceWindows?: MaintenanceWindow[]): Promise<{
+    alertIds: string[];
+    maintenanceWindowIds: string[];
+  } | null> {
+    // Persist alerts first
+    await this.persistAlertsHelper();
+
+    // Try to update the persisted alerts with maintenance windows with a scoped query
+    let updateAlertsMaintenanceWindowResult = null;
+    try {
+      updateAlertsMaintenanceWindowResult = await this.updateAlertsMaintenanceWindowIdByScopedQuery(
+        maintenanceWindows ?? []
+      );
+    } catch (e) {
+      this.options.logger.debug(
+        `Failed to update alert matched by maintenance window scoped query for rule ${this.ruleType.id}:${this.options.rule.id}: '${this.options.rule.name}'.`
+      );
+    }
+
+    return updateAlertsMaintenanceWindowResult;
+  }
+
+  public getAlertsToSerialize() {
+    // The flapping value that is persisted inside the task manager state (and used in the next execution)
+    // is different than the value that should be written to the alert document. For this reason, we call
+    // getAlertsToSerialize() twice, once before building and bulk indexing alert docs and once after to return
+    // the value for task state serialization
+
+    // This will be a blocker if ever we want to stop serializing alert data inside the task state and just use
+    // the fetched alert document.
+    return this.legacyAlertsClient.getAlertsToSerialize();
+  }
+
+  public factory() {
+    return this.legacyAlertsClient.factory();
+  }
+
+  public async getSummarizedAlerts({
+    ruleId,
+    spaceId,
+    excludedAlertInstanceIds,
+    alertsFilter,
+    start,
+    end,
+    executionUuid,
+  }: GetSummarizedAlertsParams): Promise<SummarizedAlerts> {
+    if (!ruleId || !spaceId) {
+      throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
+    }
+    const queryByExecutionUuid: boolean = !!executionUuid;
+    const queryByTimeRange: boolean = !!start && !!end;
+    // Either executionUuid or start/end dates must be specified, but not both
+    if (
+      (!queryByExecutionUuid && !queryByTimeRange) ||
+      (queryByExecutionUuid && queryByTimeRange)
+    ) {
+      throw new Error(`Must specify either execution UUID or time range for AAD alert query.`);
+    }
+
+    const getQueryParams = {
+      executionUuid,
+      start,
+      end,
+      ruleId,
+      excludedAlertInstanceIds,
+      alertsFilter,
+    };
+
+    const formatAlert = this.ruleType.alerts?.formatAlert;
+
+    const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
+
+    if (isLifecycleAlert) {
+      const queryBodies = getLifecycleAlertsQueries(getQueryParams);
+      const responses = await Promise.all(queryBodies.map((queryBody) => this.search(queryBody)));
+
+      return {
+        new: getHitsWithCount(responses[0], formatAlert),
+        ongoing: getHitsWithCount(responses[1], formatAlert),
+        recovered: getHitsWithCount(responses[2], formatAlert),
+      };
+    }
+
+    const response = await this.search(getContinualAlertsQuery(getQueryParams));
+
+    return {
+      new: getHitsWithCount(response, formatAlert),
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    };
+  }
+
+  private async persistAlertsHelper() {
     if (!this.ruleType.alerts?.shouldWrite) {
       this.options.logger.debug(
         `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false.`
@@ -313,7 +418,7 @@ export class AlertsClient<
       this.legacyAlertsClient.getAlertsToSerialize(false);
 
     const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
+    const currentRecoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -327,6 +432,13 @@ export class AlertsClient<
           this.fetchedAlerts.data.hasOwnProperty(id) &&
           get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
         ) {
+          const isImproving = isAlertImproving<
+            AlertData,
+            LegacyState,
+            LegacyContext,
+            ActionGroupIds,
+            RecoveryActionGroupId
+          >(this.fetchedAlerts.data[id], activeAlerts[id], this.ruleType.actionGroups);
           activeAlertsToIndex.push(
             buildOngoingAlert<
               AlertData,
@@ -338,12 +450,19 @@ export class AlertsClient<
               alert: this.fetchedAlerts.data[id],
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              isImproving,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
             })
           );
         } else {
+          // skip writing the alert document if the number of consecutive
+          // active alerts is less than the rule alertDelay threshold
+          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+            continue;
+          }
           activeAlertsToIndex.push(
             buildNewAlert<
               AlertData,
@@ -354,6 +473,7 @@ export class AlertsClient<
             >({
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],
               kibanaVersion: this.options.kibanaVersion,
@@ -373,7 +493,7 @@ export class AlertsClient<
       // If there is not, log an error because there should be
       if (this.fetchedAlerts.data.hasOwnProperty(id)) {
         recoveredAlertsToIndex.push(
-          recoveredAlerts[id]
+          currentRecoveredAlerts[id]
             ? buildRecoveredAlert<
                 AlertData,
                 LegacyState,
@@ -382,8 +502,9 @@ export class AlertsClient<
                 RecoveryActionGroupId
               >({
                 alert: this.fetchedAlerts.data[id],
-                legacyAlert: recoveredAlerts[id],
+                legacyAlert: currentRecoveredAlerts[id],
                 rule: this.rule,
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 payload: this.reportedAlerts[id],
                 recoveryActionGroup: this.options.ruleType.recoveryActionGroup.id,
@@ -392,13 +513,14 @@ export class AlertsClient<
             : buildUpdatedRecoveredAlert<AlertData>({
                 alert: this.fetchedAlerts.data[id],
                 legacyRawAlert: recoveredAlertsToReturn[id],
+                runTimestamp: this.runTimestampString,
                 timestamp: currentTime,
                 rule: this.rule,
               })
         );
       } else {
         this.options.logger.debug(
-          `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
+          `Could not find alert document to update for recovered alert with id ${id} and uuid ${currentRecoveredAlerts[
             id
           ].getUuid()}`
         );
@@ -494,76 +616,6 @@ export class AlertsClient<
     }
   }
 
-  public getAlertsToSerialize() {
-    // The flapping value that is persisted inside the task manager state (and used in the next execution)
-    // is different than the value that should be written to the alert document. For this reason, we call
-    // getAlertsToSerialize() twice, once before building and bulk indexing alert docs and once after to return
-    // the value for task state serialization
-
-    // This will be a blocker if ever we want to stop serializing alert data inside the task state and just use
-    // the fetched alert document.
-    return this.legacyAlertsClient.getAlertsToSerialize();
-  }
-
-  public factory() {
-    return this.legacyAlertsClient.factory();
-  }
-
-  public async getSummarizedAlerts({
-    ruleId,
-    spaceId,
-    excludedAlertInstanceIds,
-    alertsFilter,
-    start,
-    end,
-    executionUuid,
-  }: GetSummarizedAlertsParams): Promise<SummarizedAlerts> {
-    if (!ruleId || !spaceId) {
-      throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
-    }
-    const queryByExecutionUuid: boolean = !!executionUuid;
-    const queryByTimeRange: boolean = !!start && !!end;
-    // Either executionUuid or start/end dates must be specified, but not both
-    if (
-      (!queryByExecutionUuid && !queryByTimeRange) ||
-      (queryByExecutionUuid && queryByTimeRange)
-    ) {
-      throw new Error(`Must specify either execution UUID or time range for AAD alert query.`);
-    }
-
-    const getQueryParams = {
-      executionUuid,
-      start,
-      end,
-      ruleId,
-      excludedAlertInstanceIds,
-      alertsFilter,
-    };
-
-    const formatAlert = this.ruleType.alerts?.formatAlert;
-
-    const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
-
-    if (isLifecycleAlert) {
-      const queryBodies = getLifecycleAlertsQueries(getQueryParams);
-      const responses = await Promise.all(queryBodies.map((queryBody) => this.search(queryBody)));
-
-      return {
-        new: getHitsWithCount(responses[0], formatAlert),
-        ongoing: getHitsWithCount(responses[1], formatAlert),
-        recovered: getHitsWithCount(responses[2], formatAlert),
-      };
-    }
-
-    const response = await this.search(getContinualAlertsQuery(getQueryParams));
-
-    return {
-      new: getHitsWithCount(response, formatAlert),
-      ongoing: { count: 0, data: [] },
-      recovered: { count: 0, data: [] },
-    };
-  }
-
   private async getMaintenanceWindowScopedQueryAlerts({
     ruleId,
     spaceId,
@@ -628,21 +680,17 @@ export class AlertsClient<
     }
   }
 
-  public async updateAlertsMaintenanceWindowIdByScopedQuery({
-    ruleId,
-    spaceId,
-    executionUuid,
-    maintenanceWindows,
-  }: UpdateAlertsMaintenanceWindowIdByScopedQueryParams) {
-    const maintenanceWindowsWithScopedQuery = maintenanceWindows.filter(
-      ({ scopedQuery }) => scopedQuery
-    );
-    const maintenanceWindowsWithoutScopedQuery = maintenanceWindows.filter(
-      ({ scopedQuery }) => !scopedQuery
-    );
-    const maintenanceWindowsWithoutScopedQueryIds = maintenanceWindowsWithoutScopedQuery.map(
-      ({ id }) => id
-    );
+  private async updateAlertsMaintenanceWindowIdByScopedQuery(
+    maintenanceWindows: MaintenanceWindow[]
+  ) {
+    const maintenanceWindowsWithScopedQuery = filterMaintenanceWindows({
+      maintenanceWindows,
+      withScopedQuery: true,
+    });
+    const maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
+      maintenanceWindows,
+      withScopedQuery: false,
+    });
 
     if (maintenanceWindowsWithScopedQuery.length === 0) {
       return {
@@ -654,9 +702,9 @@ export class AlertsClient<
     // Run aggs to get all scoped query alert IDs, returns a record<maintenanceWindowId, alertIds>,
     // indicating the maintenance window has matches a number of alerts with the scoped query.
     const aggsResult = await this.getMaintenanceWindowScopedQueryAlerts({
-      ruleId,
-      spaceId,
-      executionUuid,
+      ruleId: this.options.rule.id,
+      spaceId: this.options.rule.spaceId,
+      executionUuid: this.options.rule.executionId,
       maintenanceWindows: maintenanceWindowsWithScopedQuery,
     });
 
@@ -718,6 +766,7 @@ export class AlertsClient<
           WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
         >
       ) => this.report(alert),
+      isTrackedAlert: (id: string) => this.isTrackedAlert(id),
       setAlertData: (
         alert: UpdateableAlert<AlertData, LegacyState, LegacyContext, RecoveryActionGroupId>
       ) => this.setAlertData(alert),

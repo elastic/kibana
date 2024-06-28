@@ -11,70 +11,55 @@ import {
   FakeRawRequest,
   Headers,
   SavedObject,
+  SavedObjectReference,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  LoadedIndirectParams,
-  LoadIndirectParamsResult,
-} from '@kbn/task-manager-plugin/server/task';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { TaskRunnerContext } from './task_runner_factory';
+import { RunRuleParams, TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
   RuleExecutionStatusErrorReasons,
   RawRule,
   RuleTypeRegistry,
   RuleTypeParamsValidator,
-  SanitizedRule,
-  RulesClientApi,
 } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleTypeParams } from '../../common';
-import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
-export interface RuleData<Params extends RuleTypeParams> extends LoadedIndirectParams<RawRule> {
-  indirectParams: RawRule;
-  rule: SanitizedRule<Params>;
+interface RuleData {
+  rawRule: RawRule;
   version: string | undefined;
-  fakeRequest: CoreKibanaRequest;
-  rulesClient: RulesClientApi;
+  references: SavedObjectReference[];
 }
 
-export type RuleDataResult<T extends LoadedIndirectParams> = LoadIndirectParamsResult<T>;
-
-export interface ValidatedRuleData<Params extends RuleTypeParams> extends RuleData<Params> {
-  validatedParams: Params;
-  apiKey: string | null;
-}
-
-interface ValidateRuleParams<Params extends RuleTypeParams> {
-  alertingEventLogger: PublicMethodsOf<AlertingEventLogger>;
-  paramValidator?: RuleTypeParamsValidator<Params>;
-  ruleId: string;
-  spaceId: string;
+interface ValidateRuleAndCreateFakeRequestParams<Params extends RuleTypeParams> {
   context: TaskRunnerContext;
+  paramValidator?: RuleTypeParamsValidator<Params>;
+  ruleData: RuleData;
+  ruleId: string;
   ruleTypeRegistry: RuleTypeRegistry;
-  ruleData: RuleDataResult<RuleData<Params>>;
+  spaceId: string;
 }
 
-export function validateRule<Params extends RuleTypeParams>(
-  params: ValidateRuleParams<Params>
-): ValidatedRuleData<Params> {
-  if (params.ruleData.error) {
-    throw params.ruleData.error;
-  }
-
+/**
+ * With the decrypted rule saved object
+ * - transform from domain model to application model (rule)
+ * - create a fakeRequest object using the rule API key
+ * - get an instance of the RulesClient using the fakeRequest
+ */
+export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
+  params: ValidateRuleAndCreateFakeRequestParams<Params>
+): RunRuleParams<Params> {
   const {
-    ruleData: {
-      data: { indirectParams, rule, fakeRequest, rulesClient, version },
-    },
-    ruleTypeRegistry,
+    context,
     paramValidator,
-    alertingEventLogger,
+    ruleData: { rawRule, references, version },
+    ruleId,
+    ruleTypeRegistry,
+    spaceId,
   } = params;
 
-  const { enabled, apiKey } = indirectParams;
+  const { enabled, apiKey, alertTypeId: ruleTypeId } = rawRule;
 
   if (!enabled) {
     throw createTaskRunError(
@@ -86,7 +71,17 @@ export function validateRule<Params extends RuleTypeParams>(
     );
   }
 
-  alertingEventLogger.setRuleName(rule.name);
+  const fakeRequest = getFakeKibanaRequest(context, spaceId, apiKey);
+  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
+  const rule = rulesClient.getAlertFromRaw({
+    id: ruleId,
+    ruleTypeId,
+    rawRule,
+    references,
+    includeLegacyId: false,
+    omitGeneratedValues: false,
+  });
+
   try {
     ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
   } catch (err) {
@@ -114,21 +109,23 @@ export function validateRule<Params extends RuleTypeParams>(
   }
 
   return {
-    rule,
-    indirectParams,
-    fakeRequest,
     apiKey,
+    fakeRequest,
+    rule,
     rulesClient,
     validatedParams,
     version,
   };
 }
 
-export async function getRuleAttributes<Params extends RuleTypeParams>(
+/**
+ * Loads the decrypted rule saved object
+ */
+export async function getDecryptedRule(
   context: TaskRunnerContext,
   ruleId: string,
   spaceId: string
-): Promise<RuleData<Params>> {
+): Promise<RuleData> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
   let rawRule: SavedObject<RawRule>;
@@ -140,29 +137,17 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
       { namespace }
     );
   } catch (e) {
+    const error = new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, e);
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-      throw createTaskRunError(e, TaskErrorSource.USER);
+      throw createTaskRunError(error, TaskErrorSource.USER);
     }
-    throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    throw createTaskRunError(error, TaskErrorSource.FRAMEWORK);
   }
 
-  const fakeRequest = getFakeKibanaRequest(context, spaceId, rawRule.attributes.apiKey);
-  const rulesClient = context.getRulesClientWithRequest(fakeRequest);
-  const rule = rulesClient.getAlertFromRaw({
-    id: ruleId,
-    ruleTypeId: rawRule.attributes.alertTypeId as string,
-    rawRule: rawRule.attributes as RawRule,
-    references: rawRule.references,
-    includeLegacyId: false,
-    omitGeneratedValues: false,
-  });
-
   return {
-    rule,
     version: rawRule.version,
-    indirectParams: rawRule.attributes,
-    fakeRequest,
-    rulesClient,
+    rawRule: rawRule.attributes,
+    references: rawRule.references,
   };
 }
 

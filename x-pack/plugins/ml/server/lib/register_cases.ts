@@ -6,15 +6,16 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { CasesSetup } from '@kbn/cases-plugin/server';
+import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { MlFeatures } from '../../common/constants/app';
 import {
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
   CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+  CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,
 } from '../../common/constants/cases';
 
 export function registerCasesPersistableState(
-  cases: CasesSetup,
+  cases: CasesServerSetup,
   enabledFeatures: MlFeatures,
   logger: Logger
 ) {
@@ -35,6 +36,16 @@ export function registerCasesPersistableState(
     } catch (error) {
       logger.warn(
         `ML failed to register cases persistable state for ${CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS}`
+      );
+    }
+
+    try {
+      cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER,
+      });
+    } catch (error) {
+      logger.warn(
+        `ML failed to register cases persistable state for ${CASE_ATTACHMENT_TYPE_ID_SINGLE_METRIC_VIEWER}`
       );
     }
   }

@@ -21,7 +21,7 @@ const onChangeEditable = jest.fn();
 const onSaveContent = jest.fn();
 
 const hyperlink = `[hyperlink](http://elastic.co)`;
-const draftStorageKey = `cases.testAppId.caseId.markdown-id.markdownEditor`;
+const draftStorageKey = `cases.securitySolution.caseId.markdown-id.markdownEditor`;
 const defaultProps = {
   content: `A link to a timeline ${hyperlink}`,
   id: 'markdown-id',

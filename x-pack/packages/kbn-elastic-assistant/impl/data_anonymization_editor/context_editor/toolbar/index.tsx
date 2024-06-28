@@ -14,8 +14,6 @@ import { BatchUpdateListItem, ContextEditorRow } from '../types';
 
 export interface Props {
   onListUpdated: (updates: BatchUpdateListItem[]) => void;
-  onlyDefaults: boolean;
-  onReset?: () => void;
   onSelectAll: () => void;
   selected: ContextEditorRow[];
   totalFields: number;
@@ -23,8 +21,6 @@ export interface Props {
 
 const ToolbarComponent: React.FC<Props> = ({
   onListUpdated,
-  onlyDefaults,
-  onReset,
   onSelectAll,
   selected,
   totalFields,
@@ -52,32 +48,9 @@ const ToolbarComponent: React.FC<Props> = ({
         appliesTo="multipleRows"
         disabled={selected.length === 0}
         onListUpdated={onListUpdated}
-        onlyDefaults={onlyDefaults}
         selected={selected}
       />
     </EuiFlexItem>
-
-    {onReset != null && (
-      <EuiFlexItem grow={true}>
-        <EuiFlexGroup
-          alignItems="center"
-          data-test-subj="toolbarTrailingActions"
-          gutterSize="none"
-          justifyContent="flexEnd"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="resetFields"
-              iconType="eraser"
-              onClick={onReset}
-              size="xs"
-            >
-              {i18n.RESET}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    )}
   </EuiFlexGroup>
 );
 

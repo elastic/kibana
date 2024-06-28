@@ -22,6 +22,8 @@ import { cloneDeep } from 'lodash';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { CollapseFunction } from '../../../common/expressions';
 import { PaletteOutput } from '@kbn/coloring';
+import { PersistedPieVisualizationState } from './persistence';
+import { LegendValue } from '@elastic/charts';
 
 jest.mock('../../id_generator');
 
@@ -52,6 +54,8 @@ function getExampleState(): PieVisualizationState {
         numberDisplay: NumberDisplay.PERCENT,
         categoryDisplay: CategoryDisplay.DEFAULT,
         legendDisplay: LegendDisplay.DEFAULT,
+        legendPosition: 'bottom',
+        truncateLegend: true,
         nestedLegend: false,
       },
     ],
@@ -158,6 +162,46 @@ describe('pie_visualization', () => {
           shape: PieChartTypes.DONUT,
         })
       );
+    });
+  });
+
+  describe('#initialize', () => {
+    describe('converting to legendStats', () => {
+      it('loads a chart with `legendStats` property', () => {
+        const persistedState = getExampleState();
+        persistedState.layers[0].legendStats = [LegendValue.Value];
+
+        const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
+
+        expect(runtimeState.layers[0].legendStats).toEqual(['value']);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
+      it('loads a xy chart with `showValuesInLegend` property equal to false and converts to legendStats: []', () => {
+        const persistedState: PersistedPieVisualizationState = getExampleState();
+        persistedState.layers[0].showValuesInLegend = false;
+
+        const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
+
+        expect(runtimeState.layers[0].legendStats).toEqual([]);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
+
+      it('loads a xy chart with `showValuesInLegend` property equal to true and converts to legendStats: [`values`]', () => {
+        const persistedState: PersistedPieVisualizationState = getExampleState();
+        persistedState.layers[0].showValuesInLegend = true;
+
+        const runtimeState = pieVisualization.initialize(() => 'first', persistedState);
+
+        expect(runtimeState.layers[0].legendStats).toEqual(['value']);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
+
+      it('loads a xy chart with undefined `showValuesInLegend` and converts to legendStats: [`values`]', () => {
+        const runtimeState = pieVisualization.initialize(() => 'first', getExampleState());
+
+        expect(runtimeState.layers[0].legendStats).toEqual(undefined);
+        expect('showValuesInLegend' in runtimeState.layers[0]).toEqual(false);
+      });
     });
   });
 

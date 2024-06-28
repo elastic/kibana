@@ -6,9 +6,15 @@
  */
 
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
+
+export enum TaskPriority {
+  Low = 1,
+  Normal = 50,
+}
 
 /*
  * Type definitions and validations for tasks.
@@ -49,7 +55,8 @@ export type SuccessfulRunResult = {
    */
   state: Record<string, unknown>;
   taskRunError?: DecoratedError;
-  skipAttempts?: number;
+  shouldValidate?: boolean;
+  shouldDeleteTask?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -82,6 +89,11 @@ export type FailedRunResult = SuccessfulRunResult & {
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
 
+export const getDeleteTaskRunResult = () => ({
+  state: {},
+  shouldDeleteTask: true,
+});
+
 export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
   !!((result as FailedRunResult)?.error ?? false);
 
@@ -89,29 +101,9 @@ export interface FailedTaskResult {
   status: TaskStatus.Failed | TaskStatus.DeadLetter;
 }
 
-type IndirectParamsType = Record<string, unknown>;
-
-export interface LoadedIndirectParams<
-  IndirectParams extends IndirectParamsType = IndirectParamsType
-> {
-  [key: string]: unknown;
-  indirectParams: IndirectParams;
-}
-
-export type LoadIndirectParamsResult<T extends LoadedIndirectParams = LoadedIndirectParams> =
-  | {
-      data: T;
-      error?: never;
-    }
-  | {
-      data?: never;
-      error: Error;
-    };
-export type LoadIndirectParamsFunction = () => Promise<LoadIndirectParamsResult>;
 export type RunFunction = () => Promise<RunResult | undefined | void>;
 export type CancelFunction = () => Promise<RunResult | undefined | void>;
 export interface CancellableTask<T = never> {
-  loadIndirectParams?: LoadIndirectParamsFunction;
   run: RunFunction;
   cancel?: CancelFunction;
   cleanup?: () => Promise<void>;
@@ -131,6 +123,10 @@ export const taskDefinitionSchema = schema.object(
      * A brief, human-friendly title for this task.
      */
     title: schema.maybe(schema.string()),
+    /**
+     * Priority of this task type. Defaults to "NORMAL" if not defined
+     */
+    priority: schema.maybe(schema.number()),
     /**
      * An optional more detailed description of what this task does.
      */
@@ -174,13 +170,17 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
-    // schema of the data fetched by the task runner (in loadIndirectParams) e.g. rule, action etc.
-    indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
-    validate({ timeout }) {
+    validate({ timeout, priority }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
         return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
+      }
+
+      if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
+        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
       }
     },
   }
@@ -204,7 +204,6 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
     }
   >;
   paramsSchema?: ObjectType;
-  indirectParamsSchema?: ObjectType;
 };
 
 export enum TaskStatus {
@@ -212,6 +211,7 @@ export enum TaskStatus {
   Claiming = 'claiming',
   Running = 'running',
   Failed = 'failed',
+  ShouldDelete = 'should_delete',
   Unrecognized = 'unrecognized',
   DeadLetter = 'dead_letter',
 }
@@ -324,10 +324,10 @@ export interface TaskInstance {
    */
   enabled?: boolean;
 
-  /**
-   * Indicates the number of skipped executions.
+  /*
+   * Optionally override the timeout defined in the task type for this specific task instance
    */
-  numSkippedRuns?: number;
+  timeoutOverride?: string;
 }
 
 /**
@@ -340,6 +340,10 @@ export interface TaskInstanceWithDeprecatedFields extends TaskInstance {
    * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
    * */
   interval?: string;
+  /**
+   * Indicates the number of skipped executions.
+   */
+  numSkippedRuns?: number;
 }
 
 /**
@@ -361,6 +365,11 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
    */
   interval?: string;
+
+  /**
+   *  @deprecated removed with version 8.14.0
+   */
+  numSkippedRuns?: number;
 
   /**
    * The saved object version from the Elasticsearch document.
@@ -417,6 +426,17 @@ export interface ConcreteTaskInstance extends TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId: string | null;
+}
+
+export interface ConcreteTaskInstanceVersion {
+  /** The _id of the the document (not the SO id) */
+  esId: string;
+  /** The _seq_no of the document when using seq_no_primary_term on fetch */
+  seqNo?: number;
+  /** The _primary_term of the document when using seq_no_primary_term on fetch */
+  primaryTerm?: number;
+  /** The error found if trying to resolve the version info for this esId */
+  error?: string;
 }
 
 /**

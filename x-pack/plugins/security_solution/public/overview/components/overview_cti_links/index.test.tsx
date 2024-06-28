@@ -6,28 +6,13 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
-import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n-react';
 import { ThreatIntelLinkPanel } from '.';
-import { ThemeProvider } from 'styled-components';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
+
+import { TestProviders } from '../../../common/mock';
+import { mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
-import { createKibanaContextProviderMock } from '../../../common/lib/kibana/kibana_react.mock';
-
-const MockKibanaContextProvider = createKibanaContextProviderMock();
-
-jest.mock('../../../common/lib/kibana');
 
 jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
 const useTiDataSourcesMock = useTiDataSources as jest.Mock;
@@ -38,27 +23,11 @@ const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
 describe('ThreatIntelLinkPanel', () => {
-  const state: State = mockGlobalState;
-
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-  beforeEach(() => {
-    const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
-
   it('renders CtiEnabledModule when Threat Intel module is enabled', () => {
     const wrapper = mount(
-      <Provider store={store}>
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>
-            <MockKibanaContextProvider>
-              <ThreatIntelLinkPanel {...mockProps} />
-            </MockKibanaContextProvider>
-          </ThemeProvider>
-        </I18nProvider>
-      </Provider>
+      <TestProviders>
+        <ThreatIntelLinkPanel {...mockProps} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="cti-enabled-module"]').length).toEqual(1);
@@ -68,15 +37,9 @@ describe('ThreatIntelLinkPanel', () => {
 
   it('renders CtiDisabledModule when Threat Intel module is disabled', () => {
     const wrapper = mount(
-      <Provider store={store}>
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>
-            <MockKibanaContextProvider>
-              <ThreatIntelLinkPanel {...mockProps} allTiDataSources={[]} />
-            </MockKibanaContextProvider>
-          </ThemeProvider>
-        </I18nProvider>
-      </Provider>
+      <TestProviders>
+        <ThreatIntelLinkPanel {...mockProps} allTiDataSources={[]} />
+      </TestProviders>
     );
 
     expect(wrapper.find('[data-test-subj="cti-disabled-module"]').length).toEqual(1);

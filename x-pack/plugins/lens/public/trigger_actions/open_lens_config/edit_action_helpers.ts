@@ -8,22 +8,21 @@ import React from 'react';
 import './helpers.scss';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
-import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { isLensEmbeddable } from '../utils';
 import type { LensPluginStartDependencies } from '../../plugin';
+import { StartServices } from '../../types';
 
-interface Context {
+interface Context extends StartServices {
   embeddable: IEmbeddable;
   startDependencies: LensPluginStartDependencies;
-  overlays: OverlayStart;
-  theme: ThemeServiceStart;
   isNewPanel?: boolean;
   deletePanel?: () => void;
 }
 
 export async function isEditActionCompatible(embeddable: IEmbeddable) {
+  if (!embeddable?.getInput) return false;
   // display the action only if dashboard is on editable mode
   const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
   return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
@@ -32,10 +31,9 @@ export async function isEditActionCompatible(embeddable: IEmbeddable) {
 export async function executeEditAction({
   embeddable,
   startDependencies,
-  overlays,
-  theme,
   isNewPanel,
   deletePanel,
+  ...startServices
 }: Context) {
   const isCompatibleAction = await isEditActionCompatible(embeddable);
   if (!isCompatibleAction || !isLensEmbeddable(embeddable)) {
@@ -44,8 +42,9 @@ export async function executeEditAction({
   const rootEmbeddable = embeddable.getRoot();
   const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
   const ConfigPanel = await embeddable.openConfingPanel(startDependencies, isNewPanel, deletePanel);
+
   if (ConfigPanel) {
-    const handle = overlays.openFlyout(
+    const handle = startServices.overlays.openFlyout(
       toMountPoint(
         React.cloneElement(ConfigPanel, {
           closeFlyout: () => {
@@ -53,9 +52,7 @@ export async function executeEditAction({
             handle.close();
           },
         }),
-        {
-          theme$: theme.theme$,
-        }
+        startServices
       ),
       {
         className: 'lnsConfigPanel__overlay',

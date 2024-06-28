@@ -16,6 +16,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const esClient = getService('es');
 
   const ensureFieldsAreSorted = (resp: { body: { fields: { name: string } } }) => {
     expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
@@ -226,6 +227,39 @@ export default function ({ getService }: FtrProviderContext) {
           pattern: 'bad_index',
         })
         .expect(404);
+    });
+
+    it('returns 200 when index is closed', async () => {
+      const es = getService('es');
+
+      await es.indices.close({ index: 'basic_index' });
+
+      await supertest
+        .get(FIELDS_FOR_WILDCARD_PATH)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .query({ pattern: 'basic_index' })
+        .expect(200, {
+          fields: [],
+          indices: [],
+        });
+    });
+
+    it('returns empty set when no fields even if meta fields are supplied', async () => {
+      await esClient.indices.create({ index: 'fields-for-wildcard-000001' });
+
+      await supertest
+        .get(FIELDS_FOR_WILDCARD_PATH)
+        .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
+        .query({
+          pattern: 'fields-for-wildcard-000001',
+          meta_fields: ['_id', '_index'],
+        })
+        .expect(200, {
+          fields: [],
+          indices: ['fields-for-wildcard-000001'],
+        });
+
+      await esClient.indices.delete({ index: 'fields-for-wildcard-000001' });
     });
   });
 }

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
+import type { OnboardingHubStepLinkClickedParams } from '../../../../lib/telemetry/events/onboarding/types';
 import type {
   ToggleTaskCompleteStatus,
   CardId,
@@ -19,12 +21,16 @@ export interface StepContextType {
   finishedSteps: Record<CardId, Set<StepId>>;
   indicesExist: boolean;
   onStepClicked: OnStepClicked;
+  onStepLinkClicked: (params: OnboardingHubStepLinkClickedParams) => void;
   toggleTaskCompleteStatus: ToggleTaskCompleteStatus;
 }
 
 const StepContext = React.createContext<StepContextType | null>(null);
 
-export const StepContextProvider: React.FC<StepContextType> = ({ children, ...others }) => {
+export const StepContextProvider: React.FC<PropsWithChildren<StepContextType>> = ({
+  children,
+  ...others
+}) => {
   return <StepContext.Provider value={others}>{children}</StepContext.Provider>;
 };
 

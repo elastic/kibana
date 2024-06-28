@@ -14,6 +14,8 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { errors } from '@elastic/elasticsearch';
 
+import { STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS } from '../../../../constants/fleet_es_assets';
+
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
@@ -21,7 +23,9 @@ import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
   FLEET_COMPONENT_TEMPLATES,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
+  STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
 } from '../../../../constants';
 
 import {
@@ -80,8 +84,10 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -101,6 +107,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual([
       'metrics@tsdb-settings',
       ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -123,8 +130,10 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
       ...composedOfTemplates,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ]);
   });
@@ -142,7 +151,9 @@ describe('EPM template', () => {
       isIndexModeTimeSeries: false,
     });
     expect(template.composed_of).toStrictEqual([
-      'logs@settings',
+      STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
+      STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
+      STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -333,6 +344,26 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithIndexFalseMapping);
+  });
+
+  it('tests processing text field with store true', () => {
+    const textWithStoreTrueYml = `
+- name: someTextId
+  type: text
+  store: true
+`;
+    const textWithStoreTrueMapping = {
+      properties: {
+        someTextId: {
+          type: 'text',
+          store: true,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(textWithStoreTrueYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(textWithStoreTrueMapping);
   });
 
   it('tests processing text field with multi fields', () => {
@@ -1309,6 +1340,103 @@ describe('EPM template', () => {
     expect(mappings).toEqual(runtimeFieldMapping);
   });
 
+  it('tests processing store true in a dynamic template', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: messages.*
+  type: text
+  store: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        messages: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'messages.*': {
+            match_mapping_type: 'string',
+            path_match: 'messages.*',
+            mapping: {
+              type: 'text',
+              store: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template object', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: object
+  object_type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dimension fields on a dynamic template field', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: labels.*
+  type: keyword
+  dimension: true
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        labels: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'labels.*': {
+            match_mapping_type: 'string',
+            path_match: 'labels.*',
+            mapping: {
+              type: 'keyword',
+              time_series_dimension: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
   it('tests processing scaled_float fields in a dynamic template', () => {
     const textWithRuntimeFieldsLiteralYml = `
 - name: numeric_labels
@@ -1409,6 +1537,63 @@ describe('EPM template', () => {
             mapping: {
               type: 'object',
               dynamic: true,
+            },
+          },
+        },
+        {
+          'group.*': {
+            path_match: 'group.*',
+            match_mapping_type: 'object',
+            mapping: {
+              type: 'object',
+              dynamic: true,
+            },
+          },
+        },
+      ],
+    };
+    const fields: Field[] = safeLoad(textWithRuntimeFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields, true);
+    expect(mappings).toEqual(runtimeFieldMapping);
+  });
+
+  it('tests processing dynamic templates priority of intermediate objects', () => {
+    const textWithRuntimeFieldsLiteralYml = `
+- name: group.*.value
+  type: object
+  object_type: double
+  object_type_mapping_type: "*"
+  metric_type: gauge
+- name: group.*.histogram
+  type: object
+  object_type: histogram
+  object_type_mapping_type: "*"
+`;
+    const runtimeFieldMapping = {
+      properties: {
+        group: {
+          type: 'object',
+          dynamic: true,
+        },
+      },
+      dynamic_templates: [
+        {
+          'group.*.value': {
+            match_mapping_type: '*',
+            path_match: 'group.*.value',
+            mapping: {
+              time_series_metric: 'gauge',
+              type: 'double',
+            },
+          },
+        },
+        {
+          'group.*.histogram': {
+            path_match: 'group.*.histogram',
+            match_mapping_type: '*',
+            mapping: {
+              type: 'histogram',
             },
           },
         },
@@ -1611,7 +1796,14 @@ describe('EPM template', () => {
         },
       ]);
 
-      expect(esClient.indices.rollover).toHaveBeenCalled();
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
     });
     it('should skip rollover on expected error when flag is on', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();

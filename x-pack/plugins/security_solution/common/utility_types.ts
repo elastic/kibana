@@ -37,7 +37,7 @@ type NonAny = number | boolean | string | symbol | null;
 export const unionWithNullType = <T extends runtimeTypes.Mixed>(type: T) =>
   runtimeTypes.union([type, runtimeTypes.null]);
 
-export const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
+export const stringEnum = <T extends object>(enumObj: T, enumName = 'enum') =>
   new runtimeTypes.Type<T[keyof T], string>(
     enumName,
     (u): u is T[keyof T] => Object.values(enumObj).includes(u),

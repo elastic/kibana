@@ -9,7 +9,7 @@
 import { intersection } from 'lodash';
 import { animationFrameScheduler } from 'rxjs';
 import { useCallback, useEffect, RefObject } from 'react';
-import { filter, debounceTime } from 'rxjs/operators';
+import { filter, debounceTime } from 'rxjs';
 
 import type { Chart } from '@elastic/charts';
 
@@ -18,7 +18,7 @@ import { parseSyncOptions } from './active_cursor_utils';
 import type { ActiveCursor } from './active_cursor';
 import type { ActiveCursorSyncOption } from './types';
 
-const DEFAULT_DEBOUNCE_TIME = 40;
+const DEFAULT_DEBOUNCE_TIME_MS = 8; // don't update more than once per frame but try to avoid skipping frames
 
 export const useActiveCursor = (
   activeCursor: ActiveCursor,
@@ -40,7 +40,7 @@ export const useActiveCursor = (
   useEffect(() => {
     const cursorSubscription = activeCursor.activeCursor$
       ?.pipe(
-        debounceTime(syncOptions.debounce ?? DEFAULT_DEBOUNCE_TIME, animationFrameScheduler),
+        debounceTime(syncOptions.debounce ?? DEFAULT_DEBOUNCE_TIME_MS, animationFrameScheduler),
         filter((payload) => {
           if (payload.isDateHistogram && isDateHistogram) {
             return true;

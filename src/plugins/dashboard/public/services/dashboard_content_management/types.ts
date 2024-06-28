@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Reference } from '@kbn/content-management-utils';
 import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
@@ -74,6 +75,12 @@ export interface LoadDashboardReturn {
   resolveMeta?: DashboardResolveMeta;
   dashboardInput: SavedDashboardInput;
   anyMigrationRun?: boolean;
+
+  /**
+   * Raw references returned directly from the Dashboard saved object. These
+   * should be provided to the React Embeddable children on deserialize.
+   */
+  references: Reference[];
 }
 
 /**
@@ -84,12 +91,14 @@ export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolea
 export interface SaveDashboardProps {
   currentState: SavedDashboardInput;
   saveOptions: SavedDashboardSaveOpts;
+  panelReferences?: Reference[];
   lastSavedId?: string;
 }
 
 export interface SaveDashboardReturn {
   id?: string;
   error?: string;
+  references?: Reference[];
   redirectRequired?: boolean;
 }
 

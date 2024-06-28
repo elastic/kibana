@@ -74,7 +74,7 @@ export class EditPanelAction
 
   public async getHref({ embeddable }: EmbeddableApiContext): Promise<string | undefined> {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return embeddable?.getEditHref?.();
+    return await embeddable?.getEditHref?.();
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
@@ -84,6 +84,6 @@ export class EditPanelAction
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.onEdit();
+    await embeddable.onEdit();
   }
 }

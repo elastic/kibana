@@ -8,6 +8,7 @@
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import qs from 'query-string';
 import { useExecutionContext } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { ComponentTemplatesAuthProvider } from './auth_provider';
@@ -24,6 +25,7 @@ export const ComponentTemplateListContainer: React.FunctionComponent<
   match: {
     params: { componentTemplateName },
   },
+  location,
   history,
 }) => {
   const { executionContext } = useComponentTemplatesContext();
@@ -33,10 +35,17 @@ export const ComponentTemplateListContainer: React.FunctionComponent<
     page: 'indexManagementComponentTemplatesTab',
   });
 
+  const urlParams = qs.parse(location.search);
+  const filter = urlParams.filter ?? '';
+
   return (
     <ComponentTemplatesAuthProvider>
       <ComponentTemplatesWithPrivileges>
-        <ComponentTemplateList componentTemplateName={componentTemplateName} history={history} />
+        <ComponentTemplateList
+          componentTemplateName={componentTemplateName}
+          history={history}
+          filter={String(filter)}
+        />
       </ComponentTemplatesWithPrivileges>
     </ComponentTemplatesAuthProvider>
   );

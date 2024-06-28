@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['discover', 'observabilityLogsExplorer', 'timePicker']);
 
   describe('Header menu', () => {
@@ -46,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await discoverLink.isDisplayed()).to.be(true);
       });
 
-      it('should navigate to discover keeping the current columns/filters/query/time/data view', async () => {
+      it('should navigate to discover keeping the current filters/query/time/data view and use fallback columns for virtual columns', async () => {
         await retry.try(async () => {
           await testSubjects.existOrFail('superDatePickerstartDatePopoverButton');
           await testSubjects.existOrFail('superDatePickerendDatePopoverButton');
@@ -62,15 +63,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.discover.waitForDocTableLoadingComplete();
 
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql('All logs');
-        });
+        await dataViews.waitForSwitcherToBe('All logs');
 
         await retry.try(async () => {
           expect(await PageObjects.discover.getColumnHeaders()).to.eql([
             '@timestamp',
-            'resource',
-            'content',
+            'host.name',
+            'service.name',
+            'message',
           ]);
         });
 

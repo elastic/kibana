@@ -84,13 +84,16 @@ export const buildDataViewMock = ({
     return dataViewFields;
   };
 
+  const indexPattern = `${name}-title`;
+
   const dataView = {
     id: `${name}-id`,
-    title: `${name}-title`,
+    title: indexPattern,
     name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
     getName: () => name,
+    getIndexPattern: () => indexPattern,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {} }),
     getSourceFiltering: () => ({}),
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
@@ -103,6 +106,7 @@ export const buildDataViewMock = ({
       return dataViewFields.find((field) => field.name === timeFieldName);
     },
     toSpec: () => ({}),
+    toMinimalSpec: () => ({}),
   } as unknown as DataView;
 
   dataView.isTimeBased = () => !!timeFieldName;

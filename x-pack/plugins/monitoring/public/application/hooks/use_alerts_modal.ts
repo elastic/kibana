@@ -7,9 +7,10 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useRequestErrorHandler } from './use_request_error_handler';
 import { EnableAlertResponse, showAlertsToast } from '../../alerts/lib/alerts_toast';
+import { MonitoringStartServices } from '../../types';
 
 export const useAlertsModal = () => {
-  const { services } = useKibana();
+  const { services } = useKibana<MonitoringStartServices>();
   const handleRequestError = useRequestErrorHandler();
 
   function shouldShowAlertsModal(alerts: {}) {
@@ -38,9 +39,9 @@ export const useAlertsModal = () => {
         {}
       )!;
       window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', 'true');
-      showAlertsToast(response, services.theme?.theme$);
+      showAlertsToast(response, services);
     } catch (err) {
-      await handleRequestError(err);
+      handleRequestError(err);
     }
   }
 

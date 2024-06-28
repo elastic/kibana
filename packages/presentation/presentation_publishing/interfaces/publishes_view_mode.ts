@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PublishingSubject, useStateFromPublishingSubject } from '../publishing_subject';
+import { PublishingSubject } from '../publishing_subject';
 
 export type ViewMode = 'view' | 'edit' | 'print' | 'preview';
 
@@ -44,12 +44,3 @@ export const apiPublishesWritableViewMode = (
     typeof (unknownApi as PublishesWritableViewMode).setViewMode === 'function'
   );
 };
-
-/**
- * A hook that gets this API's view mode as a reactive variable which will cause re-renders on change.
- */
-export const useViewMode = <
-  ApiType extends Partial<PublishesViewMode> = Partial<PublishesViewMode>
->(
-  api: ApiType | undefined
-) => useStateFromPublishingSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);

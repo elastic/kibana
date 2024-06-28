@@ -25,14 +25,16 @@
       "dashboard",
       "licensing",
       "expressions",
-      "lens"
+      "lens",
+      "controls",
+      "embeddable"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
       "spaces",
-      "serverless",
+      "serverless"
     ],
     "requiredBundles": [
       "alerting",
@@ -43,7 +45,7 @@
     ],
     "extraPublicDirs": [
       "public/common",
-      "public/common/constants"
+      "public/common/constants",
     ]
   }
 }

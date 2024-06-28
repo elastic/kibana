@@ -26,8 +26,6 @@ import { findThresholdSignals } from './find_threshold_signals';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 import { getThresholdSignalHistory } from './get_threshold_signal_history';
 import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_threshold_alerts';
-import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 import type {
   BulkCreate,
@@ -46,6 +44,7 @@ import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { buildThresholdSignalHistory } from './build_signal_history';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { getSignalHistory, transformBulkCreatedItemsToHits } from './utils';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 export const thresholdExecutor = async ({
   inputIndex,
@@ -69,6 +68,7 @@ export const thresholdExecutor = async ({
   spaceId,
   runOpts,
   licensing,
+  experimentalFeatures,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -91,6 +91,7 @@ export const thresholdExecutor = async ({
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
   licensing: LicensingPluginSetup;
+  experimentalFeatures: ExperimentalFeatures;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -155,7 +156,6 @@ export const thresholdExecutor = async ({
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
 
-    let createResult: GenericBulkCreateResponse<BaseFieldsLatest>;
     let newSignalHistory: ThresholdSignalHistory;
 
     if (alertSuppression?.duration && hasPlatinumLicense) {
@@ -170,14 +170,19 @@ export const thresholdExecutor = async ({
         ruleExecutionLogger,
         spaceId,
         runOpts,
+        experimentalFeatures,
       });
-      createResult = suppressedResults.bulkCreateResult;
+      const createResult = suppressedResults.bulkCreateResult;
 
       newSignalHistory = buildThresholdSignalHistory({
         alerts: suppressedResults.unsuppressedAlerts,
       });
+      addToSearchAfterReturn({
+        current: result,
+        next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
+      });
     } else {
-      createResult = await bulkCreateThresholdSignals({
+      const createResult = await bulkCreateThresholdSignals({
         buckets,
         completeRule,
         filter: esFilter,
@@ -195,12 +200,12 @@ export const thresholdExecutor = async ({
       newSignalHistory = buildThresholdSignalHistory({
         alerts: transformBulkCreatedItemsToHits(createResult.createdItems),
       });
-    }
 
-    addToSearchAfterReturn({
-      current: result,
-      next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
-    });
+      addToSearchAfterReturn({
+        current: result,
+        next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
+      });
+    }
 
     result.errors.push(...previousSearchErrors);
     result.errors.push(...searchErrors);

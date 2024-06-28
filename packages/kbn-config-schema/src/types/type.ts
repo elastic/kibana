@@ -7,12 +7,29 @@
  */
 
 import type { AnySchema, CustomValidator, ErrorReport } from 'joi';
+import { META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
 import { SchemaTypeError, ValidationError } from '../errors';
 import { Reference } from '../references';
+
+/**
+ * Meta fields used when introspecting runtime validation. Most notably for
+ * generating OpenAPI spec.
+ */
+export interface TypeMeta {
+  /**
+   * A human-friendly description of this type to be used in documentation.
+   */
+  description?: string;
+  /**
+   * Whether this field is deprecated.
+   */
+  deprecated?: boolean;
+}
 
 export interface TypeOptions<T> {
   defaultValue?: T | Reference<T> | (() => T);
   validate?: (value: T) => string | void;
+  meta?: TypeMeta;
 }
 
 export interface SchemaStructureEntry {
@@ -86,6 +103,15 @@ export abstract class Type<V> {
       schema = schema.custom(convertValidationFunction(options.validate));
     }
 
+    if (options.meta) {
+      if (options.meta.description) {
+        schema = schema.description(options.meta.description);
+      }
+      if (options.meta.deprecated) {
+        schema = schema.meta({ [META_FIELD_X_OAS_DEPRECATED]: true });
+      }
+    }
+
     // Attach generic error handler only if it hasn't been attached yet since
     // only the last error handler is counted.
     if (schema.$_getFlag('error') === undefined) {
@@ -99,7 +125,11 @@ export abstract class Type<V> {
     return this;
   }
 
-  public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
+  /**
+   * Validates the provided value against this schema.
+   * If valid, the resulting output will be returned, otherwise an exception will be thrown.
+   */
+  public validate(value: unknown, context: Record<string, unknown> = {}, namespace?: string): V {
     const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',
@@ -113,7 +143,8 @@ export abstract class Type<V> {
   }
 
   /**
-   * @internal
+   * @note intended for internal use, if you need to use this please contact
+   *       the core team to discuss your use case.
    */
   public getSchema() {
     return this.internalSchema;

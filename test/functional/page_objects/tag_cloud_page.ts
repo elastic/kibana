@@ -36,7 +36,7 @@ export class TagCloudPageObject extends FtrService {
     const tags = await this.find.allByCssSelector('text');
     async function returnTagSize(tag: WebElementWrapper) {
       const style = await tag.getAttribute('style');
-      const fontSize = style.match(/font-size: ([^;]*);/);
+      const fontSize = style?.match(/font-size: ([^;]*);/);
       return fontSize ? fontSize[1] : '';
     }
     return await Promise.all(tags.map(returnTagSize));

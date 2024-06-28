@@ -20,7 +20,7 @@ import {
   selectKqlSearchMode,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
 

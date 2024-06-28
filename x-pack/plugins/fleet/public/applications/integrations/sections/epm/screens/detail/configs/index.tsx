@@ -57,7 +57,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
   return (
     <EuiFlexGroup data-test-subj="epm.Configs" alignItems="flexStart">
       <EuiFlexItem grow={1} />
-      <EuiFlexItem grow={6}>
+      <EuiFlexItem grow={7}>
         {isLoading && !configs ? (
           <EuiSkeletonText lines={10} />
         ) : (

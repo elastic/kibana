@@ -7,6 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
@@ -21,16 +22,21 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerGetRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/{type}/{id}',
+      options: {
+        access,
+        description: `Get a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -38,17 +44,17 @@ export const registerGetRoute = (
         }),
       },
     },
-    catchAndReturnBoomErrors(async (context, req, res) => {
+    catchAndReturnBoomErrors(async (context, request, response) => {
       logWarnOnExternalRequest({
         method: 'get',
         path: '/api/saved_objects/{type}/{id}',
-        req,
+        request,
         logger,
       });
-      const { type, id } = req.params;
+      const { type, id } = request.params;
 
       const usageStatsClient = coreUsageData.getClient();
-      usageStatsClient.incrementSavedObjectsGet({ request: req }).catch(() => {});
+      usageStatsClient.incrementSavedObjectsGet({ request, types: [type] }).catch(() => {});
 
       const { savedObjects } = await context.core;
 
@@ -59,7 +65,7 @@ export const registerGetRoute = (
       const object = await savedObjects.client.get(type, id, {
         migrationVersionCompatibility: 'compatible',
       });
-      return res.ok({ body: object });
+      return response.ok({ body: object });
     })
   );
 };

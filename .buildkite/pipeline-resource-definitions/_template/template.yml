@@ -1,0 +1,72 @@
+###
+# For more information on authoring pipeline definitions,
+# follow the guides at https://docs.elastic.dev/ci/getting-started-with-buildkite-at-elastic
+###
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  # This will be the URL slug in Backstage UI as:
+  #  https://backstage.elastic.dev/catalog/default/resource/bk-kibana-your-pipeline-name
+  # bk-pipeline-<pipeline-name-slugified>
+  name: bk-kibana-your-pipeline-name
+  # This will be displayed in the Backstage UI
+  description: '<Describe your pipeline here>'
+  links:
+      # These are relevant links to your pipeline that will be listed in the Backstage UI
+      # The URL slug here is the .spec.implementation.metadata.name field slugified
+    - url: 'https://buildkite.com/elastic/kibana-your-pipeline-name'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  system: buildkite
+  # The owner team's github group name in the format 'group:<github-group-name>'
+  owner: 'group:github-group-name'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      # <context / pipeline name> - this will be displayed in the Buildkite UI as title
+      #  and this will be slugified to form the URL in the Backstage UI
+      name: kibana / your pipeline name
+      # This will appear as description on the Buildkite UI
+      description: '<Describe your pipeline here>'
+    spec:
+      # Environment variables that will be set for the pipeline
+      env:
+        # Slack channel to send notifications to, if ELASTIC_SLACK_NOTIFICATIONS_ENABLED = 'true'
+        SLACK_NOTIFICATIONS_CHANNEL: '#team-slack-channel-name'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+
+      allow_rebuilds: false
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      # Point to a pipeline implementation, detailing the pipeline steps to run
+      pipeline_file: .buildkite/pipelines/your-pipeline-name.yml
+      skip_intermediate_builds: false
+      provider_settings:
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+        trigger_mode: none
+      # Teams and their access levels to the pipeline,
+      # please keep [kibana-operations, appex-qa, kibana-tech-leads] as MANAGE_BUILD_AND_READ
+      #         and [everyone] as BUILD_AND_READ
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      # Scheduled runs for the pipeline
+      schedules:
+        Daily 6 am UTC:
+          cronline: 0 5 * * *
+          message: Daily 6 am UTC
+          branch: main
+          # Optionally, set schedule-specific env-vars here
+          env:
+            SCHEDULED: 'true'

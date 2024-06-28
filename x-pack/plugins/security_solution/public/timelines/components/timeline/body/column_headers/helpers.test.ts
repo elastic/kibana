@@ -6,11 +6,11 @@
  */
 
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
-import '../../../../../common/mock/match_media';
 import type { BrowserFields } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
+import { defaultUdtHeaders } from '../../unified_components/default_headers';
 import {
   getColumnWidthFromType,
   getColumnHeaders,
@@ -87,6 +87,17 @@ describe('helpers', () => {
         type: 'date',
       });
     });
+
+    test('should return the expected metadata in case of unified header', () => {
+      const inputHeaders = defaultUdtHeaders;
+      expect(getColumnHeader('@timestamp', inputHeaders)).toEqual({
+        columnHeaderType: 'not-filtered',
+        id: '@timestamp',
+        initialWidth: 215,
+        esTypes: ['date'],
+        type: 'date',
+      });
+    });
   });
 
   describe('getColumnHeaders', () => {
@@ -94,11 +105,7 @@ describe('helpers', () => {
       const expectedData = [
         {
           aggregatable: true,
-          category: 'base',
           columnHeaderType: 'not-filtered',
-          description:
-            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
-          example: '2016-05-23T08:05:34.853Z',
           format: '',
           id: '@timestamp',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -111,10 +118,7 @@ describe('helpers', () => {
         },
         {
           aggregatable: true,
-          category: 'source',
           columnHeaderType: 'not-filtered',
-          description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
-          example: '',
           format: '',
           id: 'source.ip',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -126,11 +130,7 @@ describe('helpers', () => {
         },
         {
           aggregatable: true,
-          category: 'destination',
           columnHeaderType: 'not-filtered',
-          description:
-            'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
-          example: '',
           format: '',
           id: 'destination.ip',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -159,11 +159,8 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, mockBrowserFields)).toEqual([
         {
           aggregatable: false,
-          category: 'base',
           columnHeaderType: 'not-filtered',
-          description: 'Each document has an _id that uniquely identifies it',
           esTypes: [],
-          example: 'Y-6TfmcB0WOhS6qyMv3s',
           id: '_id',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           initialWidth: 180,
@@ -188,7 +185,6 @@ describe('helpers', () => {
           fields: {
             test_field_1: {
               aggregatable: true,
-              category: 'test_field_1',
               esTypes: ['keyword'],
               format: 'string',
               indexes: [
@@ -215,7 +211,6 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, oneLevelDeep)).toEqual([
         {
           aggregatable: true,
-          category: 'test_field_1',
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
           format: 'string',
@@ -255,7 +250,6 @@ describe('helpers', () => {
           fields: {
             'foo.bar': {
               aggregatable: true,
-              category: 'foo',
               esTypes: ['keyword'],
               format: 'string',
               indexes: [
@@ -282,7 +276,6 @@ describe('helpers', () => {
       expect(getColumnHeaders(headers, twoLevelsDeep)).toEqual([
         {
           aggregatable: true,
-          category: 'foo',
           columnHeaderType: 'not-filtered',
           esTypes: ['keyword'],
           format: 'string',

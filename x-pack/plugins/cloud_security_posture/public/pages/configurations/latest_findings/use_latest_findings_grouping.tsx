@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { getGroupingQuery } from '@kbn/grouping';
 import {
   GroupingAggregation,
   GroupPanelRenderer,
@@ -12,10 +12,13 @@ import {
   isNoneGroup,
   NamedAggregation,
   parseGroupingQuery,
-} from '@kbn/securitysolution-grouping/src';
+} from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
-import { LOCAL_STORAGE_FINDINGS_GROUPING_KEY } from '../../../common/constants';
+import {
+  FINDINGS_GROUPING_OPTIONS,
+  LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
+} from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
@@ -29,7 +32,7 @@ import {
   groupingTitle,
   defaultGroupingOptions,
   getDefaultQuery,
-  GROUPING_OPTIONS,
+  MISCONFIGURATIONS_GROUPS_UNIT,
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
@@ -80,26 +83,26 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case GROUPING_OPTIONS.RESOURCE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('resourceName', 'resource.id'),
         getTermAggregation('resourceSubType', 'resource.sub_type'),
         getTermAggregation('resourceType', 'resource.type'),
       ];
-    case GROUPING_OPTIONS.RULE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkVersion', 'rule.benchmark.version'),
       ];
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
       ];
-    case GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
+    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
@@ -147,6 +150,7 @@ export const useLatestFindingsGrouping = ({
     query,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,
@@ -164,6 +168,7 @@ export const useLatestFindingsGrouping = ({
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
+    groupsUnit: MISCONFIGURATIONS_GROUPS_UNIT,
   });
 
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
@@ -257,6 +262,7 @@ export const useLatestFindingsGrouping = ({
     selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
+    urlQuery,
     setUrlQuery,
     isGroupSelected: !isNoneSelected,
     isGroupLoading: !data,

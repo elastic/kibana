@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import type { WindowParameters } from '@kbn/aiops-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
+import {
+  useAppDispatch,
+  useCurrentSelectedSignificantItem,
+  useCurrentSelectedGroup,
+  setInitialAnalysisStart,
+  setDocumentCountChartData,
+} from '@kbn/aiops-log-rate-analysis/state';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -26,23 +36,19 @@ import {
   windowParametersToAppState,
   type LogRateAnalysisPageUrlState,
 } from '../../application/url_state/log_rate_analysis';
-import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import { SearchPanel } from '../search_panel';
-import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 import { PageHeader } from '../page_header';
 
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
-interface Props {
-  stickyHistogram?: boolean;
-}
 
-export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
+export const LogRateAnalysisPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { currentSelectedSignificantItem, currentSelectedGroup } =
-    useLogRateAnalysisResultsTableRowContext();
+  const currentSelectedGroup = useCurrentSelectedGroup();
+  const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
+  const dispatch = useAppDispatch();
 
   const [stateFromUrl, setUrlState] = usePageUrlState<LogRateAnalysisPageUrlState>(
     'logRateAnalysis',
@@ -87,7 +93,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     stateFromUrl
   );
 
-  const { timefilter } = useData(
+  const { documentStats, timefilter, earliest, latest, intervalMs } = useData(
     dataView,
     'log_rate_analysis',
     searchQuery,
@@ -96,8 +102,25 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     currentSelectedGroup
   );
 
+  // TODO Since `useData` isn't just used within Log Rate Analysis, this is a bit of
+  // a workaround to pass the result on to the redux store. At least this ensures
+  // we now use `useData` only once across Log Rate Analysis! Originally `useData`
+  // was quite general, but over time it got quite some specific features used
+  // across Log Rate Analysis and Pattern Analysis. We discussed that we should
+  // split this up into more specific hooks.
+  useEffect(() => {
+    dispatch(
+      setDocumentCountChartData({
+        earliest,
+        latest,
+        intervalMs,
+        documentStats,
+      })
+    );
+  }, [documentStats, dispatch, earliest, intervalMs, latest]);
+
   useEffect(
-    // TODO: Consolidate this hook/function with with Data visualizer's
+    // TODO: Consolidate this hook/function with the one in `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx`
     function clearFiltersOnLeave() {
       return () => {
         // We want to clear all filters that have not been pinned globally
@@ -113,10 +136,14 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
+      if (
+        !isEqual({ from: globalState.time.from, to: globalState.time.to }, timefilter.getTime())
+      ) {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.time), timefilter]);
@@ -136,11 +163,22 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
-  const onWindowParametersHandler = (wp?: WindowParameters) => {
-    if (!isEqual(wp, stateFromUrl.wp)) {
-      setUrlState({
-        wp: windowParametersToAppState(wp),
-      });
+  useEffect(
+    () => {
+      dispatch(setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp)));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const onWindowParametersHandler = (wp?: WindowParameters, replace = false) => {
+    if (!isEqual(windowParametersToAppState(wp), stateFromUrl.wp)) {
+      setUrlState(
+        {
+          wp: windowParametersToAppState(wp),
+        },
+        replace
+      );
     }
   };
 
@@ -152,7 +190,6 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
         <EuiFlexGroup gutterSize="m" direction="column">
           <EuiFlexItem>
             <SearchPanel
-              dataView={dataView}
               searchString={searchString ?? ''}
               searchQuery={searchQuery}
               searchQueryLanguage={searchQueryLanguage}
@@ -160,13 +197,9 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             />
           </EuiFlexItem>
           <LogRateAnalysisContent
-            initialAnalysisStart={appStateToWindowParameters(stateFromUrl.wp)}
-            dataView={dataView}
             embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
             onWindowParametersChange={onWindowParametersHandler}
-            setGlobalState={setGlobalState}
-            stickyHistogram={stickyHistogram}
           />
         </EuiFlexGroup>
       </EuiPageSection>

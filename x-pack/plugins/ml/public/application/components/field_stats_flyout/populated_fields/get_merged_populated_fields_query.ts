@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { cloneDeep } from 'lodash';
 import { getDefaultDSLQuery } from '@kbn/ml-query-utils';

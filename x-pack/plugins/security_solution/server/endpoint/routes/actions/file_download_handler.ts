@@ -8,8 +8,12 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { EndpointActionFileDownloadParams } from '../../../../common/api/endpoint';
 import { EndpointActionFileDownloadSchema } from '../../../../common/api/endpoint';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { validateActionId } from '../../services';
+import type { ResponseActionsClient } from '../../services';
+import {
+  getResponseActionsClient,
+  NormalizedExternalConnectorClient,
+  getActionAgentType,
+} from '../../services';
 import { errorHandler } from '../error_handler';
 import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -61,22 +65,23 @@ export const getActionFileDownloadRouteHandler = (
   const logger = endpointContext.logFactory.get('actionFileDownload');
 
   return async (context, req, res) => {
-    const fleetFiles = await endpointContext.service.getFleetFromHostFilesClient();
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const { action_id: actionId, file_id: fileId } = req.params;
 
     try {
-      await validateActionId(esClient, actionId);
-      const file = await fleetFiles.get(fileId);
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const { agentType } = await getActionAgentType(esClient, actionId);
+      const user = endpointContext.service.security?.authc.getCurrentUser(req);
+      const casesClient = await endpointContext.service.getCasesClient(req);
+      const connectorActions = (await context.actions).getActionsClient();
+      const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
+        esClient,
+        casesClient,
+        endpointService: endpointContext.service,
+        username: user?.username || 'unknown',
+        connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
+      });
 
-      if (file.id !== fileId) {
-        throw new CustomHttpRequestError(
-          `Invalid file id [${fileId}] for action [${actionId}]`,
-          400
-        );
-      }
-
-      const { stream, fileName } = await fleetFiles.download(fileId);
+      const { stream, fileName } = await responseActionsClient.getFileDownload(actionId, fileId);
 
       return res.ok({
         body: stream,

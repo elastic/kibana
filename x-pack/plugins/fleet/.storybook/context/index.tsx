@@ -13,7 +13,11 @@ import { createBrowserHistory } from 'history';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
-import type { PluginsServiceStart } from '@kbn/core/public';
+import type {
+  PluginsServiceStart,
+  SecurityServiceStart,
+  UserProfileServiceStart,
+} from '@kbn/core/public';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { getStorybookContextProvider } from '@kbn/custom-integrations-plugin/storybook';
 
@@ -45,10 +49,10 @@ import { getCustomBranding } from './custom_branding';
 // mock later, (or, ideally, Fleet starts to use a service abstraction).
 //
 // Expect this to grow as components that are given Stories need access to mocked services.
-export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>[1] }> = ({
-  storyContext,
-  children: storyChildren,
-}) => {
+export const StorybookContext: React.FC<{
+  children: React.ReactNode;
+  storyContext?: Parameters<DecoratorFn>[1];
+}> = ({ storyContext, children: storyChildren }) => {
   const basepath = '';
   const browserHistory = createBrowserHistory();
   const history = new CoreScopedHistory(browserHistory, basepath);
@@ -95,13 +99,24 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
         theme$: EMPTY,
         getTheme: () => ({ darkMode: false }),
       },
+      security: {} as unknown as SecurityServiceStart,
+      userProfile: {} as unknown as UserProfileServiceStart,
       plugins: {} as unknown as PluginsServiceStart,
       authz: {
         fleet: {
           all: true,
           setup: true,
           readEnrollmentTokens: true,
+
+          // subfeatures
+          allAgents: true,
+          readAgents: true,
+          allSettings: true,
+          readSettings: true,
           readAgentPolicies: true,
+          allAgentPolicies: true,
+          addAgents: true,
+          addFleetServers: true,
         },
         integrations: {
           readPackageInfo: true,

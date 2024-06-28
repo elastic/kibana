@@ -6,13 +6,13 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs/operators';
-import { KibanaExecutionContext } from '@kbn/core/types';
+import { map } from 'rxjs';
+import type { KibanaExecutionContext } from '@kbn/core/types';
 import { useMemo } from 'react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import type { Observable } from 'rxjs';
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { ExecutionContextStart } from '@kbn/core/public';
+import type { ExecutionContextStart } from '@kbn/core/public';
 
 /**
  * Use execution context for ML embeddables.
@@ -47,3 +47,25 @@ export function useEmbeddableExecutionContext<T extends EmbeddableInput>(
 
   useExecutionContext(executionContext, embeddableExecutionContext);
 }
+
+export const useReactEmbeddableExecutionContext = (
+  executionContextStart: ExecutionContextStart,
+  parentExecutionContext: KibanaExecutionContext,
+  embeddableType: string,
+  id: string
+) => {
+  const embeddableExecutionContext = useMemo(() => {
+    const child: KibanaExecutionContext = {
+      type: 'visualization',
+      name: embeddableType,
+      id,
+    };
+
+    return {
+      ...parentExecutionContext,
+      child,
+    };
+  }, [embeddableType, id, parentExecutionContext]);
+
+  useExecutionContext(executionContextStart, embeddableExecutionContext);
+};

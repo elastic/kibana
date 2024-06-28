@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import deepEqual from 'react-fast-compare';
+import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -21,6 +24,7 @@ export function CasesTableServiceProvider(
   const browser = getService('browser');
   const retry = getService('retry');
   const config = getService('config');
+  const toasts = getService('toasts');
 
   const assertCaseExists = (index: number, totalCases: number) => {
     if (index > totalCases - 1) {
@@ -46,6 +50,7 @@ export function CasesTableServiceProvider(
     },
 
     async deleteCase(index: number = 0) {
+      await toasts.dismissAll();
       this.openRowActions(index);
       await testSubjects.existOrFail('cases-bulk-action-delete');
       await testSubjects.click('cases-bulk-action-delete');
@@ -100,6 +105,15 @@ export function CasesTableServiceProvider(
       await header.waitUntilLoadingHasFinished();
     },
 
+    async waitForNthToBeListed(numberOfCases: number) {
+      await retry.try(async () => {
+        await this.refreshTable();
+        await this.validateCasesTableHasNthRows(numberOfCases);
+      });
+
+      await header.waitUntilLoadingHasFinished();
+    },
+
     async waitForCasesToBeDeleted() {
       await retry.waitFor('the cases table to be empty', async () => {
         await this.refreshTable();
@@ -133,6 +147,13 @@ export function CasesTableServiceProvider(
       return rows[index] ?? null;
     },
 
+    async verifyCase(caseId: string, index: number) {
+      const theCaseById = await this.getCaseById(caseId);
+      const theCaseByIndex = await this.getCaseByIndex(index);
+
+      return (await theCaseById._webElement.getId()) === (await theCaseByIndex._webElement.getId());
+    },
+
     async filterByTag(tag: string) {
       await common.clickAndValidate(
         'options-filter-popover-button-tags',
@@ -160,10 +181,6 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`options-filter-popover-item-${status}`);
       // to close the popup
       await testSubjects.click('options-filter-popover-button-status');
-
-      await testSubjects.missingOrFail(`options-filter-popover-item-${status}`, {
-        timeout: 5000,
-      });
     },
 
     async filterBySeverity(severity: CaseSeverity) {
@@ -183,18 +200,22 @@ export function CasesTableServiceProvider(
       await casesCommon.selectFirstRowInAssigneesPopover();
     },
 
-    async filterByOwner(
-      owner: string,
-      options: { popupAlreadyOpen: boolean } = { popupAlreadyOpen: false }
-    ) {
-      if (!options.popupAlreadyOpen) {
-        await common.clickAndValidate(
-          'options-filter-popover-button-owner',
-          `options-filter-popover-item-${owner}`
-        );
+    async filterByOwner(owner: string) {
+      const isAlreadyOpen = await testSubjects.exists('options-filter-popover-panel-owner');
+
+      if (isAlreadyOpen) {
+        await testSubjects.click(`options-filter-popover-item-${owner}`);
+        await header.waitUntilLoadingHasFinished();
+        return;
       }
 
+      await retry.waitFor(`filterByOwner popover opened`, async () => {
+        await testSubjects.click('options-filter-popover-button-owner');
+        return await testSubjects.exists('options-filter-popover-panel-owner');
+      });
+
       await testSubjects.click(`options-filter-popover-item-${owner}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async refreshTable() {
@@ -436,6 +457,55 @@ export function CasesTableServiceProvider(
 
       // closes the popover
       await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async clearFilters() {
+      if (await testSubjects.exists('all-cases-clear-filters-link-icon')) {
+        await testSubjects.click('all-cases-clear-filters-link-icon');
+        await header.waitUntilLoadingHasFinished();
+      }
+    },
+
+    async setAllCasesStateInLocalStorage(state: Record<string, unknown>) {
+      await browser.setLocalStorageItem('cases.cases.list.state', JSON.stringify(state));
+
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
+      );
+
+      expect(deepEqual(currentState, state)).to.be(true);
+    },
+
+    async getAllCasesStateInLocalStorage() {
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.state')) ?? '{}'
+      );
+
+      return currentState;
+    },
+
+    async setFiltersConfigurationInLocalStorage(state: Array<{ key: string; isActive: boolean }>) {
+      await browser.setLocalStorageItem(
+        'cases.cases.list.tableFiltersConfig',
+        JSON.stringify(state)
+      );
+
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('cases.cases.list.tableFiltersConfig')) ?? '{}'
+      );
+
+      expect(deepEqual(currentState, state)).to.be(true);
+    },
+
+    async expectFiltersToBeActive(filters: string[]) {
+      for (const filter of filters) {
+        await testSubjects.existOrFail(`options-filter-popover-button-${filter}`);
+      }
+    },
+
+    async setStateToUrlAndNavigate(state: Record<string, unknown>) {
+      const encodedUrlParams = rison.encode(state);
+      await common.navigateToApp('cases', { search: `cases=${encodedUrlParams}` });
     },
   };
 }

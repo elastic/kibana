@@ -59,7 +59,7 @@ describe('ContextApp test', () => {
       notifications: { toasts: [] },
       theme: { theme$: themeServiceMock.createStartContract().theme$ },
     },
-    history: () => history,
+    history,
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
       getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getAddPanelActionMenuItems } from './add_panel_action_menu_items';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
+import { getAddPanelActionMenuItemsGroup } from './add_panel_action_menu_items';
 
 describe('getAddPanelActionMenuItems', () => {
   it('returns the items correctly', async () => {
@@ -20,21 +21,95 @@ describe('getAddPanelActionMenuItems', () => {
         isCompatible: () => Promise.resolve(true),
         execute: jest.fn(),
       },
-    ];
-    const items = getAddPanelActionMenuItems(registeredActions, jest.fn(), jest.fn(), jest.fn());
-    expect(items).toStrictEqual([
       {
-        'data-test-subj': 'create-action-Action name',
-        icon: 'pencil',
-        name: 'Action name',
-        onClick: expect.any(Function),
-        toolTipContent: 'Action tooltip',
+        id: 'TEST_ACTION_01',
+        type: 'TEST_ACTION_01',
+        getDisplayName: () => 'Action name 01',
+        getIconType: () => 'pencil',
+        getDisplayNameTooltip: () => 'Action tooltip',
+        isCompatible: () => Promise.resolve(true),
+        execute: jest.fn(),
+        grouping: [
+          {
+            id: 'groupedAddPanelAction',
+            getDisplayName: () => 'Custom group',
+            getIconType: () => 'logoElasticsearch',
+          },
+        ],
       },
-    ]);
+      {
+        id: 'TEST_ACTION_02',
+        type: 'TEST_ACTION_02',
+        getDisplayName: () => 'Action name',
+        getDisplayNameTooltip: () => 'Action tooltip',
+        getIconType: () => undefined,
+        isCompatible: () => Promise.resolve(true),
+        execute: jest.fn(),
+        grouping: [
+          {
+            id: 'groupedAddPanelAction',
+            getDisplayName: () => 'Custom group',
+            getIconType: () => 'logoElasticsearch',
+          },
+        ],
+      },
+    ];
+    const grouped = getAddPanelActionMenuItemsGroup(
+      getMockPresentationContainer(),
+      registeredActions,
+      jest.fn()
+    );
+
+    expect(grouped).toStrictEqual({
+      groupedAddPanelAction: {
+        id: 'groupedAddPanelAction',
+        title: 'Custom group',
+        order: 0,
+        'data-test-subj': 'dashboardEditorMenu-groupedAddPanelActionGroup',
+        items: [
+          {
+            'data-test-subj': 'create-action-Action name 01',
+            icon: 'pencil',
+            id: 'TEST_ACTION_01',
+            name: 'Action name 01',
+            onClick: expect.any(Function),
+            description: 'Action tooltip',
+            order: 0,
+          },
+          {
+            'data-test-subj': 'create-action-Action name',
+            icon: 'empty',
+            id: 'TEST_ACTION_02',
+            name: 'Action name',
+            onClick: expect.any(Function),
+            description: 'Action tooltip',
+            order: 0,
+          },
+        ],
+      },
+      other: {
+        id: 'other',
+        title: 'Other',
+        order: -1,
+        'data-test-subj': 'dashboardEditorMenu-otherGroup',
+        items: [
+          {
+            id: 'ACTION_CREATE_ESQL_CHART',
+            name: 'Action name',
+            icon: 'pencil',
+            description: 'Action tooltip',
+            onClick: expect.any(Function),
+            'data-test-subj': 'create-action-Action name',
+            order: 0,
+          },
+        ],
+      },
+    });
   });
 
   it('returns empty array if no actions have been registered', async () => {
-    const items = getAddPanelActionMenuItems([], jest.fn(), jest.fn(), jest.fn());
-    expect(items).toStrictEqual([]);
+    const grouped = getAddPanelActionMenuItemsGroup(getMockPresentationContainer(), [], jest.fn());
+
+    expect(grouped).toStrictEqual({});
   });
 });

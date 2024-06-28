@@ -13,15 +13,11 @@ import type { ToastsStart } from '@kbn/core/public';
 import { stringHash } from '@kbn/ml-string-hash';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import { RANDOM_SAMPLER_SEED } from '@kbn/aiops-log-rate-analysis/constants';
+import type { DocumentCountStats } from '@kbn/aiops-log-rate-analysis/types';
 
-import { RANDOM_SAMPLER_SEED } from '../../common/constants';
-
-import {
-  DocumentCountStats,
-  getDocumentCountStatsRequest,
-  processDocumentCountStats,
-  DocumentStatsSearchStrategyParams,
-} from '../get_document_stats';
+import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
+import { getDocumentCountStatsRequest, processDocumentCountStats } from '../get_document_stats';
 
 import { useAiopsAppContext } from './use_aiops_app_context';
 
@@ -61,7 +57,8 @@ function displayError(toastNotifications: ToastsStart, index: string, err: any) 
 export function useDocumentCountStats<TParams extends DocumentStatsSearchStrategyParams>(
   searchParams: TParams | undefined,
   searchParamsCompare: TParams | undefined,
-  lastRefresh: number
+  lastRefresh: number,
+  changePointsByDefault = true
 ): DocumentStats {
   const {
     data,
@@ -77,12 +74,12 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
   const [documentStatsCache, setDocumentStatsCache] = useState<Record<string, DocumentStats>>({});
 
+  const cacheKey = stringHash(
+    `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
+  );
+
   const fetchDocumentCountData = useCallback(async () => {
     if (!searchParams) return;
-
-    const cacheKey = stringHash(
-      `${JSON.stringify(searchParams)}_${JSON.stringify(searchParamsCompare)}`
-    );
 
     if (documentStatsCache[cacheKey]) {
       setDocumentStats(documentStatsCache[cacheKey]);
@@ -101,7 +98,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       const totalHitsResp = await lastValueFrom(
         data.search.search(
           {
-            params: getDocumentCountStatsRequest(totalHitsParams, undefined, true),
+            params: getDocumentCountStatsRequest(totalHitsParams, undefined, changePointsByDefault),
           },
           { abortSignal: abortCtrl.current.signal }
         )
@@ -119,7 +116,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           {
             params: getDocumentCountStatsRequest(
               { ...searchParams, trackTotalHits: false },
-              randomSamplerWrapper
+              randomSamplerWrapper,
+              false,
+              searchParamsCompare === undefined && changePointsByDefault
             ),
           },
           { abortSignal: abortCtrl.current.signal }
@@ -172,7 +171,9 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
         displayError(toasts, searchParams!.index, extractErrorProperties(error));
       }
     }
-  }, [data?.search, documentStatsCache, searchParams, searchParamsCompare, toasts]);
+    // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.search, documentStatsCache, cacheKey]);
 
   useEffect(
     function getDocumentCountData() {

@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingSpinner } from '@elastic/
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type { DiscoverStateContainer } from '../../application/main/services/discover_state';
+import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { FetchStatus } from '../../application/types';
 import { useDataState } from '../../application/main/hooks/use_data_state';
 

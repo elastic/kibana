@@ -11,7 +11,7 @@ import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
 
 const meta = getESAssetMetadata();
 
-export const FLEET_INSTALL_FORMAT_VERSION = '1.1.0';
+export const FLEET_INSTALL_FORMAT_VERSION = '1.2.0';
 
 export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.1';
 
@@ -61,6 +61,7 @@ export const FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_CONTENT = {
             ingested: {
               type: 'date',
               format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
+              ignore_malformed: false,
             },
             agent_id_status: {
               ignore_above: 1024,
@@ -82,13 +83,17 @@ export const FLEET_COMPONENT_TEMPLATES = [
 ];
 
 export const STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS = `logs@settings`;
+export const STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS = `logs@mappings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS = `metrics@settings`;
 export const STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS = `metrics@tsdb-settings`;
+export const STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS = 'ecs@mappings';
 
 export const STACK_COMPONENT_TEMPLATES = [
+  STACK_COMPONENT_TEMPLATE_LOGS_MAPPINGS,
   STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS,
   STACK_COMPONENT_TEMPLATE_METRICS_SETTINGS,
   STACK_COMPONENT_TEMPLATE_METRICS_TSDB_SETTINGS,
+  STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
 ];
 
 export const FLEET_FINAL_PIPELINE_VERSION = 4;

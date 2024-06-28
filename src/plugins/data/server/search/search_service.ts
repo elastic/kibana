@@ -19,13 +19,19 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs';
+import type {
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  ISearchOptions,
+  IEsSearchRequest,
+  IEsSearchResponse,
+} from '@kbn/search-types';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   DataRequestHandlerContext,
@@ -56,13 +62,8 @@ import {
   fieldFunction,
   geoBoundingBoxFunction,
   geoPointFunction,
-  IEsSearchRequest,
-  IEsSearchResponse,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   ipPrefixFunction,
   ipRangeFunction,
-  ISearchOptions,
   kibana,
   kibanaFilterFunction,
   kibanaTimerangeFunction,
@@ -108,7 +109,6 @@ export interface SearchServiceSetupDependencies {
   bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
-  security?: SecurityPluginSetup;
 }
 
 /** @internal */
@@ -145,7 +145,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection, security }: SearchServiceSetupDependencies
+    { bfetch, expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     core.savedObjects.registerType(searchSessionSavedObjectType);
     const usage = usageCollection ? usageProvider(core) : undefined;
@@ -154,7 +154,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerSessionRoutes(router, this.logger);
 
-    this.sessionService.setup(core, { security });
+    this.sessionService.setup(core, {});
 
     core.http.registerRouteHandlerContext<DataRequestHandlerContext, 'search'>(
       'search',
@@ -256,7 +256,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerFunction: expressions.registerFunction,
     });
 
-    firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
+    void firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {
         aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
         expressions.registerFunction(aggShardDelay);
@@ -314,6 +314,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
+            dataViews: scopedIndexPatterns,
             scriptedFieldsEnabled: true,
           };
 

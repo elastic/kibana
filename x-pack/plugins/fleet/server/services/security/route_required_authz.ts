@@ -133,7 +133,7 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
   [`get:${AGENT_API_ROUTES.STATUS_PATTERN}`]: {
     any: {
       fleet: {
-        all: true,
+        readAgents: true,
       },
       packagePrivileges: {
         endpoint: {

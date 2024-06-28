@@ -64,6 +64,10 @@ export const CONFLICT_MULTIPLE_INDEX_DESCRIPTION = (name: string, count: number)
     values: { count, name },
   });
 
+export const SHOW_VALUE_LIST_MODAL = i18n.translate('autocomplete.showValueListModal', {
+  defaultMessage: 'Show value list',
+});
+
 // eslint-disable-next-line import/no-default-export
 export default {
   LOADING,

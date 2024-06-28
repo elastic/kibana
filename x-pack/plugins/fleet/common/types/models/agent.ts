@@ -10,6 +10,7 @@ import type {
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
   FleetServerAgentComponentStatuses,
+  AgentStatuses,
 } from '../../constants';
 
 export type AgentType =
@@ -17,16 +18,8 @@ export type AgentType =
   | typeof AGENT_TYPE_PERMANENT
   | typeof AGENT_TYPE_TEMPORARY;
 
-export type AgentStatus =
-  | 'offline'
-  | 'error'
-  | 'online'
-  | 'inactive'
-  | 'enrolling'
-  | 'unenrolling'
-  | 'unenrolled'
-  | 'updating'
-  | 'degraded';
+type AgentStatusTuple = typeof AgentStatuses;
+export type AgentStatus = AgentStatusTuple[number];
 
 export type SimplifiedAgentStatus =
   | 'healthy'
@@ -114,6 +107,14 @@ interface AgentBase {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   agent?: FleetServerAgentMetadata;
+  unhealthy_reason?: UnhealthyReason[];
+  namespaces?: string[];
+}
+
+export enum UnhealthyReason {
+  INPUT = 'input',
+  OUTPUT = 'output',
+  OTHER = 'other',
 }
 
 export interface AgentMetrics {
@@ -187,7 +188,7 @@ export interface AgentDiagnostics {
   name: string;
   createTime: string;
   filePath: string;
-  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'IN_PROGRESS' | 'FAILED';
+  status: 'READY' | 'AWAITING_UPLOAD' | 'DELETED' | 'EXPIRED' | 'IN_PROGRESS' | 'FAILED';
   actionId: string;
   error?: string;
 }
@@ -343,6 +344,16 @@ export interface FleetServerAgent {
    * Outputs map
    */
   outputs?: OutputMap;
+
+  /**
+   * Unhealthy reason: input, output, other
+   */
+  unhealthy_reason?: UnhealthyReason[];
+
+  /**
+   * Namespaces
+   */
+  namespaces?: string[];
 }
 
 /**
@@ -437,6 +448,8 @@ export interface ActionStatusOptions {
   errorSize: number;
   page?: number;
   perPage?: number;
+  date?: string;
+  latest?: number;
 }
 
 export interface AgentUpgradeDetails {

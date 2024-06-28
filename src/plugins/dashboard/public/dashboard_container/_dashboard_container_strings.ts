@@ -58,12 +58,12 @@ export const emptyScreenStrings = {
 export const dashboardSaveToastStrings = {
   getSuccessString: (dashTitle: string) =>
     i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-      defaultMessage: `Dashboard '{dashTitle}' was saved`,
+      defaultMessage: `Dashboard ''{dashTitle}'' was saved`,
       values: { dashTitle },
     }),
   getFailureString: (dashTitle: string, errorMessage: string) =>
     i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-      defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
+      defaultMessage: `Dashboard ''{dashTitle}'' was not saved. Error: {errorMessage}`,
       values: {
         dashTitle,
         errorMessage,
@@ -103,5 +103,18 @@ export const backupServiceStrings = {
     i18n.translate('dashboard.panelStorageError.clearError', {
       defaultMessage: 'Error encountered while clearing unsaved changes: {message}',
       values: { message },
+    }),
+};
+
+export const panelPlacementStrings = {
+  getUnknownStrategyError: (strategy: string) =>
+    i18n.translate('dashboard.panelPlacement.unknownStrategyError', {
+      defaultMessage: 'Unknown panel placement strategy: {strategy}',
+      values: { strategy },
+    }),
+  getPanelPlacementSettingsExistsError: (panelType: string) =>
+    i18n.translate('dashboard.panelPlacement.panelPlacementSettingsExistsError', {
+      defaultMessage: 'Panel placement settings for embeddable type {panelType} already exists',
+      values: { panelType },
     }),
 };

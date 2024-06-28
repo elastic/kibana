@@ -35,11 +35,11 @@ import { SecurityPageName } from '../../app/types';
 import { getGroupByFieldsOnClick } from '../../common/components/alerts_treemap/lib/helpers';
 import { useThemes } from '../../common/components/charts/common';
 import { HeaderPage } from '../../common/components/header_page';
-import { LandingPageComponent } from '../../common/components/landing_page';
+import { EmptyPrompt } from '../../common/components/empty_prompt';
 import { useLocalStorage } from '../../common/components/local_storage';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { APP_ID, DEFAULT_BYTES_FORMAT, DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../sourcerer/containers';
 import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
@@ -131,7 +131,7 @@ const renderOption = (
 );
 
 const DataQualityComponent: React.FC = () => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { isAssistantEnabled } = useAssistantAvailability();
   const httpFetch = KibanaServices.get().http.fetch;
   const { baseTheme, theme } = useThemes();
   const toasts = useToasts();
@@ -284,7 +284,7 @@ const DataQualityComponent: React.FC = () => {
             reportDataQualityIndexChecked={reportDataQualityIndexChecked}
             httpFetch={httpFetch}
             ilmPhases={ilmPhases}
-            isAssistantEnabled={hasAssistantPrivilege}
+            isAssistantEnabled={isAssistantEnabled}
             isILMAvailable={isILMAvailable}
             lastChecked={lastChecked}
             openCreateCaseFlyout={openCreateCaseFlyout}
@@ -296,7 +296,7 @@ const DataQualityComponent: React.FC = () => {
           />
         </SecuritySolutionPageWrapper>
       ) : (
-        <LandingPageComponent />
+        <EmptyPrompt />
       )}
 
       <SpyRoute pageName={SecurityPageName.dataQuality} />

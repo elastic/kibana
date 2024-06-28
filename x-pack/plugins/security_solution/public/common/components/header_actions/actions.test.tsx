@@ -19,7 +19,12 @@ import { SecurityStepId } from '../guided_onboarding_tour/tour_config';
 import { Actions } from './actions';
 import { initialUserPrivilegesState as mockInitialUserPrivilegesState } from '../user_privileges/user_privileges_context';
 import { useUserPrivileges } from '../user_privileges';
+import { useHiddenByFlyout } from '../guided_onboarding_tour/use_hidden_by_flyout';
 
+const useHiddenByFlyoutMock = useHiddenByFlyout as jest.Mock;
+jest.mock('../guided_onboarding_tour/use_hidden_by_flyout', () => ({
+  useHiddenByFlyout: jest.fn(),
+}));
 jest.mock('../guided_onboarding_tour');
 jest.mock('../user_privileges');
 jest.mock('../../../detections/components/user_info', () => ({
@@ -93,6 +98,7 @@ const defaultProps = {
   checked: false,
   columnId: '',
   columnValues: 'abc def',
+  disableExpandAction: false,
   data: mockTimelineData[0].data,
   ecsData: mockTimelineData[0].ecs,
   eventId: 'abc',
@@ -122,40 +128,10 @@ describe('Actions', () => {
     (useShallowEqualSelector as jest.Mock).mockReturnValue(mockTimelineModel);
   });
 
-  test('it renders a checkbox for selecting the event when `showCheckboxes` is `true`', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toEqual(true);
-  });
-
-  test('it does NOT render a checkbox for selecting the event when `showCheckboxes` is `false`', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} showCheckboxes={false} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
-  test('it does NOT render a checkbox for selecting the event when `tGridEnabled` is `true`', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const wrapper = mount(
-      <TestProviders>
-        <Actions {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('[data-test-subj="select-event"]').exists()).toBe(false);
-  });
-
   describe('Guided Onboarding Step', () => {
     const incrementStepMock = jest.fn();
     beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       (useTourContext as jest.Mock).mockReturnValue({
         activeStep: 2,
         incrementStep: incrementStepMock,
@@ -200,6 +176,19 @@ describe('Actions', () => {
 
       expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
       expect(wrapper.find(SecurityTourStep).exists()).toEqual(true);
+    });
+
+    test('if left expandable flyout is expanded, SecurityTourStep not active', () => {
+      useHiddenByFlyoutMock.mockReturnValue(true);
+
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} {...isTourAnchorConditions} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find(GuidedOnboardingTourStep).exists()).toEqual(true);
+      expect(wrapper.find(SecurityTourStep).exists()).toEqual(false);
     });
 
     test('on expand event click and SecurityTourStep is active, incrementStep', () => {
@@ -438,6 +427,18 @@ describe('Actions', () => {
       );
 
       expect(wrapper.find('[data-test-subj="session-view-button"]').exists()).toEqual(true);
+    });
+  });
+
+  describe('Expand action', () => {
+    test('should not be visible if disableExpandAction is true', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toBeFalsy();
     });
   });
 });

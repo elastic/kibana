@@ -13,6 +13,7 @@ import { Subscription } from 'rxjs';
 
 import type { DataView } from '@kbn/data-plugin/common';
 import { isRunningResponse } from '@kbn/data-plugin/common';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import type {
   TimelineEqlRequestOptionsInput,
   TimelineEventsAllOptionsInput,
@@ -20,7 +21,7 @@ import type {
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
-import type { RunTimeMappings } from '../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';
@@ -147,14 +148,14 @@ export const useTimelineEventsHandler = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
-}: UseTimelineEventsProps): [boolean, TimelineArgs, TimelineEventsSearchHandler] => {
+}: UseTimelineEventsProps): [DataLoadingState, TimelineArgs, TimelineEventsSearchHandler] => {
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loaded);
   const [activePage, setActivePage] = useState(
     id === TimelineId.active ? activeTimeline.getActivePage() : 0
   );
@@ -219,7 +220,11 @@ export const useTimelineEventsHandler = ({
       const asyncSearch = async () => {
         prevTimelineRequest.current = request;
         abortCtrl.current = new AbortController();
-        setLoading(true);
+        if (activePage === 0) {
+          setLoading(DataLoadingState.loading);
+        } else {
+          setLoading(DataLoadingState.loadingMore);
+        }
         const { endTracking } = startTracking({ name: `${APP_UI_ID} timeline events search` });
         searchSubscription$.current = data.search
           .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(request, {
@@ -233,7 +238,7 @@ export const useTimelineEventsHandler = ({
             next: (response) => {
               if (!isRunningResponse(response)) {
                 endTracking('success');
-                setLoading(false);
+                setLoading(DataLoadingState.loaded);
                 setTimelineResponse((prevResponse) => {
                   const newTimelineResponse = {
                     ...prevResponse,
@@ -262,7 +267,7 @@ export const useTimelineEventsHandler = ({
             },
             error: (msg) => {
               endTracking(abortCtrl.current.signal.aborted ? 'aborted' : 'error');
-              setLoading(false);
+              setLoading(DataLoadingState.loaded);
               data.search.showError(msg);
               searchSubscription$.current.unsubscribe();
             },
@@ -276,7 +281,7 @@ export const useTimelineEventsHandler = ({
       ) {
         activeTimeline.setPageName(pageName);
         abortCtrl.current.abort();
-        setLoading(false);
+        setLoading(DataLoadingState.loaded);
 
         if (request.language === 'eql') {
           prevTimelineRequest.current = activeTimeline.getEqlRequest();
@@ -312,7 +317,17 @@ export const useTimelineEventsHandler = ({
       await asyncSearch();
       refetch.current = asyncSearch;
     },
-    [pageName, skip, id, startTracking, data.search, dataViewId, refetchGrid, wrappedLoadPage]
+    [
+      pageName,
+      skip,
+      id,
+      activePage,
+      startTracking,
+      data.search,
+      dataViewId,
+      refetchGrid,
+      wrappedLoadPage,
+    ]
   );
 
   useEffect(() => {
@@ -350,11 +365,28 @@ export const useTimelineEventsHandler = ({
         ? activePage
         : 0;
 
+      /*
+       * optimization to avoid unnecessary network request when a field
+       * has already been fetched
+       *
+       */
+
+      let finalFieldRequest = fields;
+
+      const newFieldsRequested = fields.filter(
+        (field) => !prevRequest?.fieldRequested?.includes(field)
+      );
+      if (newFieldsRequested.length > 0) {
+        finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
+      } else {
+        finalFieldRequest = prevRequest?.fieldRequested ?? [];
+      }
+
       const currentRequest = {
         defaultIndex: indexNames,
         factoryQueryType: TimelineEventsQueries.all,
-        fieldRequested: fields,
-        fields,
+        fieldRequested: finalFieldRequest,
+        fields: finalFieldRequest,
         filterQuery: createFilter(filterQuery),
         pagination: {
           activePage: newActivePage,
@@ -450,8 +482,8 @@ export const useTimelineEvents = ({
   sort = initSortDefault,
   skip = false,
   timerangeKind,
-}: UseTimelineEventsProps): [boolean, TimelineArgs] => {
-  const [loading, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
+}: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
     eqlOptions,
@@ -473,5 +505,5 @@ export const useTimelineEvents = ({
     timelineSearchHandler();
   }, [timelineSearchHandler]);
 
-  return [loading, timelineResponse];
+  return [dataLoadingState, timelineResponse];
 };

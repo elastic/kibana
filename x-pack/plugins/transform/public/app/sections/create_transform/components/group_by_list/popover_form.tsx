@@ -23,14 +23,20 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
+import type { EuiComboBoxOptionOption } from '@elastic/eui/src/components/combo_box/types';
 import { isDefined } from '@kbn/ml-is-defined';
 import { ACCEPTED_TIMEZONES, isValidTimeZone } from '../../../../common/time_zone_utils';
-import { AggName } from '../../../../../../common/types/aggregations';
+import type { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 
+import type {
+  PivotGroupByConfig,
+  PivotGroupByConfigWithUiSupportDict,
+  PivotSupportedGroupByAggs,
+  PivotSupportedGroupByAggsWithInterval,
+} from '../../../../common';
 import {
   dateHistogramIntervalFormatRegex,
   getEsAggFromGroupByConfig,
@@ -39,10 +45,6 @@ import {
   isPivotGroupByConfigWithUiSupport,
   histogramIntervalFormatRegex,
   isAggName,
-  PivotGroupByConfig,
-  PivotGroupByConfigWithUiSupportDict,
-  PivotSupportedGroupByAggs,
-  PivotSupportedGroupByAggsWithInterval,
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../../../common';
 

@@ -334,19 +334,24 @@ For more about this and other rules provided in {alert-features}, go to <<alerti
 
 * <<document-explorer, Configure the chart and document table>> to better meet your needs.
 
+[float]
+=== Troubleshooting
+
+* {blog-ref}troubleshooting-guide-common-issues-kibana-discover-load[Learn how to resolve common issues with Discover.]
+
 
 --
-include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
+include::{kibana-root}/docs/discover/document-explorer.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
+include::{kibana-root}/docs/discover/search-for-relevance.asciidoc[]
 
-include::{kib-repo-dir}/discover/save-search.asciidoc[]
+include::{kibana-root}/docs/discover/save-search.asciidoc[]
 
-include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
+include::{kibana-root}/docs/discover/field-statistics.asciidoc[]
 
-include::{kib-repo-dir}/discover/log-pattern-analysis.asciidoc[]
+include::{kibana-root}/docs/discover/log-pattern-analysis.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
+include::{kibana-root}/docs/discover/search-sessions.asciidoc[]
 
-include::{kib-repo-dir}/discover/try-esql.asciidoc[]
+include::{kibana-root}/docs/discover/try-esql.asciidoc[]
 

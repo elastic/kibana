@@ -36,7 +36,7 @@ import {
 /**
  * All action types that will mark a timeline as changed
  */
-const timelineChangedTypes = new Set([
+export const timelineChangedTypes = new Set([
   applyKqlFilterQuery.type,
   addProvider.type,
   dataProviderEdited.type,

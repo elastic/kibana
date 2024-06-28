@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { first, take, bufferCount } from 'rxjs/operators';
+import { first, take, bufferCount } from 'rxjs';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   TaskTypeAggregation,

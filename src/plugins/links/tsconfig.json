@@ -26,12 +26,13 @@
     "@kbn/logging",
     "@kbn/core-plugins-server",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme",
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/visualizations-plugin",
     "@kbn/core-mount-utils-browser",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/presentation-publishing",
+    "@kbn/react-kibana-context-render"
   ],
   "exclude": ["target/**/*"]
 }

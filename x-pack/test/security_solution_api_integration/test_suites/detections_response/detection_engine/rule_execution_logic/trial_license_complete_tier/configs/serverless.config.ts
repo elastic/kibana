@@ -18,7 +18,8 @@ export default createTestConfig({
       '/testing_regex*/',
     ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-      'entityAnalyticsAssetCriticalityEnabled',
+      'bulkCustomHighlightedFieldsEnabled',
+      'alertSuppressionForEsqlRuleEnabled',
     ])}`,
   ],
 });

@@ -23,16 +23,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { CoreStart, CoreTheme } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 
-import { Observable } from 'rxjs';
 import { getAppStyles } from '../../app.styles';
 import { BreadcrumbService } from '../services/breadcrumbs';
 
 interface CloudDataMigrationAppDeps {
   http: CoreStart['http'];
   breadcrumbService: BreadcrumbService;
-  theme$: Observable<CoreTheme>;
 }
 
 export const CloudDataMigrationApp = ({ http, breadcrumbService }: CloudDataMigrationAppDeps) => {

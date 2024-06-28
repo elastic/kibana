@@ -9,8 +9,9 @@ import { ProductLine } from '../../common/product';
 import { getCloudSecurityUsageRecord } from './cloud_security_metering_task';
 import { CLOUD_DEFEND, CNVM, CSPM, KSPM } from './constants';
 import type { CloudSecuritySolutions } from './types';
-import type { MeteringCallbackInput, Tier, UsageRecord } from '../types';
+import type { MeteringCallBackResponse, MeteringCallbackInput, Tier, UsageRecord } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
+import { getCloudDefendUsageRecords } from './defend_for_containers_metering';
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
@@ -19,7 +20,7 @@ export const cloudSecurityMetringCallback = async ({
   taskId,
   lastSuccessfulReport,
   config,
-}: MeteringCallbackInput): Promise<UsageRecord[]> => {
+}: MeteringCallbackInput): Promise<MeteringCallBackResponse> => {
   const projectId = cloudSetup?.serverless?.projectId || 'missing_project_id';
 
   const tier: Tier = getCloudProductTier(config, logger);
@@ -28,8 +29,19 @@ export const cloudSecurityMetringCallback = async ({
     const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM, CLOUD_DEFEND];
 
     const promiseResults = await Promise.allSettled(
-      cloudSecuritySolutions.map((cloudSecuritySolution) =>
-        getCloudSecurityUsageRecord({
+      cloudSecuritySolutions.map((cloudSecuritySolution) => {
+        if (cloudSecuritySolution === CLOUD_DEFEND) {
+          return getCloudDefendUsageRecords({
+            esClient,
+            projectId,
+            logger,
+            taskId,
+            lastSuccessfulReport,
+            cloudSecuritySolution,
+            tier,
+          });
+        }
+        return getCloudSecurityUsageRecord({
           esClient,
           projectId,
           logger,
@@ -37,8 +49,8 @@ export const cloudSecurityMetringCallback = async ({
           lastSuccessfulReport,
           cloudSecuritySolution,
           tier,
-        })
-      )
+        });
+      })
     );
 
     const cloudSecurityUsageRecords: UsageRecord[] = [];
@@ -53,10 +65,10 @@ export const cloudSecurityMetringCallback = async ({
       }
     });
 
-    return cloudSecurityUsageRecords;
+    return { records: cloudSecurityUsageRecords };
   } catch (err) {
     logger.error(`Failed to process Cloud Security metering data ${err}`);
-    return [];
+    return { records: [] };
   }
 };
 

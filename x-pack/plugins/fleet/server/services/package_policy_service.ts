@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
+import type {
+  AuthenticatedUser,
+  KibanaRequest,
+  Logger,
+  RequestHandlerContext,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
@@ -105,7 +110,7 @@ export interface PackagePolicyClient {
 
   list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery & { withAgentCount?: boolean }
+    options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>>;
 
   listIds(
@@ -213,4 +218,31 @@ export interface PackagePolicyClient {
     packageInfo: PackageInfo;
     experimentalDataStreamFeatures: ExperimentalDataStreamFeature[];
   }>;
+
+  /**
+   * Returns an `AsyncIterable` for retrieving all integration policy IDs
+   * @param soClient
+   * @param options
+   */
+  fetchAllItemIds(
+    soClient: SavedObjectsClientContract,
+    options?: PackagePolicyClientFetchAllItemIdsOptions
+  ): AsyncIterable<string[]>;
+
+  /**
+   * Returns an `AsyncIterable` for retrieving all integration policies
+   * @param soClient
+   * @param options
+   */
+  fetchAllItems(
+    soClient: SavedObjectsClientContract,
+    options?: PackagePolicyClientFetchAllItemsOptions
+  ): AsyncIterable<PackagePolicy[]>;
 }
+
+export type PackagePolicyClientFetchAllItemIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'>;
+
+export type PackagePolicyClientFetchAllItemsOptions = Pick<
+  ListWithKuery,
+  'perPage' | 'kuery' | 'sortField' | 'sortOrder'
+>;

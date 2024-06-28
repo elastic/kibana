@@ -17,15 +17,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
-    'error',
     'discover',
     'timePicker',
     'unifiedSearch',
     'lens',
-    'security',
-    'spaceSelector',
     'header',
     'unifiedFieldList',
   ]);
@@ -33,7 +31,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
 
   const defaultSettings = {
-    'discover:enableESQL': true,
+    enableESQL: true,
   };
 
   async function setDiscoverTimeRange() {
@@ -116,7 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_draggable-Top 3 values of extension.raw'
+          'lnsDragDrop_domDraggable_Top 3 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');
@@ -131,19 +129,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly using adhoc data view', async () => {
-      await PageObjects.discover.createAdHocDataView('logst', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dataViews.createFromSearchBar({
+        name: 'logst',
+        adHoc: true,
+        hasTimeField: true,
+      });
 
       await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await retry.try(async () => {
-        const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-        expect(selectedPattern).to.eql('logst*');
-      });
+      await dataViews.waitForSwitcherToBe('logst*');
     });
 
-    it('should visualize correctly text based language queries in Discover', async () => {
+    it('should visualize correctly ES|QL queries in Discover', async () => {
       await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -154,7 +152,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      await PageObjects.discover.chooseLensChart('Donut');
+      await PageObjects.discover.chooseLensSuggestion('donut');
       await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
@@ -169,8 +167,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
@@ -186,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       assertMatchesExpectedData(data!);
     });
 
-    it('should visualize correctly text based language queries in Lens', async () => {
+    it('should visualize correctly ES|QL queries in Lens', async () => {
       await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -205,7 +201,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    it('should visualize correctly text based language queries based on index patterns', async () => {
+    it('should visualize correctly ES|QL queries based on index patterns', async () => {
       await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
@@ -232,7 +228,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -313,7 +308,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
       await testSubjects.click('TextBasedLangEditor-expand');
       await testSubjects.click('unifiedHistogramSaveVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();

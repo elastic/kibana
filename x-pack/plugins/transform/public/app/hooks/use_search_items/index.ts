@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { SavedSearchQuery, SearchItems } from './common';
+export type { SearchItems } from './common';
 export { useSearchItems } from './use_search_items';

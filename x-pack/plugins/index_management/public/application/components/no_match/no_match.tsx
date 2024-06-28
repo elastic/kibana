@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ExtensionsService } from '../../../services';
 import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
+import { ExtensionsService } from '../../../services/extensions_service';
 
 export const NoMatch = ({
   loadIndices,

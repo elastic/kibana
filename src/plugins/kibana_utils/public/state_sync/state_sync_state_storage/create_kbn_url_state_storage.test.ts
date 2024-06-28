@@ -9,7 +9,7 @@
 import { mockStorage } from '../../storage/hashed_item_store/mock';
 import { createKbnUrlStateStorage, IKbnUrlStateStorage } from './create_kbn_url_state_storage';
 import { History, createBrowserHistory } from 'history';
-import { takeUntil, toArray } from 'rxjs/operators';
+import { takeUntil, toArray } from 'rxjs';
 import { Subject } from 'rxjs';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { withNotifyOnErrors, flushNotifyOnErrors } from '../../state_management/url';

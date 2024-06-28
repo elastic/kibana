@@ -33,13 +33,13 @@ export const config: PluginConfigDescriptor = {
     agents: {
       enabled: true,
     },
+    agentless: true,
     enableExperimental: true,
     developer: {
       maxAgentPoliciesWithInactivityTimeout: true,
     },
     internal: {
       fleetServerStandalone: true,
-      disableProxies: true,
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
@@ -142,6 +142,13 @@ export const config: PluginConfigDescriptor = {
           })
         ),
       }),
+      agentless: schema.maybe(
+        schema.object({
+          api: schema.object({
+            url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+          }),
+        })
+      ),
       packages: PreconfiguredPackagesSchema,
       agentPolicies: PreconfiguredAgentPoliciesSchema,
       outputs: PreconfiguredOutputsSchema,
@@ -182,9 +189,6 @@ export const config: PluginConfigDescriptor = {
       internal: schema.maybe(
         schema.object({
           disableILMPolicies: schema.boolean({
-            defaultValue: false,
-          }),
-          disableProxies: schema.boolean({
             defaultValue: false,
           }),
           fleetServerStandalone: schema.boolean({

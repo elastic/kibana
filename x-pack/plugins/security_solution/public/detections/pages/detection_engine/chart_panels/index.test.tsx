@@ -13,14 +13,16 @@ import type { Status } from '../../../../../common/api/detection_engine';
 import { RESET_GROUP_BY_FIELDS } from '../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../common/components/chart_settings_popover/translations';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { TestProviders } from '../../../../common/mock';
 import { ChartPanels } from '.';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
 
 jest.mock('./alerts_local_storage');
-jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../sourcerer/containers');
 
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../../../common/components/page/use_refetch_by_session', () => ({
@@ -227,79 +229,164 @@ describe('ChartPanels', () => {
 
   describe(`'Reset group by fields' context menu action`, () => {
     describe('Group by', () => {
-      const alertViewSelections = ['trend', 'table', 'treemap'];
+      test(`it resets the 'Group by' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is 'treemap'`, async () => {
+        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          ...defaultAlertSettings,
+          alertViewSelection: 'treemap',
+        });
 
-      alertViewSelections.forEach((alertViewSelection) => {
-        test(`it resets the 'Group by' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is '${alertViewSelection}'`, async () => {
+        const defaultValue = 'kibana.alert.rule.name';
+        const invalidValue = 'an invalid value';
+
+        render(
+          <TestProviders>
+            <ChartPanels {...defaultProps} />
+          </TestProviders>
+        );
+
+        const initialInput = screen.getAllByTestId('comboBoxSearchInput')[0];
+        expect(initialInput).toHaveValue(defaultValue);
+
+        // update the EuiComboBox input to an invalid value:
+        fireEvent.change(initialInput, { target: { value: invalidValue } });
+
+        const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[0];
+        expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
+        expect(afterInvalidInput).toBeInvalid();
+
+        resetGroupByFields(); // invoke the `Reset group by fields` context menu action
+
+        await waitFor(() => {
+          const afterReset = screen.getAllByTestId('comboBoxSearchInput')[0];
+          expect(afterReset).toHaveValue(defaultValue); // back to the default
+        });
+      });
+
+      describe.each([['trend'], ['table']])(`when 'alertViewSelection' is '%s'`, (view) => {
+        test(`it has resets the 'Group by' field as an extra action`, async () => {
           (useAlertsLocalStorage as jest.Mock).mockReturnValue({
             ...defaultAlertSettings,
-            alertViewSelection,
+            alertViewSelection: view,
           });
 
-          const defaultValue = 'kibana.alert.rule.name';
-          const invalidValue = 'an invalid value';
+          const mockResetGroupByFieldsAction = [
+            createResetGroupByFieldAction({ callback: jest.fn(), order: 5 }),
+          ];
+
+          const testProps = {
+            ...defaultProps,
+            extraActions: mockResetGroupByFieldsAction,
+          };
 
           render(
             <TestProviders>
-              <ChartPanels {...defaultProps} />
+              <ChartPanels {...testProps} />
             </TestProviders>
           );
 
-          const initialInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-          expect(initialInput).toHaveValue(defaultValue);
+          await waitFor(() => {
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions.length
+            ).toEqual(1);
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+            ).toEqual('resetGroupByField');
+          });
+        });
+      });
 
-          // update the EuiComboBox input to an invalid value:
-          fireEvent.change(initialInput, { target: { value: invalidValue } });
+      describe.each([
+        ['trend', 'kibana.alert.rule.name'],
+        ['table', 'kibana.alert.rule.name'],
+      ])(`when 'alertViewSelection' is '%s'`, (view, defaultGroupBy) => {
+        test(`it has resets the 'Group by' field as an extra action, with default value ${defaultGroupBy}`, async () => {
+          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+            ...defaultAlertSettings,
+            alertViewSelection: view,
+          });
 
-          const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[0];
-          expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
-          expect(afterInvalidInput).toBeInvalid();
+          const mockResetGroupByFieldsAction = [
+            createResetGroupByFieldAction({ callback: jest.fn(), order: 5 }),
+          ];
 
-          resetGroupByFields(); // invoke the `Reset group by fields` context menu action
+          const testProps = {
+            ...defaultProps,
+            extraActions: mockResetGroupByFieldsAction,
+          };
+
+          render(
+            <TestProviders>
+              <ChartPanels {...testProps} />
+            </TestProviders>
+          );
 
           await waitFor(() => {
-            const afterReset = screen.getAllByTestId('comboBoxSearchInput')[0];
-            expect(afterReset).toHaveValue(defaultValue); // back to the default
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions.length
+            ).toEqual(1);
+            expect(
+              (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraActions[0].id
+            ).toEqual('resetGroupByField');
+            expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].stackByField).toEqual(
+              defaultGroupBy
+            );
           });
         });
       });
     });
 
     describe('Group by top', () => {
-      const justTableAndTreemap = ['table', 'treemap'];
+      test(`it resets the 'Group by top' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is 'treemap'`, async () => {
+        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          ...defaultAlertSettings,
+          alertViewSelection: 'treemap',
+        });
 
-      justTableAndTreemap.forEach((alertViewSelection) => {
-        test(`it resets the 'Group by top' field to the default value, even if the user has triggered validation errors, when 'alertViewSelection' is '${alertViewSelection}'`, async () => {
-          (useAlertsLocalStorage as jest.Mock).mockReturnValue({
-            ...defaultAlertSettings,
-            alertViewSelection,
-          });
+        const defaultValue = 'host.name';
+        const invalidValue = 'an-invalid-value';
 
-          const defaultValue = 'host.name';
-          const invalidValue = 'an-invalid-value';
+        render(
+          <TestProviders>
+            <ChartPanels {...defaultProps} />
+          </TestProviders>
+        );
 
-          render(
-            <TestProviders>
-              <ChartPanels {...defaultProps} />
-            </TestProviders>
-          );
+        const initialInput = screen.getAllByTestId('comboBoxSearchInput')[1];
+        expect(initialInput).toHaveValue(defaultValue);
 
-          const initialInput = screen.getAllByTestId('comboBoxSearchInput')[1];
-          expect(initialInput).toHaveValue(defaultValue);
+        // update the EuiComboBox input to an invalid value:
+        fireEvent.change(initialInput, { target: { value: invalidValue } });
 
-          // update the EuiComboBox input to an invalid value:
-          fireEvent.change(initialInput, { target: { value: invalidValue } });
+        const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[1];
+        expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
+        expect(afterInvalidInput).toBeInvalid();
 
-          const afterInvalidInput = screen.getAllByTestId('comboBoxSearchInput')[1];
-          expect(afterInvalidInput).toHaveValue(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
-          expect(afterInvalidInput).toBeInvalid();
+        resetGroupByFields(); // invoke the `Reset group by fields` context menu action
 
-          resetGroupByFields(); // invoke the `Reset group by fields` context menu action
+        await waitFor(() => {
+          const afterReset = screen.getAllByTestId('comboBoxSearchInput')[1];
+          expect(afterReset).toHaveValue(defaultValue); // back to the default
+        });
+      });
 
-          await waitFor(() => {
-            const afterReset = screen.getAllByTestId('comboBoxSearchInput')[1];
-            expect(afterReset).toHaveValue(defaultValue); // back to the default
-          });
+      test(`it renders the 'Group by top' field to the default value, when 'alertViewSelection' is 'table'`, async () => {
+        (useAlertsLocalStorage as jest.Mock).mockReturnValue({
+          ...defaultAlertSettings,
+          alertViewSelection: 'table',
+        });
+
+        const defaultValue = 'host.name';
+
+        render(
+          <TestProviders>
+            <ChartPanels {...defaultProps} />
+          </TestProviders>
+        );
+
+        await waitFor(() => {
+          expect(
+            (LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions.breakdownField
+          ).toEqual(defaultValue);
         });
       });
     });

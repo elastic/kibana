@@ -54,7 +54,6 @@ describe('AppContextService', () => {
       appContextService.start(mockAppContext);
       appContextService.registerFeatures('super', {
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: true,
       });
       appContextService.stop();
 
@@ -103,8 +102,8 @@ describe('AppContextService', () => {
     it('should register and get features for a single plugin', () => {
       const pluginName = 'pluginName';
       const features: AssistantFeatures = {
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: true,
       };
 
       appContextService.start(mockAppContext);
@@ -118,13 +117,13 @@ describe('AppContextService', () => {
     it('should register and get features for multiple plugins', () => {
       const pluginOne = 'plugin1';
       const featuresOne: AssistantFeatures = {
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: false,
       };
       const pluginTwo = 'plugin2';
       const featuresTwo: AssistantFeatures = {
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
-        assistantStreamingEnabled: true,
       };
 
       appContextService.start(mockAppContext);
@@ -138,12 +137,12 @@ describe('AppContextService', () => {
     it('should update features if registered again', () => {
       const pluginName = 'pluginName';
       const featuresOne: AssistantFeatures = {
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
-        assistantStreamingEnabled: false,
       };
       const featuresTwo: AssistantFeatures = {
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
-        assistantStreamingEnabled: true,
       };
 
       appContextService.start(mockAppContext);

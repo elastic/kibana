@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { AuditLogger } from '@kbn/security-plugin/server';
+import { InMemoryConnector } from '../../../../..';
 import { ActionsClientContext } from '../../../../../actions_client';
 import { Connector } from '../../../types';
 
@@ -14,8 +17,18 @@ export interface GetAllParams {
   context: ActionsClientContext;
 }
 
+export interface GetAllUnsecuredParams {
+  auditLogger?: AuditLogger;
+  esClient: ElasticsearchClient;
+  inMemoryConnectors: InMemoryConnector[];
+  internalSavedObjectsRepository: ISavedObjectsRepository;
+  kibanaIndices: string[];
+  logger: Logger;
+  spaceId: string;
+}
+
 export interface InjectExtraFindDataParams {
   kibanaIndices: string[];
-  scopedClusterClient: IScopedClusterClient;
+  esClient: ElasticsearchClient;
   connectors: Connector[];
 }

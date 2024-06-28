@@ -61,9 +61,24 @@ describe('uninstall token handlers', () => {
 
   describe('getUninstallTokensMetadataHandler', () => {
     const uninstallTokensFixture: UninstallTokenMetadata[] = [
-      { id: 'id-1', policy_id: 'policy-id-1', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-2', policy_id: 'policy-id-2', created_at: '2023-06-15T16:46:48.274Z' },
-      { id: 'id-3', policy_id: 'policy-id-3', created_at: '2023-06-15T16:46:48.274Z' },
+      {
+        id: 'id-1',
+        policy_id: 'policy-id-1',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
+      {
+        id: 'id-2',
+        policy_id: 'policy-id-2',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
+      {
+        id: 'id-3',
+        policy_id: 'policy-id-3',
+        policy_name: null,
+        created_at: '2023-06-15T16:46:48.274Z',
+      },
     ];
 
     const uninstallTokensResponseFixture: GetUninstallTokensMetadataResponse = {
@@ -80,8 +95,8 @@ describe('uninstall token handlers', () => {
     >;
     const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
 
-    beforeEach(() => {
-      const uninstallTokenService = appContextService.getUninstallTokenService()!;
+    beforeEach(async () => {
+      const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
       getTokenMetadataMock = uninstallTokenService.getTokenMetadata as jest.Mock;
       mockAgentPolicyService.list.mockResolvedValue({
         items: [createAgentPolicyMock()],
@@ -103,22 +118,6 @@ describe('uninstall token handlers', () => {
       });
     });
 
-    it('should return internal error when uninstallTokenService is unavailable', async () => {
-      appContextService.stop();
-      appContextService.start({
-        ...appContextStartContractMock,
-        // @ts-expect-error
-        uninstallTokenService: undefined,
-      });
-
-      await getUninstallTokensMetadataHandler(context, request, response);
-
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: { message: 'Uninstall Token Service is unavailable.' },
-      });
-    });
-
     it('should return internal error when uninstallTokenService throws error', async () => {
       getTokenMetadataMock.mockRejectedValue(Error('something happened'));
 
@@ -135,6 +134,7 @@ describe('uninstall token handlers', () => {
     const uninstallTokenFixture: UninstallToken = {
       id: 'id-1',
       policy_id: 'policy-id-1',
+      policy_name: null,
       created_at: '2023-06-15T16:46:48.274Z',
       token: '123456789',
     };
@@ -142,8 +142,8 @@ describe('uninstall token handlers', () => {
     let getTokenMock: jest.Mock;
     let request: KibanaRequest<TypeOf<typeof GetUninstallTokenRequestSchema.params>>;
 
-    beforeEach(() => {
-      const uninstallTokenService = appContextService.getUninstallTokenService()!;
+    beforeEach(async () => {
+      const uninstallTokenService = (await context.fleet).uninstallTokenService.asCurrentUser;
       getTokenMock = uninstallTokenService.getToken as jest.Mock;
 
       const requestOptions: GetUninstallTokenRequest = {
@@ -164,22 +164,6 @@ describe('uninstall token handlers', () => {
         body: {
           item: uninstallTokenFixture,
         },
-      });
-    });
-
-    it('should return internal error when uninstallTokenService is unavailable', async () => {
-      appContextService.stop();
-      appContextService.start({
-        ...appContextStartContractMock,
-        // @ts-expect-error
-        uninstallTokenService: undefined,
-      });
-
-      await getUninstallTokenHandler(context, request, response);
-
-      expect(response.customError).toHaveBeenCalledWith({
-        statusCode: 500,
-        body: { message: 'Uninstall Token Service is unavailable.' },
       });
     });
 

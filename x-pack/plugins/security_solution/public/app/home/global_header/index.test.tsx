@@ -16,16 +16,13 @@ import {
   THREAT_INTELLIGENCE_PATH,
 } from '../../../../common/constants';
 import {
-  createSecuritySolutionStorageMock,
+  createMockStore,
   mockGlobalState,
   mockIndexPattern,
-  SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
 import { TimelineId } from '../../../../common/types/timeline';
-import { createStore } from '../../../common/store';
-import { kibanaObservable } from '@kbn/timelines-plugin/public/mock';
-import { sourcererPaths } from '../../../common/containers/sourcerer';
+import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -38,7 +35,7 @@ jest.mock('../../../common/containers/source', () => ({
   useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
 }));
 
-jest.mock('../../../common/containers/sourcerer/use_signal_helpers', () => ({
+jest.mock('../../../sourcerer/containers/use_signal_helpers', () => ({
   useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
 }));
 
@@ -61,8 +58,7 @@ describe('global header', () => {
       },
     },
   };
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore(state);
 
   beforeEach(() => {
     useVariationMock.mockReset();
@@ -159,7 +155,7 @@ describe('global header', () => {
         },
       },
     };
-    const mockStore = createStore(mockstate, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const mockStore = createMockStore(mockstate);
 
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 

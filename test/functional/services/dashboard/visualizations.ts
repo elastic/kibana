@@ -102,34 +102,4 @@ export class DashboardVisualizationsService extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     await this.dashboard.waitForRenderComplete();
   }
-
-  async createAndEmbedMetric(name: string) {
-    this.log.debug(`createAndEmbedMetric(${name})`);
-    const inViewMode = await this.dashboard.getIsInViewMode();
-    if (inViewMode) {
-      await this.dashboard.switchToEditMode();
-    }
-    await this.dashboardAddPanel.clickEditorMenuButton();
-    await this.dashboardAddPanel.clickAggBasedVisualizations();
-    await this.dashboardAddPanel.clickVisType('metric');
-    await this.testSubjects.click('savedObjectTitlelogstash-*');
-    await this.testSubjects.exists('visualizesaveAndReturnButton');
-    await this.testSubjects.click('visualizesaveAndReturnButton');
-    await this.header.waitUntilLoadingHasFinished();
-    await this.dashboard.waitForRenderComplete();
-  }
-
-  async createAndEmbedMarkdown({ name, markdown }: { name: string; markdown: string }) {
-    this.log.debug(`createAndEmbedMarkdown(${markdown})`);
-    const inViewMode = await this.dashboard.getIsInViewMode();
-    if (inViewMode) {
-      await this.dashboard.switchToEditMode();
-    }
-    await this.dashboardAddPanel.clickMarkdownQuickButton();
-    await this.visEditor.setMarkdownTxt(markdown);
-    await this.visEditor.clickGo();
-    await this.testSubjects.click('visualizesaveAndReturnButton');
-    await this.header.waitUntilLoadingHasFinished();
-    await this.dashboard.waitForRenderComplete();
-  }
 }

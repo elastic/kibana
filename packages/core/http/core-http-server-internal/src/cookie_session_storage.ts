@@ -18,7 +18,7 @@ import type {
 } from '@kbn/core-http-server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 
-class ScopedCookieSessionStorage<T extends Record<string, any>> implements SessionStorage<T> {
+class ScopedCookieSessionStorage<T extends object> implements SessionStorage<T> {
   constructor(
     private readonly log: Logger,
     private readonly server: Server,
@@ -72,7 +72,7 @@ function validateOptions(options: SessionStorageCookieOptions<any>) {
  * @param server - hapi server to create SessionStorage for
  * @param cookieOptions - cookies configuration
  */
-export async function createCookieSessionStorageFactory<T>(
+export async function createCookieSessionStorageFactory<T extends object>(
   log: Logger,
   server: Server,
   cookieOptions: SessionStorageCookieOptions<T>,

@@ -421,12 +421,33 @@ export const query = (specService: SpecDefinitionsService) => {
       },
       __scope_link: '.more_like_this',
     },
+    pinned: {
+      __template: {
+        organic: {},
+        ids: [],
+      },
+      organic: {
+        query: {},
+      },
+      ids: [],
+    },
     prefix: {
       __template: prefixTemplate,
       '{field}': {
         value: '',
         boost: 1.0,
       },
+    },
+    rank_feature: {
+      __template: {
+        field: 'FIELD',
+      },
+      field: '{field}',
+      boost: 1.0,
+      saturation: {},
+      log: {},
+      sigmoid: {},
+      linear: {},
     },
     query_string: {
       __template: {
@@ -496,16 +517,22 @@ export const query = (specService: SpecDefinitionsService) => {
         format: 'dd/MM/yyyy||yyyy',
       },
     },
-    rule_query: {
+    rule: {
       __template: {
-        organic: {
-          query: {},
-        },
-        ruleset_id: '',
+        organic: {},
+        ruleset_ids: [''],
         match_criteria: {
           FIELD: 'VALUE',
         },
       },
+    },
+    semantic: {
+      __template: {
+        field: '',
+        query: '',
+      },
+      field: '{field}',
+      query: '',
     },
     span_first: {
       __template: spanFirstTemplate,
@@ -555,6 +582,18 @@ export const query = (specService: SpecDefinitionsService) => {
       __template: spanWithinTemplate,
       little: SPAN_QUERIES,
       big: SPAN_QUERIES,
+    },
+    sparse_vector: {
+      field: 'NAME',
+      inference_id: '',
+      query: '',
+      prune: true,
+      pruning_config: {
+        tokens_freq_ratio_threshold: 5,
+        tokens_weight_threshold: 0.4,
+        only_score_pruned_tokens: false,
+      },
+      query_vector: [],
     },
     term: {
       __template: {

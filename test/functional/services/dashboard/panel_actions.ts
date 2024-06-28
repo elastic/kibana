@@ -20,7 +20,9 @@ const CUSTOMIZE_PANEL_DATA_TEST_SUBJ = 'embeddablePanelAction-ACTION_CUSTOMIZE_P
 const OPEN_CONTEXT_MENU_ICON_DATA_TEST_SUBJ = 'embeddablePanelToggleMenuIcon';
 const OPEN_INSPECTOR_TEST_SUBJ = 'embeddablePanelAction-openInspector';
 const COPY_PANEL_TO_DATA_TEST_SUBJ = 'embeddablePanelAction-copyToDashboard';
+const LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacySaveToLibrary';
 const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
+const LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-legacyUnlinkFromLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
@@ -89,7 +91,16 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickContextMenuMoreItem();
   }
 
-  private async navigateToEditorFromFlyout() {
+  async clickContextMenuItem(itemSelector: string, parent?: WebElementWrapper) {
+    await this.openContextMenu(parent);
+    const exists = await this.testSubjects.exists(itemSelector);
+    if (!exists) {
+      await this.clickContextMenuMoreItem();
+    }
+    await this.testSubjects.click(itemSelector);
+  }
+
+  async navigateToEditorFromFlyout() {
     await this.testSubjects.clickWhenNotDisabledWithoutRetry(INLINE_EDIT_PANEL_DATA_TEST_SUBJ);
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.click(EDIT_IN_LENS_EDITOR_DATA_TEST_SUBJ);
@@ -111,7 +122,8 @@ export class DashboardPanelActionsService extends FtrService {
     await this.common.waitForTopNavToBeVisible();
   }
 
-  /** The dashboard/canvas panels can be either edited on their editor or inline.
+  /**
+   * The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
   async clickEdit() {
@@ -133,7 +145,8 @@ export class DashboardPanelActionsService extends FtrService {
     await this.common.waitForTopNavToBeVisible();
   }
 
-  /** The dashboard/canvas panels can be either edited on their editor or inline.
+  /**
+   * The dashboard/canvas panels can be either edited on their editor or inline.
    * The inline editing panels allow the navigation to the editor after the flyout opens
    */
   async editPanelByTitle(title?: string) {
@@ -208,6 +221,8 @@ export class DashboardPanelActionsService extends FtrService {
     } else {
       await this.openContextMenu();
     }
+    const isActionVisible = await this.testSubjects.exists(CLONE_PANEL_DATA_TEST_SUBJ);
+    if (!isActionVisible) await this.clickContextMenuMoreItem();
     await this.testSubjects.click(CLONE_PANEL_DATA_TEST_SUBJ);
     await this.dashboard.waitForRenderComplete();
   }
@@ -249,35 +264,42 @@ export class DashboardPanelActionsService extends FtrService {
   }
 
   async openInspector(parent?: WebElementWrapper) {
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(OPEN_INSPECTOR_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(OPEN_INSPECTOR_TEST_SUBJ);
+    await this.clickContextMenuItem(OPEN_INSPECTOR_TEST_SUBJ, parent);
   }
 
-  async unlinkFromLibary(parent?: WebElementWrapper) {
-    this.log.debug('unlinkFromLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(UNLINK_FROM_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(UNLINK_FROM_LIBRARY_TEST_SUBJ);
+  async legacyUnlinkFromLibrary(parent?: WebElementWrapper) {
+    this.log.debug('legacyUnlinkFromLibrary');
+    await this.clickContextMenuItem(LEGACY_UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.waitForDeleted(
       'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
     );
   }
 
+  async unlinkFromLibrary(parent?: WebElementWrapper) {
+    this.log.debug('unlinkFromLibrary');
+    await this.clickContextMenuItem(UNLINK_FROM_LIBRARY_TEST_SUBJ, parent);
+    await this.testSubjects.waitForDeleted(
+      'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+    );
+  }
+
+  async legacySaveToLibrary(newTitle: string, parent?: WebElementWrapper) {
+    this.log.debug('legacySaveToLibrary');
+    await this.clickContextMenuItem(LEGACY_SAVE_TO_LIBRARY_TEST_SUBJ, parent);
+    await this.testSubjects.setValue('savedObjectTitle', newTitle, {
+      clearWithKeyboard: true,
+    });
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+      );
+    });
+  }
+
   async saveToLibrary(newTitle: string, parent?: WebElementWrapper) {
     this.log.debug('saveToLibrary');
-    await this.openContextMenu(parent);
-    const exists = await this.testSubjects.exists(SAVE_TO_LIBRARY_TEST_SUBJ);
-    if (!exists) {
-      await this.clickContextMenuMoreItem();
-    }
-    await this.testSubjects.click(SAVE_TO_LIBRARY_TEST_SUBJ);
+    await this.clickContextMenuItem(SAVE_TO_LIBRARY_TEST_SUBJ, parent);
     await this.testSubjects.setValue('savedObjectTitle', newTitle, {
       clearWithKeyboard: true,
     });
@@ -318,11 +340,6 @@ export class DashboardPanelActionsService extends FtrService {
     await this.expectExistsPanelAction(testSubj, title);
   }
 
-  async expectExistsReplacePanelAction() {
-    this.log.debug('expectExistsReplacePanelAction');
-    await this.expectExistsPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
-  }
-
   async expectExistsClonePanelAction() {
     this.log.debug('expectExistsClonePanelAction');
     await this.expectExistsPanelAction(CLONE_PANEL_DATA_TEST_SUBJ);
@@ -347,11 +364,6 @@ export class DashboardPanelActionsService extends FtrService {
   async expectMissingEditPanelAction() {
     this.log.debug('expectMissingEditPanelAction');
     await this.expectMissingPanelAction(EDIT_PANEL_DATA_TEST_SUBJ);
-  }
-
-  async expectMissingReplacePanelAction() {
-    this.log.debug('expectMissingReplacePanelAction');
-    await this.expectMissingPanelAction(REPLACE_PANEL_DATA_TEST_SUBJ);
   }
 
   async expectMissingDuplicatePanelAction() {

@@ -9,7 +9,7 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectAttributes } from '@kbn/core/public';
-import { SavedObject, SavedObjectKibanaServices } from '../../types';
+import { SavedObject, SavedObjectKibanaServices, StartServices } from '../../types';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 
@@ -33,7 +33,8 @@ export async function createSource(
   savedObject: SavedObject,
   esType: string,
   options = {},
-  services: SavedObjectKibanaServices
+  services: SavedObjectKibanaServices,
+  startServices: StartServices
 ) {
   const { savedObjectsClient, overlays } = services;
   try {
@@ -57,7 +58,7 @@ export async function createSource(
         defaultMessage: 'Overwrite',
       });
 
-      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays)
+      return confirmModalPromise(confirmMessage, title, confirmButtonText, overlays, startServices)
         .then(() =>
           savedObjectsClient.create(
             esType,

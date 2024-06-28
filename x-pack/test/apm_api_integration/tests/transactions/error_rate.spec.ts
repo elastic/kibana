@@ -6,6 +6,7 @@
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { buildQueryFromFilters } from '@kbn/es-query';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import {
@@ -23,7 +24,7 @@ type ErrorRate =
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   // url parameters
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
@@ -82,6 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
   });
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177598
   registry.when('Error rate when data is loaded', { config: 'basic', archives: [] }, () => {
     const config = {
       firstTransaction: {
@@ -140,10 +142,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .failure()
           ),
       ];
-      await synthtraceEsClient.index(documents);
+      await apmSynthtraceEsClient.index(documents);
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     describe('returns the transaction error rate', () => {
       let errorRateResponse: ErrorRate;
@@ -294,6 +296,137 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             expectedFailureRate
           );
         });
+      });
+    });
+
+    describe('handles kuery', () => {
+      let txMetricsErrorRateResponse: ErrorRate;
+
+      before(async () => {
+        const txMetricsResponse = await fetchErrorCharts({
+          query: {
+            kuery: 'transaction.name : "GET /pear 🍎 "',
+          },
+        });
+        txMetricsErrorRateResponse = txMetricsResponse.body;
+      });
+
+      describe('has the correct calculation for average with kuery', () => {
+        const expectedFailureRate = config.secondTransaction.failureRate / 100;
+
+        it('for tx metrics', () => {
+          expect(txMetricsErrorRateResponse.currentPeriod.average).to.eql(expectedFailureRate);
+        });
+      });
+    });
+
+    describe('handles filters', () => {
+      const filters = [
+        {
+          meta: {
+            disabled: false,
+            negate: false,
+            alias: null,
+            key: 'transaction.name',
+            params: ['GET /api/product/list'],
+            type: 'phrases',
+          },
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: {
+                match_phrase: {
+                  'transaction.name': 'GET /pear 🍎 ',
+                },
+              },
+            },
+          },
+        },
+      ];
+      const serializedFilters = JSON.stringify(buildQueryFromFilters(filters, undefined));
+      let txMetricsErrorRateResponse: ErrorRate;
+
+      before(async () => {
+        const txMetricsResponse = await fetchErrorCharts({
+          query: {
+            filters: serializedFilters,
+          },
+        });
+        txMetricsErrorRateResponse = txMetricsResponse.body;
+      });
+
+      describe('has the correct calculation for average with filter', () => {
+        const expectedFailureRate = config.secondTransaction.failureRate / 100;
+
+        it('for tx metrics', () => {
+          expect(txMetricsErrorRateResponse.currentPeriod.average).to.eql(expectedFailureRate);
+        });
+      });
+
+      describe('has the correct calculation for average with negate filter', () => {
+        const expectedFailureRate = config.secondTransaction.failureRate / 100;
+
+        it('for tx metrics', () => {
+          expect(txMetricsErrorRateResponse.currentPeriod.average).to.eql(expectedFailureRate);
+        });
+      });
+    });
+
+    describe('handles negate filters', () => {
+      const filters = [
+        {
+          meta: {
+            disabled: false,
+            negate: true,
+            alias: null,
+            key: 'transaction.name',
+            params: ['GET /api/product/list'],
+            type: 'phrases',
+          },
+          query: {
+            bool: {
+              minimum_should_match: 1,
+              should: {
+                match_phrase: {
+                  'transaction.name': 'GET /pear 🍎 ',
+                },
+              },
+            },
+          },
+        },
+      ];
+      const serializedFilters = JSON.stringify(buildQueryFromFilters(filters, undefined));
+      let txMetricsErrorRateResponse: ErrorRate;
+
+      before(async () => {
+        const txMetricsResponse = await fetchErrorCharts({
+          query: {
+            filters: serializedFilters,
+          },
+        });
+        txMetricsErrorRateResponse = txMetricsResponse.body;
+      });
+
+      describe('has the correct calculation for average with filter', () => {
+        const expectedFailureRate = config.firstTransaction.failureRate / 100;
+
+        it('for tx metrics', () => {
+          expect(txMetricsErrorRateResponse.currentPeriod.average).to.eql(expectedFailureRate);
+        });
+      });
+    });
+
+    describe('handles bad filters request', () => {
+      it('for tx metrics', async () => {
+        try {
+          await fetchErrorCharts({
+            query: {
+              filters: '{}}}',
+            },
+          });
+        } catch (e) {
+          expect(e.res.status).to.eql(400);
+        }
       });
     });
   });

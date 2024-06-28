@@ -7,121 +7,79 @@
 
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useState } from 'react';
-import type { Pagination } from '@elastic/eui';
+
 import {
   EuiButtonEmpty,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiText,
+  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
-import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
+import type { InputAlert } from '../../../hooks/use_risk_contributing_alerts';
 
 interface Props {
-  selectedAlerts: AlertRawData[];
-  pagination: Pagination;
+  riskInputs: InputAlert[];
 }
 
-export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
-  ({ selectedAlerts, pagination }) => {
-    const { euiTheme } = useEuiTheme();
-    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-    const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-    const closePopover = useCallback(() => setIsPopoverOpen(false), []);
-    const panels = useRiskInputActionsPanels(selectedAlerts, closePopover);
-    const displayedCurrentPage = pagination.pageIndex + 1;
-    const pageSize = pagination.pageSize ?? 10;
-    const fromItem: number = pagination.pageIndex * pageSize + 1;
-    const toItem: number = Math.min(pagination.totalItemCount, pageSize * displayedCurrentPage);
+export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(({ riskInputs }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const panels = useRiskInputActionsPanels(riskInputs, closePopover);
 
-    return (
-      <>
-        <EuiFlexGroup
-          data-test-subj="risk-input-utility-bar"
-          alignItems="center"
-          justifyContent="flexStart"
-          gutterSize="m"
-        >
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              padding: ${euiTheme.size.s} 0;
-            `}
-          >
-            <EuiText size="xs">
-              {pagination.totalItemCount <= 1 ? (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.selectionTextSingle"
-                  defaultMessage="Showing {totalInputs} {riskInputs}"
-                  values={{
-                    totalInputs: pagination.totalItemCount,
-                    riskInputs: (
-                      <b>
-                        <FormattedMessage
-                          id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.riskInput"
-                          defaultMessage="Risk input"
-                        />
-                      </b>
-                    ),
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.selectionTextRange"
-                  defaultMessage="Showing {displayedRange} of {totalInputs} {riskInputs}"
-                  values={{
-                    displayedRange: <b>{`${fromItem}-${toItem}`}</b>,
-                    totalInputs: pagination.totalItemCount,
-                    riskInputs: (
-                      <b>
-                        <FormattedMessage
-                          id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.riskInputs"
-                          defaultMessage="Risk inputs"
-                        />
-                      </b>
-                    ),
-                  }}
-                />
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {selectedAlerts.length > 0 && (
-              <EuiPopover
-                isOpen={isPopoverOpen}
-                closePopover={closePopover}
-                panelPaddingSize="none"
-                button={
-                  <EuiButtonEmpty
-                    onClick={togglePopover}
-                    size="xs"
-                    iconSide="right"
-                    iconType="arrowDown"
-                    flush="left"
-                  >
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
-                      defaultMessage="{totalSelectedInputs} selected risk input"
-                      values={{
-                        totalSelectedInputs: selectedAlerts.length,
-                      }}
-                    />
-                  </EuiButtonEmpty>
-                }
-              >
-                <EuiContextMenu panels={panels} initialPanelId={0} />
-              </EuiPopover>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
+  if (riskInputs.length === 0) {
+    return null;
   }
-);
+  return (
+    <>
+      <EuiFlexGroup
+        data-test-subj="risk-input-utility-bar"
+        alignItems="center"
+        justifyContent="flexStart"
+        gutterSize="m"
+      >
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            padding: ${euiTheme.size.s} 0;
+          `}
+        />
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            isOpen={isPopoverOpen}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            button={
+              <EuiButtonEmpty
+                onClick={togglePopover}
+                size="xs"
+                iconSide="right"
+                iconType="arrowDown"
+                flush="left"
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
+                  defaultMessage="{totalSelectedContributions} selected risk contribution"
+                  values={{
+                    totalSelectedContributions: riskInputs.length,
+                  }}
+                />
+              </EuiButtonEmpty>
+            }
+          >
+            <EuiContextMenu panels={panels} initialPanelId={0} />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+    </>
+  );
+});
 
 RiskInputsUtilityBar.displayName = 'RiskInputsUtilityBar';

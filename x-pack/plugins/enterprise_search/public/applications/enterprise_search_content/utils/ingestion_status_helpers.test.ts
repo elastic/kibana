@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestionStatus } from '../types';
+import { IngestionStatus } from '@kbn/search-connectors';
 
 import { ingestionStatusToColor, ingestionStatusToText } from './ingestion_status_helpers';
 

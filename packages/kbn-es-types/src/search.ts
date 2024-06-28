@@ -68,6 +68,16 @@ type MaybeArray<T> = T | T[];
 type Fields = Required<Required<estypes.SearchRequest>['body']>['fields'];
 type DocValueFields = MaybeArray<string | estypes.QueryDslFieldAndFormat>;
 
+export type ChangePointType =
+  | 'indeterminable'
+  | 'dip'
+  | 'distribution_change'
+  | 'non_stationary'
+  | 'spike'
+  | 'stationary'
+  | 'step_change'
+  | 'trend_change';
+
 export type SearchHit<
   TSource extends any = unknown,
   TFields extends Fields | undefined = undefined,
@@ -159,6 +169,16 @@ export type AggregateOf<
       bucket_script: {
         value: unknown;
       };
+      categorize_text: {
+        buckets: Array<
+          {
+            doc_count: number;
+            key: string;
+            regex: string;
+            max_matching_length: number;
+          } & SubAggregateOf<TAggregationContainer, TDocument>
+        >;
+      };
       cardinality: {
         value: number;
       };
@@ -167,12 +187,12 @@ export type AggregateOf<
           key: string;
         };
         type: Record<
-          string,
+          ChangePointType,
           {
             change_point?: number;
             r_value?: number;
             trend?: string;
-            p_value: number;
+            p_value?: number;
           }
         >;
       };
@@ -421,6 +441,7 @@ export type AggregateOf<
           {
             doc_count: number;
             key: string[];
+            key_as_string: string;
           } & SubAggregateOf<TAggregationContainer, TDocument>
         >;
       };
@@ -593,7 +614,7 @@ export type AggregateOf<
 
 export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, TDocument> = {
   [TAggregationName in keyof TAggregationMap]: Required<TAggregationMap>[TAggregationName] extends AggregationsAggregationContainer
-    ? AggregateOf<TAggregationMap[TAggregationName], TDocument>
+    ? AggregateOf<Required<TAggregationMap>[TAggregationName], TDocument>
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
 
@@ -645,15 +666,6 @@ export type InferSearchResponseOf<
       };
   };
 
-export interface ClusterDetails {
-  status: 'running' | 'successful' | 'partial' | 'skipped' | 'failed';
-  indices: string;
-  took?: number;
-  timed_out: boolean;
-  _shards?: estypes.ShardStatistics;
-  failures?: estypes.ShardFailure[];
-}
-
 export interface ESQLColumn {
   name: string;
   type: string;
@@ -661,8 +673,12 @@ export interface ESQLColumn {
 
 export type ESQLRow = unknown[];
 
-export interface ESQLSearchReponse {
+export interface ESQLSearchResponse {
   columns: ESQLColumn[];
+  // In case of ?drop_null_columns in the query, then
+  // all_columns will have available and empty fields
+  // while columns only the available ones (non nulls)
+  all_columns?: ESQLColumn[];
   values: ESQLRow[];
 }
 
@@ -674,4 +690,5 @@ export interface ESQLSearchParams {
   query: string;
   filter?: unknown;
   locale?: string;
+  dropNullColumns?: boolean;
 }

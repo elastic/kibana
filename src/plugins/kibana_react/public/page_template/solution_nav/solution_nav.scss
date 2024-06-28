@@ -1,13 +1,9 @@
-$euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
-@import '@elastic/eui/src/components/side_nav/mixins';
-
 // Put the page background color in the flyout version too
 .kbnPageTemplateSolutionNav__flyout {
   background-color: $euiPageBackgroundColor;
 }
 
 .kbnPageTemplateSolutionNav {
-  @include euiSideNavEmbellish;
   @include euiYScroll;
 
   @include euiBreakpoint('m' ,'l', 'xl') {

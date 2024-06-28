@@ -7,7 +7,13 @@
 
 import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
-import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../../mocks';
+import {
+  createMockDatasource,
+  createMockFramePublicAPI,
+  DatasourceMock,
+  generateActiveData,
+} from '../../mocks';
+import faker from 'faker';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
 import {
   Operation,
@@ -15,7 +21,9 @@ import {
   FramePublicAPI,
   TableSuggestionColumn,
   VisualizationDimensionGroupConfig,
+  VisualizationConfigProps,
 } from '../../types';
+import { RowHeightMode } from '../../../common/types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
@@ -408,6 +416,68 @@ describe('Datatable Visualization', () => {
       ).toEqual([{ columnId: 'c' }, { columnId: 'b' }]);
     });
 
+    describe('with palette', () => {
+      let params: VisualizationConfigProps<DatatableVisualizationState>;
+      beforeEach(() => {
+        const datasource = createMockDatasource('test');
+        datasource.publicAPIMock.getTableSpec.mockReturnValue([{ columnId: 'b', fields: [] }]);
+        params = {
+          layerId: 'a',
+          state: {
+            layerId: 'a',
+            layerType: LayerTypes.DATA,
+            columns: [
+              {
+                columnId: 'b',
+                palette: {
+                  type: 'palette' as const,
+                  name: '',
+                  params: { stops: [{ color: 'blue', stop: 0 }] },
+                },
+              },
+            ],
+          },
+          frame: {
+            ...mockFrame(),
+            activeData: generateActiveData([
+              {
+                id: 'a',
+                rows: Array(3).fill({
+                  b: faker.random.number(),
+                }),
+              },
+            ]),
+            datasourceLayers: { a: datasource.publicAPIMock },
+          },
+        };
+      });
+
+      it('does include palette for accessor config if the values are numeric and palette exists', () => {
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b', palette: ['blue'], triggerIconType: 'colorBy' },
+        ]);
+      });
+      it('does not include palette for accessor config if the values are not numeric and palette exists', () => {
+        params.frame.activeData = generateActiveData([
+          {
+            id: 'a',
+            rows: Array(3).fill({
+              b: faker.random.word(),
+            }),
+          },
+        ]);
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b' },
+        ]);
+      });
+      it('does not include palette for accessor config if the values are numeric but palette exists', () => {
+        params.state.columns[0].palette = undefined;
+        expect(datatableVisualization.getConfiguration(params).groups[2].accessors).toEqual([
+          { columnId: 'b' },
+        ]);
+      });
+    });
+
     it('should compute the groups correctly for text based languages', () => {
       const datasource = createMockDatasource('textBased', {
         isTextBasedLanguage: jest.fn(() => true),
@@ -677,18 +747,24 @@ describe('Datatable Visualization', () => {
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
-          .fitRowToContent
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.single,
+        }).fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'custom' })
-          .fitRowToContent
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.custom,
+        }).fitRowToContent
       ).toEqual([false]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'auto' })
-          .fitRowToContent
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.auto,
+        }).fitRowToContent
       ).toEqual([true]);
     });
 
@@ -698,15 +774,17 @@ describe('Datatable Visualization', () => {
       );
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, rowHeight: 'single' })
-          .rowHeightLines
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          rowHeight: RowHeightMode.single,
+        }).rowHeightLines
       ).toEqual([1]);
 
       // should ignore lines value based on mode
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'single',
+          rowHeight: RowHeightMode.single,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([1]);
@@ -714,7 +792,7 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'custom',
+          rowHeight: RowHeightMode.custom,
           rowHeightLines: 5,
         }).rowHeightLines
       ).toEqual([5]);
@@ -723,41 +801,44 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: 'custom',
+          rowHeight: RowHeightMode.custom,
         }).rowHeightLines
       ).toEqual([2]);
     });
 
     it('sets headerRowHeight && headerRowHeightLines correctly', () => {
+      // should fallback to 3 lines in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeightLines
-      ).toEqual([1]);
+      ).toEqual([3]);
 
-      // should fallback to single in case it's not set
+      // should fallback to custom in case it's not set
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
-      ).toEqual(['single']);
+      ).toEqual([RowHeightMode.custom]);
 
       expect(
-        getDatatableExpressionArgs({ ...defaultExpressionTableState, headerRowHeight: 'single' })
-          .headerRowHeightLines
+        getDatatableExpressionArgs({
+          ...defaultExpressionTableState,
+          headerRowHeight: RowHeightMode.single,
+        }).headerRowHeightLines
       ).toEqual([1]);
 
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: 'custom',
+          headerRowHeight: RowHeightMode.custom,
           headerRowHeightLines: 5,
         }).headerRowHeightLines
       ).toEqual([5]);
 
-      // should fallback to 2 for custom in case it's not set
+      // should fallback to 3 for custom in case it's not set
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          headerRowHeight: 'custom',
+          headerRowHeight: RowHeightMode.custom,
         }).headerRowHeightLines
-      ).toEqual([2]);
+      ).toEqual([3]);
     });
 
     it('sets alignment correctly', () => {

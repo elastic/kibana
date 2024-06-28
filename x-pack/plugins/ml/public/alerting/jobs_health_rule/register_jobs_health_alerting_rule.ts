@@ -7,10 +7,10 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
-import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
+import type { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { getResultJobsHealthRuleConfig } from '../../../common/util/alerts';
 import { validateLookbackInterval } from '../validators';
 
@@ -87,24 +87,24 @@ export function registerJobsHealthAlertingRule(
     defaultActionMessage: i18n.translate(
       'xpack.ml.alertTypes.jobsHealthAlertingRule.defaultActionMessage',
       {
-        defaultMessage: `[\\{\\{rule.name\\}\\}] Anomaly detection jobs health check result:
-\\{\\{context.message\\}\\}
-\\{\\{#context.results\\}\\}
-  Job ID: \\{\\{job_id\\}\\}
-  \\{\\{#datafeed_id\\}\\}Datafeed ID: \\{\\{datafeed_id\\}\\}
-  \\{\\{/datafeed_id\\}\\}\\{\\{#datafeed_state\\}\\}Datafeed state: \\{\\{datafeed_state\\}\\}
-  \\{\\{/datafeed_state\\}\\}\\{\\{#memory_status\\}\\}Memory status: \\{\\{memory_status\\}\\}
-  \\{\\{/memory_status\\}\\}\\{\\{#model_bytes\\}\\}Model size: \\{\\{model_bytes\\}\\}
-  \\{\\{/model_bytes\\}\\}\\{\\{#model_bytes_memory_limit\\}\\}Model memory limit: \\{\\{model_bytes_memory_limit\\}\\}
-  \\{\\{/model_bytes_memory_limit\\}\\}\\{\\{#peak_model_bytes\\}\\}Peak model bytes: \\{\\{peak_model_bytes\\}\\}
-  \\{\\{/peak_model_bytes\\}\\}\\{\\{#model_bytes_exceeded\\}\\}Model exceeded: \\{\\{model_bytes_exceeded\\}\\}
-  \\{\\{/model_bytes_exceeded\\}\\}\\{\\{#log_time\\}\\}Memory logging time: \\{\\{log_time\\}\\}
-  \\{\\{/log_time\\}\\}\\{\\{#failed_category_count\\}\\}Failed category count: \\{\\{failed_category_count\\}\\}
-  \\{\\{/failed_category_count\\}\\}\\{\\{#annotation\\}\\}Annotation: \\{\\{annotation\\}\\}
-  \\{\\{/annotation\\}\\}\\{\\{#missed_docs_count\\}\\}Number of missed documents: \\{\\{missed_docs_count\\}\\}
-  \\{\\{/missed_docs_count\\}\\}\\{\\{#end_timestamp\\}\\}Latest finalized bucket with missing docs: \\{\\{end_timestamp\\}\\}
-  \\{\\{/end_timestamp\\}\\}\\{\\{#errors\\}\\}Error message: \\{\\{message\\}\\} \\{\\{/errors\\}\\}
-\\{\\{/context.results\\}\\}
+        defaultMessage: `['{{rule.name}}'] Anomaly detection jobs health check result:
+'{{context.message}}'
+'{{#context.results}}'
+  Job ID: '{{job_id}}'
+  '{{#datafeed_id}}'Datafeed ID: '{{datafeed_id}}'
+  '{{/datafeed_id}}{{#datafeed_state}}'Datafeed state: '{{datafeed_state}}'
+  '{{/datafeed_state}}{{#memory_status}}'Memory status: '{{memory_status}}'
+  '{{/memory_status}}{{#model_bytes}}'Model size: '{{model_bytes}}'
+  '{{/model_bytes}}{{#model_bytes_memory_limit}}'Model memory limit: '{{model_bytes_memory_limit}}'
+  '{{/model_bytes_memory_limit}}{{#peak_model_bytes}}'Peak model bytes: '{{peak_model_bytes}}'
+  '{{/peak_model_bytes}}{{#model_bytes_exceeded}}'Model exceeded: '{{model_bytes_exceeded}}'
+  '{{/model_bytes_exceeded}}{{#log_time}}'Memory logging time: '{{log_time}}'
+  '{{/log_time}}{{#failed_category_count}}'Failed category count: '{{failed_category_count}}'
+  '{{/failed_category_count}}{{#annotation}}'Annotation: '{{annotation}}'
+  '{{/annotation}}{{#missed_docs_count}}'Number of missed documents: '{{missed_docs_count}}'
+  '{{/missed_docs_count}}{{#end_timestamp}}'Latest finalized bucket with missing docs: '{{end_timestamp}}'
+  '{{/end_timestamp}}{{#errors}}'Error message: '{{message}} {{/errors}}'
+'{{/context.results}}'
 `,
       }
     ),

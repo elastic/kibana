@@ -16,6 +16,7 @@ import { Editor as EditorUI, EditorOutput } from './legacy/console_editor';
 import { getAutocompleteInfo, StorageKeys } from '../../../services';
 import { useEditorReadContext, useServicesContext, useRequestReadContext } from '../../contexts';
 import type { SenseEditor } from '../../models';
+import { MonacoEditor, MonacoEditorOutput } from './monaco';
 
 const INITIAL_PANEL_WIDTH = 50;
 const PANEL_MIN_WIDTH = '100px';
@@ -28,6 +29,7 @@ interface Props {
 export const Editor = memo(({ loading, setEditorInstance }: Props) => {
   const {
     services: { storage },
+    config: { isMonacoEnabled } = {},
   } = useServicesContext();
 
   const { currentTextObject } = useEditorReadContext();
@@ -71,6 +73,8 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
         >
           {loading ? (
             <EditorContentSpinner />
+          ) : isMonacoEnabled ? (
+            <MonacoEditor initialTextValue={currentTextObject.text} />
           ) : (
             <EditorUI
               initialTextValue={currentTextObject.text}
@@ -82,7 +86,13 @@ export const Editor = memo(({ loading, setEditorInstance }: Props) => {
           style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
           initialWidth={secondPanelWidth}
         >
-          {loading ? <EditorContentSpinner /> : <EditorOutput />}
+          {loading ? (
+            <EditorContentSpinner />
+          ) : isMonacoEnabled ? (
+            <MonacoEditorOutput />
+          ) : (
+            <EditorOutput />
+          )}
         </Panel>
       </PanelsContainer>
     </>

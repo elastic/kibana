@@ -100,10 +100,10 @@ describe('_getLegacyComponentTemplatesForPackage', () => {
   it('should find legacy templates', () => {
     const packageName = 'testPkg';
     const legacyTemplates = [
-      'logs-testPkg.dataset@settings',
-      'logs-testPkg.dataset@mappings',
-      'metrics-testPkg.dataset2@mappings',
-      'metrics-testPkg.dataset2@settings',
+      'logs-testpkg.dataset@settings',
+      'logs-testpkg.dataset@mappings',
+      'metrics-testpkg.dataset2@mappings',
+      'metrics-testpkg.dataset2@settings',
     ];
     const templates = [
       ...makeArrayOf(100, () => createMockComponentTemplate({ packageName })),

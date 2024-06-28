@@ -19,8 +19,11 @@ import type {
   PosturePolicyTemplate,
 } from '../../../../common/types_old';
 import { RisksTable } from '../compliance_charts/risks_table';
-import { RULE_FAILED } from '../../../../common/constants';
-import { LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY } from '../../../common/constants';
+import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
+import {
+  LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY,
+  FINDINGS_GROUPING_OPTIONS,
+} from '../../../common/constants';
 import { NavFilter, useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { dashboardColumnsGrow, getPolicyTemplateQuery } from './summary_section';
 import {
@@ -59,29 +62,39 @@ export const BenchmarksSection = ({
 
   const navToFindingsByBenchmarkAndEvaluation = (
     benchmark: BenchmarkData,
-    evaluation: Evaluation
+    evaluation: Evaluation,
+    groupBy: string[] = [FINDINGS_GROUPING_OPTIONS.NONE]
   ) => {
-    navToFindings({
-      ...getPolicyTemplateQuery(dashboardType),
-      ...getBenchmarkIdQuery(benchmark),
-      'result.evaluation': evaluation,
-    });
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        ...getBenchmarkIdQuery(benchmark),
+        'result.evaluation': evaluation,
+      },
+      groupBy
+    );
   };
 
   const navToFailedFindingsByBenchmarkAndSection = (
     benchmark: BenchmarkData,
-    ruleSection: string
+    ruleSection: string,
+    resultEvaluation: 'passed' | 'failed' = RULE_FAILED
   ) => {
-    navToFindings({
-      ...getPolicyTemplateQuery(dashboardType),
-      ...getBenchmarkIdQuery(benchmark),
-      'rule.section': ruleSection,
-      'result.evaluation': RULE_FAILED,
-    });
+    navToFindings(
+      {
+        ...getPolicyTemplateQuery(dashboardType),
+        ...getBenchmarkIdQuery(benchmark),
+        'rule.section': ruleSection,
+        'result.evaluation': resultEvaluation,
+      },
+      [FINDINGS_GROUPING_OPTIONS.NONE]
+    );
   };
 
   const navToFailedFindingsByBenchmark = (benchmark: BenchmarkData) => {
-    navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED);
+    navToFindingsByBenchmarkAndEvaluation(benchmark, RULE_FAILED, [
+      FINDINGS_GROUPING_OPTIONS.RULE_SECTION,
+    ]);
   };
 
   const toggleBenchmarkSortingDirection = () => {
@@ -132,7 +145,7 @@ export const BenchmarksSection = ({
                   id="xpack.csp.dashboard.benchmarkSection.columnsHeader.complianceScoreTitle"
                   defaultMessage="Compliance Score"
                 />
-                <EuiIcon className="euiTableSortIcon" type={benchmarkSortingIcon} />
+                <EuiIcon type={benchmarkSortingIcon} />
               </div>
             </EuiTitle>
           </button>
@@ -190,9 +203,25 @@ export const BenchmarksSection = ({
                 compact
                 data={benchmark.groupedFindingsEvaluation}
                 maxItems={3}
-                onCellClick={(resourceTypeName) =>
-                  navToFailedFindingsByBenchmarkAndSection(benchmark, resourceTypeName)
-                }
+                onCellClick={(resourceTypeName) => {
+                  const cisSectionEvaluation = benchmark.groupedFindingsEvaluation.find(
+                    (groupedFindingsEvaluation) =>
+                      groupedFindingsEvaluation.name === resourceTypeName
+                  );
+                  // if the CIS Section posture score is 100, we should navigate with result evaluation as passed or result evaluation as failed
+                  if (
+                    cisSectionEvaluation?.postureScore &&
+                    Math.trunc(cisSectionEvaluation?.postureScore) === 100
+                  ) {
+                    navToFailedFindingsByBenchmarkAndSection(
+                      benchmark,
+                      resourceTypeName,
+                      RULE_PASSED
+                    );
+                  } else {
+                    navToFailedFindingsByBenchmarkAndSection(benchmark, resourceTypeName);
+                  }
+                }}
                 viewAllButtonTitle={i18n.translate(
                   'xpack.csp.dashboard.risksTable.benchmarkCardViewAllButtonTitle',
                   {

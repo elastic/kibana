@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useCallback, useContext, useEffect, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { FC, PropsWithChildren } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -41,7 +42,7 @@ export interface DataSourceContextProviderProps {
  * @param children
  * @constructor
  */
-export const DataSourceContextProvider: FC<DataSourceContextProviderProps> = ({
+export const DataSourceContextProvider: FC<PropsWithChildren<DataSourceContextProviderProps>> = ({
   dataViewId,
   savedSearchId,
   children,

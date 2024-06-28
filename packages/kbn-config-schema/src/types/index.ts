@@ -20,22 +20,32 @@ export type { ConditionalTypeValue } from './conditional_type';
 export { ConditionalType } from './conditional_type';
 export type { DurationOptions } from './duration_type';
 export { DurationType } from './duration_type';
+export type { IntersectionTypeOptions } from './intersection_type';
+export { IntersectionType } from './intersection_type';
 export { LiteralType } from './literal_type';
 export { MaybeType } from './maybe_type';
 export type { MapOfOptions } from './map_type';
 export { MapOfType } from './map_type';
 export type { NumberOptions } from './number_type';
 export { NumberType } from './number_type';
-export type { ObjectTypeOptions, Props, NullableProps, TypeOf } from './object_type';
+export type {
+  ObjectTypeOptions,
+  Props,
+  NullableProps,
+  TypeOf,
+  ObjectResultType,
+} from './object_type';
 export { ObjectType } from './object_type';
 export type { RecordOfOptions } from './record_type';
 export { RecordOfType } from './record_type';
 export { StreamType } from './stream_type';
 export type { StringOptions } from './string_type';
 export { StringType } from './string_type';
+export type { UnionTypeOptions } from './union_type';
 export { UnionType } from './union_type';
 export type { URIOptions } from './uri_type';
 export { URIType } from './uri_type';
 export { NeverType } from './never_type';
 export type { IpOptions } from './ip_type';
 export { IpType } from './ip_type';
+export { Lazy } from './lazy';

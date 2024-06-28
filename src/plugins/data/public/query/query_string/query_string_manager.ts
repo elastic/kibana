@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { skip } from 'rxjs';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart } from '@kbn/core/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';

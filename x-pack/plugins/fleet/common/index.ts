@@ -32,7 +32,6 @@ export {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
   // Fleet server index
-  FLEET_SERVER_SERVERS_INDEX,
   FLEET_SERVER_ARTIFACTS_INDEX,
   AGENTS_INDEX,
   AGENT_POLICY_INDEX,
@@ -73,6 +72,7 @@ export {
   fleetSetupRouteService,
   // Package policy helpers
   isValidNamespace,
+  isValidDataset,
   INVALID_NAMESPACE_CHARACTERS,
   getFileMetadataIndexName,
   getFileDataIndexName,
@@ -129,6 +129,7 @@ export type {
   FullAgentPolicyOutput,
   FullAgentPolicyOutputPermissions,
   FullAgentPolicyInputStream,
+  TemplateAgentPolicyInput,
   DryRunPackagePolicy,
   AgentPolicy,
   Installation,
@@ -195,7 +196,7 @@ export type {
   FleetServerAgentComponentStatus,
   AssetSOObject,
   SimpleSOAssetType,
-  AllowedAssetTypes,
+  DisplayedAssetTypes,
 } from './types';
 
 export { ElasticsearchAssetType } from './types';

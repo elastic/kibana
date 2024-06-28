@@ -9,14 +9,12 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
+import { removeServerGeneratedProperties, getSimpleMlRule, updateUsername } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
-  removeServerGeneratedProperties,
-  getSimpleMlRule,
   deleteAllAlerts,
-  updateUsername,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
@@ -27,9 +25,9 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const utils = getService('securitySolutionUtils');
   const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('create_ml_rules', () => {
@@ -74,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleMlRule(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleMlRule(), await utils.getUsername());
         expect(bodyToCompare).toEqual(expect.objectContaining(expectedRule));
       });
     });

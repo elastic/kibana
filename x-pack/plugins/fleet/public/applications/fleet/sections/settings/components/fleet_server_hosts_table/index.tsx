@@ -20,7 +20,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { FleetServerHost } from '../../../../types';
-import { useLink } from '../../../../hooks';
+import { useAuthz, useLink } from '../../../../hooks';
 
 export interface FleetServerHostsTableProps {
   fleetServerHosts: FleetServerHost[];
@@ -40,6 +40,7 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
   fleetServerHosts,
   deleteFleetServerHost,
 }) => {
+  const authz = useAuthz();
   const { getHref } = useLink();
 
   const columns = useMemo((): Array<EuiBasicTableColumn<FleetServerHost>> => {
@@ -106,7 +107,10 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
       {
         width: '68px',
         render: (fleetServerHost: FleetServerHost) => {
-          const isDeleteVisible = !fleetServerHost.is_default && !fleetServerHost.is_preconfigured;
+          const isDeleteVisible =
+            !fleetServerHost.is_default &&
+            !fleetServerHost.is_preconfigured &&
+            authz.fleet.allSettings;
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -150,7 +154,13 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
         }),
       },
     ];
-  }, [getHref, deleteFleetServerHost]);
+  }, [getHref, deleteFleetServerHost, authz.fleet.allSettings]);
 
-  return <EuiBasicTable columns={columns} items={fleetServerHosts} />;
+  return (
+    <EuiBasicTable
+      columns={columns}
+      items={fleetServerHosts}
+      data-test-subj="settingsFleetServerHostsTable"
+    />
+  );
 };

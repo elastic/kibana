@@ -14,6 +14,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import * as api from '../../containers/detection_engine/alerts/api';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { UserPrivilegesProvider } from '../../../common/components/user_privileges/user_privileges_context';
+import { sourcererSelectors } from '../../../common/store';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../containers/detection_engine/alerts/api');
@@ -32,6 +33,9 @@ describe('useUserInfo', () => {
         },
       },
     });
+
+    jest.spyOn(sourcererSelectors, 'signalIndexName').mockReturnValue(null);
+    jest.spyOn(sourcererSelectors, 'signalIndexMappingOutdated').mockReturnValue(null);
   });
   it('returns default state', async () => {
     await act(async () => {

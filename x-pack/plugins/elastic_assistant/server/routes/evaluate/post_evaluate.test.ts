@@ -9,7 +9,8 @@ import { postEvaluateRoute } from './post_evaluate';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostEvaluateRequest } from '../../__mocks__/request';
-import type {
+import {
+  defaultAssistantFeatures,
   PostEvaluateRequestBodyInput,
   PostEvaluateRequestQueryInput,
 } from '@kbn/elastic-assistant-common';
@@ -45,8 +46,8 @@ describe('Post Evaluate Route', () => {
   describe('Capabilities', () => {
     it('returns a 404 if evaluate feature is not registered', async () => {
       context.elasticAssistant.getRegisteredFeatures.mockReturnValueOnce({
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
-        assistantStreamingEnabled: false,
       });
 
       const response = await server.inject(

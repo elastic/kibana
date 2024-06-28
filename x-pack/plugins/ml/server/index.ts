@@ -34,6 +34,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     ad: true,
     dfa: true,
     nlp: true,
+    experimental: true,
   },
 };
 

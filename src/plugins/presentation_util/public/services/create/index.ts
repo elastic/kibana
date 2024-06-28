@@ -27,7 +27,7 @@ type ServiceHooks<Services> = { [K in keyof Services]: { useService: () => Servi
  *
  * The `Services` generic determines the shape of all service APIs being produced.
  */
-export class PluginServices<Services> {
+export class PluginServices<Services extends Record<keyof Services, {}>> {
   private registry: PluginServiceRegistry<Services, any> | null = null;
 
   /**

@@ -11,6 +11,15 @@ import { componentHelpers, MappingsEditorTestBed } from './helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
 
+jest.mock('../../../component_templates/component_templates_context', () => ({
+  useComponentTemplatesContext: jest.fn().mockReturnValue({
+    toasts: {
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+    },
+  }),
+}));
+
 describe('Mappings editor: core', () => {
   /**
    * Variable to store the mappings data forwarded to the consumer component
@@ -124,9 +133,15 @@ describe('Mappings editor: core', () => {
       dynamic_templates: [{ before: 'foo' }],
     };
 
+    const ctx = {
+      config: {
+        enableMappingsSourceFieldSection: true,
+      },
+    };
+
     beforeEach(async () => {
       await act(async () => {
-        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
       });
       testBed.component.update();
     });
@@ -239,10 +254,13 @@ describe('Mappings editor: core', () => {
 
     test('should keep default dynamic templates value when switching tabs', async () => {
       await act(async () => {
-        testBed = setup({
-          value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
-          onChange: onChangeHandler,
-        });
+        testBed = setup(
+          {
+            value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
+            onChange: onChangeHandler,
+          },
+          ctx
+        );
       });
       testBed.component.update();
 
@@ -273,6 +291,12 @@ describe('Mappings editor: core', () => {
      */
     let defaultMappings: any;
 
+    const ctx = {
+      config: {
+        enableMappingsSourceFieldSection: true,
+      },
+    };
+
     beforeEach(async () => {
       defaultMappings = {
         dynamic: true,
@@ -300,10 +324,11 @@ describe('Mappings editor: core', () => {
         _routing: {
           required: false,
         },
+        subobjects: true,
       };
 
       await act(async () => {
-        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
       });
       testBed.component.update();
     });
@@ -434,6 +459,48 @@ describe('Mappings editor: core', () => {
       delete updatedMappings.numeric_detection;
 
       expect(data).toEqual(updatedMappings);
+    });
+  });
+
+  describe('multi-fields support', () => {
+    it('allows multi-fields for most types', async () => {
+      const value = {
+        properties: {
+          name1: {
+            type: 'wildcard',
+          },
+        },
+      };
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component, exists } = testBed;
+      component.update();
+      expect(exists('addMultiFieldButton')).toBe(true);
+    });
+
+    it('keeps the fields property in the field', async () => {
+      const value = {
+        properties: {
+          name1: {
+            type: 'wildcard',
+            fields: {
+              text: {
+                type: 'match_only_text',
+              },
+            },
+          },
+        },
+      };
+      await act(async () => {
+        testBed = setup({ onChange: onChangeHandler, value });
+      });
+
+      const { component } = testBed;
+      component.update();
+      ({ data } = await getMappingsEditorData(component));
+      expect(data).toEqual(value);
     });
   });
 });

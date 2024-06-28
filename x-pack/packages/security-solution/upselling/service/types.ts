@@ -15,10 +15,14 @@ export type UpsellingSectionId =
   | 'entity_analytics_panel'
   | 'endpointPolicyProtections'
   | 'osquery_automated_response_actions'
+  | 'endpoint_protection_updates'
+  | 'endpoint_agent_tamper_protection'
+  | 'cloud_security_posture_integration_installation'
   | 'ruleDetailsEndpointExceptions';
 
 export type UpsellingMessageId =
   | 'investigation_guide'
+  | 'investigation_guide_interactions'
   | 'alert_assignments'
   | 'alert_suppression_rule_form'
   | 'alert_suppression_rule_details';

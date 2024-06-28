@@ -39,7 +39,7 @@ export const DefaultDetails: React.FunctionComponent<Props> = ({
         aria-label={i18n.translate(
           'xpack.snapshotRestore.repositoryDetails.genericSettingsDescription',
           {
-            defaultMessage: `Readonly settings for repository '{name}'`,
+            defaultMessage: `Readonly settings for repository ''{name}''`,
             values: {
               name,
             },

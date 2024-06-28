@@ -35,6 +35,7 @@ describe('of expression', () => {
         isInvalid={false}
         noSuggestions={true}
         onChange={[Function]}
+        optionMatcher={[Function]}
         options={Array []}
         placeholder="Select a field"
         selectedOptions={
@@ -90,6 +91,7 @@ describe('of expression', () => {
         isInvalid={false}
         noSuggestions={false}
         onChange={[Function]}
+        optionMatcher={[Function]}
         options={
           Array [
             Object {

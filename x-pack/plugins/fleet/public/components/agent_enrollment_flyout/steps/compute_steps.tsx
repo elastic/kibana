@@ -14,6 +14,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
 import { API_VERSIONS } from '../../../../common/constants';
+import { getRootIntegrations } from '../../../../common/services';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
 import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
@@ -168,6 +169,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         installCommand: standaloneInstallCommands,
         isK8s,
         cloudSecurityIntegration,
+        rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
       })
     );
 
@@ -204,8 +206,9 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   setSelectedPolicyId,
   selectedApiKeyId,
   setSelectedAPIKeyId,
-  fleetServerHosts,
+  fleetServerHost,
   fleetProxy,
+  downloadSource,
   refreshAgentPolicies,
   mode,
   setMode,
@@ -224,19 +227,18 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
   const apiKeyData = apiKey?.data;
   const enrollToken = apiKey.data ? apiKey.data.item.api_key : '';
 
-  const enrolledAgentIds = usePollingAgentCount(selectedPolicy?.id || '');
+  const { enrolledAgentIds } = usePollingAgentCount(selectedPolicy?.id || '');
 
   const agentVersion = useAgentVersion();
 
   const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
     getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
 
-  const fleetServerHost = fleetServerHosts?.[0];
-
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
-    fleetServerHosts,
+    fleetServerHost,
     fleetProxy,
+    downloadSource,
     agentVersion: agentVersion || '',
     gcpProjectId,
     gcpOrganizationId,
@@ -309,6 +311,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           cloudSecurityIntegration,
           fleetServerHost,
           enrollToken,
+          rootIntegrations: getRootIntegrations(selectedPolicy?.package_policies ?? []),
         })
       );
     }

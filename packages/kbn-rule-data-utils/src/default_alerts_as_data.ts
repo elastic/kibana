@@ -24,6 +24,12 @@ const VERSION = `${KIBANA_NAMESPACE}.version` as const;
 // kibana.alert.action_group - framework action group ID for this alert
 const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 
+// kibana.alert.previous_action_group
+const ALERT_PREVIOUS_ACTION_GROUP = `${ALERT_NAMESPACE}.previous_action_group` as const;
+
+// kibana.alert.severity_improving
+const ALERT_SEVERITY_IMPROVING = `${ALERT_NAMESPACE}.severity_improving` as const;
+
 // kibana.alert.case_ids - array of cases associated with the alert
 const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
 
@@ -42,6 +48,9 @@ const ALERT_FLAPPING_HISTORY = `${ALERT_NAMESPACE}.flapping_history` as const;
 
 // kibana.alert.maintenance_window_ids - IDs of maintenance windows that are affecting this alert
 const ALERT_MAINTENANCE_WINDOW_IDS = `${ALERT_NAMESPACE}.maintenance_window_ids` as const;
+
+// kibana.alert.consecutive_matches - count of consecutive times the alert has been active
+const ALERT_CONSECUTIVE_MATCHES = `${ALERT_NAMESPACE}.consecutive_matches` as const;
 
 // kibana.alert.instance.id - alert ID, also known as alert instance ID
 const ALERT_INSTANCE_ID = `${ALERT_NAMESPACE}.instance.id` as const;
@@ -78,6 +87,9 @@ const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
 
 // kibana.alert.rule.consumer - consumer for rule that generated this alert
 const ALERT_RULE_CONSUMER = `${ALERT_RULE_NAMESPACE}.consumer` as const;
+
+// kibana.alert.rule.execution.timestamp - timestamp of the rule execution that generated this alert
+const ALERT_RULE_EXECUTION_TIMESTAMP = `${ALERT_RULE_NAMESPACE}.execution.timestamp` as const;
 
 // kibana.alert.rule.execution.uuid - unique ID for the rule execution that generated this alert
 const ALERT_RULE_EXECUTION_UUID = `${ALERT_RULE_NAMESPACE}.execution.uuid` as const;
@@ -120,11 +132,14 @@ const fields = {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -133,6 +148,7 @@ const fields = {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -160,11 +176,14 @@ export {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -173,6 +192,7 @@ export {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,

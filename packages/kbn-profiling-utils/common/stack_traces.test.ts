@@ -29,7 +29,7 @@ describe('Stack trace response operations', () => {
       samplingRate: 1.0,
     };
 
-    const decoded = decodeStackTraceResponse(original);
+    const decoded = decodeStackTraceResponse(original, false);
 
     expect(decoded.executables.size).toEqual(expected.executables.size);
     expect(decoded.executables.size).toEqual(0);
@@ -141,7 +141,7 @@ describe('Stack trace response operations', () => {
       samplingRate: 1.0,
     };
 
-    const decoded = decodeStackTraceResponse(original);
+    const decoded = decodeStackTraceResponse(original, false);
 
     expect(decoded.executables.size).toEqual(expected.executables.size);
     expect(decoded.executables.size).toEqual(2);
@@ -223,7 +223,7 @@ describe('Stack trace response operations', () => {
       samplingRate: 1.0,
     };
 
-    const decoded = decodeStackTraceResponse(original);
+    const decoded = decodeStackTraceResponse(original, false);
 
     expect(decoded.executables.size).toEqual(expected.executables.size);
     expect(decoded.executables.size).toEqual(1);

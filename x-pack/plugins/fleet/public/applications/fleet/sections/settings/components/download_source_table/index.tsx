@@ -17,6 +17,7 @@ import type { DownloadSource } from '../../../../types';
 export interface DownloadSourceTableProps {
   downloadSources: DownloadSource[];
   deleteDownloadSource: (ds: DownloadSource) => void;
+  hasAllSettingsPrivileges: boolean;
 }
 
 const NameFlexItemWithMaxWidth = styled(EuiFlexItem)`
@@ -31,6 +32,7 @@ const FlexGroupWithMinWidth = styled(EuiFlexGroup)`
 export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTableProps> = ({
   downloadSources,
   deleteDownloadSource,
+  hasAllSettingsPrivileges,
 }) => {
   const { getHref } = useLink();
 
@@ -87,7 +89,7 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
       {
         width: '68px',
         render: (downloadSource: DownloadSource) => {
-          const isDeleteVisible = !downloadSource.is_default;
+          const isDeleteVisible = !downloadSource.is_default && hasAllSettingsPrivileges;
 
           return (
             <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
@@ -131,7 +133,7 @@ export const DownloadSourceTable: React.FunctionComponent<DownloadSourceTablePro
         }),
       },
     ];
-  }, [deleteDownloadSource, getHref]);
+  }, [deleteDownloadSource, getHref, hasAllSettingsPrivileges]);
 
   return (
     <EuiBasicTable

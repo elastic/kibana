@@ -7,7 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
+import { getPanelTitle, type PublishesPanelTitle } from '@kbn/presentation-publishing';
 import {
+  ChartActionContext,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   isRowClickTriggerContext,
@@ -19,11 +21,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { RowClickContext, ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import type {
-  ActionContext,
-  ActionFactoryContext,
-  EmbeddableWithQueryInput,
-} from '../url_drilldown';
+import type { ActionFactoryContext } from '../url_drilldown';
 import { deleteUndefinedKeys, toPrimitiveOrUndefined, Primitive } from './util';
 
 /**
@@ -34,8 +32,6 @@ export type UrlDrilldownEventScope =
   | RangeSelectTriggerEventScope
   | RowClickTriggerEventScope
   | ContextMenuTriggerEventScope;
-
-export type EventScopeInput = ActionContext;
 
 export interface ValueClickTriggerEventScope {
   key?: string;
@@ -95,7 +91,7 @@ const getEventScopeFromRowClickTriggerContext = (
   ctx: RowClickContext
 ): RowClickTriggerEventScope => {
   const { data } = ctx;
-  const embeddable = ctx.embeddable as EmbeddableWithQueryInput;
+  const api = ctx.embeddable as Partial<PublishesPanelTitle>;
 
   const { rowIndex } = data;
   const columns = data.columns || data.table.columns.map(({ id }) => id);
@@ -107,9 +103,10 @@ const getEventScopeFromRowClickTriggerContext = (
   for (const columnId of columns) {
     const column = data.table.columns.find(({ id }) => id === columnId);
     if (!column) {
-      // This should never happe, but in case it does we log data necessary for debugging.
+      // This should never happen, but in case it does we log data necessary for debugging.
+      const title = getPanelTitle(api);
       // eslint-disable-next-line no-console
-      console.error(data, embeddable ? `Embeddable [${embeddable.getTitle()}]` : null);
+      console.error(data, title ? `Embeddable [${title}]` : null);
       throw new Error('Could not find a datatable column.');
     }
     values.push(row[columnId]);
@@ -127,14 +124,14 @@ const getEventScopeFromRowClickTriggerContext = (
   return scope;
 };
 
-export const getEventScopeValues = (eventScopeInput: EventScopeInput): UrlDrilldownEventScope => {
-  if (isRangeSelectTriggerContext(eventScopeInput)) {
-    return getEventScopeFromRangeSelectTriggerContext(eventScopeInput);
-  } else if (isValueClickTriggerContext(eventScopeInput)) {
-    return getEventScopeFromValueClickTriggerContext(eventScopeInput);
-  } else if (isRowClickTriggerContext(eventScopeInput)) {
-    return getEventScopeFromRowClickTriggerContext(eventScopeInput);
-  } else if (isContextMenuTriggerContext(eventScopeInput)) {
+export const getEventScopeValues = (context: ChartActionContext): UrlDrilldownEventScope => {
+  if (isRangeSelectTriggerContext(context)) {
+    return getEventScopeFromRangeSelectTriggerContext(context);
+  } else if (isValueClickTriggerContext(context)) {
+    return getEventScopeFromValueClickTriggerContext(context);
+  } else if (isRowClickTriggerContext(context)) {
+    return getEventScopeFromRowClickTriggerContext(context);
+  } else if (isContextMenuTriggerContext(context)) {
     return {};
   } else {
     throw new Error("UrlDrilldown [getEventScope] can't build scope from not supported trigger");

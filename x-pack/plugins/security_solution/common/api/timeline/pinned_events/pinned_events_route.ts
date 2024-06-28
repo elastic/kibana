@@ -14,10 +14,10 @@ export const pinnedEventIds = unionWithNullType(runtimeTypes.array(runtimeTypes.
 export const persistPinnedEventSchema = runtimeTypes.intersection([
   runtimeTypes.type({
     eventId: runtimeTypes.string,
+    timelineId: runtimeTypes.string,
   }),
   runtimeTypes.partial({
     pinnedEventId: unionWithNullType(runtimeTypes.string),
-    timelineId: unionWithNullType(runtimeTypes.string),
   }),
 ]);
 
@@ -51,9 +51,6 @@ export const PinnedEventRuntimeType = runtimeTypes.intersection([
     version: runtimeTypes.string,
   }),
   BarePinnedEventType,
-  runtimeTypes.partial({
-    timelineVersion: unionWithNullType(runtimeTypes.string),
-  }),
 ]);
 
 export interface PinnedEvent extends runtimeTypes.TypeOf<typeof PinnedEventRuntimeType> {}

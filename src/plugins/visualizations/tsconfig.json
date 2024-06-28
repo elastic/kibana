@@ -68,7 +68,12 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/chart-expressions-common",
     "@kbn/shared-ux-utility",
-    "@kbn/presentation-publishing"
+    "@kbn/managed-content-badge",
+    "@kbn/presentation-publishing",
+    "@kbn/shared-ux-markdown",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-mount",
+    "@kbn/presentation-containers"
   ],
   "exclude": [
     "target/**/*",

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import type { Store } from 'redux';
 import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
 import { useFieldBrowserOptions } from '.';
 import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
@@ -17,7 +18,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { EuiInMemoryTable } from '@elastic/eui';
@@ -26,22 +27,6 @@ import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/ty
 let mockIndexPatternFieldEditor: Start;
 jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-const defaultDataviewState: {
-  missingPatterns: string[];
-  selectedDataViewId: string | null;
-} = {
-  missingPatterns: [],
-  selectedDataViewId: 'security-solution',
-};
-const mockScopeIdSelector = jest.fn(() => defaultDataviewState);
-jest.mock('../../../common/store', () => {
-  const original = jest.requireActual('../../../common/store');
-  return {
-    ...original,
-    sourcererSelectors: { scopeIdSelector: () => mockScopeIdSelector },
-  };
-});
 
 const mockIndexFieldsSearch = jest.fn();
 jest.mock('../../../common/containers/source/use_data_view', () => ({
@@ -57,8 +42,10 @@ const mockOnHide = jest.fn();
 const runAllPromises = () => new Promise(setImmediate);
 
 // helper function to render the hook
-const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps> = {}) =>
-  renderHook<UseFieldBrowserOptionsProps, ReturnType<UseFieldBrowserOptions>>(
+const renderUseFieldBrowserOptions = (
+  props: Partial<UseFieldBrowserOptionsProps & { store?: Store }> = {}
+) =>
+  renderHook<UseFieldBrowserOptionsProps & { store?: Store }, ReturnType<UseFieldBrowserOptions>>(
     () =>
       useFieldBrowserOptions({
         sourcererScope: SourcererScopeName.default,
@@ -67,7 +54,12 @@ const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps
         ...props,
       }),
     {
-      wrapper: TestProviders,
+      wrapper: ({ children, store }) => {
+        if (store) {
+          return <TestProviders store={store}>{children}</TestProviders>;
+        }
+        return <TestProviders>{children}</TestProviders>;
+      },
     }
   );
 
@@ -104,7 +96,6 @@ describe('useFieldBrowserOptions', () => {
       ...useKibanaMock().services.application.capabilities,
       indexPatterns: { save: true },
     };
-    mockScopeIdSelector.mockReturnValue(defaultDataviewState);
     jest.clearAllMocks();
   });
 
@@ -135,13 +126,6 @@ describe('useFieldBrowserOptions', () => {
     expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
       5
     );
-  });
-
-  it('should not return the button when a dataView is not present', () => {
-    mockScopeIdSelector.mockReturnValue({ missingPatterns: [], selectedDataViewId: null });
-    const { result } = renderUseFieldBrowserOptions();
-
-    expect(result.current.createFieldButton).toBeUndefined();
   });
 
   it('should call onHide when button is pressed', async () => {
@@ -180,7 +164,7 @@ describe('useFieldBrowserOptions', () => {
   it('should dispatch the proper action when a new field is saved', async () => {
     let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async (options) => {
       onSave = options.onSave;
       return () => {};
     };
@@ -214,7 +198,7 @@ describe('useFieldBrowserOptions', () => {
   it('should dispatch the proper actions when a field is edited', async () => {
     let onSave: ((field: DataViewField[]) => void) | undefined;
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async (options) => {
       onSave = options.onSave;
       return () => {};
     };
@@ -282,7 +266,7 @@ describe('useFieldBrowserOptions', () => {
   it("should store 'closeEditor' in the actions ref when editor is open by create button", async () => {
     const mockCloseEditor = jest.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async () => mockCloseEditor;
 
     const editorActionsRef: FieldEditorActionsRef = React.createRef();
 
@@ -296,6 +280,7 @@ describe('useFieldBrowserOptions', () => {
     expect(editorActionsRef?.current).toBeNull();
 
     getByRole('button').click();
+    await runAllPromises();
 
     expect(mockCloseEditor).not.toHaveBeenCalled();
     expect(editorActionsRef?.current?.closeEditor).toBeDefined();
@@ -309,7 +294,7 @@ describe('useFieldBrowserOptions', () => {
   it("should store 'closeEditor' in the actions ref when editor is open by edit button", async () => {
     const mockCloseEditor = jest.fn();
     useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
-    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+    useKibanaMock().services.dataViewFieldEditor.openEditor = async () => mockCloseEditor;
 
     const editorActionsRef: FieldEditorActionsRef = React.createRef();
 
@@ -327,6 +312,7 @@ describe('useFieldBrowserOptions', () => {
     expect(editorActionsRef?.current).toBeNull();
 
     getByTestId('actionEditRuntimeField').click();
+    await runAllPromises();
 
     expect(mockCloseEditor).not.toHaveBeenCalled();
     expect(editorActionsRef?.current?.closeEditor).toBeDefined();

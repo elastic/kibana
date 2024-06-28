@@ -69,7 +69,7 @@ export class CloudFullStoryPlugin implements Plugin {
     }
 
     // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
-    const { FullStoryShipper } = await import('@kbn/analytics-shippers-fullstory');
+    const { FullStoryShipper } = await import('@kbn/ebt/shippers/fullstory');
     analytics.registerShipper(FullStoryShipper, {
       eventTypesAllowlist,
       fullStoryOrgId,
@@ -77,7 +77,10 @@ export class CloudFullStoryPlugin implements Plugin {
       ...(pageVarsDebounceTime
         ? { pageVarsDebounceTimeMs: duration(pageVarsDebounceTime).asMilliseconds() }
         : {}),
-      // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
+      /**
+       * FIXME: this should use the {@link IStaticAssets['getPluginAssetHref']}
+       * function. Then we can avoid registering our own endpoint in this plugin.
+       */
       scriptUrl: basePath.prepend(
         `/internal/cloud/${this.initializerContext.env.packageInfo.buildNum}/fullstory.js`
       ),

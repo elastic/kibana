@@ -29,6 +29,7 @@ import {
   attemptToURIDecode,
 } from '../shared_imports';
 import { useComponentTemplatesContext } from '../component_templates_context';
+import { DeprecatedBadge } from '../components';
 import { TabSummary } from './tab_summary';
 import { ComponentTemplateTabs, TabType } from './tabs';
 import { ManageButton, ManageAction } from './manage_button';
@@ -120,6 +121,9 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
     );
   }
 
+  const isManaged = componentTemplateDetails?._kbnMeta.isManaged;
+  const isDeprecated = componentTemplateDetails?.deprecated;
+
   return (
     <>
       <EuiFlyoutHeader>
@@ -132,7 +136,14 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
             </EuiTitle>
           </EuiFlexItem>
 
-          {componentTemplateDetails?._kbnMeta.isManaged ? (
+          {isDeprecated && (
+            <EuiFlexItem grow={false}>
+              {' '}
+              <DeprecatedBadge />
+            </EuiFlexItem>
+          )}
+
+          {isManaged && (
             <EuiFlexItem grow={false}>
               {' '}
               <EuiBadge color="hollow">
@@ -142,7 +153,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
                 />
               </EuiBadge>
             </EuiFlexItem>
-          ) : null}
+          )}
         </EuiFlexGroup>
       </EuiFlyoutHeader>
 

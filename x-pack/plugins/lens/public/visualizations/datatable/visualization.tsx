@@ -14,6 +14,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
+import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
@@ -25,6 +26,7 @@ import type {
 import { TableDimensionDataExtraEditor, TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
 import type { LayerType } from '../../../common/types';
+import { RowHeightMode } from '../../../common/types';
 import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
 import type {
   ColumnState,
@@ -35,14 +37,18 @@ import type {
   DatatableExpressionFunction,
 } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
-
+import {
+  DEFAULT_HEADER_ROW_HEIGHT,
+  DEFAULT_HEADER_ROW_HEIGHT_LINES,
+  DEFAULT_ROW_HEIGHT,
+} from './components/constants';
 export interface DatatableVisualizationState {
   columns: ColumnState[];
   layerId: string;
   layerType: LayerType;
   sorting?: SortingState;
-  rowHeight?: 'auto' | 'single' | 'custom';
-  headerRowHeight?: 'auto' | 'single' | 'custom';
+  rowHeight?: RowHeightMode;
+  headerRowHeight?: RowHeightMode;
   rowHeightLines?: number;
   headerRowHeightLines?: number;
   paging?: PagingState;
@@ -315,16 +321,20 @@ export const getDatatableVisualization = ({
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
               const stops = columnConfig?.palette?.params?.stops;
+              const isNumeric = Boolean(
+                accessor && isNumericFieldForDatatable(frame.activeData?.[state.layerId], accessor)
+              );
               const hasColoring = Boolean(columnConfig?.colorMode !== 'none' && stops);
 
               return {
                 columnId: accessor,
                 triggerIconType: columnConfig?.hidden
                   ? 'invisible'
-                  : hasColoring
+                  : hasColoring && isNumeric
                   ? 'colorBy'
                   : undefined,
-                palette: hasColoring && stops ? stops.map(({ color }) => color) : undefined,
+                palette:
+                  hasColoring && isNumeric && stops ? stops.map(({ color }) => color) : undefined,
               };
             }),
           supportsMoreColumns: true,
@@ -466,7 +476,7 @@ export const getDatatableVisualization = ({
             // rewrite colors and stops as two distinct arguments
             colors: (column.palette?.params?.stops || []).map(({ color }) => color),
             stops:
-              column.palette?.params?.name === 'custom'
+              column.palette?.params?.name === RowHeightMode.custom
                 ? (column.palette?.params?.stops || []).map(({ stop }) => stop)
                 : [],
             reverse: false, // managed at UI level
@@ -510,14 +520,14 @@ export const getDatatableVisualization = ({
         }),
       sortingColumnId: state.sorting?.columnId || '',
       sortingDirection: state.sorting?.direction || 'none',
-      fitRowToContent: state.rowHeight === 'auto',
-      headerRowHeight: state.headerRowHeight ?? 'single',
+      fitRowToContent: state.rowHeight === RowHeightMode.auto,
+      headerRowHeight: state.headerRowHeight ?? DEFAULT_HEADER_ROW_HEIGHT,
       rowHeightLines:
-        !state.rowHeight || state.rowHeight === 'single' ? 1 : state.rowHeightLines ?? 2,
+        !state.rowHeight || state.rowHeight === DEFAULT_ROW_HEIGHT ? 1 : state.rowHeightLines ?? 2,
       headerRowHeightLines:
-        !state.headerRowHeight || state.headerRowHeight === 'single'
+        state.headerRowHeight === RowHeightMode.single
           ? 1
-          : state.headerRowHeightLines ?? 2,
+          : state.headerRowHeightLines ?? DEFAULT_HEADER_ROW_HEIGHT_LINES,
       pageSize: state.paging?.enabled ? state.paging.size : undefined,
     }).toAst();
 

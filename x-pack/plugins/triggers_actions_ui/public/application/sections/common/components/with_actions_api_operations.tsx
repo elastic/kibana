@@ -40,7 +40,7 @@ export function withActionOperations<T>(
     return (
       <WrappedComponent
         {...(props as T)}
-        loadActionTypes={async () => loadActionTypes({ http })}
+        loadActionTypes={async () => loadActionTypes({ http, includeSystemActions: true })}
         loadGlobalConnectorExecutionLogAggregations={async (
           loadProps: LoadGlobalConnectorExecutionLogAggregationsProps
         ) =>

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
+import type { EuiRadioGroupOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -17,7 +19,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiRadioGroup,
-  EuiRadioGroupOption,
   EuiToolTip,
 } from '@elastic/eui';
 
@@ -238,6 +239,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
             id={'mlFullTimeRangeSelectorOption'}
             button={
               <EuiButtonIcon
+                data-test-subj="mlDatePickerButtonDataTierOptions"
                 display="base"
                 size="m"
                 iconType="boxesVertical"

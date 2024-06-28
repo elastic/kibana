@@ -15,7 +15,7 @@ export const executeSetupModuleRequest = async ({
 }: {
   module: string;
   rspCode: number;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
 }) => {
   const { body } = await supertest
     .post(`/internal/ml/modules/setup/${module}`)
@@ -40,7 +40,7 @@ export const forceStartDatafeeds = async ({
 }: {
   jobId: string;
   rspCode: number;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
 }) => {
   const { body } = await supertest
     .post(`/internal/ml/jobs/force_start_datafeeds`)

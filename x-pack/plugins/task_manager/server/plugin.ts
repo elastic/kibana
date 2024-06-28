@@ -6,7 +6,7 @@
  */
 
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
+import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import {
@@ -163,6 +163,7 @@ export class TaskManagerPlugin
     });
     metricsRoute({
       router,
+      logger: this.logger,
       metrics$: this.metrics$,
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
@@ -241,6 +242,7 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
+      requestTimeouts: this.config.request_timeouts,
     });
 
     const managedConfiguration = createManagedConfiguration({
@@ -255,6 +257,8 @@ export class TaskManagerPlugin
       this.taskManagerMetricsCollector = new TaskManagerMetricsCollector({
         logger: this.logger,
         store: taskStore,
+        taskTypes: new Set(this.definitions.getAllTypes()),
+        excludedTypes: new Set(this.config.unsafe.exclude_task_types),
       });
       this.taskPollingLifecycle = new TaskPollingLifecycle({
         config: this.config!,
@@ -294,6 +298,7 @@ export class TaskManagerPlugin
 
     metricsStream({
       config: this.config!,
+      logger: this.logger,
       reset$: this.resetMetrics$,
       taskPollingLifecycle: this.taskPollingLifecycle,
       taskManagerMetricsCollector: this.taskManagerMetricsCollector,

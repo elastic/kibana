@@ -42,8 +42,12 @@ export interface SimpleSavedObject<T = unknown> {
   references: SavedObjectType<T>['references'];
   /** The date this object was last updated */
   updatedAt: SavedObjectType<T>['updated_at'];
+  /** The user that last updated this object */
+  updatedBy: SavedObjectType<T>['updated_by'];
   /** The date this object was created */
   createdAt: SavedObjectType<T>['created_at'];
+  /** The user that created this object */
+  createdBy: SavedObjectType<T>['created_by'];
   /**
    * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
    * `namespaceType: 'agnostic'`.

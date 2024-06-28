@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -48,10 +49,11 @@ interface FormTestComponentProps {
   formDefaultValue?: Record<string, unknown>;
   onSubmit?: jest.Mock;
   schema?: FormSchema<Record<string, unknown>>;
+  children: React.ReactNode;
 }
 
 // eslint-disable-next-line react/display-name
-export const FormTestComponent: React.FC<FormTestComponentProps> = ({
+export const FormTestComponent: FC<PropsWithChildren<FormTestComponentProps>> = ({
   children,
   onSubmit,
   formDefaultValue,
@@ -62,7 +64,9 @@ export const FormTestComponent: React.FC<FormTestComponentProps> = ({
   return (
     <Form form={form}>
       {children}
-      <EuiButton onClick={() => form.submit()}>{'Submit'}</EuiButton>
+      <EuiButton onClick={() => form.submit()} data-test-subj="form-test-component-submit-button">
+        {'Submit'}
+      </EuiButton>
     </Form>
   );
 };

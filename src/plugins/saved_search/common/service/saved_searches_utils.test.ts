@@ -49,6 +49,7 @@ describe('saved_searches_utils', () => {
           ],
           "description": "foo",
           "grid": Object {},
+          "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "id": "id",
@@ -63,6 +64,10 @@ describe('saved_searches_utils', () => {
             "dependencies": Object {
               "aggs": Object {
                 "createAggConfigs": [MockFunction],
+              },
+              "dataViews": Object {
+                "getMetaFields": [MockFunction],
+                "getShortDotsEnable": [MockFunction],
               },
               "getConfig": [MockFunction],
               "onResponse": [MockFunction],
@@ -90,6 +95,7 @@ describe('saved_searches_utils', () => {
           "title": "saved search",
           "usesAdHocDataView": false,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });
@@ -120,6 +126,7 @@ describe('saved_searches_utils', () => {
           ],
           "description": "description",
           "grid": Object {},
+          "headerRowHeight": undefined,
           "hideAggregatedPreview": undefined,
           "hideChart": true,
           "isTextBasedQuery": true,
@@ -141,6 +148,7 @@ describe('saved_searches_utils', () => {
           "title": "title",
           "usesAdHocDataView": false,
           "viewMode": undefined,
+          "visContext": undefined,
         }
       `);
     });

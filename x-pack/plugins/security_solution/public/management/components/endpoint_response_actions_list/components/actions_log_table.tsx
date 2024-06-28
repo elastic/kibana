@@ -273,6 +273,7 @@ interface ActionsLogTableProps {
   isFlyout: boolean;
   loading: boolean;
   onChange: ({
+    // @ts-expect-error upgrade typescript v4.9.5
     page: _page,
   }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => void;
   onShowActionDetails: (actionIds: string[]) => void;
@@ -435,7 +436,6 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
           columns={columns}
           itemId="id"
           itemIdToExpandedRowMap={expandedRowMap}
-          isExpandable
           pagination={tablePagination}
           onChange={onChange}
           loading={loading}

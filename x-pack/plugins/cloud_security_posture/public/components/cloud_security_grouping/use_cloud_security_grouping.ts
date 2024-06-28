@@ -5,14 +5,10 @@
  * 2.0.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  GroupOption,
-  GroupPanelRenderer,
-  GroupStatsRenderer,
-} from '@kbn/securitysolution-grouping/src';
+import { GroupOption, GroupPanelRenderer, GroupStatsRenderer } from '@kbn/grouping/src';
 
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
@@ -36,6 +32,7 @@ export const useCloudSecurityGrouping = ({
   groupingLevel,
   groupingLocalStorageKey,
   maxGroupingLevels = DEFAULT_MAX_GROUPING_LEVELS,
+  groupsUnit,
 }: {
   dataView: DataView;
   groupingTitle: string;
@@ -47,6 +44,7 @@ export const useCloudSecurityGrouping = ({
   groupingLevel?: number;
   groupingLocalStorageKey: string;
   maxGroupingLevels?: number;
+  groupsUnit?: (n: number, parentSelectedGroup: string, hasNullGroup: boolean) => string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -63,14 +61,18 @@ export const useCloudSecurityGrouping = ({
       unit,
       groupPanelRenderer,
       groupStatsRenderer,
+      groupsUnit,
     },
     defaultGroupingOptions,
     fields: dataView.fields,
     groupingId: groupingLocalStorageKey,
     maxGroupingLevels,
     title: groupingTitle,
-    onGroupChange: () => {
+    onGroupChange: ({ groupByFields }) => {
       setActivePageIndex(0);
+      setUrlQuery({
+        groupBy: groupByFields,
+      });
     },
   });
 
@@ -84,6 +86,16 @@ export const useCloudSecurityGrouping = ({
   useEffect(() => {
     setActivePageIndex(0);
   }, [urlQuery.filters, urlQuery.query]);
+
+  /**
+   * Set the selected groups from the URL query on the initial render
+   */
+  useEffect(() => {
+    if (urlQuery.groupBy) {
+      grouping.setSelectedGroups(urlQuery.groupBy);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // This is recommended by the grouping component to cover an edge case
   // where the selectedGroup has multiple values
@@ -116,6 +128,7 @@ export const useCloudSecurityGrouping = ({
     query,
     error,
     selectedGroup,
+    urlQuery,
     setUrlQuery,
     uniqueValue,
     isNoneSelected,

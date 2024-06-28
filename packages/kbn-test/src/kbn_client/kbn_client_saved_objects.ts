@@ -107,6 +107,7 @@ const STANDARD_LIST_TYPES = [
   // synthetics based objects
   'synthetics-monitor',
   'uptime-dynamic-settings',
+  'synthetics-privates-locations',
 
   'osquery-saved-query',
   'osquery-pack',
@@ -125,6 +126,7 @@ const STANDARD_LIST_TYPES = [
   'epm-packages-assets',
   'fleet-preconfiguration-deletion-record',
   'fleet-fleet-server-host',
+  'fleet-proxy',
   'fleet-uninstall-tokens',
 ];
 

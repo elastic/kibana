@@ -8,76 +8,68 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useFleetServerHostsForPolicy } from './use_fleet_server_hosts_for_policy';
-import { useGetFleetServerHosts } from './use_request/fleet_server_hosts';
-import { useGetFleetProxies } from './use_request/fleet_proxies';
+import { useGetEnrollmentSettings } from './use_request/settings';
 
-jest.mock('./use_request/fleet_server_hosts');
-jest.mock('./use_request/fleet_proxies');
-
-const mockedUseGetFleetServerHosts = useGetFleetServerHosts as jest.MockedFunction<
-  typeof useGetFleetServerHosts
->;
-
-const mockedUseGetFleetProxies = useGetFleetProxies as jest.MockedFunction<
-  typeof useGetFleetProxies
->;
+jest.mock('./use_request/settings');
 
 describe('useFleetServerHostsForPolicy', () => {
   beforeEach(() => {
-    mockedUseGetFleetServerHosts.mockReturnValue({
+    jest.mocked(useGetEnrollmentSettings).mockReturnValue({
       isLoading: false,
       isInitialRequest: false,
+      error: null,
+      resendRequest: jest.fn(),
       data: {
-        items: [
-          {
-            id: 'default',
+        fleet_server: {
+          policies: [
+            {
+              id: 'default-policy',
+              name: 'default-policy',
+              is_managed: false,
+            },
+          ],
+          host: {
+            id: 'fleet-server',
+            name: 'fleet-server',
+            is_preconfigured: false,
             is_default: true,
             host_urls: ['https://defaultfleetserver:8220'],
-            is_preconfigured: false,
-            name: 'Default',
           },
-          {
-            id: 'custom1',
-            is_default: false,
-            host_urls: ['https://custom1:8220'],
+          host_proxy: {
+            id: 'default-proxy',
+            name: 'default-proxy',
+            url: 'https://defaultproxy',
             is_preconfigured: false,
-            name: 'Custom 1',
           },
-        ],
-        page: 1,
-        perPage: 100,
-        total: 2,
+          has_active: true,
+        },
+        download_source: {
+          id: 'default-source',
+          name: 'default-source',
+          host: 'https://defaultsource',
+          is_default: false,
+        },
       },
-    } as any);
-    mockedUseGetFleetProxies.mockReturnValue({
-      isInitialRequest: false,
-      isLoading: false,
-      data: {
-        items: [],
-      },
-    } as any);
+    });
   });
-  it('should return default hosts if used without agent policy', () => {
+
+  it('should return correct state from api request', () => {
     const { result } = renderHook(() => useFleetServerHostsForPolicy());
-    expect(result.current.fleetServerHosts).toEqual(['https://defaultfleetserver:8220']);
-  });
-
-  it('should return default hosts if used with agent policy that do not override fleet server host', () => {
-    const { result } = renderHook(() =>
-      useFleetServerHostsForPolicy({
-        id: 'testpolicy1',
-      } as any)
-    );
-    expect(result.current.fleetServerHosts).toEqual(['https://defaultfleetserver:8220']);
-  });
-
-  it('should return custom hosts if used with agent policy that override fleet server hosts', () => {
-    const { result } = renderHook(() =>
-      useFleetServerHostsForPolicy({
-        id: 'testpolicy1',
-        fleet_server_host_id: 'custom1',
-      } as any)
-    );
-    expect(result.current.fleetServerHosts).toEqual(['https://custom1:8220']);
+    expect(result.current).toEqual({
+      isLoadingInitialRequest: false,
+      fleetServerHost: 'https://defaultfleetserver:8220',
+      fleetProxy: {
+        id: 'default-proxy',
+        name: 'default-proxy',
+        url: 'https://defaultproxy',
+        is_preconfigured: false,
+      },
+      downloadSource: {
+        id: 'default-source',
+        name: 'default-source',
+        host: 'https://defaultsource',
+        is_default: false,
+      },
+    });
   });
 });

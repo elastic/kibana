@@ -28,6 +28,13 @@ export const UPDATES_TAB_LABEL = i18n.translate(
   }
 );
 
+export const JSON_VIEW_UPDATES_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewUpdatesTabLabel',
+  {
+    defaultMessage: 'JSON view',
+  }
+);
+
 export const DISMISS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.dismissButtonLabel',
   {
@@ -164,7 +171,7 @@ export const RULE_NAME_OVERRIDE_FIELD_LABEL = i18n.translate(
 export const THREAT_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.threatFieldLabel',
   {
-    defaultMessage: 'MITRE ATT&CK\\u2122',
+    defaultMessage: 'MITRE ATT&CK\u2122',
   }
 );
 
@@ -333,5 +340,19 @@ export const FROM_FIELD_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.fromFieldLabel',
   {
     defaultMessage: 'Additional look-back time',
+  }
+);
+
+export const MAX_SIGNALS_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.maxAlertsFieldLabel',
+  {
+    defaultMessage: 'Max alerts per run',
+  }
+);
+
+export const CUSTOMIZED_PREBUILT_RULE_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.customizedPrebuiltRuleLabel',
+  {
+    defaultMessage: 'Customized Elastic rule',
   }
 );

@@ -86,7 +86,7 @@ const ACTION_DEFINITION: Record<
 export const useActions = ({
   attributes,
   lensMetadata,
-  extraActions = [],
+  extraActions,
   inspectActionProps,
   timeRange,
   withActions = DEFAULT_ACTIONS,
@@ -186,7 +186,7 @@ export const useActions = ({
             canUseEditor() && withActions.includes(VisualizationContextMenuActions.openInLens),
           order: 0,
         }),
-        ...extraActions,
+        ...(extraActions ?? []),
       ].map((a, i, totalActions) => {
         const order = Math.max(totalActions.length - (1 + i), 0);
         return {

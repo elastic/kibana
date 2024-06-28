@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/try-in-console",
+  "owner": "@elastic/search-kibana"
+}

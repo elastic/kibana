@@ -18,6 +18,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/core-security-common",
   ],
   "exclude": [
     "target/**/*",

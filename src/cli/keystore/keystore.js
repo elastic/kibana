@@ -8,6 +8,7 @@
 
 import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync } from 'crypto';
+import { question } from './utils/prompt';
 import * as errors from './errors';
 
 const VERSION = 1;
@@ -15,12 +16,16 @@ const ALGORITHM = 'aes-256-gcm';
 const ITERATIONS = 10000;
 
 export class Keystore {
+  static async initialize(path, password) {
+    const keystore = new Keystore(path, password);
+    await keystore.load();
+    return keystore;
+  }
+
   constructor(path, password = '') {
     this.path = path;
     this.password = password;
-
     this.reset();
-    this.load();
   }
 
   static errors = errors;
@@ -71,11 +76,23 @@ export class Keystore {
     writeFileSync(this.path, keystore);
   }
 
-  load() {
+  async load() {
     try {
+      if (this.hasPassword() && !this.password) {
+        if (process.env.KBN_KEYSTORE_PASSPHRASE_FILE) {
+          this.password = readFileSync(process.env.KBN_KEYSTORE_PASSPHRASE_FILE, {
+            encoding: 'utf8',
+          }).trim();
+        } else if (process.env.KEYSTORE_PASSWORD) {
+          this.password = process.env.KEYSTORE_PASSWORD;
+        } else {
+          this.password = await question('Enter password for the kibana keystore', {
+            mask: '*',
+          });
+        }
+      }
       const keystore = readFileSync(this.path);
       const [, data] = keystore.toString().split(':');
-
       this.data = JSON.parse(Keystore.decrypt(data, this.password));
     } catch (e) {
       if (e.code === 'ENOENT') {
@@ -108,5 +125,22 @@ export class Keystore {
 
   remove(key) {
     delete this.data[key];
+  }
+
+  hasPassword() {
+    try {
+      const keystore = readFileSync(this.path);
+      const [, data] = keystore.toString().split(':');
+      Keystore.decrypt(data);
+    } catch (e) {
+      if (e instanceof errors.UnableToReadKeystore) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  setPassword(password) {
+    this.password = password;
   }
 }

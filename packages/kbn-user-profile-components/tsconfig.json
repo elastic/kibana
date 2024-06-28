@@ -4,7 +4,8 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@emotion/react/types/css-prop",
     ]
   },
   "include": [
@@ -17,7 +18,9 @@
     "@kbn/core-notifications-browser",
     "@kbn/core",
     "@kbn/core-theme-browser",
-    "@kbn/core-mount-utils-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-i18n-browser",
+    "@kbn/test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

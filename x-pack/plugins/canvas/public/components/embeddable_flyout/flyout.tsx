@@ -8,12 +8,12 @@
 import React, { useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { encode } from '../../../common/lib/embeddable_dataurl';
 import { AddEmbeddableFlyout as Component, Props as ComponentProps } from './flyout.component';
 // @ts-expect-error untyped local
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 import { EmbeddableTypes } from '../../../canvas_plugin_src/expression_types/embeddable';
+import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { State } from '../../../types';
 import { useLabsService } from '../../services';
 
@@ -88,10 +88,12 @@ export const AddEmbeddablePanel: React.FunctionComponent<FlyoutProps> = ({
       // with the new generic `embeddable` function.
       // Otherwise we fallback to the embeddable type specific expressions.
       if (isByValueEnabled) {
-        const config = encode({ savedObjectId: id });
-        partialElement.expression = `embeddable config="${config}" 
-  type="${type}" 
-| render`;
+        partialElement.expression = embeddableInputToExpression(
+          { savedObjectId: id },
+          type,
+          undefined,
+          true
+        );
       } else if (allowedEmbeddables[type]) {
         partialElement.expression = allowedEmbeddables[type](id);
       }

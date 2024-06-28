@@ -6,16 +6,18 @@
  */
 
 import type { PartialTheme, Theme } from '@elastic/charts';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { getFlattenedBuckets } from './helpers';
 import { StorageTreemap } from '../../../storage_treemap';
 import { DEFAULT_MAX_CHART_HEIGHT, StorageTreemapContainer } from '../../../tabs/styles';
 import { PatternRollup, SelectedIndex } from '../../../../types';
 import { useDataQualityContext } from '../../../data_quality_context';
+import { DOCS_UNIT } from './translations';
 
 export interface Props {
   formatBytes: (value: number | undefined) => string;
+  formatNumber: (value: number | undefined) => string;
   ilmPhases: string[];
   onIndexSelected: ({ indexName, pattern }: SelectedIndex) => void;
   patternRollups: Record<string, PatternRollup>;
@@ -26,6 +28,7 @@ export interface Props {
 
 const StorageDetailsComponent: React.FC<Props> = ({
   formatBytes,
+  formatNumber,
   ilmPhases,
   onIndexSelected,
   patternRollups,
@@ -44,18 +47,25 @@ const StorageDetailsComponent: React.FC<Props> = ({
       }),
     [ilmPhases, isILMAvailable, patternRollups]
   );
+  const accessor = flattenedBuckets[0]?.sizeInBytes != null ? 'sizeInBytes' : 'docsCount';
+  const valueFormatter = useCallback(
+    (d: number) =>
+      accessor === 'sizeInBytes' ? formatBytes(d) : `${formatNumber(d)} ${DOCS_UNIT(d)}`,
+    [accessor, formatBytes, formatNumber]
+  );
 
   return (
     <StorageTreemapContainer data-test-subj="storageDetails">
       <StorageTreemap
+        accessor={accessor}
+        baseTheme={baseTheme}
         flattenedBuckets={flattenedBuckets}
-        formatBytes={formatBytes}
         maxChartHeight={DEFAULT_MAX_CHART_HEIGHT}
         onIndexSelected={onIndexSelected}
-        patterns={patterns}
         patternRollups={patternRollups}
+        patterns={patterns}
         theme={theme}
-        baseTheme={baseTheme}
+        valueFormatter={valueFormatter}
       />
     </StorageTreemapContainer>
   );

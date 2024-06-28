@@ -133,6 +133,10 @@
 #  - name: metrics.ops
 #    level: debug
 
+# Enables debug logging on the browser (dev console)
+#logging.browser.root:
+#  level: debug
+
 # =================== System: Other ===================
 # The path where Kibana stores persistent data not saved in Elasticsearch. Defaults to data
 #path.data: data

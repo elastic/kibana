@@ -23,36 +23,36 @@ export async function termsEnumSuggestions(
   field?: FieldSpec,
   abortSignal?: AbortSignal
 ) {
+  // See https://github.com/elastic/kibana/issues/165264
   const { tiers } = config.autocomplete.valueSuggestions;
+  const excludedTiers = [
+    'data_content',
+    'data_hot',
+    'data_warm',
+    'data_cold',
+    'data_frozen',
+  ].filter((tier) => !tiers.includes(tier));
+
   if (!field?.name && !field?.type) {
     const indexPattern = await findIndexPatternById(savedObjectsClient, index);
     field = indexPattern && getFieldByName(fieldName, indexPattern);
   }
 
-  const result = await esClient.termsEnum(
-    {
-      index,
-      body: {
-        field: field?.name ?? fieldName,
-        string: query,
-        index_filter: {
-          bool: {
-            must: [
-              ...(filters ?? []),
-              {
-                terms: {
-                  _tier: tiers,
-                },
-              },
-            ],
+  const body = {
+    field: field?.name ?? fieldName,
+    string: query,
+    index_filter: {
+      bool: {
+        must: filters ?? [],
+        must_not: {
+          terms: {
+            _tier: excludedTiers,
           },
         },
       },
     },
-    {
-      signal: abortSignal,
-    }
-  );
+  };
 
-  return result.terms;
+  const { terms } = await esClient.termsEnum({ index, body }, { signal: abortSignal });
+  return terms;
 }

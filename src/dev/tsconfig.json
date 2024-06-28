@@ -41,5 +41,7 @@
     "@kbn/config-schema",
     "@kbn/core-test-helpers-so-type-serializer",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/dev-proc-runner",
+    "@kbn/core-i18n-server-internal",
   ]
 }

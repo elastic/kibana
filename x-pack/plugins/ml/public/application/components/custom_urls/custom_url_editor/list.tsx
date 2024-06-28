@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FC, useState, ChangeEvent } from 'react';
+import type { FC, ChangeEvent } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButtonIcon,
@@ -35,7 +36,7 @@ import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { TIME_RANGE_TYPE } from './constants';
-import { Job } from '../../../../../common/types/anomaly_detection_jobs';
+import type { Job } from '../../../../../common/types/anomaly_detection_jobs';
 
 function isValidTimeRange(timeRange: MlKibanaUrlConfig['time_range']): boolean {
   // Allow empty timeRange string, which gives the 'auto' behaviour.

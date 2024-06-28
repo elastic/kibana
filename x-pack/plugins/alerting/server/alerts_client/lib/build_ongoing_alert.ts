@@ -9,10 +9,14 @@ import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
   ALERT_ACTION_GROUP,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PREVIOUS_ACTION_GROUP,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_TAGS,
   ALERT_TIME_RANGE,
   EVENT_ACTION,
@@ -22,6 +26,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
+import { get, omit } from 'lodash';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -39,7 +44,9 @@ interface BuildOngoingAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  isImproving: boolean | null;
   payload?: DeepPartial<AlertData>;
+  runTimestamp?: string;
   timestamp: string;
   kibanaVersion: string;
 }
@@ -59,7 +66,9 @@ export const buildOngoingAlert = <
   alert,
   legacyAlert,
   payload,
+  isImproving,
   rule,
+  runTimestamp,
   timestamp,
   kibanaVersion,
 }: BuildOngoingAlertOpts<
@@ -74,12 +83,16 @@ export const buildOngoingAlert = <
   // Make sure that any alert fields that are updateable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
+  // Omit fields that are overwrite-able with undefined value
+  const cleanedAlert = omit(alert, ALERT_SEVERITY_IMPROVING);
+
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
     // Update the timestamp to reflect latest update time
     [TIMESTAMP]: timestamp,
     [EVENT_ACTION]: 'active',
+    [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
     // Because we're building this alert after the action execution handler has been
     // run, the scheduledExecutionOptions for the alert has been cleared and
     // the lastScheduledActions has been set. If we ever change the order of operations
@@ -93,6 +106,8 @@ export const buildOngoingAlert = <
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
+    // Set latest match count
+    [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
     // Set the time range
     ...(legacyAlert.getState().start
       ? {
@@ -103,6 +118,8 @@ export const buildOngoingAlert = <
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
       : {}),
+    ...(isImproving != null ? { [ALERT_SEVERITY_IMPROVING]: isImproving } : {}),
+    [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     [SPACE_IDS]: rule[SPACE_IDS],
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(
@@ -129,12 +146,12 @@ export const buildOngoingAlert = <
   //   'kibana.alert.field1': 'value2'
   // }
   // the expanded field from the existing alert is removed
-  const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
+  const expandedAlert = removeUnflattenedFieldsFromAlert(cleanedAlert, {
     ...cleanedPayload,
     ...alertUpdates,
     ...refreshableAlertFields,
   });
-  return deepmerge.all([cleanedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
+  return deepmerge.all([expandedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };

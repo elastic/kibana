@@ -6,19 +6,8 @@ paths: {}
 components:
   x-codegen-enabled: true
   schemas:
-    NonEmptyString:
-      type: string
-      pattern: ^(?! *$).+$
-      minLength: 1
-      description: A string that is not empty and does not contain only whitespace
-
-    UUID:
-      type: string
-      format: uuid
-      description: A universally unique identifier
-
     RuleObjectId:
-      $ref: '#/components/schemas/UUID'
+      $ref: '../../../model/primitives.schema.yaml#/components/schemas/UUID'
 
     RuleSignatureId:
       type: string
@@ -53,6 +42,45 @@ components:
 
     IsRuleImmutable:
       type: boolean
+      deprecated: true
+      description: This field determines whether the rule is a prebuilt Elastic rule. It will be replaced with the `rule_source` field.
+
+    IsExternalRuleCustomized:
+      type: boolean
+      description: Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
+
+    InternalRuleSource:
+      description: Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - internal
+      required:
+        - type
+
+    ExternalRuleSource:
+      description: Type of rule source for externally sourced rules, i.e. rules that have an external source, such as the Elastic Prebuilt rules repo.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - external
+        is_customized:
+          $ref: '#/components/schemas/IsExternalRuleCustomized'
+      required:
+        - type
+        - is_customized
+
+    RuleSource:
+      description: Discriminated union that determines whether the rule is internally sourced (created within the Kibana app) or has an external source, such as the Elastic Prebuilt rules repo.
+      discriminator:
+        propertyName: type
+      oneOf:
+        - $ref: '#/components/schemas/ExternalRuleSource'
+        - $ref: '#/components/schemas/InternalRuleSource'
 
     IsRuleEnabled:
       type: boolean
@@ -287,17 +315,35 @@ components:
 
     RequiredField:
       type: object
+      description: Describes an Elasticsearch field that is needed for the rule to function
       properties:
         name:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Name of an Elasticsearch field
         type:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Type of the Elasticsearch field
         ecs:
           type: boolean
+          description: Whether the field is an ECS field
       required:
         - name
         - type
         - ecs
+
+    RequiredFieldInput:
+      type: object
+      description: Input parameters to create a RequiredField. Does not include the `ecs` field, because `ecs` is calculated on the backend based on the field name and type.
+      properties:
+        name:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Name of an Elasticsearch field
+        type:
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+          description: Type of an Elasticsearch field
+      required:
+        - name
+        - type
 
     RequiredFieldArray:
       type: array
@@ -332,11 +378,11 @@ components:
       type: object
       properties:
         package:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         version:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         integration:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
       required:
         - package
         - version
@@ -354,7 +400,7 @@ components:
         field_names:
           type: array
           items:
-            $ref: '#/components/schemas/NonEmptyString'
+            $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           minItems: 1
       required:
         - field_names
@@ -426,7 +472,7 @@ components:
         params:
           $ref: '#/components/schemas/RuleActionParams'
         uuid:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
         alerts_filter:
           $ref: '#/components/schemas/RuleActionAlertsFilter'
         frequency:
@@ -453,10 +499,10 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: ID of the exception container
         list_id:
-          $ref: '#/components/schemas/NonEmptyString'
+          $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
           description: List ID of the exception container
         type:
           $ref: '#/components/schemas/ExceptionListType'
@@ -487,3 +533,44 @@ components:
       required:
         - value
         - unit
+
+    AlertSuppressionMissingFieldsStrategy:
+      type: string
+      enum:
+        - doNotSuppress
+        - suppress
+      description: |-
+        Describes how alerts will be generated for documents with missing suppress by fields:
+        doNotSuppress - per each document a separate alert will be created
+        suppress - only alert will be created per suppress by bucket
+
+    AlertSuppressionGroupBy:
+      type: array
+      items:
+        type: string
+      minItems: 1
+      maxItems: 3
+
+    AlertSuppression:
+      type: object
+      properties:
+        group_by:
+          $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        missing_fields_strategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+      required:
+        - group_by
+
+    AlertSuppressionCamel:
+      type: object
+      properties:
+        groupBy:
+          $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        missingFieldsStrategy:
+          $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
+      required:
+        - groupBy

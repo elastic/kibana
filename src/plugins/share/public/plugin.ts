@@ -73,9 +73,8 @@ export class SharePlugin
       SharePublicStartDependencies
     >
 {
-  private readonly shareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareMenuRegistry?: ShareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
-
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
@@ -124,7 +123,7 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      ...this.shareMenuRegistry.setup(),
+      ...this.shareMenuRegistry!.setup(),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -141,7 +140,7 @@ export class SharePlugin
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
-      this.shareMenuRegistry.start(),
+      this.shareMenuRegistry!.start(),
       disableEmbed,
       this.anonymousAccessServiceProvider
     );

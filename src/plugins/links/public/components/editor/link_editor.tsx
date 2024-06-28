@@ -26,7 +26,7 @@ import {
   EuiFlyoutHeader,
   EuiRadioGroupOption,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import {
   LinkType,
@@ -90,7 +90,7 @@ export const LinkEditor = ({
   );
 
   return (
-    <EuiFocusTrap className={'linkEditor in'} data-test-subj="links--linkEditor--flyout">
+    <EuiFocusTrap className={'linkEditor in'}>
       <EuiFlyoutHeader hasBorder>
         <EuiButtonEmpty
           className="linkEditorBackButton"
@@ -108,7 +108,7 @@ export const LinkEditor = ({
           </EuiTitle>
         </EuiButtonEmpty>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="links--linkEditor--flyout">
         <EuiForm component="form" fullWidth>
           <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTypePickerLabel()}>
             <EuiRadioGroup

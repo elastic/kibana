@@ -35,7 +35,8 @@ export const useHostRelatedUsers = ({
   from,
   skip = false,
 }: UseHostRelatedUsersParam): UseHostRelatedUsersResult => {
-  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
+  const { installed: isNewRiskScoreModuleInstalled, isLoading: riskScoreStatusLoading } =
+    useIsNewRiskScoreModuleInstalled();
   const {
     loading,
     result: response,
@@ -75,10 +76,10 @@ export const useHostRelatedUsers = ({
   );
 
   useEffect(() => {
-    if (!skip) {
+    if (!skip && !riskScoreStatusLoading) {
       search(hostRelatedUsersRequest);
     }
-  }, [hostRelatedUsersRequest, search, skip]);
+  }, [hostRelatedUsersRequest, riskScoreStatusLoading, search, skip]);
 
   return hostRelatedUsersResponse;
 };

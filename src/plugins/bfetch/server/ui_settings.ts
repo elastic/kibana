@@ -24,6 +24,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
       category: [],
+      requiresPageReload: true,
     },
     [DISABLE_BFETCH_COMPRESSION]: {
       name: i18n.translate('bfetch.disableBfetchCompression', {
@@ -36,6 +37,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
       category: [],
+      requiresPageReload: true,
     },
   };
 }

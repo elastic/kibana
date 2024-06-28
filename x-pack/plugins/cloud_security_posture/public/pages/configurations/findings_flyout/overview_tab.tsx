@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
@@ -27,7 +28,7 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
 } from '../../../../common/constants';
-import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../../common/api/use_data_view';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CodeBlock, CspFlyoutMarkdown } from './findings_flyout';
@@ -36,12 +37,21 @@ import { FindingsDetectionRuleCounter } from './findings_detection_rule_counter'
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
-const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined) => [
+const getDetailsList = (data: CspFinding, ruleFlyoutLink: string, discoverIndexLink?: string) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTitle', {
       defaultMessage: 'Rule Name',
     }),
-    description: data.rule.name,
+    description: (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.ruleNameTooltip', {
+          defaultMessage: 'Manage Rule',
+        })}
+      >
+        <EuiLink href={ruleFlyoutLink}>{data.rule.name}</EuiLink>
+      </EuiToolTip>
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.alertsTitle', {
@@ -66,18 +76,6 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
       defaultMessage: 'Evaluated at',
     }),
     description: moment(data['@timestamp']).format(CSP_MOMENT_FORMAT),
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceIdTitle', {
-      defaultMessage: 'Resource ID',
-    }),
-    description: data.resource.id,
-  },
-  {
-    title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.resourceNameTitle', {
-      defaultMessage: 'Resource Name',
-    }),
-    description: data.resource.name,
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.overviewTab.frameworkSourcesTitle', {
@@ -160,11 +158,15 @@ const getEvidenceList = ({ result }: CspFinding) =>
     },
   ].filter(truthy);
 
-export const OverviewTab = ({ data }: { data: CspFinding }) => {
-  const {
-    services: { discover },
-  } = useKibana();
-  const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+export const OverviewTab = ({
+  data,
+  ruleFlyoutLink,
+}: {
+  data: CspFinding;
+  ruleFlyoutLink: string;
+}) => {
+  const { discover } = useKibana().services;
+  const latestFindingsDataView = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
   const discoverIndexLink = useMemo(
     () =>
@@ -185,7 +187,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
             defaultMessage: 'Details',
           }),
           id: 'detailsAccordion',
-          listItems: getDetailsList(data, discoverIndexLink),
+          listItems: getDetailsList(data, ruleFlyoutLink, discoverIndexLink),
         },
         {
           initialIsOpen: true,
@@ -206,7 +208,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
             listItems: getEvidenceList(data),
           },
       ].filter(truthy),
-    [data, discoverIndexLink, hasEvidence]
+    [data, discoverIndexLink, hasEvidence, ruleFlyoutLink]
   );
 
   return (

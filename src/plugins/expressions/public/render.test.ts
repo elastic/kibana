@@ -11,7 +11,7 @@ import { Observable } from 'rxjs';
 import { SerializableRecord } from '@kbn/utility-types';
 import { ExpressionRenderError } from './types';
 import { getRenderersRegistry } from './services';
-import { first, take, toArray } from 'rxjs/operators';
+import { first, take, toArray } from 'rxjs';
 import { IInterpreterRenderHandlers } from '../common';
 
 const element: HTMLElement = {} as HTMLElement;

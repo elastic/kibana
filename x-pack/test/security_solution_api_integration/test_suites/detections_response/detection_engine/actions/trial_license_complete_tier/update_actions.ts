@@ -10,10 +10,7 @@ import expect from 'expect';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  deleteAllRules,
-  deleteAllAlerts,
   getRuleWithWebHookAction,
-  waitForRuleSuccess,
   updateRule,
   installMockPrebuiltRules,
   fetchRule,
@@ -23,6 +20,11 @@ import {
   getCustomQueryRuleParams,
   getPrebuiltRulesAndTimelinesStatus,
 } from '../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleSuccess,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -145,7 +147,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body?.execution_summary?.last_execution?.status).toBe('succeeded');
       });
 
-      it('@skipInQA expects an updated rule with a webhook action and meta field runs successfully', async () => {
+      // Broken in MKI environment, needs triage
+      it('@skipInServerlessMKI expects an updated rule with a webhook action and meta field runs successfully', async () => {
         const webhookAction = await createWebHookRuleAction(supertest);
 
         await supertest
@@ -185,7 +188,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body?.execution_summary?.last_execution?.status).toBe('succeeded');
       });
 
-      it('@skipInQA adds a webhook to an immutable rule', async () => {
+      // Broken in MKI environment, needs triage
+      it('@skipInServerlessMKI adds a webhook to an immutable rule', async () => {
         const immutableRule = await getImmutableRule();
         const webhookAction = await createWebHookRuleAction(supertest);
         const ruleAction = {
@@ -208,7 +212,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(updatedRule.throttle).toEqual(immutableRule.throttle);
       });
 
-      it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
+      // Broken in MKI environment, needs triage
+      it('@skipInServerlessMKI should be able to create a new webhook action, attach it to an immutable rule and the count of prepackaged rules should not increase. If this fails, suspect the immutable tags are not staying on the rule correctly.', async () => {
         const immutableRule = await getImmutableRule();
         const hookAction = await createWebHookRuleAction(supertest);
         const ruleToUpdate = getRuleWithWebHookAction(
@@ -222,7 +227,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status.rules_not_installed).toBe(0);
       });
 
-      it('@skipInQA should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
+      // Broken in MKI environment, needs triage
+      it('@skipInServerlessMKI should be able to create a new webhook action, attach it to an immutable rule and the rule should stay immutable when searching against immutable tags', async () => {
         const immutableRule = await getImmutableRule();
         const webhookAction = await createWebHookRuleAction(supertest);
         const ruleAction = {

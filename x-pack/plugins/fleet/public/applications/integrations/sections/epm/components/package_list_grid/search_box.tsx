@@ -99,7 +99,7 @@ export const SearchBox: FunctionComponent<Props> = ({
       onChange={(e) => onQueryChange(e)}
       isClearable={true}
       incremental={true}
-      fullWidth={true}
+      fullWidth
       prepend={
         selectedCategoryTitle ? (
           <EuiText

@@ -18,6 +18,7 @@ export {
   type RawControlGroupAttributes,
   type PersistableControlGroupInput,
   type SerializableControlGroupInput,
+  type ControlGroupChainingSystem,
   persistableControlGroupInputKeys,
 } from './control_group/types';
 export {
@@ -32,6 +33,7 @@ export {
 } from './control_group/control_group_persistence';
 
 export {
+  DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_CONTROL_STYLE,
 } from './control_group/control_group_constants';

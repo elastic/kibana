@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 
-import { waitFor } from '../wait_for';
+import { waitFor } from '../../../../../common/utils/security_solution';
 import { getEventLogExecuteCompleteById } from './get_event_log_execute_complete_by_id';
 
 /**
@@ -23,11 +23,12 @@ export const waitForEventLogExecuteComplete = async (
   es: Client,
   log: ToolingLog,
   ruleId: string,
-  totalExecutions = 1
+  totalExecutions = 1,
+  executionType = 'execute'
 ): Promise<void> => {
   await waitFor(
     async () => {
-      const executionCount = await getEventLogExecuteCompleteById(es, log, ruleId);
+      const executionCount = await getEventLogExecuteCompleteById(es, log, ruleId, executionType);
       return executionCount >= totalExecutions;
     },
     'waitForEventLogExecuteComplete',

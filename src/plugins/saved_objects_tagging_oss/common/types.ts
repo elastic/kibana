@@ -8,6 +8,7 @@
 
 export interface Tag {
   id: string;
+  managed: boolean;
   name: string;
   description: string;
   color: string;
@@ -29,6 +30,7 @@ export interface CreateTagOptions {
   id?: string;
   overwrite?: boolean;
   refresh?: boolean | 'wait_for';
+  managed?: boolean;
 }
 
 export interface ITagsClient {

@@ -6,14 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  createRule,
-  deleteAllRules,
   getComplexRule,
   getComplexRuleOutput,
   getSimpleRule,
@@ -22,14 +16,14 @@ import {
   updateUsername,
   removeServerGeneratedProperties,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless find_rules', () => {
     beforeEach(async () => {
@@ -37,12 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('should return an empty find body correctly if no rules are loaded', async () => {
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .send()
-        .expect(200);
+      const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
       expect(body).to.eql({
         data: [],
@@ -56,15 +45,10 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule());
 
       // query the single rule from _find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .send()
-        .expect(200);
+      const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       expect(body).to.eql({
         data: [expectedRule],
@@ -76,23 +60,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return a single rule when a single rule is loaded from a find with everything for the rule added', async () => {
       // add a single rule
-      await supertest
-        .post(DETECTION_ENGINE_RULES_URL)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .send(getComplexRule())
-        .expect(200);
+      await securitySolutionApi.createRule({ body: getComplexRule() }).expect(200);
 
       // query and expect that we get back one record in the find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .send()
-        .expect(200);
+      const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
       body.data = [removeServerGeneratedProperties(body.data[0])];
-      const expectedRule = updateUsername(getComplexRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getComplexRuleOutput(), await utils.getUsername());
 
       expect(body).to.eql({
         data: [expectedRule],
@@ -126,14 +100,9 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, rule);
 
       // query the single rule from _find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .send()
-        .expect(200);
+      const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
 
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...expectedRule,
         actions: [
@@ -179,13 +148,8 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, rule);
 
       // query the single rule from _find
-      const { body } = await supertest
-        .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .send()
-        .expect(200);
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
+      const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...expectedRule,

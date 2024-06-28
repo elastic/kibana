@@ -14,6 +14,7 @@ const createTag = (name: string): TagWithRelations => ({
   name,
   description: '',
   color: '#FF0088',
+  managed: false,
   relationCount: 42,
 });
 

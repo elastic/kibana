@@ -11,6 +11,8 @@ import { EuiDataGridCellValueElementProps, type EuiDataGridColumn } from '@elast
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { EuiDataGridControlColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 
 /**
  * User configurable state of data grid, persisted in saved search
@@ -21,6 +23,12 @@ export interface UnifiedDataTableSettings {
 
 export interface UnifiedDataTableSettingsColumn {
   width?: number;
+  /**
+  Optional props passed to Columns to display provided labels as column names instead of field names.
+  This object maps column field names to their corresponding display labels.
+  These labels will take precedence over the data view field names.
+  */
+  display?: string;
 }
 
 export type ValueToStringConverter = (
@@ -32,7 +40,13 @@ export type ValueToStringConverter = (
 /**
  * Custom column types per column name
  */
-export type DataTableColumnTypes = Record<string, string>;
+export type DataTableColumnsMeta = Record<
+  string,
+  {
+    type: DatatableColumnMeta['type'];
+    esType?: DatatableColumnMeta['esType'];
+  }
+>;
 
 export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   row: DataTableRecord;
@@ -55,3 +69,17 @@ export type CustomGridColumnsConfiguration = Record<
   string,
   (props: CustomGridColumnProps) => EuiDataGridColumn
 >;
+
+export interface ControlColumns {
+  select: EuiDataGridControlColumn;
+  openDetails: EuiDataGridControlColumn;
+}
+
+export interface ControlColumnsProps {
+  controlColumns: ControlColumns;
+}
+
+export type CustomControlColumnConfiguration = (props: ControlColumnsProps) => {
+  leadingControlColumns: EuiDataGridControlColumn[];
+  trailingControlColumns?: EuiDataGridControlColumn[];
+};

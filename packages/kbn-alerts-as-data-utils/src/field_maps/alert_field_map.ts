@@ -14,11 +14,14 @@ import {
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_CONSECUTIVE_MATCHES,
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
@@ -27,6 +30,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -80,6 +84,11 @@ export const alertFieldMap = {
     array: true,
     required: false,
   },
+  [ALERT_CONSECUTIVE_MATCHES]: {
+    type: 'long',
+    array: false,
+    required: false,
+  },
   [ALERT_INSTANCE_ID]: {
     type: 'keyword',
     array: false,
@@ -89,6 +98,11 @@ export const alertFieldMap = {
     type: 'date',
     required: false,
     array: false,
+  },
+  [ALERT_PREVIOUS_ACTION_GROUP]: {
+    type: 'keyword',
+    array: false,
+    required: false,
   },
   [ALERT_REASON]: {
     type: 'keyword',
@@ -111,6 +125,11 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_RULE_EXECUTION_TIMESTAMP]: {
+    type: 'date',
+    array: false,
+    required: false,
   },
   [ALERT_RULE_EXECUTION_UUID]: {
     type: 'keyword',
@@ -152,6 +171,11 @@ export const alertFieldMap = {
     type: 'keyword',
     array: false,
     required: true,
+  },
+  [ALERT_SEVERITY_IMPROVING]: {
+    type: 'boolean',
+    array: false,
+    required: false,
   },
   [ALERT_START]: {
     type: 'date',

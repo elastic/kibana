@@ -23,6 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
   let updateTemplate: typeof indexManagementService['templates']['api']['updateTemplate'];
   let deleteTemplates: typeof indexManagementService['templates']['api']['deleteTemplates'];
   let simulateTemplate: typeof indexManagementService['templates']['api']['simulateTemplate'];
+  let cleanUpTemplates: typeof indexManagementService['templates']['api']['cleanUpTemplates'];
 
   let getRandomString: () => string;
   describe('Index templates', function () {
@@ -30,10 +31,20 @@ export default function ({ getService }: FtrProviderContext) {
       ({
         templates: {
           helpers: { getTemplatePayload, catTemplate, getSerializedTemplate },
-          api: { createTemplate, updateTemplate, deleteTemplates, simulateTemplate },
+          api: {
+            createTemplate,
+            updateTemplate,
+            deleteTemplates,
+            simulateTemplate,
+            cleanUpTemplates,
+          },
         },
       } = indexManagementService);
       getRandomString = () => randomness.string({ casing: 'lower', alpha: true });
+    });
+
+    after(async () => {
+      await cleanUpTemplates({ 'x-elastic-internal-origin': 'xxx' });
     });
 
     describe('get', () => {
@@ -92,7 +103,9 @@ export default function ({ getService }: FtrProviderContext) {
             'hasAliases',
             'hasMappings',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
+            'ignoreMissingComponentTemplates',
           ].sort();
 
           expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
@@ -112,7 +125,9 @@ export default function ({ getService }: FtrProviderContext) {
             'indexPatterns',
             'template',
             '_kbnMeta',
+            'allowAutoCreate',
             'composedOf',
+            'ignoreMissingComponentTemplates',
           ].sort();
 
           expect(body.name).to.eql(templateName);
@@ -123,13 +138,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('create', () => {
       it('should create an index template', async () => {
-        const payload = getTemplatePayload(`template-${getRandomString()}`, [getRandomString()]);
+        const payload = getTemplatePayload(
+          `template-${getRandomString()}`,
+          [getRandomString()],
+          undefined,
+          false
+        );
         await createTemplate(payload).set('x-elastic-internal-origin', 'xxx').expect(200);
       });
 
       it('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
         const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const payload = getTemplatePayload(templateName, [getRandomString()], undefined, false);
 
         await createTemplate(payload).set('x-elastic-internal-origin', 'xxx');
 
@@ -139,7 +159,12 @@ export default function ({ getService }: FtrProviderContext) {
       it('should validate the request payload', async () => {
         const templateName = `template-${getRandomString()}`;
         // need to cast as any to avoid errors after deleting index patterns
-        const payload = getTemplatePayload(templateName, [getRandomString()]) as any;
+        const payload = getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        ) as any;
 
         delete payload.indexPatterns; // index patterns are required
 
@@ -151,7 +176,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should parse the ES error and return the cause', async () => {
         const templateName = `template-create-parse-es-error`;
-        const payload = getTemplatePayload(templateName, ['create-parse-es-error']);
+        const payload = getTemplatePayload(
+          templateName,
+          ['create-parse-es-error'],
+          undefined,
+          false
+        );
         const runtime = {
           myRuntimeField: {
             type: 'boolean',
@@ -175,7 +205,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('update', () => {
       it('should update an index template', async () => {
         const templateName = `template-${getRandomString()}`;
-        const indexTemplate = getTemplatePayload(templateName, [getRandomString()]);
+        const indexTemplate = getTemplatePayload(
+          templateName,
+          [getRandomString()],
+          undefined,
+          false
+        );
 
         await createTemplate(indexTemplate).set('x-elastic-internal-origin', 'xxx').expect(200);
 
@@ -202,7 +237,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should parse the ES error and return the cause', async () => {
         const templateName = `template-update-parse-es-error`;
-        const payload = getTemplatePayload(templateName, ['update-parse-es-error']);
+        const payload = getTemplatePayload(
+          templateName,
+          ['update-parse-es-error'],
+          undefined,
+          false
+        );
         const runtime = {
           myRuntimeField: {
             type: 'keyword',
@@ -232,7 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('delete', () => {
       it('should delete an index template', async () => {
         const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const payload = getTemplatePayload(templateName, [getRandomString()], undefined, false);
 
         const { status: createStatus, body: createBody } = await createTemplate(payload).set(
           'x-elastic-internal-origin',
@@ -268,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('simulate', () => {
       it('should simulate an index template', async () => {
-        const payload = getSerializedTemplate([getRandomString()]);
+        const payload = getSerializedTemplate([getRandomString()], false);
 
         const { body } = await simulateTemplate(payload)
           .set('x-elastic-internal-origin', 'xxx')

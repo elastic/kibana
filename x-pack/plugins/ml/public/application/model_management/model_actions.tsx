@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import type { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { EuiToolTip } from '@elastic/eui';
@@ -30,7 +30,7 @@ import { getUserInputModelDeploymentParamsProvider } from './deployment_setup';
 import { useMlKibana, useMlLocator, useNavigateToPath } from '../contexts/kibana';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { isTestable, isDfaTrainedModel } from './test_models';
-import { ModelItem } from './models_list';
+import type { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 
 export function useModelActions({
@@ -58,10 +58,9 @@ export function useModelActions({
     services: {
       application: { navigateToUrl },
       overlays,
-      theme,
-      i18n: i18nStart,
       docLinks,
       mlServices: { mlApiServices },
+      ...startServices
     },
   } = useMlKibana();
 
@@ -109,19 +108,18 @@ export function useModelActions({
   }, [mlApiServices]);
 
   const getUserConfirmation = useMemo(
-    () => getUserConfirmationProvider(overlays, theme, i18nStart),
-    [i18nStart, overlays, theme]
+    () => getUserConfirmationProvider(overlays, startServices),
+    [overlays, startServices]
   );
 
   const getUserInputModelDeploymentParams = useMemo(
     () =>
       getUserInputModelDeploymentParamsProvider(
         overlays,
-        theme,
-        i18nStart,
+        startServices,
         startModelDeploymentDocUrl
       ),
-    [overlays, theme, i18nStart, startModelDeploymentDocUrl]
+    [overlays, startServices, startModelDeploymentDocUrl]
   );
 
   const isBuiltInModel = useCallback(
@@ -199,9 +197,8 @@ export function useModelActions({
           }
         ),
         'data-test-subj': 'mlModelsTableRowStartDeploymentAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'play',
-        type: 'button',
+        type: 'icon',
         isPrimary: true,
         enabled: (item) => {
           return canStartStopTrainedModels && !isLoading && item.state !== MODEL_STATE.DOWNLOADING;
@@ -329,7 +326,14 @@ export function useModelActions({
         available: (item) =>
           item.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
           canStartStopTrainedModels &&
-          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING),
+          (item.state === MODEL_STATE.STARTED || item.state === MODEL_STATE.STARTING) &&
+          // Only show the action if there is at least one deployment that is not used by the inference service
+          (!Array.isArray(item.inference_apis) ||
+            item.deployment_ids.some(
+              (dId) =>
+                Array.isArray(item.inference_apis) &&
+                !item.inference_apis.some((inference) => inference.model_id === dId)
+            )),
         enabled: (item) => !isLoading,
         onClick: async (item) => {
           const requireForceStop = isPopulatedObject(item.pipelines);
@@ -402,9 +406,8 @@ export function useModelActions({
           defaultMessage: 'Download',
         }),
         'data-test-subj': 'mlModelsTableRowDownloadModelAction',
-        // @ts-ignore EUI has a type check issue when type "button" is combined with an icon.
         icon: 'download',
-        type: 'button',
+        type: 'icon',
         isPrimary: true,
         available: (item) =>
           canCreateTrainedModels &&
@@ -464,32 +467,35 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const hasDeployments = model.state === MODEL_STATE.STARTED;
           return (
-            <EuiToolTip
-              position="left"
-              content={
-                hasDeployments
-                  ? i18n.translate(
-                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                      {
-                        defaultMessage: 'Model has started deployments',
-                      }
-                    )
-                  : null
-              }
-            >
-              <>
-                {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                  defaultMessage: 'Delete model',
-                })}
-              </>
-            </EuiToolTip>
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete model',
+              })}
+            </>
           );
         },
-        description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-          defaultMessage: 'Delete model',
-        }),
+        description: (model: ModelItem) => {
+          const hasDeployments = model.deployment_ids.length > 0;
+          const { hasInferenceServices } = model;
+          return hasInferenceServices
+            ? i18n.translate(
+                'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
+                {
+                  defaultMessage: 'Model is used by the _inference API',
+                }
+              )
+            : hasDeployments
+            ? i18n.translate(
+                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                {
+                  defaultMessage: 'Model has started deployments',
+                }
+              )
+            : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete model',
+              });
+        },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
         type: 'icon',

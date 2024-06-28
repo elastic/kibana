@@ -21,7 +21,7 @@ import {
   GlobalFlyout,
   AuthorizationProvider,
   RedirectAppLinks,
-  KibanaThemeProvider,
+  KibanaRenderContextProvider,
   NotAuthorizedSection,
 } from '../shared_imports';
 import { AppDependencies } from '../types';
@@ -157,30 +157,31 @@ export const App = ({ history }: { history: ScopedHistory }) => {
 export const RootComponent = (dependencies: AppDependencies) => {
   const {
     history,
-    core: { i18n, application, http, executionContext },
+    core: { application, http, executionContext, ...startServices },
   } = dependencies.services;
 
   executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (
-    <div className={APP_WRAPPER_CLASS}>
-      <RedirectAppLinks
-        coreStart={{
-          application,
-        }}
-      >
-        <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
-          <i18n.Context>
-            <KibanaThemeProvider theme$={dependencies.theme$}>
-              <AppContextProvider value={dependencies}>
-                <GlobalFlyoutProvider>
-                  <App history={history} />
-                </GlobalFlyoutProvider>
-              </AppContextProvider>
-            </KibanaThemeProvider>
-          </i18n.Context>
-        </AuthorizationProvider>
-      </RedirectAppLinks>
-    </div>
+    <KibanaRenderContextProvider {...startServices}>
+      <div className={APP_WRAPPER_CLASS}>
+        <RedirectAppLinks
+          coreStart={{
+            application,
+          }}
+        >
+          <AuthorizationProvider
+            httpClient={http}
+            privilegesEndpoint={`${API_BASE_PATH}/privileges`}
+          >
+            <AppContextProvider value={dependencies}>
+              <GlobalFlyoutProvider>
+                <App history={history} />
+              </GlobalFlyoutProvider>
+            </AppContextProvider>
+          </AuthorizationProvider>
+        </RedirectAppLinks>
+      </div>
+    </KibanaRenderContextProvider>
   );
 };

@@ -26,6 +26,11 @@ interface SaveDashboardOptions {
   tags?: string[];
 }
 
+interface AddNewDashboardOptions {
+  continueEditing?: boolean;
+  expectWarning?: boolean;
+}
+
 export class DashboardPageObject extends FtrService {
   private readonly comboBox = this.ctx.getService('comboBox');
   private readonly config = this.ctx.getService('config');
@@ -45,6 +50,7 @@ export class DashboardPageObject extends FtrService {
   private readonly visualize = this.ctx.getPageObject('visualize');
   private readonly discover = this.ctx.getPageObject('discover');
   private readonly appsMenu = this.ctx.getService('appsMenu');
+  private readonly toasts = this.ctx.getService('toasts');
 
   private readonly logstashIndex = this.config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -223,9 +229,20 @@ export class DashboardPageObject extends FtrService {
     await this.expectExistsDashboardLandingPage();
   }
 
-  public async clickClone() {
-    this.log.debug('Clicking clone');
-    await this.testSubjects.click('dashboardClone');
+  public async duplicateDashboard(dashboardNameOverride?: string) {
+    this.log.debug('Clicking duplicate');
+
+    await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
+
+    if (dashboardNameOverride) {
+      this.log.debug('entering dashboard duplicate override title');
+      await this.testSubjects.setValue('savedObjectTitle', dashboardNameOverride);
+    }
+
+    await this.clickSave();
+
+    // Confirm that the Dashboard has actually been saved
+    await this.testSubjects.existOrFail('saveDashboardSuccess');
   }
 
   /**
@@ -234,9 +251,9 @@ export class DashboardPageObject extends FtrService {
    */
   public async expectDuplicateTitleWarningDisplayed({ displayed = true }) {
     if (displayed) {
-      await this.testSubjects.existOrFail('titleDupicateWarnMsg');
+      await this.testSubjects.existOrFail('titleDuplicateWarnMsg');
     } else {
-      await this.testSubjects.missingOrFail('titleDupicateWarnMsg');
+      await this.testSubjects.missingOrFail('titleDuplicateWarnMsg');
     }
   }
 
@@ -347,18 +364,23 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectUnsavedChangesBadge() {
+    this.log.debug('Expect unsaved changes badge to be present');
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
     });
   }
 
   public async expectMissingUnsavedChangesBadge() {
+    this.log.debug('Expect there to be no unsaved changes badge');
     await this.retry.try(async () => {
       await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
     });
   }
 
-  public async clickNewDashboard(continueEditing = false) {
+  public async clickNewDashboard(
+    options: AddNewDashboardOptions = { continueEditing: false, expectWarning: false }
+  ) {
+    const { continueEditing, expectWarning } = options;
     const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
     if (!continueEditing && discardButtonExists) {
       this.log.debug('found discard button');
@@ -369,33 +391,15 @@ export class DashboardPageObject extends FtrService {
       }
     }
     await this.listingTable.clickNewButton();
+    if (expectWarning) {
+      await this.testSubjects.existOrFail('dashboardCreateConfirm');
+    }
     if (await this.testSubjects.exists('dashboardCreateConfirm')) {
       if (continueEditing) {
         await this.testSubjects.click('dashboardCreateConfirmContinue');
       } else {
         await this.testSubjects.click('dashboardCreateConfirmStartOver');
       }
-    }
-    // make sure the dashboard page is shown
-    await this.waitForRenderComplete();
-  }
-
-  public async clickNewDashboardExpectWarning(continueEditing = false) {
-    const discardButtonExists = await this.testSubjects.exists('discardDashboardPromptButton');
-    if (!continueEditing && discardButtonExists) {
-      this.log.debug('found discard button');
-      await this.testSubjects.click('discardDashboardPromptButton');
-      const confirmation = await this.testSubjects.exists('confirmModalTitleText');
-      if (confirmation) {
-        await this.common.clickConfirmOnModal();
-      }
-    }
-    await this.listingTable.clickNewButton();
-    await this.testSubjects.existOrFail('dashboardCreateConfirm');
-    if (continueEditing) {
-      await this.testSubjects.click('dashboardCreateConfirmContinue');
-    } else {
-      await this.testSubjects.click('dashboardCreateConfirmStartOver');
     }
     // make sure the dashboard page is shown
     await this.waitForRenderComplete();
@@ -467,19 +471,62 @@ export class DashboardPageObject extends FtrService {
   }
 
   /**
-   * Save the current dashboard with the specified name and options and
+   * @description opens the dashboard settings flyout to modify an existing dashboard
+   */
+  public async modifyExistingDashboardDetails(
+    dashboard: string,
+    saveOptions: Pick<SaveDashboardOptions, 'storeTimeWithDashboard' | 'tags' | 'needsConfirm'> = {}
+  ) {
+    await this.openSettingsFlyout();
+
+    await this.retry.try(async () => {
+      this.log.debug('entering new title');
+      await this.testSubjects.setValue('dashboardTitleInput', dashboard);
+
+      if (saveOptions.storeTimeWithDashboard !== undefined) {
+        await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
+      }
+
+      if (saveOptions.tags) {
+        const tagsComboBox = await this.testSubjects.find('comboBoxInput');
+        for (const tagName of saveOptions.tags) {
+          await this.comboBox.setElement(tagsComboBox, tagName);
+        }
+      }
+
+      this.log.debug('DashboardPage.applyCustomization');
+      await this.testSubjects.click('applyCustomizeDashboardButton');
+
+      if (saveOptions.needsConfirm) {
+        await this.ensureDuplicateTitleCallout();
+        await this.testSubjects.click('applyCustomizeDashboardButton');
+      }
+
+      this.log.debug('isCustomizeDashboardLoadingIndicatorVisible');
+      return await this.testSubjects.exists('dashboardUnsavedChangesBadge', { timeout: 1500 });
+    });
+  }
+
+  /**
+   * @description Save the current dashboard with the specified name and options and
    * verify that the save was successful, close the toast and return the
    * toast message
-   *
-   * @param dashboardName {String}
-   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
    */
   public async saveDashboard(
     dashboardName: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true, exitFromEditMode: true }
+    saveOptions: SaveDashboardOptions = {
+      waitDialogIsClosed: true,
+      exitFromEditMode: true,
+      saveAsNew: true,
+    }
   ) {
     await this.retry.try(async () => {
-      await this.enterDashboardTitleAndClickSave(dashboardName, saveOptions);
+      if (saveOptions.saveAsNew) {
+        await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
+      } else {
+        await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
+        await this.clickQuickSave();
+      }
 
       if (saveOptions.needsConfirm) {
         await this.ensureDuplicateTitleCallout();
@@ -489,9 +536,14 @@ export class DashboardPageObject extends FtrService {
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
-    const message = await this.common.closeToast();
-    await this.header.waitUntilLoadingHasFinished();
-    await this.common.waitForSaveModalToClose();
+
+    let message;
+
+    if (saveOptions.saveAsNew) {
+      message = await this.toasts.getTitleAndDismiss();
+      await this.header.waitUntilLoadingHasFinished();
+      await this.common.waitForSaveModalToClose();
+    }
 
     const isInViewMode = await this.testSubjects.exists('dashboardEditMode');
     if (saveOptions.exitFromEditMode && !isInViewMode) {
@@ -513,20 +565,20 @@ export class DashboardPageObject extends FtrService {
   }
 
   /**
-   *
-   * @param dashboardTitle {String}
-   * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, waitDialogIsClosed: boolean}}
+   * @description populates the duplicate dashboard modal
    */
-  public async enterDashboardTitleAndClickSave(
+  public async enterDashboardSaveModalApplyUpdatesAndClickSave(
     dashboardTitle: string,
-    saveOptions: SaveDashboardOptions = { waitDialogIsClosed: true }
+    saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
     const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
       timeout: 2000,
     });
+
     if (!isSaveModalOpen) {
-      await this.testSubjects.click('dashboardSaveMenuItem');
+      await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     }
+
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
@@ -534,11 +586,6 @@ export class DashboardPageObject extends FtrService {
 
     if (saveOptions.storeTimeWithDashboard !== undefined) {
       await this.setStoreTimeWithDashboard(saveOptions.storeTimeWithDashboard);
-    }
-
-    const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');
-    if (saveAsNewCheckboxExists) {
-      await this.setSaveAsNewCheckBox(Boolean(saveOptions.saveAsNew));
     }
 
     if (saveOptions.tags) {
@@ -552,7 +599,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async ensureDuplicateTitleCallout() {
-    await this.testSubjects.existOrFail('titleDupicateWarnMsg');
+    await this.testSubjects.existOrFail('titleDuplicateWarnMsg');
   }
 
   public async selectDashboardTags(tagNames: string[]) {
@@ -567,7 +614,7 @@ export class DashboardPageObject extends FtrService {
    * @param dashboardTitle {String}
    */
   public async enterDashboardTitleAndPressEnter(dashboardTitle: string) {
-    await this.testSubjects.click('dashboardSaveMenuItem');
+    await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     const modalDialog = await this.testSubjects.find('savedObjectSaveModal');
 
     this.log.debug('entering new title');
@@ -595,7 +642,9 @@ export class DashboardPageObject extends FtrService {
 
   public async getPanelTitles() {
     this.log.debug('in getPanelTitles');
-    const titleObjects = await this.find.allByCssSelector('span.embPanel__titleInner');
+    const titleObjects = await this.find.allByCssSelector(
+      '[data-test-subj="embeddablePanelTitleInner"] .embPanel__titleText'
+    );
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
@@ -703,7 +752,11 @@ export class DashboardPageObject extends FtrService {
     const attributeName = 'data-shared-items-count';
     const element = await this.find.byCssSelector(`[${attributeName}]`);
     if (element) {
-      return await element.getAttribute(attributeName);
+      const attribute = await element.getAttribute(attributeName);
+
+      if (!attribute) throw new Error(`no attribute found for [${attributeName}]`);
+
+      return attribute;
     }
 
     throw new Error('no element');
@@ -746,7 +799,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async expectMissingSaveOption() {
-    await this.testSubjects.missingOrFail('dashboardSaveMenuItem');
+    await this.testSubjects.missingOrFail('dashboardInteractiveSaveMenuItem');
   }
 
   public async expectMissingQuickSaveOption() {

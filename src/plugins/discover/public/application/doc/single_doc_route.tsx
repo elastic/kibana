@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { Doc } from './components/doc';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getScopedHistory } from '../../kibana_services';
 import { DiscoverError } from '../../components/common/error_alert';
 import { useDataView } from '../../hooks/use_data_view';
 import { DocHistoryLocationState } from './locator';
@@ -25,7 +24,7 @@ export interface DocUrlParams {
 }
 
 export const SingleDocRoute = () => {
-  const { timefilter, core } = useDiscoverServices();
+  const { timefilter, core, getScopedHistory } = useDiscoverServices();
   const { search } = useLocation();
   const { dataViewId, index } = useParams<DocUrlParams>();
 
@@ -33,8 +32,8 @@ export const SingleDocRoute = () => {
   const id = query.get('id');
 
   const locationState = useMemo(
-    () => getScopedHistory().location.state as DocHistoryLocationState | undefined,
-    []
+    () => getScopedHistory<DocHistoryLocationState>()?.location.state,
+    [getScopedHistory]
   );
 
   useExecutionContext(core.executionContext, {

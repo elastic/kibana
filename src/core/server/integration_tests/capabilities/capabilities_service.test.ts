@@ -18,7 +18,7 @@ import {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
 } from '@kbn/core-http-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
 import { CapabilitiesService } from '@kbn/core-capabilities-server-internal';
 
@@ -35,7 +35,7 @@ describe('CapabilitiesService', () => {
   let serviceSetup: CapabilitiesSetup;
 
   beforeEach(async () => {
-    server = createHttpServer();
+    server = createHttpService();
     httpPreboot = await server.preboot({ context: contextServiceMock.createPrebootContract() });
     httpSetup = await server.setup({
       context: contextServiceMock.createSetupContract(),

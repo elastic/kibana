@@ -33,7 +33,6 @@ paths:
                   nullable: true
                 timelineId:
                   type: string
-                  nullable: true
       responses:
         200:
           description: Indicate the event was successfully pinned in the timeline.

@@ -36,17 +36,17 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
    * These are the details we expect to see in the node detail view when the origin is selected.
    */
   const originEventDetailEntries: Array<[string, string]> = [
-    ['Field@timestamp', 'ValueSep 23, 2020 @ 08:25:32.316'],
-    ['Fieldprocess.executable', 'Valueexecutable'],
-    ['Fieldprocess.pid', 'Value0'],
-    ['Fieldprocess.entity_id', 'Valueorigin'],
-    ['Fielduser.name', 'Valueuser.name'],
-    ['Fielduser.domain', 'Valueuser.domain'],
-    ['Fieldprocess.parent.pid', 'Value0'],
-    ['Fieldprocess.hash.md5', 'Valuehash.md5'],
-    ['Fieldprocess.args', 'Valueargs0'],
-    ['Fieldprocess.args', 'Valueargs1'],
-    ['Fieldprocess.args', 'Valueargs2'],
+    ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
+    ['process.executable', 'executable'],
+    ['process.pid', '0'],
+    ['process.entity_id', 'origin'],
+    ['user.name', 'user.name'],
+    ['user.domain', 'user.domain'],
+    ['process.parent.pid', '0'],
+    ['process.hash.md5', 'hash.md5'],
+    ['process.args', 'args0'],
+    ['process.args', 'args1'],
+    ['process.args', 'args2'],
   ];
 
   beforeEach(() => {
@@ -137,17 +137,17 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     });
     it('should show the node details for the first child', async () => {
       await expect(simulator().map(() => simulator().nodeDetailEntries())).toYieldEqualTo([
-        ['Field@timestamp', 'ValueSep 23, 2020 @ 08:25:32.317'],
-        ['Fieldprocess.executable', 'Valueexecutable'],
-        ['Fieldprocess.pid', 'Value1'],
-        ['Fieldprocess.entity_id', 'ValuefirstChild'],
-        ['Fielduser.name', 'Valueuser.name'],
-        ['Fielduser.domain', 'Valueuser.domain'],
-        ['Fieldprocess.parent.pid', 'Value0'],
-        ['Fieldprocess.hash.md5', 'Valuehash.md5'],
-        ['Fieldprocess.args', 'Valueargs0'],
-        ['Fieldprocess.args', 'Valueargs1'],
-        ['Fieldprocess.args', 'Valueargs2'],
+        ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
+        ['process.executable', 'executable'],
+        ['process.pid', '1'],
+        ['process.entity_id', 'firstChild'],
+        ['user.name', 'user.name'],
+        ['user.domain', 'user.domain'],
+        ['process.parent.pid', '0'],
+        ['process.hash.md5', 'hash.md5'],
+        ['process.args', 'args0'],
+        ['process.args', 'args1'],
+        ['process.args', 'args2'],
       ]);
     });
   });
@@ -220,20 +220,19 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             return typesAndCounts;
           })
         ).toYieldEqualTo([
-          // Because there is no printed whitespace after "Count", the count immediately follows it.
-          { link: 'registry', type: 'Count2' },
-          { link: 'authentication', type: 'Count1' },
-          { link: 'database', type: 'Count1' },
-          { link: 'driver', type: 'Count1' },
-          { link: 'file', type: 'Count1' },
-          { link: 'host', type: 'Count1' },
-          { link: 'iam', type: 'Count1' },
-          { link: 'intrusion_detection', type: 'Count1' },
-          { link: 'malware', type: 'Count1' },
-          { link: 'network', type: 'Count1' },
-          { link: 'package', type: 'Count1' },
-          { link: 'process', type: 'Count1' },
-          { link: 'web', type: 'Count1' },
+          { link: 'registry', type: '2' },
+          { link: 'authentication', type: '1' },
+          { link: 'database', type: '1' },
+          { link: 'driver', type: '1' },
+          { link: 'file', type: '1' },
+          { link: 'host', type: '1' },
+          { link: 'iam', type: '1' },
+          { link: 'intrusion_detection', type: '1' },
+          { link: 'malware', type: '1' },
+          { link: 'network', type: '1' },
+          { link: 'package', type: '1' },
+          { link: 'process', type: '1' },
+          { link: 'web', type: '1' },
         ]);
       });
       describe('and when the user clicks the registry events link', () => {

@@ -28,14 +28,15 @@ export interface RemoteClustersActions {
     toggle: () => void;
     isChecked: () => boolean;
   };
-  cloudUrlSwitch: {
+  cloudAdvancedOptionsSwitch: {
     toggle: () => void;
     exists: () => boolean;
     isChecked: () => boolean;
   };
-  cloudUrlInput: {
+  cloudRemoteAddressInput: {
     exists: () => boolean;
     getValue: () => string;
+    setValue: (remoteAddress: string) => void;
   };
   seedsInput: {
     setValue: (seed: string) => void;
@@ -46,6 +47,10 @@ export interface RemoteClustersActions {
     exists: () => boolean;
   };
   serverNameInput: {
+    getLabel: () => string;
+    exists: () => boolean;
+  };
+  tlsServerNameInput: {
     getLabel: () => string;
     exists: () => boolean;
   };
@@ -123,10 +128,10 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
-  const createCloudUrlSwitchActions = () => {
-    const cloudUrlSelector = 'remoteClusterFormCloudUrlToggle';
+  const createCloudAdvancedOptionsSwitchActions = () => {
+    const cloudUrlSelector = 'remoteClusterFormCloudAdvancedOptionsToggle';
     return {
-      cloudUrlSwitch: {
+      cloudAdvancedOptionsSwitch: {
         exists: () => exists(cloudUrlSelector),
         toggle: () => {
           act(() => {
@@ -230,14 +235,26 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
+  const createTlsServerNameActions = () => {
+    const serverNameSelector = 'remoteClusterFormTLSServerNameFormRow';
+    return {
+      tlsServerNameInput: {
+        getLabel: () => find(serverNameSelector).find('label').text(),
+        exists: () => exists(serverNameSelector),
+      },
+    };
+  };
+
   const globalErrorExists = () => exists('remoteClusterFormGlobalError');
 
-  const createCloudUrlInputActions = () => {
-    const cloudUrlInputSelector = 'remoteClusterFormCloudUrlInput';
+  const createCloudRemoteAddressInputActions = () => {
+    const cloudUrlInputSelector = 'remoteClusterFormRemoteAddressInput';
     return {
-      cloudUrlInput: {
+      cloudRemoteAddressInput: {
         exists: () => exists(cloudUrlInputSelector),
         getValue: () => find(cloudUrlInputSelector).props().value,
+        setValue: (remoteAddress: string) =>
+          form.setInputValue(cloudUrlInputSelector, remoteAddress),
       },
     };
   };
@@ -247,11 +264,12 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createNameInputActions(),
     ...createSkipUnavailableActions(),
     ...createConnectionModeActions(),
-    ...createCloudUrlSwitchActions(),
+    ...createCloudAdvancedOptionsSwitchActions(),
     ...createSeedsInputActions(),
-    ...createCloudUrlInputActions(),
+    ...createCloudRemoteAddressInputActions(),
     ...createProxyAddressActions(),
     ...createServerNameActions(),
+    ...createTlsServerNameActions(),
     ...createSetupTrustActions(),
     getErrorMessages: form.getErrorsMessages,
     globalErrorExists,

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,8 +17,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import useSessionStorage from 'react-use/lib/useSessionStorage';
-import { SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED } from '../../../common/constants';
 import { FieldsSelectorTable } from './fields_selector_table';
 import {
   CSP_FIELDS_SELECTOR_CLOSE_BUTTON,
@@ -47,18 +45,6 @@ export const FieldsSelectorModal = ({
   onRemoveColumn,
   onResetColumns,
 }: FieldsSelectorModalProps) => {
-  const [isFilterSelectedEnabled, setIsFilterSelectedEnabled] = useSessionStorage(
-    SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED,
-    false
-  );
-
-  const onFilterSelectedChange = useCallback(
-    (enabled: boolean) => {
-      setIsFilterSelectedEnabled(enabled);
-    },
-    [setIsFilterSelectedEnabled]
-  );
-
   return (
     <EuiModal onClose={closeModal} data-test-subj={CSP_FIELDS_SELECTOR_MODAL}>
       <EuiModalHeader>
@@ -71,8 +57,6 @@ export const FieldsSelectorModal = ({
           columns={columns}
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
-          isFilterSelectedEnabled={isFilterSelectedEnabled}
-          onFilterSelectedChange={onFilterSelectedChange}
         />
       </EuiModalBody>
       <EuiModalFooter>

@@ -14,7 +14,9 @@ import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constant
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();
-  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+  const authz = useAuthz();
+  const canWriteIntegrationPolicies =
+    authz.integrations.writeIntegrationPolicies && authz.fleet.allAgentPolicies;
 
   return (
     <EuiEmptyPrompt

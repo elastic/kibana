@@ -8,12 +8,8 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { type DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import {
-  EsSorting,
-  UseDataGridReturnType,
-  getProcessedFields,
-  INDEX_STATUS,
-} from '@kbn/ml-data-grid';
+import type { EsSorting, UseDataGridReturnType } from '@kbn/ml-data-grid';
+import { getProcessedFields, INDEX_STATUS } from '@kbn/ml-data-grid';
 
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';

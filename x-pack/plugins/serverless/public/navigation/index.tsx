@@ -16,3 +16,5 @@ export const SideNavComponent: FC<NavigationProps> = (props) => (
     <SideNavComponentLazy {...props} />
   </Suspense>
 );
+
+export { manageOrgMembersNavCardName, generateManageOrgMembersNavCard } from './nav_cards';

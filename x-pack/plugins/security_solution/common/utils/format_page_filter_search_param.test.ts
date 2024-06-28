@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import type { FilterItemObj } from '../../public/common/components/filter_group/types';
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { formatPageFilterSearchParam } from './format_page_filter_search_param';
 
 describe('formatPageFilterSearchParam', () => {
   it('returns the same data when all values are provided', () => {
-    const filter: FilterItemObj = {
+    const filter: FilterControlConfig = {
       title: 'User',
       fieldName: 'user.name',
       selectedOptions: ['test_user'],
       existsSelected: true,
       exclude: true,
+      hideActionBar: true,
     };
 
     expect(formatPageFilterSearchParam([filter])).toEqual([filter]);
   });
 
   it('it sets default values when they are undefined', () => {
-    const filter: FilterItemObj = {
+    const filter: FilterControlConfig = {
       fieldName: 'user.name',
     };
 
@@ -33,6 +34,7 @@ describe('formatPageFilterSearchParam', () => {
         fieldName: 'user.name',
         existsSelected: false,
         exclude: false,
+        hideActionBar: false,
       },
     ]);
   });

@@ -617,9 +617,7 @@
               "Options",
               ".Optimization | undefined; infrastructureLogging?: ",
               "Options",
-              ".InfrastructureLogging | undefined; devServer?: ",
-              "Configuration",
-              " | undefined; }"
+              ".InfrastructureLogging | undefined; }"
             ],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
@@ -697,9 +695,7 @@
               "(config: ",
               "Configuration",
               ") => ",
-              "Configuration",
-              " & ",
-              "ConfigurationMergeFunction"
+              "Configuration"
             ],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,

@@ -8,7 +8,6 @@
 import { EuiPanel, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -17,7 +16,6 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
 import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -33,7 +31,6 @@ import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
-import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { Display } from '../../hosts/pages/display';
 import { networkModel } from '../store';
@@ -46,11 +43,11 @@ import {
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { LandingPageComponent } from '../../../common/components/landing_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -64,7 +61,6 @@ const ID = 'NetworkQueryId';
 
 const NetworkComponent = React.memo<NetworkComponentProps>(
   ({ hasMlUserPermissions, capabilitiesFetched }) => {
-    const dispatch = useDispatch();
     const containerElement = useRef<HTMLDivElement | null>(null);
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
     const graphEventId = useShallowEqualSelector(
@@ -91,23 +87,6 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       }
       return globalFilters;
     }, [tabName, globalFilters]);
-
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        dispatch(
-          setAbsoluteRangeDatePicker({
-            id: InputsModelId.global,
-            from: new Date(min).toISOString(),
-            to: new Date(max).toISOString(),
-          })
-        );
-      },
-      [dispatch]
-    );
 
     const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
       useSourcererDataView();
@@ -193,15 +172,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                   </>
                 )}
 
-                <NetworkKpiComponent
-                  filterQuery={filterQuery}
-                  from={from}
-                  indexNames={selectedPatterns}
-                  updateDateRange={updateDateRange}
-                  setQuery={setQuery}
-                  skip={isInitializing || filterQuery === undefined}
-                  to={to}
-                />
+                <NetworkKpiComponent from={from} to={to} />
               </Display>
 
               {capabilitiesFetched && !isInitializing ? (
@@ -229,7 +200,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
             </SecuritySolutionPageWrapper>
           </StyledFullHeightContainer>
         ) : (
-          <LandingPageComponent />
+          <EmptyPrompt />
         )}
 
         <SpyRoute pageName={SecurityPageName.network} />
