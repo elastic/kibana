@@ -149,7 +149,7 @@ export const postActionsConnectorExecuteRoute = (
             }
           };
 
-          if (!isGraphAvailable && !request.body.isEnabledRAGAlerts) {
+          if (!request.body.isEnabledKnowledgeBase && !request.body.isEnabledRAGAlerts) {
             // if not langchain, call execute action directly and return the response:
             return await nonLangChainExecute({
               abortSignal,

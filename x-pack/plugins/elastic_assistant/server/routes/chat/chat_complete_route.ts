@@ -137,12 +137,11 @@ export const chatCompleteRoute = (
                 getAnonymizedValue,
                 onNewReplacements,
                 rawData: Object.keys(m.data).reduce(
-                  (obj, key) => ({ ...obj, key: [m.data ? m.data[key] : ''] }),
+                  (obj, key) => ({ ...obj, [key]: [m.data ? m.data[key] : ''] }),
                   {}
                 ),
               });
               const wr = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(anonymizedData)}\n`;
-
               content = `${wr}\n${m.content}`;
             }
             const transformedMessage = {
@@ -175,8 +174,9 @@ export const chatCompleteRoute = (
               model: request.body.model,
             });
             if (updatedConversation == null) {
-              return response.badRequest({
+              return assistantResponse.error({
                 body: `conversation id: "${conversationId}" not updated`,
+                statusCode: 400,
               });
             }
             // messages are anonymized by conversationsDataClient
