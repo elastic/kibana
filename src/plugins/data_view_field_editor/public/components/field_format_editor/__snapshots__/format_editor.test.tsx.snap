@@ -23,6 +23,26 @@ exports[`FieldFormatEditor should render normally 1`] = `
     }
   >
     <lazy
+      fieldFormats={
+        Object {
+          "deserialize": [MockFunction],
+          "getByFieldType": [MockFunction],
+          "getDefaultConfig": [MockFunction],
+          "getDefaultInstance": [MockFunction],
+          "getDefaultInstanceCacheResolver": [MockFunction],
+          "getDefaultInstancePlain": [MockFunction],
+          "getDefaultType": [MockFunction],
+          "getDefaultTypeName": [MockFunction],
+          "getInstance": [MockFunction],
+          "getType": [MockFunction],
+          "getTypeNameByEsTypes": [MockFunction],
+          "getTypeWithoutMetaParams": [MockFunction],
+          "has": [MockFunction],
+          "init": [MockFunction],
+          "parseDefaultTypeMap": [MockFunction],
+          "register": [MockFunction],
+        }
+      }
       fieldType="number"
       format={Object {}}
       formatParams={Object {}}
@@ -56,6 +76,26 @@ exports[`FieldFormatEditor should render nothing if there is no editor for the f
     }
   >
     <lazy
+      fieldFormats={
+        Object {
+          "deserialize": [MockFunction],
+          "getByFieldType": [MockFunction],
+          "getDefaultConfig": [MockFunction],
+          "getDefaultInstance": [MockFunction],
+          "getDefaultInstanceCacheResolver": [MockFunction],
+          "getDefaultInstancePlain": [MockFunction],
+          "getDefaultType": [MockFunction],
+          "getDefaultTypeName": [MockFunction],
+          "getInstance": [MockFunction],
+          "getType": [MockFunction],
+          "getTypeNameByEsTypes": [MockFunction],
+          "getTypeWithoutMetaParams": [MockFunction],
+          "has": [MockFunction],
+          "init": [MockFunction],
+          "parseDefaultTypeMap": [MockFunction],
+          "register": [MockFunction],
+        }
+      }
       fieldType="number"
       format={Object {}}
       formatParams={Object {}}

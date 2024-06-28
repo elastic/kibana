@@ -8,6 +8,7 @@
 
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { memoize } from 'lodash';
 import React, { LazyExoticComponent, PureComponent } from 'react';
 import { FormatEditorServiceStart } from '../../service';
@@ -19,6 +20,7 @@ export interface FormatEditorProps {
   fieldFormatId: string;
   fieldFormatParams: FieldFormatParams;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
+  fieldFormats: FieldFormatsStart;
   onChange: (change: FieldFormatParams) => void;
   onError: (error?: string) => void;
 }
@@ -54,7 +56,8 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
 
   render() {
     const { EditorComponent } = this.state;
-    const { fieldType, fieldFormat, fieldFormatParams, onChange, onError } = this.props;
+    const { fieldType, fieldFormat, fieldFormatParams, fieldFormats, onChange, onError } =
+      this.props;
 
     return (
       <>
@@ -74,6 +77,7 @@ export class FormatEditor extends PureComponent<FormatEditorProps, FormatEditorS
               fieldType={fieldType}
               format={fieldFormat}
               formatParams={fieldFormatParams}
+              fieldFormats={fieldFormats}
               onChange={onChange}
               onError={onError}
             />

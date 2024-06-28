@@ -8,6 +8,7 @@
 
 import React, { PureComponent } from 'react';
 import { shallow } from 'enzyme';
+import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
 import { FormatEditor } from './format_editor';
 
 class TestEditor extends PureComponent {
@@ -37,6 +38,7 @@ describe('FieldFormatEditor', () => {
         fieldFormatId="number"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}
+        fieldFormats={fieldFormats}
         onChange={() => {}}
         onError={() => {}}
       />
@@ -53,6 +55,7 @@ describe('FieldFormatEditor', () => {
         fieldFormatId="ip"
         fieldFormatParams={{}}
         fieldFormatEditors={formatEditors}
+        fieldFormats={fieldFormats}
         onChange={() => {}}
         onError={() => {}}
       />
