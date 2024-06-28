@@ -62,7 +62,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          fetchNotesByDocumentId: ReqStatus.Loading,
+          fetchNotesByDocumentIds: ReqStatus.Loading,
         },
       },
     });
@@ -83,7 +83,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          fetchNotesByDocumentId: ReqStatus.Succeeded,
+          fetchNotesByDocumentIds: ReqStatus.Succeeded,
         },
       },
     });
@@ -104,11 +104,11 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          fetchNotesByDocumentId: ReqStatus.Failed,
+          fetchNotesByDocumentIds: ReqStatus.Failed,
         },
         error: {
           ...mockGlobalState.notes.error,
-          fetchNotesByDocumentId: { type: 'http', status: 500 },
+          fetchNotesByDocumentIds: { type: 'http', status: 500 },
         },
       },
     });
