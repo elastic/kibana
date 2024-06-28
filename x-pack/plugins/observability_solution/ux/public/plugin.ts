@@ -145,7 +145,10 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         map(([coreStart]) => {
           // checking apm capability, since ux for now doesn't have it's
           // own capability
-          if (coreStart.application.capabilities.apm.show) {
+          if (
+            coreStart.application.capabilities.apm.show ||
+            coreStart.application.capabilities.observability?.['apm:show']
+          ) {
             return [
               // UX navigation
               {

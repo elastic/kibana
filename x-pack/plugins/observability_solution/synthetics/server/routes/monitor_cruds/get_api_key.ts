@@ -33,13 +33,21 @@ export const getAPIKeySyntheticsRoute: SyntheticsRestApiRouteFactory = () => ({
 
     if (accessToElasticManagedLocations) {
       const elasticManagedLocationsEnabled =
-        Boolean(
+        (Boolean(
           (
             await server.coreStart?.capabilities.resolveCapabilities(request, {
               capabilityPath: 'uptime.*',
             })
           ).uptime.elasticManagedLocationsEnabled
-        ) ?? true;
+        ) ||
+          Boolean(
+            (
+              await server.coreStart?.capabilities.resolveCapabilities(request, {
+                capabilityPath: 'observability.*',
+              })
+            ).observability['synthetics:elasticManagedLocationsEnabled']
+          )) ??
+        true;
       if (!elasticManagedLocationsEnabled) {
         return response.customError({
           body: { message: ELASTIC_MANAGED_LOCATIONS_DISABLED },

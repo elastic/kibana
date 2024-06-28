@@ -307,13 +307,21 @@ export const validatePermissions = async (
   }
 
   const elasticManagedLocationsEnabled =
-    Boolean(
+    (Boolean(
       (
         await server.coreStart?.capabilities.resolveCapabilities(request, {
           capabilityPath: 'uptime.*',
         })
       ).uptime.elasticManagedLocationsEnabled
-    ) ?? true;
+    ) ||
+      Boolean(
+        (
+          await server.coreStart?.capabilities.resolveCapabilities(request, {
+            capabilityPath: 'observability.*',
+          })
+        ).observability['synthetics:elasticManagedLocationsEnabled']
+      )) ??
+    true;
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }

@@ -30,7 +30,9 @@ interface Props {
 export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
   const { core } = useApmPluginContext();
-  const canSave = core.application.capabilities.apm.save;
+  const canSave =
+    core.application.capabilities.apm.save ||
+    core.application.capabilities.observability?.['apm:save'];
 
   const columns: Array<ITableColumn<CustomLink>> = [
     {

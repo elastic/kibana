@@ -149,7 +149,10 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const createAlert = uiCapabilities?.infrastructure?.save
+  const canSave =
+    uiCapabilities?.infrastructure?.save || uiCapabilities?.observability?.['infra:save'];
+
+  const createAlert = canSave
     ? [
         {
           name: i18n.translate('xpack.infra.metricsExplorer.alerts.createRuleButton', {

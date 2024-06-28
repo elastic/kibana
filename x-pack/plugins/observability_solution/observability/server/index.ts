@@ -68,6 +68,7 @@ const configSchema = schema.object({
   }),
   enabled: schema.boolean({ defaultValue: true }),
   createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
+  createO11yGenericPrivilege: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor = {

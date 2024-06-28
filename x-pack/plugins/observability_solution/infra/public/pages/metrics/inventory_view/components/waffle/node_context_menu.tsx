@@ -64,7 +64,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       inventoryModel.crosslinkSupport.uptime &&
       (['pod', 'container'].includes(nodeType) || node.ip) &&
       !!uptimeLocator;
-    const showCreateAlertLink = uiCapabilities?.infrastructure?.save;
+    const showCreateAlertLink =
+      uiCapabilities?.infrastructure?.save || uiCapabilities?.observability?.['infra:save'];
 
     const inventoryId = useMemo(() => {
       if (nodeType === 'host') {

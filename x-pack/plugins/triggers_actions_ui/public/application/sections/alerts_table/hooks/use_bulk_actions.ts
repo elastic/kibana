@@ -204,11 +204,18 @@ export const useBulkUntrackActions = ({
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
   const { mutateAsync: untrackAlertsByQuery } = useBulkUntrackAlertsByQuery();
 
-  const hasApmPermission = application?.capabilities.apm?.['alerting:show'];
-  const hasInfrastructurePermission = application?.capabilities.infrastructure?.show;
+  const hasApmPermission =
+    application?.capabilities.apm?.['alerting:show'] ||
+    application?.capabilities.observability?.['apm:alerting:show'];
+  const hasInfrastructurePermission =
+    application?.capabilities.infrastructure?.show ||
+    application?.capabilities.observability?.['infra:show'];
   const hasLogsPermission = application?.capabilities.logs?.show;
-  const hasUptimePermission = application?.capabilities.uptime?.show;
-  const hasSloPermission = application?.capabilities.slo?.show;
+  const hasUptimePermission =
+    application?.capabilities.uptime?.show ||
+    application?.capabilities.observability?.['uptime:show'];
+  const hasSloPermission =
+    application?.capabilities.slo?.show || application?.capabilities.observability?.['slo:show'];
   const hasObservabilityPermission = application?.capabilities.observability?.show;
   const onClick = useCallback(
     async (alerts?: TimelineItem[]) => {

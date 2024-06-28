@@ -123,7 +123,7 @@ export class Plugin implements InfraClientPluginClass {
             isInfrastructureHostsViewEnabled,
           ]) => {
             return [
-              ...(capabilities.logs.show
+              ...(capabilities.logs.show || capabilities.observability['logs:show']
                 ? [
                     {
                       label: 'Logs',
@@ -146,7 +146,7 @@ export class Plugin implements InfraClientPluginClass {
                     },
                   ]
                 : []),
-              ...(capabilities.infrastructure.show
+              ...(capabilities.infrastructure.show || capabilities.observability['infra:show']
                 ? [
                     {
                       label: 'Infrastructure',

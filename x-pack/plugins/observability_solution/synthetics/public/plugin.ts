@@ -224,7 +224,10 @@ function registerSyntheticsRoutesWithNavigation(
   plugins.observabilityShared.navigation.registerSections(
     from(core.getStartServices()).pipe(
       map(([coreStart]) => {
-        if (coreStart.application.capabilities.uptime?.show) {
+        if (
+          coreStart.application.capabilities.uptime?.show ||
+          coreStart.application.capabilities.observability['synthetics:show']
+        ) {
           return [
             {
               label: 'Synthetics',

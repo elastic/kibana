@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
 
 export function setReadonlyBadge({ application, chrome }: CoreStart) {
-  const canSave = application.capabilities.apm.save;
+  const canSave =
+    application.capabilities.apm.save || application.capabilities.observability?.['apm:save'];
   const { setBadge } = chrome;
   setBadge(
     !canSave

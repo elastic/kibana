@@ -80,6 +80,8 @@ const MetricsApp: React.FC<{
   kibanaEnvironment,
 }) => {
   const uiCapabilities = core.application.capabilities;
+  const show =
+    uiCapabilities?.infrastructure?.show || uiCapabilities?.observability?.['infra:show'];
 
   return (
     <CoreProviders
@@ -103,9 +105,7 @@ const MetricsApp: React.FC<{
                 <PerformanceContextProvider>
                   <Routes>
                     <Route path="/link-to" component={LinkToMetricsPage} />
-                    {uiCapabilities?.infrastructure?.show && (
-                      <Route path="/" component={InfrastructurePage} />
-                    )}
+                    {show && <Route path="/" component={InfrastructurePage} />}
                   </Routes>
                 </PerformanceContextProvider>
               </Router>

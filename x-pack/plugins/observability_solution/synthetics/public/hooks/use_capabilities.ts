@@ -16,8 +16,14 @@ export const useCanEditSynthetics = () => {
 };
 
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
+  const kibana = useKibana();
+
   const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+    (kibana.services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ||
+      kibana.services?.application?.capabilities.observability[
+        'synthetics:elasticManagedLocationsEnabled'
+      ]) ??
+    true;
   const publicLocations = monLocations?.some((loc) => loc.isServiceManaged);
 
   if (!publicLocations) {

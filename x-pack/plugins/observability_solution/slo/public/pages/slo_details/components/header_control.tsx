@@ -43,7 +43,7 @@ export function HeaderControl({ isLoading, slo }: Props) {
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
-  const hasApmReadCapabilities = capabilities.apm.show;
+  const hasApmReadCapabilities = capabilities.apm.show || capabilities.observability?.['apm:show'];
   const { data: permissions } = usePermissions();
 
   const { isDeletingSlo, isResettingSlo, removeDeleteQueryParam, removeResetQueryParam } =

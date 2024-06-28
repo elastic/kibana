@@ -11,14 +11,12 @@ import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
-import { ES_QUERY_ID } from '@kbn/rule-data-utils';
-import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
-import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
-import {
+  ES_QUERY_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
-} from '../common/alerting/metrics';
+} from '@kbn/rule-data-utils';
+import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
+import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_object_type';
 

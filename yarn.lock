@@ -5677,6 +5677,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-privileges@link:packages/kbn-observability-privileges":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-shared-plugin@link:x-pack/plugins/observability_solution/observability_shared":
   version "0.0.0"
   uid ""
