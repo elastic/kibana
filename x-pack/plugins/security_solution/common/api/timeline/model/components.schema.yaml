@@ -11,10 +11,6 @@ components:
       properties:
         columns:
           $ref: '#/components/schemas/ColumnHeaderResult'
-        created:
-          type: number
-        createdBy:
-          type: string
         eventId:
           type: string
         timelineId:
@@ -108,15 +104,19 @@ components:
           nullable: true
         updatedBy:
           type: string
-      Note:
-      allOf:
-        - $ref: '#/components/schemas/BareNote'
-        - type: object
-          properties:
-            noteId:
-              type: string
-            version:
-              type: string
+    TimelineStatus:
+      type: string
+      enum:
+        - active
+        - draft
+        - immutable
+      description: The status of the timeline. Valid values are `active`, `draft`, and `immutable`.
+    DataProviderType:
+      type: string
+      enum:
+        - default
+        - template
+      description: The type of data provider to create. Valid values are `default` and `template`.
     RowRendererId:
       type: string
       enum:
@@ -151,33 +151,27 @@ components:
           type: string
         operator:
           type: string
-    BaseDataProviderResult:
+    DataProviderResult:
       type: object
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        enabled:
-          type: boolean
-        excluded:
-          type: boolean
-        kqlQuery:
-          type: string
-        queryMatch:
-          $ref: '#/components/schemas/QueryMatchResult'
-        type:
-          $ref: '#/components/schemas/DataProviderType'
-    DataProviderResult:
-      allOf:
-        - $ref: '#/components/schemas/BaseDataProviderResult'
-        - type: object
-          properties:
-            and:
-              type: array
-              items:
-                x-lazy: true
-                $ref: '#/components/schemas/DataProviderResult'
+          id:
+            type: string
+          name:
+            type: string
+          enabled:
+            type: boolean
+          excluded:
+            type: boolean
+          kqlQuery:
+            type: string
+          queryMatch:
+            $ref: '#/components/schemas/QueryMatchResult'
+          type:
+            $ref: '#/components/schemas/DataProviderType'
+          and:
+            type: array
+            items:
+              $ref: '#/components/schemas/DataProviderResult'
     FavoriteTimelineResult:
       type: object
       properties:
