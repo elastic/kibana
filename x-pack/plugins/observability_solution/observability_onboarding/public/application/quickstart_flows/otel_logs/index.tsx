@@ -540,7 +540,7 @@ spec:
 
 curl --output elastic-distro-${agentVersion}-linux-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-linux-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir elastic-distro-${agentVersion}-linux-$arch && tar -xvf elastic-distro-${agentVersion}-linux-$arch.tar.gz -C "elastic-distro-${agentVersion}-linux-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-linux-$arch 
         
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
       type: 'copy',
     },
@@ -552,7 +552,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
 
 curl --output elastic-distro-${agentVersion}-darwin-$arch.tar.gz --url https://${AGENT_CDN_BASE_URL}/elastic-agent-${agentVersion}-darwin-$arch.tar.gz --proto '=https' --tlsv1.2 -fOL && mkdir "elastic-distro-${agentVersion}-darwin-$arch" && tar -xvf elastic-distro-${agentVersion}-darwin-$arch.tar.gz -C "elastic-distro-${agentVersion}-darwin-$arch" --strip-components=1 && cd elastic-distro-${agentVersion}-darwin-$arch 
       
-rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#<<ES_ENDPOINT>>#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/<<ES_API_KEY>>/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
+rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && sed -i '' 's#\\\${env:ELASTIC_ENDPOINT}#${setup?.elasticsearchUrl}#g' ./otel.yml && sed -i '' 's/\\\${env:ELASTIC_API_KEY}/${apiKeyData?.apiKeyEncoded}/g' ./otel.yml`,
       start: './otelcol --config otel.yml',
       type: 'copy',
     },
