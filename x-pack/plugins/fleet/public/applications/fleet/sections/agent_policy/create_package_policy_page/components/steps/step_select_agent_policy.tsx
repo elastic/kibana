@@ -71,7 +71,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>([]);
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
-
   const [isLoadingSelectedAgentPolicies, setIsLoadingSelectedAgentPolicies] =
     useState<boolean>(false);
   const [selectedAgentPolicies, setSelectedAgentPolicies] = useState<AgentPolicy[]>(agentPolicies);
@@ -183,13 +182,6 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
         doesAgentPolicyHaveLimitedPackage(selectedAgentPolicy, packageInfo)
       );
 
-  // managed policies cannot be removed
-  const updateSelectedPolicyIds = (ids: string[]) =>
-    setSelectedPolicyIds([
-      ...agentPolicies.filter((policy) => policy.is_managed).map((policy) => policy.id),
-      ...ids,
-    ]);
-
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -263,8 +255,9 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 <AgentPolicyMultiSelect
                   isLoading={isLoading || !packageInfo || isLoadingSelectedAgentPolicies}
                   selectedPolicyIds={selectedPolicyIds}
-                  setSelectedPolicyIds={updateSelectedPolicyIds}
+                  setSelectedPolicyIds={setSelectedPolicyIds}
                   agentPolicyMultiOptions={agentPolicyMultiOptions}
+                  selectedAgentPolicies={agentPolicies}
                 />
               ) : (
                 <EuiSuperSelect

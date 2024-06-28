@@ -13,7 +13,7 @@ import {
   EuiFormRow,
   EuiText,
 } from '@elastic/eui';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
@@ -110,16 +110,6 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
 
   const { agentPolicyMultiOptions, isLoading } = useAgentPoliciesOptions(packageInfo);
 
-  // managed policies cannot be removed
-  const updateSelectedPolicyIds = useCallback(
-    (ids) =>
-      setSelectedPolicyIds([
-        ...selectedAgentPolicies.filter((policy) => policy.is_managed).map((policy) => policy.id),
-        ...ids,
-      ]),
-    [selectedAgentPolicies, setSelectedPolicyIds]
-  );
-
   return (
     <EuiConfirmModal
       title={
@@ -182,8 +172,9 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
             <AgentPolicyMultiSelect
               isLoading={isLoading}
               selectedPolicyIds={selectedPolicyIds}
-              setSelectedPolicyIds={updateSelectedPolicyIds}
+              setSelectedPolicyIds={setSelectedPolicyIds}
               agentPolicyMultiOptions={agentPolicyMultiOptions}
+              selectedAgentPolicies={selectedAgentPolicies}
             />
           </EuiFormRow>
         </EuiFlexItem>
