@@ -80,3 +80,6 @@ export type {
   DegradedField,
   DegradedFieldResponse,
 } from '../api_types';
+
+export type DegradedFieldMetadataResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/{dataStream}/ignored_metadata/{field}`>;
