@@ -671,8 +671,63 @@ describe('artifacts lists', () => {
         expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
       });
 
-      test('it should handle nested entries properly', () => {});
-      test('it should handle file name artifacts properly', () => {});
+      test('it should handle nested entries properly', async () => {
+        const expectedEndpointExceptions: TranslatedExceptionListItem = {
+          type: 'simple',
+          entries: [
+            {
+              type: 'descendent_of',
+              value: {
+                entries: [
+                  {
+                    type: 'simple',
+                    entries: [
+                      {
+                        entries: [
+                          {
+                            field: 'nested.field',
+                            operator: 'included',
+                            type: 'exact_cased',
+                            value: 'some value',
+                          },
+                        ],
+                        field: 'some.parentField',
+                        type: 'nested',
+                      },
+                      {
+                        field: 'some.not.nested.field',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'some value',
+                      },
+                      {
+                        field: 'event.category',
+                        operator: 'included',
+                        type: 'exact_cased',
+                        value: 'process',
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        };
+
+        const exceptionMock = getFoundExceptionListItemSchemaMock();
+        exceptionMock.data[0].tags.push(FILTER_PROCESS_DESCENDANTS_TAG);
+        exceptionMock.data[0].list_id = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;
+        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(exceptionMock);
+
+        const resp = await getFilteredEndpointExceptionListRaw({
+          elClient: mockExceptionClient,
+          filter: TEST_FILTER,
+          listId: ENDPOINT_LIST_ID,
+        });
+        const translated = convertExceptionsToEndpointFormat(resp, 'v1', enabledProcessDescendant);
+
+        expect(translated).toEqual({ entries: [expectedEndpointExceptions] });
+      });
     });
   });
 
