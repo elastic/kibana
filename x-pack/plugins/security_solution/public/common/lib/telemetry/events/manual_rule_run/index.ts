@@ -27,14 +27,16 @@ export const manualRuleRunExecuteEvent: TelemetryEvent = {
     rangeInMs: {
       type: 'integer',
       _meta: {
-        description: 'Execute manual rule run with range in milliseconds',
+        description:
+          'The time range (expressed in milliseconds) against which the manual rule run was executed',
         optional: false,
       },
     },
     status: {
       type: 'keyword',
       _meta: {
-        description: 'Execute manual rule run status (success|error)',
+        description:
+          'Outcome state of the manual rule run. Possible values are "success" and "error"',
         optional: false,
       },
     },
@@ -47,21 +49,22 @@ export const manualRuleRunCancelJobEvent: TelemetryEvent = {
     totalTasks: {
       type: 'integer',
       _meta: {
-        description: 'Total number of tasks at the moment of job cancellation',
+        description:
+          'Total number of scheduled tasks (rule executions) at the moment of backfill cancellation',
         optional: false,
       },
     },
     completedTasks: {
       type: 'integer',
       _meta: {
-        description: 'Number of completed tasks at the moment of job cancellation',
+        description: 'Number of completed rule executions at the moment of backfill cancellation',
         optional: false,
       },
     },
     errorTasks: {
       type: 'integer',
       _meta: {
-        description: 'Number of error tasks at the moment of job cancellation',
+        description: 'Number of error rule executions at the moment of backfill cancellation',
         optional: false,
       },
     },
