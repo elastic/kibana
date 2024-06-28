@@ -50,8 +50,7 @@ const EmptyMessage = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, maxBytes, ...props } =
-    opts;
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
@@ -133,7 +132,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
-        if (searchValue.length !== 0 && searchValue.length <= maxBytes / 2) {
+
+        if (searchValue.length !== 0 && searchValue.length <= 1000) {
           reportEvent.searchRequest();
         }
 

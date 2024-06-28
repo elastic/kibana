@@ -11,8 +11,7 @@
       "global_search_bar"
     ],
     "requiredPlugins": [
-      "globalSearch", 
-      "fileUpload",
+      "globalSearch"
     ],
     "optionalPlugins": [
       "usageCollection",

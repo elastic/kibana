@@ -55,7 +55,6 @@ describe('SearchBar', () => {
   const eventReporter = new EventReporter({ analytics: core.analytics, usageCollection });
   let searchService: ReturnType<typeof globalSearchPluginMock.createStartContract>;
   let applications: ReturnType<typeof applicationServiceMock.createStartContract>;
-  const maxBytes = 1024;
 
   beforeEach(() => {
     applications = applicationServiceMock.createStartContract();
@@ -111,7 +110,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -140,7 +138,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -173,7 +170,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -205,7 +201,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -229,7 +224,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );

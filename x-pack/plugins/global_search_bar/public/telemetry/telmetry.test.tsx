@@ -56,7 +56,6 @@ describe('SearchBar', () => {
   let mockReportEvent: typeof core.analytics.reportEvent;
   let eventReporter: EventReporter;
   let chromeStyle$ = of<ChromeStyle>('classic');
-  const maxBytes = 1024;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -116,7 +115,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -139,7 +137,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -167,7 +164,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -205,7 +201,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -242,7 +237,6 @@ describe('SearchBar', () => {
             basePathUrl={basePathUrl}
             chromeStyle$={chromeStyle$}
             reportEvent={eventReporter}
-            maxBytes={maxBytes}
           />
         </IntlProvider>
       );
@@ -272,7 +266,6 @@ describe('SearchBar', () => {
               basePathUrl={basePathUrl}
               chromeStyle$={chromeStyle$}
               reportEvent={eventReporter}
-              maxBytes={maxBytes}
             />
           </IntlProvider>
         );
@@ -302,7 +295,6 @@ describe('SearchBar', () => {
               basePathUrl={basePathUrl}
               chromeStyle$={chromeStyle$}
               reportEvent={eventReporter}
-              maxBytes={maxBytes}
             />
           </IntlProvider>
         );
