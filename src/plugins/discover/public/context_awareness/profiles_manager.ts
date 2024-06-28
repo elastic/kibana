@@ -41,6 +41,7 @@ export interface GetProfilesOptions {
 }
 
 export class ProfilesManager {
+  private readonly profilesEnabled$ = new BehaviorSubject(true);
   private readonly rootContext$: BehaviorSubject<ContextWithProfileId<RootContext>>;
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
 
@@ -57,6 +58,18 @@ export class ProfilesManager {
   ) {
     this.rootContext$ = new BehaviorSubject(rootProfileService.defaultContext);
     this.dataSourceContext$ = new BehaviorSubject(dataSourceProfileService.defaultContext);
+  }
+
+  public setProfilesEnabled(enabled: boolean) {
+    this.profilesEnabled$.next(enabled);
+  }
+
+  public getProfilesEnabled() {
+    return this.profilesEnabled$.getValue();
+  }
+
+  public getProfilesEnabled$() {
+    return this.profilesEnabled$.asObservable();
   }
 
   public async resolveRootProfile(params: RootProfileProviderParams) {
@@ -140,6 +153,10 @@ export class ProfilesManager {
   }
 
   public getProfiles({ record }: GetProfilesOptions = {}) {
+    if (!this.profilesEnabled$.getValue()) {
+      return [];
+    }
+
     return [
       this.rootProfileService.getProfile(this.rootContext$.getValue()),
       this.dataSourceProfileService.getProfile(this.dataSourceContext$.getValue()),
@@ -150,7 +167,7 @@ export class ProfilesManager {
   }
 
   public getProfiles$(options: GetProfilesOptions = {}) {
-    return combineLatest([this.rootContext$, this.dataSourceContext$]).pipe(
+    return combineLatest([this.profilesEnabled$, this.rootContext$, this.dataSourceContext$]).pipe(
       map(() => this.getProfiles(options))
     );
   }

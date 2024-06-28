@@ -31,6 +31,8 @@ export const getTopNavLinks = ({
   isEsqlMode,
   adHocDataViews,
   topNavCustomization,
+  profilesEnabled,
+  setProfilesEnabled,
 }: {
   dataView: DataView | undefined;
   services: DiscoverServices;
@@ -39,6 +41,8 @@ export const getTopNavLinks = ({
   isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
+  profilesEnabled: boolean;
+  setProfilesEnabled: (enabled: boolean) => void;
 }): TopNavMenuData[] => {
   const alerts = {
     id: 'alerts',
@@ -225,6 +229,36 @@ export const getTopNavLinks = ({
 
   const defaultMenu = topNavCustomization?.defaultMenu;
   const entries = [...(topNavCustomization?.getMenuItems?.() ?? [])];
+
+  if (profilesEnabled) {
+    entries.push({
+      data: {
+        id: 'disableProfiles',
+        label: i18n.translate('discover.localMenu.disableProfilesTitle', {
+          defaultMessage: 'Disable profiles',
+        }),
+        description: i18n.translate('discover.localMenu.disableProfilesDescription', {
+          defaultMessage: 'Disable contextually aware Discover profiles',
+        }),
+        run: () => setProfilesEnabled(false),
+      },
+      order: 0,
+    });
+  } else {
+    entries.push({
+      data: {
+        id: 'enableProfiles',
+        label: i18n.translate('discover.localMenu.enableProfilesTitle', {
+          defaultMessage: 'Enable profiles',
+        }),
+        description: i18n.translate('discover.localMenu.enableProfilesDescription', {
+          defaultMessage: 'Enable contextually aware Discover profiles',
+        }),
+        run: () => setProfilesEnabled(true),
+      },
+      order: 0,
+    });
+  }
 
   if (!defaultMenu?.newItem?.disabled) {
     entries.push({ data: newSearch, order: defaultMenu?.newItem?.order ?? 100 });
