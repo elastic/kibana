@@ -36,7 +36,7 @@ export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
   const response = await KibanaServices.get().http.get<{ notes: Note[]; totalCount: number }>(
     NOTE_URL,
     {
-      query: { alertIds: documentIds },
+      query: { documentIds },
       version: '2023-10-31',
     }
   );

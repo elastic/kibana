@@ -17,7 +17,7 @@ paths:
       tags:
         - access:securitySolution
       parameters:
-        - name: alertIds
+        - name: documentIds
           in: query
           schema:
             oneOf:
