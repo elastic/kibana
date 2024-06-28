@@ -112,6 +112,27 @@
           },
           {
             "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.grouping",
+            "type": "Array",
+            "tags": [],
+            "label": "grouping",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.PresentableGroup",
+                "text": "PresentableGroup"
+              },
+              "<unknown>[]"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "links",
             "id": "def-public.LinksEmbeddable.Unnamed",
             "type": "Function",
             "tags": [],
@@ -565,10 +586,10 @@
                 "pluginId": "@kbn/ui-actions-browser",
                 "scope": "common",
                 "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.PresentableGrouping",
-                "text": "PresentableGrouping"
+                "section": "def-common.PresentableGroup",
+                "text": "PresentableGroup"
               },
-              "<unknown> | undefined"
+              "<unknown>[]"
             ],
             "path": "src/plugins/links/public/embeddable/links_embeddable_factory.ts",
             "deprecated": false,

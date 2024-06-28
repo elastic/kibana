@@ -93,7 +93,11 @@ describe('When rendering PolicySettingsLayout', () => {
 
       // Turn off malware
       userEvent.click(getByTestId(testSubj.malware.enableDisableSwitch));
-      setMalwareMode(policySettings, true);
+      setMalwareMode({
+        policy: policySettings,
+        turnOff: true,
+        includeAntivirus: true,
+      });
 
       // Turn off Behaviour Protection
       userEvent.click(getByTestId(testSubj.behaviour.enableDisableSwitch));
