@@ -6992,7 +6992,7 @@
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@0.2.11", "@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.8 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.1", "@langchain/core@~0.2.9":
+"@langchain/core@0.2.11", "@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.8 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.11", "@langchain/core@~0.2.9":
   version "0.2.11"
   resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.11.tgz#5f47467e20e56b250831baef20083657c6facb4c"
   integrity sha512-d4SNL7WI0c3oHrV4WxCRH1/TNqdePXEzYjYwIb4aEH6lW1aM0utGhLbNthX+aYkOL4Ynx2FoG4h91ECIipiKWQ==

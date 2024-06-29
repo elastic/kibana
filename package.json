@@ -938,7 +938,7 @@
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/community": "^0.2.15",
-    "@langchain/core": "^0.2.1",
+    "@langchain/core": "^0.2.11",
     "@langchain/langgraph": "^0.0.25",
     "@langchain/openai": "^0.2.1",
     "@langtrase/trace-attributes": "^3.0.8",
