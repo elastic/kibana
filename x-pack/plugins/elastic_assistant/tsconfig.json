@@ -45,6 +45,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/langchain",
     "@kbn/stack-connectors-plugin",
+    "@kbn/data-views-plugin",
   ],
   "exclude": [
     "target/**/*",
