@@ -51,7 +51,8 @@
     "@kbn/discover-plugin",
     "@kbn/shared-ux-prompt-no-data-views-types",
     "@kbn/core-analytics-server",
-    "@kbn/ebt"
+    "@kbn/ebt",
+    "@kbn/ebt-tools"
   ],
   "exclude": [
     "target/**/*"
