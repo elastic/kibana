@@ -193,19 +193,23 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                   tokenParentRunId = parentRunId;
                 }
                 if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
-                  const finalOutputEndIndex = payload.search(finalOutputStopRegex);
-                  const currentOutput = message.replace(/\s/g, '');
+                  if (llmType === 'bedrock' && bedrockChatEnabled) {
+                    const finalOutputEndIndex = payload.search(finalOutputStopRegex);
+                    const currentOutput = message.replace(/\s/g, '');
 
-                  if (currentOutput.includes(finalOutputStartToken)) {
-                    finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
-                  }
+                    if (currentOutput.includes(finalOutputStartToken)) {
+                      finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+                    }
 
-                  if (finalOutputIndex > -1) {
+                    if (finalOutputIndex > -1) {
+                      push({ payload, type: 'content' });
+                    }
+
+                    if (finalOutputIndex > -1 && finalOutputEndIndex > -1) {
+                      didEnd = true;
+                    }
+                  } else {
                     push({ payload, type: 'content' });
-                  }
-
-                  if (finalOutputIndex > -1 && finalOutputEndIndex > -1) {
-                    didEnd = true;
                   }
                   // store message in case of error
                   message += payload;

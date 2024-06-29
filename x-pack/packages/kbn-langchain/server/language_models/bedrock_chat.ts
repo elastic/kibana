@@ -28,7 +28,6 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
     logger: Logger;
     request: KibanaRequest;
   } & BaseChatModelParams) {
-    // Just to make Langchain BedrockChat happy
     super({
       ...params,
       credentials: { accessKeyId: '', secretAccessKey: '' },
@@ -66,7 +65,6 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
           params: {
             subAction: 'invokeAI',
             subActionParams: {
-              // model: this.model,
               messages: inputBody.messages,
               temperature: inputBody.temperature,
               stopSequences: inputBody.stopSequences,
