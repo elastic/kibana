@@ -164,6 +164,7 @@ export const streamGraph = async ({
         }
       }
 
+      // @ts-expect-error
       processEvent();
     } catch (err) {
       // if I throw an error here, it crashes the server. Not sure how to get around that.
