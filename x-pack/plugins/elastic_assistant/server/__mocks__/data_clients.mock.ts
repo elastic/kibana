@@ -38,7 +38,6 @@ export const conversationsDataClientMock: {
 const createAttackDiscoveryDataClientMock = (): AttackDiscoveryDataClientMock => ({
   getAttackDiscovery: jest.fn(),
   createAttackDiscovery: jest.fn(),
-  findAllAttackDiscoveries: jest.fn(),
   findAttackDiscoveryByConnectorId: jest.fn(),
   updateAttackDiscovery: jest.fn(),
   getReader: jest.fn(),

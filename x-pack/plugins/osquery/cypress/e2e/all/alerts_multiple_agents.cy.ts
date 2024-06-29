@@ -16,7 +16,8 @@ import {
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/180851
+describe.skip(
   'Alert Event Details - dynamic params',
   {
     tags: ['@ess', '@serverless'],

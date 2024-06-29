@@ -7,11 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as uuid from 'uuid';
-import type {
-  AttackDiscoveryStats,
-  AttackDiscoveryStatus,
-  AttackDiscoveryResponse,
-} from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryStatus, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryCancelResponse,
   AttackDiscoveryGetResponse,
@@ -43,9 +39,7 @@ interface UsePollApi {
   didInitialFetch: boolean;
   status: AttackDiscoveryStatus | null;
   data: AttackDiscoveryData | null;
-  stats: AttackDiscoveryStats | null;
   pollApi: () => void;
-  setStatus: (status: AttackDiscoveryStatus | null) => void;
 }
 
 export const usePollApi = ({
@@ -55,18 +49,14 @@ export const usePollApi = ({
   connectorId,
 }: Props): UsePollApi => {
   const [status, setStatus] = useState<AttackDiscoveryStatus | null>(null);
-  const [stats, setStats] = useState<AttackDiscoveryStats | null>(null);
   const [data, setData] = useState<AttackDiscoveryData | null>(null);
   const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const connectorIdRef = useRef<string | undefined>(undefined);
 
   const [didInitialFetch, setDidInitialFetch] = useState(false);
 
   useEffect(() => {
-    connectorIdRef.current = connectorId;
     setDidInitialFetch(false);
     return () => {
-      connectorIdRef.current = undefined;
       // when a connectorId changes, clear timeout
       if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
@@ -120,6 +110,7 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
       const rawResponse = await http.fetch(
         `/internal/elastic_assistant/attack_discovery/cancel/${connectorId}`,
         {
@@ -147,11 +138,6 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
-      // edge case - clearTimeout does not always work in time,
-      // so we need to check if the connectorId has changed
-      if (connectorId !== connectorIdRef.current) {
-        return;
-      }
       // call the internal API to generate attack discoveries:
       const rawResponse = await http.fetch(
         `/internal/elastic_assistant/attack_discovery/${connectorId}`,
@@ -165,34 +151,12 @@ export const usePollApi = ({
       if (!parsedResponse.success) {
         throw new Error('Failed to parse the attack discovery GET response');
       }
-      // ensure component did not unmount before setting state
-      if (connectorIdRef.current) {
-        handleResponse(parsedResponse.data.data ?? null);
-        const allStats = parsedResponse.data.stats.reduce(
-          (acc, ad) => {
-            return {
-              ...acc,
-              newConnectorResultsCount:
-                !ad.hasViewed && (ad.status === 'succeeded' || ad.status === 'failed')
-                  ? acc.newConnectorResultsCount + 1
-                  : acc.newConnectorResultsCount,
-              newDiscoveriesCount:
-                !ad.hasViewed && ad.status === 'succeeded'
-                  ? acc.newDiscoveriesCount + ad.count
-                  : acc.newDiscoveriesCount,
-            };
-          },
-          {
-            newDiscoveriesCount: 0,
-            newConnectorResultsCount: 0,
-            statsPerConnector: parsedResponse.data.stats,
-          }
-        );
-        setStats(allStats);
-        // poll every 5 seconds, regardless if current connector is running. Need stats object for connector dropdown stats
+      handleResponse(parsedResponse.data.data ?? null);
+      if (parsedResponse?.data?.data?.status === attackDiscoveryStatus.running) {
+        // poll every 3 seconds if attack discovery is running
         timeoutIdRef.current = setTimeout(() => {
           pollApi();
-        }, 5000);
+        }, 3000);
       }
     } catch (error) {
       setStatus(null);
@@ -205,7 +169,7 @@ export const usePollApi = ({
     }
   }, [connectorId, handleResponse, http, toasts]);
 
-  return { cancelAttackDiscovery, didInitialFetch, status, data, pollApi, stats, setStatus };
+  return { cancelAttackDiscovery, didInitialFetch, status, data, pollApi };
 };
 
 export const attackDiscoveryStatus: { [k: string]: AttackDiscoveryStatus } = {

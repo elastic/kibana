@@ -53,7 +53,6 @@ const mockAttackDiscoveryPost = {
   backingIndex: '.ds-.kibana-elastic-ai-assistant-attack-discovery-default-2024.06.12-000001',
   createdAt: '2024-06-13T17:50:59.409Z',
   updatedAt: '2024-06-17T15:00:39.680Z',
-  lastViewedAt: '2024-06-17T15:00:39.680Z',
   users: [
     {
       id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
@@ -97,7 +96,6 @@ const mockAttackDiscoveries = [
   },
 ];
 const setLoadingConnectorId = jest.fn();
-const setStatus = jest.fn();
 
 describe('useAttackDiscovery', () => {
   const mockPollApi = {
@@ -105,9 +103,6 @@ describe('useAttackDiscovery', () => {
     data: null,
     pollApi: jest.fn(),
     status: 'succeeded',
-    stats: null,
-    setStatus,
-    didInitialFetch: true,
   };
 
   beforeEach(() => {
@@ -149,10 +144,9 @@ describe('useAttackDiscovery', () => {
         version: '1',
       }
     );
-    // called on mount
-    expect(mockPollApi.pollApi).toHaveBeenCalledTimes(1);
-    expect(setStatus).toHaveBeenCalledWith('running');
-    expect(result.current.isLoadingPost).toBe(false);
+    // called on mount, and after successful fetch
+    expect(mockPollApi.pollApi).toHaveBeenCalledTimes(2);
+    expect(result.current.isLoading).toBe(true);
   });
 
   it('handles fetch errors correctly', async () => {
@@ -171,7 +165,6 @@ describe('useAttackDiscovery', () => {
       text: errorMessage,
     });
     expect(result.current.isLoading).toBe(false);
-    expect(result.current.isLoadingPost).toBe(false);
   });
 
   it('sets loading state based on poll status', async () => {

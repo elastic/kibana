@@ -95,7 +95,6 @@ export const transformToCreateScheme = (
       timestamp: attackDiscovery.timestamp ?? createdAt,
     })),
     updated_at: createdAt,
-    last_viewed_at: createdAt,
     replacements: replacements
       ? Object.keys(replacements).map((key) => ({
           uuid: key,

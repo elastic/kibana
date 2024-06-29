@@ -15,45 +15,8 @@ import { AttackDiscoveryDataClient } from '../../ai_assistant_data_clients/attac
 import { transformESSearchToAttackDiscovery } from '../../ai_assistant_data_clients/attack_discovery/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../__mocks__/attack_discovery_schema.mock';
 import { getAttackDiscoveryRequest } from '../../__mocks__/request';
-import { getAttackDiscoveryStats, updateAttackDiscoveryLastViewedAt } from './helpers';
 jest.mock('./helpers');
 
-const mockStats = {
-  newConnectorResultsCount: 2,
-  newDiscoveriesCount: 4,
-  statsPerConnector: [
-    {
-      hasViewed: false,
-      status: 'failed',
-      count: 0,
-      connectorId: 'my-bedrock-old',
-    },
-    {
-      hasViewed: false,
-      status: 'running',
-      count: 1,
-      connectorId: 'my-gen-ai',
-    },
-    {
-      hasViewed: true,
-      status: 'succeeded',
-      count: 1,
-      connectorId: 'my-gpt4o-ai',
-    },
-    {
-      hasViewed: true,
-      status: 'canceled',
-      count: 1,
-      connectorId: 'my-bedrock',
-    },
-    {
-      hasViewed: false,
-      status: 'succeeded',
-      count: 4,
-      connectorId: 'my-gen-a2i',
-    },
-  ],
-};
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
 clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
@@ -65,8 +28,9 @@ const mockUser = {
     name: 'my_realm_name',
   },
 } as AuthenticatedUser;
+const findAttackDiscoveryByConnectorId = jest.fn();
 const mockDataClient = {
-  findAttackDiscoveryByConnectorId: jest.fn(),
+  findAttackDiscoveryByConnectorId,
   updateAttackDiscovery: jest.fn(),
   createAttackDiscovery: jest.fn(),
   getAttackDiscovery: jest.fn(),
@@ -79,8 +43,7 @@ describe('getAttackDiscoveryRoute', () => {
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
 
     getAttackDiscoveryRoute(server.router);
-    (updateAttackDiscoveryLastViewedAt as jest.Mock).mockResolvedValue(mockCurrentAd);
-    (getAttackDiscoveryStats as jest.Mock).mockResolvedValue(mockStats);
+    findAttackDiscoveryByConnectorId.mockResolvedValue(mockCurrentAd);
   });
 
   it('should handle successful request', async () => {
@@ -91,7 +54,7 @@ describe('getAttackDiscoveryRoute', () => {
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
       data: mockCurrentAd,
-      stats: mockStats,
+      entryExists: true,
     });
   });
 
@@ -124,19 +87,19 @@ describe('getAttackDiscoveryRoute', () => {
   });
 
   it('should handle findAttackDiscoveryByConnectorId null response', async () => {
-    (updateAttackDiscoveryLastViewedAt as jest.Mock).mockResolvedValue(null);
+    findAttackDiscoveryByConnectorId.mockResolvedValue(null);
     const response = await server.inject(
       getAttackDiscoveryRequest('connector-id'),
       requestContextMock.convertContext(context)
     );
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({
-      stats: mockStats,
+      entryExists: false,
     });
   });
 
   it('should handle findAttackDiscoveryByConnectorId error', async () => {
-    (updateAttackDiscoveryLastViewedAt as jest.Mock).mockRejectedValue(new Error('Oh no!'));
+    findAttackDiscoveryByConnectorId.mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
       getAttackDiscoveryRequest('connector-id'),
       requestContextMock.convertContext(context)

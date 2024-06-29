@@ -10,7 +10,6 @@ import type {
   AttackDiscoveries,
   Replacements,
   GenerationInterval,
-  AttackDiscoveryStats,
 } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
@@ -38,7 +37,6 @@ export interface UseAttackDiscovery {
   lastUpdated: Date | null;
   onCancel: () => Promise<void>;
   replacements: Replacements;
-  stats: AttackDiscoveryStats | null;
 }
 
 export const useAttackDiscovery = ({
@@ -66,9 +64,7 @@ export const useAttackDiscovery = ({
     data: pollData,
     pollApi,
     status: pollStatus,
-    setStatus: setPollStatus,
     didInitialFetch,
-    stats,
   } = usePollApi({ http, setApproximateFutureTime, toasts, connectorId });
 
   // loading boilerplate:
@@ -118,9 +114,8 @@ export const useAttackDiscovery = ({
       setReplacements({});
       setAttackDiscoveries([]);
       setGenerationIntervals([]);
-      setPollStatus(null);
     }
-  }, [pollApi, connectorId, setLoadingConnectorId, setPollStatus]);
+  }, [pollApi, connectorId, setLoadingConnectorId]);
 
   useEffect(() => {
     if (pollStatus === 'running') {
@@ -157,8 +152,7 @@ export const useAttackDiscovery = ({
         throw new Error(CONNECTOR_ERROR);
       }
       setLoadingConnectorId?.(connectorId ?? null);
-      // sets isLoading to true
-      setPollStatus('running');
+      setIsLoading(true);
       setIsLoadingPost(true);
       setApproximateFutureTime(null);
       // call the internal API to generate attack discoveries:
@@ -173,6 +167,10 @@ export const useAttackDiscovery = ({
       if (!parsedResponse.success) {
         throw new Error('Failed to parse the response');
       }
+
+      if (parsedResponse.data.status === 'running') {
+        pollApi();
+      }
     } catch (error) {
       setIsLoadingPost(false);
       setIsLoading(false);
@@ -181,7 +179,7 @@ export const useAttackDiscovery = ({
         text: getErrorToastText(error),
       });
     }
-  }, [connectorId, http, requestBody, setLoadingConnectorId, setPollStatus, toasts]);
+  }, [connectorId, http, pollApi, requestBody, setLoadingConnectorId, toasts]);
 
   return {
     alertsContextCount,
@@ -196,6 +194,5 @@ export const useAttackDiscovery = ({
     lastUpdated,
     onCancel: cancelAttackDiscovery,
     replacements,
-    stats,
   };
 };

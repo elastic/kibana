@@ -24,7 +24,6 @@ export const transformESSearchToAttackDiscovery = (
         backingIndex: hit._index,
         createdAt: adSchema.created_at,
         updatedAt: adSchema.updated_at,
-        lastViewedAt: adSchema.last_viewed_at,
         users:
           adSchema.users?.map((user) => ({
             id: user.id,

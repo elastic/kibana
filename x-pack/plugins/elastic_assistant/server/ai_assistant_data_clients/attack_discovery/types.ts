@@ -34,8 +34,7 @@ export interface EsAttackDiscoverySchema {
   alerts_context_count?: number;
   replacements?: EsReplacementSchema[];
   status: AttackDiscoveryStatus;
-  updated_at: string;
-  last_viewed_at: string;
+  updated_at?: string;
   users?: Array<{
     id?: string;
     name?: string;
@@ -72,7 +71,6 @@ export interface CreateAttackDiscoverySchema {
     id?: string;
     name?: string;
   }>;
-  updated_at: string;
-  last_viewed_at: string;
+  updated_at?: string;
   namespace: string;
 }

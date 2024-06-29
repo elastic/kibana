@@ -70,10 +70,10 @@ describe('Machine Learning rules', { tags: ['@ess', '@serverless'] }, () => {
     );
     // ensure no ML jobs are started before the suite
     machineLearningJobIds.forEach((jobId) => forceStopAndCloseJob({ jobId }));
-    deleteAlertsAndRules();
   });
 
   beforeEach(() => {
+    deleteAlertsAndRules();
     login();
     visit(CREATE_RULE_URL);
   });
