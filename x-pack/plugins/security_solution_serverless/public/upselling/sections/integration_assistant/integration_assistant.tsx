@@ -43,7 +43,7 @@ export const CONTACT_ADMINISTRATOR = i18n.translate(
   }
 );
 
-interface IntegrationsAssistantProps {
+export interface IntegrationsAssistantProps {
   requiredPLI: ProductFeatureKeyType;
 }
 export const IntegrationsAssistant = React.memo<IntegrationsAssistantProps>(({ requiredPLI }) => {
