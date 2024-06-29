@@ -14,7 +14,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { MessagesPlaceholder } from '@langchain/core/prompts';
-import { getLlmClass, isToolCallingSupported } from '../../../routes/utils';
+import { getLlmClass } from '../../../routes/utils';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -42,8 +42,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   isStream = false,
   onLlmResponse,
   onNewReplacements,
-  model,
-  region,
   replacements,
   request,
   size,
@@ -57,10 +55,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
-    region,
     // possible client model override,
     // let this be undefined otherwise so the connector handles the model
-    model,
+    model: request.body.model,
     // ensure this is defined because we default to it in the language_models
     // This is where the LangSmith logs (Metadata > Invocation Params) are set
     temperature: getDefaultArguments(llmType).temperature,
@@ -115,23 +112,24 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
   };
   // isOpenAI check is not on agentType alone because typescript doesn't like
-  const executor = isToolCallingSupported(llmType)
-    ? await initializeAgentExecutorWithOptions(tools, llm, {
-        agentType: 'openai-functions',
-        ...executorArgs,
-      })
-    : await initializeAgentExecutorWithOptions(tools, llm, {
-        agentType: 'structured-chat-zero-shot-react-description',
-        ...executorArgs,
-        returnIntermediateSteps: false,
-        agentArgs: {
-          // this is important to help LangChain correctly format tool input
-          humanMessageTemplate: `Remember, when you have enough information, always prefix your final JSON output with "Final Answer:"\n\nQuestion: {input}\n\n{agent_scratchpad}.`,
-          memoryPrompts: [new MessagesPlaceholder('chat_history')],
-          suffix:
-            'Begin! Reminder to ALWAYS use the above format, and to use tools if appropriate.',
-        },
-      });
+  const executor =
+    llmType === 'openai'
+      ? await initializeAgentExecutorWithOptions(tools, llm, {
+          agentType: 'openai-functions',
+          ...executorArgs,
+        })
+      : await initializeAgentExecutorWithOptions(tools, llm, {
+          agentType: 'structured-chat-zero-shot-react-description',
+          ...executorArgs,
+          returnIntermediateSteps: false,
+          agentArgs: {
+            // this is important to help LangChain correctly format tool input
+            humanMessageTemplate: `Remember, when you have enough information, always prefix your final JSON output with "Final Answer:"\n\nQuestion: {input}\n\n{agent_scratchpad}.`,
+            memoryPrompts: [new MessagesPlaceholder('chat_history')],
+            suffix:
+              'Begin! Reminder to ALWAYS use the above format, and to use tools if appropriate.',
+          },
+        });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing

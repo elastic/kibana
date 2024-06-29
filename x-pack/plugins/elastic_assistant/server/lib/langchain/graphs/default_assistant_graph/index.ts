@@ -9,7 +9,7 @@ import { StructuredTool } from '@langchain/core/tools';
 import { RetrievalQAChain } from 'langchain/chains';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { createOpenAIFunctionsAgent, createStructuredChatAgent } from 'langchain/agents';
-import { getLlmClass, isToolCallingSupported } from '../../../../routes/utils';
+import { getLlmClass } from '../../../../routes/utils';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
 import { openAIFunctionAgentPrompt, structuredChatAgentPrompt } from './prompts';
@@ -39,8 +39,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   onLlmResponse,
   onNewReplacements,
   replacements,
-  model,
-  region,
   request,
   size,
   traceOptions,
@@ -56,8 +54,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     logger,
     // possible client model override,
     // let this be undefined otherwise so the connector handles the model
-    model,
-    region,
+    model: request.body.model,
     // ensure this is defined because we default to it in the language_models
     // This is where the LangSmith logs (Metadata > Invocation Params) are set
     temperature: getDefaultArguments(llmType).temperature,
@@ -67,7 +64,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // failure could be due to bad connector, we should deliver that result to the client asap
     maxRetries: 0,
   });
-  const graphModel = llm;
+  const model = llm;
 
   const messages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
@@ -75,7 +72,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
-  const chain = RetrievalQAChain.fromLLM(graphModel, esStore.asRetriever(10));
+  const chain = RetrievalQAChain.fromLLM(model, esStore.asRetriever(10));
 
   // Fetch any applicable tools that the source plugin may have registered
   const assistantToolParams: AssistantToolParams = {
@@ -85,7 +82,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     esClient,
     isEnabledKnowledgeBase,
     kbDataClient: dataClients?.kbDataClient,
-    llm: graphModel,
+    llm: model,
     logger,
     modelExists,
     onNewReplacements,
@@ -98,19 +95,20 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool(assistantToolParams) ?? []
   );
 
-  const agentRunnable = isToolCallingSupported(llmType)
-    ? await createOpenAIFunctionsAgent({
-        llm,
-        tools,
-        prompt: openAIFunctionAgentPrompt,
-        streamRunnable: isStream,
-      })
-    : await createStructuredChatAgent({
-        llm,
-        tools,
-        prompt: structuredChatAgentPrompt,
-        streamRunnable: isStream,
-      });
+  const agentRunnable =
+    llmType === 'openai'
+      ? await createOpenAIFunctionsAgent({
+          llm,
+          tools,
+          prompt: openAIFunctionAgentPrompt,
+          streamRunnable: isStream,
+        })
+      : await createStructuredChatAgent({
+          llm,
+          tools,
+          prompt: structuredChatAgentPrompt,
+          streamRunnable: isStream,
+        });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 

@@ -186,5 +186,3 @@ export const getLlmClass = (llmType?: string, isStreaming?: boolean) =>
     : llmType === 'bedrock'
     ? ActionsClientBedrockChatModel
     : ActionsClientSimpleChatModel;
-
-export const isToolCallingSupported = (llmType?: string) => ['openai'].includes(llmType ?? '');

@@ -48,8 +48,6 @@ export interface AgentExecutorParams<T extends boolean> {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
-  model?: string;
-  region?: string;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements: Replacements;
   isStream?: T;

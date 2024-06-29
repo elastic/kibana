@@ -27,8 +27,6 @@ export const RunActionParamsSchema = schema.object({
   timeout: schema.maybe(schema.number()),
 });
 
-export const InvokeAIRawActionParamsSchema = schema.any();
-
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(
     schema.object({
