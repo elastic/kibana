@@ -11,7 +11,6 @@ import {
   AttackDiscoveryResponse,
 } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/core-security-common';
-import { findAllAttackDiscoveries } from './find_all_attack_discoveries';
 import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_connector_id';
 import { updateAttackDiscovery } from './update_attack_discovery';
 import { createAttackDiscovery } from './create_attack_discovery';
@@ -79,7 +78,7 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
    * @param options
    * @param options.connectorId
    * @param options.authenticatedUser
-   * @returns The Attack Discovery found
+   * @returns The Attack Discovery created
    */
   public findAttackDiscoveryByConnectorId = async ({
     connectorId,
@@ -94,26 +93,6 @@ export class AttackDiscoveryDataClient extends AIAssistantDataClient {
       logger: this.options.logger,
       attackDiscoveryIndex: this.indexTemplateAndPattern.alias,
       connectorId,
-      user: authenticatedUser,
-    });
-  };
-
-  /**
-   * Finds all attack discovery for authenticated user
-   * @param options
-   * @param options.authenticatedUser
-   * @returns The Attack Discovery
-   */
-  public findAllAttackDiscoveries = async ({
-    authenticatedUser,
-  }: {
-    authenticatedUser: AuthenticatedUser;
-  }): Promise<AttackDiscoveryResponse[]> => {
-    const esClient = await this.options.elasticsearchClientPromise;
-    return findAllAttackDiscoveries({
-      esClient,
-      logger: this.options.logger,
-      attackDiscoveryIndex: this.indexTemplateAndPattern.alias,
       user: authenticatedUser,
     });
   };

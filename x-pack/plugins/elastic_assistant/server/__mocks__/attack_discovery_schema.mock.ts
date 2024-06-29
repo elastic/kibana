@@ -68,7 +68,6 @@ export const getAttackDiscoverySearchEsMock = () => {
               },
             ],
             updated_at: '2024-06-07T21:19:08.090Z',
-            last_viewed_at: '2024-06-07T21:19:08.090Z',
             replacements: [
               {
                 uuid: 'f19e1a0a-de3b-496c-8ace-dd91229e1084',

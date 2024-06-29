@@ -10,7 +10,6 @@ import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -28,7 +27,6 @@ interface Props {
   isFlyoutMode: boolean;
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
-  stats?: AttackDiscoveryStats | null;
 }
 
 const inputContainerClassName = css`
@@ -73,7 +71,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
 
     onConnectorIdSelected,
     onConnectorSelected,
-    stats = null,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability, http } = useAssistantContext();
@@ -156,7 +153,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               setIsOpen={setIsOpen}
               onConnectorSelectionChange={onChange}
               isFlyoutMode={isFlyoutMode}
-              stats={stats}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -186,7 +182,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               setIsOpen={setIsOpen}
               onConnectorSelectionChange={onChange}
               isFlyoutMode={isFlyoutMode}
-              stats={stats}
             />
           ) : (
             <span>
