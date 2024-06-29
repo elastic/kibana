@@ -26,10 +26,15 @@
     "@kbn/kibana-react-plugin",
     "@kbn/code-editor",
     "@kbn/monaco",
-    "@kbn/spaces-plugin",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/shared-ux-router",
     "@kbn/zod-helpers",
-    "@kbn/elastic-assistant-plugin"
+    "@kbn/elastic-assistant-plugin",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/core-analytics-browser",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server"
   ]
 }
