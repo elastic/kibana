@@ -15,6 +15,7 @@ import { LogsOverviewHighlights } from './logs_overview_highlights';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { LogsOverviewAIAssistant } from './logs_overview_ai_assistant';
+import { LogsOverviewDegradedFields } from './logs_overview_degraded_fields';
 
 export function LogsOverview({
   columns,
@@ -38,6 +39,7 @@ export function LogsOverview({
       <LogsOverviewHeader doc={parsedDoc} />
       <EuiHorizontalRule margin="xs" />
       <LogsOverviewHighlights formattedDoc={parsedDoc} flattenedDoc={hit.flattened} />
+      <LogsOverviewDegradedFields rawDoc={hit.raw} />
       <LogsOverviewAIAssistant doc={hit} />
     </FieldActionsProvider>
   );
