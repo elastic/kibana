@@ -11725,7 +11725,7 @@ apidoc-light@^0.54.0:
     semver "^7.5.4"
     winston "^3.11.0"
 
-apidoc-markdown@^7.3.0:
+apidoc-markdown@^7.3.2:
   version "7.3.2"
   resolved "https://registry.yarnpkg.com/apidoc-markdown/-/apidoc-markdown-7.3.2.tgz#64c1ad45ba29dd57f376419a900cd59c786624a0"
   integrity sha512-0nOfTWSaFfbgJ673ztWiup5CKauuwmhg7hJ0jR7gb0TDK1RX3b0unl6soc8UVhdjYgrvRBRvujMUB/KUF5OG3Q==
