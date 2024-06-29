@@ -22,10 +22,14 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
+import type {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import { APP_UI_ID } from '../../../../common';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import type { LangchainZodAny } from '..';
-import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 
 export const INLINE_ESQL_QUERY_REGEX = /```esql\s*(.*?)\s*```/gms;
 
@@ -147,7 +151,7 @@ const getGenerateQuery =
     llm,
   }: {
     userQuery: string;
-    llm: ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+    llm: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
   }) =>
   async (state: IState) => {
     const [systemMessage] = await Promise.all([loadSystemMessage()]);
@@ -340,7 +344,7 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
 
         let query;
         try {
-          query = await app.invoke({ question: input.question }, { recursionLimit: 20 });
+          query = await app.invoke({ question: input.question });
         } catch (e) {
           return e;
         }
