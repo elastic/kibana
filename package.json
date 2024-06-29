@@ -1534,7 +1534,7 @@
     "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
     "@yarnpkg/lockfile": "^1.1.0",
     "aggregate-error": "^3.1.0",
-    "apidoc-markdown": "^7.3.0",
+    "apidoc-markdown": "^7.3.2",
     "argsplit": "^1.0.5",
     "autoprefixer": "^10.4.7",
     "axe-core": "^4.8.2",
