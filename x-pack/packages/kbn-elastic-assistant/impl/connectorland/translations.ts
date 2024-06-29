@@ -125,3 +125,17 @@ export const MISSING_CONNECTOR_CONVERSATION_SETTINGS_LINK = i18n.translate(
     defaultMessage: 'Conversation Settings',
   }
 );
+
+export const CREATE_CONNECTOR_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.createConnectorButton',
+  {
+    defaultMessage: 'Connector',
+  }
+);
+
+export const REFRESH_CONNECTORS_BUTTON = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.refreshConnectorsButton',
+  {
+    defaultMessage: 'Refresh',
+  }
+);

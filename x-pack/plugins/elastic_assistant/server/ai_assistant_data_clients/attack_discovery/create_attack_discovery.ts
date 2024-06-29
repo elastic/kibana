@@ -6,10 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
 import { AttackDiscoveryCreateProps, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { getAttackDiscovery } from './get_attack_discovery';
 import { CreateAttackDiscoverySchema } from './types';
 
