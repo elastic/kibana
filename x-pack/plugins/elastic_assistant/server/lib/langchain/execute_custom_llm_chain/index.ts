@@ -33,6 +33,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
+  bedrockChatEnabled,
   connectorId,
   esClient,
   esStore,
@@ -47,7 +48,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   size,
   traceOptions,
 }) => {
-  const llmClass = getLlmClass(llmType, isStream);
+  const isOpenAI = llmType === 'openai';
+  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   const llm = new llmClass({
     actions,
@@ -112,24 +114,23 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
   };
   // isOpenAI check is not on agentType alone because typescript doesn't like
-  const executor =
-    llmType === 'openai'
-      ? await initializeAgentExecutorWithOptions(tools, llm, {
-          agentType: 'openai-functions',
-          ...executorArgs,
-        })
-      : await initializeAgentExecutorWithOptions(tools, llm, {
-          agentType: 'structured-chat-zero-shot-react-description',
-          ...executorArgs,
-          returnIntermediateSteps: false,
-          agentArgs: {
-            // this is important to help LangChain correctly format tool input
-            humanMessageTemplate: `Remember, when you have enough information, always prefix your final JSON output with "Final Answer:"\n\nQuestion: {input}\n\n{agent_scratchpad}.`,
-            memoryPrompts: [new MessagesPlaceholder('chat_history')],
-            suffix:
-              'Begin! Reminder to ALWAYS use the above format, and to use tools if appropriate.',
-          },
-        });
+  const executor = isOpenAI
+    ? await initializeAgentExecutorWithOptions(tools, llm, {
+        agentType: 'openai-functions',
+        ...executorArgs,
+      })
+    : await initializeAgentExecutorWithOptions(tools, llm, {
+        agentType: 'structured-chat-zero-shot-react-description',
+        ...executorArgs,
+        returnIntermediateSteps: false,
+        agentArgs: {
+          // this is important to help LangChain correctly format tool input
+          humanMessageTemplate: `Remember, when you have enough information, always prefix your final JSON output with "Final Answer:"\n\nQuestion: {input}\n\n{agent_scratchpad}.`,
+          memoryPrompts: [new MessagesPlaceholder('chat_history')],
+          suffix:
+            'Begin! Reminder to ALWAYS use the above format, and to use tools if appropriate.',
+        },
+      });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing

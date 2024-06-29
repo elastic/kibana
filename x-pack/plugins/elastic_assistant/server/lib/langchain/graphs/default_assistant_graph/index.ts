@@ -27,6 +27,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
+  bedrockChatEnabled,
   connectorId,
   conversationId,
   dataClients,
@@ -44,7 +45,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   traceOptions,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
-  const llmClass = getLlmClass(llmType, isStream);
+  const isOpenAI = llmType === 'openai';
+  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   const llm = new llmClass({
     actions,
@@ -95,20 +97,19 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool(assistantToolParams) ?? []
   );
 
-  const agentRunnable =
-    llmType === 'openai'
-      ? await createOpenAIFunctionsAgent({
-          llm,
-          tools,
-          prompt: openAIFunctionAgentPrompt,
-          streamRunnable: isStream,
-        })
-      : await createStructuredChatAgent({
-          llm,
-          tools,
-          prompt: structuredChatAgentPrompt,
-          streamRunnable: isStream,
-        });
+  const agentRunnable = isOpenAI
+    ? await createOpenAIFunctionsAgent({
+        llm,
+        tools,
+        prompt: openAIFunctionAgentPrompt,
+        streamRunnable: isStream,
+      })
+    : await createStructuredChatAgent({
+        llm,
+        tools,
+        prompt: structuredChatAgentPrompt,
+        streamRunnable: isStream,
+      });
 
   const apmTracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
 

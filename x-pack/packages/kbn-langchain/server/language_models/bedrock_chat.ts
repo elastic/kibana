@@ -16,12 +16,6 @@ export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';
 
 export class ActionsClientBedrockChatModel extends _BedrockChat {
-  // Kibana variables
-  #actions: ActionsPluginStart;
-  #connectorId: string;
-  #logger: Logger;
-  #request: KibanaRequest;
-
   constructor({
     actions,
     request,
@@ -38,26 +32,21 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
     super({
       ...params,
       credentials: { accessKeyId: '', secretAccessKey: '' },
-      usesMessagesApi: true,
       // only needed to force BedrockChat to use messages api for Claude v2
       model: DEFAULT_BEDROCK_MODEL,
       region: DEFAULT_BEDROCK_REGION,
       fetchFn: async (url, options) => {
         // create an actions client from the authenticated request context:
-        const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
+        const actionsClient = await actions.getActionsClientWithRequest(request);
 
-        const inputBody = JSON.parse(options?.body);
+        const inputBody = JSON.parse(options?.body as string);
 
         if (this.streaming) {
-          const data = await actionsClient.execute({
-            actionId: this.#connectorId,
+          const data = (await actionsClient.execute({
+            actionId: connectorId,
             params: {
               subAction: 'invokeStream',
               subActionParams: {
-                // bedrockMethod: 'invoke-with-response-stream',
-                model: this.model,
-                // endpointHost: this.endpointHost,
-                // anthropicVersion: inputBody.anthropicVersion,
                 messages: inputBody.messages,
                 temperature: inputBody.temperature,
                 stopSequences: inputBody.stopSequences,
@@ -65,21 +54,19 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
                 maxTokens: inputBody.maxTokens,
               },
             },
-          });
-
-          console.error('data', data);
+          })) as { data: Readable };
 
           return {
             body: Readable.toWeb(data.data),
-          };
+          } as unknown as Response;
         }
 
-        const data = await actionsClient.execute({
-          actionId: this.#connectorId,
+        const data = (await actionsClient.execute({
+          actionId: connectorId,
           params: {
             subAction: 'invokeAI',
             subActionParams: {
-              model: this.model,
+              // model: this.model,
               messages: inputBody.messages,
               temperature: inputBody.temperature,
               stopSequences: inputBody.stopSequences,
@@ -87,7 +74,7 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
               maxTokens: inputBody.maxTokens,
             },
           },
-        });
+        })) as { status: string; data: { message: string } };
 
         return {
           ok: data.status === 'ok',
@@ -95,13 +82,8 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
             content: data.data.message,
             type: 'message',
           }),
-        };
+        } as unknown as Response;
       },
     });
-
-    this.#actions = actions;
-    this.#request = request;
-    this.#connectorId = connectorId;
-    this.#logger = logger;
   }
 }

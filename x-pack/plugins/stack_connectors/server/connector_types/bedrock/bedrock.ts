@@ -318,7 +318,6 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       signal,
       timeout,
     });
-
     return { message: res.completion.trim() };
   }
 }

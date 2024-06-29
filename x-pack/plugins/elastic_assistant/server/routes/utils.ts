@@ -180,9 +180,9 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   return llmTypeDictionary[actionTypeId];
 };
 
-export const getLlmClass = (llmType?: string, isStreaming?: boolean) =>
+export const getLlmClass = (llmType?: string, bedrockChatEnabled?: boolean) =>
   llmType === 'openai'
     ? ActionsClientChatOpenAI
-    : llmType === 'bedrock'
+    : llmType === 'bedrock' && bedrockChatEnabled
     ? ActionsClientBedrockChatModel
     : ActionsClientSimpleChatModel;

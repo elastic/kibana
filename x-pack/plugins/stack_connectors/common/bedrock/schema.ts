@@ -65,8 +65,6 @@ export const RunApiLatestResponseSchema = schema.object(
   { unknowns: 'allow' }
 );
 
-export const RunActionRawResponseSchema = schema.any();
-
 export const RunActionResponseSchema = schema.object(
   {
     completion: schema.string(),

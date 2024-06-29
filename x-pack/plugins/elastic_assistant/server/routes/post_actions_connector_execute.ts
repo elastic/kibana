@@ -335,6 +335,8 @@ export const postActionsConnectorExecuteRoute = (
           // Setup with kbDataClient if `assistantKnowledgeBaseByDefault` FF is enabled
           const enableKnowledgeBaseByDefault =
             assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const bedrockChatEnabled =
+            assistantContext.getRegisteredFeatures(pluginName).assistantBedrockChat;
           const kbDataClient = enableKnowledgeBaseByDefault
             ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
             : undefined;
@@ -366,6 +368,7 @@ export const postActionsConnectorExecuteRoute = (
               ? transformESSearchToAnonymizationFields(anonymizationFieldsRes.data)
               : undefined,
             actions,
+            bedrockChatEnabled,
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
             assistantTools,
             connectorId,
