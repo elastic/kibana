@@ -1072,7 +1072,7 @@
     "jsonwebtoken": "^9.0.2",
     "jsts": "^1.6.2",
     "kea": "^2.6.0",
-    "langchain": "0.2.3",
+    "langchain": "0.2.6",
     "langsmith": "^0.1.30",
     "launchdarkly-js-client-sdk": "^3.4.0",
     "launchdarkly-node-server-sdk": "^7.0.3",
@@ -1207,7 +1207,7 @@
     "xterm": "^5.1.0",
     "yauzl": "^2.10.0",
     "yazl": "^2.5.1",
-    "zod": "^3.22.3"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.0.3",
