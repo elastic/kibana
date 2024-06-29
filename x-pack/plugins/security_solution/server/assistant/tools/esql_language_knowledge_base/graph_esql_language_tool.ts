@@ -6,7 +6,7 @@
  */
 
 import Fs from 'fs';
-import { once, isEmpty, map } from 'lodash';
+import { once, isEmpty, map, without } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
 import Path from 'path';
@@ -16,15 +16,16 @@ import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
-import type { ValidationResult } from '@kbn/esql-validation-autocomplete/src/validation/types';
-import { getESQLQueryColumns } from '@kbn/esql-utils';
+import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { promisify } from 'util';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
+import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { APP_UI_ID } from '../../../../common';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import type { LangchainZodAny } from '..';
+import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 
 export const INLINE_ESQL_QUERY_REGEX = /```esql\s*(.*?)\s*```/gms;
 
@@ -37,16 +38,16 @@ export const ECS_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
 
 Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
 <context>
-<availableDataStreams>
-{availableDataStreams}
-</availableDataStreams>
+<availableDataViews>
+{availableDataViews}
+</availableDataViews>
 </context>`,
   ],
   [
     'human',
     `{input}.
 Example response format:
-<example_response>
+<example>
 A: Please find the ESQL query below:
 \`\`\`esql
 FROM logs-*
@@ -84,8 +85,9 @@ const toolDetails = {
 interface IState {
   messages: BaseMessage[];
   esqlQuery: string;
-  errors: ValidationResult['errors'];
-  availableDataStreams: string[];
+  errors: string[];
+  availableDataViews: string[];
+  dataViewFields: string[];
   invalidQueries: string[];
 }
 
@@ -107,7 +109,11 @@ const graphState: StateGraphArgs<IState>['channels'] = {
     value: (x, y) => x.concat(y),
     default: () => [],
   },
-  availableDataStreams: {
+  availableDataViews: {
+    value: (x, y) => y ?? x,
+    default: () => [],
+  },
+  dataViewFields: {
     value: (x, y) => y ?? x,
     default: () => [],
   },
@@ -126,64 +132,88 @@ const loadSystemMessage = once(async () => {
 });
 
 const getDataStreams =
-  ({ esClient }: { esClient: AssistantToolParams['esClient'] }) =>
+  ({ dataViews }: { dataViews: AssistantToolParams['dataViews'] }) =>
   async () => {
-    const allDataStreams = await esClient.indices.getDataStream();
+    const allDataStreams = await dataViews?.getTitles();
 
     return {
-      availableDataStreams: map(allDataStreams.data_streams, 'name'),
+      availableDataViews: allDataStreams,
     };
   };
 
 const getGenerateQuery =
-  ({ userQuery, llm }: { userQuery: string; llm: NonNullable<AssistantToolParams['llm']> }) =>
+  ({
+    userQuery,
+    llm,
+  }: {
+    userQuery: string;
+    llm: ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  }) =>
   async (state: IState) => {
     const [systemMessage] = await Promise.all([loadSystemMessage()]);
 
     const answerPrompt = await ChatPromptTemplate.fromMessages([
-      ['system', `${systemMessage}\nAvailable data streams: {availableDataStreams}`],
       [
-        'user',
-        `Answer the user's question that was previously asked ("{query}..."). Take into account any previous errors {errors} and invalid ES|QL queries {invalidQueries}.
+        'system',
+        `${systemMessage}
 
-          Format any ES|QL query as follows:
-          <format>
-          \`\`\`esql
-          <query>
-          \`\`\`
-          </format>
-
-          Respond in plain text. Do not attempt to use a function.
-
-          DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
-          If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
-
-          Human: plot both yesterday's and today's data.
-
-          Assistant: Here's how you can plot yesterday's data:
-          \`\`\`esql
-          <query>
-          \`\`\`
-
-          Let's see that first. We'll look at today's data next.
-
-          Human: <response from yesterday's data>
-
-          Assistant: Let's look at today's data:
-
-          \`\`\`esql
-          <query>
-          \`\`\`
-
-          DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
-          as mentioned in the system message. When converting queries from one language
-          to ES|QL, make sure that the functions are available and documented in ES|QL.
-          E.g., for SPL's LEN, use LENGTH. For IF, use CASE.
+        Available indices:
+        {availableDataViews}
         `,
       ],
+      [
+        'user',
+        `Answer the user's question that was previously asked ("{query}..."). Take into account any previous errors:
+{errors}
+
+and invalid ES|QL queries:
+{invalidQueries}
+
+If errors were related to "Unknown column" make sure to check the Available index fields:
+{dataViewFields}
+
+Format any ES|QL query as follows:
+<format>
+\`\`\`esql
+<query>
+\`\`\`
+</format>
+
+Respond in plain text. Do not attempt to use a function.
+
+DO NOT UNDER ANY CIRCUMSTANCES generate more than a single query.
+If multiple queries are needed, do it as a follow-up step. Make this clear to the user. For example:
+
+Human: plot both yesterday's and today's data.
+
+Assistant: Here's how you can plot yesterday's data:
+<format>
+\`\`\`esql
+<query>
+\`\`\`
+</format>
+
+Let's see that first. We'll look at today's data next.
+
+Human: <response from yesterday's data>
+
+Assistant: Let's look at today's data:
+
+<format>
+\`\`\`esql
+<query>
+\`\`\`
+</format>
+
+DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
+as mentioned in the system message. When converting queries from one language
+to ES|QL, make sure that the functions are available and documented in ES|QL.
+E.g., for SPL's LEN, use LENGTH. For IF, use CASE.`,
+      ],
     ]).partial({
-      availableDataStreams: JSON.stringify(state.availableDataStreams),
+      availableDataViews: state.availableDataViews.join('\n'),
       errors: state.errors.join('\n'),
+      dataViewFields: state.dataViewFields.join('\n'),
       invalidQueries: state.invalidQueries.join('\n'),
     });
 
@@ -208,7 +238,13 @@ const getGenerateQuery =
   };
 
 const getValidateQuery =
-  ({ search }: { search: AssistantToolParams['search'] }) =>
+  ({
+    dataViews,
+    search,
+  }: {
+    dataViews: AssistantToolParams['dataViews'];
+    search: AssistantToolParams['search'];
+  }) =>
   async (state: IState, config?: RunnableConfig) => {
     const { errors } = await validateQuery(state.esqlQuery, getAstAndSyntaxErrors, {
       // setting this to true, we don't want to validate the index / fields existence
@@ -216,21 +252,49 @@ const getValidateQuery =
     });
 
     if (!isEmpty(errors)) {
-      return { errors, invalidQueries: [state.esqlQuery] };
-    }
-
-    try {
-      await getESQLQueryColumns({
-        esqlQuery: state.esqlQuery,
-        search: search.search,
-      });
-      return { errors: [] };
-    } catch (e) {
       return {
-        errors: e?.message.match(new RegExp(/Unknown column.*/)),
+        errors: map(
+          errors,
+          (error) => (error as ESQLMessage)?.text || (error as EditorError)?.message
+        ),
         invalidQueries: [state.esqlQuery],
       };
     }
+
+    if (search?.search) {
+      try {
+        await getESQLQueryColumns({
+          esqlQuery: state.esqlQuery,
+          search: search.search,
+        });
+        return { errors: [] };
+      } catch (e) {
+        let dataViewFields;
+        let availableDataViews = state.availableDataViews;
+        if (dataViews) {
+          const indexPattern = getIndexPatternFromESQLQuery(state.esqlQuery);
+          let indexFields;
+          try {
+            indexFields = await dataViews.getFieldsForWildcard({ pattern: indexPattern });
+          } catch (err) {
+            availableDataViews = without(availableDataViews, indexPattern);
+          }
+
+          dataViewFields = map(indexFields, (field) => `${field.name} (${field.type})`);
+        }
+
+        // console.error('eeeeee', e);
+
+        return {
+          errors: e?.message.match(new RegExp(/Unknown column.*/)) ?? e?.message,
+          dataViewFields,
+          availableDataViews,
+          invalidQueries: [state.esqlQuery],
+        };
+      }
+    }
+
+    return {};
   };
 
 const shouldRegenerate = (state: IState) => {
@@ -251,7 +315,7 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { chain, esClient, search, llm } = params;
+    const { chain, dataViews, search, llm } = params;
     if (!llm || !chain) return null;
 
     return new DynamicStructuredTool({
@@ -264,9 +328,9 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
         const workflow = new StateGraph<IState>({
           channels: graphState,
         })
-          .addNode('getDataStreams', getDataStreams({ esClient }))
+          .addNode('getDataStreams', getDataStreams({ dataViews }))
           .addNode('generateQuery', getGenerateQuery({ userQuery: input.question, llm }))
-          .addNode('validateQuery', getValidateQuery({ search }))
+          .addNode('validateQuery', getValidateQuery({ dataViews, search }))
           .addEdge(START, 'getDataStreams')
           .addEdge('getDataStreams', 'generateQuery')
           .addEdge('generateQuery', 'validateQuery')
@@ -281,11 +345,9 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
           return e;
         }
 
-        return `
-        \`\`\`esql
-        ${query.esqlQuery}
-        \`\`\`
-        `;
+        // console.error('query', query.esqlQuery);
+
+        return query.esqlQuery;
       },
       tags: ['esql', 'query-generation', 'knowledge-base'],
     });

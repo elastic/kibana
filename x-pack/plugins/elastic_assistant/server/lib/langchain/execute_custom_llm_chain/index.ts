@@ -50,6 +50,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   size,
   traceOptions,
   search,
+  dataViews,
 }) => {
   const isOpenAI = llmType === 'openai';
   const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
@@ -104,6 +105,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
     search,
+    dataViews,
   };
 
   const tools: ToolInterface[] = assistantTools.flatMap(

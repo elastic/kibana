@@ -15,6 +15,7 @@ import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import { DataViewsService } from '@kbn/data-views-plugin/server';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
@@ -46,6 +47,7 @@ export interface AgentExecutorParams<T extends boolean> {
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
   search: ReturnType<DataPluginStart['search']['asScoped']>;
+  dataViews: DataViewsService;
   esStore: ElasticsearchStore;
   langChainMessages: BaseMessage[];
   llmType?: string;

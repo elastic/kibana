@@ -134,7 +134,6 @@ export const postAttackDiscoveryRoute = (
             onNewReplacements,
             request,
             size,
-            search: assistantContext.search,
           });
 
           // invoke the attack discovery tool:

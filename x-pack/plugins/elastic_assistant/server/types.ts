@@ -34,9 +34,14 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 
+import { DataViewsServerPluginStart, DataViewsService } from '@kbn/data-views-plugin/server';
 import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
@@ -97,6 +102,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   data: DataPluginStart;
+  dataViews: DataViewsServerPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityServiceStart;
 }
@@ -105,6 +111,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
   search: ReturnType<DataPluginStart['search']['asScoped']>;
+  dataViews: DataViewsService;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;
@@ -220,7 +227,7 @@ export interface AssistantToolParams {
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
-  llm?: ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+  llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
   logger: Logger;
   modelExists: boolean;
   onNewReplacements?: (newReplacements: Replacements) => void;
@@ -231,5 +238,6 @@ export interface AssistantToolParams {
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
   size?: number;
-  search: ReturnType<DataPluginStart['search']['asScoped']>;
+  dataViews?: DataViewsService;
+  search?: ReturnType<DataPluginStart['search']['asScoped']>;
 }

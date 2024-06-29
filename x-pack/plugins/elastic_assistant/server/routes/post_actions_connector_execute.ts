@@ -369,6 +369,7 @@ export const postActionsConnectorExecuteRoute = (
             connectorId,
             conversationId,
             dataClients,
+            dataViews: assistantContext.dataViews,
             esClient,
             search: assistantContext.search,
             esStore,

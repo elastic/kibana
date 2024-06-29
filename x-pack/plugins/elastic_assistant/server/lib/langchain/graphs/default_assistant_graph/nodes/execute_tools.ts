@@ -44,7 +44,7 @@ export const executeTools = async ({ config, logger, state, tools }: ExecuteTool
     out = await toolExecutor.invoke(agentAction, config);
   } catch (err) {
     return {
-      steps: [{ action: agentAction, error: JSON.stringify(err, null, 2) }],
+      steps: [{ action: agentAction, observation: JSON.stringify(`Error: ${err}`, null, 2) }],
     };
   }
   return {

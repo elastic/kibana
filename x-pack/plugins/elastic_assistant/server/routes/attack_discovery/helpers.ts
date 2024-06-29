@@ -26,7 +26,6 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
-import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
@@ -66,7 +65,6 @@ export const getAssistantToolParams = ({
   latestReplacements,
   onNewReplacements,
   request,
-  search,
   size,
 }: {
   actions: ActionsPluginStart;
@@ -86,7 +84,6 @@ export const getAssistantToolParams = ({
     unknown,
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
-  search: ReturnType<DataPluginStart['search']['asScoped']>;
   size: number;
 }) => {
   const traceOptions = {
@@ -121,7 +118,6 @@ export const getAssistantToolParams = ({
     logger,
     onNewReplacements,
     request,
-    search,
     size,
   });
 };
@@ -136,7 +132,6 @@ const formatAssistantToolParams = ({
   logger,
   onNewReplacements,
   request,
-  search,
   size,
 }: {
   alertsIndexPattern: string;
@@ -152,7 +147,6 @@ const formatAssistantToolParams = ({
     unknown,
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody
   >;
-  search: ReturnType<DataPluginStart['search']['asScoped']>;
   size: number;
 }): AssistantToolParams => ({
   alertsIndexPattern,
@@ -167,7 +161,6 @@ const formatAssistantToolParams = ({
   onNewReplacements,
   replacements: latestReplacements,
   request,
-  search,
   size,
 });
 
