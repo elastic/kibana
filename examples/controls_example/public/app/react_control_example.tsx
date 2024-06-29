@@ -40,6 +40,7 @@ import useAsync from 'react-use/lib/useAsync';
 import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
+import { OPTIONS_LIST_CONTROL_TYPE } from '../react_controls/data_controls/options_list_control/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
 
@@ -56,6 +57,7 @@ const toggleViewButtons = [
   },
 ];
 
+const optionsListId = 'optionsList1';
 const searchControlId = 'searchControl1';
 const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
@@ -76,12 +78,25 @@ const controlGroupPanels = {
   },
   [timesliderControlId]: {
     type: TIMESLIDER_CONTROL_TYPE,
-    order: 0,
+    order: 2,
     grow: true,
     width: 'medium',
     explicitInput: {
       id: timesliderControlId,
-      title: 'Time slider',
+      enhancements: {},
+    },
+  },
+  [optionsListId]: {
+    type: OPTIONS_LIST_CONTROL_TYPE,
+    order: 1,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: searchControlId,
+      fieldName: 'message',
+      title: 'Message',
+      grow: true,
+      width: 'medium',
       enhancements: {},
     },
   },
@@ -298,6 +313,11 @@ export const ReactControlExample = ({
             references: [
               {
                 name: `controlGroup_${searchControlId}:searchControlDataView`,
+                type: 'index-pattern',
+                id: dataViews?.[0].id!,
+              },
+              {
+                name: `controlGroup_${optionsListId}:optionsListControlDataView`,
                 type: 'index-pattern',
                 id: dataViews?.[0].id!,
               },
