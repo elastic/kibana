@@ -6975,12 +6975,12 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@^0.2.15":
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.15.tgz#91ad5af44bfc72e83f6b6bd58cf5b29e53effed6"
-  integrity sha512-WOsNQGhriXh5tqRWfX3nthWO6RoVtM5kceX2GbJhqk09KV4R+1QmrOyph3OrpmjRA/YuSf0a+94LHY+c/QGolw==
+"@langchain/community@^0.2.16":
+  version "0.2.16"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.16.tgz#5888baf7fc7ea272c5f91aaa0e71bc444167262d"
+  integrity sha512-dFDcMabKACvuRd0w6EIRLWf1ubPGZEeEwFt9v1jiEr4HCFxH0OF+iM1QUCcVRbB2fK5lqmKeTD1XAeZV8+AyXA==
   dependencies:
-    "@langchain/core" "~0.2.9"
+    "@langchain/core" "~0.2.11"
     "@langchain/openai" "~0.1.0"
     binary-extensions "^2.2.0"
     expr-eval "^2.0.2"
@@ -6992,7 +6992,7 @@
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@0.2.11", "@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.8 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.11", "@langchain/core@~0.2.9":
+"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.11", "@langchain/core@~0.2.11":
   version "0.2.11"
   resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.11.tgz#5f47467e20e56b250831baef20083657c6facb4c"
   integrity sha512-d4SNL7WI0c3oHrV4WxCRH1/TNqdePXEzYjYwIb4aEH6lW1aM0utGhLbNthX+aYkOL4Ynx2FoG4h91ECIipiKWQ==
@@ -7018,12 +7018,12 @@
     "@langchain/core" ">0.1.61 <0.3.0"
     uuid "^9.0.1"
 
-"@langchain/openai@0.2.1", "@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.2.1", "@langchain/openai@~0.1.0":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.2.1.tgz#2c0c2cb6bd7839d8ce342c97099c6e35f2dde40d"
-  integrity sha512-Ti3C6ZIUPaueIPAfMljMnLu3GSGNq5KmrlHeWkIbrLShOBlzj4xj7mRfR73oWgAC0qivfxdkfbB0e+WCY+oRJw==
+"@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.1.3", "@langchain/openai@~0.1.0":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.1.3.tgz#6eb0994e970d85ffa9aaeafb94449024ccf6ca63"
+  integrity sha512-riv/JC9x2A8b7GcHu8sx+mlZJ8KAwSSi231IPTlcciYnKozmrQ5H0vrtiD31fxiDbaRsk7tyCpkSBIOQEo7CyQ==
   dependencies:
-    "@langchain/core" ">=0.2.8 <0.3.0"
+    "@langchain/core" ">=0.2.5 <0.3.0"
     js-tiktoken "^1.0.12"
     openai "^4.49.1"
     zod "^3.22.4"
@@ -8329,6 +8329,13 @@
     "@smithy/types" "^3.2.0"
     tslib "^2.6.2"
 
+"@smithy/is-array-buffer@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@smithy/is-array-buffer/-/is-array-buffer-2.0.0.tgz#8fa9b8040651e7ba0b2f6106e636a91354ff7d34"
+  integrity sha512-z3PjFjMyZNI98JFRJi/U0nGoLWMSJlDjAW4QUX2WNZLas5C0CmVV6LJ01JI0k90l7FvpmixjWxPFmENSClQ7ug==
+  dependencies:
+    tslib "^2.5.0"
+
 "@smithy/is-array-buffer@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@smithy/is-array-buffer/-/is-array-buffer-3.0.0.tgz#9a95c2d46b8768946a9eec7f935feaddcffa5e7a"
@@ -8364,6 +8371,14 @@
   dependencies:
     tslib "^2.6.2"
 
+"@smithy/util-buffer-from@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@smithy/util-buffer-from/-/util-buffer-from-2.0.0.tgz#7eb75d72288b6b3001bc5f75b48b711513091deb"
+  integrity sha512-/YNnLoHsR+4W4Vf2wL5lGv0ksg8Bmk3GEGxn2vEQt52AQaPSCuaO5PM5VM7lP1K9qHRKHwrPGktqVoAHKWHxzw==
+  dependencies:
+    "@smithy/is-array-buffer" "^2.0.0"
+    tslib "^2.5.0"
+
 "@smithy/util-buffer-from@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@smithy/util-buffer-from/-/util-buffer-from-3.0.0.tgz#559fc1c86138a89b2edaefc1e6677780c24594e3"
@@ -8394,7 +8409,15 @@
   dependencies:
     tslib "^2.6.2"
 
-"@smithy/util-utf8@3.0.0", "@smithy/util-utf8@^2.0.0", "@smithy/util-utf8@^3.0.0":
+"@smithy/util-utf8@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@smithy/util-utf8/-/util-utf8-2.0.0.tgz#b4da87566ea7757435e153799df9da717262ad42"
+  integrity sha512-rctU1VkziY84n5OXe3bPNpKR001ZCME2JCaBBFgtiM2hfKbHFudc/BkMuPab8hRbLd0j3vbnBTTZ1igBf0wgiQ==
+  dependencies:
+    "@smithy/util-buffer-from" "^2.0.0"
+    tslib "^2.5.0"
+
+"@smithy/util-utf8@^3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@smithy/util-utf8/-/util-utf8-3.0.0.tgz#1a6a823d47cbec1fd6933e5fc87df975286d9d6a"
   integrity sha512-rUeT12bxFnplYDe815GXbq/oixEGHfRFFtcTF3YdDi/JaENIM6aSYYLJydG83UNzLXeRI5K8abYd/8Sp/QM0kA==
