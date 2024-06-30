@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import { EuiSpacer } from '@elastic/eui';
 import { AddNote } from './add_note';
 import { NotesList } from './notes_list';
-import { fetchNotesByDocumentId } from '../../../../notes/store/notes.slice';
+import { fetchNotesByDocumentIds } from '../../../../notes/store/notes.slice';
 import { useDocumentDetailsContext } from '../../shared/context';
 
 /**
@@ -22,7 +22,7 @@ export const NotesDetails = memo(() => {
   const { eventId } = useDocumentDetailsContext();
 
   useEffect(() => {
-    dispatch(fetchNotesByDocumentId({ documentId: eventId }));
+    dispatch(fetchNotesByDocumentIds({ documentIds: [eventId] }));
   }, [dispatch, eventId]);
 
   return (
