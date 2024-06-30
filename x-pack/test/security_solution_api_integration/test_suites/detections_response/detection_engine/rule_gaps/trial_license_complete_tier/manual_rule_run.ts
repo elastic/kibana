@@ -108,8 +108,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(results).toEqual([
           {
             error: {
-              error: 'Bad Request',
               message: `Rule ${createdRule.id} is disabled`,
+              rule: { id: `${createdRule.id}`, name: 'Custom query rule' },
             },
           },
         ]);
@@ -231,8 +231,8 @@ export default ({ getService }: FtrProviderContext) => {
             }),
             {
               error: {
-                error: 'Not Found',
                 message: `Saved object [alert/${nonExistingRuleId}] not found`,
+                rule: { id: nonExistingRuleId },
               },
             },
           ])
@@ -272,8 +272,8 @@ export default ({ getService }: FtrProviderContext) => {
           expect.arrayContaining([
             {
               error: {
-                error: 'Bad Request',
                 message: `Rule ${createdRule1.id} is disabled`,
+                rule: { id: `${createdRule1.id}`, name: 'Custom query rule' },
               },
             },
             expect.objectContaining({
