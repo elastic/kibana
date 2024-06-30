@@ -11,6 +11,7 @@ import { BaseChatModelParams } from '@langchain/core/language_models/chat_models
 import { Logger } from '@kbn/logging';
 import { KibanaRequest } from '@kbn/core/server';
 import { Readable } from 'stream';
+import { filter, isArray, map } from 'lodash';
 
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';
@@ -39,6 +40,7 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
         const actionsClient = await actions.getActionsClientWithRequest(request);
 
         const inputBody = JSON.parse(options?.body as string);
+        const messages = map(inputBody.messages, sanitizeMessage);
 
         if (this.streaming) {
           const data = (await actionsClient.execute({
@@ -46,7 +48,7 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
             params: {
               subAction: 'invokeStream',
               subActionParams: {
-                messages: inputBody.messages,
+                messages,
                 temperature: inputBody.temperature,
                 stopSequences: inputBody.stopSequences,
                 system: inputBody.system,
@@ -65,7 +67,7 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
           params: {
             subAction: 'invokeAI',
             subActionParams: {
-              messages: inputBody.messages,
+              messages,
               temperature: inputBody.temperature,
               stopSequences: inputBody.stopSequences,
               system: inputBody.system,
@@ -85,3 +87,21 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
     });
   }
 }
+
+const sanitizeMessage = ({
+  role,
+  content,
+}: {
+  role: string;
+  content: string | Array<{ type: string; text: string }>;
+}) => {
+  if (isArray(content)) {
+    const textContent = filter(content, ['type', 'text']);
+    return { role, content: textContent[textContent.length - 1]?.text };
+  }
+
+  return {
+    role,
+    content,
+  };
+};
