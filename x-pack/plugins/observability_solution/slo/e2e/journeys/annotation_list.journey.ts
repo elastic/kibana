@@ -36,7 +36,11 @@ journey(`AnnotationsList`, async ({ page, params }) => {
   step('create an annotation', async () => {
     await page.click('text="Create annotation"');
     await page.getByTestId('annotationName').fill('Test annotation');
-    await page.getByTestId('annotationDescription').fill('Test annotation description');
+    await page.getByTestId('annotationName').blur();
+    await page.getByTestId('annotationMessage').fill('Test annotation message');
+    await page.getByTestId('annotationMessage').blur();
+
+    await page.getByTestId('annotationTags').click();
 
     await page.getByTestId('sloSelector').getByTestId('comboBoxSearchInput').click();
     await page.click('text="All SLOs"');
@@ -50,7 +54,7 @@ journey(`AnnotationsList`, async ({ page, params }) => {
     await expect(await page.locator('.euiTableRow')).toHaveCount(1);
 
     await page.locator('.echAnnotation__marker').first().hover();
-    await page.waitForSelector('text="Test annotation description"');
+    await page.waitForSelector('text="Test annotation message"');
   });
 
   step('Go to slos', async () => {
@@ -66,13 +70,15 @@ journey(`AnnotationsList`, async ({ page, params }) => {
 
   step('check that annotation is displayed', async () => {
     await page.locator('.echAnnotation__marker').nth(1).hover();
-    await page.waitForSelector('text="Test annotation description"');
+    await page.waitForSelector('text="Test annotation message"');
   });
 
   step('update annotation', async () => {
     await page.locator('.echAnnotation__marker').nth(1).click();
     await page.getByTestId('annotationName').fill('Updated annotation');
-    await page.getByTestId('annotationDescription').fill('Updated annotation description');
+    await page.getByTestId('annotationName').blur();
+    await page.getByTestId('annotationMessage').fill('Updated annotation message');
+    await page.getByTestId('annotationMessage').blur();
     await page.getByTestId('annotationSaveButton').click();
 
     await page.getByTestId('toastCloseButton').click();
@@ -80,7 +86,7 @@ journey(`AnnotationsList`, async ({ page, params }) => {
     await page.waitForSelector('text="Updated annotation"');
 
     await page.locator('.echAnnotation__marker').nth(1).hover();
-    await page.waitForSelector('text="Updated annotation description"');
+    await page.waitForSelector('text="Updated annotation message"');
   });
 
   step('delete annotation', async () => {

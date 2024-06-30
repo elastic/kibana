@@ -96,7 +96,7 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
               rows={3}
               isInvalid={fieldState.invalid}
               compressed
-              data-test-subj="annotationDescription"
+              data-test-subj="annotationMessage"
               onBlur={() => {
                 field.onBlur();
                 // this is done to avoid too many re-renders, watch on name is expensive
@@ -130,6 +130,7 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
               }}
               isClearable={true}
               compressed
+              data-test-subj="annotationTags"
             />
           )}
         />
