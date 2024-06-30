@@ -19,11 +19,14 @@ import { handleEcsMapping } from './mapping';
 import { handleDuplicates } from './duplicates';
 import { handleMissingKeys } from './missing';
 import { handleInvalidEcs } from './invalid';
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 
 const mockLlm = new FakeLLM({
   response: "I'll callback later.",
-}) as unknown as AssistantToolLlm;
+}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 jest.mock('./mapping');
 jest.mock('./duplicates');

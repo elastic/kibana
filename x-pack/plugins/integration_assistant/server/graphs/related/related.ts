@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ESProcessorItem, Pipeline } from '../../../common';
 import type { RelatedState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_MAIN_PROMPT } from './prompts';
 
-export async function handleRelated(state: RelatedState, model: AssistantToolLlm) {
+export async function handleRelated(state: RelatedState, model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
   const relatedMainPrompt = RELATED_MAIN_PROMPT;
   const outputParser = new JsonOutputParser();
   const relatedMainGraph = relatedMainPrompt.pipe(model).pipe(outputParser);

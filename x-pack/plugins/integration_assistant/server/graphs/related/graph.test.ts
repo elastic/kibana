@@ -22,11 +22,14 @@ import { handleReview } from './review';
 import { handleRelated } from './related';
 import { handleErrors } from './errors';
 import { testPipeline, combineProcessors } from '../../util';
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 
 const mockLlm = new FakeLLM({
   response: "I'll callback later.",
-}) as unknown as AssistantToolLlm;
+}) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
 
 jest.mock('./errors');
 jest.mock('./review');

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { EcsMappingState } from '../../types';
 import { ECS_MISSING_KEYS_PROMPT } from './prompts';
 
-export async function handleMissingKeys(state: EcsMappingState, model: AssistantToolLlm) {
+export async function handleMissingKeys(state: EcsMappingState, model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
   const ecsMissingPrompt = ECS_MISSING_KEYS_PROMPT;
   const outputParser = new JsonOutputParser();
   const ecsMissingGraph = ecsMissingPrompt.pipe(model).pipe(outputParser);

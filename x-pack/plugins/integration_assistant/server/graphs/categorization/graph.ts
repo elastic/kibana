@@ -8,7 +8,10 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import type { CategorizationState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
@@ -148,7 +151,7 @@ function chainRouter(state: CategorizationState): string {
 
 export async function getCategorizationGraph(
   client: IScopedClusterClient,
-  model: AssistantToolLlm
+  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
 ) {
   const workflow = new StateGraph({
     channels: graphState,

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { EcsMappingState } from '../../types';
 import { ECS_INVALID_PROMPT } from './prompts';
 
-export async function handleInvalidEcs(state: EcsMappingState, model: AssistantToolLlm) {
+export async function handleInvalidEcs(state: EcsMappingState, model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
   const ecsInvalidEcsPrompt = ECS_INVALID_PROMPT;
   const outputParser = new JsonOutputParser();
   const ecsInvalidEcsGraph = ecsInvalidEcsPrompt.pipe(model).pipe(outputParser);

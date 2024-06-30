@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ESProcessorItem, Pipeline } from '../../../common';
 import type { CategorizationState } from '../../types';
@@ -15,7 +18,7 @@ import { CATEGORIZATION_VALIDATION_PROMPT } from './prompts';
 
 export async function handleInvalidCategorization(
   state: CategorizationState,
-  model: AssistantToolLlm
+  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
 ) {
   const categorizationInvalidPrompt = CATEGORIZATION_VALIDATION_PROMPT;
 

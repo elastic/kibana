@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AssistantToolLlm } from '@kbn/elastic-assistant-plugin/server/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server/language_models';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { CATEGORIZATION_REVIEW_PROMPT } from './prompts';
 
@@ -14,7 +17,7 @@ import type { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { ECS_EVENT_TYPES_PER_CATEGORY } from './constants';
 
-export async function handleReview(state: CategorizationState, model: AssistantToolLlm) {
+export async function handleReview(state: CategorizationState, model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
   const categorizationReviewPrompt = CATEGORIZATION_REVIEW_PROMPT;
   const outputParser = new JsonOutputParser();
   const categorizationReview = categorizationReviewPrompt.pipe(model).pipe(outputParser);

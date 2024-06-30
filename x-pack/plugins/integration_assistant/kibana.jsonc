@@ -15,8 +15,7 @@
       "kibanaReact",
       "triggersActionsUi",
       "actions",
-      "stackConnectors",
-      "elasticAssistant"
+      "stackConnectors"
     ],
   }
 }
