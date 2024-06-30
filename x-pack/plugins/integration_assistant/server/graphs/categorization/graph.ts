@@ -8,7 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

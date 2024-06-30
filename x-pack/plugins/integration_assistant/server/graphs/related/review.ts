@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
@@ -15,7 +14,10 @@ import type { RelatedState } from '../../types';
 import { combineProcessors } from '../../util/processors';
 import { RELATED_REVIEW_PROMPT } from './prompts';
 
-export async function handleReview(state: RelatedState, model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
+export async function handleReview(
+  state: RelatedState,
+  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
+) {
   const relatedReviewPrompt = RELATED_REVIEW_PROMPT;
   const outputParser = new JsonOutputParser();
   const relatedReviewGraph = relatedReviewPrompt.pipe(model).pipe(outputParser);

@@ -8,7 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { StateGraphArgs } from '@langchain/langgraph';
 import { StateGraph, END, START } from '@langchain/langgraph';
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
@@ -137,7 +137,10 @@ function chainRouter(state: RelatedState): string {
   return END;
 }
 
-export async function getRelatedGraph(client: IScopedClusterClient, model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel) {
+export async function getRelatedGraph(
+  client: IScopedClusterClient,
+  model: ActionsClientChatOpenAI | ActionsClientSimpleChatModel
+) {
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
