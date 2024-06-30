@@ -7,6 +7,7 @@
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import React from 'react';
+import type { HorizontalAlignment } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 import { useActions } from './render_actions/use_actions';
 import { RenderEndpoint } from './render_endpoint/render_endpoint';
@@ -17,6 +18,7 @@ import { DeploymentStatusEnum, ServiceProviderKeys, TaskTypes } from '../types';
 
 export const useTableColumns = () => {
   const { actions } = useActions();
+  const deploymentAlignment: HorizontalAlignment = 'center';
 
   const TABLE_COLUMNS = [
     {
@@ -30,7 +32,7 @@ export const useTableColumns = () => {
         return null;
       },
       width: '64px',
-      align: 'center',
+      align: deploymentAlignment,
     },
     {
       field: 'endpoint',
