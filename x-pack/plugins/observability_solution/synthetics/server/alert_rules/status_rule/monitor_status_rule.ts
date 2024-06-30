@@ -17,6 +17,7 @@ import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { StatusRuleExecutorOptions } from './types';
 import { AlertStatusMetaDataCodec, StatusConfigs } from './queries/query_monitor_status_alert';
+import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { StatusRuleExecutor } from './status_rule_executor';
 import { getConditionType, StatusRulePramsSchema } from '../../../common/rules/status_rule';
@@ -24,8 +25,16 @@ import {
   MONITOR_STATUS,
   SYNTHETICS_ALERT_RULE_TYPES,
 } from '../../../common/constants/synthetics_alerts';
-import { setRecoveredAlertsContext, updateState, UptimeRuleTypeAlertDefinition } from '../common';
-import { getActionVariables } from '../action_variables';
+import {
+  setRecoveredAlertsContext,
+  updateState,
+  getAlertDetailsUrl,
+  getViewInAppUrl,
+  getRelativeViewInAppUrl,
+  getFullViewInAppMessage,
+  SyntheticsRuleTypeAlertDefinition,
+} from '../common';
+import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
@@ -187,9 +196,10 @@ export const registerSyntheticsStatusCheckRule = (
       };
     },
     alerts: {
-      ...UptimeRuleTypeAlertDefinition,
+      ...SyntheticsRuleTypeAlertDefinition,
       shouldWrite: true,
     } as IRuleTypeAlerts<MonitorStatusAlert>,
+    fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
     fieldsForAAD: [

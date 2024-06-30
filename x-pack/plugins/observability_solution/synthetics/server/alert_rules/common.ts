@@ -21,8 +21,8 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { legacyExperimentalFieldMap, ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import { TimeWindow } from '../../common/rules/status_rule';
-import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
+import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import {
   MonitorStatusActionGroup,
   SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
@@ -361,11 +361,14 @@ export const generateFilterDSL = async (
   return toElasticsearchQuery(fromKueryExpression(combinedString ?? ''), await getIndexPattern());
 };
 
-export const uptimeRuleTypeFieldMap = { ...syntheticsRuleFieldMap, ...legacyExperimentalFieldMap };
+export const syntheticsRuleTypeFieldMap = {
+  ...syntheticsRuleFieldMap,
+  ...legacyExperimentalFieldMap,
+};
 
-export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts = {
+export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: uptimeRuleTypeFieldMap },
+  mappings: { fieldMap: syntheticsRuleTypeFieldMap },
   useLegacyAlerts: true,
 };
 

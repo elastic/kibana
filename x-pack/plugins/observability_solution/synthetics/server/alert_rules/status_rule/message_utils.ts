@@ -34,10 +34,12 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   [ALERT_REASON]: monitorSummary.reason,
   [STATE_ID]: monitorSummary.stateId,
   'location.id': monitorSummary.locationId,
+  'location.name': monitorSummary.locationName,
   configId: monitorSummary.configId,
   'kibana.alert.evaluation.threshold': monitorSummary.downThreshold,
   'kibana.alert.evaluation.value': monitorSummary.checks?.down ?? 1,
   pendingLastRunAt: monitorSummary.pendingLastRunAt,
+  'monitor.tags': monitorSummary.monitorTags ?? [],
 });
 
 export const getMonitorSummary = (
@@ -97,6 +99,7 @@ export const getMonitorSummary = (
     checks,
     downThreshold,
     timestamp: monitorInfo['@timestamp'],
+    monitorTags: monitorInfo.tags,
   };
 };
 

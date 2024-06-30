@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const syntheticsRuleFieldMap = {
+import { FieldMap } from '@kbn/alerts-as-data-utils';
+
+export const syntheticsRuleFieldMap: FieldMap = {
   // common fields
   'monitor.id': {
     type: 'keyword',
@@ -36,11 +38,24 @@ export const syntheticsRuleFieldMap = {
     type: 'keyword',
     required: false,
   },
+  'monitor.tags': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   configId: {
     type: 'keyword',
     required: false,
   },
+  'host.name': {
+    type: 'keyword',
+    required: false,
+  },
   'location.id': {
+    type: 'keyword',
+    required: false,
+  },
+  'location.name': {
     type: 'keyword',
     required: false,
   },

@@ -45,6 +45,7 @@ export interface MonitorSummaryStatusRule {
   lastErrorMessage: string;
   stateId: string | null;
   monitorUrlLabel: string;
+  monitorTags?: string[];
   downThreshold?: number;
   checks?: {
     total: number;
