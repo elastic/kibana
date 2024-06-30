@@ -11,7 +11,8 @@ import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 import { closeAlertsStepTourIfVisible } from '../../tasks/integrations';
 
-describe('Alert Test', { tags: ['@ess'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/180853
+describe.skip('Alert Test', { tags: ['@ess'] }, () => {
   let ruleName: string;
   let ruleId: string;
 
