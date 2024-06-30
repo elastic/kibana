@@ -307,7 +307,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   const { pkgName, pkgVersion } = request.params;
 
@@ -340,6 +340,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     return await defaultFleetErrorHandler({ error: res.error, response });
   }
 };
+
 export const createCustomIntegrationHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -349,7 +350,7 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const kibanaVersion = appContextService.getKibanaVersion();
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   const spaceId = fleetContext.spaceId;
@@ -424,7 +425,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const bulkInstalledResponses = await bulkInstallPackages({
@@ -456,7 +457,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
-  const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
 
   const res = await installPackage({
@@ -560,7 +561,7 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
 
   let username;
   try {
-    const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
+    const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
     if (user) {
       username = user.username;
     }
@@ -640,6 +641,7 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       ...pick(pkg.savedObject, ['created_at', 'updated_at', 'namespaces', 'type']),
       installed_kibana: attributes.installed_kibana,
       installed_kibana_space_id: attributes.installed_kibana_space_id,
+      additional_spaces_installed_kibana: attributes.additional_spaces_installed_kibana,
       installed_es: attributes.installed_es,
       install_status: attributes.install_status,
       install_source: attributes.install_source,

@@ -802,21 +802,23 @@ export const continueFromDefineStep = () => {
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
-export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {
+const optionsToComboboxText = (options: string[]) => {
+  return options.map((o) => `${o}{downArrow}{enter}{esc}`).join('');
+};
+
+export const fillDefineMachineLearningRule = (rule: MachineLearningRuleCreateProps) => {
   const jobsAsArray = isArray(rule.machine_learning_job_id)
     ? rule.machine_learning_job_id
     : [rule.machine_learning_job_id];
-  const text = jobsAsArray
-    .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
-    .join('');
   cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
-
-  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
-
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(optionsToComboboxText(jobsAsArray));
   cy.get(ANOMALY_THRESHOLD_INPUT).type(`{selectall}${rule.anomaly_threshold}`, {
     force: true,
   });
+};
+
+export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRuleCreateProps) => {
+  fillDefineMachineLearningRule(rule);
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
@@ -910,8 +912,17 @@ export const enablesAndPopulatesThresholdSuppression = (
 };
 
 export const fillAlertSuppressionFields = (fields: string[]) => {
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).click();
   fields.forEach((field) => {
-    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{enter}`);
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{downArrow}{enter}{esc}`);
+  });
+};
+
+export const clearAlertSuppressionFields = () => {
+  cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).should('not.be.disabled');
+  cy.get(ALERT_SUPPRESSION_FIELDS).within(() => {
+    cy.get(COMBO_BOX_CLEAR_BTN).click();
   });
 };
 
