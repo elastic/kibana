@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import agent, { Span } from 'elastic-apm-node';
 import type { Logger } from '@kbn/logging';
 import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
@@ -164,8 +166,7 @@ export const streamGraph = async ({
         }
       }
 
-      // @ts-expect-error
-      processEvent();
+      void processEvent();
     } catch (err) {
       // if I throw an error here, it crashes the server. Not sure how to get around that.
       // If I put await on this function the error works properly, but when there is not an error
