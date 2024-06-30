@@ -50,8 +50,8 @@ export const getUsageRecords = (
     resourceSubtypeCounter = assetCountAggregation.resource_sub_type.buckets.reduce(
       (resourceMap, item) => {
         resourceMap[item.key] = {
-          doc_count: item.doc_count,
-          unique_assets: item.unique_assets.value,
+          doc_count: item.doc_count as number,
+          unique_assets: item.unique_assets.value as number,
         };
         return resourceMap;
       },
@@ -78,9 +78,9 @@ export const getUsageRecords = (
   }
   const roundedCreationTimestamp = creationTimestamp.toISOString();
 
-  // const metadata = resourceSubtypeCounter
-  // ? { tier, resource_sub_type_count: resourceSubtypeCounter }
-  // : { tier };
+  const metadata = resourceSubtypeCounter
+    ? { tier, resource_sub_type_count: resourceSubtypeCounter }
+    : { tier };
 
   const usageRecord: UsageRecord = {
     id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
@@ -95,7 +95,8 @@ export const getUsageRecords = (
     source: {
       id: taskId,
       instance_group_id: projectId,
-      metadata: { tier },
+      // metadata: { tier },
+      metadata,
     },
   };
 
