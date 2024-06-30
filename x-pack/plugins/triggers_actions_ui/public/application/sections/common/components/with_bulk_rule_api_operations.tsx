@@ -12,12 +12,14 @@ import {
   IExecutionErrorsResult,
   IExecutionKPIResult,
 } from '@kbn/alerting-plugin/common';
+import { AlertingFrameworkHealth } from '@kbn/alerting-types';
+import { fetchAlertingFrameworkHealth as alertingFrameworkHealth } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health';
+import { resolveRule } from '@kbn/alerts-ui-shared/src/common/apis/resolve_rule';
 import {
   Rule,
   RuleType,
   RuleTaskState,
   RuleSummary,
-  AlertingFrameworkHealth,
   ResolvedRule,
   SnoozeSchedule,
   BulkEditResponse,
@@ -34,7 +36,6 @@ import type {
   LoadGlobalExecutionKPIAggregationsProps,
   BulkUnsnoozeRulesProps,
 } from '../../../lib/rule_api';
-import { alertingFrameworkHealth } from '../../../lib/rule_api/health';
 import { cloneRule } from '../../../lib/rule_api/clone';
 import { loadRule } from '../../../lib/rule_api/get_rule';
 import { loadRuleSummary } from '../../../lib/rule_api/rule_summary';
@@ -51,7 +52,6 @@ import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_executi
 import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 import { unmuteAlertInstance } from '../../../lib/rule_api/unmute_alert';
-import { resolveRule } from '../../../lib/rule_api/resolve_rule';
 import { snoozeRule, bulkSnoozeRules } from '../../../lib/rule_api/snooze';
 import { unsnoozeRule, bulkUnsnoozeRules } from '../../../lib/rule_api/unsnooze';
 import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
@@ -177,7 +177,7 @@ export function withBulkRuleOperations<T>(
             http,
           })
         }
-        resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, ruleId })}
+        resolveRule={async (ruleId: Rule['id']) => resolveRule({ http, id: ruleId })}
         getHealth={async () => alertingFrameworkHealth({ http })}
         snoozeRule={async (rule: Rule, snoozeSchedule: SnoozeSchedule) => {
           return await snoozeRule({ http, id: rule.id, snoozeSchedule });

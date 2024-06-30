@@ -223,7 +223,6 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.stackAlerts.threshold.ui.visualization.errorLoadingAlertVisualizationTitle"
               defaultMessage="Cannot load alert visualization"
-              values={{}}
             />
           }
           color="danger"

@@ -148,6 +148,7 @@
     "unifiedHistogram": "src/plugins/unified_histogram",
     "unifiedDataTable": "packages/kbn-unified-data-table",
     "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
+    "unsavedChangesPrompt": "packages/kbn-unsaved-changes-prompt",
     "managedContentBadge": "packages/kbn-managed-content-badge"
   },
   "translations": []

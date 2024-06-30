@@ -65,7 +65,7 @@
           },
           " & React.RefAttributes<{}>>"
         ],
-        "path": "src/plugins/unified_doc_viewer/public/index.tsx",
+        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -73,6 +73,48 @@
           {
             "parentPluginId": "unifiedDocViewer",
             "id": "def-public.UnifiedDocViewer.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedDocViewer",
+        "id": "def-public.UnifiedDocViewerFlyout",
+        "type": "Function",
+        "tags": [],
+        "label": "UnifiedDocViewerFlyout",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "UnifiedDocViewerFlyoutProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "src/plugins/unified_doc_viewer/public/components/lazy_doc_viewer_flyout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedDocViewer",
+            "id": "def-public.UnifiedDocViewerFlyout.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",

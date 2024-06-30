@@ -25,7 +25,7 @@ export const deleteActionRoute = (
       path: `${BASE_ACTION_API_PATH}/connector/{id}`,
       options: {
         access: 'public',
-        description: `Delete a connector`,
+        summary: `Delete a connector`,
       },
       validate: {
         params: paramSchema,

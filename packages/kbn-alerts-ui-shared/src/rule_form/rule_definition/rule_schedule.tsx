@@ -15,7 +15,7 @@ import {
   getDurationNumberInItsUnit,
 } from '../utils/parse_duration';
 import { getTimeOptions } from '../utils/get_time_options';
-import { MinimumScheduleInterval, RuleFormErrors } from '../types';
+import { MinimumScheduleInterval, RuleFormErrors } from '../../common';
 import {
   SCHEDULE_TITLE_PREFIX,
   INTERVAL_MINIMUM_TEXT,

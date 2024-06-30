@@ -12,6 +12,7 @@ import {
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
+import { getRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/rule_response_schema.mock';
 
 import type { requestMock } from '../../../../routes/__mocks__';
 import { createMockConfig, requestContextMock, serverMock } from '../../../../routes/__mocks__';
@@ -47,7 +48,8 @@ describe('Import rules route', () => {
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no extant rules
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    clients.detectionRulesClient.importRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())

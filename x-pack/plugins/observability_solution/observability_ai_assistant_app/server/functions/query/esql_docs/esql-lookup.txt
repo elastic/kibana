@@ -1,0 +1,82 @@
+## LOOKUP
+
+The `LOOKUP` command in ES|QL is a highly experimental feature that is currently only available in SNAPSHOT versions. This command is used to match values from the input against a table provided in the request, adding the other fields from the table to the output.
+
+### Use Cases and Limitations
+
+The `LOOKUP` command is particularly useful when you need to match and compare data from different sources or tables. It allows you to enrich your query results with additional data from a separate table based on matching fields.
+
+However, it's important to note that this command is still in the experimental stage and may not be fully stable or support all use cases. It's recommended to use this command in testing environments and not in production.
+
+### Examples
+
+Here are some examples of how to use the `LOOKUP` command in ES|QL:
+
+**Example 1:**
+
+```
+POST /_query?format=txt
+{
+  "query": """
+      FROM library
+    | SORT page_count DESC
+    | KEEP name, author
+    | LOOKUP era ON author
+    | LIMIT 5
+  """
+  "tables": {
+    "era": {
+      "author:keyword": ["Frank Herbert", "Peter F. Hamilton", "Vernor Vinge", "Alastair Reynolds", "James S.A. Corey"],
+      "era:keyword"   : [ "The New Wave", "Diamond", "Diamond", "Diamond", "Hadron"]
+    }
+  }
+}
+```
+
+In this example, the `LOOKUP` command is used to match the `author` field from the `library` index with the `author` field in the `era` table. The matched data is then added to the output.
+
+**Example 2:**
+
+```
+POST /_query?format=txt
+{
+  "query": """
+      FROM employees
+    | SORT salary DESC
+    | KEEP name, department
+    | LOOKUP departments ON department
+    | LIMIT 10
+  """
+  "tables": {
+    "departments": {
+      "department:keyword": ["Sales", "Marketing", "HR", "Engineering"],
+      "location:keyword"   : [ "New York", "San Francisco", "London", "Berlin"]
+    }
+  }
+}
+```
+
+In this example, the `LOOKUP` command is used to match the `department` field from the `employees` index with the `department` field in the `departments` table. The matched data is then added to the output.
+
+**Example 3:**
+
+```
+POST /_query?format=txt
+{
+  "query": """
+      FROM orders
+    | SORT order_date DESC
+    | KEEP order_id, product_id
+    | LOOKUP products ON product_id
+    | LIMIT 20
+  """
+  "tables": {
+    "products": {
+      "product_id:keyword": ["P001", "P002", "P003", "P004"],
+      "product_name:keyword"   : [ "Product 1", "Product 2", "Product 3", "Product 4"]
+    }
+  }
+}
+```
+
+In this example, the `LOOKUP` command is used to match the `product_id` field from the `orders` index with the `product_id` field in the `products` table. The matched data is then added to the output.

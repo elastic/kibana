@@ -21,7 +21,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Cases list', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithRole('admin');
       await svlObltNavigation.navigateToLandingPage();
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
     });

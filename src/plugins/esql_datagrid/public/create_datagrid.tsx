@@ -24,6 +24,7 @@ interface ESQLDataGridProps {
   query: AggregateQuery;
   flyoutType?: 'overlay' | 'push';
   isTableView?: boolean;
+  initialColumns?: DatatableColumn[];
 }
 
 const DataGridLazy = withSuspense(lazy(() => import('./data_grid')));

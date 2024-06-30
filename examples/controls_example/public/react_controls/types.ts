@@ -33,7 +33,7 @@ export interface PublishesControlDisplaySettings {
 }
 
 export interface HasCustomPrepend {
-  getCustomPrepend: () => React.FC<{}>;
+  CustomPrependComponent: React.FC<{}>;
 }
 
 export type DefaultControlApi = PublishesDataLoading &
