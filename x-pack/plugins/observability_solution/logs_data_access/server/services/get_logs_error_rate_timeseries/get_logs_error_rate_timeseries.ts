@@ -22,25 +22,24 @@ export interface LogsErrorRateTimeseries {
   kuery?: string;
 }
 
-interface AggFieldBucket {
-  doc_count_error_upper_bound: number;
-  sum_other_doc_count: number;
-  buckets: Array<{
-    key?: string;
-    doc_count?: string;
-  }>;
-}
+export const getLogErrorsAggegation = () => ({
+  terms: {
+    field: 'log.level',
+    include: ['error', 'ERROR'],
+  },
+});
 
+type LogErrorsAggregation = ReturnType<typeof getLogErrorsAggegation>;
 interface LogsErrorRateTimeseriesHistogram {
   timeseries: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
+      aggs: { logErrors: LogErrorsAggregation };
     },
     {}
   >;
   doc_count: number;
   key: string;
-  logErrors: AggFieldBucket;
 }
 
 interface LogRateQueryAggregation {
@@ -104,12 +103,7 @@ export function createGetLogErrorRateTimeseries(params: RegisterServicesParams) 
                 },
               },
               aggs: {
-                logErrors: {
-                  terms: {
-                    field: 'log.level',
-                    include: ['error', 'ERROR'],
-                  },
-                },
+                logErrors: getLogErrorsAggegation(),
               },
             },
           },

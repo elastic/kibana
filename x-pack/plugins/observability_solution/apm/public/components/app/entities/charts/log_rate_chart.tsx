@@ -19,7 +19,7 @@ type LogRateReturnType =
   APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries'>;
 
 const INITIAL_STATE: LogRateReturnType = {
-  currentPeriod: [],
+  currentPeriod: {},
 };
 
 export function LogRateChart({ height }: { height: number }) {

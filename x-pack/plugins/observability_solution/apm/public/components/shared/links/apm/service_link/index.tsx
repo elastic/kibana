@@ -12,6 +12,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { isMobileAgentName } from '../../../../../../common/agent_name';
+import { SignalTypes } from '../../../../../../common/entities/types';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmRouter } from '../../../../../hooks/use_apm_router';
@@ -33,18 +34,24 @@ interface ServiceLinkProps {
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
   serviceName: string;
   serviceOverflowCount?: number;
+  signalTypes?: SignalTypes[];
 }
-export function ServiceLink({ agentName, query, serviceName, signalTypes }: ServiceLinkProps) {
-  const { link } = useApmRouter();
+export function ServiceLink({
+  agentName,
+  query,
+  serviceName,
+  signalTypes = [SignalTypes.METRICS],
+}: ServiceLinkProps) {
+  const apmRouter = useApmRouter();
 
-  let serviceLinkBase;
+  let serviceLinkBase: string = '/services';
 
   if (isMobileAgentName(agentName)) {
     serviceLinkBase = '/mobile-services';
-  } else if (isLogsSignal(signalTypes)) {
+  }
+
+  if (isLogsSignal(signalTypes)) {
     serviceLinkBase = '/logs-services';
-  } else {
-    serviceLinkBase = '/services';
   }
 
   const serviceLink = `${serviceLinkBase}/{serviceName}/overview`;
@@ -83,7 +90,7 @@ export function ServiceLink({ agentName, query, serviceName, signalTypes }: Serv
       content={
         <StyledLink
           data-test-subj={`serviceLink_${agentName}`}
-          href={link(serviceLink, {
+          href={apmRouter.link(serviceLink, {
             path: { serviceName },
             query,
           })}

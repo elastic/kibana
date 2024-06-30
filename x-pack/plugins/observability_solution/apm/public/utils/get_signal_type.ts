@@ -7,9 +7,9 @@
 
 import { SignalTypes } from '../../common/entities/types';
 
-export function isApmSignal(signalType: string[]) {
-  return signalType.includes(SignalTypes.METRICS);
+export function isApmSignal(signalTypes: SignalTypes[]) {
+  return signalTypes.includes(SignalTypes.METRICS) || signalTypes.includes(SignalTypes.TRACES);
 }
-export function isLogsSignal(signalType: string) {
-  return signalType.includes(SignalTypes.LOGS) && !signalType.includes(SignalTypes.METRICS);
+export function isLogsSignal(signalTypes: SignalTypes[]) {
+  return signalTypes.includes(SignalTypes.LOGS) && !isApmSignal(signalTypes);
 }

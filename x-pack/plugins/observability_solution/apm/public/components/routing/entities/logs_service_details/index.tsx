@@ -122,11 +122,6 @@ export const logsServiceDetailsRoute = {
             showUnifiedSearchBar: false,
           },
         }),
-        params: t.partial({
-          query: t.partial({
-            alertStatus: t.string,
-          }),
-        }),
       },
       '/logs-services/{serviceName}/dashboards': {
         ...page({
