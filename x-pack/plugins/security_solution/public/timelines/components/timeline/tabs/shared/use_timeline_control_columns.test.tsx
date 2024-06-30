@@ -51,6 +51,7 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -70,6 +71,7 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
@@ -90,6 +92,7 @@ describe('useTimelineColumns', () => {
             timelineId: TimelineId.test,
             activeTab: TimelineTabs.query,
             refetch: refetchMock,
+            onToggleShowNotes: jest.fn(),
           }),
         {
           wrapper: TestProviders,
