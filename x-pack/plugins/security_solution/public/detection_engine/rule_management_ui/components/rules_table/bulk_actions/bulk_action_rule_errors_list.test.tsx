@@ -92,4 +92,31 @@ describe('Component BulkEditRuleErrorsList', () => {
 
     expect(screen.getByText(value)).toBeInTheDocument();
   });
+
+  test.each([
+    [
+      BulkActionsDryRunErrCode.MANUAL_RULE_RUN_FEATURE,
+      '2 rules (Manual rule run feature is disabled)',
+    ],
+    [
+      BulkActionsDryRunErrCode.MANUAL_RULE_RUN_DISABLED_RULE,
+      '2 rules (Cannot schedule manual rule run for disabled rules)',
+    ],
+  ])('should render correct message for "%s" errorCode', (errorCode, value) => {
+    const ruleErrors: DryRunResult['ruleErrors'] = [
+      {
+        message: 'test failure',
+        errorCode,
+        ruleIds: ['rule:1', 'rule:2'],
+      },
+    ];
+    render(
+      <BulkActionRuleErrorsList bulkAction={BulkActionTypeEnum.run} ruleErrors={ruleErrors} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
+
+    expect(screen.getByText(value)).toBeInTheDocument();
+  });
 });
