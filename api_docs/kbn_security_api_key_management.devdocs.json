@@ -976,13 +976,7 @@
             "label": "sort",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/security-api-key-management",
-                "scope": "public",
-                "docId": "kibKbnSecurityApiKeyManagementPluginApi",
-                "section": "def-public.QueryApiKeySortOptions",
-                "text": "QueryApiKeySortOptions"
-              }
+              "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"expiration\" | \"role_descriptors\" | \"realm\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
             "deprecated": false,
@@ -1003,48 +997,6 @@
                 "section": "def-public.QueryFilters",
                 "text": "QueryFilters"
               }
-            ],
-            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/security-api-key-management",
-        "id": "def-public.QueryApiKeySortOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "QueryApiKeySortOptions",
-        "description": [],
-        "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/security-api-key-management",
-            "id": "def-public.QueryApiKeySortOptions.field",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "signature": [
-              "\"id\" | \"type\" | \"name\" | \"username\" | \"metadata\" | \"expired\" | \"creation\" | \"expiration\" | \"role_descriptors\" | \"realm\" | \"invalidated\" | \"limited_by\" | \"_sort\""
-            ],
-            "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/security-api-key-management",
-            "id": "def-public.QueryApiKeySortOptions.direction",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "direction",
-            "description": [],
-            "signature": [
-              "\"asc\" | \"desc\""
             ],
             "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
             "deprecated": false,
@@ -1199,6 +1151,21 @@
           "SecurityCreateApiKeyResponse"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-api-key-management",
+        "id": "def-public.QueryApiKeySortOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryApiKeySortOptions",
+        "description": [],
+        "signature": [
+          "{ field: \"id\" | \"type\" | \"name\" | \"username\" | \"profile_uid\" | \"metadata\" | \"expired\" | \"creation\" | \"expiration\" | \"role_descriptors\" | \"realm\" | \"invalidated\" | \"realm_type\" | \"limited_by\" | \"_sort\"; direction: \"asc\" | \"desc\"; }"
+        ],
+        "path": "x-pack/packages/security/api_key_management/src/components/api_keys_api_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
