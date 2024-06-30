@@ -48,7 +48,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await panelActions.customizePanel();
       await dashboardCustomizePanel.disableCustomTimeRange();
       await dashboardCustomizePanel.clickSaveButton();
-      await dashboard.saveDashboard('Dashboard with Pie Chart');
+      await dashboard.saveDashboard('Dashboard with Pie Chart', {
+        saveAsNew: false,
+        exitFromEditMode: true,
+      });
     });
 
     it('action exists in panel context menu', async () => {
@@ -85,7 +88,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardCustomizePanel.clickCommonlyUsedTimeRange('Last_90 days');
       await dashboardCustomizePanel.clickSaveButton();
 
-      await dashboard.saveDashboard('Dashboard with Pie Chart');
+      await dashboard.saveDashboard('Dashboard with Pie Chart', {
+        saveAsNew: false,
+        exitFromEditMode: true,
+      });
 
       await panelActions.openContextMenu();
       await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);

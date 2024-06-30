@@ -8,43 +8,83 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
-import type { AgentPolicy, NewAgentPolicy } from '../../../../../types';
+import type {
+  AgentPolicy,
+  NewAgentPolicy,
+  NewPackagePolicy,
+  PackageInfo,
+} from '../../../../../types';
 import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
 
-export const useAgentlessPolicy = () => {
+export const useAgentless = () => {
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
   const { cloud } = useStartServices();
   const isServerless = !!cloud?.isServerlessEnabled;
 
   const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
-  const isAgentlessPolicyId = (id: string | undefined) =>
-    isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
 
+  const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
+    if (!agentPolicy) return false;
+    return (
+      isAgentlessEnabled &&
+      (agentPolicy?.id === AGENTLESS_POLICY_ID || !!agentPolicy?.supports_agentless)
+    );
+  };
+
+  // When an integration has at least a policy template enabled for agentless
+  const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
+    if (
+      isAgentlessEnabled &&
+      packageInfo?.policy_templates &&
+      packageInfo?.policy_templates.length > 0 &&
+      !!packageInfo?.policy_templates.find(
+        (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
+      )
+    ) {
+      return true;
+    }
+    return false;
+  };
+
+  // TODO: remove this check when CSPM implements the above flag and rely only on `isAgentlessIntegration`
+  const isAgentlessPackagePolicy = (packagePolicy: NewPackagePolicy) => {
+    return isAgentlessEnabled && packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
+  };
   return {
     isAgentlessEnabled,
-    isAgentlessPolicyId,
+    isAgentlessAgentPolicy,
+    isAgentlessIntegration,
+    isAgentlessPackagePolicy,
   };
 };
 
 export function useSetupTechnology({
   updateNewAgentPolicy,
   newAgentPolicy,
-  updateAgentPolicy,
+  updateAgentPolicies,
   setSelectedPolicyTab,
+  packageInfo,
 }: {
   updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
-  updateAgentPolicy: (policy: AgentPolicy | undefined) => void;
+  updateAgentPolicies: (policies: AgentPolicy[]) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
+  packageInfo?: PackageInfo;
 }) {
-  const { isAgentlessEnabled } = useAgentlessPolicy();
+  const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
   const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
+
+  useEffect(() => {
+    if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
+      setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
+    }
+  }, [isAgentlessEnabled, isAgentlessIntegration, packageInfo]);
 
   useEffect(() => {
     const fetchAgentlessPolicy = async () => {
@@ -69,13 +109,13 @@ export function useSetupTechnology({
 
       if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (agentlessPolicy) {
-          updateAgentPolicy(agentlessPolicy);
+          updateAgentPolicies([agentlessPolicy]);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
       } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
-        updateAgentPolicy(undefined);
+        updateAgentPolicies([]);
       }
       setSelectedSetupTechnology(setupTechnology);
     },
@@ -83,7 +123,7 @@ export function useSetupTechnology({
       isAgentlessEnabled,
       selectedSetupTechnology,
       agentlessPolicy,
-      updateAgentPolicy,
+      updateAgentPolicies,
       setSelectedPolicyTab,
       updateNewAgentPolicy,
       newAgentPolicy,

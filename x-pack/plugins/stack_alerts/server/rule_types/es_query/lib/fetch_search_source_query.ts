@@ -56,11 +56,10 @@ export async function fetchSearchSourceQuery({
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
-
-  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+  const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
-  const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+  const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
     initialSearchSource,
     index,
     params,
@@ -102,7 +101,7 @@ export async function fetchSearchSourceQuery({
   };
 }
 
-export function updateSearchSource(
+export async function updateSearchSource(
   searchSource: ISearchSource,
   index: DataView,
   params: OnlySearchSourceRuleParams,
@@ -110,9 +109,9 @@ export function updateSearchSource(
   dateStart: string,
   dateEnd: string,
   alertLimit?: number
-): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
+): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const timeField = index.getTimeField();
+  const timeField = await index.getTimeField();
 
   if (!timeField) {
     throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);

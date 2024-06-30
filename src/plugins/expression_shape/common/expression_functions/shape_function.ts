@@ -44,7 +44,7 @@ export const errors = {
   invalidShape: (shape: string) =>
     new Error(
       i18n.translate('expressionShape.functions.shape.invalidShapeErrorMessage', {
-        defaultMessage: "Invalid value: '{shape}'. Such a shape doesn't exist.",
+        defaultMessage: "Invalid value: ''{shape}''. Such a shape doesn't exist.",
         values: {
           shape,
         },

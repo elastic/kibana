@@ -70,7 +70,10 @@ export function LibraryNotificationPopover({ unlinkAction, api }: LibraryNotific
               data-test-subj={'libraryNotificationUnlinkButton'}
               size="s"
               fill
-              onClick={() => unlinkAction.execute({ embeddable: api })}
+              onClick={() => {
+                setIsPopoverOpen(false);
+                unlinkAction.execute({ embeddable: api });
+              }}
             >
               {unlinkAction.getDisplayName({ embeddable: api })}
             </EuiButton>

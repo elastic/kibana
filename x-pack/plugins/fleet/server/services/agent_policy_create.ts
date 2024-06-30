@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type {
+  AuthenticatedUser,
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 import type { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
 
@@ -71,6 +73,7 @@ async function createPackagePolicy(
   if (!newPackagePolicy) return;
 
   newPackagePolicy.policy_id = agentPolicy.id;
+  newPackagePolicy.policy_ids = [agentPolicy.id];
   newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 

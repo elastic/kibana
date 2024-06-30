@@ -8,6 +8,7 @@ import {
   SerializedTitles,
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
+  HasEditCapabilities,
 } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -20,6 +21,7 @@ import {
 } from '@kbn/core/public';
 import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
@@ -52,7 +54,8 @@ export type SloOverviewEmbeddableState = SerializedTitles &
 export type SloOverviewApi = DefaultEmbeddableApi<SloOverviewEmbeddableState> &
   PublishesWritablePanelTitle &
   PublishesPanelTitle &
-  HasSloGroupOverviewConfig;
+  HasSloGroupOverviewConfig &
+  HasEditCapabilities;
 
 export interface HasSloGroupOverviewConfig {
   getSloGroupOverviewConfig: () => GroupSloCustomInput;
@@ -77,6 +80,7 @@ export interface SloEmbeddableDeps {
   application: ApplicationStart;
   notifications: NotificationsStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   uiActions: UiActionsStart;
 }
 

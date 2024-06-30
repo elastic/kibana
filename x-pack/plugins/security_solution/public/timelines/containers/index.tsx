@@ -21,7 +21,7 @@ import type {
 import type { ESQuery } from '../../../common/typed_json';
 
 import type { inputsModel } from '../../common/store';
-import type { RunTimeMappings } from '../../common/store/sourcerer/model';
+import type { RunTimeMappings } from '../../sourcerer/store/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
 import { timelineActions } from '../store';

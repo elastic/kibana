@@ -85,7 +85,7 @@ export class AutoFollowPatternEdit extends PureComponent {
             error: i18n.translate(
               'xpack.crossClusterReplication.autoFollowPatternEditForm.loadingErrorMessage',
               {
-                defaultMessage: `The auto-follow pattern '{name}' does not exist.`,
+                defaultMessage: `The auto-follow pattern ''{name}'' does not exist.`,
                 values: { name },
               }
             ),

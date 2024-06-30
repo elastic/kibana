@@ -10,9 +10,7 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
 
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 import { AgentExecutor } from './types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
@@ -30,13 +28,11 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
   actions,
   connectorId,
   esClient,
+  esStore,
   langChainMessages,
   llmType,
   logger,
   request,
-  elserId,
-  kbResource,
-  telemetry,
   traceOptions,
 }) => {
   const llm = new ActionsClientLlm({
@@ -58,16 +54,6 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
     outputKey: 'output',
     returnMessages: true,
   });
-
-  // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(
-    esClient,
-    KNOWLEDGE_BASE_INDEX_PATTERN,
-    logger,
-    telemetry,
-    elserId,
-    kbResource
-  );
 
   const modelExists = await esStore.isModelInstalled();
   if (!modelExists) {

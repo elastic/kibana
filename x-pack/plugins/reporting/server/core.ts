@@ -19,6 +19,7 @@ import type {
   PackageInfo,
   PluginInitializerContext,
   SavedObjectsServiceStart,
+  SecurityServiceStart,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
@@ -38,7 +39,7 @@ import { PngExportType } from '@kbn/reporting-export-types-png';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ExportType } from '@kbn/reporting-server';
 import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
@@ -82,7 +83,7 @@ export interface ReportingInternalStart {
   licensing: LicensingPluginStart;
   logger: Logger;
   screenshotting?: ScreenshottingStart;
-  security?: SecurityPluginStart;
+  securityService: SecurityServiceStart;
   taskManager: TaskManagerStartContract;
 }
 
@@ -214,7 +215,7 @@ export class ReportingCore {
    */
   private getExportTypes(): ExportType[] {
     const { csv, pdf, png } = this.config.export_types;
-    const exportTypes = [];
+    const exportTypes: ExportType[] = [];
 
     if (csv.enabled) {
       // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
@@ -235,41 +236,6 @@ export class ReportingCore {
     }
 
     return exportTypes;
-  }
-
-  /**
-   * If xpack.reporting.roles.enabled === true, register Reporting as a feature
-   * that is controlled by user role names
-   */
-  public registerFeature() {
-    const { features } = this.getPluginSetupDeps();
-    const deprecatedRoles = this.getDeprecatedAllowedRoles();
-
-    if (deprecatedRoles !== false) {
-      // refer to roles.allow configuration (deprecated path)
-      const allowedRoles = ['superuser', ...(deprecatedRoles ?? [])];
-      const privileges = allowedRoles.map((role) => ({
-        requiredClusterPrivileges: [],
-        requiredRoles: [role],
-        ui: [],
-      }));
-
-      // self-register as an elasticsearch feature (deprecated)
-      features.registerElasticsearchFeature({
-        id: 'reporting',
-        catalogue: ['reporting'],
-        management: {
-          insightsAndAlerting: ['reporting'],
-        },
-        privileges,
-      });
-    } else {
-      this.logger.debug(
-        `Reporting roles configuration is disabled. Please assign access to Reporting use Kibana feature controls for applications.`
-      );
-      // trigger application to register Reporting as a subfeature
-      features.enableReportingUiCapabilities();
-    }
   }
 
   /*

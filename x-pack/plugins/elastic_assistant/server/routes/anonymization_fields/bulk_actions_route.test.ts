@@ -14,7 +14,7 @@ import {
   getEmptyFindResult,
   getFindAnonymizationFieldsResultWithSingleHit,
 } from '../../__mocks__/response';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import { bulkActionAnonymizationFieldsRoute } from './bulk_actions_route';
 import {
   getAnonymizationFieldMock,

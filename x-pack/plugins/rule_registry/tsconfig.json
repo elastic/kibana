@@ -31,11 +31,11 @@
     "@kbn/logging",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/share-plugin",
-    "@kbn/alerting-state-types",
     "@kbn/alerts-as-data-utils",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server",
     "@kbn/search-types",
+    "@kbn/alerting-state-types"
   ],
   "exclude": [
     "target/**/*",

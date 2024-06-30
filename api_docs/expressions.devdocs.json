@@ -270,6 +270,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Execution.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1271,6 +1288,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.Executor.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -2192,6 +2226,19 @@
             "label": "type",
             "description": [
               "\nReturn type of function. This SHOULD be supplied. We use it for UI\nand autocomplete hinting. We may also use it for optimizations in\nthe future."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunction.allowCache",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -7148,6 +7195,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-public.ExecutionContext.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nAllow caching in the current execution."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-public.ExecutionContext.abortSignal",
             "type": "Object",
             "tags": [],
@@ -8378,6 +8441,22 @@
                 "text": "UnmappedTypeStrings"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionFunctionDefinition.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -10728,20 +10807,6 @@
           },
           {
             "parentPluginId": "expressions",
-            "id": "def-public.IExpressionLoaderParams.disableCaching",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "disableCaching",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/expressions/public/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "expressions",
             "id": "def-public.IExpressionLoaderParams.customFunctions",
             "type": "Object",
             "tags": [],
@@ -11007,6 +11072,20 @@
             ],
             "signature": [
               "number | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false,
@@ -13813,6 +13892,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Execution.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -14595,6 +14691,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.Executor.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -15516,6 +15629,19 @@
             "label": "type",
             "description": [
               "\nReturn type of function. This SHOULD be supplied. We use it for UI\nand autocomplete hinting. We may also use it for optimizations in\nthe future."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunction.allowCache",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -18577,6 +18703,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-server.ExecutionContext.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nAllow caching in the current execution."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-server.ExecutionContext.abortSignal",
             "type": "Object",
             "tags": [],
@@ -19776,6 +19918,22 @@
                 "text": "UnmappedTypeStrings"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExpressionFunctionDefinition.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false,
@@ -22974,6 +23132,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Execution.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/execution/execution.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -23975,6 +24150,23 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.Executor.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "functionCache",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  "FunctionCacheItem",
+                  ">"
+                ],
+                "path": "src/plugins/expressions/common/executor/executor.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -24896,6 +25088,19 @@
             "label": "type",
             "description": [
               "\nReturn type of function. This SHOULD be supplied. We use it for UI\nand autocomplete hinting. We may also use it for optimizations in\nthe future."
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunction.allowCache",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
             ],
             "path": "src/plugins/expressions/common/expression_functions/expression_function.ts",
             "deprecated": false,
@@ -30650,6 +30855,22 @@
           },
           {
             "parentPluginId": "expressions",
+            "id": "def-common.ExecutionContext.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nAllow caching in the current execution."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
             "id": "def-common.ExecutionContext.abortSignal",
             "type": "Object",
             "tags": [],
@@ -32523,6 +32744,20 @@
             "path": "src/plugins/expressions/common/service/expressions_services.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionExecutionParams.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/service/expressions_services.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -32670,6 +32905,22 @@
                 "text": "UnmappedTypeStrings"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_functions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExpressionFunctionDefinition.allowCache",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowCache",
+            "description": [
+              "\nOpt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_functions/types.ts",
             "deprecated": false,

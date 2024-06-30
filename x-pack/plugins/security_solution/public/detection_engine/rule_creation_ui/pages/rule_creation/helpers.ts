@@ -512,6 +512,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         required_fields: requiredFields,
+        ...alertSuppressionFields,
       }
     : {
         ...alertSuppressionFields,

@@ -335,6 +335,7 @@ export const javaSettings: RawSettingDefinition[] = [
         '`object_name[<JMX object name pattern>] attribute[<JMX attribute>:metric_name=<optional metric name>]`\n' +
         '\n' +
         'See the Java agent documentation for more details.',
+      ignoreTag: true,
     }),
     includeAgents: ['java'],
   },

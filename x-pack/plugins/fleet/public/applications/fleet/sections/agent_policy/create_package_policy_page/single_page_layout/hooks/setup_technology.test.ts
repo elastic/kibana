@@ -25,7 +25,7 @@ type MockFn = jest.MockedFunction<any>;
 
 describe('useSetupTechnology', () => {
   const updateNewAgentPolicyMock = jest.fn();
-  const updateAgentPolicyMock = jest.fn();
+  const updateAgentPoliciesMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
   const newAgentPolicyMock = {
     name: 'mock_new_agent_policy',
@@ -59,7 +59,7 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicy: updateAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
       })
     );
@@ -74,7 +74,7 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicy: updateAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
       })
     );
@@ -95,7 +95,7 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicy: updateAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
       })
     );
@@ -110,7 +110,7 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicy: updateAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
       })
     );
@@ -121,7 +121,7 @@ describe('useSetupTechnology', () => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
-    expect(updateAgentPolicyMock).toHaveBeenCalledWith({ id: 'agentless-policy-id' });
+    expect(updateAgentPoliciesMock).toHaveBeenCalledWith([{ id: 'agentless-policy-id' }]);
     expect(setSelectedPolicyTabMock).toHaveBeenCalledWith(SelectedPolicyTab.EXISTING);
   });
 
@@ -130,7 +130,7 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicy: updateAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
       })
     );
@@ -164,7 +164,7 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicy: updateAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
       })
     );
@@ -183,7 +183,7 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         updateNewAgentPolicy: updateNewAgentPolicyMock,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicy: updateAgentPolicyMock,
+        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
       })
     );

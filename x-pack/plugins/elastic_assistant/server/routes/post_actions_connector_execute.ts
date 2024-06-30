@@ -21,7 +21,11 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { i18n } from '@kbn/i18n';
 import { getLlmType } from './utils';
-import { StaticReturnType } from '../lib/langchain/executors/types';
+import {
+  AgentExecutorParams,
+  AssistantDataClients,
+  StaticReturnType,
+} from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -31,7 +35,7 @@ import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { getLangChainMessages } from '../lib/langchain/helpers';
 import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
-import { ESQL_RESOURCE } from './knowledge_base/constants';
+import { ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
 import {
   DEFAULT_PLUGIN_NAME,
@@ -41,6 +45,8 @@ import {
 import { getLangSmithTracer } from './evaluate/utils';
 import { EsAnonymizationFieldsSchema } from '../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../ai_assistant_data_clients/anonymization_fields/helpers';
+import { ElasticsearchStore } from '../lib/langchain/elasticsearch_store/elasticsearch_store';
+import { callAssistantGraph } from '../lib/langchain/graphs/default_assistant_graph';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -180,7 +186,7 @@ export const postActionsConnectorExecuteRoute = (
                       model: request.body.model,
                       messages: [
                         {
-                          role: 'assistant',
+                          role: 'system',
                           content: i18n.translate(
                             'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
                             {
@@ -315,7 +321,7 @@ export const postActionsConnectorExecuteRoute = (
               []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 
-          const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+          const elserId = await getElser();
 
           const anonymizationFieldsRes =
             await anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>({
@@ -323,7 +329,35 @@ export const postActionsConnectorExecuteRoute = (
               page: 1,
             });
 
-          const result: StreamResponseWithHeaders | StaticReturnType = await callAgentExecutor({
+          // Create an ElasticsearchStore for KB interactions
+          // Setup with kbDataClient if `assistantKnowledgeBaseByDefault` FF is enabled
+          const enableKnowledgeBaseByDefault =
+            assistantContext.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
+          const kbDataClient = enableKnowledgeBaseByDefault
+            ? (await assistantContext.getAIAssistantKnowledgeBaseDataClient(false)) ?? undefined
+            : undefined;
+          const kbIndex =
+            enableKnowledgeBaseByDefault && kbDataClient != null
+              ? kbDataClient.indexTemplateAndPattern.alias
+              : KNOWLEDGE_BASE_INDEX_PATTERN;
+          const esStore = new ElasticsearchStore(
+            esClient,
+            kbIndex,
+            logger,
+            telemetry,
+            elserId,
+            ESQL_RESOURCE,
+            kbDataClient
+          );
+
+          const dataClients: AssistantDataClients = {
+            anonymizationFieldsDataClient: anonymizationFieldsDataClient ?? undefined,
+            conversationsDataClient: conversationsDataClient ?? undefined,
+            kbDataClient,
+          };
+
+          // Shared executor params
+          const executorParams: AgentExecutorParams<boolean> = {
             abortSignal,
             alertsIndexPattern: request.body.alertsIndexPattern,
             anonymizationFields: anonymizationFieldsRes
@@ -333,22 +367,20 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase ?? false,
             assistantTools,
             connectorId,
-            elserId,
+            conversationId,
+            dataClients,
             esClient,
-            isStream:
-              // TODO implement llmClass for bedrock streaming
-              // tracked here: https://github.com/elastic/security-team/issues/7363
-              request.body.subAction !== 'invokeAI' && actionTypeId === '.gen-ai',
+            esStore,
+            isStream: request.body.subAction !== 'invokeAI',
             llmType: getLlmType(actionTypeId),
-            kbResource: ESQL_RESOURCE,
             langChainMessages,
             logger,
             onNewReplacements,
             onLlmResponse,
             request,
+            response,
             replacements: request.body.replacements,
             size: request.body.size,
-            telemetry,
             traceOptions: {
               projectName: langSmithProject,
               tracers: getLangSmithTracer({
@@ -357,7 +389,15 @@ export const postActionsConnectorExecuteRoute = (
                 logger,
               }),
             },
-          });
+          };
+
+          // New code path for LangGraph implementation, behind `assistantKnowledgeBaseByDefault` FF
+          let result: StreamResponseWithHeaders | StaticReturnType;
+          if (enableKnowledgeBaseByDefault) {
+            result = await callAssistantGraph(executorParams);
+          } else {
+            result = await callAgentExecutor(executorParams);
+          }
 
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             actionTypeId,

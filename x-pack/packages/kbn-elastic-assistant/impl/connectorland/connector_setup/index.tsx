@@ -20,7 +20,8 @@ import { getGenAiConfig } from '../helpers';
 
 export interface ConnectorSetupProps {
   conversation?: Conversation;
-  onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  onSetupComplete?: () => void;
+  onConversationUpdate?: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
 }
 
@@ -61,7 +62,10 @@ export const ConnectorSetup = ({
         });
 
         if (updatedConversation) {
-          onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
+          onConversationUpdate?.({
+            cId: updatedConversation.id,
+            cTitle: updatedConversation.title,
+          });
 
           refetchConnectors?.();
         }

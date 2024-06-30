@@ -212,23 +212,15 @@
             "section": "def-common.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
-            "text": "PublishingSubject"
+            "section": "def-common.PublishesFilters",
+            "text": "PublishesFilters"
           },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined>; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -306,23 +298,15 @@
                 "section": "def-common.PublishesTimeRange",
                 "text": "PublishesTimeRange"
               },
-              " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+              " & ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-common.PublishingSubject",
-                "text": "PublishingSubject"
+                "section": "def-common.PublishesFilters",
+                "text": "PublishesFilters"
               },
-              "<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
-              "[] | undefined>; query$: ",
+              " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -858,23 +842,15 @@
             "section": "def-common.PublishesTimeRange",
             "text": "PublishesTimeRange"
           },
-          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; filters$: ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishingSubject",
-            "text": "PublishingSubject"
+            "section": "def-common.PublishesFilters",
+            "text": "PublishesFilters"
           },
-          "<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined>; query$: ",
+          " & { isCompatibleWithUnifiedSearch?: (() => boolean) | undefined; query$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -968,7 +944,13 @@
             "text": "DashboardContainerInput"
           },
           ", \"executionContext\" | \"panels\" | \"controlGroupInput\" | \"isEmbeddedExternally\">> & { dashboardId?: string | undefined; useHash?: boolean | undefined; preserveSavedFilters?: boolean | undefined; searchSessionId?: string | undefined; panels?: (",
-          "SavedDashboardPanel",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.SavedDashboardPanel",
+            "text": "SavedDashboardPanel"
+          },
           " & ",
           {
             "pluginId": "@kbn/utility-types",
@@ -1226,7 +1208,13 @@
             "text": "DashboardPanelMap"
           },
           ", removeLegacyVersion?: boolean | undefined) => ",
-          "SavedDashboardPanel",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.SavedDashboardPanel",
+            "text": "SavedDashboardPanel"
+          },
           "[]"
         ],
         "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
@@ -1298,7 +1286,13 @@
             "text": "SavedObjectEmbeddableInput"
           },
           ">, removeLegacyVersion: boolean | undefined) => ",
-          "SavedDashboardPanel"
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.SavedDashboardPanel",
+            "text": "SavedDashboardPanel"
+          }
         ],
         "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
         "deprecated": false,
@@ -1362,7 +1356,13 @@
         "description": [],
         "signature": [
           "(savedDashboardPanel: ",
-          "SavedDashboardPanel",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.SavedDashboardPanel",
+            "text": "SavedDashboardPanel"
+          },
           ") => ",
           {
             "pluginId": "dashboard",
@@ -1385,7 +1385,13 @@
             "label": "savedDashboardPanel",
             "description": [],
             "signature": [
-              "SavedDashboardPanel"
+              {
+                "pluginId": "dashboard",
+                "scope": "common",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-common.SavedDashboardPanel",
+                "text": "SavedDashboardPanel"
+              }
             ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
@@ -1405,7 +1411,13 @@
         "description": [],
         "signature": [
           "(panels?: ",
-          "SavedDashboardPanel",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.SavedDashboardPanel",
+            "text": "SavedDashboardPanel"
+          },
           "[] | undefined) => ",
           {
             "pluginId": "dashboard",
@@ -1427,7 +1439,13 @@
             "label": "panels",
             "description": [],
             "signature": [
-              "SavedDashboardPanel",
+              {
+                "pluginId": "dashboard",
+                "scope": "common",
+                "docId": "kibDashboardPluginApi",
+                "section": "def-common.SavedDashboardPanel",
+                "text": "SavedDashboardPanel"
+              },
               "[] | undefined"
             ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
@@ -1684,6 +1702,77 @@
               "InjectExtractDeps"
             ],
             "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.prefixReferencesFromPanel",
+        "type": "Function",
+        "tags": [],
+        "label": "prefixReferencesFromPanel",
+        "description": [],
+        "signature": [
+          "(id: string, references: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.Reference",
+            "text": "Reference"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-common.Reference",
+            "text": "Reference"
+          },
+          "[]"
+        ],
+        "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.prefixReferencesFromPanel.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.prefixReferencesFromPanel.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/dashboard/common/dashboard_container/persistable_state/dashboard_container_references.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2254,6 +2343,161 @@
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.DashboardPanelState.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "\nReact embeddables are serialized and may pass references that are later used in factory's deserialize method."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-common.Reference",
+                "text": "Reference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dashboard",
+        "id": "def-common.SavedDashboardPanel",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedDashboardPanel",
+        "description": [
+          "\nA saved dashboard panel parsed directly from the Dashboard Attributes panels JSON"
+        ],
+        "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.embeddableConfig",
+            "type": "Object",
+            "tags": [],
+            "label": "embeddableConfig",
+            "description": [],
+            "signature": [
+              "{ [key: string]: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Serializable",
+                "text": "Serializable"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.panelRefName",
+            "type": "string",
+            "tags": [],
+            "label": "panelRefName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.gridData",
+            "type": "Object",
+            "tags": [],
+            "label": "gridData",
+            "description": [],
+            "signature": [
+              "GridData"
+            ],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.panelIndex",
+            "type": "string",
+            "tags": [],
+            "label": "panelIndex",
+            "description": [],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboard",
+            "id": "def-common.SavedDashboardPanel.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "\nThis version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.\nAs of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the\nembeddable's input. (embeddableConfig in this type)."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/dashboard/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2315,7 +2559,7 @@
           "\nFor BWC reasons, dashboard state is stored with panels as an array instead of a map"
         ],
         "signature": [
-          "{ id?: string | undefined; tags?: string[] | undefined; title?: string | undefined; query?: ",
+          "{ id?: string | undefined; version?: string | undefined; tags?: string[] | undefined; title?: string | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -2331,7 +2575,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; description?: string | undefined; version?: string | undefined; refreshInterval?: ",
+          "[] | undefined; description?: string | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -2372,7 +2616,13 @@
             "text": "TimeRange"
           },
           " | undefined; timeslice?: [number, number] | undefined; isEmbeddedExternally?: boolean | undefined; timeRestore?: boolean | undefined; useMargins?: boolean | undefined; panels?: ",
-          "SavedDashboardPanel",
+          {
+            "pluginId": "dashboard",
+            "scope": "common",
+            "docId": "kibDashboardPluginApi",
+            "section": "def-common.SavedDashboardPanel",
+            "text": "SavedDashboardPanel"
+          },
           "[] | undefined; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",

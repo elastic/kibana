@@ -36,7 +36,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('Case View', function () {
     before(async () => {
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithRole('admin');
     });
 
     after(async () => {

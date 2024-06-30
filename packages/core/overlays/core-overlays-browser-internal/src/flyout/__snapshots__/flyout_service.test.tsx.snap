@@ -114,90 +114,7 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <IntlProvider
-                  defaultLocale="en"
-                  formats={
-                    Object {
-                      "date": Object {
-                        "full": Object {
-                          "day": "numeric",
-                          "month": "long",
-                          "weekday": "long",
-                          "year": "numeric",
-                        },
-                        "long": Object {
-                          "day": "numeric",
-                          "month": "long",
-                          "year": "numeric",
-                        },
-                        "medium": Object {
-                          "day": "numeric",
-                          "month": "short",
-                          "year": "numeric",
-                        },
-                        "short": Object {
-                          "day": "numeric",
-                          "month": "numeric",
-                          "year": "2-digit",
-                        },
-                      },
-                      "number": Object {
-                        "currency": Object {
-                          "style": "currency",
-                        },
-                        "percent": Object {
-                          "style": "percent",
-                        },
-                      },
-                      "relative": Object {
-                        "days": Object {
-                          "units": "day",
-                        },
-                        "hours": Object {
-                          "units": "hour",
-                        },
-                        "minutes": Object {
-                          "units": "minute",
-                        },
-                        "months": Object {
-                          "units": "month",
-                        },
-                        "seconds": Object {
-                          "units": "second",
-                        },
-                        "years": Object {
-                          "units": "year",
-                        },
-                      },
-                      "time": Object {
-                        "full": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                          "second": "numeric",
-                          "timeZoneName": "short",
-                        },
-                        "long": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                          "second": "numeric",
-                          "timeZoneName": "short",
-                        },
-                        "medium": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                          "second": "numeric",
-                        },
-                        "short": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                        },
-                      },
-                    }
-                  }
-                  locale="en"
-                  messages={Object {}}
-                  textComponent={Symbol(react.fragment)}
-                >
+                "value": <I18nProvider>
                   <KibanaErrorBoundaryProvider
                     analytics={
                       Object {
@@ -225,7 +142,7 @@ Array [
                       </EuiFlyout>
                     </KibanaErrorBoundary>
                   </KibanaErrorBoundaryProvider>
-                </IntlProvider>,
+                </I18nProvider>,
               },
             ],
           },
@@ -307,90 +224,7 @@ Array [
             "results": Array [
               Object {
                 "type": "return",
-                "value": <IntlProvider
-                  defaultLocale="en"
-                  formats={
-                    Object {
-                      "date": Object {
-                        "full": Object {
-                          "day": "numeric",
-                          "month": "long",
-                          "weekday": "long",
-                          "year": "numeric",
-                        },
-                        "long": Object {
-                          "day": "numeric",
-                          "month": "long",
-                          "year": "numeric",
-                        },
-                        "medium": Object {
-                          "day": "numeric",
-                          "month": "short",
-                          "year": "numeric",
-                        },
-                        "short": Object {
-                          "day": "numeric",
-                          "month": "numeric",
-                          "year": "2-digit",
-                        },
-                      },
-                      "number": Object {
-                        "currency": Object {
-                          "style": "currency",
-                        },
-                        "percent": Object {
-                          "style": "percent",
-                        },
-                      },
-                      "relative": Object {
-                        "days": Object {
-                          "units": "day",
-                        },
-                        "hours": Object {
-                          "units": "hour",
-                        },
-                        "minutes": Object {
-                          "units": "minute",
-                        },
-                        "months": Object {
-                          "units": "month",
-                        },
-                        "seconds": Object {
-                          "units": "second",
-                        },
-                        "years": Object {
-                          "units": "year",
-                        },
-                      },
-                      "time": Object {
-                        "full": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                          "second": "numeric",
-                          "timeZoneName": "short",
-                        },
-                        "long": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                          "second": "numeric",
-                          "timeZoneName": "short",
-                        },
-                        "medium": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                          "second": "numeric",
-                        },
-                        "short": Object {
-                          "hour": "numeric",
-                          "minute": "numeric",
-                        },
-                      },
-                    }
-                  }
-                  locale="en"
-                  messages={Object {}}
-                  textComponent={Symbol(react.fragment)}
-                >
+                "value": <I18nProvider>
                   <KibanaErrorBoundaryProvider
                     analytics={
                       Object {
@@ -418,7 +252,7 @@ Array [
                       </EuiFlyout>
                     </KibanaErrorBoundary>
                   </KibanaErrorBoundaryProvider>
-                </IntlProvider>,
+                </I18nProvider>,
               },
             ],
           },

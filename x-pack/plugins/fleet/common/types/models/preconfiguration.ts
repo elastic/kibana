@@ -24,6 +24,7 @@ export type InputsOverride = Partial<NewPackagePolicyInput> & {
 
 export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespace' | 'id'> {
   id: string | number;
+  space_id?: string;
   namespace?: string;
   package_policies: Array<
     | (Partial<Omit<NewPackagePolicy, 'inputs' | 'package'>> & {

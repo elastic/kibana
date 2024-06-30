@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, {
   Dispatch,
   SetStateAction,
@@ -37,7 +39,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
-import { AssistantHeader } from './assistant_header';
 import { WELCOME_CONVERSATION_TITLE } from './use_conversation/translations';
 import {
   getDefaultConnector,
@@ -59,6 +60,7 @@ import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { NEW_CHAT } from './conversations/conversation_sidepanel/translations';
 import { SystemPrompt } from './prompt_editor/system_prompt';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
+import { AssistantHeader } from './assistant_header';
 import * as i18n from './translations';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
@@ -78,6 +80,7 @@ import { Conversation } from '../assistant_context/types';
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
 
 export interface Props {
   conversationTitle?: string;
@@ -259,7 +262,9 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const blockBotConversation = useMemo(
-    () => currentConversation && getBlockBotConversation(currentConversation, isAssistantEnabled),
+    () =>
+      currentConversation &&
+      getBlockBotConversation(currentConversation, isAssistantEnabled),
     [currentConversation, isAssistantEnabled]
   );
 
@@ -306,7 +311,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Show missing connector callout if no connectors are configured
 
   const showMissingConnectorCallout = useMemo(() => {
-    if (!isLoading && areConnectorsFetched) {
+    if (!isLoading && areConnectorsFetched && currentConversation?.id !== '') {
       if (!currentConversation?.apiConfig?.connectorId) {
         return true;
       }
@@ -317,7 +322,13 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return false;
-  }, [areConnectorsFetched, connectors, currentConversation?.apiConfig?.connectorId, isLoading]);
+  }, [
+    areConnectorsFetched,
+    connectors,
+    currentConversation?.apiConfig?.connectorId,
+    currentConversation?.id,
+    isLoading,
+  ]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -471,14 +482,6 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedAnonymizationFields,
   ]);
 
-  useEffect(() => {}, [
-    areConnectorsFetched,
-    connectors,
-    conversationsLoaded,
-    currentConversation,
-    isLoading,
-  ]);
-
   const createCodeBlockPortals = useCallback(
     () =>
       messageCodeBlocks?.map((codeBlocks: CodeBlockDetails[], i: number) => {
@@ -562,6 +565,7 @@ const AssistantComponent: React.FC<Props> = ({
       abortStream,
       refetchCurrentConversation,
       currentConversation,
+      editingSystemPromptId,
       getComments,
       showAnonymizedValues,
       handleRegenerateResponse,
@@ -570,6 +574,11 @@ const AssistantComponent: React.FC<Props> = ({
       isLoadingChatSend,
       currentUserAvatar,
       selectedPromptContextsCount,
+      isNewConversation,
+      isSettingsModalVisible,
+      promptContexts,
+      handleOnSystemPromptSelectionChange,
+      selectedPromptContexts,
     ]
   );
 
@@ -600,8 +609,8 @@ const AssistantComponent: React.FC<Props> = ({
           conversation: payload,
           apiConfig: {
             ...payload?.apiConfig,
-            connectorId: defaultConnector?.id as string,
-            actionTypeId: defaultConnector?.actionTypeId as string,
+            connectorId: (defaultConnector?.id as string) ?? '',
+            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
             provider: apiConfig?.apiProvider,
             model: apiConfig?.defaultModel,
           },
@@ -622,12 +631,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      if (
-        showMissingConnectorCallout &&
-        areConnectorsFetched &&
-        defaultConnector &&
-        currentConversation
-      ) {
+      if (areConnectorsFetched && currentConversation?.id === '') {
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);
@@ -683,9 +687,12 @@ const AssistantComponent: React.FC<Props> = ({
           textAlign="center"
           color={euiThemeVars.euiColorMediumShade}
           size="xs"
-          css={css`
-            margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
-          `}
+          css={
+           css`
+                  margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM}
+                    ${euiThemeVars.euiSizeL};
+                `
+          }
         >
           {i18n.DISCLAIMER}
         </EuiText>
@@ -762,6 +769,9 @@ const AssistantComponent: React.FC<Props> = ({
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                   />
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InstallKnowledgeBaseButton />
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
@@ -780,11 +790,9 @@ const AssistantComponent: React.FC<Props> = ({
       </EuiPanel>
     );
   }, [
-    blockBotConversation,
     comments,
     currentConversation,
     editingSystemPromptId,
-    handleOnConversationSelected,
     handleOnSystemPromptSelectionChange,
     isSettingsModalVisible,
     isWelcomeSetup,
@@ -841,6 +849,7 @@ const AssistantComponent: React.FC<Props> = ({
                   setChatHistoryVisible={setChatHistoryVisible}
                   onConversationSelected={handleOnConversationSelected}
                   conversations={conversations}
+                  conversationsLoaded={conversationsLoaded}
                   refetchConversationsState={refetchConversationsState}
                   onConversationCreate={handleCreateConversation}
                   isAssistantEnabled={isAssistantEnabled}
@@ -883,7 +892,10 @@ const AssistantComponent: React.FC<Props> = ({
                 }
               >
                 {!isAssistantEnabled ? (
-                  <BlockBotCallToAction http={http} isAssistantEnabled={isAssistantEnabled} />
+                  <BlockBotCallToAction
+                    http={http}
+                    isAssistantEnabled={isAssistantEnabled}
+                  />
                 ) : (
                   <EuiFlexGroup direction="column" justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>

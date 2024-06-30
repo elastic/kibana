@@ -39,6 +39,7 @@ export const AssetsAccordion: FunctionComponent<{
   return (
     <EuiAccordion
       initialIsOpen={isDashboard}
+      data-test-subj={`fleetAssetsAccordion.button.${type}`}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -57,7 +58,11 @@ export const AssetsAccordion: FunctionComponent<{
     >
       <>
         <EuiSpacer size="m" />
-        <EuiSplitPanel.Outer hasBorder hasShadow={false}>
+        <EuiSplitPanel.Outer
+          hasBorder
+          hasShadow={false}
+          data-test-subj={`fleetAssetsAccordion.content.${type}`}
+        >
           {savedObjects.map(({ id, attributes, appLink }, idx) => {
             const { title: soTitle, description } = attributes || {};
             // Ignore custom asset views or if not a Kibana asset
@@ -68,7 +73,11 @@ export const AssetsAccordion: FunctionComponent<{
             const title = soTitle ?? id;
             return (
               <Fragment key={id}>
-                <EuiSplitPanel.Inner grow={false} key={idx}>
+                <EuiSplitPanel.Inner
+                  grow={false}
+                  key={idx}
+                  data-test-subj={`fleetAssetsAccordion.content.${type}.${title}`}
+                >
                   <EuiText size="m">
                     <p>
                       {appLink ? (

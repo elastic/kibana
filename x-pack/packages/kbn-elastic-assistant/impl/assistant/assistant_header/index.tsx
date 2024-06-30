@@ -27,7 +27,7 @@ import { AssistantSettingsButton } from '../settings/assistant_settings_button';
 import * as i18n from './translations';
 import { AIConnector } from '../../connectorland/connector_selector';
 
-export interface AssistantHeaderProps {
+interface OwnProps {
   selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
   isDisabled: boolean;
@@ -41,17 +41,19 @@ export interface AssistantHeaderProps {
   setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
 }
 
+type Props = OwnProps;
 /**
  * Renders the header of the Elastic AI Assistant.
  * Provide a user interface for selecting and managing conversations,
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
-export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
+export const AssistantHeader: React.FC<Props> = ({
   selectedConversation,
   defaultConnector,
   isDisabled,
@@ -65,6 +67,7 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
   onCloseFlyout,
   onConversationSelected,
   conversations,
+  conversationsLoaded,
   refetchConversationsState,
   onConversationCreate,
   isAssistantEnabled,
@@ -154,6 +157,7 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
               setIsSettingsModalVisible={setIsSettingsModalVisible}
               onConversationSelected={onConversationSelected}
               conversations={conversations}
+              conversationsLoaded={conversationsLoaded}
               refetchConversationsState={refetchConversationsState}
             />
           </EuiFlexItem>
@@ -161,7 +165,7 @@ export const AssistantHeader: React.FC<AssistantHeaderProps> = ({
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                data-test-subj="euiFlyoutCloseButton"
+                aria-label="xxx"
                 iconType="cross"
                 color="text"
                 size="xs"

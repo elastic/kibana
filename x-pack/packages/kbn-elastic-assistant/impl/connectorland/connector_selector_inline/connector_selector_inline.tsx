@@ -10,6 +10,7 @@ import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
@@ -24,6 +25,7 @@ interface Props {
   selectedConversation?: Conversation;
   onConnectorIdSelected?: (connectorId: string) => void;
   onConnectorSelected?: (conversation: Conversation) => void;
+  stats?: AttackDiscoveryStats | null;
 }
 
 const inputContainerClassName = css`
@@ -58,12 +60,14 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     selectedConversation,
     onConnectorIdSelected,
     onConnectorSelected,
+    stats = null,
   }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
+
 
     const onChange = useCallback(
       async (connector: AIConnector) => {
@@ -127,6 +131,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             selectedConnectorId={selectedConnectorId}
             setIsOpen={setIsOpen}
             onConnectorSelectionChange={onChange}
+            stats={stats}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

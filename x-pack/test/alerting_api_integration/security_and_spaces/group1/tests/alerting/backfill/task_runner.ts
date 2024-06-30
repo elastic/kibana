@@ -92,7 +92,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       await esTestIndexTool.setup();
     });
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await esTestIndexTool.destroy();
     });
     after(async () => {
@@ -235,6 +235,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'siem.queryRule',
@@ -467,6 +468,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',
@@ -499,6 +501,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',
@@ -604,6 +607,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
             namespace: 'space1',
           },
           {
+            rel: 'primary',
             type: RULE_SAVED_OBJECT_TYPE,
             id: ruleId,
             type_id: 'test.patternFiringAutoRecoverFalse',

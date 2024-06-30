@@ -99,7 +99,6 @@
     "@kbn/profiling-data-access-plugin",
     "@kbn/profiling-utils",
     "@kbn/core-analytics-server",
-    "@kbn/analytics-client",
     "@kbn/monaco",
     "@kbn/deeplinks-observability",
     "@kbn/custom-icons",
@@ -120,7 +119,11 @@
     "@kbn/ebt-tools",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/test-jest-helpers",
+    "@kbn/security-plugin-types-common"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

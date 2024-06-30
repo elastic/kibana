@@ -654,7 +654,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 PageObjects.observabilityLogsExplorer.getPanelEntries(menu)
               );
 
-            expect(menuEntries.length).to.be(1);
+            expect(menuEntries.length).to.be(2);
             expect(await menuEntries[0].getVisibleText()).to.be(sortedExpectedDataViews[0]);
           });
 

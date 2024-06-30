@@ -205,7 +205,7 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
     );
     usedPackages.forEach(({ attributes: { name } }) => {
       packagePoliciesByPackage[name].forEach((packagePolicy) => {
-        if (!agentPoliciesById[packagePolicy.policy_id]) {
+        if (packagePolicy.policy_ids.every((policyId) => !agentPoliciesById[policyId])) {
           orphanedPackagePolicies.push(packagePolicy);
         }
       });
@@ -231,7 +231,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { force, id, package: pkg, ...newPolicy } = request.body;
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
   let wasPackageAlreadyInstalled = false;
@@ -242,6 +242,10 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   }
   const spaceId = fleetContext.spaceId;
   try {
+    if (!newPolicy.policy_id && (!newPolicy.policy_ids || newPolicy.policy_ids.length === 0)) {
+      throw new PackagePolicyRequestError('Either policy_id or policy_ids must be provided');
+    }
+
     let newPackagePolicy: NewPackagePolicy;
     if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
       if (!pkg) {
@@ -335,7 +339,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.internalSoClient;
   const limitedToPackages = fleetContext.limitedToPackages;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
 
   if (!packagePolicy) {
@@ -438,7 +442,7 @@ export const deletePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const body: PostDeletePackagePoliciesResponse = await packagePolicyService.delete(
@@ -466,7 +470,7 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
   try {
     const res = await packagePolicyService.delete(
@@ -505,7 +509,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
+  const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   try {
     const body: UpgradePackagePolicyResponse = await packagePolicyService.upgrade(
       soClient,

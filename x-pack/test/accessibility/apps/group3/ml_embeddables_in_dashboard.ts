@@ -81,7 +81,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const testData of testDataList) {
-      describe(testData.suiteSuffix, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/183196
+      describe.skip(testData.suiteSuffix, function () {
         before(async () => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(
             testData.jobConfig,
@@ -102,12 +103,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('can select jobs', async () => {
-          await ml.dashboardJobSelectionTable.setRowCheckboxState(testData.jobConfig.job_id, true);
-          await ml.dashboardJobSelectionTable.applyJobSelection();
-          await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
-          await a11y.testAppSnapshot();
+          await ml.alerting.selectJobs([testData.jobConfig.job_id]);
+          await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);
         });
 
+        it('populates with default default info', async () => {
+          await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
+          await ml.dashboardEmbeddables.assertSelectMaxSeriesToPlotValue(6);
+          await a11y.testAppSnapshot();
+        });
         it('create new anomaly charts panel', async () => {
           await ml.dashboardEmbeddables.clickInitializerConfirmButtonEnabled();
           await ml.dashboardEmbeddables.assertDashboardPanelExists(testData.panelTitle);

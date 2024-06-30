@@ -42,6 +42,7 @@ interface BulkActionsProps {
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
   featureIds?: ValidFeatureId[];
+  hideBulkActions?: boolean;
 }
 
 export interface UseBulkActions {
@@ -278,6 +279,7 @@ export function useBulkActions({
   refresh,
   useBulkActionsConfig = () => [],
   featureIds,
+  hideBulkActions,
 }: BulkActionsProps): UseBulkActions {
   const {
     bulkActions: [bulkActionsState, updateBulkActionsState],
@@ -302,17 +304,22 @@ export function useBulkActions({
     featureIds,
     isAllSelected: bulkActionsState.isAllSelected,
   });
+
   const initialItems = useMemo(() => {
     return [...caseBulkActions, ...(featureIds?.includes('siem') ? [] : untrackBulkActions)];
   }, [caseBulkActions, featureIds, untrackBulkActions]);
   const bulkActions = useMemo(() => {
+    if (hideBulkActions) {
+      return [];
+    }
+
     return initialItems.length
       ? addItemsToInitialPanel({
           panels: configBulkActionPanels,
           items: initialItems,
         })
       : configBulkActionPanels;
-  }, [configBulkActionPanels, initialItems]);
+  }, [configBulkActionPanels, initialItems, hideBulkActions]);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 

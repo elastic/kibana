@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, fireEvent, render } from '@testing-library/react';
-import { AssistantHeader, AssistantHeaderProps } from '.';
+import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { alertConvo, emptyWelcomeConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
@@ -18,8 +18,14 @@ const mockConversations = {
   [alertConvo.title]: alertConvo,
   [welcomeConvo.title]: welcomeConvo,
 };
-const testProps: AssistantHeaderProps = {
+const testProps = {
+  conversationsLoaded: true,
   selectedConversation: welcomeConvo,
+  title: 'Test Title',
+  docLinks: {
+    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+    DOC_LINK_VERSION: 'master',
+  },
   isDisabled: false,
   isSettingsModalVisible: false,
   onConversationSelected,

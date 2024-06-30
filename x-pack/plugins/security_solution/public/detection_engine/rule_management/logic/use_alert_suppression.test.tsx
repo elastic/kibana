@@ -36,4 +36,19 @@ describe('useAlertSuppression', () => {
 
     expect(result.current.isSuppressionEnabled).toBe(false);
   });
+
+  it('should return isSuppressionEnabled false if ES|QL Feature Flag is disabled', () => {
+    const { result } = renderHook(() => useAlertSuppression('esql'));
+
+    expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+
+  it('should return isSuppressionEnabled true if ES|QL Feature Flag is enabled', () => {
+    jest
+      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+      .mockImplementation((flag) => flag === 'alertSuppressionForEsqlRuleEnabled');
+    const { result } = renderHook(() => useAlertSuppression('esql'));
+
+    expect(result.current.isSuppressionEnabled).toBe(true);
+  });
 });

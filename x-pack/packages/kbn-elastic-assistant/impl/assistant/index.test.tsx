@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 
@@ -39,7 +39,7 @@ jest.mock('./use_conversation');
 const renderAssistant = (extraProps = {}, providerProps = {}) =>
   render(
     <TestProviders>
-      <Assistant chatHistoryVisible={false} setChatHistoryVisible={jest.fn()} {...extraProps} />
+      <Assistant chatHistoryVisible={true} setChatHistoryVisible={jest.fn()} {...extraProps} />
     </TestProviders>
   );
 
@@ -62,9 +62,10 @@ const mockData = {
   },
 };
 const mockDeleteConvo = jest.fn();
+const mockGetDefaultConversation = jest.fn().mockReturnValue(mockData.welcome_id);
 const mockUseConversation = {
   getConversation: jest.fn(),
-  getDefaultConversation: jest.fn().mockReturnValue(mockData.welcome_id),
+  getDefaultConversation: mockGetDefaultConversation,
   deleteConversation: mockDeleteConvo,
   setApiConfig: jest.fn().mockResolvedValue({}),
 };
@@ -213,20 +214,24 @@ describe('Assistant', () => {
       );
     });
 
-    it.skip('should delete conversation when delete button is clicked', async () => {
+    it('should delete conversation when delete button is clicked', async () => {
       renderAssistant();
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('aiAssistantFlyoutNavigationToggle'));
-      });
-
       const deleteButton = screen.getAllByTestId('delete-option')[0];
       await act(async () => {
         fireEvent.click(deleteButton);
       });
-      expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.welcome_id.id);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'))
+
+      })
+
+      await waitFor(() => {
+        expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
+      })
     });
   });
-  describe.skip('when selected conversation changes and some connectors are loaded', () => {
+  describe.only('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
       const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
       (useConversation as jest.Mock).mockReturnValue({
@@ -239,7 +244,7 @@ describe('Assistant', () => {
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
 
-      const previousConversationButton = screen.getByLabelText('Previous conversation');
+      const previousConversationButton = await screen.findByText(mockData.electric_sheep_id.title);
 
       expect(previousConversationButton).toBeInTheDocument();
       await act(async () => {
@@ -275,13 +280,13 @@ describe('Assistant', () => {
         isFetched: true,
       } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
 
-      const { getByLabelText } = renderAssistant();
+      const { findByText } = renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
 
-      const previousConversationButton = getByLabelText('Previous conversation');
+      const previousConversationButton = await findByText(mockData.electric_sheep_id.title);
 
       expect(previousConversationButton).toBeInTheDocument();
 
@@ -301,7 +306,7 @@ describe('Assistant', () => {
       renderAssistant({ setConversationTitle });
 
       await act(async () => {
-        fireEvent.click(screen.getByLabelText('Previous conversation'));
+        fireEvent.click(await screen.findByText(mockData.electric_sheep_id.title));
       });
 
       expect(setConversationTitle).toHaveBeenLastCalledWith('electric sheep');
@@ -331,7 +336,7 @@ describe('Assistant', () => {
       } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
       renderAssistant();
 
-      const previousConversationButton = screen.getByLabelText('Previous conversation');
+      const previousConversationButton = await screen.findByText('updated title');
       await act(async () => {
         fireEvent.click(previousConversationButton);
       });

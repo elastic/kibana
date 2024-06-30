@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
@@ -39,7 +39,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
@@ -67,14 +67,14 @@ const mockContextValue = {
   indexName: 'index',
   scopeId: 'scopeId',
   getFieldsData: mockGetFieldsData,
-} as unknown as RightPanelContext;
+} as unknown as DocumentDetailsContext;
 
-const renderEntitiesOverview = (contextValue: RightPanelContext) =>
+const renderEntitiesOverview = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <EntitiesOverview />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -108,7 +108,7 @@ describe('<EntitiesOverview />', () => {
     const contextValue = {
       ...mockContextValue,
       getFieldsData: (field: string) => (field === 'user.name' ? 'user1' : null),
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
 
@@ -121,7 +121,7 @@ describe('<EntitiesOverview />', () => {
     const contextValue = {
       ...mockContextValue,
       getFieldsData: (field: string) => (field === 'host.name' ? 'host1' : null),
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { queryByTestId, getByTestId, queryByText } = renderEntitiesOverview(contextValue);
 
@@ -134,7 +134,7 @@ describe('<EntitiesOverview />', () => {
     const contextValue = {
       ...mockContextValue,
       getFieldsData: (field: string) => {},
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByText } = renderEntitiesOverview(contextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();

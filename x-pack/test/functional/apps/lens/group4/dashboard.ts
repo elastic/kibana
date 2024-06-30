@@ -321,5 +321,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // check the success state
       await PageObjects.dashboard.verifyNoRenderErrors();
     });
+
+    it('should work in lens with by-value charts', async () => {
+      // create a new dashboard, then a new visualization in Lens.
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.clickNewDashboard();
+      await testSubjects.click('dashboardEditorMenuButton');
+      await testSubjects.click('visType-lens');
+      // Configure it and save to return to the dashboard.
+      await PageObjects.lens.waitForField('@timestamp');
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+      await PageObjects.lens.save('test', true);
+      // Edit the visualization now and get back to Lens editor
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelAction-ACTION_CONFIGURE_IN_LENS');
+      await testSubjects.click('navigateToLensEditorLink');
+      // Click on Share, then Copy link and paste the link in a new tab.
+      const url = await PageObjects.lens.getUrl();
+      await browser.openNewTab();
+      await browser.navigateTo(url);
+      expect(await PageObjects.lens.getTitle()).to.be('test');
+      // need to make sure there aren't extra tabs or it will impact future test suites
+      // close any new tabs that were opened
+      const windowHandlers = await browser.getAllWindowHandles();
+      if (windowHandlers.length > 1) {
+        await browser.closeCurrentWindow();
+        await browser.switchToWindow(windowHandlers[0]);
+      }
+    });
   });
 }

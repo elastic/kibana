@@ -10,4 +10,5 @@ import { unionWithNullType } from '../../../utility_types';
 
 export const deleteNoteSchema = runtimeTypes.partial({
   noteId: unionWithNullType(runtimeTypes.string),
+  noteIds: unionWithNullType(runtimeTypes.array(runtimeTypes.string)),
 });

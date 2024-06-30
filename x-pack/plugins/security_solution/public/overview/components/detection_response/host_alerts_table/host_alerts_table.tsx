@@ -39,7 +39,7 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;

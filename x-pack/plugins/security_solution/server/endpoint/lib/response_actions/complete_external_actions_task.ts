@@ -11,7 +11,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { CompleteExternalActionsTaskRunner } from './complete_external_actions_task_runner';
 import type { EndpointAppContext } from '../../types';
@@ -41,7 +40,7 @@ export class CompleteExternalResponseActionsTask {
   private log: Logger;
   private esClient: ElasticsearchClient | undefined = undefined;
   private cleanup: (() => void) | undefined;
-  private taskTimeout = '20m'; // Default. Real value comes from server config
+  private taskTimeout = '5m'; // Default. Real value comes from server config
   private taskInterval = '60s'; // Default. Real value comes from server config
 
   constructor(protected readonly options: CompleteExternalResponseActionsTaskConstructorOptions) {
@@ -87,14 +86,6 @@ export class CompleteExternalResponseActionsTask {
           if (!this.esClient) {
             throw new EndpointError(
               `esClient not defined. Was [${this.constructor.name}.start()] called?`
-            );
-          }
-
-          if (taskInstance.id !== this.taskId) {
-            throwUnrecoverableError(
-              new EndpointError(
-                `Outdated task version. Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
-              )
             );
           }
 
