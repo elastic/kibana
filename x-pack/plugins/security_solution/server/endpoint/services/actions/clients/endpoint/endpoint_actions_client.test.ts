@@ -120,6 +120,44 @@ describe('EndpointActionsClient', () => {
     );
   });
 
+  it('should write correct comment when invalid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions({
+        ...getCommonResponseActionOptions(),
+        comment: '',
+      })
+    );
+
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      {
+        index: ENDPOINT_ACTIONS_INDEX,
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'isolate',
+              comment:
+                '(WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+              parameters: undefined,
+            },
+            expiration: expect.any(String),
+            input_type: 'endpoint',
+            type: 'INPUT_ACTION',
+          },
+          agent: {
+            id: ['1-2-3'],
+          },
+          user: {
+            id: 'foo',
+          },
+        },
+        refresh: 'wait_for',
+      },
+      expect.anything()
+    );
+  });
+
   it('should write action request document to endpoint action request index with given valid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions({
