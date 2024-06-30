@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';

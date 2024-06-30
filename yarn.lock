@@ -6973,10 +6973,10 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@^0.2.13":
-  version "0.2.13"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.13.tgz#7a327663d2a6006456ff136d2b16cb2b1a76b541"
-  integrity sha512-f0GZCGM5XP0r+H643GpUU4YelKHsUdhUY1Kb8rKpCoy8zgs1nUkiYDVylAf0ezwUOT4NYCEuwpw0jj8hQSLn1Q==
+"@langchain/community@^0.2.15":
+  version "0.2.15"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.15.tgz#91ad5af44bfc72e83f6b6bd58cf5b29e53effed6"
+  integrity sha512-WOsNQGhriXh5tqRWfX3nthWO6RoVtM5kceX2GbJhqk09KV4R+1QmrOyph3OrpmjRA/YuSf0a+94LHY+c/QGolw==
   dependencies:
     "@langchain/core" "~0.2.9"
     "@langchain/openai" "~0.1.0"
@@ -6990,10 +6990,10 @@
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@0.2.9", "@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.8 <0.3.0", "@langchain/core@^0.2.9", "@langchain/core@~0.2.0", "@langchain/core@~0.2.9":
-  version "0.2.9"
-  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.9.tgz#8a22585ef11d2ca8742a8bbfe77dd25baedc7779"
-  integrity sha512-pJshopBZqMNF020q0OrrO+vfApWTZUlZecRYMM7TWA5M8/zvEyU/mgA9DlzeRjjDmG6pwF6dIKVjpl6fIGVXlQ==
+"@langchain/core@0.2.11", "@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.8 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.11", "@langchain/core@~0.2.9":
+  version "0.2.11"
+  resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.11.tgz#5f47467e20e56b250831baef20083657c6facb4c"
+  integrity sha512-d4SNL7WI0c3oHrV4WxCRH1/TNqdePXEzYjYwIb4aEH6lW1aM0utGhLbNthX+aYkOL4Ynx2FoG4h91ECIipiKWQ==
   dependencies:
     ansi-styles "^5.0.0"
     camelcase "6"
@@ -7008,18 +7008,18 @@
     zod "^3.22.4"
     zod-to-json-schema "^3.22.3"
 
-"@langchain/langgraph@^0.0.24":
-  version "0.0.24"
-  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.0.24.tgz#814e686dcef700d15a6f90e27e9c9f79d75faef4"
-  integrity sha512-fW9cnz62oKZFAlyO/4oEjXxthrqZPQtqyX4f7ttKEi0rJZKeuoohvOtnC8faq6nrtMtX9JpLixHjK0SgN7XN3g==
+"@langchain/langgraph@^0.0.25":
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-0.0.25.tgz#2582d8652e2dda722f0c5043c1d0254a778e2486"
+  integrity sha512-DiTnB5Psm0y7TSgHdK4r/r+xzLohbN4zMQL+5Wk3EmOGX45ioBp98AqL8hYdyxKgHM6cjoIFHavHF7EhMg+ugQ==
   dependencies:
     "@langchain/core" ">0.1.61 <0.3.0"
     uuid "^9.0.1"
 
-"@langchain/openai@0.2.0", "@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.2.0", "@langchain/openai@~0.1.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.2.0.tgz#342e49d15b946fa01128d1bb81357e688e7cf567"
-  integrity sha512-gZd+0IOxpiKuh1m6KTT5vtUoOO72GEYyoU4+c6qAUucOEqQS0Vvz3lMGyNWLjK4x4Xpd+r8GAF5mj/jvghwP1A==
+"@langchain/openai@0.2.1", "@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.2.1", "@langchain/openai@~0.1.0":
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.2.1.tgz#2c0c2cb6bd7839d8ce342c97099c6e35f2dde40d"
+  integrity sha512-Ti3C6ZIUPaueIPAfMljMnLu3GSGNq5KmrlHeWkIbrLShOBlzj4xj7mRfR73oWgAC0qivfxdkfbB0e+WCY+oRJw==
   dependencies:
     "@langchain/core" ">=0.2.8 <0.3.0"
     js-tiktoken "^1.0.12"
@@ -21774,12 +21774,12 @@ kuler@^2.0.0:
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
 
-langchain@0.2.3, langchain@0.2.6, langchain@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.2.6.tgz#22249707ba800c38ec9a6cca36e383a881227393"
-  integrity sha512-vDAJHGu/lA4pn3hkyzSC6RiaZhtj0ozfRyG8L6J2vCnXyJV/lgk9uGMP2x645EBrSozBMHJBng1UYeaUR/1fQQ==
+langchain@0.2.3, langchain@0.2.8, langchain@^0.2.8:
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/langchain/-/langchain-0.2.8.tgz#9bd77f5c12071d0ccb637c04fc33415e5369e5aa"
+  integrity sha512-kb2IOMA71xH8e6EXFg0l4S+QSMC/c796pj1+7mPBkR91HHwoyHZhFRrBaZv4tV+Td+Ba91J2uEDBmySklZLpNQ==
   dependencies:
-    "@langchain/core" "~0.2.0"
+    "@langchain/core" ">=0.2.9 <0.3.0"
     "@langchain/openai" ">=0.1.0 <0.3.0"
     "@langchain/textsplitters" "~0.0.0"
     binary-extensions "^2.2.0"
