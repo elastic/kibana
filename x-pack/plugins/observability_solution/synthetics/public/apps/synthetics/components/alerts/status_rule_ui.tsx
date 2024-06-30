@@ -23,7 +23,6 @@ export const StatusRuleComponent: React.FC<{
 }> = ({ ruleParams, setRuleParams }) => {
   const onFiltersChange = useCallback(
     (val: { kqlQuery?: string; filters?: Filter[] }) => {
-      setRuleParams('filters', val.filters);
       setRuleParams('kqlQuery', val.kqlQuery);
     },
     [setRuleParams]
@@ -31,11 +30,7 @@ export const StatusRuleComponent: React.FC<{
 
   return (
     <>
-      <AlertSearchBar
-        filters={ruleParams.filters ?? []}
-        kqlQuery={ruleParams.kqlQuery ?? ''}
-        onChange={onFiltersChange}
-      />
+      <AlertSearchBar kqlQuery={ruleParams.kqlQuery ?? ''} onChange={onFiltersChange} />
       <EuiSpacer size="m" />
       <FieldFilters ruleParams={ruleParams} setRuleParams={setRuleParams} />
       <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />

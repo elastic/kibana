@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
+import { CoreStart } from '@kbn/core/public';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
 import { StatusRuleComponent } from '../../../components/alerts/status_rule_ui';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { ClientPluginsStart } from '../../../../../plugin';
@@ -29,11 +30,12 @@ interface Props {
 export default function MonitorStatusAlert({ core, plugins, params }: Props) {
   kibanaService.core = core;
   const queryClient = new QueryClient();
+  const { ruleParams } = params;
   return (
     <ReduxProvider store={store}>
       <QueryClientProvider client={queryClient}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
-          {params.id && (
+          {params.id && isEmpty(ruleParams) && (
             <EuiText>
               <FormattedMessage
                 id="xpack.synthetics.alertRule.monitorStatus.description"
@@ -42,10 +44,9 @@ export default function MonitorStatusAlert({ core, plugins, params }: Props) {
             </EuiText>
           )}
 
-          <StatusRuleComponent
-            ruleParams={params.ruleParams}
-            setRuleParams={params.setRuleParams}
-          />
+          {(!params.id || !isEmpty(ruleParams)) && (
+            <StatusRuleComponent ruleParams={ruleParams} setRuleParams={params.setRuleParams} />
+          )}
 
           <EuiSpacer size="m" />
         </KibanaContextProvider>

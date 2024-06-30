@@ -42,7 +42,6 @@ export const StatusRuleConditionSchema = schema.object({
 
 export const StatusRulePramsSchema = schema.object({
   condition: schema.maybe(StatusRuleConditionSchema),
-  filters: schema.maybe(schema.arrayOf(schema.any())),
   monitorIds: schema.maybe(schema.arrayOf(schema.string())),
   locations: schema.maybe(schema.arrayOf(schema.string())),
   tags: schema.maybe(schema.arrayOf(schema.string())),

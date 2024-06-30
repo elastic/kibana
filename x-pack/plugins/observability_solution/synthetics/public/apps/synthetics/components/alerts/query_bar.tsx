@@ -10,23 +10,20 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Query, Filter } from '@kbn/es-query';
 import { EuiFormRow } from '@elastic/eui';
-import styled from 'styled-components';
 import { useSyntheticsDataView } from '../../contexts/synthetics_data_view_context';
 import { ClientPluginsStart } from '../../../../plugin';
 
 export function AlertSearchBar({
-  filters,
   kqlQuery,
   onChange,
 }: {
-  filters: Filter[];
   kqlQuery: string;
   onChange: (val: { kqlQuery?: string; filters?: Filter[] }) => void;
 }) {
   const {
     data: { query },
     unifiedSearch: {
-      ui: { SearchBar },
+      ui: { QueryStringInput },
     },
   } = useKibana<ClientPluginsStart>().services;
 
@@ -37,7 +34,6 @@ export function AlertSearchBar({
       const queryState = query.getState();
       onChange({
         kqlQuery: String((queryState.query as Query).query),
-        filters: queryState.filters,
       });
     });
 
@@ -51,42 +47,30 @@ export function AlertSearchBar({
       })}
       fullWidth
     >
-      <Container>
-        <SearchBar
-          appName="synthetics"
-          placeholder={PLACEHOLDER}
-          indexPatterns={dataView ? [dataView] : []}
-          filters={filters}
-          onFiltersUpdated={(newFilters) => {
-            onChange({ filters: newFilters, kqlQuery });
-          }}
-          onQuerySubmit={({ query: value }) => {
-            onChange({ filters, kqlQuery });
-          }}
-          query={{ query: String(kqlQuery), language: 'kuery' }}
-          showSubmitButton={false}
-          showDatePicker={false}
-          showQueryInput={true}
-          disableQueryLanguageSwitcher={true}
-          saveQueryMenuVisibility="globally_managed"
-          onClearSavedQuery={() => {}}
-          onSavedQueryUpdated={(savedQuery) => {
+      <QueryStringInput
+        appName="synthetics"
+        iconType="search"
+        placeholder={PLACEHOLDER}
+        indexPatterns={dataView ? [dataView] : []}
+        onChange={(queryN) => {
+          onChange({
+            kqlQuery: String((queryN.query as Query).query),
+          });
+        }}
+        onSubmit={(queryN) => {
+          if (queryN) {
             onChange({
-              filters: savedQuery.attributes.filters,
-              kqlQuery: String(savedQuery.attributes.query.query),
+              kqlQuery: String((queryN.query as Query).query),
             });
-          }}
-        />
-      </Container>
+          }
+        }}
+        query={{ query: String(kqlQuery), language: 'kuery' }}
+        autoSubmit={true}
+        disableLanguageSwitcher={true}
+      />
     </EuiFormRow>
   );
 }
-
-const Container = styled.div`
-  .uniSearchBar {
-    padding: 0;
-  }
-`;
 
 const PLACEHOLDER = i18n.translate('xpack.synthetics.list.search', {
   defaultMessage: 'Filter by KQL query',

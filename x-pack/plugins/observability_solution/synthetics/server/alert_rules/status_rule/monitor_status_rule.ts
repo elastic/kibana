@@ -28,13 +28,9 @@ import {
 import {
   setRecoveredAlertsContext,
   updateState,
-  getAlertDetailsUrl,
-  getViewInAppUrl,
-  getRelativeViewInAppUrl,
-  getFullViewInAppMessage,
   SyntheticsRuleTypeAlertDefinition,
 } from '../common';
-import { ALERT_DETAILS_URL, getActionVariables, VIEW_IN_APP_URL } from '../action_variables';
+import { getActionVariables } from '../action_variables';
 import { STATUS_RULE_NAME } from '../translations';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 
@@ -202,17 +198,5 @@ export const registerSyntheticsStatusCheckRule = (
     fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
-    fieldsForAAD: [
-      'monitor.id',
-      'monitor.name',
-      'monitor.type',
-      'monitor.url',
-      'observer.geo.name',
-      'error.message',
-      'location.id',
-      'location.name',
-      'config.id',
-      'configId',
-    ],
   });
 };
