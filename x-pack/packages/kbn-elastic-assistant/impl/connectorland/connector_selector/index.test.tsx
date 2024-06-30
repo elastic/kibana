@@ -69,6 +69,7 @@ describe('Connector selector', () => {
         <ConnectorSelector {...defaultProps} selectedConnectorId={undefined} />
       </TestProviders>
     );
+    fireEvent.click(getByTestId('connector-selector'));
     expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
   it('renders with provided selected connector', () => {

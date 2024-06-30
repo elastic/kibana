@@ -68,7 +68,6 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
 
     const localIsDisabled = isDisabled || !assistantAvailability.hasConnectorsReadPrivilege;
 
-
     const onChange = useCallback(
       async (connector: AIConnector) => {
         const connectorId = connector.id;

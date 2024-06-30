@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable complexity */
-
 import React, {
   Dispatch,
   SetStateAction,
@@ -262,9 +260,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Welcome conversation is a special 'setup' case when no connector exists, mostly extracted to `ConnectorSetup` component,
   // but currently a bit of state is littered throughout the assistant component. TODO: clean up/isolate this state
   const blockBotConversation = useMemo(
-    () =>
-      currentConversation &&
-      getBlockBotConversation(currentConversation, isAssistantEnabled),
+    () => currentConversation && getBlockBotConversation(currentConversation, isAssistantEnabled),
     [currentConversation, isAssistantEnabled]
   );
 
@@ -565,7 +561,6 @@ const AssistantComponent: React.FC<Props> = ({
       abortStream,
       refetchCurrentConversation,
       currentConversation,
-      editingSystemPromptId,
       getComments,
       showAnonymizedValues,
       handleRegenerateResponse,
@@ -574,11 +569,6 @@ const AssistantComponent: React.FC<Props> = ({
       isLoadingChatSend,
       currentUserAvatar,
       selectedPromptContextsCount,
-      isNewConversation,
-      isSettingsModalVisible,
-      promptContexts,
-      handleOnSystemPromptSelectionChange,
-      selectedPromptContexts,
     ]
   );
 
@@ -687,12 +677,9 @@ const AssistantComponent: React.FC<Props> = ({
           textAlign="center"
           color={euiThemeVars.euiColorMediumShade}
           size="xs"
-          css={
-           css`
-                  margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM}
-                    ${euiThemeVars.euiSizeL};
-                `
-          }
+          css={css`
+            margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeL};
+          `}
         >
           {i18n.DISCLAIMER}
         </EuiText>
@@ -790,9 +777,11 @@ const AssistantComponent: React.FC<Props> = ({
       </EuiPanel>
     );
   }, [
+    blockBotConversation,
     comments,
     currentConversation,
     editingSystemPromptId,
+    handleOnConversationSelected,
     handleOnSystemPromptSelectionChange,
     isSettingsModalVisible,
     isWelcomeSetup,
@@ -892,10 +881,7 @@ const AssistantComponent: React.FC<Props> = ({
                 }
               >
                 {!isAssistantEnabled ? (
-                  <BlockBotCallToAction
-                    http={http}
-                    isAssistantEnabled={isAssistantEnabled}
-                  />
+                  <BlockBotCallToAction http={http} isAssistantEnabled={isAssistantEnabled} />
                 ) : (
                   <EuiFlexGroup direction="column" justifyContent="spaceBetween">
                     <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>

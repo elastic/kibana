@@ -77,6 +77,7 @@ describe('ConnectorSelectorInline', () => {
         />
       </TestProviders>
     );
+    fireEvent.click(getByTestId('connector-selector'));
     expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
 
@@ -91,6 +92,7 @@ describe('ConnectorSelectorInline', () => {
         />
       </TestProviders>
     );
+    fireEvent.click(getByTestId('connector-selector'));
     expect(getByTestId('addNewConnectorButton')).toBeInTheDocument();
   });
   it('renders the connector selector', () => {

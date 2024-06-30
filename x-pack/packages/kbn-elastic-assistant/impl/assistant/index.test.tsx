@@ -222,16 +222,15 @@ describe('Assistant', () => {
       });
 
       await act(async () => {
-        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'))
-
-      })
+        fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      });
 
       await waitFor(() => {
         expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
-      })
+      });
     });
   });
-  describe.only('when selected conversation changes and some connectors are loaded', () => {
+  describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
       const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
       (useConversation as jest.Mock).mockReturnValue({
