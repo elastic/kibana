@@ -120,6 +120,13 @@ export const ENDPOINT_ADDED_SUCCESS = i18n.translate(
   }
 );
 
+export const ENDPOINT_CREATION_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.endpointAddedFailure',
+  {
+    defaultMessage: 'Endpoint creation failed',
+  }
+);
+
 export const ENDPOINT_ADDED_SUCCESS_DESCRIPTION = (endpointId: string) =>
   i18n.translate('xpack.searchInferenceEndpoints.actions.endpointAddedSuccessDescription', {
     defaultMessage: 'The inference endpoint "{endpointId}" was added.',

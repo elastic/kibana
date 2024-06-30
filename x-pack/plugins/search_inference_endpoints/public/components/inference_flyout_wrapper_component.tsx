@@ -98,14 +98,21 @@ export const InferenceFlyoutWrapperComponent: React.FC<InferenceFlyoutWrapperCom
         .mutateAsync({ inferenceId, taskType, modelConfig })
         .catch((error) => {
           const errorObj = extractErrorProperties(error);
-          setInferenceAddError(errorObj.message);
+          notifications?.toasts?.addError(errorObj.message ? new Error(error.message) : error, {
+            title: i18n.ENDPOINT_CREATION_FAILED,
+          });
         })
         .finally(() => {
           setIsCreateInferenceApiLoading(false);
         });
       setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
     },
-    [createInferenceEndpointMutation, isInferenceFlyoutVisible, setIsInferenceFlyoutVisible]
+    [
+      createInferenceEndpointMutation,
+      isInferenceFlyoutVisible,
+      setIsInferenceFlyoutVisible,
+      notifications,
+    ]
   );
 
   const onFlyoutClose = useCallback(() => {
