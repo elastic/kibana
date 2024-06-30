@@ -46,6 +46,7 @@
     "@kbn/langchain",
     "@kbn/stack-connectors-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/security-plugin",
   ],
   "exclude": [
     "target/**/*",

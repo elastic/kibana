@@ -1743,10 +1743,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@95.1.0-backport.0":
-  version "95.1.0-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.1.0-backport.0.tgz#effc5a536d7630a7bad7ff1aae817c8beab3cfef"
-  integrity sha512-0V5+7hGk4PyiR1qi1UA15RctQMJCCRDvCZSlgtisj5BLQ1fbfPbKUwr3oVqpx7gwhswDDP2jWWbk1OmUR1nnfg==
+"@elastic/eui@95.2.0":
+  version "95.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-95.2.0.tgz#12204f9206f1432e17276264e08e48cd026913bf"
+  integrity sha512-DVIAqZHox5esbmoxnG3McTw0ppbatvH+ymXYjr3PNNTTnXzmcAGadQAA0ZIpx1/c3/YOZmh2LJWWowLl4wodzw==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -6973,12 +6973,12 @@
   resolved "https://registry.yarnpkg.com/@kwsites/promise-deferred/-/promise-deferred-1.1.1.tgz#8ace5259254426ccef57f3175bc64ed7095ed919"
   integrity sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==
 
-"@langchain/community@^0.2.15":
-  version "0.2.15"
-  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.15.tgz#91ad5af44bfc72e83f6b6bd58cf5b29e53effed6"
-  integrity sha512-WOsNQGhriXh5tqRWfX3nthWO6RoVtM5kceX2GbJhqk09KV4R+1QmrOyph3OrpmjRA/YuSf0a+94LHY+c/QGolw==
+"@langchain/community@^0.2.16":
+  version "0.2.16"
+  resolved "https://registry.yarnpkg.com/@langchain/community/-/community-0.2.16.tgz#5888baf7fc7ea272c5f91aaa0e71bc444167262d"
+  integrity sha512-dFDcMabKACvuRd0w6EIRLWf1ubPGZEeEwFt9v1jiEr4HCFxH0OF+iM1QUCcVRbB2fK5lqmKeTD1XAeZV8+AyXA==
   dependencies:
-    "@langchain/core" "~0.2.9"
+    "@langchain/core" "~0.2.11"
     "@langchain/openai" "~0.1.0"
     binary-extensions "^2.2.0"
     expr-eval "^2.0.2"
@@ -6990,7 +6990,7 @@
     zod "^3.22.3"
     zod-to-json-schema "^3.22.5"
 
-"@langchain/core@0.2.11", "@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.8 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.11", "@langchain/core@~0.2.9":
+"@langchain/core@>0.1.0  <0.3.0", "@langchain/core@>0.1.61 <0.3.0", "@langchain/core@>=0.2.5 <0.3.0", "@langchain/core@>=0.2.9 <0.3.0", "@langchain/core@^0.2.11", "@langchain/core@~0.2.11":
   version "0.2.11"
   resolved "https://registry.yarnpkg.com/@langchain/core/-/core-0.2.11.tgz#5f47467e20e56b250831baef20083657c6facb4c"
   integrity sha512-d4SNL7WI0c3oHrV4WxCRH1/TNqdePXEzYjYwIb4aEH6lW1aM0utGhLbNthX+aYkOL4Ynx2FoG4h91ECIipiKWQ==
@@ -7016,12 +7016,12 @@
     "@langchain/core" ">0.1.61 <0.3.0"
     uuid "^9.0.1"
 
-"@langchain/openai@0.2.1", "@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.2.1", "@langchain/openai@~0.1.0":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.2.1.tgz#2c0c2cb6bd7839d8ce342c97099c6e35f2dde40d"
-  integrity sha512-Ti3C6ZIUPaueIPAfMljMnLu3GSGNq5KmrlHeWkIbrLShOBlzj4xj7mRfR73oWgAC0qivfxdkfbB0e+WCY+oRJw==
+"@langchain/openai@>=0.1.0 <0.3.0", "@langchain/openai@^0.1.3", "@langchain/openai@~0.1.0":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@langchain/openai/-/openai-0.1.3.tgz#6eb0994e970d85ffa9aaeafb94449024ccf6ca63"
+  integrity sha512-riv/JC9x2A8b7GcHu8sx+mlZJ8KAwSSi231IPTlcciYnKozmrQ5H0vrtiD31fxiDbaRsk7tyCpkSBIOQEo7CyQ==
   dependencies:
-    "@langchain/core" ">=0.2.8 <0.3.0"
+    "@langchain/core" ">=0.2.5 <0.3.0"
     js-tiktoken "^1.0.12"
     openai "^4.49.1"
     zod "^3.22.4"
@@ -12159,7 +12159,7 @@ apidoc-light@^0.54.0:
     semver "^7.5.4"
     winston "^3.11.0"
 
-apidoc-markdown@^7.3.0:
+apidoc-markdown@^7.3.2:
   version "7.3.2"
   resolved "https://registry.yarnpkg.com/apidoc-markdown/-/apidoc-markdown-7.3.2.tgz#64c1ad45ba29dd57f376419a900cd59c786624a0"
   integrity sha512-0nOfTWSaFfbgJ673ztWiup5CKauuwmhg7hJ0jR7gb0TDK1RX3b0unl6soc8UVhdjYgrvRBRvujMUB/KUF5OG3Q==
@@ -23978,10 +23978,10 @@ node-source-walk@^6.0.0, node-source-walk@^6.0.1, node-source-walk@^6.0.2:
   dependencies:
     "@babel/parser" "^7.21.8"
 
-nodemailer@^6.9.9:
-  version "6.9.9"
-  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.9.tgz#4549bfbf710cc6addec5064dd0f19874d24248d9"
-  integrity sha512-dexTll8zqQoVJEZPwQAKzxxtFn0qTnjdQTchoU6Re9BUUGBJiOy3YMn/0ShTW6J5M0dfQ1NeDeRTTl4oIWgQMA==
+nodemailer@^6.9.14:
+  version "6.9.14"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.9.14.tgz#845fda981f9fd5ac264f4446af908a7c78027f75"
+  integrity sha512-Dobp/ebDKBvz91sbtRKhcznLThrKxKt97GI2FAlAyy+fk19j73Uz3sBXolVtmcXjaorivqsbbbjDY+Jkt4/bQA==
 
 nopt@^4.0.1:
   version "4.0.3"
@@ -27033,10 +27033,10 @@ real-require@^0.2.0:
   resolved "https://registry.yarnpkg.com/real-require/-/real-require-0.2.0.tgz#209632dea1810be2ae063a6ac084fee7e33fba78"
   integrity sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg==
 
-recast@^0.23.7:
-  version "0.23.7"
-  resolved "https://registry.yarnpkg.com/recast/-/recast-0.23.7.tgz#1e08f164e10402b075c904a2b01022b3da039c72"
-  integrity sha512-MpQlLZVpqbbxYcqEjwpRWo88sGvjOYoXptySz710RuddNMHx+wPkoNX6YyLZJlXAh5VZr1qmPrTwcTuFMh0Lag==
+recast@^0.23.9:
+  version "0.23.9"
+  resolved "https://registry.yarnpkg.com/recast/-/recast-0.23.9.tgz#587c5d3a77c2cfcb0c18ccce6da4361528c2587b"
+  integrity sha512-Hx/BGIbwj+Des3+xy5uAtAbdCyqK9y9wbBcDFDYanLS9JnMqf7OeF87HQwUimE87OEc72mr6tkKUKMBBL+hF9Q==
   dependencies:
     ast-types "^0.16.1"
     esprima "~4.0.0"

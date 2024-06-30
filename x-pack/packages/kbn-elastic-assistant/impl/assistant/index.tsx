@@ -939,6 +939,7 @@ const AssistantComponent: React.FC<Props> = ({
                     setChatHistoryVisible={setChatHistoryVisible}
                     onConversationSelected={handleOnConversationSelected}
                     conversations={conversations}
+                    conversationsLoaded={conversationsLoaded}
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
                     isAssistantEnabled={isAssistantEnabled}
@@ -1107,6 +1108,7 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues={showAnonymizedValues}
             title={title}
             conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
           />
