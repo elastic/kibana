@@ -12,3 +12,12 @@ export const PLUGIN_ID = 'filesManagement';
 export const PLUGIN_NAME = i18n.translate('filesManagement.name', {
   defaultMessage: 'Files',
 });
+
+export const LIST_BREADCRUMB = [
+  {
+    text: i18n.translate('filesManagement.listBreadcrumb', {
+      defaultMessage: 'Files',
+    }),
+    href: '#/management/kibana/filesManagement',
+  },
+];
