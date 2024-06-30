@@ -8,9 +8,23 @@
 import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
+export const ENDPOINT_DELETION_FAILED = i18n.translate(
+  'xpack.searchInferenceEndpoints.deleteEndpoint.endpointDeletionFailed',
+  {
+    defaultMessage: 'Endpoint deletion failed',
+  }
+);
+
 export const ERROR_DELETING = i18n.translate(
   'xpack.searchInferenceEndpoints.deleteEndpoint.errorDeleting',
   {
     defaultMessage: 'The inference endpoint cannot be deleted. Please try again.',
+  }
+);
+
+export const DELETE_SUCCESS = i18n.translate(
+  'xpack.searchInferenceEndpoints.deleteEndpoint.deleteSuccess',
+  {
+    defaultMessage: 'The inference endpoint has been deleted sucessfully.',
   }
 );

@@ -7,6 +7,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
+import * as i18n from './translations';
 
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
 
@@ -18,6 +19,7 @@ interface MutationArgs {
 export const useDeleteEndpoint = () => {
   const queryClient = useQueryClient();
   const { services } = useKibana();
+  const toasts = services.notifications?.toasts;
 
   return useMutation(
     async ({ type, id }: MutationArgs) => {
@@ -26,9 +28,15 @@ export const useDeleteEndpoint = () => {
     {
       onSuccess: () => {
         queryClient.invalidateQueries([INFERENCE_ENDPOINTS_QUERY_KEY]);
+        toasts?.addSuccess({
+          title: i18n.DELETE_SUCCESS,
+        });
+      },
+      onError: (error: Error) => {
+        toasts?.addError(new Error(error?.message), {
+          title: i18n.ENDPOINT_DELETION_FAILED,
+        });
       },
     }
   );
 };
-
-export type UseDeleteEndpoint = ReturnType<typeof useDeleteEndpoint>;
