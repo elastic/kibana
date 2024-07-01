@@ -10,6 +10,7 @@ import { screen, fireEvent, render, within, act, waitFor } from '@testing-librar
 import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase } from '@kbn/es-query';
 import { StepDefineRule, aggregatableFields } from '.';
+import type { StepDefineRuleProps } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { TestProviders } from '../../../../common/mock';
@@ -24,6 +25,7 @@ import {
   createIndexPatternField,
   getSelectToggleButtonForName,
 } from '../../../rule_creation/components/required_fields/required_fields.test';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');
@@ -35,6 +37,23 @@ jest.mock('../../../../common/components/query_bar', () => {
   };
 });
 
+jest.mock('../../../rule_creation/components/pick_timeline', () => ({
+  PickTimeline: 'pick-timeline',
+}));
+
+jest.mock('../ai_assistant', () => {
+  return {
+    AiAssistant: jest.fn(() => {
+      return <div data-test-subj="ai-assistant" />;
+    }),
+  };
+});
+
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
+}));
+
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockRedirectLegacyUrl = jest.fn();
 const mockGetLegacyUrlConflict = jest.fn();
 jest.mock('../../../../common/lib/kibana', () => {
@@ -610,6 +629,45 @@ describe('StepDefineRule', () => {
       );
     });
   });
+
+  describe('AI assistant', () => {
+    beforeEach(() => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    });
+    it('renders assistant when query is not valid', () => {
+      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'query' }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.getByTestId('ai-assistant')).toBeInTheDocument();
+    });
+
+    it('does not render assistant when feature flag is disabled', () => {
+      useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+
+      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'query' }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
+    });
+
+    it('does not render assistant when query is valid', () => {
+      render(<TestForm formProps={{ isQueryBarValid: true, ruleType: 'query' }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
+    });
+
+    it('does not render assistant for ML rule type', () => {
+      render(<TestForm formProps={{ isQueryBarValid: false, ruleType: 'machine_learning' }} />, {
+        wrapper: TestProviders,
+      });
+
+      expect(screen.queryByTestId('ai-assistant')).toBe(null);
+    });
+  });
 });
 
 interface TestFormProps {
@@ -617,6 +675,7 @@ interface TestFormProps {
   ruleType?: RuleType;
   indexPattern?: DataViewBase;
   onSubmit?: FormSubmitHandler<DefineStepRule>;
+  formProps?: Partial<StepDefineRuleProps>;
 }
 
 function TestForm({
@@ -624,6 +683,7 @@ function TestForm({
   ruleType = stepDefineDefaultValue.ruleType,
   indexPattern = { fields: [], title: '' },
   onSubmit,
+  formProps,
 }: TestFormProps): JSX.Element {
   const [selectedEqlOptions, setSelectedEqlOptions] = useState(stepDefineDefaultValue.eqlOptions);
   const { form } = useForm({
@@ -658,6 +718,7 @@ function TestForm({
         queryBarSavedId=""
         thresholdFields={[]}
         enableThresholdSuppression={false}
+        {...formProps}
       />
       <button type="button" onClick={form.submit}>
         {'Submit'}
