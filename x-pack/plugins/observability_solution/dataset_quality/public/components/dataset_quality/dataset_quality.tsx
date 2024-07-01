@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
@@ -41,13 +42,15 @@ export const createDatasetQuality = ({
     );
 
     return (
-      <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
-        <SummaryPanelProvider>
-          <KibanaContextProviderForPlugin>
-            <DatasetQuality />
-          </KibanaContextProviderForPlugin>
-        </SummaryPanelProvider>
-      </DatasetQualityContext.Provider>
+      <PerformanceContextProvider>
+        <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
+          <SummaryPanelProvider>
+            <KibanaContextProviderForPlugin>
+              <DatasetQuality />
+            </KibanaContextProviderForPlugin>
+          </SummaryPanelProvider>
+        </DatasetQualityContext.Provider>
+      </PerformanceContextProvider>
     );
   };
 };
