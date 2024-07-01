@@ -27,6 +27,7 @@ interface UseTimelineControlColumnArgs {
   timelineId: string;
   activeTab: TimelineTabs;
   refetch: () => void;
+  onToggleShowNotes: (eventId?: string) => void;
 }
 
 const EMPTY_STRING_ARRAY: string[] = [];
@@ -39,6 +40,7 @@ export const useTimelineControlColumn = ({
   timelineId,
   activeTab,
   refetch,
+  onToggleShowNotes,
 }: UseTimelineControlColumnArgs) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
@@ -95,6 +97,7 @@ export const useTimelineControlColumn = ({
               showCheckboxes={false}
               setEventsLoading={noOp}
               setEventsDeleted={noOp}
+              onToggleShowNotes={onToggleShowNotes}
             />
           );
         },
@@ -106,14 +109,15 @@ export const useTimelineControlColumn = ({
       })) as unknown as ColumnHeaderOptions[];
     }
   }, [
-    ACTION_BUTTON_COUNT,
+    unifiedComponentsInTimelineEnabled,
     UNIFIED_COMPONENTS_ACTION_BUTTON_COUNT,
     browserFields,
     localColumns,
     sort,
-    unifiedComponentsInTimelineEnabled,
-    timelineId,
     activeTab,
+    timelineId,
     refetch,
+    onToggleShowNotes,
+    ACTION_BUTTON_COUNT,
   ]);
 };
