@@ -182,11 +182,14 @@ export class SecurityUsageReportingTask {
           }, ${usageReportResponse.statusText}`
         );
       } catch (err) {
-        this.logger.error(
-          `Failed to send (${
-            usageRecords.length
-          }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
-        );
+        this.logger.error(err);
+        console.log('**********************');
+        this.logger.error(JSON.stringify(usageRecords));
+        // this.logger.error(
+        //   `Failed to send (${
+        //     usageRecords.length
+        //   }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
+        // );
         shouldRunAgain = true;
       }
     }

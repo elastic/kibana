@@ -23,5 +23,6 @@ export default createTestConfig({
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
     // useful for testing (also enabled in MKI QA)
     '--coreApp.allowDynamicConfigOverrides=true',
+    `--xpack.securitySolutionServerless.usageReportingApiUrl=https://localhost:8080`,
   ],
 });
