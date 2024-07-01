@@ -94,13 +94,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const columns = ['@timestamp', 'Document'];
       expect(await dataGrid.getHeaderFields()).to.eql(columns);
 
-      await monacoEditor.setCodeEditorValue('from logstash-* | limit 1');
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 500');
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(columns);
 
-      await monacoEditor.setCodeEditorValue('from logs* | limit 1');
+      await monacoEditor.setCodeEditorValue('from logs* | limit 500');
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await dataGrid.getHeaderFields()).to.eql(['bytes']);
 
       // different index pattern => reset columns
-      await monacoEditor.setCodeEditorValue('from logstash-* | limit 1');
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 500');
       await testSubjects.click('querySubmitButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
