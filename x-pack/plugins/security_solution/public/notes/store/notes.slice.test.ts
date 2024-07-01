@@ -32,7 +32,6 @@ import {
   selectNotesTableSearch,
   selectNotesTableSelectedIds,
   selectNotesTableSort,
-  selectNotesTableTotalItems,
   userClosedDeleteModal,
   userFilteredNotes,
   userSearchedNotes,
@@ -544,7 +543,7 @@ describe('notesSlice', () => {
           pagination: { ...initialNotesState.pagination, total: 100 },
         },
       };
-      expect(selectNotesTableTotalItems(state)).toBe(100);
+      expect(selectNotesPagination(state).total).toBe(100);
     });
 
     it('should select notes table selected ids', () => {

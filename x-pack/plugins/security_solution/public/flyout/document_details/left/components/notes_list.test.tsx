@@ -131,7 +131,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         entities: {
           '1': {
-            eventId: 'event-id',
+            eventId: 'document-id-1',
             noteId: '1',
             note: 'note-1',
             timelineId: '',

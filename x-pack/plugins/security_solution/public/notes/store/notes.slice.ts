@@ -251,8 +251,6 @@ export const selectNotesPagination = (state: State) => state.notes.pagination;
 
 export const selectNotesTableSort = (state: State) => state.notes.sort;
 
-export const selectNotesTableTotalItems = (state: State) => state.notes.pagination.total;
-
 export const selectNotesTableSelectedIds = (state: State) => state.notes.selectedIds;
 
 export const selectNotesTableSearch = (state: State) => state.notes.search;

@@ -20,7 +20,6 @@ import {
   selectAllNotes,
   selectNotesPagination,
   selectNotesTableSort,
-  selectNotesTableTotalItems,
   fetchNotes,
   selectNotesTableSearch,
   selectFetchNotesStatus,
@@ -73,7 +72,7 @@ export const NoteManagementPage = () => {
   const notes = useSelector(selectAllNotes);
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
-  const totalItems = useSelector(selectNotesTableTotalItems);
+  const totalItems = pagination.total ?? 0;
   const notesSearch = useSelector(selectNotesTableSearch);
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
   const isDeleteModalVisible = pendingDeleteIds.length > 0;

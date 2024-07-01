@@ -17,7 +17,6 @@ import {
 import {
   selectNotesPagination,
   selectNotesTableSort,
-  selectNotesTableTotalItems,
   fetchNotes,
   selectNotesTableSelectedIds,
   selectNotesTableSearch,
@@ -29,7 +28,7 @@ export const NotesUtilityBar = React.memo(() => {
   const dispatch = useDispatch();
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
-  const totalItems = useSelector(selectNotesTableTotalItems);
+  const totalItems = pagination.total ?? 0;
   const selectedItems = useSelector(selectNotesTableSelectedIds);
   const resultsCount = useMemo(() => {
     const { perPage, page } = pagination;
