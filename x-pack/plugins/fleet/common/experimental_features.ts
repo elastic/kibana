@@ -22,7 +22,7 @@ const _allowedExperimentalValues = {
   outputSecretsStorage: true,
   remoteESOutput: true,
   agentless: false,
-  enableStrictKQLValidation: false,
+  enableStrictKQLValidation: true,
   subfeaturePrivileges: false,
   enablePackagesStateMachine: true,
   advancedPolicySettings: true,
