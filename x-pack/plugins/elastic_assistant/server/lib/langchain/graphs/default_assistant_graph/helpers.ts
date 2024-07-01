@@ -134,7 +134,7 @@ export const streamGraph = async ({
   };
 
   // Start processing events, do not await! Return `responseWithHeaders` immediately
-  await processEvent();
+  void processEvent();
 
   return responseWithHeaders;
 };
