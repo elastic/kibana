@@ -30,6 +30,7 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
+import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import { lastValueFrom } from 'rxjs';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { DataTableModel } from '@kbn/securitysolution-data-table';
@@ -42,7 +43,12 @@ import {
   ALERT_NEW_TERMS,
   ALERT_RULE_INDICES,
 } from '../../../../common/field_maps/field_names';
-import { isEqlRule, isEsqlRule } from '../../../../common/detection_engine/utils';
+import {
+  isEqlRule,
+  isEsqlRule,
+  isNewTermsRule,
+  isThresholdRule,
+} from '../../../../common/detection_engine/utils';
 import type { TimelineResult } from '../../../../common/api/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
@@ -266,31 +272,15 @@ export const isEqlAlertWithGroupId = (ecsData: Ecs): boolean => {
   return isEql && groupId?.length > 0;
 };
 
-export const isThresholdAlert = (ecsData: Ecs): boolean => {
+const getRuleType = (ecsData: Ecs): RuleType | undefined => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return (
-    ruleType === 'threshold' ||
-    (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'threshold')
-  );
+  return Array.isArray(ruleType) ? ruleType[0] : ruleType;
 };
 
-export const isEqlAlert = (ecsData: Ecs): boolean => {
-  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return isEqlRule(ruleType) || (Array.isArray(ruleType) && isEqlRule(ruleType[0]));
-};
-
-export const isEsqlAlert = (ecsData: Ecs): boolean => {
-  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return isEsqlRule(ruleType) || (Array.isArray(ruleType) && isEsqlRule(ruleType[0]));
-};
-
-export const isNewTermsAlert = (ecsData: Ecs): boolean => {
-  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return (
-    ruleType === 'new_terms' ||
-    (Array.isArray(ruleType) && ruleType.length > 0 && ruleType[0] === 'new_terms')
-  );
-};
+const isNewTermsAlert = (ecsData: Ecs): boolean => isNewTermsRule(getRuleType(ecsData));
+const isEsqlAlert = (ecsData: Ecs): boolean => isEsqlRule(getRuleType(ecsData));
+const isEqlAlert = (ecsData: Ecs): boolean => isEqlRule(getRuleType(ecsData));
+const isThresholdAlert = (ecsData: Ecs): boolean => isThresholdRule(getRuleType(ecsData));
 
 const isSuppressedAlert = (ecsData: Ecs): boolean => {
   return getField(ecsData, ALERT_SUPPRESSION_DOCS_COUNT) != null;
