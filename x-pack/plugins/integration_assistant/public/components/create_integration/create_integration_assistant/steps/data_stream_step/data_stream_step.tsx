@@ -30,6 +30,7 @@ export const InputTypeOptions: Array<{ value: InputType; text: string }> = [
   { value: 'aws_s3', text: 'AWS S3' },
   { value: 'azure_blob_storage', text: 'Azure Blob Storage' },
   { value: 'azure_eventhub', text: 'Azure Event Hub' },
+  { value: 'cel', text: 'Common Expression Language (CEL)' },
   { value: 'cloudfoundry', text: 'Cloud Foundry' },
   { value: 'filestream', text: 'File Stream' },
   { value: 'gcp_pubsub', text: 'GCP Pub/Sub' },
