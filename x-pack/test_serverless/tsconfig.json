@@ -2,19 +2,30 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "rootDirs": [".", "../test"],
+    "rootDirs": [
+      ".",
+      "../test"
+    ],
     "types": [
       "node",
       "@kbn/ambient-ftr-types",
       "cypress",
       "cypress-file-upload",
       "cypress-real-events",
-      "cypress-recurse",
-      "jest"
-    ]
+      "cypress-recurse"
+    ],
   },
-  "include": ["**/*", "../../typings/**/*", "../../packages/kbn-test/types/ftr_globals/**/*"],
-  "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
+  "include": [
+    "**/*",
+    "../../typings/**/*",
+    "../../packages/kbn-test/types/ftr_globals/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+    "*/plugins/**/*",
+    "*/packages/**/*",
+    "*/*/packages/**/*",
+  ],
   "kbn_references": [
     {
       "path": "../test/tsconfig.json"
@@ -92,6 +103,6 @@
     "@kbn/search-types",
     "@kbn/reporting-server",
     "@kbn/config-schema",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
   ]
 }
