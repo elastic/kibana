@@ -27,6 +27,8 @@ export const listActionTypesRoute = (
       options: {
         access: 'public',
         summary: `Get connector types`,
+        description:
+          'Deprecated in 7.13.0. Instead, use the get all connector types API with the `api/actions/connector_types` path.',
       },
       validate: {},
     },
