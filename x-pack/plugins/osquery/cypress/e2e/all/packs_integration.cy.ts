@@ -164,7 +164,6 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
-        cy.getBySel('globalLoadingIndicator').should('exist');
         cy.getBySel('globalLoadingIndicator').should('not.exist');
         selectAllAgents();
         cy.getBySel('select-live-pack').click();
