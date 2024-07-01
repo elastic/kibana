@@ -627,7 +627,7 @@ packages/kbn-openapi-common @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
-packages/kbn-osquery-io-ts-types @elastic/security-asset-management
+packages/kbn-osquery-io-ts-types @elastic/security-defend-workflows
 x-pack/plugins/osquery @elastic/security-defend-workflows
 examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/plugins/painless_lab @elastic/kibana-management
