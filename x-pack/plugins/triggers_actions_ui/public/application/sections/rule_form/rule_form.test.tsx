@@ -507,22 +507,6 @@ describe('rule_form', () => {
       expect(ruleTypeSelectOptions.exists()).toBeFalsy();
     });
 
-    it('renders rule type description', async () => {
-      await setup({ showRulesList: true });
-      wrapper.find('button[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
-      const ruleDescription = wrapper.find('[data-test-subj="ruleDescription"]');
-      expect(ruleDescription.exists()).toBeTruthy();
-      expect(ruleDescription.first().text()).toContain('Rule when testing');
-    });
-
-    it('renders rule type documentation link', async () => {
-      await setup({ showRulesList: true });
-      wrapper.find('button[data-test-subj="my-rule-type-SelectOption"]').first().simulate('click');
-      const ruleDocumentationLink = wrapper.find('[data-test-subj="ruleDocumentationLink"]');
-      expect(ruleDocumentationLink.exists()).toBeTruthy();
-      expect(ruleDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
-    });
-
     it('renders rule types disabled by license', async () => {
       await setup({ showRulesList: true });
       const actionOption = wrapper.find(`[data-test-subj="disabled-by-license-SelectOption"]`);
@@ -1194,22 +1178,9 @@ describe('rule_form', () => {
 
     it('renders registered selected rule type', async () => {
       await setup();
-      const ruleTypeSelectOptions = wrapper.find('[data-test-subj="selectedRuleTypeTitle"]');
+      const ruleTypeSelectOptions = wrapper.find('[data-test-subj="ruleGroupTypeSelectContainer"]');
+
       expect(ruleTypeSelectOptions.exists()).toBeTruthy();
-    });
-
-    it('renders rule type description', async () => {
-      await setup();
-      const ruleDescription = wrapper.find('[data-test-subj="ruleDescription"]');
-      expect(ruleDescription.exists()).toBeTruthy();
-      expect(ruleDescription.first().text()).toContain('Rule when testing');
-    });
-
-    it('renders rule type documentation link', async () => {
-      await setup();
-      const ruleDocumentationLink = wrapper.find('[data-test-subj="ruleDocumentationLink"]');
-      expect(ruleDocumentationLink.exists()).toBeTruthy();
-      expect(ruleDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
     });
   });
 });

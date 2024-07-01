@@ -11,7 +11,6 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
-  EuiFlyout,
   EuiFlyoutFooter,
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +22,7 @@ import {
   EuiSpacer,
   EuiLoadingSpinner,
   EuiIconTip,
+  EuiFlyoutResizable,
 } from '@elastic/eui';
 import { cloneDeep, omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
@@ -30,6 +30,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { updateRule } from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { RuleTypeDescription } from './common/rule_type_description';
+import { useLoadRuleTypesQuery } from '../../..';
 import {
   Rule,
   RuleFlyoutCloseReason,
@@ -146,6 +148,10 @@ export const RuleEdit = <
     isServerless,
   } = useKibana().services;
 
+  const {
+    ruleTypesState: { data: ruleTypeIndex },
+  } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+
   const setRule = (value: Rule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
   };
@@ -245,22 +251,31 @@ export const RuleEdit = <
 
   return (
     <EuiPortal>
-      <EuiFlyout
+      <EuiFlyoutResizable
         onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutRuleEditTitle"
         size="m"
-        maxWidth={620}
+        maxWidth={820}
+        minWidth={400}
         ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editRuleFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Edit rule"
+                defaultMessage="Edit rule - {ruleType}"
+                values={{
+                  ruleType:
+                    rule.ruleTypeId && ruleTypeIndex && ruleTypeIndex.has(rule.ruleTypeId)
+                      ? ruleTypeIndex.get(rule.ruleTypeId)!.name
+                      : '',
+                }}
                 id="xpack.triggersActionsUI.sections.ruleEdit.flyoutTitle"
               />
             </h3>
           </EuiTitle>
+          <EuiSpacer size="xs" />
+          <RuleTypeDescription ruleTypeModel={ruleType} />
         </EuiFlyoutHeader>
         <HealthContextProvider>
           <HealthCheck inFlyout={true} waitForCheck={true}>
@@ -398,7 +413,7 @@ export const RuleEdit = <
             edit={true}
           />
         )}
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     </EuiPortal>
   );
 };

@@ -117,8 +117,8 @@ describe('rule_edit', () => {
     const ruleType = {
       id: 'my-rule-type',
       iconClass: 'test',
-      description: 'test',
-      documentationUrl: null,
+      description: 'Rule when testing',
+      documentationUrl: 'https://localhost.local/docs',
       validate: (): ValidationResult => {
         return { errors: {} };
       },
@@ -256,5 +256,19 @@ describe('rule_edit', () => {
     expect(wrapper.find('.euiToolTipPopover').last().text()).toBe(
       'Saving this rule will change its privileges and might change its behavior.'
     );
+  });
+
+  it('renders rule type description', async () => {
+    await setup();
+    const ruleDescription = wrapper.find('[data-test-subj="ruleDescription"]');
+    expect(ruleDescription.exists()).toBeTruthy();
+    expect(ruleDescription.first().text()).toContain('Rule when testing');
+  });
+
+  it('renders rule type documentation link', async () => {
+    await setup();
+    const ruleDocumentationLink = wrapper.find('[data-test-subj="ruleDocumentationLink"]');
+    expect(ruleDocumentationLink.exists()).toBeTruthy();
+    expect(ruleDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
   });
 });

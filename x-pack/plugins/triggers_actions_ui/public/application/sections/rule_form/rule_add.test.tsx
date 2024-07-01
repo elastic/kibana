@@ -82,7 +82,7 @@ export const TestExpression: FunctionComponent<any> = () => {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/174397
-describe.skip('rule_add', () => {
+describe('rule_add', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -169,7 +169,7 @@ describe.skip('rule_add', () => {
       id: 'my-rule-type',
       iconClass: 'test',
       description: 'test',
-      documentationUrl: null,
+      documentationUrl: 'https://localhost.local/docs',
       validate: (): ValidationResult => {
         return { errors: {} };
       },
@@ -548,6 +548,52 @@ describe.skip('rule_add', () => {
         'You must configure an encryption key to use Alerting'
       );
     });
+  });
+
+  it('renders rule type description', async () => {
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+
+    await setup({
+      initialValues: {},
+      onClose: jest.fn(),
+      ruleTypeId: 'my-rule-type',
+      actionsShow: true,
+    });
+
+    // Wait for handlers to fire
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const ruleDescription = wrapper.find('[data-test-subj="ruleDescription"]');
+    expect(ruleDescription.exists()).toBeTruthy();
+    expect(ruleDescription.first().text()).toContain('test');
+  });
+
+  it('renders rule type documentation link', async () => {
+    (fetchUiConfig as jest.Mock).mockResolvedValue({
+      minimumScheduleInterval: { value: '1m', enforce: false },
+    });
+
+    await setup({
+      initialValues: {},
+      onClose: jest.fn(),
+      ruleTypeId: 'my-rule-type',
+      actionsShow: true,
+    });
+
+    // Wait for handlers to fire
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    const ruleDocumentationLink = wrapper.find('[data-test-subj="ruleDocumentationLink"]');
+    expect(ruleDocumentationLink.exists()).toBeTruthy();
+    expect(ruleDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
   });
 });
 

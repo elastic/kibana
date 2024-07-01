@@ -25,7 +25,6 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiFieldSearch,
-  EuiFlexGrid,
   EuiFormRow,
   EuiComboBox,
   EuiFieldNumber,
@@ -190,7 +189,6 @@ export const RuleForm = ({
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
-    docLinks,
     application: { capabilities },
     kibanaFeatures,
     charts,
@@ -692,63 +690,30 @@ export const RuleForm = ({
 
   const ruleTypeDetails = (
     <>
-      <EuiHorizontalRule />
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem>
-          <EuiTitle size="s" data-test-subj="selectedRuleTypeTitle">
-            <h5 id="selectedRuleTypeTitle">
-              {rule.ruleTypeId && ruleTypeIndex && ruleTypeIndex.has(rule.ruleTypeId)
-                ? ruleTypeIndex.get(rule.ruleTypeId)!.name
-                : ''}
-            </h5>
-          </EuiTitle>
-        </EuiFlexItem>
-        {canChangeTrigger ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="danger"
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleForm.changeRuleTypeAriaLabel',
-                {
-                  defaultMessage: 'Delete',
-                }
-              )}
-              onClick={() => {
-                setRuleProperty('ruleTypeId', null);
-                setRuleTypeModel(null);
-                setRuleProperty('params', {});
-              }}
-            />
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-      {ruleTypeModel?.description && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s" data-test-subj="ruleDescription">
-              {ruleTypeModel.description}&nbsp;
-              {ruleTypeModel?.documentationUrl && (
-                <EuiLink
-                  external
-                  target="_blank"
-                  data-test-subj="ruleDocumentationLink"
-                  href={
-                    typeof ruleTypeModel.documentationUrl === 'function'
-                      ? ruleTypeModel.documentationUrl(docLinks)
-                      : ruleTypeModel.documentationUrl
+      {canChangeTrigger ? (
+        <>
+          <EuiHorizontalRule />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.ruleForm.changeRuleTypeAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
                   }
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.ruleForm.documentationLabel"
-                    defaultMessage="Learn more"
-                  />
-                </EuiLink>
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+                )}
+                onClick={() => {
+                  setRuleProperty('ruleTypeId', null);
+                  setRuleTypeModel(null);
+                  setRuleProperty('params', {});
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      ) : null}
       <EuiHorizontalRule />
       {RuleParamsExpressionComponent &&
       defaultActionGroupId &&
@@ -972,7 +937,7 @@ export const RuleForm = ({
 
   return (
     <EuiForm>
-      <EuiFlexGrid columns={1}>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
@@ -1045,7 +1010,7 @@ export const RuleForm = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiFlexGrid>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <div data-test-subj="ruleGroupTypeSelectContainer">
         {ruleTypeModel ? (

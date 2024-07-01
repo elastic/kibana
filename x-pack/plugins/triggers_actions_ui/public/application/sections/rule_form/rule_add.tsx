@@ -7,13 +7,21 @@
 
 import React, { useReducer, useMemo, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTitle, EuiFlyoutHeader, EuiFlyout, EuiFlyoutBody, EuiPortal } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiPortal,
+  EuiFlyoutResizable,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { createRule, CreateRuleBody } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
 import { fetchUiConfig as triggersActionsUiConfig } from '@kbn/alerts-ui-shared/src/common/apis/fetch_ui_config';
+import { RuleTypeDescription } from './common/rule_type_description';
 import {
   Rule,
   RuleTypeParams,
@@ -291,22 +299,31 @@ const RuleAdd = <
 
   return (
     <EuiPortal>
-      <EuiFlyout
+      <EuiFlyoutResizable
         onClose={checkForChangesAndCloseFlyout}
         aria-labelledby="flyoutRuleAddTitle"
         size="m"
-        maxWidth={620}
+        maxWidth={820}
+        minWidth={400}
         ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="addRuleFlyoutTitle">
             <h3 id="flyoutTitle">
               <FormattedMessage
-                defaultMessage="Create rule"
+                defaultMessage="Create rule - {ruleType}"
                 id="xpack.triggersActionsUI.sections.ruleAdd.flyoutTitle"
+                values={{
+                  ruleType:
+                    rule.ruleTypeId && ruleTypeIndex && ruleTypeIndex.has(rule.ruleTypeId)
+                      ? ruleTypeIndex.get(rule.ruleTypeId)!.name
+                      : '',
+                }}
               />
             </h3>
           </EuiTitle>
+          <EuiSpacer size="xs" />
+          <RuleTypeDescription ruleTypeModel={ruleType} />
         </EuiFlyoutHeader>
         <HealthContextProvider>
           <HealthCheck inFlyout={true} waitForCheck={true}>
@@ -405,7 +422,7 @@ const RuleAdd = <
             }
           />
         )}
-      </EuiFlyout>
+      </EuiFlyoutResizable>
     </EuiPortal>
   );
 };
