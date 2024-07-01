@@ -37,6 +37,7 @@ describe('isCompatible', () => {
 
   test('should return false if error embeddable', async () => {
     const errorApi = {
+      ...mockLensApi,
       blockingError: new BehaviorSubject<Error | undefined>(new Error('Simulated blocking error')),
     };
     expect(isCompatible(errorApi, appId, mockCoreStart)).toBe(false);
