@@ -33,6 +33,11 @@ export type NotesFlyoutProps = {
  * Timeline Modal as they both have same z-index of 1000
  */
 const NotesFlyoutContainer = styled(EuiFlyout)`
+  /*
+  * We want the width of flyout to be less than 50% of screen because
+  * otherwise it interferes with the delete notes modal
+  * */
+  width: 30%;
   z-index: ${(props) =>
     ((props.theme as EuiTheme).eui.euiZFlyout.toFixed() ?? 1000) + 2} !important;
 `;
