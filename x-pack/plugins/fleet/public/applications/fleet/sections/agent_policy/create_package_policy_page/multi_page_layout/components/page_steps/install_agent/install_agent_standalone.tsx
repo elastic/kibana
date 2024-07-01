@@ -5,82 +5,37 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSteps, EuiSpacer } from '@elastic/eui';
-import { safeDump } from 'js-yaml';
 
-import { i18n } from '@kbn/i18n';
-
-import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 import { getRootIntegrations } from '../../../../../../../../../../common/services';
 import {
   AgentStandaloneBottomBar,
   StandaloneModeWarningCallout,
   NotObscuredByBottomBar,
 } from '../..';
-import { fullAgentPolicyToYaml } from '../../../../../../../../../services';
-import { useGetCreateApiKey } from '../../../../../../../../../components/agent_enrollment_flyout/hooks';
 
 import { Error as FleetError } from '../../../../../../../components';
-import {
-  useKibanaVersion,
-  useStartServices,
-  sendGetOneAgentPolicyFull,
-} from '../../../../../../../../../hooks';
+import { useKibanaVersion } from '../../../../../../../../../hooks';
 import {
   InstallStandaloneAgentStep,
   ConfigureStandaloneAgentStep,
 } from '../../../../../../../../../components/agent_enrollment_flyout/steps';
 import { StandaloneInstructions } from '../../../../../../../../../components/enrollment_instructions';
 
+import { useFetchFullPolicy } from '../../../../../../../../../components/agent_enrollment_flyout/hooks';
+
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
   const { setIsManaged, agentPolicy, cancelUrl, onNext, cancelClickHandler } = props;
-  const core = useStartServices();
+
   const kibanaVersion = useKibanaVersion();
-  const [yaml, setYaml] = useState<any | undefined>('');
   const [commandCopied, setCommandCopied] = useState(false);
   const [policyCopied, setPolicyCopied] = useState(false);
-  const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
 
-  const { apiKey, onCreateApiKey } = useGetCreateApiKey();
-
-  useEffect(() => {
-    async function fetchFullPolicy() {
-      try {
-        if (!agentPolicy?.id) {
-          return;
-        }
-        const query = { standalone: true, kubernetes: false };
-        const res = await sendGetOneAgentPolicyFull(agentPolicy?.id, query);
-        if (res.error) {
-          throw res.error;
-        }
-
-        if (!res.data) {
-          throw new Error('No data while fetching full agent policy');
-        }
-        setFullAgentPolicy(res.data.item);
-      } catch (error) {
-        core.notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.fleet.standaloneAgentPage.errorFetchingFullAgentPolicy', {
-            defaultMessage: 'Error fetching full agent policy',
-          }),
-        });
-      }
-    }
-    fetchFullPolicy();
-  }, [core.http.basePath, agentPolicy?.id, core.notifications.toasts, apiKey]);
-
-  useEffect(() => {
-    if (!fullAgentPolicy) {
-      return;
-    }
-
-    setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump, apiKey));
-  }, [apiKey, fullAgentPolicy]);
+  const { yaml, onCreateApiKey, apiKey, downloadYaml } = useFetchFullPolicy(agentPolicy);
 
   if (!agentPolicy) {
     return (
@@ -98,12 +53,6 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
 
   const installManagedCommands = StandaloneInstructions(kibanaVersion);
 
-  const downloadYaml = () => {
-    const link = document.createElement('a');
-    link.href = `data:text/json;charset=utf-8,${yaml}`;
-    link.download = `elastic-agent.yaml`;
-    link.click();
-  };
   const steps = [
     ConfigureStandaloneAgentStep({
       selectedPolicyId: agentPolicy?.id,

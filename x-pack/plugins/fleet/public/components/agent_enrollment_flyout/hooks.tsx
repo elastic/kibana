@@ -9,8 +9,15 @@ import crypto from 'crypto';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { safeDump } from 'js-yaml';
+
 import type { PackagePolicy, AgentPolicy } from '../../types';
-import { sendGetOneAgentPolicy, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
+import {
+  sendGetOneAgentPolicy,
+  sendGetOneAgentPolicyFull,
+  useGetPackageInfoByKeyQuery,
+  useStartServices,
+} from '../../hooks';
 import {
   FLEET_KUBERNETES_PACKAGE,
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
@@ -26,6 +33,10 @@ import {
 } from '../cloud_security_posture/services';
 
 import { sendCreateStandaloneAgentAPIKey } from '../../hooks';
+
+import type { FullAgentPolicy } from '../../../common';
+
+import { fullAgentPolicyToYaml } from '../../services';
 
 import type {
   K8sMode,
@@ -217,5 +228,81 @@ export function useGetCreateApiKey() {
   return {
     apiKey,
     onCreateApiKey,
+  };
+}
+
+export function useFetchFullPolicy(agentPolicy: AgentPolicy | undefined, isK8s?: K8sMode) {
+  const core = useStartServices();
+  const [yaml, setYaml] = useState<any | undefined>('');
+  const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
+  const { apiKey, onCreateApiKey } = useGetCreateApiKey();
+
+  useEffect(() => {
+    async function fetchFullPolicy() {
+      try {
+        if (!agentPolicy?.id) {
+          return;
+        }
+        let query = { standalone: true, kubernetes: false };
+        if (isK8s === 'IS_KUBERNETES') {
+          query = { standalone: true, kubernetes: true };
+        }
+        const res = await sendGetOneAgentPolicyFull(agentPolicy?.id, query);
+        if (res.error) {
+          throw res.error;
+        }
+
+        if (!res.data) {
+          throw new Error('No data while fetching full agent policy');
+        }
+        setFullAgentPolicy(res.data.item);
+      } catch (error) {
+        core.notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.standaloneAgentPage.errorFetchingFullAgentPolicy', {
+            defaultMessage: 'Error fetching full agent policy',
+          }),
+        });
+      }
+    }
+
+    if (isK8s === 'IS_NOT_KUBERNETES' || isK8s !== 'IS_LOADING') {
+      fetchFullPolicy();
+    }
+  }, [core.http.basePath, agentPolicy?.id, core.notifications.toasts, apiKey, isK8s, agentPolicy]);
+
+  useEffect(() => {
+    if (!fullAgentPolicy) {
+      return;
+    }
+
+    if (isK8s === 'IS_KUBERNETES') {
+      if (typeof fullAgentPolicy === 'object') {
+        return;
+      }
+      setYaml(fullAgentPolicy);
+    } else {
+      if (typeof fullAgentPolicy === 'string') {
+        return;
+      }
+      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump, apiKey));
+    }
+  }, [apiKey, fullAgentPolicy, isK8s]);
+
+  const downloadYaml = useMemo(
+    () => () => {
+      const link = document.createElement('a');
+      link.href = `data:text/json;charset=utf-8,${yaml}`;
+      link.download = `elastic-agent.yaml`;
+      link.click();
+    },
+    [yaml]
+  );
+
+  return {
+    yaml,
+    onCreateApiKey,
+    fullAgentPolicy,
+    apiKey,
+    downloadYaml,
   };
 }
