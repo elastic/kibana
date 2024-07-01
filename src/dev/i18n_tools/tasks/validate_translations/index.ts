@@ -7,3 +7,4 @@
  */
 
 export { validateTranslationsTask } from './task';
+export { validateMessages } from './per_namespace';

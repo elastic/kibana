@@ -7,3 +7,4 @@
  */
 
 export { validateTranslationFiles } from './task';
+export { updateTranslationFile } from './update_translation_file';

@@ -17,14 +17,16 @@ import { ErrorReporter } from '../../utils/error_reporter';
 import { getLocalesFromFiles } from './get_locale_from_file';
 
 import { TaskSignature } from '../../types';
+import { makeAbsolutePath } from '../../utils';
 
 export interface TaskOptions {
   fix?: boolean;
   filterNamespaces?: string[];
+  filterTranslationFiles?: string[];
 }
 export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, task, options) => {
   const { config } = context;
-  const { filterNamespaces, fix = false } = options;
+  const { filterNamespaces, filterTranslationFiles, fix = false } = options;
   const errorReporter = new ErrorReporter({ name: 'Validate Translation Files' });
 
   if (!config || !Object.keys(config.paths).length) {
@@ -54,12 +56,20 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
   return task.newListr(
     (parent) => [
       {
-        title: `Checking outdated messages inside translation files`,
+        title: `Verifying messages inside translation files`,
         task: async () => {
           const translationFiles = getLocalesFromFiles(config.translations);
-
           for (const [locale, filePath] of translationFiles.entries()) {
             const translationInput = await parseTranslationFile(filePath);
+            if (filterTranslationFiles && filterTranslationFiles.length) {
+              const matchingFilteredFile = filterTranslationFiles.find((filterTranslationFile) => {
+                return makeAbsolutePath(filterTranslationFile) === makeAbsolutePath(filePath);
+              });
+              if (!matchingFilteredFile) {
+                continue;
+              }
+            }
+
             const namespacedTranslatedMessages = groupMessagesByNamespace(
               translationInput,
               namespaces

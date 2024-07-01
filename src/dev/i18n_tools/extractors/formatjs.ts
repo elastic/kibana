@@ -105,9 +105,6 @@ export const verifyMessagesWithValues = (
   const valuesInsideMessage = [...new Set(extractValues(elements))];
 
   const excessValues = difference(messageDescriptor.valuesKeys || [], valuesInsideMessage);
-  // console.log('messageDescriptor::', messageDescriptor);
-  // console.log('valuesInsideMessage::', valuesInsideMessage);
-  // console.log('excessValues::', excessValues);
   if (excessValues.length) {
     throw new Error(
       `Messsage with ID ${messageDescriptor.id} in ${
@@ -117,7 +114,6 @@ export const verifyMessagesWithValues = (
   }
 
   const nonDefinedValues = difference(valuesInsideMessage, messageDescriptor.valuesKeys || []);
-  // console.log('nonDefinedValues::', nonDefinedValues);
   if (nonDefinedValues.length) {
     throw new Error(
       `Messsage with ID ${messageDescriptor.id} in ${
@@ -126,21 +122,6 @@ export const verifyMessagesWithValues = (
     );
   }
 };
-
-// TODO:
-// Open an issue to allow not defining a defaultMessages
-// Combine messages that dont have a defaultMessage with the ones that has one.
-// verify that each message with an id only has it defined somewhere in the namespace
-// all output contains default messsages
-
-// TODO:
-// Show each plugin translations count
-
-// TODO:
-// How about using kibana.json instead of .i18nrc file to define namespace prefix
-
-// Next:
-// test case for double count
 
 export const verifyMessageDescriptor = (
   defaultMessage: string,
@@ -166,7 +147,6 @@ export const verifyMessageIdStartsWithNamespace = (
    * Invalid messageId: advancedSettings123.advancedSettingsLabel
    * Invalid messageId: something_else.advancedSettingsLabel
    */
-
   return messageDescriptor.id.startsWith(`${namespace}.`);
 };
 
@@ -190,15 +170,9 @@ export async function extractI18nMessageDescriptors(fileName: string, source: st
             extractSourceLocation: true,
             ast: true,
             onMsgWithValuesExtracted(filePath, msgs) {
-              // console.log('msgs inside values::', msgs)
               msgs.map((msg) => {
                 const newDefinition = { ...msg };
                 const { id } = msg;
-                // TODO: check if message not matching first
-                // if (extractedMessages.has(id)) {
-                //   throw new Error(`During normalization Message with id ${id} already defined in ${extractedMessages.get(id)!.file}.`)
-                // }
-
                 extractedMessages.set(id, newDefinition);
               });
             },
@@ -209,24 +183,16 @@ export async function extractI18nMessageDescriptors(fileName: string, source: st
             removeDefaultMessage: true,
             ast: true,
             onMsgExtracted(filePath, msgs) {
-              // console.log('msgs inside extracted::', msgs)
-              // console.log('extractedMessages::', extractedMessages)
-
               msgs.map((msg) => {
                 const { id } = msg;
                 if (extractedMessages.has(id)) {
                   const existingMsg = extractedMessages.get(id);
-
-                  // if (!existingMsg!.hasValuesObject) {
-                  //   throw new Error(`during formatjs ts Message with id ${id} already defined in ${existingMsg!.file}.`);
-                  // }
                   extractedMessages.set(id, {
                     ...existingMsg,
                     ...msg,
                   });
                   return;
                 }
-
                 extractedMessages.set(id, msg);
               });
             },

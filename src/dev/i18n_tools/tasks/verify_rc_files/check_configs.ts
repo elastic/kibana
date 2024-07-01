@@ -6,28 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { resolve, join } from 'path';
+import { join } from 'path';
 import { I18N_RC } from '../../constants';
-import { arrayify } from '../../utils';
+import { arrayify, ErrorReporter, makeAbsolutePath } from '../../utils';
 import { checkConfigNamespacePrefix } from './i18n_config';
 import { I18nCheckTaskContext } from '../../types';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
-  const root = join(__dirname, '../../../../../');
-  const kibanaRC = resolve(root, I18N_RC);
-  const xpackRC = resolve(root, 'x-pack', I18N_RC);
+  const kibanaRC = makeAbsolutePath(I18N_RC);
+  const xpackRC = makeAbsolutePath(join('x-pack', I18N_RC));
 
   const configPaths = [kibanaRC, xpackRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
     task: async (context: I18nCheckTaskContext) => {
+      const errorReporter = new ErrorReporter({ name: `Checking config path ${configPath}` });
+
       try {
         await checkConfigNamespacePrefix(configPath);
       } catch (err) {
-        const { errorReporter } = context;
-        const reporterWithContext = errorReporter.withContext({ name: configPath });
-        reporterWithContext.reportError(err);
-        throw errorReporter;
+        throw errorReporter.reportFailure(err);
       }
     },
     title: `Checking configs in ${configPath}`,

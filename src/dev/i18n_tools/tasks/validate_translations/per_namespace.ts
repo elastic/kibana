@@ -16,14 +16,12 @@ import {
 } from '../../extractors/formatjs';
 import { globNamespacePaths, descriptorDetailsStack, ErrorReporter } from '../../utils';
 
-const validateFile = ({
+export const validateMessages = ({
   extractedMessages,
   namespace,
-  filePath,
 }: {
   extractedMessages: Map<string, MessageDescriptor>;
   namespace: string;
-  filePath: string;
 }) => {
   for (const [, messageDescriptor] of extractedMessages) {
     const validId = verifyMessageIdStartsWithNamespace(messageDescriptor, namespace);
@@ -43,6 +41,7 @@ const validateFile = ({
     }
   }
 };
+
 const formatJsRunner = async (
   filePaths: string[],
   namespace: string,
@@ -53,9 +52,8 @@ const formatJsRunner = async (
     const source = await readFileAsync(filePath, 'utf8');
     const extractedMessages = await extractI18nMessageDescriptors(filePath, source);
 
-    validateFile({
+    validateMessages({
       extractedMessages,
-      filePath,
       namespace,
     });
 

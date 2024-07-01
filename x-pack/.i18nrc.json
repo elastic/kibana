@@ -124,8 +124,8 @@
   },
   "exclude": ["examples"],
   "translations": [
-    "@kbn/translations-plugin/translations/zh-CN.json",
-    "@kbn/translations-plugin/translations/ja-JP.json",
-    "@kbn/translations-plugin/translations/fr-FR.json"
+    "plugins/translations/translations/zh-CN.json",
+    "plugins/translations/translations/ja-JP.json",
+    "plugins/translations/translations/fr-FR.json"
   ]
 }
