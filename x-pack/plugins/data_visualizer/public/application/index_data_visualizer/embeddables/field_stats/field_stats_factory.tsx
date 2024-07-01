@@ -67,6 +67,12 @@ const ERROR_MSG = {
   APPLY_FILTER_ERR: i18n.translate('xpack.dataVisualizer.fieldStats.errors.errorApplyingFilter', {
     defaultMessage: 'Error applying filter',
   }),
+  UPDATE_CONFIG_ERROR: i18n.translate(
+    'xpack.dataVisualizer.fieldStats.errors.errorUpdatingConfig',
+    {
+      defaultMessage: 'Error updating settings for field statistics.',
+    }
+  ),
 };
 
 export const getDependencies = async (
@@ -230,7 +236,7 @@ export const getFieldStatsChartEmbeddableFactory = (
 
               fieldStatsControlsApi.updateUserInput(nextUpdate);
             } catch (e) {
-              return Promise.reject(e);
+              toasts.addError(e, { title: ERROR_MSG.UPDATE_CONFIG_ERROR });
             }
           },
           dataViews: dataViews$,
@@ -283,8 +289,6 @@ export const getFieldStatsChartEmbeddableFactory = (
         if (!trigger) {
           toasts.addWarning(ERROR_MSG.APPLY_FILTER_ERR);
           return;
-          // eslint-disable-next-line no-console
-          console.error(`${ERROR_MSG.APPLY_FILTER_ERR}: APPLY_FILTER_TRIGGER is undefined`);
         }
         const actionContext = {
           embeddable: api,
