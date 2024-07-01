@@ -226,7 +226,7 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   chain?: RetrievalQAChain;
   esClient: ElasticsearchClient;
-  esStore: ElasticsearchStore;
+  esStore?: ElasticsearchStore;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;
   llm?: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;

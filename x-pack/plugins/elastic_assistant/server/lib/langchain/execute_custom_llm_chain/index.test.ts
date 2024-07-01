@@ -11,6 +11,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
+import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
@@ -104,6 +106,8 @@ const defaultProps: AgentExecutorParams<true> = {
   langChainMessages,
   logger: mockLogger,
   onNewReplacements: jest.fn(),
+  search: dataPluginMock.createRequestHandlerContext().search,
+  dataViews: dataViewsServiceMock,
   request: mockRequest,
   replacements: {},
 };

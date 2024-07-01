@@ -9,6 +9,8 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { MockedKeys } from '@kbn/utility-types-jest';
 import { AwaitedProperties } from '@kbn/utility-types';
+import { dataViewsService as dataViewsServiceMock } from '@kbn/data-views-plugin/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantRequestHandlerContext,
@@ -132,6 +134,8 @@ const createElasticAssistantRequestContextMock = (
     getSpaceId: jest.fn(),
     core: clients.core,
     telemetry: clients.elasticAssistant.telemetry,
+    search: dataPluginMock.createRequestHandlerContext().search,
+    dataViews: dataViewsServiceMock,
   };
 };
 

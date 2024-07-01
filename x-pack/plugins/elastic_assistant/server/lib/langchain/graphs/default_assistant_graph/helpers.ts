@@ -116,7 +116,7 @@ export const streamGraph = async ({
         }
       }
 
-      return processEvent();
+      void processEvent();
     } catch (err) {
       // if I throw an error here, it crashes the server. Not sure how to get around that.
       // If I put await on this function the error works properly, but when there is not an error
@@ -134,7 +134,7 @@ export const streamGraph = async ({
   };
 
   // Start processing events, do not await! Return `responseWithHeaders` immediately
-  await processEvent();
+  void processEvent();
 
   return responseWithHeaders;
 };

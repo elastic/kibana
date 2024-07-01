@@ -96,6 +96,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
+    esStore,
     isEnabledKnowledgeBase,
     llm,
     logger,

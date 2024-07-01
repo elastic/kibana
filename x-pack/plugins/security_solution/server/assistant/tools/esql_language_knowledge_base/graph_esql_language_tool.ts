@@ -109,10 +109,10 @@ const getGenerateQuery =
   }: {
     userQuery: string;
     llm: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
-    esStore: ElasticsearchStore;
+    esStore?: ElasticsearchStore;
   }) =>
   async (state: IState) => {
-    const knowledgeBaseDocs = await esStore.similaritySearch(userQuery);
+    const knowledgeBaseDocs = (await esStore?.similaritySearch(userQuery)) ?? [];
     const documentation = map(knowledgeBaseDocs, 'pageContent').join('\n');
 
     const answerPrompt = await ChatPromptTemplate.fromMessages([
