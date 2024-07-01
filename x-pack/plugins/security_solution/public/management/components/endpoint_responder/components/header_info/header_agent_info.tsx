@@ -6,8 +6,11 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { AgentTypeIntegration } from '../../../../../common/components/endpoint/agents/agent_type_integration';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
 
@@ -16,24 +19,36 @@ interface HeaderAgentInfoProps {
   hostName: string;
   lastCheckin: string;
   children: React.ReactNode;
+  agentType?: ResponseActionAgentType;
+  'data-test-subj'?: string;
 }
 
 export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
-  ({ platform, hostName, lastCheckin, children }) => {
+  ({ platform, hostName, lastCheckin, agentType, 'data-test-subj': dataTestSubj, children }) => {
+    const { euiTheme } = useEuiTheme();
+    const testId = useTestIdGenerator(dataTestSubj);
+
     return (
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        alignItems="center"
+        data-test-subj={testId('agentInfo')}
+      >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center" justifyContent="center">
-            <PlatformIcon data-test-subj="responderHeaderHostPlatformIcon" platform={platform} />
-          </EuiFlexGroup>
+          <PlatformIcon data-test-subj={testId('platformIcon')} platform={platform} />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexItem grow={false} className="eui-textTruncate">
+          <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 <EuiFlexItem grow={false} className="eui-textTruncate">
                   <EuiToolTip content={hostName} anchorClassName="eui-textTruncate">
-                    <EuiText size="s" data-test-subj="responderHeaderHostName">
+                    <EuiText
+                      size="s"
+                      data-test-subj={testId('hostName')}
+                      className="eui-textTruncate"
+                    >
                       <h6 className="eui-textTruncate">{hostName}</h6>
                     </EuiText>
                   </EuiToolTip>
@@ -41,9 +56,9 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
                 <EuiFlexItem grow={false}>{children}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
-              <EuiSpacer size="xs" />
-              <EuiText color="subdued" size="s" data-test-subj="responderHeaderLastSeen">
+              <EuiText color="subdued" size="s" data-test-subj={testId('lastSeen')}>
                 <FormattedMessage
                   id="xpack.securitySolution.responder.header.lastSeen"
                   defaultMessage="Last seen {date}"
@@ -55,6 +70,12 @@ export const HeaderAgentInfo = memo<HeaderAgentInfoProps>(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+
+        {agentType && (
+          <EuiFlexItem grow={false} css={{ paddingLeft: euiTheme.size.l }}>
+            <AgentTypeIntegration agentType={agentType} data-test-subj={testId('integration')} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

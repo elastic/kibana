@@ -30,6 +30,7 @@ const fields = [
   'agent',
   'url',
   'state',
+  'tags',
 ];
 
 export async function queryMonitorStatus(

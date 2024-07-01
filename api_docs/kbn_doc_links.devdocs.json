@@ -848,6 +848,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.integrationDeveloper",
+            "type": "Object",
+            "tags": [],
+            "label": "integrationDeveloper",
+            "description": [],
+            "signature": [
+              "{ upload: string; }"
+            ],
+            "path": "packages/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.ecs",
             "type": "Object",
             "tags": [],

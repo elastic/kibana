@@ -16,10 +16,10 @@ import {
   EuiHorizontalRule,
   EuiButtonGroup,
 } from '@elastic/eui';
-import type { Position } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import { type PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { PieVisualizationState, SharedPieLayerState } from '../../../common/types';
@@ -28,6 +28,15 @@ import { VisualizationToolbarProps } from '../../types';
 import { ToolbarPopover, LegendSettingsPopover } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 import { getLegendStats } from './render_helpers';
+
+const partitionLegendValues = [
+  {
+    value: LegendValue.Value,
+    label: i18n.translate('xpack.lens.shared.legendValues.value', {
+      defaultMessage: 'Value',
+    }),
+  },
+];
 
 const legendOptions: Array<{
   value: SharedPieLayerState['legendDisplay'];
@@ -135,10 +144,8 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
   );
 
   const onLegendStatsChange = useCallback(
-    (checked) => {
-      onStateChange({
-        legendStats: checked ? [PartitionLegendValue.Value] : [],
-      });
+    (legendStats) => {
+      onStateChange({ legendStats });
     },
     [onStateChange]
   );
@@ -250,7 +257,11 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         mode={layer.legendDisplay}
         onDisplayChange={onLegendDisplayChange}
         legendStats={getLegendStats(layer, state.shape)}
-        allowLegendStats={!!PartitionChartsMeta[state.shape]?.legend.defaultLegendStats}
+        allowedLegendStats={
+          PartitionChartsMeta[state.shape]?.legend.defaultLegendStats
+            ? partitionLegendValues
+            : undefined
+        }
         onLegendStatsChange={onLegendStatsChange}
         position={layer.legendPosition}
         onPositionChange={onLegendPositionChange}

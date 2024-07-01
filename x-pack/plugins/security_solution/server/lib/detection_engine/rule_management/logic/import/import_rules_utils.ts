@@ -98,7 +98,7 @@ export const importRules = async ({
               });
 
               resolve({
-                rule_id: importedRule.params.ruleId,
+                rule_id: importedRule.rule_id,
                 status_code: 200,
               });
             } catch (err) {

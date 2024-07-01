@@ -5,8 +5,9 @@ info:
 paths:
   /api/detection_engine/rules/_find:
     get:
-      operationId: FindRules
+      x-labels: [ess, serverless]
       x-codegen-enabled: true
+      operationId: FindRules
       description: Finds rules that match the given query.
       tags:
         - Rules API

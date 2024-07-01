@@ -36,7 +36,7 @@ export interface FetchAlertsArgs {
     pageIndex: number;
     pageSize: number;
   };
-  onLoaded?: () => void;
+  onLoaded?: (alerts: Alerts) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
   runtimeMappings?: MappingRuntimeFields;
   sort: SortCombinations[];
@@ -259,13 +259,13 @@ const useFetchAlerts = ({
                     totalAlerts,
                   });
                   dispatch({ type: 'loading', loading: false });
-                  onLoaded?.();
+                  onLoaded?.(alerts);
                   searchSubscription$.current.unsubscribe();
                 }
               },
               error: (msg) => {
                 dispatch({ type: 'loading', loading: false });
-                onLoaded?.();
+                onLoaded?.([]);
                 data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
               },

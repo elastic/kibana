@@ -14,7 +14,7 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
-import { useRightPanelContext } from './context';
+import { useDocumentDetailsContext } from '../shared/context';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import {
   AlertsCasesTourSteps,
@@ -41,7 +41,7 @@ export interface PanelHeaderProps {
 
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
-    const { dataFormattedForFieldBrowser } = useRightPanelContext();
+    const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
     const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
 

@@ -52,7 +52,7 @@ describe('CasesClientFactory', () => {
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
-      expect(args.securityPluginStart.authc.getCurrentUser).not.toHaveBeenCalled();
+      expect(args.securityServiceStart.authc.getCurrentUser).not.toHaveBeenCalled();
       expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
         username: 'my_user',
         full_name: 'My user',
@@ -63,7 +63,7 @@ describe('CasesClientFactory', () => {
     it('constructs the user info from the authc service if the user profile is not available', async () => {
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
       // @ts-expect-error: not all fields are needed
-      args.securityPluginStart.authc.getCurrentUser.mockReturnValueOnce({
+      args.securityServiceStart.authc.getCurrentUser.mockReturnValueOnce({
         username: 'my_user_2',
         full_name: 'My user 2',
         email: 'elastic2@elastic.co',
@@ -76,7 +76,7 @@ describe('CasesClientFactory', () => {
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
-      expect(args.securityPluginStart.authc.getCurrentUser).toHaveBeenCalled();
+      expect(args.securityServiceStart.authc.getCurrentUser).toHaveBeenCalled();
       expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
         username: 'my_user_2',
         full_name: 'My user 2',
@@ -95,7 +95,7 @@ describe('CasesClientFactory', () => {
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
-      expect(args.securityPluginStart.authc.getCurrentUser).toHaveBeenCalled();
+      expect(args.securityServiceStart.authc.getCurrentUser).toHaveBeenCalled();
       expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
         username: 'elastic/kibana',
         full_name: null,
@@ -113,7 +113,7 @@ describe('CasesClientFactory', () => {
       });
 
       expect(args.securityPluginStart.userProfiles.getCurrent).toHaveBeenCalled();
-      expect(args.securityPluginStart.authc.getCurrentUser).toHaveBeenCalled();
+      expect(args.securityServiceStart.authc.getCurrentUser).toHaveBeenCalled();
       expect(createCasesClientMocked.mock.calls[0][0].user).toEqual({
         username: null,
         full_name: null,

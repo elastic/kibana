@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 import type { OpenApiDocument } from '../openapi_types';
-import { traverseObject } from './traverse_object';
+import { findRefs } from './find_refs';
 
 export interface ImportsMap {
   [importPath: string]: string[];
@@ -37,31 +37,3 @@ export const getImportsMap = (parsedSchema: OpenApiDocument): ImportsMap => {
 
   return importMap;
 };
-
-/**
- * Check if an object has a $ref property
- *
- * @param obj Any object
- * @returns True if the object has a $ref property
- */
-const hasRef = (obj: unknown): obj is { $ref: string } => {
-  return typeof obj === 'object' && obj !== null && '$ref' in obj;
-};
-
-/**
- * Traverse the OpenAPI document recursively and find all references
- *
- * @param obj Any object
- * @returns A list of external references
- */
-function findRefs(obj: unknown): string[] {
-  const refs: string[] = [];
-
-  traverseObject(obj, (element) => {
-    if (hasRef(element)) {
-      refs.push(element.$ref);
-    }
-  });
-
-  return refs;
-}

@@ -18,7 +18,7 @@ import type {
   RiskScoresEntityCalculationRequest,
   RiskScoresEntityCalculationResponse,
 } from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
-import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
+import type { AssetCriticalityBulkUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
 import type {
   AssetCriticalityRecord,
   EntityAnalyticsPrivileges,
@@ -181,12 +181,12 @@ export const useEntityAnalyticsRoutes = () => {
     const uploadAssetCriticalityFile = async (
       fileContent: string,
       fileName: string
-    ): Promise<AssetCriticalityCsvUploadResponse> => {
+    ): Promise<AssetCriticalityBulkUploadResponse> => {
       const file = new File([new Blob([fileContent])], fileName, { type: 'text/csv' });
       const body = new FormData();
       body.append('file', file);
 
-      return http.fetch<AssetCriticalityCsvUploadResponse>(
+      return http.fetch<AssetCriticalityBulkUploadResponse>(
         ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
         {
           version: API_VERSIONS.public.v1,

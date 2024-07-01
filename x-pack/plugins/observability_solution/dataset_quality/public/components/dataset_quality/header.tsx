@@ -10,6 +10,7 @@ import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DEFAULT_LOGS_DATA_VIEW } from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../utils';
 import { datasetQualityAppTitle } from '../../../common/translations';
 
@@ -39,7 +40,7 @@ export default function Header() {
           id="xpack.datasetQuality.appDescription"
           defaultMessage="Monitor the data set quality for {logsPattern} data streams that follow the {ecsNamingSchemeLink}."
           values={{
-            logsPattern: <EuiCode>logs-*</EuiCode>,
+            logsPattern: <EuiCode>{DEFAULT_LOGS_DATA_VIEW}</EuiCode>,
             ecsNamingSchemeLink: (
               <EuiLink
                 data-test-subj="datasetQualityAppDescriptionEcsNamingSchemeLink"

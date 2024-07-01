@@ -6,11 +6,11 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { AlertsMigrationCleanupRequestBody } from '../../../../../common/api/detection_engine/signals_migration';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
-import { deleteSignalsMigrationSchema } from '../../../../../common/api/detection_engine/signals_migration';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../utils';
 
 import { signalsMigrationService } from '../../migrations/migration_service';
@@ -31,7 +31,9 @@ export const deleteSignalsMigrationRoute = (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidation(deleteSignalsMigrationSchema) } },
+        validate: {
+          request: { body: buildRouteValidationWithZod(AlertsMigrationCleanupRequestBody) },
+        },
       },
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);

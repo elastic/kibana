@@ -87,9 +87,9 @@ selected_unknown_log_file_pattern_array=()
 excluded_options_string=""
 selected_unknown_log_file_pattern_tsv_string=""
 custom_log_file_path_list_tsv_string=""
-install_integrations_api_body_string=""
 elastic_agent_artifact_name=""
 elastic_agent_config_path="/opt/Elastic/Agent/elastic-agent.yml"
+elastic_agent_tmp_config_path="/tmp/elastic-agent-config-template.yml"
 
 OS="$(uname)"
 ARCH="$(uname -m)"
@@ -130,14 +130,16 @@ update_step_progress() {
     --header "x-elastic-internal-origin: Kibana" \
     --data "$data" \
     --output /dev/null \
-    --no-progress-meter
+    --no-progress-meter \
+    --fail
 }
 
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
-  curl -L -O $download_url --fail
+  curl -L -O $download_url --silent --fail
 
   if [ "$?" -eq 0 ]; then
+    printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent downloaded to $(pwd)/$elastic_agent_artifact_name.tar.gz"
     update_step_progress "ea-download" "complete"
   else
     update_step_progress "ea-download" "danger" "Failed to download Elastic Agent, see script output for error."
@@ -149,6 +151,7 @@ extract_elastic_agent() {
   tar -xzf "${elastic_agent_artifact_name}.tar.gz"
 
   if [ "$?" -eq 0 ]; then
+    printf "\e[1;32m✓\e[0m %s\n" "Archive extracted"
     update_step_progress "ea-extract" "complete"
   else
     update_step_progress "ea-extract" "danger" "Failed to extract Elastic Agent, see script output for error."
@@ -157,9 +160,10 @@ extract_elastic_agent() {
 }
 
 install_elastic_agent() {
-  "./${elastic_agent_artifact_name}/elastic-agent" install -f
+  "./${elastic_agent_artifact_name}/elastic-agent" install -f -n > /dev/null
 
   if [ "$?" -eq 0 ]; then
+    printf "\e[1;32m✓\e[0m %s\n" "Elastic Agent installed to $(dirname $elastic_agent_config_path)"
     update_step_progress "ea-install" "complete"
   else
     update_step_progress "ea-install" "danger" "Failed to install Elastic Agent, see script output for error."
@@ -170,17 +174,14 @@ install_elastic_agent() {
 wait_for_elastic_agent_status() {
   local MAX_RETRIES=10
   local i=0
-  echo -n "."
   elastic-agent status > /dev/null 2>&1
   local ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
   while [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ] && [ $i -le $MAX_RETRIES ]; do
     sleep 1
-    echo -n "."
     elastic-agent status > /dev/null 2>&1
     ELASTIC_AGENT_STATUS_EXIT_CODE="$?"
     ((i++))
   done
-  echo ""
 
   if [ "$ELASTIC_AGENT_STATUS_EXIT_CODE" -ne 0 ]; then
     update_step_progress "ea-status" "warning" "Unable to determine agent status"
@@ -214,11 +215,11 @@ backup_elastic_agent_config() {
     confirmation_reply="${confirmation_reply:-Y}"
 
     if [[ "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
-      local backup_path="${elastic_agent_config_path%.yml}.$(date +%s).yml" # e.g. /opt/Elastic/Agent/elastic-agent.1712267614.yml
+      local backup_path="$(pwd)/$(basename "${elastic_agent_config_path%.yml}.$(date +%s).yml")" # e.g. /opt/Elastic/Agent/elastic-agent.1712267614.yml
       cp $elastic_agent_config_path $backup_path
 
       if [ "$?" -eq 0 ]; then
-        printf "\n\e[1;32m✓\e[0m \e[1m%s\e[0m\n" "Backup saved to $backup_path"
+        printf "\n\e[1;32m✓\e[0m %s\n" "Backup saved to $backup_path"
       else
         update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
         fail "Failed to backup existing config file - Try manually creating a backup or delete your existing config file before re-running this script"
@@ -229,31 +230,56 @@ backup_elastic_agent_config() {
   fi
 }
 
-download_elastic_agent_config() {
-  local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
-  local tmp_path="/tmp/elastic-agent-config-template.yml"
+install_integrations() {
+  local install_integrations_api_body_string=""
 
-  update_step_progress "ea-config" "loading"
+  for item in "${selected_known_integrations_array[@]}"; do
+    install_integrations_api_body_string+="$item\tregistry\n"
+  done
+
+  for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
+    local integration_name=$(generate_custom_integration_name "$item")
+
+    install_integrations_api_body_string+="$integration_name\tcustom\t$item\n"
+  done
 
   curl --request POST \
-    -o $tmp_path \
+    -o $elastic_agent_tmp_config_path \
     --url "$kibana_api_endpoint/internal/observability_onboarding/flow/$onboarding_flow_id/integrations/install" \
     --header "Authorization: ApiKey $install_api_key_encoded" \
     --header "Content-Type: text/tab-separated-values" \
+    --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
     --data "$(echo -e "$install_integrations_api_body_string")" \
-    --no-progress-meter
+    --no-progress-meter \
+    --fail
 
-  if [ "$?" -ne 0 ]; then
-    update_step_progress "ea-config" "warning" "Failed to install integrations."
-    fail "Failed to install integrations."
+  if [ "$?" -eq 0 ]; then
+    printf "\n\e[1;32m✓\e[0m %s\n" "Integrations installed"
+  else
+    update_step_progress "ea-config" "warning" "Failed to install integrations"
+    fail "Failed to install integrations"
   fi
+}
 
-  sed "s/'\${API_KEY}'/$decoded_ingest_api_key/g" $tmp_path > $elastic_agent_config_path
+apply_elastic_agent_config() {
+  local decoded_ingest_api_key=$(echo "$ingest_api_key_encoded" | base64 -d)
+
+  sed "s/'\${API_KEY}'/$decoded_ingest_api_key/g" $elastic_agent_tmp_config_path > $elastic_agent_config_path
+  if [ "$?" -eq 0 ]; then
+    printf "\e[1;32m✓\e[0m %s\n" "Config written to $elastic_agent_config_path"
+    update_step_progress "ea-config" "complete"
+  else
+    update_step_progress "ea-config" "warning" "Failed to configure Elastic Agent"
+    fail "Failed to configure Elastic Agent"
+  fi
 }
 
 read_open_log_file_list() {
   local exclude_patterns=(
     "^\/Users\/.+?\/Library\/Application Support"
+    "^\/Users\/.+?\/Library\/Group Containers"
+    "^\/Users\/.+?\/Library\/Containers"
     "^\/Users\/.+?\/Library\/Caches"
     "^\/private"
     # Excluding all patterns that correspond to known integrations
@@ -269,7 +295,7 @@ read_open_log_file_list() {
     "^\/var\/log\/secure"
   )
 
-  local list=$(lsof -Fn | grep "\.log$" | awk '/^n/ {print substr($0, 2)}' | sort | uniq)
+  local list=$(lsof -Fn / | grep "^n.*\.log$" | cut -c2- | sort -u)
 
   # Filtering by the exclude patterns
   while IFS= read -r line; do
@@ -385,12 +411,12 @@ function select_list() {
     fi
   done
 
-  printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Ingest all detected logs?" "[Y/n] (default: Yes): "
+  printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Continue installation with detected logs?" "[Y/n] (default: Yes): "
   read confirmation_reply
   confirmation_reply="${confirmation_reply:-Y}"
 
   if [[ ! "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
-    printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Exclude logs by listing their index numbers" "(e.g. 1, 2, 3): "
+    printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m\n" "Exclude logs by listing their index numbers" "(e.g. 1, 2, 3). Press Enter to skip."
     read exclude_index_list_string
 
     IFS=', ' read -r -a exclude_index_list_array <<< "$exclude_index_list_string"
@@ -417,6 +443,33 @@ function select_list() {
         fi
       fi
     done
+
+    if [[ -n "$excluded_options_string" ]]; then
+      echo -e "\nThese logs will not be ingested:"
+      echo -e "$excluded_options_string"
+    fi
+
+    printf "\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m\n" "List any additional logs you'd like to ingest" "(e.g. /path1/*.log, /path2/*.log). Press Enter to skip."
+    read custom_log_file_path_list_string
+
+    IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
+
+    echo -e "\nYou've selected these logs for ingestion:"
+    for item in "${selected_known_integrations_array[@]}"; do
+      printf "\e[32m•\e[0m %s\n" "$(known_integration_title "${item}")"
+    done
+    for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
+      printf "\e[32m•\e[0m %s\n" "$item"
+    done
+
+    printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Continue installation with selected logs?" "[Y/n] (default: Yes): "
+    read confirmation_reply
+    confirmation_reply="${confirmation_reply:-Y}"
+
+    if [[ ! "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
+      echo -e "Rerun the script again to select different logs."
+      exit 1
+    fi
   else
     selected_known_integrations_array=("${known_integrations_options[@]}")
     selected_unknown_log_file_pattern_array=("${unknown_logs_options[@]}")
@@ -450,70 +503,26 @@ generate_custom_integration_name() {
     echo "$name"
 }
 
-build_install_integrations_api_body_string() {
-  for item in "${selected_known_integrations_array[@]}"; do
-    install_integrations_api_body_string+="$item\tregistry\n"
-  done
-
-  for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
-    local integration_name=$(generate_custom_integration_name "$item")
-
-    install_integrations_api_body_string+="$integration_name\tcustom\t$item\n"
-  done
-}
-
-echo "Looking for log files..."
+printf "\e[1m%s\e[0m\n" "Looking for log files..."
+update_step_progress "logs-detect" "loading"
 detect_known_integrations
 read_open_log_file_list
 build_unknown_log_file_patterns
-
+update_step_progress "logs-detect" "complete"
 echo -e "\nWe found these logs on your system:"
 select_list
 
-if [[ -n "$excluded_options_string" ]]; then
-  echo -e "\nThese logs will not be ingested:"
-  echo -e "$excluded_options_string"
-fi
-
-
-printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m\n" "Add paths to any custom logs we've missed" "(e.g. /path1/*.log, /path2/*.log). Press Enter to skip."
-read custom_log_file_path_list_string
-
-IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
-
-echo -e "\nYou've selected these logs to ingest:"
-for item in "${selected_known_integrations_array[@]}"; do
-  printf "• %s\n" "$(known_integration_title "${item}")"
-done
-for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
-  printf "• %s\n" "$item"
-done
-
-
-printf "\n\e[1;36m?\e[0m \e[1m%s\e[0m \e[2m%s\e[0m" "Continue installation with selected logs?" "[Y/n] (default: Yes): "
-read confirmation_reply
-confirmation_reply="${confirmation_reply:-Y}"
-
-if [[ ! "$confirmation_reply" =~ ^[Yy](es)?$ ]]; then
-  echo -e "Rerun the script again to select different logs."
-  exit 1
-fi
-
-build_install_integrations_api_body_string
-
 backup_elastic_agent_config
 
-echo -e "\nDownloading Elastic Agent...\n"
+printf "\n\e[1m%s\e[0m\n" "Installing Elastic Agent..."
+install_integrations
 download_elastic_agent
 extract_elastic_agent
-
-echo -e "\nInstalling Elastic Agent...\n"
 install_elastic_agent
+apply_elastic_agent_config
+
+printf "\n\e[1m%s\e[0m\n" "Waiting for healthy status..."
 wait_for_elastic_agent_status
 ensure_elastic_agent_healthy
 
-echo -e "\nInstalling integrations...\n"
-download_elastic_agent_config
-
-update_step_progress "ea-config" "complete"
 printf "\n\e[32m%s\e[0m\n" "🎉 Elastic Agent is configured and running. You can now go back to Kibana and check for incoming logs."

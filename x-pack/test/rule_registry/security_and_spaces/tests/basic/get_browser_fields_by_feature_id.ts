@@ -47,11 +47,16 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         expect(Object.keys(resp.browserFields)).toEqual([
           'base',
+          'agent',
           'cloud',
           'container',
+          'error',
           'host',
           'kibana',
+          'observer',
           'orchestrator',
+          'tls',
+          'url',
         ]);
       });
 
@@ -64,11 +69,19 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         expect(Object.keys(resp.browserFields)).toEqual([
           'base',
+          'agent',
+          'anomaly',
           'cloud',
           'container',
+          'error',
           'host',
           'kibana',
+          'location',
+          'monitor',
+          'observer',
           'orchestrator',
+          'tls',
+          'url',
         ]);
       });
 

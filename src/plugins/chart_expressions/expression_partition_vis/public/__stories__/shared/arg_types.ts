@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Position } from '@elastic/charts';
+import { LegendValue, Position } from '@elastic/charts';
 import { ArgTypes } from '@storybook/addons';
-import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { EmptySizeRatios, LegendDisplay } from '../../../common';
 import { ChartTypes } from '../../../common/types';
 
@@ -212,7 +211,7 @@ export const waffleArgTypes: ArgTypes = {
     description: 'Legend stats',
     type: { name: 'string', required: false },
     table: { type: { summary: 'string' }, defaultValue: { summary: undefined } },
-    options: [PartitionLegendValue.Value],
+    options: [LegendValue.Value],
     control: { type: 'select' },
   },
 };

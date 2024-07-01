@@ -92,7 +92,7 @@ export const DiscoverTopNav = ({
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
             if (dataView?.id) {
               const dataViewInstance = await data.dataViews.get(dataView.id);
-              closeFieldEditor.current = dataViewFieldEditor.openEditor({
+              closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
                   dataView: dataViewInstance,
                 },

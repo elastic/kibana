@@ -12,6 +12,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiAutoRefresh.autoRefreshLabel": "Auto refresh",
           "euiAutoRefresh.buttonLabelOff": "Auto refresh is off",
           "euiAutoRefresh.buttonLabelOn": [Function],
+          "euiBasicTable.deselectRows": "Deselect rows",
           "euiBasicTable.noItemsMessage": "No items found",
           "euiBasicTable.selectAllRows": "Select all rows",
           "euiBasicTable.selectThisRow": [Function],

@@ -6,11 +6,21 @@
  */
 
 import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
-
+import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import semverCompare from 'semver/functions/compare';
+import semverValid from 'semver/functions/valid';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  getTemplateUrlFromPackageInfo,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+} from '../../../common/utils/get_template_url_package_info';
+import {
+  CLOUD_CREDENTIALS_PACKAGE_VERSION,
+  ORGANIZATION_ACCOUNT,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+} from '../../../../common/constants';
 import {
   GcpFormProps,
-  GCPSetupInfoContent,
   GcpInputVarFields,
   gcpField,
   getInputVarsFields,
@@ -23,12 +33,18 @@ export const GcpCredentialsFormAgentless = ({
   input,
   newPolicy,
   updatePolicy,
+  packageInfo,
   disabled,
 }: GcpFormProps) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
-  const isOrganization = accountType === 'organization-account';
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
   const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
+
+  const isValidSemantic = semverValid(packageInfo.version);
+  const showCloudCredentialsButton = isValidSemantic
+    ? semverCompare(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
+    : false;
 
   /*
     For Agentless only JSON credentials type is supported.
@@ -42,10 +58,43 @@ export const GcpCredentialsFormAgentless = ({
     }
   });
 
+  const cloudShellUrl = getTemplateUrlFromPackageInfo(
+    packageInfo,
+    input.policy_template,
+    SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_SHELL_URL
+  )?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType);
+
   return (
     <>
-      <GCPSetupInfoContent />
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+      {!showCloudCredentialsButton && (
+        <>
+          <EuiCallOut color="warning">
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.gcpCloudCredentials.cloudFormationSupportedMessage"
+              defaultMessage="Launch Cloud Shell for automated credentials not supported in current integration version. Please upgrade to the latest version to enable Launch Cloud Shell for automated credentials."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {showCloudCredentialsButton && (
+        <>
+          <EuiButton
+            data-test-subj="launchGoogleCloudShellAgentlessButton"
+            target="_blank"
+            iconSide="left"
+            iconType="launch"
+            href={cloudShellUrl}
+          >
+            <FormattedMessage
+              id="xpack.csp.agentlessForm.googleCloudShell.cloudCredentials.button"
+              defaultMessage="Launch Google Cloud Shell"
+            />
+          </EuiButton>
+          <EuiSpacer size="l" />
+        </>
+      )}
       <GcpInputVarFields
         disabled={disabled}
         fields={fields}

@@ -1,5 +1,5 @@
 post:
-  summary: Creates a connector.
+  summary: Create a connector
   operationId: createConnector
   tags:
     - connectors

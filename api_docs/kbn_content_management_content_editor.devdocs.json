@@ -186,7 +186,7 @@
           "Item",
           "; isReadonly?: boolean | undefined; readonlyReason?: string | undefined; entityName: string; customValidators?: ",
           "CustomValidators",
-          " | undefined; }"
+          " | undefined; showActivityView?: boolean | undefined; }"
         ],
         "path": "packages/content-management/content_editor/src/open_content_editor.tsx",
         "deprecated": false,

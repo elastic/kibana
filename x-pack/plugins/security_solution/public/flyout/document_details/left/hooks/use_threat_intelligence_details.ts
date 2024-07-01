@@ -22,7 +22,7 @@ import { useInvestigationTimeEnrichment } from '../../../../common/containers/ct
 import { useTimelineEventsDetails } from '../../../../timelines/containers/details';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 
 export interface ThreatIntelligenceDetailsValue {
   enrichments: CtiEnrichment[];
@@ -43,7 +43,7 @@ export interface ThreatIntelligenceDetailsValue {
  * for component testing.
  */
 export const useThreatIntelligenceDetails = (): ThreatIntelligenceDetailsValue => {
-  const { indexName, eventId } = useLeftPanelContext();
+  const { indexName, eventId } = useDocumentDetailsContext();
   const [{ pageName }] = useRouteSpy();
   const sourcererScope =
     pageName === SecurityPageName.detections

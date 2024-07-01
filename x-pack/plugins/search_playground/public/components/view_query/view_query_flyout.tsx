@@ -65,6 +65,12 @@ const groupTypeQueryFields = (
       typeQueryFields += (typeQueryFields ? '_' : '') + 'SPARSE';
     }
 
+    if (
+      selectedFields.some((field) => indexFields.semantic_fields.find((f) => f.field === field))
+    ) {
+      typeQueryFields += (typeQueryFields ? '_' : '') + 'SEMANTIC';
+    }
+
     return typeQueryFields;
   });
 
@@ -76,6 +82,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
   const usageTracker = useUsageTracker();
   const { getValues } = useFormContext<ChatForm>();
   const selectedIndices: string[] = getValues(ChatFormFields.indices);
+  const sourceFields = getValues(ChatFormFields.sourceFields);
   const { fields } = useIndicesFields(selectedIndices);
   const defaultFields = getDefaultQueryFields(fields);
 
@@ -111,7 +118,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
 
   const saveQuery = () => {
     queryFieldsOnChange(tempQueryFields);
-    elasticsearchQueryChange(createQuery(tempQueryFields, fields));
+    elasticsearchQueryChange(createQuery(tempQueryFields, sourceFields, fields));
     onClose();
 
     const groupedQueryFields = groupTypeQueryFields(fields, tempQueryFields);
@@ -168,7 +175,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
               lineNumbers
               data-test-subj="ViewElasticsearchQueryResult"
             >
-              {JSON.stringify(createQuery(tempQueryFields, fields), null, 2)}
+              {JSON.stringify(createQuery(tempQueryFields, sourceFields, fields), null, 2)}
             </EuiCodeBlock>
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
@@ -198,6 +205,7 @@ export const ViewQueryFlyout: React.FC<ViewQueryFlyoutProps> = ({ onClose }) => 
                         aria-label="Select query fields"
                         data-test-subj={`queryFieldsSelectable_${index}`}
                         options={[
+                          ...group.semantic_fields,
                           ...group.elser_query_fields,
                           ...group.dense_vector_query_fields,
                           ...group.bm25_query_fields,

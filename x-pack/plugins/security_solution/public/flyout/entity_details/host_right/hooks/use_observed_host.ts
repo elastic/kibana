@@ -11,13 +11,13 @@ import { inputsSelectors } from '../../../../common/store';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { HostItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '..';
 import { useQueryInspector } from '../../../../common/components/page/manage_query';
 import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
-import { getSourcererScopeId, isActiveTimeline } from '../../../../helpers';
+import { isActiveTimeline } from '../../../../helpers';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 
 export const useObservedHost = (
   hostName: string,
@@ -31,7 +31,7 @@ export const useObservedHost = (
   const { to, from } = isActiveTimelines ? timelineTime : globalTime;
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
-  const { selectedPatterns } = useSourcererDataView(getSourcererScopeId(scopeId));
+  const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
   const [isLoading, { hostDetails, inspect: inspectObservedHost }, refetch] = useHostDetails({
     endDate: to,

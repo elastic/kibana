@@ -7,6 +7,8 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
+
 import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
@@ -48,7 +50,10 @@ import {
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
+  InstallKibanaAssetsRequestSchema,
+  DeleteKibanaAssetsRequestSchema,
 } from '../../types';
+import type { FleetConfigType } from '../../config';
 
 import {
   getCategoriesHandler,
@@ -70,6 +75,10 @@ import {
   getInputsHandler,
 } from './handlers';
 import { getFileHandler } from './file_handler';
+import {
+  deletePackageKibanaAssetsHandler,
+  installPackageKibanaAssetsHandler,
+} from './kibana_assets_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -81,7 +90,9 @@ export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
   integrations: { readPackageInfo: true },
 };
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+
   router.versioned
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
@@ -218,6 +229,38 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       installPackageFromRegistryHandler
     );
+
+  if (experimentalFeatures.useSpaceAwareness) {
+    router.versioned
+      .post({
+        path: EPM_API_ROUTES.INSTALL_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: InstallKibanaAssetsRequestSchema },
+        },
+        installPackageKibanaAssetsHandler
+      );
+
+    router.versioned
+      .delete({
+        path: EPM_API_ROUTES.DELETE_KIBANA_ASSETS_PATTERN,
+        fleetAuthz: {
+          integrations: { installPackages: true },
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: DeleteKibanaAssetsRequestSchema },
+        },
+        deletePackageKibanaAssetsHandler
+      );
+  }
 
   router.versioned
     .post({

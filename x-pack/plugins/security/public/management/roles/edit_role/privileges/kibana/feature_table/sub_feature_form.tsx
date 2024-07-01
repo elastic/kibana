@@ -130,7 +130,6 @@ export const SubFeatureForm = (props: Props) => {
               }}
               checked={isGranted}
               disabled={props.disabled}
-              compressed={true}
             />
           );
         })}

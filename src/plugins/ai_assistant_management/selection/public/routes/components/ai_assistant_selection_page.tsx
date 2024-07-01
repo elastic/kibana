@@ -9,6 +9,7 @@
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiCallOut,
   EuiCard,
   EuiFlexGrid,
@@ -86,32 +87,48 @@ export function AiAssistantSelectionPage() {
                     <EuiSpacer size="s" />
                   </>
                 ) : null}
-                <EuiLink
-                  data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
-                  external
-                  target="_blank"
-                  href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
+                <p>
+                  {i18n.translate(
+                    'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkDescription',
+                    { defaultMessage: 'For more info, see our' }
+                  )}{' '}
+                  <EuiLink
+                    data-test-subj="pluginsAiAssistantSelectionPageDocumentationLink"
+                    external
+                    target="_blank"
+                    href="https://www.elastic.co/guide/en/observability/current/obs-ai-assistant.html"
+                  >
+                    {i18n.translate(
+                      'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.documentationLinkLabel',
+                      { defaultMessage: 'documentation' }
+                    )}
+                  </EuiLink>
+                </p>
+                <EuiButton
+                  iconType="gear"
+                  data-test-subj="pluginsAiAssistantSelectionPageButton"
+                  onClick={() =>
+                    navigateToApp('management', {
+                      path: 'kibana/observabilityAiAssistantManagement',
+                    })
+                  }
                 >
                   {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSettingsPage.obsAssistant.documentationLinkLabel',
-                    { defaultMessage: 'Documentation' }
+                    'aiAssistantManagementSelection.aiAssistantSelectionPage.obsAssistant.manageSettingsButtonLabel',
+                    { defaultMessage: 'Manage Settings' }
                   )}
-                </EuiLink>
+                </EuiButton>
               </div>
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="l" type="logoObservability" />}
+            icon={<EuiIcon size="xxl" type="logoObservability" />}
             isDisabled={!observabilityAIAssistantEnabled}
-            layout="horizontal"
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.observabilityLabel',
               { defaultMessage: 'Elastic AI Assistant for Observability' }
             )}
             titleSize="xs"
-            onClick={() =>
-              navigateToApp('management', { path: 'kibana/observabilityAiAssistantManagement' })
-            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow>
@@ -135,32 +152,46 @@ export function AiAssistantSelectionPage() {
                     <EuiSpacer size="s" />
                   </>
                 ) : null}
-                <EuiLink
-                  data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
-                  external
-                  target="_blank"
-                  href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                <p>
+                  {i18n.translate(
+                    'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.documentationLinkDescription',
+                    { defaultMessage: 'For more info, see our' }
+                  )}{' '}
+                  <EuiLink
+                    data-test-subj="securityAiAssistantSelectionPageDocumentationLink"
+                    external
+                    target="_blank"
+                    href="https://www.elastic.co/guide/en/security/current/security-assistant.html"
+                  >
+                    {i18n.translate(
+                      'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
+                      { defaultMessage: 'documentation' }
+                    )}
+                  </EuiLink>
+                </p>
+                <EuiButton
+                  data-test-subj="pluginsAiAssistantSelectionPageButton"
+                  iconType="gear"
+                  onClick={() =>
+                    navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
+                  }
                 >
                   {i18n.translate(
-                    'aiAssistantManagementSelection.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
-                    { defaultMessage: 'Documentation' }
+                    'aiAssistantManagementSelection.aiAssistantSelectionPage.securityAssistant.manageSettingsButtonLabel',
+                    { defaultMessage: 'Manage Settings' }
                   )}
-                </EuiLink>
+                </EuiButton>
               </div>
             }
             display="plain"
             hasBorder
-            icon={<EuiIcon size="l" type="logoSecurity" />}
+            icon={<EuiIcon size="xxl" type="logoSecurity" />}
             isDisabled={!securityAIAssistantEnabled}
-            layout="horizontal"
             title={i18n.translate(
               'aiAssistantManagementSelection.aiAssistantSelectionPage.securityLabel',
               { defaultMessage: 'Elastic AI Assistant for Security' }
             )}
             titleSize="xs"
-            onClick={() =>
-              navigateToApp('management', { path: 'kibana/securityAiAssistantManagement' })
-            }
           />
         </EuiFlexItem>
       </EuiFlexGrid>

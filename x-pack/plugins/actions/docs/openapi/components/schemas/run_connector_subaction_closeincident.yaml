@@ -22,13 +22,15 @@ properties:
           - required: [externalId] 
         properties:
           correlation_id:
-            type: ['null', string]
+            type: string
+            nullable: true
             description: >
               An identifier that is assigned to the incident when it is created by the connector.
               NOTE: If you use the default value and the rule generates multiple alerts that use the same alert IDs, the latest open incident for this correlation ID is closed unless you specify the external ID.
             maxLength: 100
             default: '{{rule.id}}:{{alert.id}}'
           externalId:
-            type: ['null', string]
+            type: string
+            nullable: true
             description: The unique identifier (`incidentId`) for the incident in ServiceNow.
  

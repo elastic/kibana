@@ -19,7 +19,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',
@@ -30,7 +30,7 @@ describe('METRICS', () => {
       ]);
     });
 
-    it('can parse multiple "indices"', () => {
+    it('can parse multiple "sources"', () => {
       const text = 'METRICS foo ,\nbar\t,\t\nbaz \n';
       const { ast, errors } = parse(text);
 
@@ -39,7 +39,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',
@@ -69,7 +69,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',
@@ -99,7 +99,7 @@ describe('METRICS', () => {
         {
           type: 'command',
           name: 'metrics',
-          indices: [
+          sources: [
             {
               type: 'source',
               name: 'foo',

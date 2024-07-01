@@ -117,6 +117,7 @@ export class ReportingPlugin
         savedObjects,
         uiSettings,
         store,
+        securityService: core.security,
         ...plugins,
       });
 

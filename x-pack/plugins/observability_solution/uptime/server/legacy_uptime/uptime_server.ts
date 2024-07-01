@@ -89,6 +89,7 @@ export const initUptimeServer = (
         router.versioned
           .get({
             access: 'public',
+            description: `Get uptime settings`,
             path: routeDefinition.path,
             options: {
               tags: options?.tags,
@@ -115,6 +116,7 @@ export const initUptimeServer = (
         router.versioned
           .put({
             access: 'public',
+            description: `Update uptime settings`,
             path: routeDefinition.path,
             options: {
               tags: options?.tags,

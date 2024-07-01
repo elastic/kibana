@@ -13,4 +13,6 @@ export type MarkdownEditorSerializedState = SerializedTitles & {
   content: string;
 };
 
+export type MarkdownEditorRuntimeState = MarkdownEditorSerializedState;
+
 export type MarkdownEditorApi = DefaultEmbeddableApi<MarkdownEditorSerializedState>;

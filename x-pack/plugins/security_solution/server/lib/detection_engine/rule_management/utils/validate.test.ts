@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { transformValidate, transformValidateBulkError } from './validate';
+import { transformValidateBulkError } from './validate';
 import type { BulkError } from '../../routes/utils';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
@@ -82,23 +82,6 @@ export const ruleOutput = (): RuleResponse => ({
 });
 
 describe('validate', () => {
-  describe('transformValidate', () => {
-    test('it should do a validation correctly of a partial alert', () => {
-      const ruleAlert = getRuleMock(getQueryRuleParams());
-      const validated = transformValidate(ruleAlert);
-      expect(validated).toEqual(ruleOutput());
-    });
-
-    test('it should do an in-validation correctly of a partial alert', () => {
-      const ruleAlert = getRuleMock(getQueryRuleParams());
-      // @ts-expect-error
-      delete ruleAlert.name;
-      expect(() => {
-        transformValidate(ruleAlert);
-      }).toThrowError('Required');
-    });
-  });
-
   describe('transformValidateBulkError', () => {
     test('it should do a validation correctly of a rule id', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());

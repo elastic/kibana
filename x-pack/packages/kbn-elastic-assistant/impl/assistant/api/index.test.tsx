@@ -9,13 +9,7 @@ import { HttpSetup } from '@kbn/core-http-browser';
 import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
-import {
-  deleteKnowledgeBase,
-  fetchConnectorExecuteAction,
-  FetchConnectorExecuteAction,
-  getKnowledgeBaseStatus,
-  postKnowledgeBase,
-} from '.';
+import { fetchConnectorExecuteAction, FetchConnectorExecuteAction } from '.';
 import { API_ERROR } from '../translations';
 
 jest.mock('@kbn/core-http-browser');
@@ -301,81 +295,6 @@ describe('API tests', () => {
       });
 
       expect(result).toEqual({ response, isStream: false, isError: false });
-    });
-  });
-
-  const knowledgeBaseArgs = {
-    resource: 'a-resource',
-    http: mockHttp,
-  };
-  describe('getKnowledgeBaseStatus', () => {
-    it('calls the knowledge base API when correct resource path', async () => {
-      await getKnowledgeBaseStatus(knowledgeBaseArgs);
-
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/a-resource',
-        {
-          method: 'GET',
-          signal: undefined,
-          version: '1',
-        }
-      );
-    });
-    it('returns error when error is an error', async () => {
-      const error = 'simulated error';
-      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
-        throw new Error(error);
-      });
-
-      await expect(getKnowledgeBaseStatus(knowledgeBaseArgs)).resolves.toThrowError(
-        'simulated error'
-      );
-    });
-  });
-
-  describe('postKnowledgeBase', () => {
-    it('calls the knowledge base API when correct resource path', async () => {
-      await postKnowledgeBase(knowledgeBaseArgs);
-
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/a-resource',
-        {
-          method: 'POST',
-          signal: undefined,
-          version: '1',
-        }
-      );
-    });
-    it('returns error when error is an error', async () => {
-      const error = 'simulated error';
-      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
-        throw new Error(error);
-      });
-
-      await expect(postKnowledgeBase(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
-    });
-  });
-
-  describe('deleteKnowledgeBase', () => {
-    it('calls the knowledge base API when correct resource path', async () => {
-      await deleteKnowledgeBase(knowledgeBaseArgs);
-
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/elastic_assistant/knowledge_base/a-resource',
-        {
-          method: 'DELETE',
-          signal: undefined,
-          version: '1',
-        }
-      );
-    });
-    it('returns error when error is an error', async () => {
-      const error = 'simulated error';
-      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
-        throw new Error(error);
-      });
-
-      await expect(deleteKnowledgeBase(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
     });
   });
 });

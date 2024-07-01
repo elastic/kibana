@@ -21,7 +21,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import { policyHasFleetServer } from '../../../../../../../../common/services';
-import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { InstallStatus } from '../../../../../types';
 import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
@@ -40,6 +39,9 @@ import {
   AgentPolicySummaryLine,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
+import { SideBarColumn } from '../../../components/side_bar_column';
+
+import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
@@ -103,7 +105,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const packageInstallStatus = getPackageInstallStatus(name);
   const { pagination, pageSizeOptions, setPagination } = useUrlPagination();
-  const { enableReusableIntegrationPolicies } = ExperimentalFeaturesService.get();
+  const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
 
   const {
     data,
@@ -173,7 +175,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
     [setPagination]
   );
   const canShowMultiplePoliciesCell =
-    enableReusableIntegrationPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
+    canUseMultipleAgentPolicies && canReadIntegrationPolicies && canReadAgentPolicies;
   const columns: Array<EuiTableFieldDataColumnType<InMemoryPackagePolicyAndAgentPolicy>> = useMemo(
     () => [
       {
@@ -303,7 +305,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
           const agentPolicy = agentPolicies[0]; // TODO: handle multiple agent policies
           return (
             <PackagePolicyActionsMenu
-              agentPolicy={agentPolicy}
+              agentPolicies={agentPolicies}
               packagePolicy={packagePolicy}
               showAddAgent={true}
               upgradePackagePolicyHref={
@@ -364,7 +366,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={1} />
+        <SideBarColumn grow={1} />
         <EuiFlexItem grow={7}>
           <EuiBasicTable
             items={packageAndAgentPolicies || []}

@@ -19,32 +19,22 @@ import type {
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
-import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging-plugin/server';
-
-import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type {
-  AssetType,
-  AssetReference,
-  AssetParts,
-  Installation,
-  PackageSpecTags,
-} from '../../../../types';
-import { savedObjectTypes } from '../../packages';
-import type { PackageInstallContext } from '../../../../../common/types';
+import type { AssetReference, AssetParts, Installation, PackageSpecTags } from '../../../../types';
+import type { KibanaAssetReference, PackageInstallContext } from '../../../../../common/types';
 import {
   indexPatternTypes,
   getIndexPatternSavedObjects,
   makeManagedIndexPatternsGlobal,
 } from '../index_pattern/install';
-import { saveKibanaAssetsRefs } from '../../packages/install';
+import { kibanaAssetsToAssetsRef, saveKibanaAssetsRefs } from '../../packages/install';
 import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
-import { KibanaSOReferenceError } from '../../../../errors';
-
+import { FleetError, KibanaSOReferenceError } from '../../../../errors';
 import { withPackageSpan } from '../../packages/utils';
 
 import { tagKibanaAssets } from './tag_assets';
+import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
 type SavedObjectsImporterContract = Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
@@ -163,11 +153,8 @@ export async function installKibanaAssets(options: {
   return installedAssets;
 }
 
-export async function installKibanaAssetsAndReferences({
+export async function installKibanaAssetsAndReferencesMultispace({
   savedObjectsClient,
-  savedObjectsImporter,
-  savedObjectTagAssignmentService,
-  savedObjectTagClient,
   logger,
   pkgName,
   pkgTitle,
@@ -175,11 +162,9 @@ export async function installKibanaAssetsAndReferences({
   installedPkg,
   spaceId,
   assetTags,
+  installAsAdditionalSpace,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
-  savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
-  savedObjectTagAssignmentService: IAssignmentService;
-  savedObjectTagClient: ITagsClient;
   logger: Logger;
   pkgName: string;
   pkgTitle: string;
@@ -187,15 +172,89 @@ export async function installKibanaAssetsAndReferences({
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
   assetTags?: PackageSpecTags[];
+  installAsAdditionalSpace?: boolean;
 }) {
-  const kibanaAssets = await getKibanaAssets(packageInstallContext);
-  if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
-  // save new kibana refs before installing the assets
-  const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
+  if (installedPkg && !installAsAdditionalSpace) {
+    // Install in every space => upgrades
+    const refs = await installKibanaAssetsAndReferences({
+      savedObjectsClient,
+      logger,
+      pkgName,
+      pkgTitle,
+      packageInstallContext,
+      installedPkg,
+      spaceId,
+      assetTags,
+      installAsAdditionalSpace,
+    });
+
+    for (const additionnalSpaceId of Object.keys(
+      installedPkg.attributes.additional_spaces_installed_kibana ?? {}
+    )) {
+      await installKibanaAssetsAndReferences({
+        savedObjectsClient,
+        logger,
+        pkgName,
+        pkgTitle,
+        packageInstallContext,
+        installedPkg,
+        spaceId: additionnalSpaceId,
+        assetTags,
+        installAsAdditionalSpace: true,
+      });
+    }
+    return refs;
+  }
+
+  return installKibanaAssetsAndReferences({
     savedObjectsClient,
+    logger,
     pkgName,
-    kibanaAssets
-  );
+    pkgTitle,
+    packageInstallContext,
+    installedPkg,
+    spaceId,
+    assetTags,
+    installAsAdditionalSpace,
+  });
+}
+
+export async function installKibanaAssetsAndReferences({
+  savedObjectsClient,
+  logger,
+  pkgName,
+  pkgTitle,
+  packageInstallContext,
+  installedPkg,
+  spaceId,
+  assetTags,
+  installAsAdditionalSpace,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  pkgName: string;
+  pkgTitle: string;
+  packageInstallContext: PackageInstallContext;
+  installedPkg?: SavedObject<Installation>;
+  spaceId: string;
+  assetTags?: PackageSpecTags[];
+  installAsAdditionalSpace?: boolean;
+}) {
+  const { savedObjectsImporter, savedObjectTagAssignmentService, savedObjectTagClient } =
+    getSpaceAwareSaveobjectsClients(spaceId);
+  const kibanaAssets = await getKibanaAssets(packageInstallContext);
+  if (installedPkg) {
+    await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
+  }
+  let installedKibanaAssetsRefs: KibanaAssetReference[] = [];
+  if (!installAsAdditionalSpace) {
+    // save new kibana refs before installing the assets
+    installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
+      savedObjectsClient,
+      pkgName,
+      kibanaAssetsToAssetsRef(kibanaAssets)
+    );
+  }
 
   const importedAssets = await installKibanaAssets({
     savedObjectsClient,
@@ -204,6 +263,24 @@ export async function installKibanaAssetsAndReferences({
     pkgName,
     kibanaAssets,
   });
+  if (installAsAdditionalSpace) {
+    const assets = importedAssets.map(
+      ({ id, type, destinationId }) =>
+        ({
+          id: destinationId ?? id,
+          originId: id,
+          type,
+        } as KibanaAssetReference)
+    );
+    installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
+      savedObjectsClient,
+      pkgName,
+      assets,
+      installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
+        ? false
+        : installAsAdditionalSpace
+    );
+  }
   await withPackageSpan('Create and assign package tags', () =>
     tagKibanaAssets({
       savedObjectTagAssignmentService,
@@ -220,20 +297,32 @@ export async function installKibanaAssetsAndReferences({
   return installedKibanaAssetsRefs;
 }
 
-export const deleteKibanaInstalledRefs = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string,
-  installedKibanaRefs: AssetReference[]
-) => {
-  const installedAssetsToSave = installedKibanaRefs.filter(({ id, type }) => {
-    const assetType = type as AssetType;
-    return !savedObjectTypes.includes(assetType);
-  });
+export async function deleteKibanaAssetsAndReferencesForSpace({
+  savedObjectsClient,
+  logger,
+  pkgName,
+  installedPkg,
+  spaceId,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  logger: Logger;
+  pkgName: string;
+  installedPkg: SavedObject<Installation>;
+  spaceId: string;
+}) {
+  if (!installedPkg) {
+    return;
+  }
 
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_kibana: installedAssetsToSave,
-  });
-};
+  if (installedPkg.attributes.installed_kibana_space_id === spaceId) {
+    throw new FleetError(
+      'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
+    );
+  }
+  await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
+  await saveKibanaAssetsRefs(savedObjectsClient, pkgName, [], true);
+}
+
 export async function getKibanaAssets(
   packageInstallContext: PackageInstallContext
 ): Promise<Record<KibanaAssetType, ArchiveAsset[]>> {

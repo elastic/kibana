@@ -17,6 +17,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
     PlaygroundStartChatPage: {
       async expectPlaygroundStartChatPageComponentsToExist() {
         await testSubjects.existOrFail('startChatPage');
+        await testSubjects.existOrFail('connectToLLMChatPanel');
         await testSubjects.existOrFail('selectIndicesChatPanel');
         await testSubjects.existOrFail('startChatButton');
       },
@@ -26,8 +27,10 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('playground-documentation-link');
       },
 
-      async expectCreateIndexButtonToMissed() {
-        await testSubjects.missingOrFail('createIndexButton');
+      async expectPlaygroundHeaderComponentsToDisabled() {
+        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
       },
 
       async expectCreateIndexButtonToExists() {
@@ -45,8 +48,23 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await comboBox.setCustom('selectIndicesComboBox', indexName);
       },
 
-      async expectNoIndicesFieldsWarningExists() {
-        await testSubjects.existOrFail('NoIndicesFieldsMessage');
+      async expectIndicesInDropdown() {
+        await testSubjects.existOrFail('selectIndicesComboBox');
+      },
+
+      async removeIndexFromComboBox() {
+        await testSubjects.click('removeIndexButton');
+      },
+
+      async expectToSelectIndicesAndStartButtonEnabled(indexName: string) {
+        await comboBox.setCustom('selectIndicesComboBox', indexName);
+        expect(await testSubjects.isEnabled('startChatButton')).to.be(true);
+        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(true);
+        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(true);
+        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(true);
+
+        await testSubjects.click('startChatButton');
+        await testSubjects.existOrFail('chatPage');
       },
 
       async expectAddConnectorButtonExists() {
@@ -58,24 +76,66 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('create-connector-flyout');
       },
 
-      async expectHideGenAIPanelConnector(createConnector: () => Promise<void>) {
+      async expectHideGenAIPanelConnectorAfterCreatingConnector(
+        createConnector: () => Promise<void>
+      ) {
         await createConnector();
         await browser.refresh();
         await testSubjects.missingOrFail('connectToLLMChatPanel');
       },
 
-      async expectToStartChatPage() {
-        expect(await testSubjects.isEnabled('startChatButton')).to.be(true);
-        await testSubjects.click('startChatButton');
-        await testSubjects.existOrFail('chatPage');
+      async expectHideGenAIPanelConnector() {
+        await testSubjects.missingOrFail('connectToLLMChatPanel');
       },
     },
     PlaygroundChatPage: {
-      async expectChatWorks() {
+      async navigateToChatPage(indexName: string) {
+        await comboBox.setCustom('selectIndicesComboBox', indexName);
+        await testSubjects.click('startChatButton');
+      },
+
+      async expectChatWindowLoaded() {
+        expect(await testSubjects.isEnabled('editContextActionButton')).to.be(true);
+        expect(await testSubjects.isEnabled('viewQueryActionButton')).to.be(true);
+        expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(true);
+
+        expect(await testSubjects.isEnabled('regenerateActionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('clearChatActionButton')).to.be(false);
+        expect(await testSubjects.isEnabled('sendQuestionButton')).to.be(false);
+
         await testSubjects.existOrFail('questionInput');
+        const model = await testSubjects.find('summarizationModelSelect');
+        const defaultModel = await model.getVisibleText();
+
+        expect(defaultModel).to.equal('OpenAI GPT-3.5 Turbo');
+        expect(defaultModel).not.to.be.empty();
+
+        expect(
+          await (await testSubjects.find('manageConnectorsLink')).getAttribute('href')
+        ).to.contain('/app/management/insightsAndAlerting/triggersActionsConnectors/connectors/');
+
+        await testSubjects.click('sourcesAccordion');
+
+        expect(await testSubjects.findAll('indicesInAccordian')).to.have.length(1);
+      },
+
+      async sendQuestion() {
         await testSubjects.setValue('questionInput', 'test question');
         await testSubjects.click('sendQuestionButton');
-        await testSubjects.existOrFail('userMessage');
+      },
+
+      async expectChatWorks() {
+        const userMessageElement = await testSubjects.find('userMessage');
+        const userMessage = await userMessageElement.getVisibleText();
+        expect(userMessage).to.contain('test question');
+
+        const assistantMessageElement = await testSubjects.find('assistant-message');
+        const assistantMessage = await assistantMessageElement.getVisibleText();
+        expect(assistantMessage).to.contain('My response');
+      },
+
+      async expectTokenTooltipExists() {
+        await testSubjects.existOrFail('token-tooltip-button');
       },
 
       async expectOpenViewCode() {

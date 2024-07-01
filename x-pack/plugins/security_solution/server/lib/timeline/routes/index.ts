@@ -24,7 +24,7 @@ import { getDraftTimelinesRoute } from './draft_timelines/get_draft_timelines';
 import { cleanDraftTimelinesRoute } from './draft_timelines/clean_draft_timelines';
 import { installPrepackedTimelinesRoute } from './prepackaged_timelines/install_prepackaged_timelines';
 
-import { persistNoteRoute, deleteNoteRoute } from './notes';
+import { persistNoteRoute, deleteNoteRoute, getNotesRoute } from './notes';
 
 import { persistPinnedEventRoute } from './pinned_events';
 
@@ -51,5 +51,7 @@ export function registerTimelineRoutes(
 
   persistNoteRoute(router, config, security);
   deleteNoteRoute(router, config, security);
+  getNotesRoute(router, config, security);
+
   persistPinnedEventRoute(router, config, security);
 }

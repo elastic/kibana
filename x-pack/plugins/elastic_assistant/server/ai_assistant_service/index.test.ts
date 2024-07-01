@@ -10,7 +10,7 @@ import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typ
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject } from 'rxjs';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { conversationsDataClientMock } from '../__mocks__/data_clients.mock';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
@@ -135,12 +135,18 @@ describe('AI Assistant Service', () => {
       );
 
       expect(assistantService.isInitialized()).toEqual(true);
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
 
-      const componentTemplate = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
-      expect(componentTemplate.name).toEqual(
-        '.kibana-elastic-ai-assistant-component-template-conversations'
-      );
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+
+      const expectedTemplates = [
+        '.kibana-elastic-ai-assistant-component-template-conversations',
+        '.kibana-elastic-ai-assistant-component-template-prompts',
+        '.kibana-elastic-ai-assistant-component-template-anonymization-fields',
+        '.kibana-elastic-ai-assistant-component-template-attack-discovery',
+      ];
+      expectedTemplates.forEach((t, i) => {
+        expect(clusterClient.cluster.putComponentTemplate.mock.calls[i][0].name).toEqual(t);
+      });
     });
 
     test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
@@ -628,7 +634,19 @@ describe('AI Assistant Service', () => {
         'AI Assistant service initialized',
         async () => assistantService.isInitialized() === true
       );
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(5);
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(6);
+
+      const expectedTemplates = [
+        '.kibana-elastic-ai-assistant-component-template-conversations',
+        '.kibana-elastic-ai-assistant-component-template-conversations',
+        '.kibana-elastic-ai-assistant-component-template-conversations',
+        '.kibana-elastic-ai-assistant-component-template-prompts',
+        '.kibana-elastic-ai-assistant-component-template-anonymization-fields',
+        '.kibana-elastic-ai-assistant-component-template-attack-discovery',
+      ];
+      expectedTemplates.forEach((t, i) => {
+        expect(clusterClient.cluster.putComponentTemplate.mock.calls[i][0].name).toEqual(t);
+      });
     });
 
     test('should retry updating index template for transient ES errors', async () => {
@@ -649,7 +667,18 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(5);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(6);
+      const expectedTemplates = [
+        '.kibana-elastic-ai-assistant-index-template-conversations',
+        '.kibana-elastic-ai-assistant-index-template-conversations',
+        '.kibana-elastic-ai-assistant-index-template-conversations',
+        '.kibana-elastic-ai-assistant-index-template-prompts',
+        '.kibana-elastic-ai-assistant-index-template-anonymization-fields',
+        '.kibana-elastic-ai-assistant-index-template-attack-discovery',
+      ];
+      expectedTemplates.forEach((t, i) => {
+        expect(clusterClient.indices.putIndexTemplate.mock.calls[i][0].name).toEqual(t);
+      });
     });
 
     test('should retry updating index settings for existing indices for transient ES errors', async () => {
@@ -669,7 +698,7 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(5);
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(6);
     });
 
     test('should retry updating index mappings for existing indices for transient ES errors', async () => {
@@ -689,7 +718,7 @@ describe('AI Assistant Service', () => {
         async () => (await getSpaceResourcesInitialized(assistantService)) === true
       );
 
-      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(5);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(6);
     });
 
     test('should retry creating concrete index for transient ES errors', async () => {

@@ -5,246 +5,246 @@
  * 2.0.
  */
 import React from 'react';
-import Chance from 'chance';
-import type { UseQueryResult } from '@tanstack/react-query';
-import { of } from 'rxjs';
-import { useDataView } from '../../common/api/use_data_view';
+import {
+  getMockServerDependencies,
+  setupMockServer,
+  startMockServer,
+} from '../../test/mock_server/mock_server';
+import { renderWrapper } from '../../test/mock_server/mock_server_test_provider';
 import { Configurations } from './configurations';
-import { TestProvider } from '../../test/test_provider';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createStubDataView } from '@kbn/data-views-plugin/public/data_views/data_view.stub';
-import { CSP_LATEST_FINDINGS_DATA_VIEW } from '../../../common/constants';
-import * as TEST_SUBJECTS from './test_subjects';
-import type { DataView } from '@kbn/data-plugin/common';
-import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
-import { useSubscriptionStatus } from '../../common/hooks/use_subscription_status';
-import { createReactQueryResponse } from '../../test/fixtures/react_query';
-import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
-import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
-import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
-import { render } from '@testing-library/react';
-import { expectIdsInDoc } from '../../test/utils';
-import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
-import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from '@kbn/shared-ux-router';
+import { findingsNavigation } from '../../common/navigation/constants';
+import userEvent from '@testing-library/user-event';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { CspClientPluginStartDeps } from '../../types';
+import * as statusHandlers from '../../../server/routes/status/status.handlers.mock';
+import {
+  bsearchFindingsHandler,
+  generateCspFinding,
+  rulesGetStatesHandler,
+} from './configurations.handlers.mock';
 
-jest.mock('../../common/api/use_data_view');
-jest.mock('../../common/api/use_setup_status_api');
-jest.mock('../../common/api/use_license_management_locator_api');
-jest.mock('../../common/hooks/use_subscription_status');
-jest.mock('../../common/navigation/use_navigate_to_cis_integration_policies');
-jest.mock('../../common/navigation/use_csp_integration_link');
+const server = setupMockServer();
 
-const chance = new Chance();
-
-beforeEach(() => {
-  jest.clearAllMocks();
-
-  (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
-    createReactQueryResponse({
-      status: 'success',
-      data: true,
-    })
-  );
-
-  (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
-    createReactQueryResponse({
-      status: 'success',
-      data: true,
-    })
-  );
-});
-
-const renderFindingsPage = () => {
-  render(
-    <TestProvider>
+const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
+  return renderWrapper(
+    <MemoryRouter initialEntries={[findingsNavigation.findings_default.path]}>
       <Configurations />
-    </TestProvider>
+    </MemoryRouter>,
+    dependencies
   );
 };
 
 describe('<Findings />', () => {
-  it('no findings state: not-deployed - shows NotDeployed instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'not-deployed' },
-          cspm: { status: 'not-deployed' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCISIntegrationPoliciesLink as jest.Mock).mockImplementation(() => chance.url());
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+  startMockServer(server);
 
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('no findings state: indexing - shows Indexing instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'indexing' },
-          cspm: { status: 'indexing' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('no findings state: index-timeout - shows IndexTimeout instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'index-timeout' },
-          cspm: { status: 'index-timeout' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
-  });
-
-  it('no findings state: unprivileged - shows Unprivileged instead of findings', () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'unprivileged' },
-          cspm: { status: 'unprivileged' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED],
-      notToBe: [
-        TEST_SUBJECTS.FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-      ],
-    });
-  });
-
-  it("renders the success state component when 'latest findings' DataView exists and request status is 'success'", async () => {
-    const source = await dataPluginMock.createStartContract().search.searchSource.create();
-
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() => ({
-      status: 'success',
-      data: {
-        kspm: { status: 'indexed' },
-        cspm: { status: 'indexed' },
-        indicesDetails: [
-          { index: 'logs-cloud_security_posture.findings_latest-default', status: 'not-empty' },
-          { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-        ],
-      },
-    }));
-    (source.fetch$ as jest.Mock).mockReturnValue(of({ rawResponse: { hits: { hits: [] } } }));
-
-    (useDataView as jest.Mock).mockReturnValue({
-      status: 'success',
-      data: createStubDataView({
-        spec: {
-          id: CSP_LATEST_FINDINGS_DATA_VIEW,
-        },
-      }),
-    } as UseQueryResult<DataView>);
-
-    renderFindingsPage();
-
-    expectIdsInDoc({
-      be: [TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER],
-      notToBe: [
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
-    });
+  beforeEach(() => {
+    server.use(rulesGetStatesHandler);
   });
 
   it('renders integrations installation prompt if integration is not installed', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: { status: 'not-installed' },
-          cspm: { status: 'not-installed' },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
-    (useCspIntegrationLink as jest.Mock).mockImplementation(() => chance.url());
+    server.use(statusHandlers.notInstalledHandler);
     renderFindingsPage();
 
-    expectIdsInDoc({
-      be: [PACKAGE_NOT_INSTALLED_TEST_SUBJECT],
-      notToBe: [
-        TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
-        NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,
-        NO_FINDINGS_STATUS_TEST_SUBJ.INDEXING,
-        NO_FINDINGS_STATUS_TEST_SUBJ.UNPRIVILEGED,
-      ],
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText(/add cspm integration/i)).toBeInTheDocument());
+    expect(screen.getByText(/add kspm integration/i)).toBeInTheDocument();
+  });
+
+  it("renders the 'latest findings' DataTable component when the CSPM/KSPM integration status is 'indexed' grouped by 'none'", async () => {
+    const finding1 = generateCspFinding('0001', 'failed');
+    const finding2 = generateCspFinding('0002', 'passed');
+
+    server.use(statusHandlers.indexedHandler);
+    server.use(bsearchFindingsHandler([finding1, finding2]));
+    renderFindingsPage();
+
+    // Loading while checking the status API
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+    expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
+    expect(screen.getByText(finding1.resource.id)).toBeInTheDocument();
+    expect(screen.getByText(finding1.rule.benchmark.rule_number as string)).toBeInTheDocument();
+    expect(screen.getByText(finding1.rule.name)).toBeInTheDocument();
+    expect(screen.getByText(finding1.rule.section)).toBeInTheDocument();
+
+    expect(screen.getByText(finding2.resource.name)).toBeInTheDocument();
+    expect(screen.getByText(finding2.resource.id)).toBeInTheDocument();
+    expect(screen.getByText(finding2.rule.benchmark.rule_number as string)).toBeInTheDocument();
+    expect(screen.getByText(finding2.rule.name)).toBeInTheDocument();
+    expect(screen.getByText(finding2.rule.section)).toBeInTheDocument();
+
+    expect(screen.getByText(/group findings by: none/i)).toBeInTheDocument();
+  });
+
+  describe('SearchBar', () => {
+    it('set search query', async () => {
+      const finding1 = generateCspFinding('0001', 'failed');
+      const finding2 = generateCspFinding('0002', 'passed');
+
+      server.use(statusHandlers.indexedHandler);
+      server.use(bsearchFindingsHandler([finding1, finding2]));
+
+      renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+      const queryInput = screen.getByTestId('queryInput');
+      userEvent.paste(queryInput, `rule.section : ${finding1.rule.section}`);
+
+      const submitButton = screen.getByTestId('querySubmitButton');
+      userEvent.click(submitButton);
+
+      await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
+
+      expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
+      expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
+
+      userEvent.clear(queryInput);
+      userEvent.click(submitButton);
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+    });
+    it('renders no results message and reset button when search query does not match', async () => {
+      const finding1 = generateCspFinding('0001', 'failed');
+      const finding2 = generateCspFinding('0002', 'passed');
+
+      server.use(statusHandlers.indexedHandler);
+      server.use(bsearchFindingsHandler([finding1, finding2]));
+
+      renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+      const queryInput = screen.getByTestId('queryInput');
+      userEvent.paste(queryInput, `rule.section : Invalid`);
+
+      const submitButton = screen.getByTestId('querySubmitButton');
+      userEvent.click(submitButton);
+
+      await waitFor(() =>
+        expect(screen.getByText(/no results match your search criteria/i)).toBeInTheDocument()
+      );
+
+      const resetButton = screen.getByRole('button', {
+        name: /reset filters/i,
+      });
+
+      userEvent.click(resetButton);
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+    });
+    it('add filter', async () => {
+      const finding1 = generateCspFinding('0001', 'failed');
+      const finding2 = generateCspFinding('0002', 'passed');
+
+      server.use(statusHandlers.indexedHandler);
+      server.use(bsearchFindingsHandler([finding1, finding2]));
+
+      renderFindingsPage();
+
+      // Loading while checking the status API
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+      userEvent.click(screen.getByTestId('addFilter'), undefined, { skipPointerEventsCheck: true });
+
+      await waitFor(() =>
+        expect(screen.getByTestId('filterFieldSuggestionList')).toBeInTheDocument()
+      );
+
+      const filterFieldSuggestionListInput = within(
+        screen.getByTestId('filterFieldSuggestionList')
+      ).getByTestId('comboBoxSearchInput');
+
+      userEvent.paste(filterFieldSuggestionListInput, 'rule.section');
+      userEvent.keyboard('{enter}');
+
+      const filterOperatorListInput = within(screen.getByTestId('filterOperatorList')).getByTestId(
+        'comboBoxSearchInput'
+      );
+      userEvent.click(filterOperatorListInput, undefined, { skipPointerEventsCheck: true });
+
+      const filterOption = within(
+        screen.getByTestId('comboBoxOptionsList filterOperatorList-optionsList')
+      ).getByRole('option', { name: 'is' });
+      fireEvent.click(filterOption);
+
+      const filterParamsInput = within(screen.getByTestId('filterParams')).getByRole('textbox');
+      userEvent.paste(filterParamsInput, finding1.rule.section);
+
+      userEvent.click(screen.getByTestId('saveFilter'), undefined, {
+        skipPointerEventsCheck: true,
+      });
+
+      await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
+      expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
+      expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
+    });
+    it('remove filter', async () => {
+      const finding1 = generateCspFinding('0001', 'failed');
+      const finding2 = generateCspFinding('0002', 'passed');
+
+      const mockedFilterManager = new FilterManager(getMockServerDependencies().core.uiSettings);
+      mockedFilterManager.setFilters([
+        {
+          meta: {
+            alias: `rule.section: ${finding1.rule.section}`,
+            negate: false,
+            disabled: false,
+            key: 'rule.section',
+            value: finding1.rule.section,
+          },
+          query: {
+            match_phrase: {
+              'rule.section': finding1.rule.section,
+            },
+          },
+        },
+      ]);
+      const mockDependenciesWithFilter = {
+        ...getMockServerDependencies(),
+        deps: {
+          ...getMockServerDependencies().deps,
+          data: {
+            ...getMockServerDependencies().deps.data,
+            query: {
+              ...getMockServerDependencies().deps.data!.query,
+              filterManager: mockedFilterManager,
+            },
+          },
+        } as unknown as Partial<CspClientPluginStartDeps>,
+      };
+
+      server.use(statusHandlers.indexedHandler);
+      server.use(bsearchFindingsHandler([finding1, finding2]));
+
+      renderFindingsPage(mockDependenciesWithFilter);
+
+      // Loading while checking the status API
+      expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+      await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
+      expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
+      expect(screen.queryByText(finding2.resource.id)).not.toBeInTheDocument();
+
+      const deleteFilter = screen.getByRole('button', {
+        name: `Delete rule.section: ${finding1.rule.section}`,
+      });
+      userEvent.click(deleteFilter);
+
+      await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
+
+      expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();
+      expect(screen.getByText(finding2.resource.name)).toBeInTheDocument();
     });
   });
 });

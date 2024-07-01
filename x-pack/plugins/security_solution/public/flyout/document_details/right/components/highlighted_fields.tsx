@@ -16,7 +16,7 @@ import { useBasicDataFromDetailsData } from '../../../../timelines/components/si
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { CellActions } from './cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 
 export interface HighlightedFieldsTableRow {
@@ -92,7 +92,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
 export const HighlightedFields: FC = () => {
-  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview } = useDocumentDetailsContext();
   const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const { loading, rule: maybeRule } = useRuleWithFallback(ruleId);
 

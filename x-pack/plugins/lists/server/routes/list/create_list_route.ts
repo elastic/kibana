@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { CreateListRequestBody, CreateListResponse } from '@kbn/securitysolution-lists-common/api';
 
 import type { ListsPluginRouter } from '../../types';
-import {
-  CreateListRequestDecoded,
-  createListRequest,
-  createListResponse,
-} from '../../../common/api';
-import { buildRouteValidation, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
 import { getListClient } from '..';
 
 export const createListRoute = (router: ListsPluginRouter): void => {
@@ -31,9 +27,7 @@ export const createListRoute = (router: ListsPluginRouter): void => {
       {
         validate: {
           request: {
-            body: buildRouteValidation<typeof createListRequest, CreateListRequestDecoded>(
-              createListRequest
-            ),
+            body: buildRouteValidationWithZod(CreateListRequestBody),
           },
         },
         version: '2023-10-31',
@@ -77,12 +71,8 @@ export const createListRoute = (router: ListsPluginRouter): void => {
               type,
               version,
             });
-            const [validated, errors] = validate(list, createListResponse);
-            if (errors != null) {
-              return siemResponse.error({ body: errors, statusCode: 500 });
-            } else {
-              return response.ok({ body: validated ?? {} });
-            }
+
+            return response.ok({ body: CreateListResponse.parse(list) });
           }
         } catch (err) {
           const error = transformError(err);

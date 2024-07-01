@@ -34,6 +34,7 @@ import {
 } from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -59,13 +60,12 @@ interface HeadingWithPosition {
   position: number;
 }
 
-const SideBar = styled(EuiFlexItem)`
+const SideBar = styled(SideBarColumn)`
   position: sticky;
   top: 70px;
   padding-top: 50px;
   padding-left: 10px;
   text-overflow: ellipsis;
-  max-width: 180px;
   max-height: 500px;
 `;
 const StyledSideNav = styled(EuiSideNav)`

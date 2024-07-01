@@ -2,6 +2,7 @@
 
 exports[`renders correctly 1`] = `
 <SectionPanel
+  dataTestSubj="generalPanel"
   title="General"
 >
   <EuiDescribedFormGroup

@@ -221,7 +221,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && allowQueryCancellation) {
+    if (isQueryLoading && isLoading && allowQueryCancellation) {
       abortController?.abort();
       setIsQueryLoading(false);
     } else {
@@ -235,7 +235,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+  }, [
+    isQueryLoading,
+    isLoading,
+    allowQueryCancellation,
+    abortController,
+    onTextLangQuerySubmit,
+    language,
+  ]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -667,41 +674,41 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [language, documentationSections]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
-    automaticLayout: true,
     accessibilitySupport: 'off',
+    autoIndent: 'none',
+    automaticLayout: true,
+    fixedOverflowWidgets: true,
     folding: false,
     fontSize: 14,
-    padding: {
-      top: 8,
-      bottom: 8,
-    },
-    scrollBeyondLastLine: false,
-    quickSuggestions: true,
-    minimap: { enabled: false },
-    wordWrap: 'on',
-    lineNumbers: showLineNumbers ? 'on' : 'off',
-    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
-    lineDecorationsWidth: 12,
-    autoIndent: 'none',
-    wrappingIndent: 'none',
-    lineNumbersMinChars: 3,
-    overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
-    scrollbar: {
-      horizontal: 'hidden',
-      vertical: 'auto',
-    },
-    overviewRulerBorder: false,
     // this becomes confusing with multiple markers, so quick fixes
     // will be proposed only within the tooltip
     lightbulb: {
       enabled: false,
     },
-    fixedOverflowWidgets: true,
+    lineDecorationsWidth: 12,
+    lineNumbers: showLineNumbers ? 'on' : 'off',
+    lineNumbersMinChars: 3,
+    minimap: { enabled: false },
+    overviewRulerLanes: 0,
+    overviewRulerBorder: false,
+    padding: {
+      top: 8,
+      bottom: 8,
+    },
+    quickSuggestions: true,
     readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+    renderLineHighlight: !isCodeEditorExpanded ? 'none' : 'line',
+    renderLineHighlightOnlyWhenFocus: true,
+    scrollbar: {
+      horizontal: 'hidden',
+      vertical: 'auto',
+    },
+    scrollBeyondLastLine: false,
+    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
+    wordWrap: 'on',
+    wrappingIndent: 'none',
   };
 
   if (isCompactFocused) {
@@ -743,7 +750,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   <EuiButtonIcon
                     iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
                     color="text"
-                    size="s"
+                    size="xs"
                     data-test-subj="TextBasedLangEditor-toggleWordWrap"
                     aria-label={
                       isWrappedInPipes
@@ -786,7 +793,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       }
                       buttonProps={{
                         color: 'text',
-                        size: 's',
+                        size: 'xs',
                         'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
@@ -800,7 +807,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 )}
               </EuiFlexItem>
               {!Boolean(hideMinimizeButton) && (
-                <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+                <EuiFlexItem grow={false}>
                   <EuiToolTip
                     position="top"
                     content={i18n.translate(
@@ -820,7 +827,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         }
                       )}
                       data-test-subj="TextBasedLangEditor-minimize"
-                      size="s"
+                      size="xs"
                       onClick={() => {
                         expandCodeEditor(false);
                         updateLinesFromModel = false;
@@ -1015,6 +1022,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
+                          transform: 'none !important',
                         },
                       }}
                     />
@@ -1044,6 +1052,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                       borderLeft: 'transparent !important',
+                      transform: 'none !important',
                     }}
                   />
                 </EuiToolTip>

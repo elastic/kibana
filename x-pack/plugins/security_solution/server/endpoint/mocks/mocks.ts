@@ -48,6 +48,7 @@ import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import type { AddVersionOpts, VersionedRouteConfig } from '@kbn/core-http-server';
 import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client.mock';
 import type { PluginStartContract } from '@kbn/actions-plugin/server';
+import type { Mutable } from 'utility-types';
 import { responseActionsClientMock } from '../services/actions/clients/mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { createMockConfig, requestContextMock } from '../../lib/detection_engine/routes/__mocks__';
@@ -264,7 +265,7 @@ export interface HttpApiTestSetupMock<P = any, Q = any, B = any> {
   httpResponseMock: ReturnType<typeof httpServerMock.createResponseFactory>;
   httpHandlerContextMock: ReturnType<typeof requestContextMock.convertContext>;
   getEsClientMock: (type?: 'internalUser' | 'currentUser') => ElasticsearchClientMock;
-  createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => KibanaRequest<P, Q, B>;
+  createRequestMock: (options?: RequestFixtureOptions<P, Q, B>) => Mutable<KibanaRequest<P, Q, B>>;
   /** Retrieves the handler that was registered with the `router` for a given `method` and `path` */
   getRegisteredRouteHandler: (method: RouterMethod, path: string) => RequestHandler;
   /** Retrieves the route handler configuration that was registered with the router */
@@ -334,7 +335,9 @@ export const createHttpApiTestSetupMock = <P = any, Q = any, B = any>(): HttpApi
     httpHandlerContextMock,
     httpResponseMock,
 
-    createRequestMock: (options: RequestFixtureOptions<P, Q, B> = {}): KibanaRequest<P, Q, B> => {
+    createRequestMock: (
+      options: RequestFixtureOptions<P, Q, B> = {}
+    ): Mutable<KibanaRequest<P, Q, B>> => {
       return httpServerMock.createKibanaRequest<P, Q, B>(options);
     },
 

@@ -21,6 +21,12 @@ export const NOTES_DISABLE_TOOLTIP = i18n.translate(
   }
 );
 
+export const NOTE_COUNT_TOOLTIP = (notesCount: number) =>
+  i18n.translate('xpack.securitySolution.notes.noteCountTooltip', {
+    defaultMessage: '{notesCount} {notesCount, plural, one { note } other { notes }}',
+    values: { notesCount },
+  });
+
 export const NOTES_TOOLTIP = i18n.translate(
   'xpack.securitySolution.timeline.body.notes.addNoteTooltip',
   {

@@ -104,7 +104,7 @@ const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataDat
   },
   {
     field: 'containerImageName',
-    value: metadataInfo?.container?.imageName,
+    value: metadataInfo?.container?.image?.name,
     tooltipFieldLabel: 'container.image.name',
   },
   {

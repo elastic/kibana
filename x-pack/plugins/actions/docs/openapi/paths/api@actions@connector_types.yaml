@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves a list of all connector types.
+  summary: Get all connector types
   operationId: getConnectorTypes
   tags:
     - connectors
@@ -24,41 +24,34 @@ get:
                 enabled:
                   type: boolean
                   description: Indicates whether the connector type is enabled in Kibana.
-                  examples:
-                    - true
+                  example: true
                 enabled_in_config:
                   type: boolean
                   description: Indicates whether the connector type is enabled in the Kibana configuration file.
-                  examples:
-                    - true
+                  example: true
                 enabled_in_license:
                   type: boolean
                   description: Indicates whether the connector is enabled in the license.
-                  examples:
-                    - true
+                  example: true
                 id:
                   $ref: '../components/schemas/connector_types.yaml'
                 is_system_action_type:
                   type: boolean
-                  examples:
-                    - false
+                  example: false
                 minimum_license_required:
                   type: string
                   description: The license that is required to use the connector type.
-                  examples:
-                    - basic
+                  example: basic
                 name:
                   type: string
                   description: The name of the connector type.
-                  examples:
-                    - Index
+                  example: Index
                 supported_feature_ids:
                   type: array
                   description: The features that are supported by the connector type.
                   items:
                     $ref: '../components/schemas/features.yaml'
-                  examples:
-                    - [alerting, cases, siem]
+                  example: [alerting, cases, siem]
           examples:
             getConnectorTypesServerlessResponse:
               $ref: '../components/examples/get_connector_types_generativeai_response.yaml'

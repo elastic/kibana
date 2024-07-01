@@ -80,20 +80,20 @@ export const CreateDockerUbuntu: Task = {
   },
 };
 
-export const CreateDockerChainguard: Task = {
-  description: 'Creating Docker Chainguard image',
+export const CreateDockerWolfi: Task = {
+  description: 'Creating Docker Wolfi image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'chainguard',
+      baseImage: 'wolfi',
       context: false,
       image: true,
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
       architecture: 'aarch64',
-      baseImage: 'chainguard',
+      baseImage: 'wolfi',
       context: false,
       image: true,
       dockerBuildDate,
@@ -183,7 +183,7 @@ export const CreateDockerContexts: Task = {
       dockerBuildDate,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'chainguard',
+      baseImage: 'wolfi',
       context: true,
       image: false,
       dockerBuildDate,

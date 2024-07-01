@@ -21,11 +21,14 @@ export {
 export type { RetryableEsClientError };
 
 // actions/* imports
-export type { InitActionParams, IncompatibleClusterRoutingAllocation } from './initialize_action';
-export { initAction } from './initialize_action';
+export type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
+export { checkClusterRoutingAllocationEnabled } from './check_cluster_routing_allocation';
 
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
+
+export type { SafeWriteBlockParams } from './safe_write_block';
+export { safeWriteBlock } from './safe_write_block';
 
 export type { SetWriteBlockParams } from './set_write_block';
 export { setWriteBlock } from './set_write_block';
@@ -105,7 +108,7 @@ export {
 } from './update_source_mappings_properties';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
-import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import type { IncompatibleClusterRoutingAllocation } from './check_cluster_routing_allocation';
 import type { ClusterShardLimitExceeded } from './create_index';
 import type { SynchronizationFailed } from './synchronize_migrators';
 import type { IndexMappingsIncomplete, TypesChanged } from './check_target_mappings';
@@ -158,6 +161,11 @@ export interface EsResponseTooLargeError {
   contentLength: number;
 }
 
+export interface SourceEqualsTarget {
+  type: 'source_equals_target';
+  index: string;
+}
+
 /** @internal */
 export interface AcknowledgeResponse {
   acknowledged: boolean;
@@ -185,6 +193,7 @@ export interface ActionErrorTypeMap {
   index_mappings_incomplete: IndexMappingsIncomplete;
   types_changed: TypesChanged;
   operation_not_supported: OperationNotSupported;
+  source_equals_target: SourceEqualsTarget;
 }
 
 /**

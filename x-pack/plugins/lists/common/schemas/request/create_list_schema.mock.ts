@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CreateListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateListRequestBodyInput } from '@kbn/securitysolution-lists-common/api';
 
 import { DESCRIPTION, LIST_ID, META, NAME, TYPE, VERSION } from '../../constants.mock';
 
-export const getCreateListSchemaMock = (): CreateListSchema => ({
+export const getCreateListSchemaMock = (): CreateListRequestBodyInput => ({
   description: DESCRIPTION,
   deserializer: undefined,
   id: LIST_ID,
@@ -23,7 +23,7 @@ export const getCreateListSchemaMock = (): CreateListSchema => ({
 /**
  * Useful for end to end tests and other mechanisms which want to fill in the values
  */
-export const getCreateMinimalListSchemaMock = (): CreateListSchema => ({
+export const getCreateMinimalListSchemaMock = (): CreateListRequestBodyInput => ({
   description: DESCRIPTION,
   id: LIST_ID,
   name: NAME,
@@ -33,7 +33,7 @@ export const getCreateMinimalListSchemaMock = (): CreateListSchema => ({
 /**
  * Useful for end to end tests and other mechanisms which want to fill in the values
  */
-export const getCreateMinimalListSchemaMockWithoutId = (): CreateListSchema => ({
+export const getCreateMinimalListSchemaMockWithoutId = (): CreateListRequestBodyInput => ({
   description: DESCRIPTION,
   name: NAME,
   type: TYPE,

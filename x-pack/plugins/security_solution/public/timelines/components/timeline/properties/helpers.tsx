@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -20,15 +20,22 @@ const NotesCountBadge = styled(EuiBadge)`
 
 NotesCountBadge.displayName = 'NotesCountBadge';
 
-interface NotesButtonProps {
-  ariaLabel?: string;
-  isDisabled?: boolean;
-  showNotes: boolean;
-  toggleShowNotes: () => void | ((eventId: string) => void);
-  toolTip?: string;
-  timelineType: TimelineTypeLiteral;
-  eventId?: string;
-}
+export const NotificationDot = styled.span`
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: ${({ theme }) => theme.eui.euiColorDanger};
+  top: 17%;
+  left: 52%;
+`;
+
+const NotesButtonContainer = styled(EuiFlexGroup)`
+  position: relative;
+`;
+
+export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
 
 interface SmallNotesButtonProps {
   ariaLabel?: string;
@@ -36,12 +43,14 @@ interface SmallNotesButtonProps {
   toggleShowNotes: (eventId?: string) => void;
   timelineType: TimelineTypeLiteral;
   eventId?: string;
+  /**
+   * Number of notes. If > 0, then a red dot is shown in the top right corner of the icon.
+   */
+  notesCount: number;
 }
 
-export const NOTES_BUTTON_CLASS_NAME = 'notes-button';
-
 const SmallNotesButton = React.memo<SmallNotesButtonProps>(
-  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId }) => {
+  ({ ariaLabel = i18n.NOTES, isDisabled, toggleShowNotes, timelineType, eventId, notesCount }) => {
     const isTemplate = timelineType === TimelineType.template;
     const onClick = useCallback(() => {
       if (eventId != null) {
@@ -52,23 +61,52 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
     }, [toggleShowNotes, eventId]);
 
     return (
-      <EuiButtonIcon
-        aria-label={ariaLabel}
-        className={NOTES_BUTTON_CLASS_NAME}
-        data-test-subj="timeline-notes-button-small"
-        disabled={isDisabled}
-        iconType="editorComment"
-        onClick={onClick}
-        size="s"
-        isDisabled={isTemplate}
-      />
+      <NotesButtonContainer>
+        <EuiFlexItem grow={false}>
+          {notesCount > 0 ? <NotificationDot /> : null}
+          <EuiButtonIcon
+            aria-label={ariaLabel}
+            className={NOTES_BUTTON_CLASS_NAME}
+            data-test-subj="timeline-notes-button-small"
+            disabled={isDisabled}
+            iconType="editorComment"
+            onClick={onClick}
+            size="s"
+            isDisabled={isTemplate}
+          />
+        </EuiFlexItem>
+      </NotesButtonContainer>
     );
   }
 );
 SmallNotesButton.displayName = 'SmallNotesButton';
 
+interface NotesButtonProps {
+  ariaLabel?: string;
+  isDisabled?: boolean;
+  showNotes: boolean;
+  toggleShowNotes: () => void | ((eventId: string) => void);
+  toolTip?: string;
+  timelineType: TimelineTypeLiteral;
+  eventId?: string;
+  /**
+   * Number of notes associated with the event.
+   * Defaults to 0
+   */
+  notesCount?: number;
+}
+
 export const NotesButton = React.memo<NotesButtonProps>(
-  ({ ariaLabel, isDisabled, showNotes, timelineType, toggleShowNotes, toolTip, eventId }) =>
+  ({
+    ariaLabel,
+    isDisabled,
+    showNotes,
+    timelineType,
+    toggleShowNotes,
+    toolTip,
+    eventId,
+    notesCount = 0,
+  }) =>
     showNotes ? (
       <SmallNotesButton
         ariaLabel={ariaLabel}
@@ -76,6 +114,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
         toggleShowNotes={toggleShowNotes}
         timelineType={timelineType}
         eventId={eventId}
+        notesCount={notesCount}
       />
     ) : (
       <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
@@ -85,6 +124,7 @@ export const NotesButton = React.memo<NotesButtonProps>(
           toggleShowNotes={toggleShowNotes}
           timelineType={timelineType}
           eventId={eventId}
+          notesCount={notesCount}
         />
       </EuiToolTip>
     )

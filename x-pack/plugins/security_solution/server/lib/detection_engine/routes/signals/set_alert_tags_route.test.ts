@@ -75,20 +75,9 @@ describe('setAlertTagsRoute', () => {
         body: getSetAlertTagsRequestMock(['tag-1'], ['tag-2']),
       });
 
-      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
-        getSuccessfulSignalUpdateResponse()
-      );
+      const result = server.validate(request);
 
-      const response = await server.inject(request, requestContextMock.convertContext(context));
-
-      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
-        new Error('Test error')
-      );
-
-      expect(response.body).toEqual({
-        message: [`No alert ids were provided`],
-        status_code: 400,
-      });
+      expect(result.badRequest).toHaveBeenCalled();
     });
   });
 

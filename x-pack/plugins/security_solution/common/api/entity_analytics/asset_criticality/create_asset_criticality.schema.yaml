@@ -21,7 +21,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+              $ref: './common.schema.yaml#/components/schemas/CreateSingleAssetCriticalityRequest'
       responses:
         '200':
           description: Successful response
@@ -41,7 +41,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
+              $ref: './common.schema.yaml#/components/schemas/CreateSingleAssetCriticalityRequest'
       responses:
         '200':
           description: Successful response

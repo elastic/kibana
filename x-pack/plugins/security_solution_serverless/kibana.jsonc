@@ -24,7 +24,8 @@
       "discover"
     ],
     "optionalPlugins": [
-      "securitySolutionEss"
+      "securitySolutionEss",
+      "integrationAssistant"
     ],
   }
 }

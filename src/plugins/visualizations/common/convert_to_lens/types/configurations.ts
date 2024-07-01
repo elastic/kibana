@@ -10,7 +10,7 @@ import { HorizontalAlignment, LayoutDirection, Position, VerticalAlignment } fro
 import { $Values } from '@kbn/utility-types';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { LegendSize, XYLegendValue, PartitionLegendValue } from '../../constants';
+import { LegendSize, type XYLegendValue, type PartitionLegendValue } from '../../constants';
 import {
   CategoryDisplayTypes,
   PartitionChartTypes,

@@ -443,6 +443,6 @@ export const ecsTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
   packageName: 'testpackage',
-  dataStreamName: 'testdatastream',
+  dataStreamName: 'testDataStream',
   formattedSamples: '{"test1": "test1"}',
 };

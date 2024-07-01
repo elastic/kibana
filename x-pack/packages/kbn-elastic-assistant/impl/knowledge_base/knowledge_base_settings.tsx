@@ -30,9 +30,9 @@ import { AlertsSettings } from '../alerts/settings/alerts_settings';
 import { useAssistantContext } from '../assistant_context';
 import type { KnowledgeBaseConfig } from '../assistant/types';
 import * as i18n from './translations';
-import { useDeleteKnowledgeBase } from './use_delete_knowledge_base';
-import { useKnowledgeBaseStatus } from './use_knowledge_base_status';
-import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
+import { useDeleteKnowledgeBase } from '../assistant/api/knowledge_base/use_delete_knowledge_base';
+import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
+import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
 
 const ESQL_RESOURCE = 'esql';
 const KNOWLEDGE_BASE_INDEX_PATTERN_OLD = '.kibana-elastic-ai-assistant-kb';

@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'data',
-          sectionLinks: ['index_management', 'transform'],
+          sectionLinks: ['index_management', 'data_quality', 'transform'],
         });
       });
     });

@@ -58,6 +58,8 @@ export type MapSerializedState = SerializedTitles &
     tooltipRenderer?: RenderToolTipContent;
   };
 
+export type MapRuntimeState = MapSerializedState;
+
 export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
   HasDynamicActions &
   Partial<HasEditCapabilities> &

@@ -12,6 +12,8 @@ import {
   getCreateMachineLearningRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
+import { getRuleMock } from '../../../routes/__mocks__/request_responses';
+import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
@@ -29,7 +31,10 @@ describe('DetectionRulesClient.createCustomRule', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+
     rulesClient = rulesClientMock.create();
+    rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
     detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
   });
 

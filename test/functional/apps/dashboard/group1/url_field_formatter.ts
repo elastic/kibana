@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const browser = getService('browser');
   const fieldName = 'clientip';
   const deployment = getService('deployment');
@@ -82,13 +83,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitForWithTimeout(`${fieldName} is visible`, 30000, async () => {
         return await testSubjects.isDisplayed(`tableDocViewRow-${fieldName}-value`);
       });
-      const fieldLink = await testSubjects.find(`tableDocViewRow-${fieldName}-value`);
+      const fieldLink = await find.byCssSelector(
+        `[data-test-subj="tableDocViewRow-${fieldName}-value"] a`
+      );
       const fieldValue = await fieldLink.getVisibleText();
       await fieldLink.click();
       await retry.try(async () => {
         await checkUrl(fieldValue);
       });
     });
+
     afterEach(async function () {
       const windowHandlers = await browser.getAllWindowHandles();
       if (windowHandlers.length > 1) {

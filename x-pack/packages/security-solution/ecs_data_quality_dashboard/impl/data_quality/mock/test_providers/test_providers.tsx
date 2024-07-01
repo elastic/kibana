@@ -31,6 +31,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
+  const mockNavigateToApp = jest.fn();
   const mockTelemetryEvents = {
     reportDataQualityIndexChecked: jest.fn(),
     reportDataQualityCheckAllCompleted: jest.fn(),
@@ -71,6 +72,7 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
             getComments={mockGetComments}
             http={mockHttp}
             baseConversations={{}}
+            navigateToApp={mockNavigateToApp}
           >
             <DataQualityProvider
               httpFetch={http.fetch}

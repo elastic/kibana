@@ -1,0 +1,103 @@
+extends: ["spectral:oas"]
+rules:
+# Built-in rules
+  # Descriptions
+  oas3-parameter-description: warn
+  oas2-parameter-description: warn
+  tag-description: info
+  # Document info
+  info-contact: info
+  info-description: warn
+  info-license: warn
+  # Examples
+  oas3-valid-media-example: false
+  oas3-valid-schema-example: false
+  oas2-valid-media-example: false
+  # Operations 
+  operation-operationId: false
+  operation-operationId-unique: false
+  operation-operationId-valid-in-url: false
+  operation-tag-defined: warn
+  operation-tags: warn
+  # Responses
+  operation-success-response: warn
+  # Schema
+  oas3-schema: error
+  oas2-schema: error
+  # Tags
+  openapi-tags: warn
+  openapi-tags-alphabetical: info
+  # Turn off some built-in rules
+  operation-description: false
+  operation-singular-tag: false
+# Custom rules
+  # Descriptions
+  avoid-problematic-words:
+    description: Ban certain words from descriptions
+    message: "Use appropriate replacements for problematic terms"
+    severity: warn
+    given: "$..*.description"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: /(blacklist|whitelist|execute|kill)/i
+  # Examples
+  operation-success-examples:
+    formats: ["oas3_1"]
+    description: Response code 200 should have at least one example.
+    message: "Each response body should have a realistic example. It must not contain any sensitive or confidential data."
+    severity: info
+    given: $.paths[*].[*].responses.[200].content.[application/json]
+    then:
+      field: examples
+      function: defined
+  # Extensions
+  internal-extension:
+    description: Operations should not have x-internal extension.
+    message: "Do not publish x-internal operations"
+    severity: error
+    given: $.paths[*].[get,put,post,delete,options,head,patch,trace]
+    then:
+      field: x-internal
+      function: undefined
+  # Operations
+  operation-summary:
+    description: Operations should have summaries.
+    message: "Each operation should have a summary"
+    severity: error
+    recommended: true
+    given: $.paths[*].[get,put,post,delete,options,head,patch,trace]
+    then:
+      field: summary
+      function: defined   
+  operation-summary-length:
+    description: Operation summary should be between 5 and 45 characters
+    given: "$.paths[*].[get,put,post,delete,options,head,patch,trace]"
+    then:
+      field: summary
+      function: length
+      functionOptions:
+        max: 45
+        min: 5
+    severity: warn
+  simple-verbs-in-summary:
+    given:
+      - "$.paths[*][*].summary"
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "Retrieve|Return|List *"
+    severity: warn
+    description: Summaries should use common verbs.
+    message: "Summaries should use common verbs like Get, Update, Delete whenever possible"
+  # NOTE: This one hiccups on acronyms so perhaps too noisy
+  # docs-operation-summary-sentence-case:
+  #   description: Operation summary should be sentence cased
+  #   given: "$.paths[*].[get,put,post,delete,options,head,patch,trace]"
+  #   then:
+  #     field: summary
+  #     function: pattern
+  #     functionOptions:
+  #       match: /^[A-Z]+[^A-Z]+$/
+  #   severity: warn
+

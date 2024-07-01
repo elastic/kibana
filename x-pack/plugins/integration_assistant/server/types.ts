@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IntegrationAssistantPluginSetup {}
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+
+export interface IntegrationAssistantPluginSetup {
+  setIsAvailable: (isAvailable: boolean) => void;
+}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginStart {}
+
+export interface IntegrationAssistantPluginSetupDependencies {
+  licensing: LicensingPluginSetup;
+}
+export interface IntegrationAssistantPluginStartDependencies {
+  licensing: LicensingPluginStart;
+}
 
 export interface CategorizationState {
   rawSamples: string[];

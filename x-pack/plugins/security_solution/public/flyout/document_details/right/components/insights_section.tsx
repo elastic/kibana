@@ -15,7 +15,7 @@ import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { ExpandableSection } from './expandable_section';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../shared/constants/event_kinds';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
@@ -30,7 +30,7 @@ const KEY = 'insights';
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
 export const InsightsSection = memo(() => {
-  const { getFieldsData } = useRightPanelContext();
+  const { getFieldsData } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
   const { activeStep, isTourShown } = useTourContext();

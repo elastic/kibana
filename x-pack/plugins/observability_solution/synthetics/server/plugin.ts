@@ -30,7 +30,7 @@ import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './synthetics_service/synthetics_service';
 import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
-import { uptimeRuleTypeFieldMap } from './alert_rules/common';
+import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -58,7 +58,7 @@ export class Plugin implements PluginType {
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(uptimeRuleTypeFieldMap, 'strict'),
+          mappings: mappingFromFieldMap(syntheticsRuleTypeFieldMap, 'strict'),
         },
       ],
     });

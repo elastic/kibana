@@ -11,7 +11,7 @@ import {
   AnonymizationFieldResponse,
   AnonymizationFieldUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   CreateAnonymizationFieldSchema,
   EsAnonymizationFieldsSchema,
@@ -53,7 +53,8 @@ export const transformESSearchToAnonymizationFields = (
         anonymized: anonymizationFieldSchema.anonymized,
         updatedAt: anonymizationFieldSchema.updated_at,
         namespace: anonymizationFieldSchema.namespace,
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
       };
 
       return anonymizationField;

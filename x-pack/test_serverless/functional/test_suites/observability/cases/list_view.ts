@@ -29,7 +29,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
-      await svlCommonPage.forceLogout();
     });
 
     describe('empty state', () => {

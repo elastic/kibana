@@ -61,7 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after('clean up archives', async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       if (cleanupDataStreamSetup) {
         cleanupDataStreamSetup();
       }

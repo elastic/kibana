@@ -80,7 +80,7 @@ export const nextActionMap = (
 ) => {
   return {
     INIT: (state: InitState) =>
-      Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
+      Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
@@ -117,6 +117,7 @@ export const nextActionMap = (
       Actions.updateAliases({ client, aliasActions: state.preTransformDocsActions }),
     REFRESH_SOURCE: (state: RefreshSource) =>
       Actions.refreshIndex({ client, index: state.sourceIndex.value }),
+    CHECK_CLUSTER_ROUTING_ALLOCATION: () => Actions.checkClusterRoutingAllocationEnabled(client),
     CHECK_UNKNOWN_DOCUMENTS: (state: CheckUnknownDocumentsState) =>
       Actions.checkForUnknownDocs({
         client,
@@ -125,7 +126,11 @@ export const nextActionMap = (
         knownTypes: state.knownTypes,
       }),
     SET_SOURCE_WRITE_BLOCK: (state: SetSourceWriteBlockState) =>
-      Actions.setWriteBlock({ client, index: state.sourceIndex.value }),
+      Actions.safeWriteBlock({
+        client,
+        sourceIndex: state.sourceIndex.value,
+        targetIndex: state.targetIndex,
+      }),
     CALCULATE_EXCLUDE_FILTERS: (state: CalculateExcludeFiltersState) =>
       Actions.calculateExcludeFilters({
         client,
@@ -283,6 +288,8 @@ export const nextActionMap = (
       ),
     MARK_VERSION_INDEX_READY_CONFLICT: (state: MarkVersionIndexReadyConflict) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
+    LEGACY_CHECK_CLUSTER_ROUTING_ALLOCATION: () =>
+      Actions.checkClusterRoutingAllocationEnabled(client),
     LEGACY_SET_WRITE_BLOCK: (state: LegacySetWriteBlockState) =>
       Actions.setWriteBlock({ client, index: state.legacyIndex }),
     LEGACY_CREATE_REINDEX_TARGET: (state: LegacyCreateReindexTargetState) =>

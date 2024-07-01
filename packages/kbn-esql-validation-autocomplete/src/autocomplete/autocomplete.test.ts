@@ -10,7 +10,7 @@ import { suggest } from './autocomplete';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { chronoLiterals, timeUnitsToSuggest } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { getUnitDuration, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase, partition } from 'lodash';
@@ -203,7 +203,7 @@ function getLiteralsByType(_type: string | string[]) {
   const type = Array.isArray(_type) ? _type : [_type];
   if (type.includes('time_literal')) {
     // return only singular
-    return timeLiterals.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
+    return timeUnitsToSuggest.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
   }
   if (type.includes('chrono_literal')) {
     return chronoLiterals.map(({ name }) => name);
@@ -1238,7 +1238,7 @@ describe('autocomplete', () => {
     testSuggestions('from a | eval var0 = bucket(@timestamp,', getUnitDuration(1));
 
     describe('date math', () => {
-      const dateSuggestions = timeLiterals.map(({ name }) => name);
+      const dateSuggestions = timeUnitsToSuggest.map(({ name }) => name);
       // If a literal number is detected then suggest also date period keywords
       testSuggestions('from a | eval a = 1 ', [
         ...dateSuggestions,

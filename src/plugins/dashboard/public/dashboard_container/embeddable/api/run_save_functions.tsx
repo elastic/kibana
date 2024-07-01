@@ -275,21 +275,18 @@ export async function runInteractiveSave(this: DashboardContainer, interactionMo
 
         if (lastSavedId) {
           const [baseTitle, baseCount] = extractTitleAndCount(newTitle);
-          let copyCount = baseCount + 1;
-          newTitle = `${baseTitle} (${copyCount})`;
 
-          // increment count until we find a unique title
-          while (
-            !(await checkForDuplicateDashboardTitle({
-              title: newTitle,
-              lastSavedTitle: currentState.title,
-              copyOnSave: true,
-              isTitleDuplicateConfirmed: false,
-            }))
-          ) {
-            copyCount++;
-            newTitle = `${baseTitle} (${copyCount})`;
-          }
+          newTitle = `${baseTitle} (${baseCount + 1})`;
+
+          await checkForDuplicateDashboardTitle({
+            title: newTitle,
+            lastSavedTitle: currentState.title,
+            copyOnSave: true,
+            isTitleDuplicateConfirmed: false,
+            onTitleDuplicate(speculativeSuggestion) {
+              newTitle = speculativeSuggestion;
+            },
+          });
 
           switch (interactionMode) {
             case ViewMode.EDIT: {

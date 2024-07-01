@@ -29,6 +29,7 @@ import type {
   TimelineStrategyResponseType,
 } from '@kbn/timelines-plugin/common/search_strategy';
 import { dataTableActions, Direction, TableId } from '@kbn/securitysolution-data-table';
+import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
 import { TimelineEventsQueries } from '../../../../common/search_strategy';
 import type { KueryFilterQueryKind } from '../../../../common/types';
@@ -434,6 +435,8 @@ export const useTimelineEvents = ({
   timerangeKind,
   data,
 }: UseTimelineEventsProps): [boolean, TimelineArgs] => {
+  const dispatch = useDispatch();
+
   const [loading, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     alertConsumers,
     dataViewId,
@@ -458,7 +461,11 @@ export const useTimelineEvents = ({
   useEffect(() => {
     if (!timelineSearchHandler) return;
     timelineSearchHandler();
-  }, [timelineSearchHandler]);
+
+    // fetch notes for the events
+    const events = timelineResponse.events.map((event: TimelineItem) => event._id);
+    dispatch(fetchNotesByDocumentIds({ documentIds: events }));
+  }, [dispatch, timelineResponse.events, timelineSearchHandler]);
 
   return [loading, timelineResponse];
 };

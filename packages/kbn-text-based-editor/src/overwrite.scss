@@ -1,45 +1,63 @@
-.TextBasedLangEditor .monaco-editor {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
+/* Editor styles for any layout mode */
+/* NOTE: Much of this is overriding Monaco styles so the specificity is intentional */
+
+// Radius for both the main container and the margin (container for line numbers)
+.TextBasedLangEditor .monaco-editor, .TextBasedLangEditor .monaco-editor .margin, .TextBasedLangEditor .monaco-editor .overflow-guard {
+  border-top-left-radius: $euiBorderRadius;
+  border-bottom-left-radius: $euiBorderRadius;
 }
 
 .TextBasedLangEditor .monaco-editor .monaco-hover {
   display: none !important;
 }
 
-.TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
-  display: block !important;
-}
-
-.TextBasedLangEditor .monaco-editor .margin {
-  border-top-left-radius: 6px;
-  border-bottom-left-radius: 6px;
-}
-
-.TextBasedLangEditor--compact .monaco-editor {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-}
-
-.TextBasedLangEditor--compact .monaco-editor .margin {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  background-color: $euiColorLightestShade;
-  color: $euiColorDisabledText;
-}
-
 .TextBasedLangEditor .monaco-editor .margin-view-overlays .line-numbers {
   color: $euiColorDisabledText;
 }
 
+// Currently focused line(s)
 .TextBasedLangEditor .monaco-editor .current-line ~ .line-numbers {
   color: $euiTextSubduedColor;
 }
 
-.TextBasedLangEditor--compact .monaco-editor .monaco-scrollable-element {
-  margin-left: 4px;
+// Suggest (autocomplete) menu
+.TextBasedLangEditor .monaco-editor .suggest-widget, .TextBasedLangEditor .monaco-editor .suggest-details-container {
+  @include euiBottomShadow;
+  border-radius: $euiBorderRadius;
+}
+
+.TextBasedLangEditor .monaco-editor .suggest-details-container {
+  background-color: $euiColorEmptyShade;
+  line-height: 1.5rem;
 }
 
 .TextBasedLangEditor_errorMessage {
   @include euiTextBreakWord;
+}
+
+/* For compact mode */
+
+// All scrollable containers (e.g. main container and suggest menu)
+.TextBasedLangEditor--compact .monaco-editor .monaco-scrollable-element {
+  margin-left: $euiSizeS;
+}
+
+// Suggest menu in compact mode
+.TextBasedLangEditor--compact .monaco-editor .monaco-list .monaco-scrollable-element {
+  margin-left: 0;
+
+  .monaco-list-row.focused {
+    border-radius: $euiBorderRadius;
+  }
+}
+
+/*  For expanded mode */
+
+.TextBasedLangEditor--expanded .monaco-editor .monaco-hover {
+  display: block !important;
+}
+
+.TextBasedLangEditor--expanded .monaco-editor, .TextBasedLangEditor--expanded .monaco-editor .margin, .TextBasedLangEditor--expanded .monaco-editor .overflow-guard {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
 }

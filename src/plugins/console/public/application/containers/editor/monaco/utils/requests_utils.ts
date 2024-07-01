@@ -22,8 +22,8 @@ import { AdjustedParsedRequest } from '../types';
  * - the request body is stringified from an object using JSON.stringify
  */
 export const stringifyRequest = (parsedRequest: ParsedRequest): EditorRequest => {
-  const url = removeTrailingWhitespaces(parsedRequest.url);
-  const method = parsedRequest.method.toUpperCase();
+  const url = parsedRequest.url ? removeTrailingWhitespaces(parsedRequest.url) : '';
+  const method = parsedRequest.method?.toUpperCase() ?? '';
   const data = parsedRequest.data?.map((parsedData) => JSON.stringify(parsedData, null, 2));
   return { url, method, data: data ?? [] };
 };

@@ -6,7 +6,68 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "integrationAssistant",
+      "id": "def-public.IntegrationAssistantPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "IntegrationAssistantPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/integration_assistant/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "integrationAssistant",
+      "id": "def-public.IntegrationAssistantPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "IntegrationAssistantPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/integration_assistant/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "integrationAssistant",
+          "id": "def-public.IntegrationAssistantPluginStart.CreateIntegration",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "CreateIntegration",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+          ],
+          "path": "x-pack/plugins/integration_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "integrationAssistant",
+          "id": "def-public.IntegrationAssistantPluginStart.CreateIntegrationCardButton",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "CreateIntegrationCardButton",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<",
+            "CreateIntegrationCardButtonProps",
+            ", any> | React.FunctionComponent<",
+            "CreateIntegrationCardButtonProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/integration_assistant/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "server": {
     "classes": [],
@@ -47,853 +108,40 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.BuildIntegrationApiRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "BuildIntegrationApiRequest",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.BuildIntegrationApiRequest.integration",
-            "type": "Object",
-            "tags": [],
-            "label": "integration",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.Integration",
-                "text": "Integration"
-              }
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.CategorizationApiRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "CategorizationApiRequest",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.CategorizationApiRequest.packageName",
-            "type": "string",
-            "tags": [],
-            "label": "packageName",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.CategorizationApiRequest.dataStreamName",
-            "type": "string",
-            "tags": [],
-            "label": "dataStreamName",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.CategorizationApiRequest.rawSamples",
-            "type": "Array",
-            "tags": [],
-            "label": "rawSamples",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.CategorizationApiRequest.currentPipeline",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "currentPipeline",
-            "description": [],
-            "signature": [
-              "object"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.CategorizationApiResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "CategorizationApiResponse",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.CategorizationApiResponse.results",
-            "type": "Object",
-            "tags": [],
-            "label": "results",
-            "description": [],
-            "signature": [
-              "{ pipeline: object; docs: object[]; }"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.DataStream",
-        "type": "Interface",
-        "tags": [],
-        "label": "DataStream",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.DataStream.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.DataStream.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.DataStream.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.DataStream.inputTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "inputTypes",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.InputTypes",
-                "text": "InputTypes"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.DataStream.rawSamples",
-            "type": "Array",
-            "tags": [],
-            "label": "rawSamples",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.DataStream.pipeline",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "pipeline",
-            "description": [],
-            "signature": [
-              "object"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.DataStream.docs",
-            "type": "Array",
-            "tags": [],
-            "label": "docs",
-            "description": [],
-            "signature": [
-              "object[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.EcsMappingApiRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "EcsMappingApiRequest",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.EcsMappingApiRequest.packageName",
-            "type": "string",
-            "tags": [],
-            "label": "packageName",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.EcsMappingApiRequest.dataStreamName",
-            "type": "string",
-            "tags": [],
-            "label": "dataStreamName",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.EcsMappingApiRequest.rawSamples",
-            "type": "Array",
-            "tags": [],
-            "label": "rawSamples",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.EcsMappingApiRequest.mapping",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "mapping",
-            "description": [],
-            "signature": [
-              "object | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.EcsMappingApiResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "EcsMappingApiResponse",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.EcsMappingApiResponse.results",
-            "type": "Object",
-            "tags": [],
-            "label": "results",
-            "description": [],
-            "signature": [
-              "{ mapping: object; pipeline: object; }"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.ESProcessorItem",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESProcessorItem",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.ESProcessorItem.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[processorName: string]: ESProcessorOptions",
-            "description": [],
-            "signature": [
-              "[processorName: string]:  ",
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.ESProcessorOptions",
-                "text": "ESProcessorOptions"
-              }
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.ESProcessorOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESProcessorOptions",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.ESProcessorOptions.on_failure",
-            "type": "Array",
-            "tags": [],
-            "label": "on_failure",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.ESProcessorItem",
-                "text": "ESProcessorItem"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.ESProcessorOptions.ignore_failure",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ignore_failure",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.ESProcessorOptions.ignore_missing",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ignore_missing",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.ESProcessorOptions.if",
-            "type": "string",
-            "tags": [],
-            "label": "if",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.ESProcessorOptions.tag",
-            "type": "string",
-            "tags": [],
-            "label": "tag",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.ESProcessorOptions.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: unknown",
-            "description": [],
-            "signature": [
-              "[key: string]:  unknown"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.Integration",
-        "type": "Interface",
-        "tags": [],
-        "label": "Integration",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Integration.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Integration.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Integration.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Integration.dataStreams",
-            "type": "Array",
-            "tags": [],
-            "label": "dataStreams",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.DataStream",
-                "text": "DataStream"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Integration.logo",
-            "type": "string",
-            "tags": [],
-            "label": "logo",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.Pipeline",
-        "type": "Interface",
-        "tags": [],
-        "label": "Pipeline",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Pipeline.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Pipeline.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Pipeline.version",
-            "type": "number",
-            "tags": [],
-            "label": "version",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Pipeline.processors",
-            "type": "Array",
-            "tags": [],
-            "label": "processors",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.ESProcessorItem",
-                "text": "ESProcessorItem"
-              },
-              "[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.Pipeline.on_failure",
-            "type": "Array",
-            "tags": [],
-            "label": "on_failure",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.ESProcessorItem",
-                "text": "ESProcessorItem"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.RelatedApiRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "RelatedApiRequest",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.RelatedApiRequest.packageName",
-            "type": "string",
-            "tags": [],
-            "label": "packageName",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.RelatedApiRequest.dataStreamName",
-            "type": "string",
-            "tags": [],
-            "label": "dataStreamName",
-            "description": [],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.RelatedApiRequest.rawSamples",
-            "type": "Array",
-            "tags": [],
-            "label": "rawSamples",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.RelatedApiRequest.currentPipeline",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "currentPipeline",
-            "description": [],
-            "signature": [
-              "object"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.RelatedApiResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "RelatedApiResponse",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.RelatedApiResponse.results",
-            "type": "Object",
-            "tags": [],
-            "label": "results",
-            "description": [],
-            "signature": [
-              "{ pipeline: object; docs: object[]; }"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.TestPipelineApiRequest",
-        "type": "Interface",
-        "tags": [],
-        "label": "TestPipelineApiRequest",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.TestPipelineApiRequest.rawSamples",
-            "type": "Array",
-            "tags": [],
-            "label": "rawSamples",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.TestPipelineApiRequest.currentPipeline",
-            "type": "Object",
-            "tags": [],
-            "label": "currentPipeline",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "integrationAssistant",
-                "scope": "common",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-common.Pipeline",
-                "text": "Pipeline"
-              }
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.TestPipelineApiResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "TestPipelineApiResponse",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.TestPipelineApiResponse.pipelineResults",
-            "type": "Array",
-            "tags": [],
-            "label": "pipelineResults",
-            "description": [],
-            "signature": [
-              "object[]"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "integrationAssistant",
-            "id": "def-common.TestPipelineApiResponse.errors",
-            "type": "Array",
-            "tags": [],
-            "label": "errors",
-            "description": [],
-            "signature": [
-              "object[] | undefined"
-            ],
-            "path": "x-pack/plugins/integration_assistant/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
-    "enums": [
-      {
-        "parentPluginId": "integrationAssistant",
-        "id": "def-common.InputTypes",
-        "type": "Enum",
-        "tags": [],
-        "label": "InputTypes",
-        "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
+    "enums": [],
     "misc": [
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.BuildIntegrationRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "BuildIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "{ integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/build_integration/build_integration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "integrationAssistant",
         "id": "def-common.CATEGORIZATION_GRAPH_PATH",
@@ -908,12 +156,297 @@
       },
       {
         "parentPluginId": "integrationAssistant",
+        "id": "def-common.CategorizationRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CategorizationRequestBody",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CategorizationResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CategorizationResponse",
+        "description": [],
+        "signature": [
+          "{ results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CHECK_PIPELINE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "CHECK_PIPELINE_PATH",
+        "description": [],
+        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CheckPipelineRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "CheckPipelineRequestBody",
+        "description": [],
+        "signature": [
+          "{ rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CheckPipelineResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CheckPipelineResponse",
+        "description": [],
+        "signature": [
+          "{ results: { docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.DataStream",
+        "type": "Type",
+        "tags": [],
+        "label": "DataStream",
+        "description": [
+          "\nThe dataStream object."
+        ],
+        "signature": [
+          "{ name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.Docs",
+        "type": "Type",
+        "tags": [],
+        "label": "Docs",
+        "description": [
+          "\nAn array of processed documents."
+        ],
+        "signature": [
+          "Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
         "id": "def-common.ECS_GRAPH_PATH",
         "type": "string",
         "tags": [],
         "label": "ECS_GRAPH_PATH",
         "description": [],
         "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.EcsMappingRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "EcsMappingRequestBody",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; mapping?: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.EcsMappingResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "EcsMappingResponse",
+        "description": [],
+        "signature": [
+          "{ results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.ESProcessorItem",
+        "type": "Type",
+        "tags": [],
+        "label": "ESProcessorItem",
+        "description": [
+          "\nProcessor item for the Elasticsearch processor."
+        ],
+        "signature": [
+          "{ [x: string]: ",
+          "ESProcessorOptions",
+          "; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/processor_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.InputType",
+        "type": "Type",
+        "tags": [],
+        "label": "InputType",
+        "description": [
+          "\nThe input type for the dataStream to pull logs from."
+        ],
+        "signature": [
+          "\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\""
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.Integration",
+        "type": "Type",
+        "tags": [],
+        "label": "Integration",
+        "description": [
+          "\nThe integration object."
+        ],
+        "signature": [
+          "{ name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -962,6 +495,39 @@
       },
       {
         "parentPluginId": "integrationAssistant",
+        "id": "def-common.Pipeline",
+        "type": "Type",
+        "tags": [],
+        "label": "Pipeline",
+        "description": [
+          "\nThe pipeline object."
+        ],
+        "signature": [
+          "{ processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -989,17 +555,1429 @@
       },
       {
         "parentPluginId": "integrationAssistant",
-        "id": "def-common.TEST_PIPELINE_PATH",
-        "type": "string",
+        "id": "def-common.RelatedRequestBody",
+        "type": "Type",
         "tags": [],
-        "label": "TEST_PIPELINE_PATH",
+        "label": "RelatedRequestBody",
         "description": [],
-        "path": "x-pack/plugins/integration_assistant/common/constants.ts",
+        "signature": [
+          "{ connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.RelatedResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "RelatedResponse",
+        "description": [],
+        "signature": [
+          "{ results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.BuildIntegrationRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "BuildIntegrationRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ integration: Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; dataStreams: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>, \"many\">; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }; }, { integration: { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/build_integration/build_integration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CategorizationRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "CategorizationRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; currentPipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; connectorId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CategorizationResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "CategorizationResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ results: Zod.ZodObject<{ docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>; }, \"strip\", Zod.ZodTypeAny, { results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }, { results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/categorization/categorization_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CheckPipelineRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "CheckPipelineRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }, { rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.CheckPipelineResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "CheckPipelineResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ results: Zod.ZodObject<{ docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>; }, \"strip\", Zod.ZodTypeAny, { results: { docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }, { results: { docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/check_pipeline/check_pipeline.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.DataStream",
+        "type": "Object",
+        "tags": [],
+        "label": "DataStream",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.Docs",
+        "type": "Object",
+        "tags": [],
+        "label": "Docs",
+        "description": [],
+        "signature": [
+          "Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.EcsMappingRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "EcsMappingRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; mapping: Zod.ZodOptional<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>>; connectorId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; mapping?: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; }, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; mapping?: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\"> | undefined; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.EcsMappingResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "EcsMappingResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ results: Zod.ZodObject<{ mapping: Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }, { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }>; }, \"strip\", Zod.ZodTypeAny, { results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }, { results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; mapping: {} & { [k: string]: unknown; }; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/ecs/ecs_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.ESProcessorItem",
+        "type": "Object",
+        "tags": [],
+        "label": "ESProcessorItem",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/processor_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.InputType",
+        "type": "Object",
+        "tags": [],
+        "label": "InputType",
+        "description": [],
+        "signature": [
+          "Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.Integration",
+        "type": "Object",
+        "tags": [],
+        "label": "Integration",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; dataStreams: Zod.ZodArray<Zod.ZodObject<{ name: Zod.ZodString; title: Zod.ZodString; description: Zod.ZodString; inputTypes: Zod.ZodArray<Zod.ZodEnum<[\"aws_cloudwatch\", \"aws_s3\", \"azure_blob_storage\", \"azure_eventhub\", \"cel\", \"cloudfoundry\", \"filestream\", \"gcp_pubsub\", \"gcs\", \"http_endpoint\", \"journald\", \"kafka\", \"tcp\", \"udp\"]>, \"many\">; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>, \"many\">; logo: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }, { name: string; title: string; description: string; dataStreams: { name: string; title: string; description: string; inputTypes: (\"kafka\" | \"aws_cloudwatch\" | \"aws_s3\" | \"azure_blob_storage\" | \"azure_eventhub\" | \"cel\" | \"cloudfoundry\" | \"filestream\" | \"gcp_pubsub\" | \"gcs\" | \"http_endpoint\" | \"journald\" | \"tcp\" | \"udp\")[]; rawSamples: string[]; pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }[]; logo?: string | undefined; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.Pipeline",
+        "type": "Object",
+        "tags": [],
+        "label": "Pipeline",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/model/common_attributes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.RelatedRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "RelatedRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ packageName: Zod.ZodString; dataStreamName: Zod.ZodString; rawSamples: Zod.ZodArray<Zod.ZodString, \"many\">; currentPipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; connectorId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }, { connectorId: string; packageName: string; rawSamples: string[]; dataStreamName: string; currentPipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "integrationAssistant",
+        "id": "def-common.RelatedResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "RelatedResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ results: Zod.ZodObject<{ docs: Zod.ZodArray<Zod.ZodObject<{}, \"passthrough\", Zod.ZodTypeAny, Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">, Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">>, \"many\">; pipeline: Zod.ZodObject<{ name: Zod.ZodOptional<Zod.ZodString>; description: Zod.ZodOptional<Zod.ZodString>; version: Zod.ZodOptional<Zod.ZodNumber>; processors: Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">; on_failure: Zod.ZodOptional<Zod.ZodArray<Zod.ZodType<",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          ">, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }, { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }, { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }>; }, \"strip\", Zod.ZodTypeAny, { results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectOutputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }, { results: { pipeline: { processors: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[]; name?: string | undefined; description?: string | undefined; version?: number | undefined; on_failure?: ",
+          {
+            "pluginId": "integrationAssistant",
+            "scope": "common",
+            "docId": "kibIntegrationAssistantPluginApi",
+            "section": "def-common.ESProcessorItem",
+            "text": "ESProcessorItem"
+          },
+          "[] | undefined; }; docs: Zod.objectInputType<{}, Zod.ZodTypeAny, \"passthrough\">[]; }; }>"
+        ],
+        "path": "x-pack/plugins/integration_assistant/common/api/related/related_route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

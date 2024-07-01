@@ -19,7 +19,14 @@ export type FieldListSerializedStateState = SerializedTitles & {
   selectedFieldNames?: string[];
 };
 
-export type FieldListApi = DefaultEmbeddableApi & PublishesSelectedFields & PublishesDataViews;
+export type FieldListRuntimeState = FieldListSerializedStateState;
+
+export type FieldListApi = DefaultEmbeddableApi<
+  FieldListSerializedStateState,
+  FieldListSerializedStateState
+> &
+  PublishesSelectedFields &
+  PublishesDataViews;
 
 export interface Services {
   dataViews: DataViewsPublicPluginStart;

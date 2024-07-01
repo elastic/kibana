@@ -520,14 +520,6 @@
               {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/plugin.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/common/components/filebeat_config_flyout/filebeat_config_flyout.tsx"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/hooks/use_data_visualizer_grid_data.ts"
               }
             ]
           },
@@ -636,20 +628,8 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "dataViews",
-                "path": "src/plugins/data_views/public/plugin.ts"
-              },
-              {
                 "plugin": "security",
                 "path": "x-pack/plugins/security/public/plugin.tsx"
-              },
-              {
-                "plugin": "maps",
-                "path": "x-pack/plugins/maps/public/classes/sources/es_search_source/es_search_source.tsx"
-              },
-              {
-                "plugin": "imageEmbeddable",
-                "path": "src/plugins/image_embeddable/public/components/image_editor/open_image_editor.tsx"
               },
               {
                 "plugin": "securitySolution",

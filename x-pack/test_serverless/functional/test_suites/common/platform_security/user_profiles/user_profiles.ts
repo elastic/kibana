@@ -20,10 +20,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.svlCommonPage.loginWithRole(VIEWER_ROLE);
     });
 
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
-    });
-
     describe('User details', async () => {
       it('should display correct user details', async () => {
         await pageObjects.common.navigateToApp('security_account');

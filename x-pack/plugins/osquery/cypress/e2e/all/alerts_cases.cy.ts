@@ -23,11 +23,7 @@ import {
   submitQuery,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import {
-  closeAlertsStepTourIfVisible,
-  generateRandomStringName,
-  interceptCaseId,
-} from '../../tasks/integrations';
+import { generateRandomStringName, interceptCaseId } from '../../tasks/integrations';
 
 describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () => {
   let ruleId: string;
@@ -70,7 +66,6 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
     it('runs osquery against alert and creates a new case', () => {
       const [caseName, caseDescription] = generateRandomStringName(2);
       cy.getBySel('expand-event').first().click();
-      closeAlertsStepTourIfVisible();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').click();
       cy.contains(/^\d+ agen(t|ts) selected/);
@@ -106,7 +101,6 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
 
     it('sees osquery results from last action and add to a case', () => {
       cy.getBySel('expand-event').first().click();
-      closeAlertsStepTourIfVisible();
       cy.getBySel('securitySolutionFlyoutResponseSectionHeader').click();
       cy.getBySel('securitySolutionFlyoutResponseButton').click();
       cy.getBySel('responseActionsViewWrapper').should('exist');

@@ -15,6 +15,7 @@ import {
   BooleanDefaultContext,
   type BooleanExpressionContext,
   BooleanLiteralContext,
+  InputParamsContext,
   BooleanValueContext,
   type CommandOptionsContext,
   ComparisonContext,
@@ -58,6 +59,8 @@ import {
   ValueExpressionDefaultContext,
   IndexIdentifierContext,
   InlineCastContext,
+  InputNamedOrPositionalParamContext,
+  InputParamContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -87,7 +90,11 @@ import type {
   ESQLFunction,
   ESQLCommandOption,
   ESQLAstItem,
+  ESQLAstField,
   ESQLInlineCast,
+  ESQLUnnamedParamLiteral,
+  ESQLPositionalParamLiteral,
+  ESQLNamedParamLiteral,
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
@@ -338,6 +345,57 @@ function getConstant(ctx: ConstantContext): ESQLAstItem {
     }
     return createList(ctx, values);
   }
+  if (ctx instanceof InputParamsContext && ctx.children) {
+    const values: ESQLLiteral[] = [];
+
+    for (const child of ctx.children) {
+      if (child instanceof InputParamContext) {
+        const literal: ESQLUnnamedParamLiteral = {
+          type: 'literal',
+          literalType: 'param',
+          paramType: 'unnamed',
+          text: ctx.getText(),
+          name: '',
+          location: getPosition(ctx.start, ctx.stop),
+          incomplete: Boolean(ctx.exception),
+        };
+        values.push(literal);
+      } else if (child instanceof InputNamedOrPositionalParamContext) {
+        const text = child.getText();
+        const value = text.slice(1);
+        const valueAsNumber = Number(value);
+        const isPositional = String(valueAsNumber) === value;
+
+        if (isPositional) {
+          const literal: ESQLPositionalParamLiteral = {
+            type: 'literal',
+            literalType: 'param',
+            paramType: 'positional',
+            value: valueAsNumber,
+            text,
+            name: '',
+            location: getPosition(ctx.start, ctx.stop),
+            incomplete: Boolean(ctx.exception),
+          };
+          values.push(literal);
+        } else {
+          const literal: ESQLNamedParamLiteral = {
+            type: 'literal',
+            literalType: 'param',
+            paramType: 'named',
+            value,
+            text,
+            name: '',
+            location: getPosition(ctx.start, ctx.stop),
+            incomplete: Boolean(ctx.exception),
+          };
+          values.push(literal);
+        }
+      }
+    }
+
+    return values;
+  }
 
   return createUnknownItem(ctx);
 }
@@ -490,14 +548,14 @@ export function visitField(ctx: FieldContext) {
   return collectBooleanExpression(ctx.booleanExpression());
 }
 
-export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQLAstItem[] {
-  const ast: ESQLAstItem[] = [];
+export function collectAllFields(ctx: FieldsContext | undefined): ESQLAstField[] {
+  const ast: ESQLAstField[] = [];
   if (!ctx) {
     return ast;
   }
   try {
     for (const field of ctx.field_list()) {
-      ast.push(...visitField(field));
+      ast.push(...(visitField(field) as ESQLAstField[]));
     }
   } catch (e) {
     // do nothing
@@ -510,7 +568,7 @@ export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | un
     return [];
   }
   const option = createOption(ctx.BY()!.getText().toLowerCase(), ctx);
-  option.args.push(...collectAllFieldsStatements(expr));
+  option.args.push(...collectAllFields(expr));
   return [option];
 }
 

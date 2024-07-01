@@ -18,7 +18,7 @@ import type {
 } from '../../../common/types';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
-import { agentPolicyService, downloadSourceService } from '../../services';
+import { agentPolicyService, appContextService, downloadSourceService } from '../../services';
 import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
 import { getFleetProxy } from '../../services/fleet_proxies';
 import { getFleetServerPolicies, hasFleetServersForPolicies } from '../../services/fleet_server';
@@ -53,8 +53,8 @@ export const getEnrollmentSettingsHandler: FleetRequestHandler<
       settingsResponse.fleet_server.policies = fleetServerPolicies;
       settingsResponse.fleet_server.has_active = await hasFleetServersForPolicies(
         esClient,
-        soClient,
-        fleetServerPolicies.map((p) => p.id),
+        appContextService.getInternalUserSOClientWithoutSpaceExtension(),
+        fleetServerPolicies,
         true
       );
     }
@@ -115,6 +115,7 @@ export const getFleetServerOrAgentPolicies = async (
     has_fleet_server: policy.has_fleet_server,
     fleet_server_host_id: policy.fleet_server_host_id,
     download_source_id: policy.download_source_id,
+    space_id: policy.space_id,
   });
 
   // If an agent policy is specified, return only that policy
@@ -136,7 +137,9 @@ export const getFleetServerOrAgentPolicies = async (
   }
 
   // If an agent policy is not specified, return all fleet server policies
-  const fleetServerPolicies = (await getFleetServerPolicies(soClient)).map(mapPolicy);
+  const fleetServerPolicies = (
+    await getFleetServerPolicies(appContextService.getInternalUserSOClientWithoutSpaceExtension())
+  ).map(mapPolicy);
   return { fleetServerPolicies };
 };
 

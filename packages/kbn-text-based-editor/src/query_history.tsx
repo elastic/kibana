@@ -364,6 +364,8 @@ export function QueryHistory({
     .euiTable th[data-test-subj='tableHeaderCell_duration_3'] span {
       justify-content: flex-end;
     }
+    border-bottom-left-radius: ${euiTheme.border.radius.medium};
+    border-top-left-radius: ${euiTheme.border.radius.medium};
     max-height: ${isInCompactMode ? CONTAINER_MAX_HEIGHT_COMPACT : CONTAINER_MAX_HEIGHT_EXPANDED}px;
     overflow-y: auto;
     ${scrollBarStyles}

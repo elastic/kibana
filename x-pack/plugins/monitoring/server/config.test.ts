@@ -69,6 +69,7 @@ describe('config schema', () => {
             "logFetchCount": 10,
             "logQueries": false,
             "maxIdleSockets": 256,
+            "maxResponseSize": false,
             "maxSockets": 800,
             "pingTimeout": "PT30S",
             "requestHeadersWhitelist": Array [

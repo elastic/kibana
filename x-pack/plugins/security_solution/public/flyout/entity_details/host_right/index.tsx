@@ -30,20 +30,23 @@ import type { ObservedEntityData } from '../shared/components/observed_entity/ty
 import { useObservedHost } from './hooks/use_observed_host';
 import { HostDetailsPanelKey } from '../host_details_left';
 import type { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
+import { HostPreviewPanelFooter } from '../host_preview/footer';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   hostName: string;
   isDraggable?: boolean;
+  isPreviewMode?: boolean;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'host-panel';
+  key: 'host-panel' | 'host-preview-panel';
   params: HostPanelProps;
 }
 
 export const HostPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-panel';
+export const HostPreviewPanelKey: HostPanelExpandableFlyoutProps['key'] = 'host-preview-panel';
 export const HOST_PANEL_RISK_SCORE_QUERY_ID = 'HostPanelRiskScoreQuery';
 export const HOST_PANEL_OBSERVED_HOST_QUERY_ID = 'HostPanelObservedHostQuery';
 
@@ -52,7 +55,13 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPanelProps) => {
+export const HostPanel = ({
+  contextID,
+  scopeId,
+  hostName,
+  isDraggable,
+  isPreviewMode,
+}: HostPanelProps) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
   const { to, from, isInitializing, setQuery, deleteQuery } = useGlobalTime();
@@ -138,7 +147,7 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
         return (
           <>
             <FlyoutNavigation
-              flyoutIsExpandable={isRiskScoreExist}
+              flyoutIsExpandable={!isPreviewMode && isRiskScoreExist}
               expandDetails={openDefaultPanel}
             />
             <HostPanelHeader hostName={hostName} observedHost={observedHostWithAnomalies} />
@@ -149,10 +158,19 @@ export const HostPanel = ({ contextID, scopeId, hostName, isDraggable }: HostPan
               contextID={contextID}
               scopeId={scopeId}
               isDraggable={!!isDraggable}
-              openDetailsPanel={openTabPanel}
+              openDetailsPanel={!isPreviewMode ? openTabPanel : undefined}
               recalculatingScore={recalculatingScore}
               onAssetCriticalityChange={calculateEntityRiskScore}
+              isPreviewMode={isPreviewMode}
             />
+            {isPreviewMode && (
+              <HostPreviewPanelFooter
+                hostName={hostName}
+                contextID={contextID}
+                scopeId={scopeId}
+                isDraggable={!!isDraggable}
+              />
+            )}
           </>
         );
       }}

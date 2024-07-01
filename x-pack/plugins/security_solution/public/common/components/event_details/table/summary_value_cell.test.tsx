@@ -24,9 +24,6 @@ const eventId = 'TUWyf3wBFCFU0qRJTauW';
 const hostIpValues = ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'];
 const hostIpFieldFromBrowserField: BrowserField = {
   aggregatable: true,
-  category: 'host',
-  description: 'Host ip addresses.',
-  example: '127.0.0.1',
   fields: {},
   format: '',
   indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
@@ -61,9 +58,6 @@ const enrichedAgentStatusData: AlertSummaryRow['description'] = {
     format: '',
     type: '',
     aggregatable: false,
-    description: '',
-    example: '',
-    category: '',
     fields: {},
     indexes: [],
     name: AGENT_STATUS_FIELD_NAME,

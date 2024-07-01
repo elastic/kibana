@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: Initiates alerts migration API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/signals/migration:
+    post:
+      x-labels: [ess]
+      operationId: CreateAlertsMigration
+      x-codegen-enabled: true
+      summary: Initiates an alerts migration
+      tags:
+        - Alerts migration API
+      requestBody:
+        description: Alerts migration parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    index:
+                      type: array
+                      items:
+                        $ref: '../../../model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                      minItems: 1
+                  required: [index]
+                - $ref: '#/components/schemas/AlertsReindexOptions'
+
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  indices:
+                    type: array
+                    items:
+                      oneOf:
+                        - $ref: '#/components/schemas/AlertsIndexMigrationSuccess'
+                        - $ref: '#/components/schemas/AlertsIndexMigrationError'
+                        - $ref: '#/components/schemas/SkippedAlertsIndexMigration'
+                required: [indices]
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../model/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+
+components:
+  schemas:
+    AlertsReindexOptions:
+      type: object
+      properties:
+        requests_per_second:
+          type: integer
+          minimum: 1
+        size:
+          type: integer
+          minimum: 1
+        slices:
+          type: integer
+          minimum: 1
+
+    AlertsIndexMigrationSuccess:
+      type: object
+      properties:
+        index:
+          type: string
+        migration_id:
+          type: string
+        migration_index:
+          type: string
+      required:
+        - index
+        - migration_id
+        - migration_index
+
+    AlertsIndexMigrationError:
+      type: object
+      properties:
+        index:
+          type: string
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+            status_code:
+              type: string
+          required: [message, status_code]
+      required:
+        - index
+        - error
+
+    SkippedAlertsIndexMigration:
+      type: object
+      properties:
+        index:
+          type: string
+      required:
+        - index

@@ -54,6 +54,7 @@ export function CurrentRelatedEventFetcher(
 
       api.dispatch(appRequestedCurrentRelatedEventData({ id }));
       const detectedBounds = selectors.detectedBounds(state.analyzer[id]);
+      const agentId = selectors.agentId(state.analyzer[id]);
       const timeRangeFilters =
         detectedBounds !== undefined ? undefined : selectors.timeRangeFilters(state.analyzer[id]);
       let result: SafeResolverEvent | null = null;
@@ -66,6 +67,7 @@ export function CurrentRelatedEventFetcher(
           winlogRecordID,
           indexPatterns: indices,
           timeRange: timeRangeFilters,
+          agentId,
         });
       } catch (error) {
         api.dispatch(serverFailedToReturnCurrentRelatedEventData({ id }));

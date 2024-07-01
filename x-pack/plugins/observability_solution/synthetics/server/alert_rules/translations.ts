@@ -53,6 +53,15 @@ export const commonMonitorStateI18: Array<{
     ),
   },
   {
+    name: 'monitorTags',
+    description: i18n.translate(
+      'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.monitorTags',
+      {
+        defaultMessage: 'Tags associated with the monitor.',
+      }
+    ),
+  },
+  {
     name: 'status',
     description: i18n.translate(
       'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.status',

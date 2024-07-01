@@ -7,14 +7,12 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import {
   ExportRulesRequestBody,
   ExportRulesRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
 import { getNonPackagedRulesCount } from '../../../logic/search/get_existing_prepackaged_rules';

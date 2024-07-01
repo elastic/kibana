@@ -132,7 +132,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const { selectedColumns, setSelectedColumns } = useCasesColumnsSelection();
 
-    const { columns, isLoadingColumns } = useCasesColumns({
+    const { columns, isLoadingColumns, rowHeader } = useCasesColumns({
       filterStatus: filterOptions.status ?? [],
       userProfiles: userProfiles ?? new Map(),
       isSelectorView,
@@ -228,6 +228,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         />
         <CasesTable
           columns={columns}
+          rowHeader={rowHeader}
           data={data}
           goToCreateCase={onRowClick ? onCreateCasePressed : undefined}
           isCasesLoading={isLoadingCases}

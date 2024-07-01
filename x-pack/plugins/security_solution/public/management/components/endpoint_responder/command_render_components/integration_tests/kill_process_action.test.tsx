@@ -229,8 +229,17 @@ describe('When using the kill-process action from response actions console', () 
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/1.2.3',
     });
+    pendingDetailResponse.data.command = 'kill-process';
     pendingDetailResponse.data.wasSuccessful = false;
     pendingDetailResponse.data.errors = ['error one', 'error two'];
+    pendingDetailResponse.data.agentState = {
+      'agent-a': {
+        isCompleted: true,
+        wasSuccessful: false,
+        errors: ['error one', 'error two'],
+        completedAt: new Date().toISOString(),
+      },
+    };
     apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);
     await render();
     enterConsoleCommand(renderResult, 'kill-process --pid 123');
@@ -248,11 +257,19 @@ describe('When using the kill-process action from response actions console', () 
       const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
         path: '/api/endpoint/action/a.b.c',
       }) as ActionDetailsApiResponse<KillProcessActionOutputContent>;
-      pendingDetailResponse.data.agents = ['a.b.c'];
+      pendingDetailResponse.data.command = 'kill-process';
       pendingDetailResponse.data.wasSuccessful = false;
       pendingDetailResponse.data.errors = ['not found'];
+      pendingDetailResponse.data.agentState = {
+        'agent-a': {
+          isCompleted: true,
+          wasSuccessful: false,
+          errors: ['not found'],
+          completedAt: new Date().toISOString(),
+        },
+      };
       pendingDetailResponse.data.outputs = {
-        'a.b.c': {
+        'agent-a': {
           type: 'json',
           content: {
             code: outputCode,
@@ -318,6 +335,7 @@ describe('When using the kill-process action from response actions console', () 
         path: '/api/endpoint/action/1.2.3',
       });
 
+      pendingDetailResponse.data.command = 'kill-process';
       pendingDetailResponse.data.isCompleted = false;
       apiMocks.responseProvider.actionDetails.mockClear();
       apiMocks.responseProvider.actionDetails.mockReturnValue(pendingDetailResponse);

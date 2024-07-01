@@ -34,6 +34,7 @@ export type EnrollmentSettingsFleetServerPolicy = Pick<
   | 'has_fleet_server'
   | 'fleet_server_host_id'
   | 'download_source_id'
+  | 'space_id'
 >;
 
 export interface GetEnrollmentSettingsResponse {

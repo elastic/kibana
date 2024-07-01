@@ -22,7 +22,6 @@ import {
   RULE_INTERVAL_MILLIS,
   RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
-  SourceField,
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
@@ -38,12 +37,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     removeAllAADDocs,
     getAllAADDocs,
   } = getRuleServices(getService);
-
-  const sourceFields = [
-    { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
-    { label: 'host.id', searchPath: 'host.id' },
-    { label: 'host.name', searchPath: 'host.name' },
-  ];
 
   describe('rule', async () => {
     let endDate: string;
@@ -81,13 +74,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         name: 'never fire',
         esqlQuery:
           'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
-        sourceFields,
       });
       await createRule({
         name: 'always fire',
         esqlQuery:
           'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
-        sourceFields,
       });
 
       const docs = await waitForDocs(2);
@@ -225,13 +216,11 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         name: 'never fire',
         esqlQuery:
           'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c < 0',
-        sourceFields,
       });
       await createRule({
         name: 'always fire',
         esqlQuery:
           'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c > -1',
-        sourceFields,
       });
 
       const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
@@ -397,7 +386,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       groupBy?: string;
       termField?: string;
       termSize?: number;
-      sourceFields?: SourceField[];
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -469,7 +457,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             termSize: params.termSize,
             timeField: params.timeField || 'date',
             esqlQuery: { esql: params.esqlQuery },
-            sourceFields: params.sourceFields,
+            sourceFields: [],
           },
         })
         .expect(200);

@@ -61,7 +61,7 @@ describe('Create custom query rule', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     // FLAKEY - see https://github.com/elastic/kibana/issues/182891
-    it('@skipInServerless Adds filter on define step', () => {
+    it('Adds filter on define step', { tags: ['@skipInServerless'] }, () => {
       visit(CREATE_RULE_URL);
       fillDefineCustomRule(rule);
       openAddFilterPopover();

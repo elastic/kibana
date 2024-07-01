@@ -7,8 +7,7 @@
  */
 
 import { monaco } from '@kbn/monaco';
-import { getHeight } from './get_height';
-import { MARGIN_BOTTOM } from './source';
+import { getHeight, DEFAULT_MARGIN_BOTTOM } from './get_height';
 
 describe('getHeight', () => {
   Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 500 });
@@ -32,28 +31,31 @@ describe('getHeight', () => {
   test('when using document explorer, returning the available height in the flyout', () => {
     const monacoMock = getMonacoMock(500, 0);
 
-    const height = getHeight(monacoMock, true);
-    expect(height).toBe(500 - MARGIN_BOTTOM);
+    const height = getHeight(monacoMock, true, DEFAULT_MARGIN_BOTTOM);
+    expect(height).toBe(484);
+
+    const heightCustom = getHeight(monacoMock, true, 80);
+    expect(heightCustom).toBe(420);
   });
 
   test('when using document explorer, returning the available height in the flyout has a minimun guarenteed height', () => {
     const monacoMock = getMonacoMock(500);
 
-    const height = getHeight(monacoMock, true);
+    const height = getHeight(monacoMock, true, DEFAULT_MARGIN_BOTTOM);
     expect(height).toBe(400);
   });
 
   test('when using classic table, its displayed inline without scrolling', () => {
     const monacoMock = getMonacoMock(100);
 
-    const height = getHeight(monacoMock, false);
+    const height = getHeight(monacoMock, false, DEFAULT_MARGIN_BOTTOM);
     expect(height).toBe(1020);
   });
 
   test('when using classic table, limited height > 500 lines to allow scrolling', () => {
     const monacoMock = getMonacoMock(1000);
 
-    const height = getHeight(monacoMock, false);
+    const height = getHeight(monacoMock, false, DEFAULT_MARGIN_BOTTOM);
     expect(height).toBe(5020);
   });
 });

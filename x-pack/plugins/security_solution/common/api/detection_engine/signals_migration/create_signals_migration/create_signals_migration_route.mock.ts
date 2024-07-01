@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CreateSignalsMigrationSchema } from './create_signals_migration_route';
+import type { CreateAlertsMigrationRequestBody } from './create_signals_migration.gen';
 
 export const getCreateSignalsMigrationSchemaMock = (
   index: string = 'signals-index'
-): CreateSignalsMigrationSchema => ({
+): CreateAlertsMigrationRequestBody => ({
   index: [index],
 });

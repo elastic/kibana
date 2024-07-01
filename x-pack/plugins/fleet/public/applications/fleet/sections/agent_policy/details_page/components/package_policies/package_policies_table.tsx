@@ -249,7 +249,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             render: (packagePolicy: InMemoryPackagePolicy) => {
               return canWriteIntegrationPolicies ? (
                 <PackagePolicyActionsMenu
-                  agentPolicy={agentPolicy}
+                  agentPolicies={[agentPolicy]}
                   from={'fleet-policy-list'}
                   packagePolicy={packagePolicy}
                   upgradePackagePolicyHref={`${getHref('upgrade_package_policy', {

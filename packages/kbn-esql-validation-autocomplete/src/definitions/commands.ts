@@ -89,6 +89,36 @@ export const commandDefinitions: CommandDefinition[] = [
     },
   },
   {
+    name: 'metrics',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
+      defaultMessage:
+        'A metrics-specific source command, use this command to load data from TSDB indices. ' +
+        'Similar to STATS command on can calculate aggregate statistics, such as average, count, and sum, over the incoming search results set. ' +
+        'When used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. ' +
+        'When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. ' +
+        'The command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. ' +
+        'When you perform more than one aggregation, separate each aggregation with a comma.',
+    }),
+    examples: [
+      'metrics index',
+      'metrics index, index2',
+      'metrics index avg = avg(a)',
+      'metrics index sum(b) by b',
+      'metrics index, index2 sum(b) by b % 2',
+      'metrics <sources> [ <aggregates> [ by <grouping> ]]',
+      'metrics src1, src2 agg1, agg2 by field1, field2',
+    ],
+    options: [],
+    modes: [],
+    signature: {
+      multipleParams: true,
+      params: [
+        { name: 'index', type: 'source', wildcards: true },
+        { name: 'expression', type: 'function', optional: true },
+      ],
+    },
+  },
+  {
     name: 'stats',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.statsDoc', {
       defaultMessage:

@@ -37,10 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
-    });
-
     describe('when no dataSourceSelection is given', () => {
       it('should initialize the "All logs" selection', async () => {
         await PageObjects.observabilityLogsExplorer.navigateTo();

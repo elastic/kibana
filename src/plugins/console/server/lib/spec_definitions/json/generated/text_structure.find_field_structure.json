@@ -1,0 +1,15 @@
+{
+  "text_structure.find_field_structure": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_text_structure/find_field_structure"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/find-field-structure.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

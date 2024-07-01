@@ -43,5 +43,5 @@ export const getAgentIdsForAgentPolicies = async (
     },
   });
 
-  return res.hits.hits.map((hit) => hit._id);
+  return res.hits.hits.map((hit) => hit._id!);
 };

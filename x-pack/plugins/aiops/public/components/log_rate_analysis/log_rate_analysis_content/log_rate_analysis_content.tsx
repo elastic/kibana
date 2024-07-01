@@ -8,7 +8,6 @@
 import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
-import type { Moment } from 'moment';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
@@ -37,7 +36,7 @@ import {
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
 
-const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
+export const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
 const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
   bool: {
     filter: [],
@@ -51,8 +50,6 @@ const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
 };
 
 export interface LogRateAnalysisContentProps {
-  /** Optional time range override */
-  timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
   /** Optional color override for the default bar color for charts */
@@ -68,7 +65,6 @@ export interface LogRateAnalysisContentProps {
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
-  timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
   barColorOverride,
   barHighlightColorOverride,

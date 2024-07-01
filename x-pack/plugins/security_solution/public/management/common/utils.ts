@@ -25,9 +25,9 @@ export const parseQueryFilterToKQL = (
   return `(${kuery})`;
 };
 
-const getPolicyQuery = (policyId: string): string => {
+export const getPolicyQuery = (policyId: string): string => {
   if (policyId === 'global') return 'exception-list-agnostic.attributes.tags:"policy:all"';
-  if (policyId === 'unassigned') return '(not exception-list-agnostic.attributes.tags:*)';
+  if (policyId === 'unassigned') return '(not exception-list-agnostic.attributes.tags:policy\\:*)';
   return `exception-list-agnostic.attributes.tags:"policy:${policyId}"`;
 };
 

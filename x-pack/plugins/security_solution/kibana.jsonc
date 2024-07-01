@@ -70,7 +70,8 @@
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
-      "guidedOnboarding"
+      "guidedOnboarding",
+      "integrationAssistant"
     ],
     "requiredBundles": [
       "esUiShared",

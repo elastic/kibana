@@ -74,7 +74,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
 
     expect(await screen.findByTestId('authNone')).toBeInTheDocument();
     expect(await screen.findByTestId('authBasic')).toBeInTheDocument();
-    // expect(await screen.findByTestId('authSSL')).toBeInTheDocument();
+    expect(await screen.findByTestId('authSSL')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookUserInput')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookPasswordInput')).toBeInTheDocument();
     expect(await screen.findByTestId('webhookHeadersKeyInput')).toBeInTheDocument();
@@ -363,7 +363,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           data: {
             ...rest,
             __internal__: {
-              // hasCA: false,
+              hasCA: false,
               hasHeaders: true,
             },
           },
@@ -404,7 +404,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
               authType: null,
             },
             __internal__: {
-              // hasCA: false,
+              hasCA: false,
               hasHeaders: true,
             },
           },
@@ -442,7 +442,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             ...rest,
             config: rest2,
             __internal__: {
-              // hasCA: false,
+              hasCA: false,
               hasHeaders: false,
             },
           },

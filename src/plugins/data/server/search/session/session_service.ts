@@ -18,7 +18,7 @@ import {
   SavedObjectsFindOptions,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import type { AuthenticatedUser, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { AuthenticatedUser } from '@kbn/core/server';
 import { defer } from '@kbn/kibana-utils-plugin/common';
 import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import { debounce } from 'lodash';
@@ -43,10 +43,8 @@ export interface SearchSessionStatusDependencies extends SearchSessionDependenci
   internalElasticsearchClient: ElasticsearchClient;
 }
 
-interface SetupDependencies {
-  security?: SecurityPluginSetup;
-}
-
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface SetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface StartDependencies {}
 
@@ -68,7 +66,6 @@ interface TrackIdQueueEntry {
 
 export class SearchSessionService implements ISearchSessionService {
   private sessionConfig: SearchSessionsConfigSchema;
-  private security?: SecurityPluginSetup;
   private setupCompleted = false;
 
   constructor(
@@ -80,8 +77,6 @@ export class SearchSessionService implements ISearchSessionService {
   }
 
   public setup(core: CoreSetup, deps: SetupDependencies) {
-    this.security = deps.security;
-
     this.setupCompleted = true;
   }
 
@@ -419,9 +414,9 @@ export class SearchSessionService implements ISearchSessionService {
     return session.attributes.idMapping[requestHash].id;
   };
 
-  public asScopedProvider = ({ savedObjects, elasticsearch }: CoreStart) => {
+  public asScopedProvider = ({ security, savedObjects, elasticsearch }: CoreStart) => {
     return (request: KibanaRequest) => {
-      const user = this.security?.authc.getCurrentUser(request) ?? null;
+      const user = security.authc.getCurrentUser(request) ?? null;
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [SEARCH_SESSION_TYPE],
       });

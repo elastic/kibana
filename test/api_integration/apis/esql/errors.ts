@@ -152,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
       for (const policy of policies) {
         log.info(`deleting policy "${policy}"...`);
+        // TODO: Maybe `policy` -> `policy.name`?
         await es.enrich.deletePolicy({ name: policy }, { ignore: [404] });
       }
     }

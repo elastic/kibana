@@ -38,6 +38,7 @@ interface OwnProps {
   showAnonymizedValues: boolean;
   title: string;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
 }
 
@@ -61,6 +62,7 @@ export const AssistantHeader: React.FC<Props> = ({
   showAnonymizedValues,
   title,
   conversations,
+  conversationsLoaded,
   refetchConversationsState,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
@@ -151,6 +153,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}
+                  conversationsLoaded={conversationsLoaded}
                   refetchConversationsState={refetchConversationsState}
                   isFlyoutMode={false}
                 />

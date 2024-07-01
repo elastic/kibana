@@ -41,6 +41,20 @@ export const createTransport = ({
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
       const opts: TransportRequestOptions = options ? { ...options } : {};
+      // sync override of maxResponseSize and maxCompressedResponseSize
+      if (options) {
+        if (
+          options.maxResponseSize !== undefined &&
+          options.maxCompressedResponseSize === undefined
+        ) {
+          opts.maxCompressedResponseSize = options.maxResponseSize;
+        } else if (
+          options.maxCompressedResponseSize !== undefined &&
+          options.maxResponseSize === undefined
+        ) {
+          opts.maxResponseSize = options.maxCompressedResponseSize;
+        }
+      }
       const opaqueId = getExecutionContext();
       if (opaqueId && !opts.opaqueId) {
         // rewrites headers['x-opaque-id'] if it presents

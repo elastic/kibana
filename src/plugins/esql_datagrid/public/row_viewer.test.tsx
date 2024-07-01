@@ -59,7 +59,7 @@ describe('RowViewer', () => {
       <KibanaContextProvider services={services}>
         <RowViewer
           dataView={dataView as unknown as DataView}
-          toastNotifications={
+          notifications={
             {
               toasts: {
                 addSuccess: jest.fn(),
@@ -88,7 +88,7 @@ describe('RowViewer', () => {
     const closeFlyoutSpy = jest.fn();
     renderComponent(closeFlyoutSpy);
     await waitFor(() => {
-      userEvent.click(screen.getByTestId('esqlRowDetailsFlyoutCloseBtn'));
+      userEvent.click(screen.getByTestId('docViewerFlyoutCloseButton'));
       expect(closeFlyoutSpy).toHaveBeenCalled();
     });
   });
@@ -106,14 +106,14 @@ describe('RowViewer', () => {
       },
     } as unknown as DataTableRecord);
     await waitFor(() => {
-      expect(screen.getByTestId('esqlTableRowNavigation')).toBeInTheDocument();
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
     });
   });
 
   it('doesnt display row navigation when there is only 1 row available', async () => {
     renderComponent();
     await waitFor(() => {
-      expect(screen.queryByTestId('esqlTableRowNavigation')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
     });
   });
 });

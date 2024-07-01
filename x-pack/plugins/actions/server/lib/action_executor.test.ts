@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock, analyticsServiceMock } from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType as ConnectorType } from '../types';
@@ -26,6 +26,7 @@ import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -61,7 +62,6 @@ const securityMockStart = securityMock.createStart();
 
 const authorizationMock = actionsAuthorizationMock.create();
 const getActionsAuthorizationWithRequest = jest.fn();
-
 const actionExecutorInitializationParams = {
   logger: loggerMock,
   spaces: spacesMock,
@@ -69,6 +69,7 @@ const actionExecutorInitializationParams = {
   getServices: () => services,
   getUnsecuredServices: () => unsecuredServices,
   actionTypeRegistry: connectorTypeRegistry,
+  analyticsService: analyticsServiceMock.createAnalyticsServiceStart(),
   encryptedSavedObjectsClient,
   eventLogger,
   getActionsAuthorizationWithRequest,
@@ -1355,163 +1356,160 @@ describe('System actions', () => {
     });
   });
 });
+describe('Event log', () => {
+  test('writes to event log for execute timeout', async () => {
+    setupActionExecutorMock();
 
-test('writes to event log for execute timeout', async () => {
-  setupActionExecutorMock();
-
-  await actionExecutor.logCancellation({
-    actionId: 'action1',
-    executionId: '123abc',
-    consumer: 'test-consumer',
-    relatedSavedObjects: [],
-    request: {} as KibanaRequest,
-    actionExecutionId: '2',
-  });
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-    event: {
-      action: 'execute-timeout',
-      kind: 'action',
-    },
-    kibana: {
-      action: {
-        execution: {
-          uuid: '2',
-        },
-        name: undefined,
-        id: 'action1',
+    await actionExecutor.logCancellation({
+      actionId: 'action1',
+      executionId: '123abc',
+      consumer: 'test-consumer',
+      relatedSavedObjects: [],
+      request: {} as KibanaRequest,
+      actionExecutionId: '2',
+    });
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'execute-timeout',
+        kind: 'action',
       },
-      alert: {
-        rule: {
-          consumer: 'test-consumer',
+      kibana: {
+        action: {
           execution: {
-            uuid: '123abc',
+            uuid: '2',
           },
-        },
-      },
-      saved_objects: [
-        {
+          name: undefined,
           id: 'action1',
-          namespace: 'some-namespace',
-          rel: 'primary',
-          type: 'action',
-          type_id: 'test',
         },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message:
-      'action: test:action1: \'action-1\' execution cancelled due to timeout - exceeded default timeout of "5m"',
-  });
-});
-
-test('writes to event log for execute and execute start', async () => {
-  const executorMock = setupActionExecutorMock();
-  executorMock.mockResolvedValue({
-    actionId: '1',
-    status: 'ok',
-  });
-  await actionExecutor.execute(executeParams);
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-    event: {
-      action: 'execute-start',
-      kind: 'action',
-    },
-    kibana: {
-      action: {
-        execution: {
-          uuid: '2',
-        },
-        name: 'action-1',
-        id: '1',
-      },
-      alert: {
-        rule: {
-          execution: {
-            uuid: '123abc',
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
           },
         },
-      },
-      saved_objects: [
-        {
-          id: '1',
-          namespace: 'some-namespace',
-          rel: 'primary',
-          type: 'action',
-          type_id: 'test',
-        },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action started: test:1: action-1',
-  });
-});
-
-test('writes to event log for execute and execute start when consumer and related saved object are defined', async () => {
-  const executorMock = setupActionExecutorMock();
-  executorMock.mockResolvedValue({
-    actionId: '1',
-    status: 'ok',
-  });
-  await actionExecutor.execute({
-    ...executeParams,
-    consumer: 'test-consumer',
-    relatedSavedObjects: [
-      {
-        typeId: '.rule-type',
-        type: 'alert',
-        id: '12',
-      },
-    ],
-  });
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
-    event: {
-      action: 'execute-start',
-      kind: 'action',
-    },
-    kibana: {
-      action: {
-        execution: {
-          uuid: '2',
-        },
-        name: 'action-1',
-        id: '1',
-      },
-      alert: {
-        rule: {
-          consumer: 'test-consumer',
-          execution: {
-            uuid: '123abc',
+        saved_objects: [
+          {
+            id: 'action1',
+            namespace: 'some-namespace',
+            rel: 'primary',
+            type: 'action',
+            type_id: 'test',
           },
-          rule_type_id: '.rule-type',
-        },
+        ],
+        space_ids: ['some-namespace'],
       },
-      saved_objects: [
-        {
+      message:
+        'action: test:action1: \'action-1\' execution cancelled due to timeout - exceeded default timeout of "5m"',
+    });
+  });
+
+  test('writes to event log for execute and execute start', async () => {
+    const executorMock = setupActionExecutorMock();
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+    });
+    await actionExecutor.execute(executeParams);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'execute-start',
+        kind: 'action',
+      },
+      kibana: {
+        action: {
+          execution: {
+            uuid: '2',
+          },
+          name: 'action-1',
           id: '1',
-          namespace: 'some-namespace',
-          rel: 'primary',
-          type: 'action',
-          type_id: 'test',
         },
+        alert: {
+          rule: {
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: 'some-namespace',
+            rel: 'primary',
+            type: 'action',
+            type_id: 'test',
+          },
+        ],
+        space_ids: ['some-namespace'],
+      },
+      message: 'action started: test:1: action-1',
+    });
+  });
+
+  test('writes to event log for execute and execute start when consumer and related saved object are defined', async () => {
+    const executorMock = setupActionExecutorMock();
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+    });
+    await actionExecutor.execute({
+      ...executeParams,
+      consumer: 'test-consumer',
+      relatedSavedObjects: [
         {
-          id: '12',
-          namespace: undefined,
-          rel: 'primary',
+          typeId: '.rule-type',
           type: 'alert',
-          type_id: '.rule-type',
+          id: '12',
         },
       ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action started: test:1: action-1',
+    });
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+      event: {
+        action: 'execute-start',
+        kind: 'action',
+      },
+      kibana: {
+        action: {
+          execution: {
+            uuid: '2',
+          },
+          name: 'action-1',
+          id: '1',
+        },
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+            rule_type_id: '.rule-type',
+          },
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: 'some-namespace',
+            rel: 'primary',
+            type: 'action',
+            type_id: 'test',
+          },
+          {
+            id: '12',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+            type_id: '.rule-type',
+          },
+        ],
+        space_ids: ['some-namespace'],
+      },
+      message: 'action started: test:1: action-1',
+    });
   });
-});
-
-test('writes usage data to event log for OpenAI events', async () => {
-  const executorMock = setupActionExecutorMock('.gen-ai');
   const mockGenAi = {
     id: 'chatcmpl-7LztF5xsJl2z5jcNpJKvaPm4uWt8x',
     object: 'chat.completion',
@@ -1533,150 +1531,167 @@ test('writes usage data to event log for OpenAI events', async () => {
       },
     ],
   };
-  executorMock.mockResolvedValue({
-    actionId: '1',
-    status: 'ok',
-    // @ts-ignore
-    data: mockGenAi,
-  });
-  await actionExecutor.execute(executeParams);
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-    event: {
-      action: 'execute',
-      kind: 'action',
-      outcome: 'success',
-    },
-    kibana: {
-      action: {
-        execution: {
-          uuid: '2',
-          gen_ai: {
-            usage: mockGenAi.usage,
-          },
-        },
-        name: 'action-1',
-        id: '1',
+  test('writes usage data to event log for OpenAI events', async () => {
+    const executorMock = setupActionExecutorMock('.gen-ai');
+
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+      // @ts-ignore
+      data: mockGenAi,
+    });
+    await actionExecutor.execute(executeParams);
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+      event: {
+        action: 'execute',
+        kind: 'action',
+        outcome: 'success',
       },
-      alert: {
-        rule: {
+      kibana: {
+        action: {
           execution: {
-            uuid: '123abc',
+            uuid: '2',
+            gen_ai: {
+              usage: mockGenAi.usage,
+            },
+          },
+          name: 'action-1',
+          id: '1',
+        },
+        alert: {
+          rule: {
+            execution: {
+              uuid: '123abc',
+            },
           },
         },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: 'some-namespace',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.gen-ai',
+          },
+        ],
+        space_ids: ['some-namespace'],
       },
-      saved_objects: [
-        {
-          id: '1',
-          namespace: 'some-namespace',
-          rel: 'primary',
-          type: 'action',
-          type_id: '.gen-ai',
+      message: 'action executed: .gen-ai:1: action-1',
+      user: { name: 'coolguy', id: '123' },
+    });
+  });
+
+  test('writes usage data to event log for streaming OpenAI events', async () => {
+    const executorMock = setupActionExecutorMock('.gen-ai', {
+      params: { schema: schema.any() },
+      config: { schema: schema.any() },
+      secrets: { schema: schema.any() },
+    });
+
+    const stream = new PassThrough();
+
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+      // @ts-ignore
+      data: stream,
+    });
+
+    await actionExecutor.execute({
+      ...executeParams,
+      params: {
+        subActionParams: {
+          body: JSON.stringify({
+            messages: [
+              {
+                role: 'system',
+                content: 'System message',
+              },
+              {
+                role: 'user',
+                content: 'User message',
+              },
+            ],
+          }),
         },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action executed: .gen-ai:1: action-1',
-    user: { name: 'coolguy', id: '123' },
+      },
+    });
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+    stream.write(
+      `data: ${JSON.stringify({
+        object: 'chat.completion.chunk',
+        choices: [{ delta: { content: 'Single' } }],
+      })}\n`
+    );
+    stream.write(`data: [DONE]`);
+
+    stream.end();
+
+    await finished(stream);
+
+    await new Promise(process.nextTick);
+
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+      event: {
+        action: 'execute',
+        kind: 'action',
+        outcome: 'success',
+      },
+      kibana: {
+        action: {
+          execution: {
+            uuid: '2',
+            gen_ai: {
+              usage: {
+                completion_tokens: 5,
+                prompt_tokens: 30,
+                total_tokens: 35,
+              },
+            },
+          },
+          name: 'action-1',
+          id: '1',
+        },
+        alert: {
+          rule: {
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: 'some-namespace',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.gen-ai',
+          },
+        ],
+        space_ids: ['some-namespace'],
+      },
+      message: 'action executed: .gen-ai:1: action-1',
+      user: { name: 'coolguy', id: '123' },
+    });
+  });
+  test('reports telemetry for token count events', async () => {
+    const executorMock = setupActionExecutorMock('.gen-ai');
+    executorMock.mockResolvedValue({
+      actionId: '1',
+      status: 'ok',
+      // @ts-ignore
+      data: mockGenAi,
+    });
+    await actionExecutor.execute(executeParams);
+    expect(actionExecutorInitializationParams.analyticsService.reportEvent).toHaveBeenCalledWith(
+      GEN_AI_TOKEN_COUNT_EVENT.eventType,
+      { actionTypeId: '.gen-ai', completion_tokens: 9, prompt_tokens: 10, total_tokens: 19 }
+    );
   });
 });
-
-test('writes usage data to event log for streaming OpenAI events', async () => {
-  const executorMock = setupActionExecutorMock('.gen-ai', {
-    params: { schema: schema.any() },
-    config: { schema: schema.any() },
-    secrets: { schema: schema.any() },
-  });
-
-  const stream = new PassThrough();
-
-  executorMock.mockResolvedValue({
-    actionId: '1',
-    status: 'ok',
-    // @ts-ignore
-    data: stream,
-  });
-
-  await actionExecutor.execute({
-    ...executeParams,
-    params: {
-      subActionParams: {
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content: 'System message',
-            },
-            {
-              role: 'user',
-              content: 'User message',
-            },
-          ],
-        }),
-      },
-    },
-  });
-
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
-  stream.write(
-    `data: ${JSON.stringify({
-      object: 'chat.completion.chunk',
-      choices: [{ delta: { content: 'Single' } }],
-    })}\n`
-  );
-  stream.write(`data: [DONE]`);
-
-  stream.end();
-
-  await finished(stream);
-
-  await new Promise(process.nextTick);
-
-  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
-  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
-    event: {
-      action: 'execute',
-      kind: 'action',
-      outcome: 'success',
-    },
-    kibana: {
-      action: {
-        execution: {
-          uuid: '2',
-          gen_ai: {
-            usage: {
-              completion_tokens: 5,
-              prompt_tokens: 30,
-              total_tokens: 35,
-            },
-          },
-        },
-        name: 'action-1',
-        id: '1',
-      },
-      alert: {
-        rule: {
-          execution: {
-            uuid: '123abc',
-          },
-        },
-      },
-      saved_objects: [
-        {
-          id: '1',
-          namespace: 'some-namespace',
-          rel: 'primary',
-          type: 'action',
-          type_id: '.gen-ai',
-        },
-      ],
-      space_ids: ['some-namespace'],
-    },
-    message: 'action executed: .gen-ai:1: action-1',
-    user: { name: 'coolguy', id: '123' },
-  });
-});
-
 function setupActionExecutorMock(
   actionTypeId = 'test',
   validationOverride?: ConnectorType['validate']

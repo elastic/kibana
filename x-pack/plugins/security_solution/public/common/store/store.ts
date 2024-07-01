@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import thunk from 'redux-thunk';
 import type {
   Action,
   Store,
@@ -54,6 +55,12 @@ import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory
 import { sourcererActions } from '../../sourcerer/store';
 import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
+import {
+  reducer as dataViewPickerReducer,
+  initialState as dataViewPickerState,
+} from '../../sourcerer/experimental/redux/reducer';
+import { listenerMiddleware } from '../../sourcerer/experimental/redux/listeners';
+import { initialNotesState } from '../../notes/store/notes.slice';
 
 let store: Store<State, Action> | null = null;
 
@@ -168,19 +175,23 @@ export const createStoreFactory = async (
     },
     dataTableInitialState,
     groupsInitialState,
-    analyzerInitialState
+    analyzerInitialState,
+    dataViewPickerState,
+    initialNotesState
   );
 
   const rootReducer = {
     ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
+    dataViewPicker: dataViewPickerReducer,
   };
 
   return createStore(initialState, rootReducer, coreStart, storage, [
     ...(subPlugins.management.store.middleware ?? []),
     ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
+    listenerMiddleware.middleware,
   ]);
 };
 
@@ -284,7 +295,8 @@ export const createStore = (
   const middlewareEnhancer = applyMiddleware(
     ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
-    ...(additionalMiddleware ?? [])
+    ...(additionalMiddleware ?? []),
+    thunk
   );
 
   store = createReduxStore(

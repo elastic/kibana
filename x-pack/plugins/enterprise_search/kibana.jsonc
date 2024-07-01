@@ -30,6 +30,7 @@
       "guidedOnboarding",
       "console",
       "searchConnectors",
+      "searchHomepage",
       "searchPlayground",
       "searchInferenceEndpoints",
       "embeddable",

@@ -22,8 +22,7 @@ properties:
       connector. The JSON is validated once the Mustache variables have been
       placed when the REST method runs. Manually ensure that the JSON is valid,
       disregarding the Mustache variables, so the later validation will pass.
-    examples:
-      - '{"body": {{{case.comment}}}}'
+    example: '{"body": {{{case.comment}}}}'
   createCommentMethod:
     type: string
     description: >
@@ -41,8 +40,7 @@ properties:
       You can use a variable to add the external system ID to the URL. If you
       are using the `xpack.actions.allowedHosts setting`, add the hostname to
       the allowed hosts.
-    examples:
-      - https://example.com/issue/{{{external.system.id}}}/comment
+    example: https://example.com/issue/{{{external.system.id}}}/comment
   createIncidentJson:
     type: string
     description: >
@@ -54,8 +52,7 @@ properties:
       connector. The JSON is validated after the Mustache variables have been
       placed when REST method runs. Manually ensure that the JSON is valid to
       avoid future validation errors; disregard Mustache variables during your review.
-    examples:
-      - '{"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}'
+    example: '{"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}'
   createIncidentMethod:
     type: string
     description: >
@@ -89,8 +86,7 @@ properties:
       variables have been placed when REST method runs. Manually ensure that the
       JSON is valid, disregarding the Mustache variables, so the later
       validation will pass.
-    examples:
-      - https://example.com/issue/{{{external.system.id}}}
+    example: https://example.com/issue/{{{external.system.id}}}
   hasAuth:
     type: boolean
     description: If true, a username and password for login type authentication must be provided.
@@ -111,8 +107,7 @@ properties:
       connector. The JSON is validated after the Mustache variables have been
       placed when REST method runs. Manually ensure that the JSON is valid to
       avoid future validation errors; disregard Mustache variables during your review.
-    examples:
-      - '{"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}'
+    example: '{"fields": {"summary": {{{case.title}}},"description": {{{case.description}}},"labels": {{{case.tags}}}}}'
   updateIncidentMethod:
     type: string
     description: >
@@ -129,14 +124,12 @@ properties:
       The REST API URL to update the case by ID in the third-party system. You
       can use a variable to add the external system ID to the URL. If you are
       using the `xpack.actions.allowedHosts` setting, add the hostname to the allowed hosts.
-    examples:
-      - https://example.com/issue/{{{external.system.ID}}}
+    example: https://example.com/issue/{{{external.system.ID}}}
   viewIncidentUrl:
     type: string
     description: >
       The URL to view the case in the external system. You can use variables to
       add the external system ID or external system title to the URL.
-    examples:
-      - https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
+    example: https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
 
 

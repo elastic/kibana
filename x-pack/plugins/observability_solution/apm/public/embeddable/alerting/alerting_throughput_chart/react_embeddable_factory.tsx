@@ -19,6 +19,7 @@ export const APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE = 'APM_ALERTING_THROUGHPUT
 export const getApmAlertingThroughputChartEmbeddableFactory = (deps: EmbeddableDeps) => {
   const factory: ReactEmbeddableFactory<
     EmbeddableApmAlertingVizProps,
+    EmbeddableApmAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {
     type: APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE,

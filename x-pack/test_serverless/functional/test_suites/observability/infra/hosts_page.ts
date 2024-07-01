@@ -53,7 +53,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await Promise.all([
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
       ]);
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('#Single Host Flyout', () => {

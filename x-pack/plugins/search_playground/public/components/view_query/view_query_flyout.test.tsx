@@ -10,6 +10,7 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import { ViewQueryFlyout } from './view_query_flyout';
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { ChatFormFields } from '../../types';
 
 jest.mock('../../hooks/use_indices_fields', () => ({
   useIndicesFields: () => ({
@@ -19,12 +20,14 @@ jest.mock('../../hooks/use_indices_fields', () => ({
         dense_vector_query_fields: [],
         bm25_query_fields: ['field1', 'field2'],
         skipped_fields: 1,
+        semantic_fields: [],
       },
       index2: {
         elser_query_fields: [],
         dense_vector_query_fields: [],
         bm25_query_fields: ['field1', 'field2'],
         skipped_fields: 0,
+        semantic_fields: [],
       },
     },
   }),
@@ -41,7 +44,11 @@ jest.mock('../../hooks/use_usage_tracker', () => ({
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({
     values: {
-      indices: ['index1', 'index2'],
+      [ChatFormFields.indices]: ['index1', 'index2'],
+      [ChatFormFields.sourceFields]: {
+        index1: ['field1'],
+        index2: ['field1'],
+      },
     },
   });
   return <FormProvider {...methods}>{children}</FormProvider>;

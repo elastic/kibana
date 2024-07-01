@@ -19,10 +19,11 @@ import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import type { DescriptionList } from '../../../../../common/utility_types';
 import { getField } from '../../shared/utils';
 import { CellActions } from './cell_actions';
@@ -54,6 +55,7 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 
 const USER_ICON = 'user';
 
@@ -64,12 +66,23 @@ export interface UserEntityOverviewProps {
   userName: string;
 }
 
+export const USER_PREVIEW_BANNER = {
+  title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
+    defaultMessage: 'Preview user',
+  }),
+  backgroundColor: 'warning',
+  textColor: 'warning',
+};
+
 /**
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { eventId, indexName, scopeId } = useDocumentDetailsContext();
+  const { openLeftPanel, openPreviewPanel } = useExpandableFlyoutApi();
+
+  const isPreviewEnabled = useIsExperimentalFeatureEnabled('entityAlertPreviewEnabled');
+
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: DocumentDetailsLeftPanelKey,
@@ -81,6 +94,17 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  const openUserPreview = useCallback(() => {
+    openPreviewPanel({
+      id: UserPreviewPanelKey,
+      params: {
+        userName,
+        scopeId,
+        banner: USER_PREVIEW_BANNER,
+      },
+    });
+  }, [openPreviewPanel, userName, scopeId]);
 
   const { from, to } = useGlobalTime();
   const { selectedPatterns } = useSourcererDataView();
@@ -199,7 +223,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
                 font-size: ${xsFontSize};
                 font-weight: ${euiTheme.font.weight.bold};
               `}
-              onClick={goToEntitiesTab}
+              onClick={isPreviewEnabled ? openUserPreview : goToEntitiesTab}
             >
               {userName}
             </EuiLink>

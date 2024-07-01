@@ -19,10 +19,15 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
-import { MarkdownEditorSerializedState, MarkdownEditorApi } from './types';
+import {
+  MarkdownEditorApi,
+  MarkdownEditorRuntimeState,
+  MarkdownEditorSerializedState,
+} from './types';
 
 export const markdownEmbeddableFactory: ReactEmbeddableFactory<
   MarkdownEditorSerializedState,
+  MarkdownEditorRuntimeState,
   MarkdownEditorApi
 > = {
   type: EUI_MARKDOWN_ID,

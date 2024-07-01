@@ -26,6 +26,7 @@ import {
   createMockIdpMetadata,
 } from '@kbn/mock-idp-utils';
 
+import { getServerlessImageTag, getCommitUrl } from './extract_image_info';
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
 import { EsClusterExecOptions } from '../cluster_exec_options';
@@ -393,13 +394,27 @@ export async function maybePullDockerImage(log: ToolingLog, image: string) {
     // inherit is required to show Docker pull output
     stdio: ['ignore', 'inherit', 'pipe'],
   }).catch(({ message }) => {
-    throw createCliError(
-      `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
+    const errorMessage = `Error pulling image. This is likely an issue authenticating with ${DOCKER_REGISTRY}.
 Visit ${chalk.bold.cyan('https://docker-auth.elastic.co/github_auth')} to login.
 
-${message}`
-    );
+${message}`;
+    throw createCliError(errorMessage);
   });
+}
+
+/**
+ * When we're working with :latest or :latest-verified, it is useful to expand what version they refer to
+ */
+export async function printESImageInfo(log: ToolingLog, image: string) {
+  let imageFullName = image;
+  if (image.includes('serverless')) {
+    const imageTag = (await getServerlessImageTag(image)) ?? image.split(':').pop() ?? '';
+    const imageBase = image.replace(/:.*/, '');
+    imageFullName = `${imageBase}:${imageTag}`;
+  }
+
+  const revisionUrl = await getCommitUrl(image);
+  log.info(`Using ES image: ${imageFullName} (${revisionUrl})`);
 }
 
 export async function detectRunningNodes(
@@ -445,6 +460,7 @@ async function setupDocker({
   await detectRunningNodes(log, options);
   await maybeCreateDockerNetwork(log);
   await maybePullDockerImage(log, image);
+  await printESImageInfo(log, image);
 }
 
 /**
@@ -751,14 +767,9 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
     SYSTEM_INDICES_SUPERUSER
   )} and password ${chalk.bold.magenta(ELASTIC_SERVERLESS_SUPERUSER_PASSWORD)}
+  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
   Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
-
-  if (options.ssl) {
-    log.warning(`SSL has been enabled for ES. Kibana should be started with the SSL flag so that it can authenticate with ES.
-  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
-    `);
-  }
 
   if (!options.skipTeardown) {
     // SIGINT will not trigger in FTR (see cluster.runServerless for FTR signal)

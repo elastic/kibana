@@ -5,8 +5,9 @@ info:
 paths:
   /api/detection_engine/rules/prepackaged/_status:
     get:
-      operationId: GetPrebuiltRulesAndTimelinesStatus
+      x-labels: [ess]
       x-codegen-enabled: true
+      operationId: GetPrebuiltRulesAndTimelinesStatus
       summary: Get the status of Elastic prebuilt rules
       tags:
         - Prebuilt Rules API

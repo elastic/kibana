@@ -663,6 +663,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.kernel.network_report_loopback',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.kernel.network_report_loopback',
+      {
+        defaultMessage:
+          'Controls whether the kernel reports loopback network events. Default: true.',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.kernel.fileopen',
     first_supported_version: '7.9',
     documentation: i18n.translate(
@@ -1275,6 +1286,72 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     ),
   },
   {
+    key: 'windows.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.process_ancestry_length',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.process_ancestry_length',
+      {
+        defaultMessage:
+          'Maximum number of process ancestry entries to include in process events. Default: 5',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.ancestry_in_all_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.ancestry_in_all_events',
+      {
+        defaultMessage:
+          'Include ancestor process entity IDs in all event types, by default it is only included in alerts and process events. Default: false',
+      }
+    ),
+  },
+  {
     key: 'windows.advanced.artifacts.global.proxy_url',
     first_supported_version: '8.8',
     documentation: i18n.translate(
@@ -1765,6 +1842,69 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Comma-separated list of additional wildcard patterns that will be monitored for read access.  Put only commas (no spaces) between entries. Wildcard matching is case-insensitive.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.deduplicate_network_events',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events',
+      {
+        defaultMessage: "A value of 'false' disables network events deduplication. Default: true",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.events.deduplicate_network_events_below_bytes',
+    first_supported_version: '8.15',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.deduplicate_network_events_below_bytes',
+      {
+        defaultMessage:
+          "Deduplication transfer threshold in bytes. Events exceeding the transfer will not be deduplicated. A value '0' means disabled. Default: 1048576 (1MB)",
       }
     ),
   },

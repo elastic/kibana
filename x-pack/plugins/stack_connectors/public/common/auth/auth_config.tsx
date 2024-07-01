@@ -39,14 +39,13 @@ import * as i18n from './translations';
 
 interface Props {
   readOnly: boolean;
-  hideSSL?: boolean;
 }
 
 const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-export const AuthConfig: FunctionComponent<Props> = ({ readOnly, hideSSL }) => {
+export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
@@ -77,37 +76,6 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, hideSSL }) => {
 
   useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
 
-  const hideSSLFields = hideSSL && authType !== AuthType.SSL;
-
-  const authOptions = [
-    {
-      value: null,
-      label: i18n.AUTHENTICATION_NONE,
-      'data-test-subj': 'authNone',
-    },
-    {
-      value: AuthType.Basic,
-      label: i18n.AUTHENTICATION_BASIC,
-      children: authType === AuthType.Basic && <BasicAuthFields readOnly={readOnly} />,
-      'data-test-subj': 'authBasic',
-    },
-  ];
-
-  if (!hideSSLFields) {
-    authOptions.push({
-      value: AuthType.SSL,
-      label: i18n.AUTHENTICATION_SSL,
-      children: authType === AuthType.SSL && (
-        <SSLCertFields
-          readOnly={readOnly}
-          certTypeDefaultValue={certTypeDefaultValue}
-          certType={certType}
-        />
-      ),
-      'data-test-subj': 'authSSL',
-    });
-  }
-
   return (
     <>
       <EuiFlexGroup>
@@ -124,7 +92,31 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, hideSSL }) => {
         defaultValue={authTypeDefaultValue}
         component={CardRadioGroupField}
         componentProps={{
-          options: authOptions,
+          options: [
+            {
+              value: null,
+              label: i18n.AUTHENTICATION_NONE,
+              'data-test-subj': 'authNone',
+            },
+            {
+              value: AuthType.Basic,
+              label: i18n.AUTHENTICATION_BASIC,
+              children: authType === AuthType.Basic && <BasicAuthFields readOnly={readOnly} />,
+              'data-test-subj': 'authBasic',
+            },
+            {
+              value: AuthType.SSL,
+              label: i18n.AUTHENTICATION_SSL,
+              children: authType === AuthType.SSL && (
+                <SSLCertFields
+                  readOnly={readOnly}
+                  certTypeDefaultValue={certTypeDefaultValue}
+                  certType={certType}
+                />
+              ),
+              'data-test-subj': 'authSSL',
+            },
+          ],
         }}
       />
       <EuiSpacer size="m" />
@@ -208,81 +200,77 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly, hideSSL }) => {
         </UseArray>
       )}
       <EuiSpacer size="m" />
-      {!hideSSLFields && (
+      <UseField
+        path="__internal__.hasCA"
+        component={ToggleField}
+        config={{ defaultValue: hasCADefaultValue, label: i18n.ADD_CA_LABEL }}
+        componentProps={{
+          euiFieldProps: {
+            disabled: readOnly,
+            'data-test-subj': 'webhookViewCASwitch',
+          },
+        }}
+      />
+      {hasCA && (
         <>
-          <UseField
-            path="__internal__.hasCA"
-            component={ToggleField}
-            config={{ defaultValue: hasCADefaultValue, label: i18n.ADD_CA_LABEL }}
-            componentProps={{
-              euiFieldProps: {
-                disabled: readOnly,
-                'data-test-subj': 'webhookViewCASwitch',
-              },
-            }}
-          />
-          {hasCA && (
+          <EuiSpacer size="s" />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <UseField
+                path="config.ca"
+                config={{
+                  label: 'CA file',
+                  validations: [
+                    {
+                      validator:
+                        config?.verificationMode !== 'none'
+                          ? emptyField(i18n.CA_REQUIRED)
+                          : () => {},
+                    },
+                  ],
+                }}
+                component={FilePickerField}
+                componentProps={{
+                  euiFieldProps: {
+                    display: 'default',
+                    'data-test-subj': 'webhookCAInput',
+                    accept: '.ca,.pem',
+                  },
+                }}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <UseField
+                path="config.verificationMode"
+                component={SelectField}
+                config={{
+                  label: i18n.VERIFICATION_MODE_LABEL,
+                  defaultValue: VERIFICATION_MODE_DEFAULT,
+                  validations: [
+                    {
+                      validator: emptyField(i18n.VERIFICATION_MODE_LABEL),
+                    },
+                  ],
+                }}
+                componentProps={{
+                  euiFieldProps: {
+                    'data-test-subj': 'webhookVerificationModeSelect',
+                    options: [
+                      { text: 'None', value: 'none' },
+                      { text: 'Certificate', value: 'certificate' },
+                      { text: 'Full', value: 'full' },
+                    ],
+                    fullWidth: true,
+                    readOnly,
+                  },
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {hasInitialCA && (
             <>
               <EuiSpacer size="s" />
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <UseField
-                    path="config.ca"
-                    config={{
-                      label: 'CA file',
-                      validations: [
-                        {
-                          validator:
-                            config?.verificationMode !== 'none'
-                              ? emptyField(i18n.CA_REQUIRED)
-                              : () => {},
-                        },
-                      ],
-                    }}
-                    component={FilePickerField}
-                    componentProps={{
-                      euiFieldProps: {
-                        display: 'default',
-                        'data-test-subj': 'webhookCAInput',
-                        accept: '.ca,.pem',
-                      },
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <UseField
-                    path="config.verificationMode"
-                    component={SelectField}
-                    config={{
-                      label: i18n.VERIFICATION_MODE_LABEL,
-                      defaultValue: VERIFICATION_MODE_DEFAULT,
-                      validations: [
-                        {
-                          validator: emptyField(i18n.VERIFICATION_MODE_LABEL),
-                        },
-                      ],
-                    }}
-                    componentProps={{
-                      euiFieldProps: {
-                        'data-test-subj': 'webhookVerificationModeSelect',
-                        options: [
-                          { text: 'None', value: 'none' },
-                          { text: 'Certificate', value: 'certificate' },
-                          { text: 'Full', value: 'full' },
-                        ],
-                        fullWidth: true,
-                        readOnly,
-                      },
-                    }}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              {hasInitialCA && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiCallOut size="s" iconType="document" title={i18n.EDIT_CA_CALLOUT} />
-                </>
-              )}
+              <EuiCallOut size="s" iconType="document" title={i18n.EDIT_CA_CALLOUT} />
             </>
           )}
         </>

@@ -1,0 +1,15 @@
+{
+  "connector.sync_job_claim": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_connector/_sync_job/{connector_sync_job_id}/_claim"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/claim-connector-sync-job-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

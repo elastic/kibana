@@ -11,7 +11,7 @@ import {
   PromptResponse,
   PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import { CreatePromptSchema, EsPromptsSchema, UpdatePromptSchema } from './types';
 
 export const transformESToPrompts = (response: EsPromptsSchema[]): PromptResponse[] => {
@@ -62,7 +62,8 @@ export const transformESSearchToPrompts = (
         isNewConversationDefault: promptSchema.is_new_conversation_default,
         updatedAt: promptSchema.updated_at,
         namespace: promptSchema.namespace,
-        id: hit._id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: hit._id!,
         name: promptSchema.name,
         promptType: promptSchema.prompt_type,
         isShared: promptSchema.is_shared,

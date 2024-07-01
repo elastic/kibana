@@ -6,15 +6,15 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
+import { uniqBy } from 'lodash';
 
 import type { AgentPolicy } from '../../../common/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../common/constants';
-
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
-
 import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
 import { getAgentStatusForAgentPolicy } from '../agents';
@@ -28,16 +28,20 @@ export const getFleetServerPolicies = async (
 ): Promise<AgentPolicy[]> => {
   const fleetServerPackagePolicies = await packagePolicyService.list(soClient, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
+    spaceId: '*',
   });
 
   // Extract associated fleet server agent policy IDs
-  const fleetServerAgentPolicyIds = [
-    ...new Set(fleetServerPackagePolicies.items.flatMap((p) => p.policy_ids)),
-  ];
+  const fleetServerAgentPolicyIds = fleetServerPackagePolicies.items.flatMap((p) =>
+    p.policy_ids?.map((id) => ({ id, spaceId: p.spaceId } ?? []))
+  );
 
   // Retrieve associated agent policies
   const fleetServerAgentPolicies = fleetServerAgentPolicyIds.length
-    ? await agentPolicyService.getByIDs(soClient, fleetServerAgentPolicyIds)
+    ? await agentPolicyService.getByIDs(
+        soClient,
+        uniqBy(fleetServerAgentPolicyIds, (p) => `${p?.spaceId ?? ''}:${p.id}`)
+      )
     : [];
 
   return fleetServerAgentPolicies;
@@ -51,15 +55,24 @@ export const getFleetServerPolicies = async (
 export const hasFleetServersForPolicies = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  agentPolicyIds: string[],
+  agentPolicies: Array<Pick<AgentPolicy, 'id' | 'space_id'>>,
   activeOnly: boolean = false
 ): Promise<boolean> => {
-  if (agentPolicyIds.length > 0) {
+  if (agentPolicies.length > 0) {
     const agentStatusesRes = await getAgentStatusForAgentPolicy(
       esClient,
       soClient,
       undefined,
-      agentPolicyIds.map((id) => `policy_id:${id}`).join(' or ')
+      agentPolicies
+        .map(({ id, space_id: spaceId }) => {
+          const space =
+            spaceId && spaceId !== DEFAULT_SPACE_ID
+              ? `namespaces:"${spaceId}"`
+              : `not namespaces:* or namespaces:"${DEFAULT_SPACE_ID}"`;
+
+          return `(policy_id:${id} and (${space}))`;
+        })
+        .join(' or ')
     );
 
     return activeOnly
@@ -79,7 +92,7 @@ export async function hasFleetServers(
   return await hasFleetServersForPolicies(
     esClient,
     soClient,
-    (await getFleetServerPolicies(soClient)).map((policy) => policy.id)
+    await getFleetServerPolicies(soClient)
   );
 }
 

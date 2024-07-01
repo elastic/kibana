@@ -22,7 +22,10 @@ export const INTERNAL_API_ACCESS = 'internal';
 export * from './common_attributes.gen';
 
 // Attack discovery Schemas
+export * from './attack_discovery/common_attributes.gen';
+export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
+export * from './attack_discovery/cancel_attack_discovery_route.gen';
 
 // Evaluation Schemas
 export * from './evaluation/post_evaluate_route.gen';
@@ -45,3 +48,4 @@ export * from './knowledge_base/crud_kb_route.gen';
 export * from './knowledge_base/bulk_crud_knowledge_base_route.gen';
 export * from './knowledge_base/common_attributes.gen';
 export * from './knowledge_base/crud_knowledge_base_route.gen';
+export * from './knowledge_base/find_knowledge_base_entries_route.gen';

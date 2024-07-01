@@ -30,10 +30,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await svlObltNavigation.navigateToLandingPage();
     });
 
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
-    });
-
     describe('when Hosts settings is on', () => {
       before(async () => {
         await setHostsSetting(true);

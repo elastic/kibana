@@ -14,7 +14,7 @@ import {
   DataSourceProfileProvider,
   DataSourceProfileProviderParams,
 } from '../../profiles';
-import { ProfileProviderServices } from '../../profiles/profile_provider_services';
+import { ProfileProviderServices } from '../profile_provider_services';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices

@@ -209,5 +209,6 @@
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser",
+    "@kbn/integration-assistant-plugin",
   ]
 }

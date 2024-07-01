@@ -29,6 +29,7 @@
     "optionalPlugins": [
       "indexManagement",
       "searchConnectors",
+      "searchHomepage",
       "searchInferenceEndpoints",
       "usageCollection"
     ],

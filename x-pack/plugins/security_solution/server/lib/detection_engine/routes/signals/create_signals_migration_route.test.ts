@@ -7,7 +7,6 @@
 
 import { requestMock, serverMock } from '../__mocks__';
 import type { SetupPlugins } from '../../../../plugin';
-import type { SignalsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration_route.mock';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
@@ -17,6 +16,7 @@ import { getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
+import type { AlertsReindexOptions } from '../../../../../common/api/detection_engine/signals_migration';
 
 jest.mock('../index/check_template_version');
 jest.mock('@kbn/securitysolution-es-utils', () => {
@@ -53,7 +53,7 @@ describe('creating signals migrations route', () => {
   });
 
   it('passes options to the createMigration', async () => {
-    const reindexOptions: SignalsReindexOptions = { requests_per_second: 4, size: 10, slices: 2 };
+    const reindexOptions: AlertsReindexOptions = { requests_per_second: 4, size: 10, slices: 2 };
     const request = requestMock.create({
       method: 'post',
       path: DETECTION_ENGINE_SIGNALS_MIGRATION_URL,

@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
 import type {
+  AuthenticatedUser,
   KibanaRequest,
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -24,8 +25,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 
@@ -726,7 +725,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
   public async list(
     soClient: SavedObjectsClientContract,
-    options: ListWithKuery
+    options: ListWithKuery & { spaceId?: string }
   ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
@@ -737,6 +736,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       page,
       perPage,
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
+      namespaces: options.spaceId ? [options.spaceId] : undefined,
     });
 
     for (const packagePolicy of packagePolicies?.saved_objects ?? []) {
@@ -752,6 +752,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         id: packagePolicySO.id,
         version: packagePolicySO.version,
         ...packagePolicySO.attributes,
+        spaceId: packagePolicySO.namespaces?.[0],
       })),
       total: packagePolicies?.total,
       page,

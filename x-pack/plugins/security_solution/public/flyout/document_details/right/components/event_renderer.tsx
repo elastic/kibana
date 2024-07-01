@@ -12,7 +12,7 @@ import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
 
 const ReasonPreviewContainerWrapper = styled.div`
@@ -26,7 +26,7 @@ const ReasonPreviewContainer = styled.div``;
  * Event renderer of an event document
  */
 export const EventRenderer: FC = () => {
-  const { dataAsNestedObject, scopeId } = useRightPanelContext();
+  const { dataAsNestedObject, scopeId } = useDocumentDetailsContext();
 
   const renderer = useMemo(
     () => getRowRenderer({ data: dataAsNestedObject, rowRenderers: defaultRowRenderers }),

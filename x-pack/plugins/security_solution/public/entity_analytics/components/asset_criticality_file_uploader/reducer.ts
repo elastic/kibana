@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetCriticalityCsvUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
+import type { AssetCriticalityBulkUploadResponse } from '../../../../common/entity_analytics/asset_criticality/types';
 import { FileUploaderSteps } from './types';
 import type { ValidatedFile } from './types';
 import { isFilePickerStep, isValidationStep } from './helpers';
@@ -26,7 +26,7 @@ export interface ValidationStepState {
 
 export interface ResultStepState {
   step: FileUploaderSteps.RESULT;
-  fileUploadResponse?: AssetCriticalityCsvUploadResponse;
+  fileUploadResponse?: AssetCriticalityBulkUploadResponse;
   fileUploadError?: string;
   validLinesAsText: string;
 }
@@ -46,7 +46,7 @@ export type ReducerAction =
   | { type: 'uploadingFile' }
   | {
       type: 'fileUploaded';
-      payload: { response?: AssetCriticalityCsvUploadResponse; errorMessage?: string };
+      payload: { response?: AssetCriticalityBulkUploadResponse; errorMessage?: string };
     };
 
 export const INITIAL_STATE: FilePickerState = {

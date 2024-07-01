@@ -108,24 +108,21 @@ export class SloPlugin
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           async () => {
-            const deps = { ...coreStart, ...pluginsStart };
             const { getOverviewEmbeddableFactory } = await import(
               './embeddable/slo/overview/slo_embeddable_factory'
             );
-            return getOverviewEmbeddableFactory(deps);
+            return getOverviewEmbeddableFactory(coreSetup.getStartServices);
           }
         );
 
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_ALERTS_EMBEDDABLE_ID,
           async () => {
-            const deps = { ...coreStart, ...pluginsStart };
-
             const { getAlertsEmbeddableFactory } = await import(
               './embeddable/slo/alerts/slo_alerts_embeddable_factory'
             );
 
-            return getAlertsEmbeddableFactory(deps, kibanaVersion);
+            return getAlertsEmbeddableFactory(coreSetup.getStartServices, kibanaVersion);
           }
         );
 
@@ -141,7 +138,8 @@ export class SloPlugin
         const registerAsyncSloUiActions = async () => {
           if (pluginsSetup.uiActions) {
             const { registerSloUiActions } = await import('./ui_actions');
-            registerSloUiActions(pluginsSetup.uiActions, coreSetup);
+
+            registerSloUiActions(coreSetup, pluginsSetup, pluginsStart);
           }
         };
         registerAsyncSloUiActions();

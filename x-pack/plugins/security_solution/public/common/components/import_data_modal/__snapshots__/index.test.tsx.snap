@@ -60,36 +60,32 @@ Object {
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+                class="euiFilePicker emotion-euiFilePicker-fullWidth"
               >
+                <input
+                  accept=".ndjson"
+                  aria-describedby="rule-file-picker-filePicker__prompt"
+                  aria-labelledby="generated-id"
+                  class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+                  data-test-subj="rule-file-picker"
+                  id="rule-file-picker"
+                  type="file"
+                />
                 <div
-                  class="euiFilePicker__wrap"
+                  class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+                  id="rule-file-picker-filePicker__prompt"
                 >
-                  <input
-                    accept=".ndjson"
-                    aria-describedby="rule-file-picker-filePicker__prompt"
-                    aria-labelledby="generated-id"
-                    class="euiFilePicker__input"
-                    data-test-subj="rule-file-picker"
-                    id="rule-file-picker"
-                    type="file"
+                  <span
+                    aria-hidden="true"
+                    class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                    color="primary"
+                    data-euiicon-type="importAction"
                   />
-                  <div
-                    class="euiFilePicker__prompt"
-                    id="rule-file-picker-filePicker__prompt"
+                  <span
+                    class="euiFilePicker__promptText"
                   >
-                    <span
-                      aria-hidden="true"
-                      class="euiFilePicker__icon"
-                      color="primary"
-                      data-euiicon-type="importAction"
-                    />
-                    <div
-                      class="euiFilePicker__promptText"
-                    >
-                      subtitle
-                    </div>
-                  </div>
+                    subtitle
+                  </span>
                 </div>
               </div>
               <div
@@ -272,51 +268,47 @@ Object {
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth euiFilePicker-hasFiles"
+                class="euiFilePicker euiFilePicker-hasFiles emotion-euiFilePicker-fullWidth-hasFiles"
               >
+                <input
+                  accept=".ndjson"
+                  aria-describedby="rule-file-picker-filePicker__prompt"
+                  aria-labelledby="generated-id"
+                  class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+                  data-test-subj="rule-file-picker"
+                  id="rule-file-picker"
+                  type="file"
+                />
                 <div
-                  class="euiFilePicker__wrap"
+                  class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+                  id="rule-file-picker-filePicker__prompt"
                 >
-                  <input
-                    accept=".ndjson"
-                    aria-describedby="rule-file-picker-filePicker__prompt"
-                    aria-labelledby="generated-id"
-                    class="euiFilePicker__input"
-                    data-test-subj="rule-file-picker"
-                    id="rule-file-picker"
-                    type="file"
+                  <span
+                    aria-hidden="true"
+                    class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                    color="primary"
+                    data-euiicon-type="importAction"
                   />
-                  <div
-                    class="euiFilePicker__prompt"
-                    id="rule-file-picker-filePicker__prompt"
+                  <span
+                    class="euiFilePicker__promptText"
+                  >
+                    subtitle
+                  </span>
+                  <button
+                    aria-label="Clear selected files"
+                    class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
+                    type="button"
                   >
                     <span
-                      aria-hidden="true"
-                      class="euiFilePicker__icon"
-                      color="primary"
-                      data-euiicon-type="importAction"
-                    />
-                    <div
-                      class="euiFilePicker__promptText"
-                    >
-                      subtitle
-                    </div>
-                    <button
-                      aria-label="Clear selected files"
-                      class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
-                      type="button"
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                        class="eui-textTruncate euiButtonEmpty__text"
                       >
-                        <span
-                          class="eui-textTruncate euiButtonEmpty__text"
-                        >
-                          Remove
-                        </span>
+                        Remove
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
                 </div>
               </div>
               <div
@@ -563,51 +555,47 @@ Object {
                 class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
               />
               <div
-                class="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth euiFilePicker-hasFiles"
+                class="euiFilePicker euiFilePicker-hasFiles emotion-euiFilePicker-fullWidth-hasFiles"
               >
+                <input
+                  accept=".ndjson"
+                  aria-describedby="rule-file-picker-filePicker__prompt"
+                  aria-labelledby="generated-id"
+                  class="euiFilePicker__input emotion-euiFilePicker__input-largeInteractive"
+                  data-test-subj="rule-file-picker"
+                  id="rule-file-picker"
+                  type="file"
+                />
                 <div
-                  class="euiFilePicker__wrap"
+                  class="euiFilePicker__prompt emotion-euiFilePicker__prompt-large"
+                  id="rule-file-picker-filePicker__prompt"
                 >
-                  <input
-                    accept=".ndjson"
-                    aria-describedby="rule-file-picker-filePicker__prompt"
-                    aria-labelledby="generated-id"
-                    class="euiFilePicker__input"
-                    data-test-subj="rule-file-picker"
-                    id="rule-file-picker"
-                    type="file"
+                  <span
+                    aria-hidden="true"
+                    class="euiFilePicker__icon emotion-euiFilePicker__icon-large"
+                    color="primary"
+                    data-euiicon-type="importAction"
                   />
-                  <div
-                    class="euiFilePicker__prompt"
-                    id="rule-file-picker-filePicker__prompt"
+                  <span
+                    class="euiFilePicker__promptText"
+                  >
+                    subtitle
+                  </span>
+                  <button
+                    aria-label="Clear selected files"
+                    class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-euiFilePicker__clearButton"
+                    type="button"
                   >
                     <span
-                      aria-hidden="true"
-                      class="euiFilePicker__icon"
-                      color="primary"
-                      data-euiicon-type="importAction"
-                    />
-                    <div
-                      class="euiFilePicker__promptText"
-                    >
-                      subtitle
-                    </div>
-                    <button
-                      aria-label="Clear selected files"
-                      class="euiButtonEmpty euiFilePicker__clearButton emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary"
-                      type="button"
+                      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
                     >
                       <span
-                        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                        class="eui-textTruncate euiButtonEmpty__text"
                       >
-                        <span
-                          class="eui-textTruncate euiButtonEmpty__text"
-                        >
-                          Remove
-                        </span>
+                        Remove
                       </span>
-                    </button>
-                  </div>
+                    </span>
+                  </button>
                 </div>
               </div>
               <div

@@ -50,7 +50,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         await kibanaServer.savedObjects.cleanStandardList();
-        await svlCommonPage.forceLogout();
       });
 
       it('adds lens visualization to a new case', async () => {

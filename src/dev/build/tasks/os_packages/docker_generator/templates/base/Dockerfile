@@ -17,9 +17,9 @@ RUN microdnf install -y findutils tar gzip
 {{#ubuntu}}
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
 {{/ubuntu}}
-{{#chainguard}}
+{{#wolfi}}
 RUN apk --no-cache add curl
-{{/chainguard}}
+{{/wolfi}}
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
@@ -109,9 +109,9 @@ RUN for iter in {1..10}; do \
     done; \
     (exit $exit_code)
 {{/ubuntu}}
-{{#chainguard}}
+{{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig libstdc++ freetype nss findutils shadow
-{{/chainguard}}
+{{/wolfi}}
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana

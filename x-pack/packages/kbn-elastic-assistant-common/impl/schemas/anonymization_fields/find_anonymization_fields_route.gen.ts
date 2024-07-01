@@ -17,6 +17,7 @@
 import { z } from 'zod';
 import { ArrayFromString } from '@kbn/zod-helpers';
 
+import { SortOrder } from '../common_attributes.gen';
 import { AnonymizationFieldResponse } from './bulk_crud_anonymization_fields_route.gen';
 
 export type FindAnonymizationFieldsSortField = z.infer<typeof FindAnonymizationFieldsSortField>;
@@ -29,11 +30,6 @@ export const FindAnonymizationFieldsSortField = z.enum([
 ]);
 export type FindAnonymizationFieldsSortFieldEnum = typeof FindAnonymizationFieldsSortField.enum;
 export const FindAnonymizationFieldsSortFieldEnum = FindAnonymizationFieldsSortField.enum;
-
-export type SortOrder = z.infer<typeof SortOrder>;
-export const SortOrder = z.enum(['asc', 'desc']);
-export type SortOrderEnum = typeof SortOrder.enum;
-export const SortOrderEnum = SortOrder.enum;
 
 export type FindAnonymizationFieldsRequestQuery = z.infer<
   typeof FindAnonymizationFieldsRequestQuery

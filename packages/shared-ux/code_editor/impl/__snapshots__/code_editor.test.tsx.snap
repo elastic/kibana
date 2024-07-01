@@ -169,6 +169,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           </p>
         </React.Fragment>
       }
+      data-test-subj="codeEditorAccessibilityOverlay"
       delay="regular"
       display="block"
       position="top"

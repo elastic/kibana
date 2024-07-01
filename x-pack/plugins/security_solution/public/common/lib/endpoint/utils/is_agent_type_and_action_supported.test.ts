@@ -30,6 +30,9 @@ describe('isAgentTypeAndActionSupported() util', () => {
   const disableS1GetFileFeature = () => {
     enableFeatures({ responseActionsSentinelOneGetFileEnabled: false });
   };
+  const disableCSIsolateFeature = () => {
+    enableFeatures({ responseActionsCrowdstrikeManualHostIsolationEnabled: false });
+  };
 
   const resetFeatures = (): void => {
     (ExperimentalFeaturesService.get as jest.Mock).mockReturnValue({
@@ -56,7 +59,7 @@ describe('isAgentTypeAndActionSupported() util', () => {
     ${'sentinel_one'} | ${'get-file'} | ${undefined}   | ${false}      | ${disableS1GetFileFeature}
     ${'crowdstrike'}  | ${undefined}  | ${undefined}   | ${true}       | ${undefined}
     ${'crowdstrike'}  | ${'isolate'}  | ${'manual'}    | ${true}       | ${undefined}
-    ${'crowdstrike'}  | ${'isolate'}  | ${undefined}   | ${false}      | ${resetFeatures}
+    ${'crowdstrike'}  | ${'isolate'}  | ${undefined}   | ${false}      | ${disableCSIsolateFeature}
   `(
     'should return `$expectedValue` for $agentType $actionName ($actionType)',
     ({

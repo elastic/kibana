@@ -21,11 +21,7 @@ import type {
   PngScreenshotOptions as BasePngScreenshotOptions,
   ScreenshottingStart,
 } from '@kbn/screenshotting-plugin/server';
-import type {
-  AuthenticatedUser,
-  SecurityPluginSetup,
-  SecurityPluginStart,
-} from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -34,6 +30,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 /**
  * Plugin Setup Contract
@@ -70,7 +67,6 @@ export interface ReportingStartDeps {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
-  security?: SecurityPluginStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{

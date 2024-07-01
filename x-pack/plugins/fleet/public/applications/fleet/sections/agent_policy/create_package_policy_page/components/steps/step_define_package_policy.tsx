@@ -24,12 +24,7 @@ import {
 
 import styled from 'styled-components';
 
-import type {
-  AgentPolicy,
-  PackageInfo,
-  NewPackagePolicy,
-  RegistryVarsEntry,
-} from '../../../../../types';
+import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
 import { useStartServices } from '../../../../../hooks';
 
@@ -48,7 +43,7 @@ const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
 `;
 
 export const StepDefinePackagePolicy: React.FunctionComponent<{
-  agentPolicies?: AgentPolicy[];
+  namespacePlaceholder?: string;
   packageInfo: PackageInfo;
   packagePolicy: NewPackagePolicy;
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
@@ -58,7 +53,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
 }> = memo(
   ({
-    agentPolicies,
+    namespacePlaceholder,
     packageInfo,
     packagePolicy,
     updatePackagePolicy,
@@ -290,7 +285,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       <EuiComboBox
                         data-test-subj="packagePolicyNamespaceInput"
                         noSuggestions
-                        placeholder={agentPolicies?.[0]?.namespace}
+                        placeholder={namespacePlaceholder}
                         isDisabled={isEditPage && packageInfo.type === 'input'}
                         singleSelection={true}
                         selectedOptions={

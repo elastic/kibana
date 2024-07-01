@@ -38,9 +38,8 @@ export function registerElasticsearchFunction({
       },
     },
     async ({ arguments: { method, path, body } }) => {
-      const response = await (
-        await resources.context.core
-      ).elasticsearch.client.asCurrentUser.transport.request({
+      const esClient = (await resources.context.core).elasticsearch.client;
+      const response = await esClient.asCurrentUser.transport.request({
         method,
         path,
         body,

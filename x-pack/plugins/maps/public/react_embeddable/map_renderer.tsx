@@ -11,7 +11,7 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useSearchApi } from '@kbn/presentation-publishing';
 import type { LayerDescriptor, MapCenterAndZoom, MapSettings } from '../../common/descriptor_types';
 import { createBasemapLayerDescriptor } from '../classes/layers/create_basemap_layer_descriptor';
-import { MapApi, MapSerializedState } from './types';
+import { MapApi, MapRuntimeState, MapSerializedState } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 
@@ -58,7 +58,7 @@ export function MapRenderer(props: Props) {
 
   return (
     <div className="mapEmbeddableContainer">
-      <ReactEmbeddableRenderer<MapSerializedState, MapApi>
+      <ReactEmbeddableRenderer<MapSerializedState, MapRuntimeState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
         getParentApi={() => ({
           ...searchApi,

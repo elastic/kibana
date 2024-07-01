@@ -253,7 +253,6 @@ const updateIndexTemplate = async (
         },
         _meta,
         composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
-        // @ts-expect-error es client do not contains this yet
         ignore_missing_component_templates: composedOf.filter((templateName) =>
           templateName.endsWith('@custom')
         ),

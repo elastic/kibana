@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
+import { IKibanaResponse, KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
 import { Message, TraceData } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
+import { AwaitedProperties } from '@kbn/utility-types';
+import { AssistantFeatureKey } from '@kbn/elastic-assistant-common/impl/capabilities';
 import { MINIMUM_AI_ASSISTANT_LICENSE } from '../../common/constants';
+import { ElasticAssistantRequestHandlerContext } from '../types';
+import { buildResponse } from './utils';
 
 interface GetPluginNameFromRequestParams {
   request: KibanaRequest;
@@ -87,3 +91,69 @@ export const hasAIAssistantLicense = (license: ILicense): boolean =>
 
 export const UPGRADE_LICENSE_MESSAGE =
   'Your license does not support AI Assistant. Please upgrade your license.';
+
+interface PerformChecksParams {
+  authenticatedUser?: boolean;
+  capability?: AssistantFeatureKey;
+  context: AwaitedProperties<
+    Pick<ElasticAssistantRequestHandlerContext, 'elasticAssistant' | 'licensing' | 'core'>
+  >;
+  license?: boolean;
+  request: KibanaRequest;
+  response: KibanaResponseFactory;
+}
+
+/**
+ * Helper to perform checks for authenticated user, capability, and license. Perform all or one
+ * of the checks by providing relevant optional params. Check order is license, authenticated user,
+ * then capability.
+ *
+ * @param authenticatedUser - Whether to check for an authenticated user
+ * @param capability - Specific capability to check if enabled, e.g. `assistantModelEvaluation`
+ * @param context - Route context
+ * @param license - Whether to check for a valid license
+ * @param request - Route KibanaRequest
+ * @param response - Route KibanaResponseFactory
+ */
+export const performChecks = ({
+  authenticatedUser,
+  capability,
+  context,
+  license,
+  request,
+  response,
+}: PerformChecksParams): IKibanaResponse | undefined => {
+  const assistantResponse = buildResponse(response);
+
+  if (license) {
+    if (!hasAIAssistantLicense(context.licensing.license)) {
+      return response.forbidden({
+        body: {
+          message: UPGRADE_LICENSE_MESSAGE,
+        },
+      });
+    }
+  }
+
+  if (authenticatedUser) {
+    if (context.elasticAssistant.getCurrentUser() == null) {
+      return assistantResponse.error({
+        body: `Authenticated user not found`,
+        statusCode: 401,
+      });
+    }
+  }
+
+  if (capability) {
+    const pluginName = getPluginNameFromRequest({
+      request,
+      defaultPluginName: DEFAULT_PLUGIN_NAME,
+    });
+    const registeredFeatures = context.elasticAssistant.getRegisteredFeatures(pluginName);
+    if (!registeredFeatures[capability]) {
+      return response.notFound();
+    }
+  }
+
+  return undefined;
+};

@@ -35,7 +35,8 @@ export default function (providerContext: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationKspmPage();
     });
 
-    describe('KSPM EKS Assume Role', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186306
+    describe.skip('KSPM EKS Assume Role', async () => {
       it('KSPM EKS Assume Role workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(CIS_EKS_OPTION_TEST_ID);
@@ -50,7 +51,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Direct Access', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186315
+    describe.skip('KSPM EKS Direct Access', async () => {
       it('KSPM EKS Direct Access Workflow', async () => {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
@@ -74,7 +76,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Temporary Keys', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186389
+    describe.skip('KSPM EKS Temporary Keys', () => {
       it('KSPM EKS Temporary Keys Workflow', async () => {
         const accessKeyId = 'accessKeyIdTest';
         const accessKeySecretKey = 'accessKeySecretKeyTest';
@@ -107,7 +110,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('KSPM EKS Shared Credentials', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186387
+    describe.skip('KSPM EKS Shared Credentials', () => {
       it('KSPM EKS Shared Credentials Workflow', async () => {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';

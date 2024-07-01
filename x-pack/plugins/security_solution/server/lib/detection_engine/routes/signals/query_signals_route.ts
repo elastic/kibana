@@ -8,13 +8,12 @@
 import type { MappingRuntimeFields, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-
-import type { QuerySignalsSchemaDecoded } from '../../../../../common/api/detection_engine/signals';
-import { querySignalsSchema } from '../../../../../common/api/detection_engine/signals';
 
 export const querySignalsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -33,9 +32,7 @@ export const querySignalsRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            body: buildRouteValidation<typeof querySignalsSchema, QuerySignalsSchemaDecoded>(
-              querySignalsSchema
-            ),
+            body: buildRouteValidationWithZod(SearchAlertsRequestBody),
           },
         },
       },
@@ -67,8 +64,7 @@ export const querySignalsRoute = (
             index: indexPattern,
             body: {
               query,
-              // Note: I use a spread operator to please TypeScript with aggs: { ...aggs }
-              aggs: { ...aggs },
+              aggs: aggs as Record<string, AggregationsAggregationContainer>,
               _source,
               fields,
               track_total_hits,

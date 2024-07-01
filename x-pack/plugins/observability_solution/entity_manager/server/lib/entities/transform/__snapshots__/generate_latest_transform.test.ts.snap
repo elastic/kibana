@@ -1,0 +1,159 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generateLatestTransform(definition) should generate a valid latest transform 1`] = `
+Object {
+  "defer_validation": true,
+  "dest": Object {
+    "index": ".entities-observability.latest-v1.admin-console-services",
+    "pipeline": ".entities-observability.latest-v1.admin-console-services",
+  },
+  "frequency": "30s",
+  "pivot": Object {
+    "aggs": Object {
+      "_errorRate": Object {
+        "top_metrics": Object {
+          "metrics": Array [
+            Object {
+              "field": "entity.metrics.errorRate",
+            },
+          ],
+          "sort": Array [
+            Object {
+              "@timestamp": "desc",
+            },
+          ],
+        },
+      },
+      "_logRate": Object {
+        "top_metrics": Object {
+          "metrics": Array [
+            Object {
+              "field": "entity.metrics.logRate",
+            },
+          ],
+          "sort": Array [
+            Object {
+              "@timestamp": "desc",
+            },
+          ],
+        },
+      },
+      "entity.firstSeenTimestamp": Object {
+        "min": Object {
+          "field": "@timestamp",
+        },
+      },
+      "entity.lastSeenTimestamp": Object {
+        "max": Object {
+          "field": "entity.lastSeenTimestamp",
+        },
+      },
+      "entity.metadata.host.name": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "host.name",
+              "size": 1000,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "event.ingested": Object {
+              "gte": "now-1m",
+            },
+          },
+        },
+      },
+      "entity.metadata.host.os.name": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "host.os.name",
+              "size": 1000,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "event.ingested": Object {
+              "gte": "now-1m",
+            },
+          },
+        },
+      },
+      "entity.metadata.tags": Object {
+        "aggs": Object {
+          "data": Object {
+            "terms": Object {
+              "field": "tags",
+              "size": 1000,
+            },
+          },
+        },
+        "filter": Object {
+          "range": Object {
+            "event.ingested": Object {
+              "gte": "now-1m",
+            },
+          },
+        },
+      },
+      "entity.metrics.errorRate": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "value": "_errorRate[entity.metrics.errorRate]",
+          },
+          "script": "params.value",
+        },
+      },
+      "entity.metrics.logRate": Object {
+        "bucket_script": Object {
+          "buckets_path": Object {
+            "value": "_logRate[entity.metrics.logRate]",
+          },
+          "script": "params.value",
+        },
+      },
+    },
+    "group_by": Object {
+      "entity.displayName": Object {
+        "terms": Object {
+          "field": "entity.displayName.keyword",
+        },
+      },
+      "entity.id": Object {
+        "terms": Object {
+          "field": "entity.id",
+        },
+      },
+      "entity.identityFields.event.category": Object {
+        "terms": Object {
+          "field": "entity.identityFields.event.category",
+          "missing_bucket": true,
+        },
+      },
+      "entity.identityFields.log.logger": Object {
+        "terms": Object {
+          "field": "entity.identityFields.log.logger",
+          "missing_bucket": false,
+        },
+      },
+    },
+  },
+  "settings": Object {
+    "deduce_mappings": false,
+    "unattended": true,
+  },
+  "source": Object {
+    "index": ".entities-observability.history-v1.admin-console-services.*",
+  },
+  "sync": Object {
+    "time": Object {
+      "delay": "1s",
+      "field": "event.ingested",
+    },
+  },
+  "transform_id": "entity-latest-v1-admin-console-services",
+}
+`;

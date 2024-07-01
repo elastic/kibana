@@ -69,10 +69,6 @@ interface PreviewSectionProps {
    */
   leftPosition: number;
   /**
-   * Display the back button in the header
-   */
-  showBackButton: boolean;
-  /**
    * Preview banner shown at the top of preview panel
    */
   banner?: PreviewBanner;
@@ -84,7 +80,6 @@ interface PreviewSectionProps {
  */
 export const PreviewSection: React.FC<PreviewSectionProps> = ({
   component,
-  showBackButton,
   leftPosition,
   banner,
 }: PreviewSectionProps) => {
@@ -103,7 +98,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       />
     </EuiFlexItem>
   );
-  const header = showBackButton ? (
+  const header = (
     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
@@ -117,10 +112,6 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           {BACK_BUTTON}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      {closeButton}
-    </EuiFlexGroup>
-  ) : (
-    <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
       {closeButton}
     </EuiFlexGroup>
   );
@@ -141,8 +132,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           margin: ${euiTheme.size.xs};
           box-shadow: 0 0 4px 4px ${euiTheme.colors.darkShade};
         `}
-        className="eui-yScroll"
         data-test-subj={PREVIEW_SECTION_TEST_ID}
+        className="eui-fullHeight"
       >
         {isPreviewBanner(banner) && (
           <EuiSplitPanel.Inner
@@ -168,7 +159,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
         >
           {header}
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner paddingSize="none">{component}</EuiSplitPanel.Inner>
+        {component}
       </EuiSplitPanel.Outer>
     </div>
   );

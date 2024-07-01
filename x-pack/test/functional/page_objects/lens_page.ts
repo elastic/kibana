@@ -120,10 +120,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
-    async selectOptionFromComboBox(testTargetId: string, name: string) {
+    async selectOptionFromComboBox(testTargetId: string, name: string | string[]) {
       const target = await testSubjects.find(testTargetId, 1000);
       await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, name);
+      const names = Array.isArray(name) ? name : [name];
+      for (const option of names) {
+        await comboBox.setElement(target, option);
+      }
     },
 
     async configureQueryAnnotation(opts: {
@@ -1354,17 +1357,20 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getMetricDatum(tile: WebElementWrapper) {
+      // using getAttribute('innerText') because getVisibleText() fails when the text overflows the metric panel.
+      // The reported "visible" text is somewhat inaccurate and just report the full innerText of just the visible DOM elements.
+      // In the case of Metric, suffixes that are on a sub-element are not considered visible.
       return {
-        title: await (await this.getMetricElementIfExists('h2', tile))?.getVisibleText(),
+        title: await (await this.getMetricElementIfExists('h2', tile))?.getAttribute('innerText'),
         subtitle: await (
           await this.getMetricElementIfExists('.echMetricText__subtitle', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         extraText: await (
           await this.getMetricElementIfExists('.echMetricText__extra', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         value: await (
           await this.getMetricElementIfExists('.echMetricText__value', tile)
-        )?.getVisibleText(),
+        )?.getAttribute('innerText'),
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),

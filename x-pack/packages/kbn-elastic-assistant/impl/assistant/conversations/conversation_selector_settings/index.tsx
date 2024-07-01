@@ -8,7 +8,6 @@
 import {
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -21,6 +20,7 @@ import { css } from '@emotion/react';
 import { Conversation } from '../../../..';
 import * as i18n from '../conversation_selector/translations';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
+import { ConversationSelectorSettingsOption } from './types';
 
 interface Props {
   conversations: Record<string, Conversation>;
@@ -48,10 +48,6 @@ const getNextConversationTitle = (
     ? conversationTitles[0]
     : conversationTitles[conversationTitles.indexOf(selectedConversationTitle) + 1];
 };
-
-export type ConversationSelectorSettingsOption = EuiComboBoxOptionOption<{
-  isDefault: boolean;
-}>;
 
 /**
  * A disconnected variant of the ConversationSelector component that allows for
