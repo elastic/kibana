@@ -59,7 +59,7 @@ export const registerSyntheticsTLSCheckRule = (
 ) => {
   if (!plugins.alerting) {
     throw new Error(
-      'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
+      'Cannot register the synthetics TLS check rule type. The alerting plugin needs to be enabled.'
     );
   }
 
