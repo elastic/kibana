@@ -150,8 +150,11 @@ export const getUpdateScript = ({
     if (params.assignEmpty == true || params.containsKey('is_new_conversation_default')) {
       ctx._source.is_new_conversation_default = params.is_new_conversation_default;
     }
-    if (params.assignEmpty == true || params.containsKey('is_shared')) {
-      ctx._source.is_shared = params.is_shared;
+    if (params.assignEmpty == true || params.containsKey('color')) {
+      ctx._source.color = params.color;
+    }
+    if (params.assignEmpty == true || params.containsKey('categories')) {
+      ctx._source.categories = params.categories;
     }
     ctx._source.updated_at = params.updated_at;
   `,

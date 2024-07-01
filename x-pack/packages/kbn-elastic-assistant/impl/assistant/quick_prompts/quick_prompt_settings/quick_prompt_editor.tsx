@@ -62,7 +62,7 @@ const QuickPromptSettingsEditorComponent = ({
               if (qp.id === selectedQuickPrompt.id) {
                 return {
                   ...qp,
-                  prompt: e.target.value,
+                  content: e.target.value,
                 };
               }
               return qp;
@@ -137,9 +137,44 @@ const QuickPromptSettingsEditorComponent = ({
           }
           return prev;
         });
+        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
+        if (existingPrompt) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+              ? {
+                  update: [
+                    ...(promptsBulkActions.update ?? []).filter(
+                      (p) => p.id !== selectedQuickPrompt.id
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      color,
+                    },
+                  ],
+                }
+              : {
+                  create: [
+                    ...(promptsBulkActions.create ?? []).filter(
+                      (p) => p.name !== selectedQuickPrompt.name
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      color,
+                    },
+                  ],
+                }),
+          });
+        }
       }
     },
-    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+    [
+      promptsBulkActions,
+      quickPromptSettings,
+      selectedQuickPrompt,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
   // Prompt Contexts
@@ -170,9 +205,45 @@ const QuickPromptSettingsEditorComponent = ({
           }
           return prev;
         });
+
+        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
+        if (existingPrompt) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+              ? {
+                  update: [
+                    ...(promptsBulkActions.update ?? []).filter(
+                      (p) => p.id !== selectedQuickPrompt.id
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      categories: pc.map((p) => p.category),
+                    },
+                  ],
+                }
+              : {
+                  create: [
+                    ...(promptsBulkActions.create ?? []).filter(
+                      (p) => p.name !== selectedQuickPrompt.name
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      categories: pc.map((p) => p.category),
+                    },
+                  ],
+                }),
+          });
+        }
       }
     },
-    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+    [
+      promptsBulkActions,
+      quickPromptSettings,
+      selectedQuickPrompt,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
   // When top level quick prompt selection changes

@@ -112,7 +112,9 @@ export const useSettingsUpdater = (
     );
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
-    setUpdatedSystemPromptSettings(allSystemPrompts.data);
+    setUpdatedSystemPromptSettings(
+      allSystemPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+    );
     setUpdatedAnonymizationData(anonymizationFields);
   }, [
     allSystemPrompts,
