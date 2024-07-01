@@ -7,8 +7,9 @@
  */
 
 require('../../../src/setup_node_env');
-const { resolve } = require('path');
+const { join, resolve } = require('path');
 const { generate } = require('@kbn/openapi-generator');
+const { REPO_ROOT } = require('@kbn/repo-info');
 
 const ROOT = resolve(__dirname, '..');
 
@@ -18,5 +19,19 @@ const ROOT = resolve(__dirname, '..');
     rootDir: ROOT,
     sourceGlob: './**/*.schema.yaml',
     templateName: 'zod_operation_schema',
+  });
+
+  await generate({
+    title: 'Lists API client for tests',
+    rootDir: ROOT,
+    sourceGlob: './**/*.schema.yaml',
+    templateName: 'api_client_supertest',
+    skipLinting: true,
+    bundle: {
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/test/api_integration/services/security_solution_lists_api.gen.ts'
+      ),
+    },
   });
 })();
