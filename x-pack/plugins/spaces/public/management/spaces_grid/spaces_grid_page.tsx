@@ -35,6 +35,7 @@ import { isReservedSpace } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import { SpaceSolutionBadge } from '../../space_solution_badge';
 import type { SpacesManager } from '../../spaces_manager';
 import { ConfirmDeleteModal, UnauthorizedPrompt } from '../components';
 import { getEnabledFeatures } from '../lib/feature_utils';
@@ -53,6 +54,7 @@ interface Props {
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
   maxSpaces: number;
+  solutionNavExperiment?: Promise<boolean>;
 }
 
 interface State {
@@ -62,6 +64,7 @@ interface State {
   loading: boolean;
   showConfirmDeleteModal: boolean;
   selectedSpace: Space | null;
+  isSolutionNavEnabled: boolean;
 }
 
 export class SpacesGridPage extends Component<Props, State> {
@@ -74,6 +77,7 @@ export class SpacesGridPage extends Component<Props, State> {
       loading: true,
       showConfirmDeleteModal: false,
       selectedSpace: null,
+      isSolutionNavEnabled: false,
     };
   }
 
@@ -81,6 +85,10 @@ export class SpacesGridPage extends Component<Props, State> {
     if (this.props.capabilities.spaces.manage) {
       this.loadGrid();
     }
+
+    this.props.solutionNavExperiment?.then((isEnabled) => {
+      this.setState({ isSolutionNavEnabled: isEnabled });
+    });
   }
 
   public render() {
@@ -245,12 +253,8 @@ export class SpacesGridPage extends Component<Props, State> {
     }
   };
 
-  public getColumnConfig({
-    serverBasePath,
-  }: {
-    serverBasePath: string;
-  }): Array<EuiBasicTableColumn<Space>> {
-    return [
+  public getColumnConfig({ serverBasePath }: { serverBasePath: string }) {
+    const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
         name: '',
@@ -344,73 +348,86 @@ export class SpacesGridPage extends Component<Props, State> {
           return id;
         },
       },
-      {
-        name: i18n.translate('xpack.spaces.management.spacesGridPage.actionsColumnName', {
-          defaultMessage: 'Actions',
-        }),
-        actions: [
-          {
-            isPrimary: true,
-            name: i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionName', {
-              defaultMessage: `Edit`,
-            }),
-            description: (rowRecord) =>
-              i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionDescription', {
-                defaultMessage: `Edit {spaceName}.`,
-                values: { spaceName: rowRecord.name },
-              }),
-            type: 'icon',
-            icon: 'pencil',
-            color: 'primary',
-            href: (rowRecord) =>
-              reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).href,
-            onClick: (rowRecord) =>
-              reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).onClick,
-            'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
-          },
-          {
-            name: i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionName', {
-              defaultMessage: 'Switch',
-            }),
-            description: (rowRecord) =>
-              i18n.translate(
-                'xpack.spaces.management.spacesGridPage.switchSpaceActionDescription',
-                {
-                  defaultMessage: 'Switch to {spaceName} space',
-                  values: { spaceName: rowRecord.name },
-                }
-              ),
-            type: 'icon',
-            icon: 'merge',
-            color: 'primary',
-            href: (rowRecord) =>
-              addSpaceIdToPath(
-                serverBasePath,
-                rowRecord.id,
-                `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
-              ),
-            available: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
-            'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
-          },
-          {
-            name: i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
-              defaultMessage: `Delete`,
-            }),
-            description: (rowRecord) =>
-              i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionDescription', {
-                defaultMessage: `Delete {spaceName}.`,
-                values: { spaceName: rowRecord.name },
-              }),
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
-            onClick: (rowRecord) => this.onDeleteSpaceClick(rowRecord),
-            available: (rowRecord: Space) => !isReservedSpace(rowRecord),
-            'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
-          },
-        ],
-      },
     ];
+
+    if (this.state.isSolutionNavEnabled) {
+      config.push({
+        field: 'solution',
+        name: i18n.translate('xpack.spaces.management.spacesGridPage.solutionColumnName', {
+          defaultMessage: 'Solution View',
+        }),
+        sortable: true,
+        render: (solution: Space['solution'], record: Space) => (
+          <SpaceSolutionBadge solution={solution} data-test-subj={`${record.id}-solution`} />
+        ),
+      });
+    }
+
+    config.push({
+      name: i18n.translate('xpack.spaces.management.spacesGridPage.actionsColumnName', {
+        defaultMessage: 'Actions',
+      }),
+      actions: [
+        {
+          isPrimary: true,
+          name: i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionName', {
+            defaultMessage: `Edit`,
+          }),
+          description: (rowRecord) =>
+            i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionDescription', {
+              defaultMessage: `Edit {spaceName}.`,
+              values: { spaceName: rowRecord.name },
+            }),
+          type: 'icon',
+          icon: 'pencil',
+          color: 'primary',
+          href: (rowRecord) =>
+            reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).href,
+          onClick: (rowRecord) =>
+            reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).onClick,
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
+        },
+        {
+          name: i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionName', {
+            defaultMessage: 'Switch',
+          }),
+          description: (rowRecord) =>
+            i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionDescription', {
+              defaultMessage: 'Switch to {spaceName} space',
+              values: { spaceName: rowRecord.name },
+            }),
+          type: 'icon',
+          icon: 'merge',
+          color: 'primary',
+          href: (rowRecord) =>
+            addSpaceIdToPath(
+              serverBasePath,
+              rowRecord.id,
+              `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
+            ),
+          available: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
+        },
+        {
+          name: i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
+            defaultMessage: `Delete`,
+          }),
+          description: (rowRecord) =>
+            i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionDescription', {
+              defaultMessage: `Delete {spaceName}.`,
+              values: { spaceName: rowRecord.name },
+            }),
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          onClick: (rowRecord) => this.onDeleteSpaceClick(rowRecord),
+          available: (rowRecord: Space) => !isReservedSpace(rowRecord),
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
+        },
+      ],
+    });
+
+    return config;
   }
 
   private getViewSpacePath = (space: Space) => `view/${encodeURIComponent(space.id)}`;
