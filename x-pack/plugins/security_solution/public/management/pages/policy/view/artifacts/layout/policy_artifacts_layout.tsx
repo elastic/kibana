@@ -17,9 +17,14 @@ import {
   EuiButton,
   EuiPageSection,
 } from '@elastic/eui';
+import type { AnyArtifact } from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
-import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import type {
+  ImmutableObject,
+  MaybeImmutable,
+  PolicyData,
+} from '../../../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { useUrlParams } from '../../../../../hooks/use_url_params';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
@@ -44,6 +49,8 @@ interface PolicyArtifactsLayoutProps {
   getPolicyArtifactsPath: (policyId: string) => string;
   /** A boolean to check if has write artifact privilege or not */
   canWriteArtifact?: boolean;
+  // Artifact specific decorations to display in the cards
+  cardDecorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
   ({
@@ -54,6 +61,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     getArtifactPath,
     getPolicyArtifactsPath,
     canWriteArtifact = false,
+    cardDecorator,
   }) => {
     const exceptionsListApiClient = useMemo(
       () => getExceptionsListApiClient(),
@@ -154,6 +162,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               searchableFields={[...searchableFields]}
               onClose={handleOnCloseFlyout}
               labels={labels}
+              cardDecorator={cardDecorator}
             />
           )}
           {allArtifacts && allArtifacts.total !== 0 ? (
@@ -228,6 +237,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             canWriteArtifact={canWriteArtifact}
             getPolicyArtifactsPath={getPolicyArtifactsPath}
             getArtifactPath={getArtifactPath}
+            cardDecorator={cardDecorator}
           />
         </EuiPageSection>
       </div>

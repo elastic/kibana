@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Pagination } from '@elastic/eui';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { AnyArtifact } from '../../../../../components/artifact_entry_card';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
@@ -20,7 +21,11 @@ import { useOldUrlSearchPaginationReplace } from '../../../../../hooks/use_old_u
 import type { ArtifactCardGridProps } from '../../../../../components/artifact_card_grid';
 import { ArtifactCardGrid } from '../../../../../components/artifact_card_grid';
 import { usePolicyDetailsArtifactsNavigateCallback } from '../../policy_hooks';
-import type { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import type {
+  ImmutableObject,
+  MaybeImmutable,
+  PolicyData,
+} from '../../../../../../../common/endpoint/types';
 import { isArtifactGlobal } from '../../../../../../../common/endpoint/service/artifacts';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { useGetLinkTo } from '../empty/use_policy_artifacts_empty_hooks';
@@ -38,6 +43,7 @@ interface PolicyArtifactsListProps {
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
   canWriteArtifact?: boolean;
+  cardDecorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -50,6 +56,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     labels,
     onDeleteActionCallback,
     canWriteArtifact = false,
+    cardDecorator,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -192,6 +199,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           pagination={artifacts ? pagination : undefined}
           loading={isLoadingArtifacts || isRefetchingArtifacts}
           data-test-subj={'artifacts-collapsed-list'}
+          cardDecorator={cardDecorator}
         />
       </>
     );

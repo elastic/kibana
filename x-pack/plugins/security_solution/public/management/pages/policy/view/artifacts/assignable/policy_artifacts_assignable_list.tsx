@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import type {
   GetTrustedAppsListResponse,
   Immutable,
+  MaybeImmutable,
 } from '../../../../../../../common/endpoint/types';
 import type { AnyArtifact } from '../../../../../components/artifact_entry_card';
 import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
@@ -25,10 +26,11 @@ export interface PolicyArtifactsAssignableListProps {
   selectedArtifactIds: string[];
   selectedArtifactsUpdated: (id: string, selected: boolean) => void;
   isListLoading: boolean;
+  cardDecorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
 }
 
 export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignableListProps>(
-  ({ artifacts, isListLoading, selectedArtifactIds, selectedArtifactsUpdated }) => {
+  ({ artifacts, isListLoading, selectedArtifactIds, selectedArtifactsUpdated, cardDecorator }) => {
     const selectedArtifactIdsByKey = useMemo(
       () =>
         selectedArtifactIds.reduce(
@@ -51,11 +53,12 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
               onToggleSelectedArtifact={(selected) =>
                 selectedArtifactsUpdated(artifact.id, selected)
               }
+              decorator={cardDecorator}
             />
           ))}
         </div>
       );
-    }, [artifacts, selectedArtifactIdsByKey, selectedArtifactsUpdated]);
+    }, [artifacts, cardDecorator, selectedArtifactIdsByKey, selectedArtifactsUpdated]);
 
     return (
       <>
