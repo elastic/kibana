@@ -57,5 +57,4 @@ export const mockSourcererScope: SelectedDataView = {
   loading: false,
   dataViewId: mockGlobalState.sourcerer.defaultDataView.id,
   runtimeMappings: mockRuntimeMappings,
-  patternList: mockPatterns,
 };

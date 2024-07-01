@@ -61,13 +61,6 @@ export type RunTimeMappings =
  * DataView from Kibana + timelines/index_fields enhanced field data
  */
 export interface SourcererDataView extends KibanaDataView {
-  id: string;
-  /**
-   * @deprecated
-   * determines how we can use the field in the app
-   * aggregatable, searchable, type, example
-   * category, description, format
-   * indices the field is included in etc*/
   browserFields: BrowserFields;
   /**
    * @deprecated use sourcererDataView.fields
@@ -107,11 +100,6 @@ export interface SelectedDataView {
   indicesExist: boolean;
   /** is an update being made to the data view */
   loading: boolean;
-  /**
-   * @deprecated use sourcererDataView.title or sourcererDataView.matchedIndices
-   * all active & inactive patterns from SourcererDataView['title']
-   */
-  patternList: string[];
   /**
    * @deprecated use sourcererDataView.runtimeMappings
    */
