@@ -865,6 +865,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,
       proxiesSettings: `${FLEET_DOCS}fleet-agent-proxy-support.html`,
+      unprivilegedMode: `${FLEET_DOCS}elastic-agent-unprivileged.html#unprivileged-change-mode`,
     },
     integrationDeveloper: {
       upload: `${INTEGRATIONS_DEV_DOCS}upload-a-new-integration.html`,

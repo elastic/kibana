@@ -1609,7 +1609,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { connectorId: string; actionTypeId: string; size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, any>"
+              "<unknown, unknown, { actionTypeId: string; subAction: \"invokeAI\" | \"invokeStream\"; replacements: {} & { [k: string]: string; }; conversationId?: string | undefined; message?: string | undefined; model?: string | undefined; alertsIndexPattern?: string | undefined; allow?: string[] | undefined; allowReplacement?: string[] | undefined; isEnabledKnowledgeBase?: boolean | undefined; isEnabledRAGAlerts?: boolean | undefined; size?: number | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; } | { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, any>"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,
@@ -1816,11 +1816,11 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.SecurityPluginStart",
-                "text": "SecurityPluginStart"
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.SecurityServiceStart",
+                "text": "SecurityServiceStart"
               }
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",
