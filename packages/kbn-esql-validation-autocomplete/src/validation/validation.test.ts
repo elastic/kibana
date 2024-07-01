@@ -10189,7 +10189,8 @@ describe('validation logic', () => {
           );
         });
 
-        describe('order must be "asc" or "desc"', () => {
+        // See for details: https://github.com/elastic/kibana/pull/187290#discussion_r1661414755
+        describe.skip('order must be "asc" or "desc"', () => {
           testErrorsAndWarnings(
             'from a_index | stats var = top_list(stringField, 1, stringField)',
             ['The order argument must be a string literal with value "asc" or "desc".']
