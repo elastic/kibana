@@ -87,4 +87,15 @@ export const defendForContainersHeartbeatsForMetering = [
       ingested: new Date().toISOString(),
     },
   },
+  {
+    agent: {
+      id: chance.guid(),
+    },
+    cloud_defend: {
+      block_action_enabled: true,
+    },
+    event: {
+      ingested: new Date().toISOString(),
+    },
+  },
 ];

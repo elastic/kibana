@@ -20,11 +20,12 @@ export class UsageReportingService {
     url = USAGE_SERVICE_USAGE_URL
   ): Promise<Response> {
     const isHttps = url.includes('https');
+
     return fetch(url, {
       method: 'post',
       body: JSON.stringify(records),
       headers: { 'Content-Type': 'application/json' },
-      ...(isHttps && { agent }), // Conditionally add agent if URL is HTTPS for supporting integration tests.
+      agent: isHttps ? agent : undefined, // Conditionally add agent if URL is HTTPS for supporting integration tests.
     });
   }
 }

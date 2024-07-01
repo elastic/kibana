@@ -198,8 +198,10 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
+      expect(interceptedRequestBody.length).to.be(2);
       expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
       expect(interceptedRequestBody[0].usage.quantity).to.be(1);
+      expect(interceptedRequestBody[1].usage.quantity).to.be(1);
       expect(interceptedRequestBody[0].usage.period_seconds).to.be(3600);
     });
   });

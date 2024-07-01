@@ -8,6 +8,49 @@ import Chance from 'chance';
 
 const chance = new Chance();
 
+export const findingsMockData = [
+  {
+    resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
+    result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
+    rule: {
+      name: 'Upper case rule name',
+      section: 'Upper case section',
+      benchmark: {
+        id: 'cis_k8s',
+        posture_type: 'kspm',
+        name: 'CIS Kubernetes V1.23',
+        version: 'v1.0.0',
+      },
+      type: 'process',
+    },
+    cluster_id: 'Upper case cluster id',
+    event: {
+      ingested: '2023-08-19T18:20:41Z',
+      created: '2023-08-19T18:17:15.609124281Z',
+    },
+  },
+  {
+    resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
+    result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
+    rule: {
+      name: 'lower case rule name',
+      section: 'Another upper case section',
+      benchmark: {
+        id: 'cis_aws',
+        posture_type: 'cspm',
+        name: 'CIS Kubernetes V1.23',
+        version: 'v1.0.0',
+      },
+      type: 'process',
+    },
+    cluster_id: 'Another Upper case cluster id',
+    event: {
+      ingested: '2023-08-19T18:20:41Z',
+      created: '2023-08-19T18:17:15.609124281Z',
+    },
+  },
+];
+
 export const vulnerabilityMockData = [
   {
     resource: {
