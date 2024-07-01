@@ -1741,7 +1741,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               rule: {
                 id: 'id',
@@ -1773,7 +1773,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1804,7 +1804,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               type: AttachmentType.alert,
               rule: {
@@ -1831,7 +1831,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql('open');
@@ -1860,7 +1860,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               rule: {
                 id: 'id',
@@ -1905,7 +1905,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source?.['kibana.alert.workflow_status']).eql(
@@ -1932,7 +1932,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest,
             caseId: postedCase.id,
             params: {
-              alertId: alert._id,
+              alertId: alert._id!,
               index: alert._index,
               type: AttachmentType.alert,
               rule: {
@@ -1974,7 +1974,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const { body: updatedAlert } = await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQueryAlertIds([alert._id]))
+            .send(getQueryAlertIds([alert._id!]))
             .expect(200);
 
           expect(updatedAlert.hits.hits[0]._source['kibana.alert.workflow_status']).eql('open');
