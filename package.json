@@ -1162,6 +1162,7 @@
     "reselect": "^4.1.8",
     "resize-observer-polyfill": "1.5.1",
     "rison-node": "1.0.2",
+    "rrule": "^2.8.1",
     "rxjs": "^7.5.5",
     "safe-squel": "^5.12.5",
     "seedrandom": "^3.0.5",

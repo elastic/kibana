@@ -777,7 +777,6 @@ export class TaskRunner<
 
         return { interval: retryInterval };
       }),
-      monitoring: this.ruleMonitoring.getMonitoring(),
       ...getTaskRunError(stateWithMetrics),
     };
   }

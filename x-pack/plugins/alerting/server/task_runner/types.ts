@@ -32,7 +32,6 @@ import {
   AlertInstanceState,
   RuleTypeParams,
   IntervalSchedule,
-  RuleMonitoring,
   RuleTaskState,
   SanitizedRule,
   RuleTypeState,
@@ -60,7 +59,6 @@ import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapte
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
-  monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
   taskRunError?: DecoratedError;
 }

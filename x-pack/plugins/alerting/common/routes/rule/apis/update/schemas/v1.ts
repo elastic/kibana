@@ -10,10 +10,25 @@ import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../.
 import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 
+export const byweekdaySchema = schema.arrayOf(
+  schema.oneOf([
+    schema.literal('MO'),
+    schema.literal('TU'),
+    schema.literal('WE'),
+    schema.literal('TH'),
+    schema.literal('FR'),
+    schema.literal('SA'),
+    schema.literal('SU'),
+  ])
+);
+
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
   notify_when: notifyWhenSchemaV1,
   throttle: schema.nullable(schema.string({ validate: validateDurationV1 })),
+  dtstart: schema.maybe(schema.string()),
+  tzid: schema.maybe(schema.string()),
+  byweekday: schema.maybe(byweekdaySchema),
 });
 
 export const actionAlertsFilterSchema = schema.object({

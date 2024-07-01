@@ -405,6 +405,24 @@ export const ActionTypeForm = ({
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
       defaultNotifyWhenValue={defaultNotifyWhenValue}
+      onTzidChange={useCallback(
+        (tzid) => {
+          setActionFrequencyProperty('tzid', tzid, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      onDtStartChange={useCallback(
+        (dtstart) => {
+          setActionFrequencyProperty('dtstart', dtstart, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
+      onByWeekdayChange={useCallback(
+        (byweekday) => {
+          setActionFrequencyProperty('byweekday', byweekday, index);
+        },
+        [setActionFrequencyProperty, index]
+      )}
     />
   );
 
@@ -480,7 +498,7 @@ export const ActionTypeForm = ({
         {!hideNotifyWhen && actionNotifyWhen}
         {showSelectActionGroup && (
           <>
-            {!hideNotifyWhen && <EuiSpacer size="s" />}
+            {!hideNotifyWhen && <EuiSpacer size="m" />}
             <EuiSuperSelect
               prepend={
                 <EuiFormLabel

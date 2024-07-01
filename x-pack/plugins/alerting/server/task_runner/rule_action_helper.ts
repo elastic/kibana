@@ -6,6 +6,8 @@
  */
 
 import { Logger } from '@kbn/logging';
+import { Frequency, RRule } from 'rrule';
+import moment from 'moment/moment';
 import {
   IntervalSchedule,
   parseDuration,
@@ -63,7 +65,34 @@ export const isSummaryActionThrottled = ({
     logger.debug(`Action'${action?.actionTypeId}:${action?.id}', has an invalid throttle interval`);
   }
 
-  const throttled = new Date(throttledAction.date).getTime() + throttleMills > Date.now();
+  const { frequency } = action!;
+
+  let throttled = false;
+
+  if (frequency?.tzid && frequency?.dtstart && frequency?.byweekday && frequency.throttle) {
+    const throttleUnitToFreq: { [key: string]: number } = {
+      s: Frequency.SECONDLY,
+      m: Frequency.MINUTELY,
+      h: Frequency.HOURLY,
+      d: Frequency.DAILY,
+    };
+    const rrule = new RRule({
+      freq: throttleUnitToFreq[frequency.throttle.slice(-1)] || Frequency.MINUTELY,
+      interval: parseInt(frequency.throttle.replace(/[^0-9.]/g, ''), 10) || 1,
+      tzid: frequency.tzid,
+      dtstart: moment(frequency.dtstart).tz(frequency.tzid).toDate(),
+      byweekday: frequency.byweekday,
+    });
+
+    try {
+      const nextRun = rrule.after(new Date(throttledAction.date));
+      throttled = nextRun ? nextRun?.getTime() > Date.now() : false;
+    } catch (e) {
+      throttled = new Date(throttledAction.date).getTime() + throttleMills > Date.now();
+    }
+  } else {
+    throttled = new Date(throttledAction.date).getTime() + throttleMills > Date.now();
+  }
 
   if (throttled) {
     logger.debug(

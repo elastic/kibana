@@ -42,6 +42,16 @@ export const summaryMessage = i18n.translate(
   }
 );
 
+export const RRULE_DAY_NAMES = {
+  MO: 'Monday',
+  TU: 'Tuesday',
+  WE: 'Wednesday',
+  TH: 'Thursday',
+  FR: 'Friday',
+  SA: 'Saturday',
+  SU: 'Sunday',
+} as const;
+
 export { TIME_UNITS } from './time_units';
 export enum SORT_ORDERS {
   ASCENDING = 'asc',

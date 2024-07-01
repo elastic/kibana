@@ -10,7 +10,9 @@ import { AADAlert } from '@kbn/alerts-as-data-utils';
 import { get, isEmpty } from 'lodash';
 import { MutableAlertInstanceMeta } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { AlertHit, CombinedSummarizedAlerts } from '../types';
+import { Frequency, RRule } from 'rrule';
+import moment from 'moment';
+import { AlertHit, CombinedSummarizedAlerts, RuleActionFrequency } from '../types';
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -105,14 +107,17 @@ export class Alert<
     throttle,
     actionHash,
     uuid,
+    actionFrequency,
   }: {
     throttle: string | null;
     actionHash?: string;
     uuid?: string;
+    actionFrequency?: RuleActionFrequency;
   }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
+
     const throttleMills = throttle ? parseDuration(throttle) : 0;
     if (
       this.meta.lastScheduledActions &&
@@ -127,12 +132,38 @@ export class Alert<
             this.meta.lastScheduledActions.actions[uuid] ||
             this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
           const lastTriggerDate = actionInState?.date;
+
+          if (
+            actionFrequency?.tzid &&
+            actionFrequency?.dtstart &&
+            actionFrequency?.byweekday &&
+            actionFrequency?.throttle
+          ) {
+            const throttleUnitToFreq: { [key: string]: number } = {
+              s: Frequency.SECONDLY,
+              m: Frequency.MINUTELY,
+              h: Frequency.HOURLY,
+              d: Frequency.DAILY,
+            };
+            const rrule = new RRule({
+              freq: throttleUnitToFreq[actionFrequency.throttle.slice(-1)] || Frequency.MINUTELY,
+              interval: parseDuration(throttle || '0') || 1,
+              tzid: actionFrequency.tzid,
+              dtstart: moment(actionFrequency.dtstart).tz(actionFrequency.tzid).toDate(),
+              byweekday: actionFrequency.byweekday,
+            });
+
+            const nextRun = rrule.after(new Date(lastTriggerDate));
+
+            return nextRun ? nextRun?.getTime() > Date.now() : false;
+          }
           return !!(
             lastTriggerDate && new Date(lastTriggerDate).getTime() + throttleMills > Date.now()
           );
         }
         return false;
       } else {
+        // TODO
         return new Date(this.meta.lastScheduledActions.date).getTime() + throttleMills > Date.now();
       }
     }
