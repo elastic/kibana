@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
+import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
 import {
   getSLOSummaryPipelineId,
@@ -19,6 +20,7 @@ import {
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
 import { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
+import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
@@ -62,17 +64,42 @@ export class UpdateSLO {
     });
 
     validateSLO(updatedSlo);
+
+    const rollbackOperations = [];
+
     await this.repository.save(updatedSlo);
+    rollbackOperations.push(() => this.repository.save(originalSlo));
 
     if (!requireRevisionBump) {
       // At this point, we still need to update the summary pipeline to include the changes (name, desc, tags, ...) in the summary index
-      await retryTransientEsErrors(
-        () =>
-          this.esClient.ingest.putPipeline(
-            getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
-          ),
-        { logger: this.logger }
-      );
+
+      try {
+        await retryTransientEsErrors(
+          () =>
+            this.esClient.ingest.putPipeline(
+              getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
+            ),
+          { logger: this.logger }
+        );
+      } catch (err) {
+        this.logger.error(
+          `Cannot update the SLO summary pipeline [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}].`
+        );
+
+        await asyncForEach(rollbackOperations.reverse(), async (operation) => {
+          try {
+            await operation();
+          } catch (rollbackErr) {
+            this.logger.error('Rollback operation failed', rollbackErr);
+          }
+        });
+
+        if (err.meta?.body?.error?.type === 'security_exception') {
+          throw new SecurityException(err.meta.body.error.reason);
+        }
+
+        throw err;
+      }
 
       return this.toResponse(updatedSlo);
     }
@@ -82,7 +109,10 @@ export class UpdateSLO {
 
     try {
       await this.transformManager.install(updatedSlo);
+      rollbackOperations.push(() => this.transformManager.uninstall(updatedRollupTransformId));
+
       await this.transformManager.start(updatedRollupTransformId);
+      rollbackOperations.push(() => this.transformManager.stop(updatedRollupTransformId));
 
       await retryTransientEsErrors(
         () =>
@@ -91,9 +121,20 @@ export class UpdateSLO {
           ),
         { logger: this.logger }
       );
+      rollbackOperations.push(() =>
+        this.esClient.ingest.deletePipeline(
+          { id: getSLOSummaryPipelineId(updatedSlo.id, updatedSlo.revision) },
+          { ignore: [404] }
+        )
+      );
 
       await this.summaryTransformManager.install(updatedSlo);
+      rollbackOperations.push(() =>
+        this.summaryTransformManager.uninstall(updatedSummaryTransformId)
+      );
+
       await this.summaryTransformManager.start(updatedSummaryTransformId);
+      rollbackOperations.push(() => this.summaryTransformManager.stop(updatedSummaryTransformId));
 
       await retryTransientEsErrors(
         () =>
@@ -110,17 +151,17 @@ export class UpdateSLO {
         `Cannot update the SLO [id: ${updatedSlo.id}, revision: ${updatedSlo.revision}]. Rolling back.`
       );
 
-      // Restore the previous slo definition
-      await this.repository.save(originalSlo);
-      // delete the created resources for the updated slo
-      await this.summaryTransformManager.stop(updatedSummaryTransformId);
-      await this.summaryTransformManager.uninstall(updatedSummaryTransformId);
-      await this.transformManager.stop(updatedRollupTransformId);
-      await this.transformManager.uninstall(updatedRollupTransformId);
-      await this.esClient.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(updatedSlo.id, updatedSlo.revision) },
-        { ignore: [404] }
-      );
+      await asyncForEach(rollbackOperations.reverse(), async (operation) => {
+        try {
+          await operation();
+        } catch (rollbackErr) {
+          this.logger.error('Rollback operation failed', rollbackErr);
+        }
+      });
+
+      if (err.meta?.body?.error?.type === 'security_exception') {
+        throw new SecurityException(err.meta.body.error.reason);
+      }
 
       throw err;
     }

@@ -21,6 +21,7 @@ Kibana configuration entries providing developers with a fully typed model of th
       - [`schema.object()`](#schemaobject)
       - [`schema.recordOf()`](#schemarecordof)
       - [`schema.mapOf()`](#schemamapof)
+      - [`schema.allOf` / `schema.intersection`](#schemaintersection--schemaallof)
     - [Advanced types](#advanced-types)
       - [`schema.oneOf()`](#schemaoneof)
       - [`schema.any()`](#schemaany)
@@ -294,6 +295,30 @@ const valueSchema = schema.mapOf(schema.string(), schema.number());
 __Notes:__
 * You can use a union of literal types as a record's key schema to restrict record to a specific set of keys, e.g. `schema.oneOf([schema.literal('isEnabled'), schema.literal('name')])`.
 * `schema.mapOf()` also supports a json string as input if it can be safely parsed using `JSON.parse` and if the resulting value is a plain object.
+
+#### `schema.intersection()` / `schema.allOf()`
+
+Creates an `object` schema being the intersection of the provided `object` schemas. 
+Note that schema construction will throw an error if some of the intersection schema share the same key(s).
+
+See the documentation for [schema.object](#schemaobject).
+
+__Options:__
+* `defaultValue: TObject | Reference<TObject> | (() => TObject)` - defines a default value, see [Default values](#default-values) section for more details.
+* `validate: (value: TObject) => string | void` - defines a custom validator function, see [Custom validation](#custom-validation) section for more details.
+* `unknowns: 'allow' | 'ignore' | 'forbid'` - indicates whether unknown object properties should be allowed, ignored, or forbidden. It's `forbid` by default.
+
+__Usage:__
+```typescript
+const mySchema = schema.intersection([
+  schema.object({
+    someKey: schema.string(),
+  }),
+  schema.object({
+    anotherKey: schema.string(),
+  })
+]);
+```
 
 ### Advanced types
 

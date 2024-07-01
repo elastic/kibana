@@ -37,9 +37,17 @@ export const getScheduleNotificationResponseActionsService =
           });
         }
         if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
-          await endpointResponseAction(responseAction, endpointAppContextService, {
-            alerts,
-          });
+          // We currently support only automated response actions for Elastic Defend. This will
+          // need to be updated once we introduce support for other EDR systems.
+          // For an explanation of why this is needed, see this comment here:
+          // https://github.com/elastic/kibana/issues/180774#issuecomment-2139526239
+          const alertsFromElasticDefend = alerts.filter((alert) => alert.agent.type === 'endpoint');
+
+          if (alertsFromElasticDefend.length > 0) {
+            await endpointResponseAction(responseAction, endpointAppContextService, {
+              alerts: alertsFromElasticDefend,
+            });
+          }
         }
       })
     );

@@ -8,7 +8,6 @@
 import {
   EuiBadge,
   EuiButton,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -21,14 +20,27 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { ApiKey } from '@kbn/security-plugin/common';
+import { ApiKey } from '@kbn/security-plugin-types-common';
 import { useQuery } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
+import {
+  SecurityCreateApiKeyResponse,
+  SecurityUpdateApiKeyResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
 import './api_key.scss';
-import { CreateApiKeyResponse } from '../../hooks/api/use_create_api_key';
+
+function isCreatedResponse(
+  value: SecurityCreateApiKeyResponse | SecurityUpdateApiKeyResponse
+): value is SecurityCreateApiKeyResponse {
+  if ((value as SecurityCreateApiKeyResponse).id) {
+    return true;
+  }
+  return false;
+}
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
   const { http, user } = useKibanaServices();
@@ -37,19 +49,30 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
     queryKey: ['apiKey'],
     queryFn: () => http.fetch<{ apiKeys: ApiKey[] }>('/internal/serverless_search/api_keys'),
   });
-  const [apiKey, setApiKey] = useState<CreateApiKeyResponse | undefined>(undefined);
-  const saveApiKey = (value: CreateApiKeyResponse) => {
+  const [apiKey, setApiKey] = useState<SecurityCreateApiKeyResponse | undefined>(undefined);
+  const saveApiKey = (value: SecurityCreateApiKeyResponse) => {
     setApiKey(value);
-    if (value.encoded) setClientApiKey(value.encoded);
   };
+
+  useEffect(() => {
+    if (apiKey) {
+      setClientApiKey(apiKey.encoded);
+      setIsFlyoutOpen(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey]);
 
   return (
     <>
       {isFlyoutOpen && (
         <CreateApiKeyFlyout
           onClose={() => setIsFlyoutOpen(false)}
-          setApiKey={saveApiKey}
-          username={user?.full_name || user?.username || ''}
+          setApiKey={(value) => {
+            if (isCreatedResponse(value)) {
+              saveApiKey(value);
+            }
+          }}
+          user={user}
         />
       )}
       {apiKey ? (
@@ -74,9 +97,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
               })}
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiCodeBlock isCopyable data-test-subj="api-key-created-key-codeblock">
-              {JSON.stringify(apiKey, undefined, 2)}
-            </EuiCodeBlock>
+            <ApiKeySelectableTokenField createdApiKey={apiKey} />
           </EuiStep>
         </EuiPanel>
       ) : (

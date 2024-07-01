@@ -15,7 +15,7 @@ import { statsAggregationFunctionDefinitions } from '../src/definitions/aggs';
 import { evalFunctionDefinitions } from '../src/definitions/functions';
 import { groupingFunctionDefinitions } from '../src/definitions/grouping';
 import { getFunctionSignatures } from '../src/definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../src/definitions/literals';
+import { timeUnits, chronoLiterals } from '../src/definitions/literals';
 import { nonNullable } from '../src/shared/helpers';
 import {
   SupportedFieldType,
@@ -1046,7 +1046,7 @@ function getFieldName(
 
 const literals = {
   chrono_literal: chronoLiterals[0].name,
-  time_literal: timeLiterals[0].name,
+  time_literal: timeUnits[0],
 };
 
 function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {

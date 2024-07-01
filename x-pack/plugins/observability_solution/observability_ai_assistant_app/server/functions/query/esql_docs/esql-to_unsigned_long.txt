@@ -1,17 +1,21 @@
-TO_UNSIGNED_LONG
+## TO_UNSIGNED_LONG
 
-Syntax
-Parameters
-field
-Input value. The input can be a single- or multi-valued column or an expression.
-DescriptionConverts an input value to an unsigned long value. If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long. Boolean true will be converted to unsigned long 1, false to 0.Supported types
-Example
+The `TO_UNSIGNED_LONG` function converts an input value to an unsigned long value. If the input parameter is of a date type, its value will be interpreted as milliseconds since the Unix epoch, converted to unsigned long. Boolean true will be converted to unsigned long 1, false to 0.
+
+### Examples
+
+Here are a couple of examples of full ES|QL queries using the `TO_UNSIGNED_LONG` function:
+
 ```esql
 ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"
 | EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)
 ```
 
-Note that in this example, the last conversion of the string isn’t possible.
-When this happens, the result is a null value. In this case a Warning header is added to the response.
-The header will provide information on the source of the failure:"Line 1:133: evaluation of [TO_UL(str3)] failed, treating result as null. Only first 20 failures recorded."A following header will contain the failure reason and the offending value:"java.lang.NumberFormatException: Character f is neither a decimal digit number, decimal point,
-+ "nor "e" notation exponential mark."
+In this example, the `TO_UNSIGNED_LONG` function is used to convert string values to unsigned long. Note that the last conversion of the string isn’t possible. When this happens, the result is a null value.
+
+```esql
+ROW date = "2022-01-01T00:00:00Z"
+| EVAL timestamp = TO_UNSIGNED_LONG(date)
+```
+
+In this example, the `TO_UNSIGNED_LONG` function is used to convert a date string to an unsigned long value, representing the milliseconds since the Unix epoch.

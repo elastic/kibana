@@ -45,7 +45,7 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  UserInstruction,
+  UserInstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -153,7 +153,7 @@ export class ObservabilityAIAssistantClient {
     }
 
     await this.dependencies.esClient.asInternalUser.delete({
-      id: conversation._id,
+      id: conversation._id!,
       index: conversation._index,
       refresh: true,
     });
@@ -170,9 +170,13 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: Array<string | UserInstruction>;
+    instructions?: UserInstructionOrPlainText[];
     simulateFunctionCalling?: boolean;
-    disableFunctions?: boolean;
+    disableFunctions?:
+      | boolean
+      | {
+          except: string[];
+        };
   }): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new LangTracer(context.active()).startActiveSpan(
       'complete',
@@ -211,17 +215,17 @@ export class ObservabilityAIAssistantClient {
           );
         }
 
-        const kbInstructions$ = from(this.fetchKnowledgeBaseInstructions()).pipe(shareReplay());
+        const userInstructions$ = from(this.fetchUserInstructions()).pipe(shareReplay());
 
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
-        const messagesWithUpdatedSystemMessage$ = kbInstructions$.pipe(
-          map((knowledgeBaseInstructions) => {
+        const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
+          map((userInstructions) => {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
                 registeredInstructions: functionClient.getInstructions(),
-                knowledgeBaseInstructions,
+                userInstructions,
                 requestInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
@@ -268,9 +272,9 @@ export class ObservabilityAIAssistantClient {
         // messages and the knowledge base instructions
         const nextEvents$ = combineLatest([
           messagesWithUpdatedSystemMessage$,
-          kbInstructions$,
+          userInstructions$,
         ]).pipe(
-          switchMap(([messagesWithUpdatedSystemMessage, knowledgeBaseInstructions]) => {
+          switchMap(([messagesWithUpdatedSystemMessage, userInstructions]) => {
             // if needed, inject a context function request here
             const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
@@ -298,7 +302,7 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                knowledgeBaseInstructions,
+                userInstructions,
                 requestInstructions,
                 signal,
                 logger: this.dependencies.logger,
@@ -630,7 +634,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: persistedConversation._id,
+      id: persistedConversation._id!,
       index: persistedConversation._index,
       doc: updatedConversation,
       refresh: true,
@@ -659,7 +663,7 @@ export class ObservabilityAIAssistantClient {
     );
 
     await this.dependencies.esClient.asInternalUser.update({
-      id: document._id,
+      id: document._id!,
       index: document._index,
       doc: { conversation: { title } },
       refresh: true,
@@ -694,7 +698,7 @@ export class ObservabilityAIAssistantClient {
     queries,
     categories,
   }: {
-    queries: string[];
+    queries: Array<{ text: string; boost?: number }>;
     categories?: string[];
   }): Promise<{ entries: RecalledEntry[] }> => {
     return this.dependencies.knowledgeBaseService.recall({
@@ -702,7 +706,7 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       queries,
       categories,
-      asCurrentUser: this.dependencies.esClient.asCurrentUser,
+      esClient: this.dependencies.esClient,
       uiSettingsClient: this.dependencies.uiSettingsClient,
     });
   };
@@ -756,12 +760,10 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  fetchKnowledgeBaseInstructions = async () => {
-    const knowledgeBaseInstructions = await this.dependencies.knowledgeBaseService.getInstructions(
+  fetchUserInstructions = async () => {
+    return this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user
     );
-
-    return knowledgeBaseInstructions;
   };
 }

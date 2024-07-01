@@ -29,7 +29,6 @@ import {
   type LanguageDocumentationSections,
 } from '@kbn/language-documentation-popover';
 import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import { TooltipWrapper } from '@kbn/visualization-utils';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -222,7 +221,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && allowQueryCancellation) {
+    if (isQueryLoading && isLoading && allowQueryCancellation) {
       abortController?.abort();
       setIsQueryLoading(false);
     } else {
@@ -236,7 +235,40 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+  }, [
+    isQueryLoading,
+    isLoading,
+    allowQueryCancellation,
+    abortController,
+    onTextLangQuerySubmit,
+    language,
+  ]);
+
+  const onCommentLine = useCallback(() => {
+    const currentSelection = editor1?.current?.getSelection();
+    const startLineNumber = currentSelection?.startLineNumber;
+    const endLineNumber = currentSelection?.endLineNumber;
+    if (startLineNumber && endLineNumber) {
+      for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; lineNumber++) {
+        const lineContent = editorModel.current?.getLineContent(lineNumber) ?? '';
+        const hasComment = lineContent?.startsWith('//');
+        const commentedLine = hasComment ? lineContent?.replace('//', '') : `//${lineContent}`;
+
+        // executeEdits allows to keep edit in history
+        editor1.current?.executeEdits('comment', [
+          {
+            range: {
+              startLineNumber: lineNumber,
+              startColumn: 0,
+              endLineNumber: lineNumber,
+              endColumn: (lineContent?.length ?? 0) + 1,
+            },
+            text: commentedLine,
+          },
+        ]);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -366,7 +398,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
     const fn = memoize(
-      (...args: [DataViewsPublicPluginStart]) => ({
+      (...args: [DataViewsPublicPluginStart, CoreStart]) => ({
         timestamp: Date.now(),
         result: getESQLSources(...args),
       }),
@@ -380,7 +412,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         clearCacheWhenOld(dataSourcesCache, queryString);
-        const sources = await memoizedSources(dataViews).result;
+        const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
@@ -420,6 +452,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     memoizedSources,
     dataSourcesCache,
     dataViews,
+    core,
     esqlFieldsCache,
     memoizedFieldsFromESQL,
     expressions,
@@ -445,7 +478,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   useEffect(() => {
     const validateQuery = async () => {
-      if (editorModel?.current) {
+      if (editor1?.current) {
         const parserMessages = await parseMessages();
         setClientParserMessages({
           errors: parserMessages?.errors ?? [],
@@ -624,13 +657,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [isCodeEditorExpanded, queryString]);
 
-  const linesBreaksButtonsStatus = useMemo(() => {
+  const isWrappedInPipes = useMemo(() => {
     const pipes = code?.split('|');
     const pipesWithNewLine = code?.split('\n|');
-    return {
-      addLineBreaksDisabled: pipes?.length === pipesWithNewLine?.length,
-      removeLineBreaksDisabled: pipesWithNewLine?.length === 1,
-    };
+    return pipes?.length === pipesWithNewLine?.length;
   }, [code]);
 
   useEffect(() => {
@@ -644,40 +674,41 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [language, documentationSections]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
-    automaticLayout: true,
     accessibilitySupport: 'off',
+    autoIndent: 'none',
+    automaticLayout: true,
+    fixedOverflowWidgets: true,
     folding: false,
     fontSize: 14,
-    padding: {
-      top: 8,
-      bottom: 8,
-    },
-    scrollBeyondLastLine: false,
-    quickSuggestions: true,
-    minimap: { enabled: false },
-    wordWrap: 'on',
-    lineNumbers: showLineNumbers ? 'on' : 'off',
-    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
-    lineDecorationsWidth: 12,
-    autoIndent: 'none',
-    wrappingIndent: 'none',
-    lineNumbersMinChars: 3,
-    overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
-    scrollbar: {
-      horizontal: 'hidden',
-      vertical: 'auto',
-    },
-    overviewRulerBorder: false,
     // this becomes confusing with multiple markers, so quick fixes
     // will be proposed only within the tooltip
     lightbulb: {
       enabled: false,
     },
+    lineDecorationsWidth: 12,
+    lineNumbers: showLineNumbers ? 'on' : 'off',
+    lineNumbersMinChars: 3,
+    minimap: { enabled: false },
+    overviewRulerLanes: 0,
+    overviewRulerBorder: false,
+    padding: {
+      top: 8,
+      bottom: 8,
+    },
+    quickSuggestions: true,
     readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+    renderLineHighlight: !isCodeEditorExpanded ? 'none' : 'line',
+    renderLineHighlightOnlyWhenFocus: true,
+    scrollbar: {
+      horizontal: 'hidden',
+      vertical: 'auto',
+    },
+    scrollBeyondLastLine: false,
+    theme: language === 'esql' ? ESQL_THEME_ID : isDark ? 'vs-dark' : 'vs',
+    wordWrap: 'on',
+    wrappingIndent: 'none',
   };
 
   if (isCompactFocused) {
@@ -698,68 +729,53 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} gutterSize="none" alignItems="center">
               <EuiFlexItem grow={false}>
-                <TooltipWrapper
-                  tooltipContent={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                    {
-                      defaultMessage: 'Add line breaks on pipes',
-                    }
-                  )}
-                  condition={!linesBreaksButtonsStatus.addLineBreaksDisabled}
+                <EuiToolTip
+                  position="top"
+                  content={
+                    isWrappedInPipes
+                      ? i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                          {
+                            defaultMessage: 'Remove line breaks on pipes',
+                          }
+                        )
+                      : i18n.translate(
+                          'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                          {
+                            defaultMessage: 'Add line breaks on pipes',
+                          }
+                        )
+                  }
                 >
                   <EuiButtonIcon
-                    iconType="pipeBreaks"
+                    iconType={isWrappedInPipes ? 'pipeNoBreaks' : 'pipeBreaks'}
                     color="text"
-                    size="s"
+                    size="xs"
                     data-test-subj="TextBasedLangEditor-toggleWordWrap"
-                    aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
-                      {
-                        defaultMessage: 'Add line breaks on pipes',
-                      }
-                    )}
-                    isDisabled={linesBreaksButtonsStatus.addLineBreaksDisabled}
+                    aria-label={
+                      isWrappedInPipes
+                        ? i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
+                            {
+                              defaultMessage: 'Remove line breaks on pipes',
+                            }
+                          )
+                        : i18n.translate(
+                            'textBasedEditor.query.textBasedLanguagesEditor.EnableWordWrapLabel',
+                            {
+                              defaultMessage: 'Add line breaks on pipes',
+                            }
+                          )
+                    }
                     onClick={() => {
-                      const updatedCode = getWrappedInPipesCode(code, false);
+                      const updatedCode = getWrappedInPipesCode(code, isWrappedInPipes);
                       if (code !== updatedCode) {
                         setCode(updatedCode);
                         onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
                       }
                     }}
                   />
-                </TooltipWrapper>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TooltipWrapper
-                  tooltipContent={i18n.translate(
-                    'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                    {
-                      defaultMessage: 'Remove line breaks on pipes',
-                    }
-                  )}
-                  condition={!linesBreaksButtonsStatus.removeLineBreaksDisabled}
-                >
-                  <EuiButtonIcon
-                    iconType="pipeNoBreaks"
-                    color="text"
-                    size="s"
-                    data-test-subj="TextBasedLangEditor-toggleWordWrap"
-                    aria-label={i18n.translate(
-                      'textBasedEditor.query.textBasedLanguagesEditor.disableWordWrapLabel',
-                      {
-                        defaultMessage: 'Remove line breaks on pipes',
-                      }
-                    )}
-                    isDisabled={linesBreaksButtonsStatus.removeLineBreaksDisabled}
-                    onClick={() => {
-                      const updatedCode = getWrappedInPipesCode(code, true);
-                      if (code !== updatedCode) {
-                        setCode(updatedCode);
-                        onTextLangQueryChange({ [language]: updatedCode } as AggregateQuery);
-                      }
-                    }}
-                  />
-                </TooltipWrapper>
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -777,7 +793,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       }
                       buttonProps={{
                         color: 'text',
-                        size: 's',
+                        size: 'xs',
                         'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',
@@ -791,7 +807,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 )}
               </EuiFlexItem>
               {!Boolean(hideMinimizeButton) && (
-                <EuiFlexItem grow={false} style={{ marginRight: '8px' }}>
+                <EuiFlexItem grow={false}>
                   <EuiToolTip
                     position="top"
                     content={i18n.translate(
@@ -811,7 +827,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         }
                       )}
                       data-test-subj="TextBasedLangEditor-minimize"
-                      size="s"
+                      size="xs"
                       onClick={() => {
                         expandCodeEditor(false);
                         updateLinesFromModel = false;
@@ -824,12 +840,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        css={{ margin: '0 0 1px 0' }}
-        ref={containerRef}
-      >
+      <EuiFlexGroup gutterSize="none" responsive={false} ref={containerRef}>
         <EuiOutsideClickDetector
           onOutsideClick={() => {
             restoreInitialMode();
@@ -927,6 +938,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       onQuerySubmit
                     );
 
+                    // on CMD/CTRL + / comment out the entire line
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                      onCommentLine
+                    );
+
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     setMeasuredContentWidth(editor.getContentWidth());
 
@@ -1004,6 +1022,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           borderRadius: 0,
                           backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                           border: '1px solid rgb(17 43 134 / 10%) !important',
+                          transform: 'none !important',
                         },
                       }}
                     />
@@ -1033,6 +1052,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
                       border: '1px solid rgb(17 43 134 / 10%) !important',
                       borderLeft: 'transparent !important',
+                      transform: 'none !important',
                     }}
                   />
                 </EuiToolTip>

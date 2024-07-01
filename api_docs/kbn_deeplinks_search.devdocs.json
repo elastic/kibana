@@ -30,7 +30,7 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"appSearch\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"searchPlayground\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:searchIndices\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"enterpriseSearchApplications:playground\" | \"appSearch:engines\""
+          "\"appSearch\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"workplaceSearch\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:searchIndices\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"enterpriseSearchApplications:playground\" | \"appSearch:engines\""
         ],
         "path": "packages/deeplinks/search/deep_links.ts",
         "deprecated": false,
@@ -106,6 +106,21 @@
         "description": [],
         "signature": [
           "\"enterpriseSearchContent\""
+        ],
+        "path": "packages/deeplinks/search/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-search",
+        "id": "def-common.ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID",
+        "description": [],
+        "signature": [
+          "\"enterpriseSearchInferenceEndpoints\""
         ],
         "path": "packages/deeplinks/search/constants.ts",
         "deprecated": false,

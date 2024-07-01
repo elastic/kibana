@@ -73,12 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     for (const type of ['PNG', 'PDF'] as const) {
-      // FLAKY: https://github.com/elastic/kibana/issues/183567
-      describe.skip(`${type} report`, () => {
-        afterEach(async () => {
-          await PageObjects.lens.closeShareModal();
-        });
-
+      describe(`${type} report`, () => {
         it(`should not allow to download reports for incomplete visualization`, async () => {
           await PageObjects.visualize.gotoVisualizationLandingPage();
           await PageObjects.visualize.navigateToNewVisualization();
@@ -115,19 +110,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.lens.openReportingShare(type);
           await PageObjects.reporting.clickGenerateReportButton();
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.lens.closeShareModal();
-          }
+
           const url = await PageObjects.reporting.getReportURL(60000);
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.lens.closeShareModal();
-          }
+
+          await PageObjects.lens.closeShareModal();
+
           expect(url).to.be.ok();
           if (await testSubjects.exists('toastCloseButton')) {
             await testSubjects.click('toastCloseButton');
-          }
-          if (await testSubjects.exists('shareContextModal')) {
-            await PageObjects.lens.closeShareModal();
           }
         });
 
@@ -139,6 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql(
             'Copy Post URL'
           );
+          await PageObjects.lens.closeShareModal();
         });
 
         it(`should produce a valid URL for reporting`, async () => {

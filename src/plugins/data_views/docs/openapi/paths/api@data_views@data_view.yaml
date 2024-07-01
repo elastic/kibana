@@ -1,0 +1,31 @@
+post:
+  summary: Create a data view in the default space
+  operationId: createDataViewDefault
+  description: >
+    This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/create_data_view_request_object.yaml'
+        examples:
+          createDataViewRequest:
+            $ref: '../components/examples/create_data_view_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/data_view_response_object.yaml'
+    '400':
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

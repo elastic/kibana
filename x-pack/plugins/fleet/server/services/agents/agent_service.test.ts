@@ -9,6 +9,12 @@ jest.mock('../security');
 jest.mock('./crud');
 jest.mock('./status');
 jest.mock('./versions');
+jest.mock('../app_context', () => ({
+  appContextService: {
+    getInternalUserSOClientForSpaceId: jest.fn(),
+    getSavedObjects: jest.fn(),
+  },
+}));
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -22,6 +28,7 @@ import { FleetUnauthorizedError } from '../../errors';
 import { getAuthzFromRequest } from '../security';
 import type { FleetAuthz } from '../../../common';
 import { createFleetAuthzMock } from '../../../common/mocks';
+import { appContextService } from '../app_context';
 
 import type { AgentClient } from './agent_service';
 import { AgentServiceImpl } from './agent_service';
@@ -37,18 +44,24 @@ const mockGetAgentStatusForAgentPolicy = getAgentStatusForAgentPolicy as jest.Mo
 const mockgetLatestAvailableAgentVersion = getLatestAvailableAgentVersion as jest.Mock;
 
 describe('AgentService', () => {
+  let mockedScopedSoClient: jest.Mocked<SavedObjectsClientContract>;
+
   beforeEach(() => {
     jest.resetAllMocks();
+    mockedScopedSoClient = savedObjectsClientMock.create();
+    jest.mocked(appContextService.getSavedObjects).mockReturnValue({
+      getScopedClient: jest.fn().mockReturnValue(mockedScopedSoClient),
+    } as any);
+    jest
+      .mocked(appContextService.getInternalUserSOClientForSpaceId)
+      .mockReturnValue(mockedScopedSoClient);
   });
 
   describe('asScoped', () => {
     describe('without required privilege', () => {
-      const agentClient = new AgentServiceImpl(
-        elasticsearchServiceMock.createElasticsearchClient(),
-        savedObjectsClientMock.create()
-      ).asScoped(httpServerMock.createKibanaRequest());
+      let agentClient: AgentClient;
 
-      beforeEach(() =>
+      beforeEach(() => {
         mockGetAuthzFromRequest.mockReturnValue(
           Promise.resolve({
             fleet: {
@@ -77,8 +90,12 @@ describe('AgentService', () => {
               writeIntegrationPolicies: false,
             },
           })
-        )
-      );
+        );
+        agentClient = new AgentServiceImpl(
+          elasticsearchServiceMock.createElasticsearchClient(),
+          savedObjectsClientMock.create()
+        ).asScoped(httpServerMock.createKibanaRequest());
+      });
 
       it('rejects on listAgents', async () => {
         await expect(agentClient.listAgents({ showInactive: true })).rejects.toThrowError(
@@ -124,32 +141,65 @@ describe('AgentService', () => {
     describe('with required privilege', () => {
       const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
       const mockSoClient = savedObjectsClientMock.create();
-      const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asScoped(
-        httpServerMock.createKibanaRequest()
-      );
 
       beforeEach(() =>
         mockGetAuthzFromRequest.mockReturnValue(Promise.resolve(createFleetAuthzMock()))
       );
+      expectApisToCallServicesSuccessfully(
+        mockEsClient,
+        () => mockedScopedSoClient,
+        () =>
+          new AgentServiceImpl(mockEsClient, mockSoClient).asScoped(
+            httpServerMock.createKibanaRequest()
+          ),
+        'default'
+      );
+    });
 
-      expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);
+    describe('with required privilege in a non default space', () => {
+      const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+      const mockSoClient = savedObjectsClientMock.create();
+
+      beforeEach(() => {
+        mockGetAuthzFromRequest.mockReturnValue(Promise.resolve(createFleetAuthzMock()));
+        jest.mocked(mockedScopedSoClient.getCurrentNamespace).mockReturnValue('test');
+      });
+      expectApisToCallServicesSuccessfully(
+        mockEsClient,
+        () => mockedScopedSoClient,
+        () =>
+          new AgentServiceImpl(mockEsClient, mockSoClient).asScoped(
+            httpServerMock.createKibanaRequest()
+          ),
+        'test'
+      );
     });
   });
 
   describe('asInternalUser', () => {
     const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     const mockSoClient = savedObjectsClientMock.create();
-    const agentClient = new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser;
-
-    expectApisToCallServicesSuccessfully(mockEsClient, mockSoClient, agentClient);
+    expectApisToCallServicesSuccessfully(
+      mockEsClient,
+      () => mockSoClient,
+      () => new AgentServiceImpl(mockEsClient, mockSoClient).asInternalUser
+    );
   });
 });
 
 function expectApisToCallServicesSuccessfully(
   mockEsClient: ElasticsearchClient,
-  mockSoClient: jest.Mocked<SavedObjectsClientContract>,
-  agentClient: AgentClient
+  getExpectedSoClient: () => jest.Mocked<SavedObjectsClientContract>,
+  agentClientFactory: () => AgentClient,
+  spaceId?: string
 ) {
+  let agentClient: AgentClient;
+  let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
+  beforeEach(() => {
+    mockSoClient = getExpectedSoClient();
+    agentClient = agentClientFactory();
+  });
+
   test('client.listAgents calls getAgentsByKuery and returns results', async () => {
     mockGetAgentsByKuery.mockResolvedValue('getAgentsByKuery success');
     await expect(agentClient.listAgents({ showInactive: true })).resolves.toEqual(
@@ -157,6 +207,7 @@ function expectApisToCallServicesSuccessfully(
     );
     expect(mockGetAgentsByKuery).toHaveBeenCalledWith(mockEsClient, mockSoClient, {
       showInactive: true,
+      spaceId,
     });
   });
 
@@ -183,7 +234,8 @@ function expectApisToCallServicesSuccessfully(
       mockEsClient,
       mockSoClient,
       'foo-id',
-      'foo-filter'
+      'foo-filter',
+      spaceId
     );
   });
 

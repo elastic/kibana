@@ -58,8 +58,9 @@ describe('POST /api/saved_objects/_bulk_delete with allowApiAccess as true', () 
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
+    const access = 'public';
 
-    registerBulkDeleteRoute(router, { config, coreUsageData, logger });
+    registerBulkDeleteRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

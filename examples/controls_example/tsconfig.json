@@ -34,5 +34,6 @@
     "@kbn/ui-theme",
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-panel-plugin",
+    "@kbn/datemath",
   ]
 }

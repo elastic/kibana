@@ -23,6 +23,7 @@ disabled:
   - x-pack/test/upgrade/config.ts
   - test/functional/config.edge.js
   - x-pack/test/functional/config.edge.js
+  - x-pack/test/cloud_security_posture_functional/config.cloud.ts
 
   # Cypress configs, for now these are still run manually
   - x-pack/test/fleet_cypress/cli_config.ts
@@ -97,7 +98,8 @@ enabled:
   - test/api_integration/config.js
   - test/examples/config.js
   - test/functional/apps/bundles/config.ts
-  - test/functional/apps/console/config.ts
+  - test/functional/apps/console/monaco/config.ts
+  - test/functional/apps/console/ace/config.ts
   - test/functional/apps/context/config.ts
   - test/functional/apps/dashboard_elements/controls/common/config.ts
   - test/functional/apps/dashboard_elements/controls/options_list/config.ts
@@ -114,6 +116,7 @@ enabled:
   - test/functional/apps/discover/ccs_compatibility/config.ts
   - test/functional/apps/discover/classic/config.ts
   - test/functional/apps/discover/embeddable/config.ts
+  - test/functional/apps/discover/esql/config.ts
   - test/functional/apps/discover/group1/config.ts
   - test/functional/apps/discover/group2_data_grid1/config.ts
   - test/functional/apps/discover/group2_data_grid2/config.ts
@@ -124,6 +127,7 @@ enabled:
   - test/functional/apps/discover/group6/config.ts
   - test/functional/apps/discover/group7/config.ts
   - test/functional/apps/discover/group8/config.ts
+  - test/functional/apps/discover/context_awareness/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
   - test/functional/apps/kibana_overview/config.ts
@@ -189,8 +193,6 @@ enabled:
   - x-pack/test/api_integration/config_security_basic.ts
   - x-pack/test/api_integration/config_security_trial.ts
   - x-pack/test/api_integration/apis/aiops/config.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_when_disabled.ts
-  - x-pack/test/api_integration/apis/asset_manager/config_when_enabled.ts
   - x-pack/test/api_integration/apis/cases/config.ts
   - x-pack/test/api_integration/apis/content_management/config.ts
   - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
@@ -245,6 +247,7 @@ enabled:
   - x-pack/test/fleet_api_integration/config.epm.ts
   - x-pack/test/fleet_api_integration/config.fleet.ts
   - x-pack/test/fleet_api_integration/config.package_policy.ts
+  - x-pack/test/fleet_api_integration/config.space_awareness.ts
   - x-pack/test/fleet_functional/config.ts
   - x-pack/test/ftr_apis/security_and_spaces/config.ts
   - x-pack/test/functional_basic/apps/ml/permissions/config.ts
@@ -323,6 +326,7 @@ enabled:
   - x-pack/test/functional/apps/search_playground/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
+  - x-pack/test/functional/apps/spaces/solution_view_flag_enabled/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
   - x-pack/test/functional/apps/transform/creation/index_pattern/config.ts
   - x-pack/test/functional/apps/transform/creation/runtime_mappings_saved_search/config.ts
@@ -383,8 +387,10 @@ enabled:
   - x-pack/test/security_api_integration/login_selector.config.ts
   - x-pack/test/security_api_integration/oidc_implicit_flow.config.ts
   - x-pack/test/security_api_integration/oidc.config.ts
+  - x-pack/test/security_api_integration/oidc.http2.config.ts
   - x-pack/test/security_api_integration/pki.config.ts
   - x-pack/test/security_api_integration/saml.config.ts
+  - x-pack/test/security_api_integration/saml.http2.config.ts
   - x-pack/test/security_api_integration/saml_cloud.config.ts
   - x-pack/test/security_api_integration/session_idle.config.ts
   - x-pack/test/security_api_integration/session_invalidate.config.ts
@@ -395,6 +401,8 @@ enabled:
   - x-pack/test/security_functional/login_selector.config.ts
   - x-pack/test/security_functional/oidc.config.ts
   - x-pack/test/security_functional/saml.config.ts
+  - x-pack/test/security_functional/saml.http2.config.ts
+  - x-pack/test/security_functional/oidc.http2.config.ts
   - x-pack/test/security_functional/insecure_cluster_warning.config.ts
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
@@ -404,6 +412,7 @@ enabled:
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
+  - x-pack/test/task_manager_claimer_mget/config.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
@@ -420,6 +429,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.saved_objects_management.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts
@@ -432,6 +442,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
   - x-pack/test_serverless/functional/test_suites/search/config.saved_objects_management.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group3.ts
@@ -440,8 +451,11 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group6.ts
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.basic.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.essentials.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.agentless.ts
   - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.context_awareness.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts
@@ -454,6 +468,7 @@ enabled:
   - x-pack/performance/journeys_e2e/flight_dashboard.ts
   - x-pack/performance/journeys_e2e/login.ts
   - x-pack/performance/journeys_e2e/many_fields_discover.ts
+  - x-pack/performance/journeys_e2e/many_fields_discover_esql.ts
   - x-pack/performance/journeys_e2e/many_fields_lens_editor.ts
   - x-pack/performance/journeys_e2e/many_fields_transform.ts
   - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts
@@ -489,6 +504,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/exceptions/workflows/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/trial_license_complete_tier/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_gaps/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_gaps/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_creation/basic_license_essentials_tier/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_creation/basic_license_essentials_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/rules_management/rule_creation/trial_license_complete_tier/configs/ess.config.ts
@@ -567,4 +584,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations_feature_flag.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations_feature_flag.config.ts
-

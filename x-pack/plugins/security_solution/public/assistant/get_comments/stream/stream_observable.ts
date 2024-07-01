@@ -19,6 +19,30 @@ interface StreamObservable {
   reader: ReadableStreamDefaultReader<Uint8Array>;
   setLoading: Dispatch<SetStateAction<boolean>>;
 }
+
+interface ResponseSchema {
+  candidates: Candidate[];
+  usageMetadata: {
+    promptTokenCount: number;
+    candidatesTokenCount: number;
+    totalTokenCount: number;
+  };
+}
+
+interface Part {
+  text: string;
+}
+
+interface Candidate {
+  content: Content;
+  finishReason: string;
+}
+
+interface Content {
+  role: string;
+  parts: Part[];
+}
+
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
@@ -44,9 +68,10 @@ export const getStreamObservable = ({
     let openAIBuffer: string = '';
     // Initialize an empty string to store the LangChain buffer.
     let langChainBuffer: string = '';
-
     // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
     let bedrockBuffer: Uint8Array = new Uint8Array(0);
+    // Initialize an empty string to store the Gemini buffer.
+    let geminiBuffer: string = '';
 
     // read data from LangChain stream
     function readLangChain() {
@@ -203,6 +228,54 @@ export const getStreamObservable = ({
         });
     }
 
+    // read data from Gemini stream
+    function readGemini() {
+      reader
+        .read()
+        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          try {
+            if (done) {
+              if (geminiBuffer) {
+                chunks.push(getGeminiChunks([geminiBuffer])[0]);
+              }
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: false,
+              });
+              observer.complete();
+              return;
+            }
+
+            const decoded = decoder.decode(value, { stream: true });
+            const lines = decoded.split('\r');
+            lines[0] = geminiBuffer + lines[0];
+            geminiBuffer = lines.pop() || '';
+
+            const nextChunks = getGeminiChunks(lines);
+
+            nextChunks.forEach((chunk: string) => {
+              const splitBySpace = chunk.split(' ');
+              for (const word of splitBySpace) {
+                chunks.push(`${word} `);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              }
+            });
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          readGemini();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
+    }
+
     // this should never actually happen
     function badConnector() {
       observer.next({
@@ -215,6 +288,7 @@ export const getStreamObservable = ({
     if (isEnabledLangChain) readLangChain();
     else if (actionTypeId === '.bedrock') readBedrock();
     else if (actionTypeId === '.gen-ai') readOpenAI();
+    else if (actionTypeId === '.gemini') readGemini();
     else badConnector();
 
     return () => {
@@ -291,5 +365,24 @@ const getLangChainChunks = (lines: string[]): string[] =>
     }
     return acc;
   }, []);
+
+/**
+ * Parses an Gemini response from a string.
+ * @param lines
+ * @returns {string[]} - Parsed string array from the Gemini response.
+ */
+const getGeminiChunks = (lines: string[]): string[] => {
+  return lines
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      try {
+        const newLine = line.replaceAll('data: ', '');
+        const geminiResponse: ResponseSchema = JSON.parse(newLine);
+        return geminiResponse.candidates[0]?.content.parts.map((part) => part.text).join('') ?? '';
+      } catch (err) {
+        return '';
+      }
+    });
+};
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();

@@ -10,8 +10,12 @@ import { backfillSchema } from '../../../result/schemas';
 
 export const scheduleBackfillErrorSchema = schema.object({
   error: schema.object({
-    error: schema.string(),
     message: schema.string(),
+    status: schema.maybe(schema.number()),
+    rule: schema.object({
+      id: schema.string(),
+      name: schema.maybe(schema.string()),
+    }),
   }),
 });
 
