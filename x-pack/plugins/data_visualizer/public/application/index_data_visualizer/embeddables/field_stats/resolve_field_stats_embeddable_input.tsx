@@ -91,6 +91,7 @@ export async function resolveEmbeddableFieldStatsUserInput(
           ownFocus: true,
           size: 's',
           paddingSize: 'm',
+          hideCloseButton: true,
           type: 'push',
           'data-test-subj': 'fieldStatisticsInitializerFlyout',
           onClose: cancelChanges,

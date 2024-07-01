@@ -12,7 +12,7 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { getESQLWithSafeLimit, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
@@ -119,6 +119,7 @@ async function updatePanelFromFlyoutEdits({
       ownFocus: true,
       size: 's',
       paddingSize: 'm',
+      hideCloseButton: true,
       type: 'push',
       'data-test-subj': 'fieldStatisticsInitializerFlyout',
       onClose: cancelChanges,
@@ -152,7 +153,8 @@ export function createAddFieldStatsTableAction(
         const defaultInitialState: FieldStatsInitialState = {
           viewType: FieldStatsInitializerViewType.ESQL,
           query: {
-            esql: getESQLWithSafeLimit(`from ${defaultIndexPattern?.getIndexPattern()}`, 10),
+            // Initial default query
+            esql: `from ${defaultIndexPattern?.getIndexPattern()} | limit 10`,
           },
         };
         const embeddable = await presentationContainerParent.addNewPanel<
