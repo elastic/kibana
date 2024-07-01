@@ -79,7 +79,7 @@ export const InvestigationGuide: React.FC = () => {
       ) : hasInvesigationGuide && isPreviewMode ? (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutMessage"
-          defaultMessage="You are currently in preview mode. Switch to this flyout to access all expandable options."
+          defaultMessage="Open alert details to access investigation guides."
         />
       ) : hasInvesigationGuide ? (
         <EuiFlexItem>

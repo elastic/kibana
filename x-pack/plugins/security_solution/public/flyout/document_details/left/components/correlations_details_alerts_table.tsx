@@ -141,9 +141,7 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
 
   const mappedData = useMemo(() => {
     return data
-      .map((hit) => {
-        return { fields: hit.fields ?? {}, id: hit._id, index: hit._index };
-      })
+      .map((hit) => ({ fields: hit.fields ?? {}, id: hit._id, index: hit._index }))
       .map((dataWithMeta) => {
         const res = Object.keys(dataWithMeta.fields).reduce((result, fieldName) => {
           result[fieldName] =
@@ -168,86 +166,89 @@ export const CorrelationsDetailsAlertsTable: FC<CorrelationsDetailsAlertsTablePr
     [alertIds, shouldUseFilters]
   );
 
-  const columns = [
-    ...(isPreviewEnabled
-      ? [
-          {
-            render: (row: Record<string, unknown>) => (
-              <AlertPreviewButton id={row.id as string} indexName={row.index as string} />
-            ),
-            width: '5%',
-          },
-        ]
-      : []),
-    {
-      field: '@timestamp',
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.timestampColumnLabel"
-          defaultMessage="Timestamp"
-        />
-      ),
-      truncateText: true,
-      dataType: 'date' as const,
-      render: (value: string) => {
-        const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
-        return (
-          <CellTooltipWrapper tooltip={date}>
-            <span>{date}</span>
+  const columns = useMemo(
+    () => [
+      ...(isPreviewEnabled
+        ? [
+            {
+              render: (row: Record<string, unknown>) => (
+                <AlertPreviewButton id={row.id as string} indexName={row.index as string} />
+              ),
+              width: '5%',
+            },
+          ]
+        : []),
+      {
+        field: '@timestamp',
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.correlations.timestampColumnLabel"
+            defaultMessage="Timestamp"
+          />
+        ),
+        truncateText: true,
+        dataType: 'date' as const,
+        render: (value: string) => {
+          const date = formatDate(value, TIMESTAMP_DATE_FORMAT);
+          return (
+            <CellTooltipWrapper tooltip={date}>
+              <span>{date}</span>
+            </CellTooltipWrapper>
+          );
+        },
+      },
+      {
+        field: ALERT_RULE_NAME,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
+            defaultMessage="Rule"
+          />
+        ),
+        truncateText: true,
+        render: (value: string) => (
+          <CellTooltipWrapper tooltip={value}>
+            <span>{value}</span>
           </CellTooltipWrapper>
-        );
+        ),
       },
-    },
-    {
-      field: ALERT_RULE_NAME,
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.ruleColumnLabel"
-          defaultMessage="Rule"
-        />
-      ),
-      truncateText: true,
-      render: (value: string) => (
-        <CellTooltipWrapper tooltip={value}>
-          <span>{value}</span>
-        </CellTooltipWrapper>
-      ),
-    },
-    {
-      field: ALERT_REASON,
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.reasonColumnLabel"
-          defaultMessage="Reason"
-        />
-      ),
-      truncateText: true,
-      render: (value: string) => (
-        <CellTooltipWrapper tooltip={value} anchorPosition="left">
-          <span>{value}</span>
-        </CellTooltipWrapper>
-      ),
-    },
-    {
-      field: 'kibana.alert.severity',
-      name: (
-        <FormattedMessage
-          id="xpack.securitySolution.flyout.left.insights.correlations.severityColumnLabel"
-          defaultMessage="Severity"
-        />
-      ),
-      truncateText: true,
-      render: (value: string) => {
-        const decodedSeverity = Severity.decode(value);
-        const renderValue = isRight(decodedSeverity) ? (
-          <SeverityBadge value={decodedSeverity.right} />
-        ) : (
-          <p>{value}</p>
-        );
-        return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
+      {
+        field: ALERT_REASON,
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.correlations.reasonColumnLabel"
+            defaultMessage="Reason"
+          />
+        ),
+        truncateText: true,
+        render: (value: string) => (
+          <CellTooltipWrapper tooltip={value} anchorPosition="left">
+            <span>{value}</span>
+          </CellTooltipWrapper>
+        ),
       },
-    },
-  ];
+      {
+        field: 'kibana.alert.severity',
+        name: (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.left.insights.correlations.severityColumnLabel"
+            defaultMessage="Severity"
+          />
+        ),
+        truncateText: true,
+        render: (value: string) => {
+          const decodedSeverity = Severity.decode(value);
+          const renderValue = isRight(decodedSeverity) ? (
+            <SeverityBadge value={decodedSeverity.right} />
+          ) : (
+            <p>{value}</p>
+          );
+          return <CellTooltipWrapper tooltip={value}>{renderValue}</CellTooltipWrapper>;
+        },
+      },
+    ],
+    [isPreviewEnabled]
+  );
 
   return (
     <ExpandablePanel

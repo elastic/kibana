@@ -23,7 +23,7 @@ export const ALERT_PREVIEW_BANNER = {
   title: i18n.translate(
     'xpack.securitySolution.flyout.left.insights.correlations.alertPreviewTitle',
     {
-      defaultMessage: 'Preview alert',
+      defaultMessage: 'Preview alert details',
     }
   ),
   backgroundColor: 'warning',
@@ -63,6 +63,7 @@ export const PreviewPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) =
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}
+        style={{ marginTop: '-15px' }}
       />
       <PanelContent tabs={tabsDisplayed} selectedTabId={selectedTabId} />
       <PreviewPanelFooter />

@@ -14,6 +14,7 @@ import {
   EuiText,
   useEuiTheme,
   EuiSplitPanel,
+  transparentize,
 } from '@elastic/eui';
 import React from 'react';
 import { css } from '@emotion/react';
@@ -139,7 +140,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       <EuiSplitPanel.Outer
         css={css`
           margin: ${euiTheme.size.xs};
-          box-shadow: 0 0 16px 0px rgb(105, 112, 125, 0.5);
+          box-shadow: 0 0 16px 0px ${transparentize(euiTheme.colors.mediumShade, 0.5)};
         `}
         data-test-subj={PREVIEW_SECTION_TEST_ID}
         className="eui-fullHeight"
@@ -154,7 +155,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
             <EuiText
               textAlign="center"
               color={banner.textColor}
-              size="s"
+              size="xs"
               data-test-subj={`${PREVIEW_SECTION_TEST_ID}BannerText`}
             >
               {banner.title}
