@@ -245,8 +245,6 @@ export const migrateLegacyActionsIds = async (
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
 
-        console.error('partitioned system actions', systemActions);
-
         // were there any errors discovered while trying to migrate and swap the action connector ids?
         const [actionMigrationErrors, newlyMigratedActions] = partition<RuleAction | Error, Error>(
           (item): item is Error => item instanceof Error

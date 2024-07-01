@@ -101,9 +101,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             RuleExceptionsPromiseFromStreams[]
           >([request.body.file as HapiReadableStream, ...readAllStream]);
 
-          console.error('DID WE GET HERE 00');
-          console.error('rules', JSON.stringify(rules));
-
           // import exceptions, includes validation
           const {
             errors: exceptionsErrors,
@@ -119,19 +116,11 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
           const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
             getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
 
-          console.error('DID WE GET HERE 0');
-          console.error(
-            'parsedObjectsWithoutDuplicateErrors',
-            JSON.stringify(parsedObjectsWithoutDuplicateErrors)
-          );
-
           const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
             parsedObjectsWithoutDuplicateErrors,
             actionSOClient,
             actionsClient
           );
-
-          console.error('DID WE GET HERE 1');
 
           // import actions-connectors
           const {
@@ -148,13 +137,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             overwrite: request.query.overwrite_action_connectors,
           });
 
-          console.error('DID WE GET HERE 2');
-          console.error('rulesWithMigratedActions', JSON.stringify(rulesWithMigratedActions));
-          console.error(
-            'migratedParsedObjectsWithoutDuplicateErrors',
-            JSON.stringify(migratedParsedObjectsWithoutDuplicateErrors)
-          );
-
           // rulesWithMigratedActions: Is returned only in case connectors were exported from different namespace and the
           // original rules actions' ids were replaced with new destinationIds
           const parsedRules = actionConnectorErrors.length
@@ -167,8 +149,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             savedObjectsClient,
           });
 
-          console.error('parsedRules', JSON.stringify(parsedRules));
-
           const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, parsedRules);
 
           const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
@@ -180,7 +160,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });
 
-          console.error('DID WE GET HERE 3');
           const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
           const successes = importRuleResponse.filter((resp) => {
             if (isImportRegular(resp)) {

@@ -51,7 +51,6 @@ const filterOutPredefinedActionConnectorsIds = async (
   const predefinedActionsIds = allActions
     .filter(({ isPreconfigured, isSystemAction }) => isPreconfigured || isSystemAction)
     .map(({ id }) => id);
-  console.error('PREDEFINED ACTION IDS', predefinedActionsIds);
   if (predefinedActionsIds.length)
     return actionsIdsToExport.filter((id) => !predefinedActionsIds.includes(id));
   return actionsIdsToExport;
@@ -81,7 +80,6 @@ export const getRuleActionConnectorsForExport = async (
   // check tomorrow
   const ids = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
 
-  console.error('WHAT ARE THE IDS', ids);
   let actionsIds = ids;
   if (!actionsIds.length) return exportedActionConnectors;
 

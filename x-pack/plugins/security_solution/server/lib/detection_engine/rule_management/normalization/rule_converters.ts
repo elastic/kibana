@@ -609,18 +609,10 @@ export const convertCreateAPIToInternalSchema = (
     actionsClient.isSystemAction(action.id)
   );
 
-  console.error(
-    `SYSTEM ACTIONS: ${JSON.stringify(systemActions)}\nexternalActions: ${JSON.stringify(
-      externalActions
-    )}`
-  );
-
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
 
   const alertSystemActions = systemActions?.map((action) => transformRuleToAlertAction(action));
-
-  console.error('alertSystemActions', JSON.stringify(alertSystemActions));
 
   const alertActions = externalActions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions as RuleActionCamel[], input.throttle);
@@ -840,9 +832,6 @@ export const internalRuleToAPIResponse = (
     const transformedAction = transformAlertToRuleSystemAction(action);
     return transformedAction;
   });
-
-  console.error('alertActions', JSON.stringify(alertActions));
-  console.error('systemActions', JSON.stringify(systemActions));
 
   return {
     // saved object properties

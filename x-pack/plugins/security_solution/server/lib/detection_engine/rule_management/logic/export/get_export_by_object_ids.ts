@@ -40,7 +40,6 @@ export const getExportByObjectIds = async (
     const rulesAndErrors = await fetchRulesByIds(rulesClient, ruleIds);
     const { rules, missingRuleIds } = rulesAndErrors;
 
-    console.error('RULES AND ERRORS', JSON.stringify(rulesAndErrors));
     // Retrieve exceptions
     const exceptions = rules.flatMap((rule) => rule.exceptions_list ?? []);
     const { exportData: exceptionLists, exportDetails: exceptionDetails } =
@@ -100,7 +99,6 @@ const fetchRulesByIds = async (
         sortField: undefined,
         sortOrder: undefined,
       });
-      console.error(JSON.stringify(rulesResult, null, 2));
       const rulesMap = new Map<string, PartialRule<RuleParams>>();
 
       for (const rule of rulesResult.data) {
@@ -145,8 +143,6 @@ const fetchRulesByIds = async (
       }
     }
   }
-
-  console.error('ABOUT TO RETURN RULES');
 
   return {
     rules,
