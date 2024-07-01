@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
-
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import { EuiSteps, EuiLoadingSpinner } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
@@ -28,8 +26,8 @@ import {
   useStartServices,
   sendGetOneAgentPolicyFull,
   useAgentVersion,
-  sendCreateStandaloneAgentAPIKey,
 } from '../../../hooks';
+import { useGetCreateApiKey } from '../hooks';
 
 import type { InstructionProps } from '../types';
 import { usePollingAgentCount } from '../confirm_agent_enrollment';
@@ -69,7 +67,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   const { notifications } = core;
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
   const [yaml, setYaml] = useState<any | undefined>('');
-  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
+  const { apiKey, onCreateApiKey } = useGetCreateApiKey();
 
   const downloadLink = useMemo(() => {
     if (!selectedPolicy?.id) {
@@ -131,17 +129,6 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
     }
   }, [fullAgentPolicy, isK8s]);
-
-  const onCreateApiKey = useCallback(async () => {
-    const res = await sendCreateStandaloneAgentAPIKey({
-      name: crypto.randomBytes(16).toString('hex'),
-    });
-    if (res.error) {
-      throw res.error;
-    }
-    const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
-    setApiKey(newApiKey);
-  }, []);
 
   const agentVersion = useAgentVersion();
 

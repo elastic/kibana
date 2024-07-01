@@ -4,7 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect, useMemo } from 'react';
+import crypto from 'crypto';
+
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { PackagePolicy, AgentPolicy } from '../../types';
@@ -22,6 +24,8 @@ import {
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG,
 } from '../cloud_security_posture/services';
+
+import { sendCreateStandaloneAgentAPIKey } from '../../hooks';
 
 import type {
   K8sMode,
@@ -190,3 +194,28 @@ const getCloudSecurityPackagePolicyFromAgentPolicy = (
     (input) => input.package?.name === FLEET_CLOUD_SECURITY_POSTURE_PACKAGE
   );
 };
+
+export function useGetCreateApiKey() {
+  const core = useStartServices();
+
+  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
+  const onCreateApiKey = useCallback(async () => {
+    try {
+      const res = await sendCreateStandaloneAgentAPIKey({
+        name: crypto.randomBytes(16).toString('hex'),
+      });
+      const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
+      setApiKey(newApiKey);
+    } catch (err) {
+      core.notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.fleet.standaloneAgentPage.errorCreatingAgentAPIKey', {
+          defaultMessage: 'Error creating Agent API Key',
+        }),
+      });
+    }
+  }, [core.notifications.toasts]);
+  return {
+    apiKey,
+    onCreateApiKey,
+  };
+}

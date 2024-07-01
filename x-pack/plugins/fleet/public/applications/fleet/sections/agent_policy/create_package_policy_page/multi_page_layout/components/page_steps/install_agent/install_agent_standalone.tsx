@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
-
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSteps, EuiSpacer } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
+
+import { i18n } from '@kbn/i18n';
 
 import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 import { API_VERSIONS } from '../../../../../../../../../../common/constants';
@@ -24,13 +24,13 @@ import {
   fullAgentPolicyToYaml,
   agentPolicyRouteService,
 } from '../../../../../../../../../services';
+import { useGetCreateApiKey } from '../../../../../../../../../components/agent_enrollment_flyout/hooks';
 
 import { Error as FleetError } from '../../../../../../../components';
 import {
   useKibanaVersion,
   useStartServices,
   sendGetOneAgentPolicyFull,
-  sendCreateStandaloneAgentAPIKey,
 } from '../../../../../../../../../hooks';
 import {
   InstallStandaloneAgentStep,
@@ -48,7 +48,8 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
   const [commandCopied, setCommandCopied] = useState(false);
   const [policyCopied, setPolicyCopied] = useState(false);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
-  const [apiKey, setApiKey] = useState<string | undefined>(undefined);
+
+  const { apiKey, onCreateApiKey } = useGetCreateApiKey();
 
   useEffect(() => {
     async function fetchFullPolicy() {
@@ -68,7 +69,9 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
         setFullAgentPolicy(res.data.item);
       } catch (error) {
         core.notifications.toasts.addError(error, {
-          title: 'Error',
+          title: i18n.translate('xpack.fleet.standaloneAgentPage.errorFetchingFullAgentPolicy', {
+            defaultMessage: 'Error fetching full agent policy',
+          }),
         });
       }
     }
@@ -82,17 +85,6 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
 
     setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
   }, [fullAgentPolicy]);
-
-  const onCreateApiKey = useCallback(async () => {
-    const res = await sendCreateStandaloneAgentAPIKey({
-      name: crypto.randomBytes(16).toString('hex'),
-    });
-    if (res.error) {
-      throw res.error;
-    }
-    const newApiKey = `${res.data?.item.id}:${res.data?.item.api_key}`;
-    setApiKey(newApiKey);
-  }, []);
 
   if (!agentPolicy) {
     return (
