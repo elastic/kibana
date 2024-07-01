@@ -40,7 +40,6 @@ export enum ConnectorDetailTabId {
   CONFIGURATION = 'configuration',
   SYNC_RULES = 'sync_rules',
   SCHEDULING = 'scheduling',
-  DEPLOYMENT = 'deployment',
 }
 
 export const ConnectorDetail: React.FC = () => {

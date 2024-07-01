@@ -35,27 +35,17 @@ export const getConnectorTemplate = ({
     api_key: "${apiKeyData?.encoded || ''}"
 `;
 
-export const getRunFromDockerSnippet = ({
-  connectorId,
-  elasticsearchHost,
-  serviceType,
-}: {
-  connectorId: string;
-  elasticsearchHost: string;
-  serviceType: string;
-}) => dedent`docker run \\
+export const getRunFromDockerSnippet = ({ version }: { version: string }) => dedent`
+docker run \\
 
-  --rm \\
+    -v "</absolute/path/to>/connectors-config:/config" \ # NOTE: change absolute path to match where config.yml is located on your machine
+    --tty \\
 
-  --tty -i \\
+    --rm \\
 
-  docker.elastic.co/enterprise-search/enterprise-search:8.15.0 \\
+    docker.elastic.co/enterprise-search/elastic-connectors:${version} \\
 
-  /app/bin/elastic-ingest \\
+    /app/bin/elastic-ingest \\
 
-  -e "connectors.[0].connector_id=${connectorId}" \\
-
-  -e "connectors.[0].service_type=${serviceType}" \\
-
-  -e "elasticsearch.host=${elasticsearchHost}"
+    -c /config/config.yml # Path to your configuration file in the container
 `;

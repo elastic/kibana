@@ -27,6 +27,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
+import { Status } from '../../../../../common/types/api';
+
+import { GetApiKeyByIdLogic } from '../../api/api_key/get_api_key_by_id_api_logic';
+
+import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
+
 import { ConnectorLinked } from './components/connector_linked';
 import { DockerInstructionsStep } from './components/docker_instructions_step';
 import { GenerateConfigButton } from './components/generate_config_button';
@@ -38,25 +44,37 @@ import { ConnectorViewLogic } from './connector_view_logic';
 import { DeploymentLogic } from './deployment_logic';
 
 export const ConnectorDeployment: React.FC = () => {
-  const [selectedDeploymentMethod, setSelectedDeploymentMethod] = useState<
-    'docker' | 'source' | null
-  >(null);
+  const [selectedDeploymentMethod, setSelectedDeploymentMethod] = useState<'docker' | 'source'>(
+    'docker'
+  );
   const { generatedData, isGenerateLoading } = useValues(DeploymentLogic);
   const { index, isLoading, connector, connectorId } = useValues(ConnectorViewLogic);
   const { fetchConnector } = useActions(ConnectorViewLogic);
   const { generateConfiguration } = useActions(DeploymentLogic);
+  const { makeRequest: getApiKeyById } = useActions(GetApiKeyByIdLogic);
+  const { data: apiKeyMetaData } = useValues(GetApiKeyByIdLogic);
+  const { makeRequest: generateConnectorApiKey } = useActions(GenerateConnectorApiKeyApiLogic);
+  const { status, data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
 
   const [connectorUiOptions, setConnectorUiOptions] = useLocalStorage<
-    Record<string, { deploymentMethod: 'docker' | 'source' | null }>
+    Record<string, { deploymentMethod: 'docker' | 'source' }>
   >('search:connector-ui-options', {});
 
   useEffect(() => {
     if (connectorUiOptions && connectorId && connectorUiOptions[connectorId]) {
       setSelectedDeploymentMethod(connectorUiOptions[connectorId].deploymentMethod);
+    } else {
+      selectDeploymentMethod('docker');
     }
   }, [connectorUiOptions, connectorId]);
 
-  if (!connector) {
+  useEffect(() => {
+    if (connectorId && connector && connector.api_key_id) {
+      getApiKeyById(connector.api_key_id);
+    }
+  }, [connector, connectorId]);
+
+  if (!connector || connector.is_native) {
     return <></>;
   }
 
@@ -67,14 +85,11 @@ export const ConnectorDeployment: React.FC = () => {
       [connector.id]: { deploymentMethod },
     });
   };
-  // TODO figure out
-  if (connector.is_native) {
-    return <></>;
-  }
 
   const hasApiKey = !!(connector.api_key_id ?? generatedData?.apiKey);
 
   const isWaitingForConnector = !connector.status || connector.status === ConnectorStatus.CREATED;
+  const apiKey = generatedData?.apiKey || apiKeyData || apiKeyMetaData;
 
   return (
     <EuiFlexGroup>
@@ -129,10 +144,19 @@ export const ConnectorDeployment: React.FC = () => {
                       </EuiText>
 
                       <EuiSpacer />
-                      {hasApiKey ? (
+                      {hasApiKey && connector.index_name ? (
                         <GeneratedConfigFields
-                          apiKey={generatedData?.apiKey}
+                          apiKey={apiKey}
                           connector={connector}
+                          generateApiKey={() => {
+                            if (connector.index_name) {
+                              generateConnectorApiKey({
+                                indexName: connector.index_name,
+                                isNative: connector.is_native,
+                              });
+                            }
+                          }}
+                          isGenerateLoading={status === Status.LOADING}
                         />
                       ) : (
                         <GenerateConfigButton
@@ -159,7 +183,6 @@ export const ConnectorDeployment: React.FC = () => {
                       {selectedDeploymentMethod === 'source' ? (
                         <RunFromSourceStep
                           connectorId={connectorId ?? ''}
-                          hasApiKey={hasApiKey}
                           serviceType={connector.service_type ?? ''}
                           apiKeyData={generatedData?.apiKey}
                           isWaitingForConnector={isWaitingForConnector}

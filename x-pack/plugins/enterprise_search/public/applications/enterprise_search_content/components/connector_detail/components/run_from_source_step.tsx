@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSkeletonRectangle,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -34,7 +33,6 @@ import { getConnectorTemplate } from '../../search_index/connector/constants';
 export interface RunFromSourceStepProps {
   apiKeyData?: ApiKey;
   connectorId?: string;
-  hasApiKey: boolean;
   isWaitingForConnector: boolean;
   serviceType: string;
 }
@@ -42,7 +40,6 @@ export interface RunFromSourceStepProps {
 export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
   apiKeyData,
   connectorId,
-  hasApiKey,
   isWaitingForConnector,
   serviceType,
 }) => {
@@ -76,6 +73,8 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
       <EuiButton
         data-test-subj="enterpriseSearchConnectorDeploymentGoToSourceButton"
         iconType="logoGithub"
+        href="https://github.com/elastic/connectors"
+        target="_blank"
       >
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem>
@@ -115,31 +114,29 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
         }
       >
         <EuiSpacer size="s" />
-        {hasApiKey ? (
-          <CodeBox
-            languageType="yaml"
-            codeSnippet={getConnectorTemplate({
-              apiKeyData,
-              connectorData: {
-                id: connectorId ?? '',
-                service_type: serviceType,
-              },
-              host: elasticsearchUrl,
-            })}
-          />
-        ) : (
-          <EuiSkeletonRectangle width="100%" height={148} />
-        )}
-        <EuiSpacer size="s" />
-        <EuiText>
+        <CodeBox
+          showTopBar={false}
+          languageType="yaml"
+          codeSnippet={getConnectorTemplate({
+            apiKeyData,
+            connectorData: {
+              id: connectorId ?? '',
+              service_type: serviceType,
+            },
+            host: elasticsearchUrl,
+          })}
+        />
+        <EuiSpacer />
+        <EuiText size="s">
           <p>
             {i18n.translate('xpack.enterpriseSearch.connectorDeployment.p.compileAndRunLabel', {
               defaultMessage: 'Compile and run',
             })}
           </p>
         </EuiText>
-        <EuiSpacer size="s" />
+        <EuiSpacer />
         <CodeBox
+          showTopBar={false}
           languageType="bash"
           codeSnippet={dedent`
                               make install

@@ -25,6 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ConnectorStatus } from '@kbn/search-connectors';
 
+import { APPLICATIONS_PLUGIN } from '../../../../../../common/constants';
+
+import { PLAYGROUND_PATH } from '../../../../applications/routes';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
@@ -34,21 +37,21 @@ import { SyncsContextMenu } from '../../shared/header_actions/syncs_context_menu
 import { ConnectorDetailTabId } from '../connector_detail';
 
 export interface WhatsNextBoxProps {
-  disabled?: boolean;
-  isWaitingForConnector?: boolean;
   connectorId: string;
   connectorIndex?: string;
   connectorStatus: ConnectorStatus;
+  disabled?: boolean;
   isSyncing?: boolean;
+  isWaitingForConnector?: boolean;
 }
 
 export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
-  disabled = false,
-  isWaitingForConnector = false,
   connectorId,
   connectorIndex,
   connectorStatus,
+  disabled = false,
   isSyncing = false,
+  isWaitingForConnector = false,
 }) => {
   const { navigateToUrl } = useValues(KibanaLogic);
   const isConfigured = !(
@@ -80,11 +83,14 @@ export const WhatsNextBox: React.FC<WhatsNextBoxProps> = ({
           <EuiButton
             data-test-subj="enterpriseSearchWhatsNextBoxSearchPlaygroundButton"
             iconType="sparkles"
-            disabled={disabled}
+            disabled={!connectorIndex || disabled}
             onClick={() => {
-              navigateToUrl('/app/enterprise_search/applications/playground', {
-                shouldNotCreateHref: true,
-              });
+              navigateToUrl(
+                `${APPLICATIONS_PLUGIN.URL}${PLAYGROUND_PATH}?default-index=${connectorIndex}`,
+                {
+                  shouldNotCreateHref: true,
+                }
+              );
             }}
           >
             <FormattedMessage

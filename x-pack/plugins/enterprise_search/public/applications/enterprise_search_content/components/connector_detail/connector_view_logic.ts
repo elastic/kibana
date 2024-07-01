@@ -18,6 +18,10 @@ import {
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
 import {
+  GenerateConnectorApiKeyApiLogicActions,
+  GenerateConnectorApiKeyApiLogic,
+} from '../../api/connector/generate_connector_api_key_api_logic';
+import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationActions,
 } from '../../api/connector/update_connector_configuration_api_logic';
@@ -47,6 +51,7 @@ export interface ConnectorViewActions {
   fetchIndexApiError: FetchIndexActions['apiError'];
   fetchIndexApiReset: FetchIndexActions['apiReset'];
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
+  generateApiKeySuccess: GenerateConnectorApiKeyApiLogicActions['apiSuccess'];
   generateConfigurationSuccess: DeploymentLogicActions['generateConfigurationSuccess'];
   nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
   nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
@@ -113,6 +118,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['apiSuccess as nameAndDescriptionApiSuccess', 'apiError as nameAndDescriptionApiError'],
       DeploymentLogic,
       ['generateConfigurationSuccess'],
+      GenerateConnectorApiKeyApiLogic,
+      ['apiSuccess as generateApiKeySuccess'],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -130,6 +137,21 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     },
   }),
   listeners: ({ actions, values }) => ({
+    fetchConnectorApiSuccess: ({ connector }) => {
+      if (!values.index && connector?.index_name) {
+        actions.fetchIndex({ indexName: connector.index_name });
+      }
+    },
+    generateApiKeySuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
+    generateConfigurationSuccess: () => {
+      if (values.connectorId) {
+        actions.fetchConnector({ connectorId: values.connectorId });
+      }
+    },
     nameAndDescriptionApiError: () => {
       if (values.connectorId) {
         actions.fetchConnector({ connectorId: values.connectorId });
@@ -141,16 +163,6 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       }
     },
     updateConnectorConfigurationSuccess: () => {
-      if (values.connectorId) {
-        actions.fetchConnector({ connectorId: values.connectorId });
-      }
-    },
-    fetchConnectorApiSuccess: ({ connector }) => {
-      if (!values.index && connector?.index_name) {
-        actions.fetchIndex({ indexName: connector.index_name });
-      }
-    },
-    generateConfigurationSuccess: () => {
       if (values.connectorId) {
         actions.fetchConnector({ connectorId: values.connectorId });
       }
