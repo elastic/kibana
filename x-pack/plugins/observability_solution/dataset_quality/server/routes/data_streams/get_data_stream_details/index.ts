@@ -61,6 +61,7 @@ export async function getDataStreamDetails({
         await getDataStreamsStats({
           esClient,
           dataStreams: [dataStream],
+          sizeStatsAvailable,
         })
       ).items[0]?.lastActivity
     : undefined;

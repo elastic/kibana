@@ -10,6 +10,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type {
+  AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
   AnalyticsServiceSetup,
@@ -17,12 +18,12 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
+  SecurityServiceStart,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -39,6 +40,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
+import { AttackDiscoveryDataClient } from './ai_assistant_data_clients/attack_discovery';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -98,7 +100,7 @@ export interface ElasticAssistantPluginSetupDependencies {
 export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   spaces?: SpacesPluginStart;
-  security: SecurityPluginStart;
+  security: SecurityServiceStart;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {
@@ -114,6 +116,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantKnowledgeBaseDataClient: (
     initializeKnowledgeBase: boolean
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
+  getAttackDiscoveryDataClient: () => Promise<AttackDiscoveryDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
@@ -148,24 +151,28 @@ export interface AssistantResourceNames {
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   indexTemplate: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   aliases: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   indexPatterns: {
     conversations: string;
     knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
+    attackDiscovery: string;
   };
   pipelines: {
     knowledgeBase: string;

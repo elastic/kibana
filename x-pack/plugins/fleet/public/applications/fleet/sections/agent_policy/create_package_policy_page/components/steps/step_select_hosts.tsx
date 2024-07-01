@@ -42,7 +42,8 @@ interface Props {
   packageInfo?: PackageInfo;
   setHasAgentPolicyError: (hasError: boolean) => void;
   updateSelectedTab: (tab: SelectedPolicyTab) => void;
-  selectedAgentPolicyId?: string;
+  selectedAgentPolicyIds: string[];
+  initialSelectedTabIndex?: number;
 }
 
 export const StepSelectHosts: React.FunctionComponent<Props> = ({
@@ -56,7 +57,8 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   packageInfo,
   setHasAgentPolicyError,
   updateSelectedTab,
-  selectedAgentPolicyId,
+  selectedAgentPolicyIds,
+  initialSelectedTabIndex,
 }) => {
   let existingAgentPolicies: AgentPolicy[] = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
@@ -110,7 +112,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
           agentPolicies={agentPolicies}
           updateAgentPolicies={updateAgentPolicies}
           setHasAgentPolicyError={setHasAgentPolicyError}
-          selectedAgentPolicyId={selectedAgentPolicyId}
+          selectedAgentPolicyIds={selectedAgentPolicyIds}
         />
       ),
     },
@@ -121,7 +123,13 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
 
   return existingAgentPolicies.length > 0 ? (
     <StyledEuiTabbedContent
-      initialSelectedTab={selectedAgentPolicyId ? tabs[1] : tabs[0]}
+      initialSelectedTab={
+        initialSelectedTabIndex
+          ? tabs[initialSelectedTabIndex]
+          : selectedAgentPolicyIds.length > 0
+          ? tabs[1]
+          : tabs[0]
+      }
       tabs={tabs}
       onTabClick={handleOnTabClick}
     />

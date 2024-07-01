@@ -226,6 +226,7 @@ describe('ActionsClientSimpleChatModel', () => {
         actions: mockStreamActions,
         llmType: 'bedrock',
         streaming: true,
+        maxTokens: 333,
       });
 
       const result = await actionsClientSimpleChatModel._call(
@@ -235,6 +236,14 @@ describe('ActionsClientSimpleChatModel', () => {
       );
       const subAction = mockStreamExecute.mock.calls[0][0].params.subAction;
       expect(subAction).toEqual('invokeStream');
+
+      const { messages, ...rest } = mockStreamExecute.mock.calls[0][0].params.subActionParams;
+
+      expect(rest).toEqual({
+        temperature: 0,
+        stopSequences: ['\n'],
+        maxTokens: 333,
+      });
 
       expect(result).toEqual(mockActionResponse.message);
     });
@@ -244,6 +253,7 @@ describe('ActionsClientSimpleChatModel', () => {
         actions: mockStreamActions,
         llmType: 'gemini',
         streaming: true,
+        maxTokens: 333,
       });
 
       const result = await actionsClientSimpleChatModel._call(
@@ -253,6 +263,11 @@ describe('ActionsClientSimpleChatModel', () => {
       );
       const subAction = mockStreamExecute.mock.calls[0][0].params.subAction;
       expect(subAction).toEqual('invokeStream');
+      const { messages, ...rest } = mockStreamExecute.mock.calls[0][0].params.subActionParams;
+
+      expect(rest).toEqual({
+        temperature: 0,
+      });
 
       expect(result).toEqual(mockActionResponse.message);
     });

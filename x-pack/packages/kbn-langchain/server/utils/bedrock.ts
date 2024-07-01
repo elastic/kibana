@@ -180,7 +180,7 @@ const prepareBedrockOutput = (responseBody: CompletionChunk, logger?: Logger): s
       return responseBody.delta.text;
     }
   }
-  logger?.warn(`Failed to parse bedrock chunk ${JSON.stringify(responseBody)}`);
+  // ignore any chunks that do not include text output
   return '';
 };
 
