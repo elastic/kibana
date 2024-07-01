@@ -55,8 +55,13 @@ interface UseSettingsUpdater {
 
 export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
+<<<<<<< HEAD
   anonymizationFields: FindAnonymizationFieldsResponse,
   allSystemPrompts: FindPromptsResponse
+=======
+  conversationsLoaded: boolean,
+  anonymizationFields: FindAnonymizationFieldsResponse
+>>>>>>> upstream/main
 ): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
@@ -166,6 +171,7 @@ export const useSettingsUpdater = (
     const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
       ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
       : undefined;
+<<<<<<< HEAD
 
     const bulkPromptsResult = hasBulkPrompts
       ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
@@ -176,6 +182,9 @@ export const useSettingsUpdater = (
       (bulkAnonymizationFieldsResult?.success ?? true) &&
       (bulkPromptsResult?.success ?? true)
     );
+=======
+    return (bulkResult?.success ?? true) && (bulkAnonymizationFieldsResult?.success ?? true);
+>>>>>>> upstream/main
   }, [
     hasBulkConversations,
     http,
@@ -210,6 +219,13 @@ export const useSettingsUpdater = (
     anonymizationFieldsBulkActions.delete?.ids?.length,
     anonymizationFieldsBulkActions.update?.length,
   ]);
+
+  useEffect(() => {
+    // Update conversation settings when conversations are loaded
+    if (conversationsLoaded) {
+      setConversationSettings(conversations);
+    }
+  }, [conversations, conversationsLoaded]);
 
   return {
     conversationSettings,

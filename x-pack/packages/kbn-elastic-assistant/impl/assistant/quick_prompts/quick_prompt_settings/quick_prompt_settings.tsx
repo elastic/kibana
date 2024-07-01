@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFormRow,
-  EuiColorPicker,
-  EuiTextArea,
-  EuiTitle,
-  EuiText,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
+<<<<<<< HEAD
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
 import {
@@ -28,6 +21,11 @@ import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selec
 import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
 
 const DEFAULT_COLOR = '#D36086';
+=======
+import * as i18n from './translations';
+import { QuickPrompt } from '../types';
+import { QuickPromptSettingsEditor } from './quick_prompt_editor';
+>>>>>>> upstream/main
 
 interface Props {
   onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
@@ -46,6 +44,7 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     selectedQuickPrompt,
     setUpdatedQuickPromptSettings,
   }) => {
+<<<<<<< HEAD
     const { basePromptContexts } = useAssistantContext();
     // Prompt
     const prompt = useMemo(
@@ -180,6 +179,8 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
       [setUpdatedQuickPromptSettings]
     );
 
+=======
+>>>>>>> upstream/main
     return (
       <>
         <EuiTitle size={'s'}>
@@ -189,52 +190,12 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
         <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
         <EuiHorizontalRule margin={'s'} />
 
-        <EuiFormRow label={i18n.QUICK_PROMPT_NAME} display="rowCompressed" fullWidth>
-          <QuickPromptSelector
-            onQuickPromptDeleted={onQuickPromptDeleted}
-            onQuickPromptSelectionChange={onQuickPromptSelectionChange}
-            quickPrompts={quickPromptSettings}
-            selectedQuickPrompt={selectedQuickPrompt}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow label={i18n.QUICK_PROMPT_PROMPT} display="rowCompressed" fullWidth>
-          <EuiTextArea
-            compressed
-            disabled={selectedQuickPrompt == null}
-            fullWidth
-            data-test-subj="quick-prompt-prompt"
-            onChange={handlePromptChange}
-            placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
-            value={prompt}
-            css={css`
-              min-height: 150px;
-            `}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow
-          display="rowCompressed"
-          fullWidth
-          label={i18n.QUICK_PROMPT_CONTEXTS}
-          helpText={i18n.QUICK_PROMPT_CONTEXTS_HELP_TEXT}
-        >
-          <PromptContextSelector
-            isDisabled={selectedQuickPrompt == null}
-            onPromptContextSelectionChange={onPromptContextSelectionChange}
-            promptContexts={basePromptContexts}
-            selectedPromptContexts={selectedPromptContexts}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow display="rowCompressed" label={i18n.QUICK_PROMPT_BADGE_COLOR}>
-          <EuiColorPicker
-            color={selectedColor}
-            compressed
-            disabled={selectedQuickPrompt == null}
-            onChange={handleColorChange}
-          />
-        </EuiFormRow>
+        <QuickPromptSettingsEditor
+          onSelectedQuickPromptChange={onSelectedQuickPromptChange}
+          quickPromptSettings={quickPromptSettings}
+          selectedQuickPrompt={selectedQuickPrompt}
+          setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+        />
       </>
     );
   }

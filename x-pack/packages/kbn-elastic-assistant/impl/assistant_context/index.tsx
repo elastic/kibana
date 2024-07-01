@@ -14,6 +14,7 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -33,10 +34,10 @@ import {
   STREAMING_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
-import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
+import { SettingsTabs } from '../assistant/settings/types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -77,6 +78,7 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
   toasts?: IToasts;
 }
@@ -117,13 +119,20 @@ export interface UseAssistantContext {
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
+<<<<<<< HEAD
   selectedSettingsTab: SettingsTabs;
+=======
+  selectedSettingsTab: SettingsTabs | null;
+  setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
+  setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
+>>>>>>> upstream/main
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   setTraceOptions: (traceOptions: {
@@ -153,6 +162,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   baseConversations,
+  navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
@@ -234,7 +244,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Settings State
    */
-  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
 
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
@@ -263,6 +273,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       http,
       knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
@@ -296,6 +307,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       http,
       localStorageKnowledgeBase,
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,

@@ -25,7 +25,11 @@ import styled from 'styled-components';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
+<<<<<<< HEAD
 import { Conversation } from '../../..';
+=======
+import { Conversation, Prompt, QuickPrompt, useLoadConnectors } from '../../..';
+>>>>>>> upstream/main
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { TEST_IDS } from '../constants';
@@ -39,27 +43,24 @@ import {
   SystemPromptSettings,
 } from '.';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
+<<<<<<< HEAD
 import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
+=======
+import {
+  ANONYMIZATION_TAB,
+  CONVERSATIONS_TAB,
+  EVALUATION_TAB,
+  KNOWLEDGE_BASE_TAB,
+  QUICK_PROMPTS_TAB,
+  SYSTEM_PROMPTS_TAB,
+} from './const';
+>>>>>>> upstream/main
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
   height: 575px;
 `;
 
-export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
-export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
-export const SYSTEM_PROMPTS_TAB = 'SYSTEM_PROMPTS_TAB' as const;
-export const ANONYMIZATION_TAB = 'ANONYMIZATION_TAB' as const;
-export const KNOWLEDGE_BASE_TAB = 'KNOWLEDGE_BASE_TAB' as const;
-export const EVALUATION_TAB = 'EVALUATION_TAB' as const;
-
-export type SettingsTabs =
-  | typeof CONVERSATIONS_TAB
-  | typeof QUICK_PROMPTS_TAB
-  | typeof SYSTEM_PROMPTS_TAB
-  | typeof ANONYMIZATION_TAB
-  | typeof KNOWLEDGE_BASE_TAB
-  | typeof EVALUATION_TAB;
 interface Props {
   defaultConnector?: AIConnector;
   onClose: (
@@ -70,6 +71,7 @@ interface Props {
   selectedConversationId?: string;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
 }
 
 /**
@@ -84,6 +86,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversationId: defaultSelectedConversationId,
     onConversationSelected,
     conversations,
+    conversationsLoaded,
     isFlyoutMode,
   }) => {
     const {
@@ -95,9 +98,19 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       setSelectedSettingsTab,
     } = useAssistantContext();
 
+    useEffect(() => {
+      if (selectedSettingsTab == null) {
+        setSelectedSettingsTab(CONVERSATIONS_TAB);
+      }
+    }, [selectedSettingsTab, setSelectedSettingsTab]);
+
     const { data: anonymizationFields, refetch: refetchAnonymizationFieldsResults } =
       useFetchAnonymizationFields();
     const { data: allPrompts } = useFetchPrompts();
+
+    const { data: connectors } = useLoadConnectors({
+      http,
+    });
 
     const {
       conversationSettings,
@@ -117,9 +130,13 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       anonymizationFieldsBulkActions,
       setAnonymizationFieldsBulkActions,
       setUpdatedAnonymizationData,
+<<<<<<< HEAD
       setPromptsBulkActions,
       setUpdatedSystemPromptSettings,
     } = useSettingsUpdater(conversations, anonymizationFields, allPrompts);
+=======
+    } = useSettingsUpdater(conversations, conversationsLoaded, anonymizationFields);
+>>>>>>> upstream/main
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
@@ -210,7 +227,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
               <EuiKeyPadMenuItem
                 id={CONVERSATIONS_TAB}
                 label={i18n.CONVERSATIONS_MENU_ITEM}
-                isSelected={selectedSettingsTab === CONVERSATIONS_TAB}
+                isSelected={!selectedSettingsTab || selectedSettingsTab === CONVERSATIONS_TAB}
                 onClick={() => setSelectedSettingsTab(CONVERSATIONS_TAB)}
                 data-test-subj={`${CONVERSATIONS_TAB}-button`}
               >
@@ -315,24 +332,26 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                   overflow-y: scroll;
                 `}
               >
-                {selectedSettingsTab === CONVERSATIONS_TAB && (
-                  <ConversationSettings
-                    actionTypeRegistry={actionTypeRegistry}
-                    defaultConnector={defaultConnector}
-                    conversationSettings={conversationSettings}
-                    setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-                    conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-                    setConversationSettings={setConversationSettings}
-                    allSystemPrompts={systemPromptSettings}
-                    selectedConversation={selectedConversation}
-                    isDisabled={selectedConversation == null}
-                    assistantStreamingEnabled={assistantStreamingEnabled}
-                    setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
-                    onSelectedConversationChange={onHandleSelectedConversationChange}
-                    http={http}
-                    isFlyoutMode={isFlyoutMode}
-                  />
-                )}
+                {!selectedSettingsTab ||
+                  (selectedSettingsTab === CONVERSATIONS_TAB && (
+                    <ConversationSettings
+                      actionTypeRegistry={actionTypeRegistry}
+                      connectors={connectors}
+                      defaultConnector={defaultConnector}
+                      conversationSettings={conversationSettings}
+                      setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+                      conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+                      setConversationSettings={setConversationSettings}
+                      allSystemPrompts={systemPromptSettings}
+                      selectedConversation={selectedConversation}
+                      isDisabled={selectedConversation == null}
+                      assistantStreamingEnabled={assistantStreamingEnabled}
+                      setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
+                      onSelectedConversationChange={onHandleSelectedConversationChange}
+                      http={http}
+                      isFlyoutMode={isFlyoutMode}
+                    />
+                  ))}
                 {selectedSettingsTab === QUICK_PROMPTS_TAB && (
                   <QuickPromptSettings
                     quickPromptSettings={quickPromptSettings}
@@ -343,6 +362,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                 )}
                 {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
                   <SystemPromptSettings
+                    connectors={connectors}
                     conversationSettings={conversationSettings}
                     defaultConnector={defaultConnector}
                     systemPromptSettings={systemPromptSettings}

@@ -7,6 +7,10 @@
 
 import { kebabCase } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
+import type {
+  EuiFilePickerClass,
+  EuiFilePickerProps,
+} from '@elastic/eui/src/components/form/file_picker/file_picker';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,7 +34,7 @@ interface OsqueryPackUploaderProps {
 
 const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onChange }) => {
   const packName = useRef('');
-  const filePickerRef = useRef<EuiFilePicker>(null);
+  const filePickerRef = useRef<EuiFilePickerClass>(null);
   const [isInvalid, setIsInvalid] = useState<string | null>(null);
   // @ts-expect-error update types
   let fileReader;
@@ -59,8 +63,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
       setIsInvalid(null);
     } catch (error) {
       setIsInvalid(error);
-      // @ts-expect-error update types
-      filePickerRef.current?.removeFiles(new Event('fake'));
+      filePickerRef.current?.removeFiles();
     }
 
     if (!parsedContent?.queries) {
@@ -68,8 +71,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
     }
 
     onChange(parsedContent, packName.current);
-    // @ts-expect-error update types
-    filePickerRef.current?.removeFiles(new Event('fake'));
+    filePickerRef.current?.removeFiles();
   };
 
   // @ts-expect-error update types
@@ -104,8 +106,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
             },
           })
         );
-        // @ts-expect-error update types
-        filePickerRef.current?.removeFiles(new Event('fake'));
+        filePickerRef.current?.removeFiles();
 
         return;
       }
@@ -126,7 +127,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         error={<>{`${isInvalid}`}</>}
       >
         <EuiFilePicker
-          ref={filePickerRef}
+          ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
           id="osquery_pack_picker"
           initialPromptText={i18n.translate('xpack.osquery.packUploader.initialPromptTextLabel', {
             defaultMessage: 'Select or drag and drop osquery pack config file',

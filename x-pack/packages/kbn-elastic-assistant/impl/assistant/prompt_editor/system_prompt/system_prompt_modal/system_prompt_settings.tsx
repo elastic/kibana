@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import {
-  EuiFormRow,
-  EuiTextArea,
-  EuiCheckbox,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiText,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
+<<<<<<< HEAD
 import { keyBy } from 'lodash/fp';
 
 import { css } from '@emotion/react';
@@ -50,12 +40,18 @@ interface Props {
   promptsBulkActions: PerformBulkActionRequestBody;
   defaultConnector?: AIConnector;
 }
+=======
+import * as i18n from './translations';
+import { SystemPromptEditor } from './system_prompt_editor';
+import { SystemPromptSettingsProps } from './types';
+>>>>>>> upstream/main
 
 /**
  * Settings for adding/removing system prompts. Configure name, prompt and default conversations.
  */
-export const SystemPromptSettings: React.FC<Props> = React.memo(
+export const SystemPromptSettings: React.FC<SystemPromptSettingsProps> = React.memo(
   ({
+    connectors,
     conversationSettings,
     onSelectedSystemPromptChange,
     selectedSystemPrompt,
@@ -68,6 +64,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
     defaultConnector,
     setPromptsBulkActions,
   }) => {
+<<<<<<< HEAD
     // Prompt
     const promptContent = useMemo(
       () => selectedSystemPrompt?.content ?? '',
@@ -378,6 +375,8 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
       [promptsBulkActions, setPromptsBulkActions, setUpdatedSystemPromptSettings]
     );
 
+=======
+>>>>>>> upstream/main
     return (
       <>
         <EuiTitle size={'s'}>
@@ -387,59 +386,18 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
         <EuiText size={'s'}>{i18n.SETTINGS_DESCRIPTION}</EuiText>
         <EuiHorizontalRule margin={'s'} />
 
-        <EuiFormRow display="rowCompressed" label={i18n.SYSTEM_PROMPT_NAME} fullWidth>
-          <SystemPromptSelector
-            onSystemPromptDeleted={onSystemPromptDeleted}
-            onSystemPromptSelectionChange={onSystemPromptSelectionChange}
-            systemPrompts={systemPromptSettings}
-            selectedSystemPrompt={selectedSystemPrompt}
-          />
-        </EuiFormRow>
-        <EuiFormRow display="rowCompressed" label={i18n.SYSTEM_PROMPT_PROMPT} fullWidth>
-          <EuiTextArea
-            data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT}
-            disabled={selectedSystemPrompt == null}
-            onChange={handlePromptContentChange}
-            placeholder={i18n.SYSTEM_PROMPT_PROMPT_PLACEHOLDER}
-            value={promptContent}
-            compressed
-            fullWidth
-            css={css`
-              min-height: 150px;
-            `}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          display="rowCompressed"
-          fullWidth
-          helpText={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS_HELP_TEXT}
-          label={i18n.SYSTEM_PROMPT_DEFAULT_CONVERSATIONS}
-        >
-          <ConversationMultiSelector
-            conversations={conversationOptions}
-            isDisabled={selectedSystemPrompt == null}
-            onConversationSelectionChange={handleConversationSelectionChange}
-            selectedConversations={selectedConversations}
-          />
-        </EuiFormRow>
-
-        <EuiFormRow display="rowCompressed">
-          <EuiCheckbox
-            data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS}
-            disabled={selectedSystemPrompt == null}
-            id={'defaultNewConversation'}
-            label={
-              <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
-                <EuiFlexItem>{i18n.SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type={isNewConversationDefault ? 'starFilled' : 'starEmpty'} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            checked={isNewConversationDefault}
-            onChange={handleNewConversationDefaultChange}
-          />
-        </EuiFormRow>
+        <SystemPromptEditor
+          connectors={connectors}
+          conversationSettings={conversationSettings}
+          onSelectedSystemPromptChange={onSelectedSystemPromptChange}
+          selectedSystemPrompt={selectedSystemPrompt}
+          setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
+          setConversationSettings={setConversationSettings}
+          systemPromptSettings={systemPromptSettings}
+          conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+          setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+          defaultConnector={defaultConnector}
+        />
       </>
     );
   }

@@ -26,11 +26,19 @@ import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
 export const SYSTEM_PROMPT_SELECTOR_CLASSNAME = 'systemPromptSelector';
 
 interface Props {
+  autoFocus?: boolean;
   onSystemPromptDeleted: (systemPromptTitle: string) => void;
+<<<<<<< HEAD
   onSystemPromptSelectionChange: (systemPrompt?: PromptResponse | string) => void;
   systemPrompts: PromptResponse[];
   autoFocus?: boolean;
   selectedSystemPrompt?: PromptResponse;
+=======
+  onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
+  resetSettings?: () => void;
+  selectedSystemPrompt?: Prompt;
+  systemPrompts: Prompt[];
+>>>>>>> upstream/main
 }
 
 export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
@@ -44,10 +52,11 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
 export const SystemPromptSelector: React.FC<Props> = React.memo(
   ({
     autoFocus = false,
-    systemPrompts,
     onSystemPromptDeleted,
     onSystemPromptSelectionChange,
+    resetSettings,
     selectedSystemPrompt,
+    systemPrompts,
   }) => {
     // Form options
     const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
@@ -76,6 +85,8 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
     const handleSelectionChange = useCallback(
       (systemPromptSelectorOption: SystemPromptSelectorOption[]) => {
+        // Reset settings on every selection change to avoid option saved automatically on settings management page
+        resetSettings?.();
         const newSystemPrompt =
           systemPromptSelectorOption.length === 0
             ? undefined
@@ -83,7 +94,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
               systemPromptSelectorOption[0]?.label;
         onSystemPromptSelectionChange(newSystemPrompt);
       },
-      [onSystemPromptSelectionChange, systemPrompts]
+      [onSystemPromptSelectionChange, resetSettings, systemPrompts]
     );
 
     // Callback for when user types to create a new system prompt

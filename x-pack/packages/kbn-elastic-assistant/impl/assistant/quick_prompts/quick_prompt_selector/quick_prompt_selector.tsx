@@ -24,9 +24,16 @@ import * as i18n from './translations';
 interface Props {
   isDisabled?: boolean;
   onQuickPromptDeleted: (quickPromptTitle: string) => void;
+<<<<<<< HEAD
   onQuickPromptSelectionChange: (quickPrompt?: PromptResponse | string) => void;
   quickPrompts: PromptResponse[];
   selectedQuickPrompt?: PromptResponse;
+=======
+  onQuickPromptSelectionChange: (quickPrompt?: QuickPrompt | string) => void;
+  quickPrompts: QuickPrompt[];
+  resetSettings?: () => void;
+  selectedQuickPrompt?: QuickPrompt;
+>>>>>>> upstream/main
 }
 
 export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boolean }>;
@@ -40,6 +47,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     quickPrompts,
     onQuickPromptDeleted,
     onQuickPromptSelectionChange,
+    resetSettings,
     selectedQuickPrompt,
   }) => {
     // Form options
@@ -69,6 +77,8 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     const handleSelectionChange = useCallback(
       (quickPromptSelectorOption: QuickPromptSelectorOption[]) => {
+        // Reset settings on every selection change to avoid option saved automatically on settings management page
+        resetSettings?.();
         const newQuickPrompt =
           quickPromptSelectorOption.length === 0
             ? undefined
@@ -76,7 +86,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
               quickPromptSelectorOption[0]?.label;
         onQuickPromptSelectionChange(newQuickPrompt);
       },
-      [onQuickPromptSelectionChange, quickPrompts]
+      [onQuickPromptSelectionChange, resetSettings, quickPrompts]
     );
 
     // Callback for when user types to create a new quick prompt
