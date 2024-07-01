@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
     });

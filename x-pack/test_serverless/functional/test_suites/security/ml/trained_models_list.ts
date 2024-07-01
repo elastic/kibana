@@ -17,10 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.api.syncSavedObjects();
     });
 
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
-    });
-
     describe('page navigation', () => {
       it('renders trained models list', async () => {
         await ml.navigation.navigateToMl();

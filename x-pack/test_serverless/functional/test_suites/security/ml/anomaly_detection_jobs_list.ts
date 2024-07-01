@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       await ml.api.cleanMlIndices();
       await ml.testResources.cleanMLSavedObjects();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
