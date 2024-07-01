@@ -164,12 +164,12 @@ export function translateToEndpointExceptions(
   experimentalFeatures: ExperimentalFeatures
 ): TranslatedExceptionListItem[] {
   const entrySet = new Set();
-  const deduplicatedItems: TranslatedExceptionListItem[] = [];
-  const storeDeduplicatedItem = (item: TranslatedExceptionListItem) => {
+  const uniqueItems: TranslatedExceptionListItem[] = [];
+  const storeUniqueItem = (item: TranslatedExceptionListItem) => {
     const entryHash = createHash('sha256').update(JSON.stringify(item)).digest('hex');
 
     if (!entrySet.has(entryHash)) {
-      deduplicatedItems.push(item);
+      uniqueItems.push(item);
       entrySet.add(entryHash);
     }
   };
@@ -189,7 +189,7 @@ export function translateToEndpointExceptions(
             entries: [blocklistSingleEntry],
           });
 
-          storeDeduplicatedItem(translatedItem);
+          storeUniqueItem(translatedItem);
         });
       } else if (
         experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
@@ -197,14 +197,14 @@ export function translateToEndpointExceptions(
         isFilterProcessDescendantsEnabled(entry)
       ) {
         const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
-        storeDeduplicatedItem(translatedItem);
+        storeUniqueItem(translatedItem);
       } else {
         const translatedItem = translateItem(schemaVersion, entry);
-        storeDeduplicatedItem(translatedItem);
+        storeUniqueItem(translatedItem);
       }
     });
 
-    return deduplicatedItems;
+    return uniqueItems;
   } else {
     throw new Error('unsupported schemaVersion');
   }
