@@ -136,6 +136,7 @@ export const getMonitorFilters = async (
 export const parseArrayFilters = ({
   tags,
   filter,
+  configIds,
   projects,
   monitorTypes,
   schedules,
@@ -143,6 +144,7 @@ export const parseArrayFilters = ({
   locationFilter,
 }: Filters & {
   locationFilter?: string | string[];
+  configIds?: string[];
 }) => {
   const filtersStr = [
     filter,
@@ -152,6 +154,7 @@ export const parseArrayFilters = ({
     getKqlFilter({ field: 'locations.id', values: locationFilter }),
     getKqlFilter({ field: 'schedule.number', values: schedules }),
     getKqlFilter({ field: 'id', values: monitorQueryIds }),
+    getKqlFilter({ field: 'config_id', values: configIds }),
   ]
     .filter((f) => !!f)
     .join(' AND ');
@@ -180,7 +183,8 @@ export const getKqlFilter = ({
   }
 
   if (Array.isArray(values)) {
-    return ` (${fieldKey}:"${values.join(`" ${operator} ${fieldKey}:"`)}" )`;
+    const vals = values.map((val) => `"${val}"`).join(` ${operator} `);
+    return ` (${fieldKey}: (${vals}))`;
   }
 
   return `${fieldKey}:"${values}"`;

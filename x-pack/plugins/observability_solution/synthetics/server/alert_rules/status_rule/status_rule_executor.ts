@@ -14,6 +14,7 @@ import { isEmpty } from 'lodash';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { queryFilterMonitors } from './queries/filter_monitors';
 import { periodToMs } from '../../routes/overview_status/overview_status';
 import { getMonitorToPing } from './utils';
 import { queryMonitorLastRun } from './queries/query_monitor_last_run';
@@ -123,12 +124,20 @@ export class StatusRuleExecutor {
     const baseFilter = !this.hasCustomCondition
       ? `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`
       : '';
+
+    const configIds = await queryFilterMonitors({
+      spaceId: this.options.spaceId,
+      esClient: this.esClient,
+      ruleParams: this.params,
+    });
+
     const { filtersStr } = parseArrayFilters({
+      configIds,
       filter: baseFilter,
-      tags: this.params.tags,
-      locations: this.params.locations,
-      monitorTypes: this.params.monitorTypes,
-      monitorQueryIds: this.params.monitorIds,
+      tags: this.params?.tags,
+      locations: this.params?.locations,
+      monitorTypes: this.params?.monitorTypes,
+      monitorQueryIds: this.params?.monitorIds,
     });
 
     this.monitors = await getAllMonitors({
@@ -136,7 +145,7 @@ export class StatusRuleExecutor {
       filter: filtersStr,
     });
 
-    return processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
+    return processMonitors(this.monitors);
   }
 
   async getDownChecks(prevDownConfigs: StatusConfigs = {}): Promise<AlertOverviewStatus> {

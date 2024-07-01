@@ -21,7 +21,7 @@ export interface UseFetchSyntheticsSuggestions {
 }
 
 export interface Params {
-  fieldName: string;
+  fieldName?: string;
   filters?: {
     locations?: string[];
     monitorIds?: string[];
@@ -58,7 +58,7 @@ export function useFetchSyntheticsSuggestions({
   );
 
   return {
-    suggestions: data?.[fieldName] ?? [],
+    suggestions: fieldName ? data?.[fieldName] ?? [] : [],
     isLoading: Boolean(loading),
   };
 }

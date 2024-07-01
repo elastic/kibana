@@ -77,13 +77,7 @@ export async function getStatus(context: RouteContext, params: OverviewStatusQue
     disabledMonitorsCount,
     projectMonitorsCount,
     monitorQueryIdToConfigIdMap,
-  } = processMonitors(
-    allMonitors,
-    server,
-    savedObjectsClient,
-    syntheticsMonitorClient,
-    queryLocations
-  );
+  } = processMonitors(allMonitors, queryLocations);
 
   // Account for locations filter
   const listOfLocationAfterFilter =

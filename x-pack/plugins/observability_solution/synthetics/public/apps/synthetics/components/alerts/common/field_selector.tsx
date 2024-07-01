@@ -4,15 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';
-import {
-  useFetchSyntheticsSuggestions,
-  Suggestion,
-} from '../hooks/use_fetch_synthetics_suggestions';
+import { i18n } from '@kbn/i18n';
+import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 
 interface Option {
   label: string;
@@ -29,31 +26,30 @@ export interface Props {
   value?: string[];
   onChange: (selected: string[]) => void;
   placeholder: string;
+  setSearch: (val: string) => void;
+  setSelectedField: (value: string) => void;
 }
+
+const ALL_OPTION = {
+  label: i18n.translate('xpack.synthetics.filter.alert.allLabel', {
+    defaultMessage: 'All',
+  }),
+  value: 'All',
+};
 
 export function FieldSelector({
   allowAllOption = true,
   dataTestSubj,
-  fieldName,
   value,
   onChange,
+  isLoading,
   placeholder,
+  suggestions,
+  setSearch,
 }: Props) {
-  const [search, setSearch] = useState<string>('');
-
-  const { suggestions = [], isLoading } = useFetchSyntheticsSuggestions({
-    search,
-    fieldName,
-  });
+  const options = (allowAllOption ? [ALL_OPTION] : []).concat(createOptions(suggestions));
 
   const debouncedSearch = debounce((val) => setSearch(val), 200);
-
-  const ALL_VALUE_OPTION = {
-    value: ALL_VALUE,
-    label: i18n.translate('xpack.synthetics.fieldSelector.all', { defaultMessage: 'All' }),
-  };
-
-  const options = (allowAllOption ? [ALL_VALUE_OPTION] : []).concat(createOptions(suggestions));
 
   return (
     <EuiFormRow fullWidth>

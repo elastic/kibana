@@ -6,7 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useFetchSyntheticsSuggestions } from '../hooks/use_fetch_synthetics_suggestions';
 import { StatusRuleParamsProps } from '../status_rule_ui';
 import { LocationsField, MonitorField, MonitorTypeField, TagsField } from './fields';
 
@@ -18,6 +19,14 @@ interface Props {
 }
 
 export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
+  const [search, setSearch] = useState<string>('');
+  const [selectedField, setSelectedField] = useState<string>();
+
+  const { suggestions = [], isLoading } = useFetchSyntheticsSuggestions({
+    search,
+    fieldName: selectedField,
+  });
+
   const onFieldChange = useCallback(
     (key: FieldKeys, value?: string[]) => {
       setRuleParams(key, value);
@@ -34,6 +43,11 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
               onFieldChange('monitorIds', val);
             }}
             value={ruleParams.monitorIds}
+            setSearch={setSearch}
+            suggestions={suggestions}
+            isLoading={isLoading}
+            setSelectedField={setSelectedField}
+            selectedField={selectedField}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -42,6 +56,11 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
               onFieldChange('monitorTypes', val);
             }}
             value={ruleParams.monitorTypes}
+            setSearch={setSearch}
+            suggestions={suggestions}
+            isLoading={isLoading}
+            setSelectedField={setSelectedField}
+            selectedField={selectedField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -53,6 +72,11 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
               onFieldChange('tags', val);
             }}
             value={ruleParams.tags}
+            setSearch={setSearch}
+            suggestions={suggestions}
+            isLoading={isLoading}
+            setSelectedField={setSelectedField}
+            selectedField={selectedField}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -61,6 +85,11 @@ export const FieldFilters = ({ ruleParams, setRuleParams }: Props) => {
               onFieldChange('locations', val);
             }}
             value={ruleParams.locations}
+            setSearch={setSearch}
+            suggestions={suggestions}
+            isLoading={isLoading}
+            setSelectedField={setSelectedField}
+            selectedField={selectedField}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

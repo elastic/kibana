@@ -6,26 +6,34 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FieldPopoverExpression } from './field_popover_expression';
+import { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
 import { FieldSelector } from './field_selector';
-import { PopoverExpression } from './popover_expression';
+
+interface FieldProps {
+  value?: string[];
+  onChange: (value?: string[]) => void;
+  setSearch: (val: string) => void;
+  suggestions?: Suggestion[];
+  isLoading?: boolean;
+  setSelectedField: (value?: string) => void;
+  selectedField?: string;
+}
 
 export const allOptionText = i18n.translate('xpack.synthetics.filter.alert.allLabel', {
   defaultMessage: 'All',
 });
 
-export function MonitorField({
-  value,
-  onChange,
-}: {
-  value?: string[];
-  onChange: (value?: string[]) => void;
-}) {
+export function MonitorField({ value, onChange, ...rest }: FieldProps) {
   return (
-    <PopoverExpression
+    <FieldPopoverExpression
       value={value?.join(', ') || allOptionText}
       title={i18n.translate('xpack.synthetics.alerting.fields.monitor', {
         defaultMessage: 'Monitor',
       })}
+      fieldName="monitorIds"
+      selectedField={rest.selectedField}
+      setSelectedField={rest.setSelectedField}
     >
       <FieldSelector
         value={value}
@@ -35,24 +43,22 @@ export function MonitorField({
           defaultMessage: 'Select monitor name',
         })}
         dataTestSubj="monitorNameField"
+        {...rest}
       />
-    </PopoverExpression>
+    </FieldPopoverExpression>
   );
 }
 
-export function TagsField({
-  value,
-  onChange,
-}: {
-  value?: string[];
-  onChange: (value?: string[]) => void;
-}) {
+export function TagsField({ value, onChange, ...rest }: FieldProps) {
   return (
-    <PopoverExpression
+    <FieldPopoverExpression
       value={value?.join(', ') || allOptionText}
       title={i18n.translate('xpack.synthetics.alerting.fields.tags', {
         defaultMessage: 'Tags',
       })}
+      fieldName="tags"
+      selectedField={rest.selectedField}
+      setSelectedField={rest.setSelectedField}
     >
       <FieldSelector
         value={value}
@@ -62,23 +68,24 @@ export function TagsField({
         })}
         dataTestSubj="tagsField"
         fieldName="tags"
+        {...rest}
       />
-    </PopoverExpression>
+    </FieldPopoverExpression>
   );
 }
 
-export function MonitorTypeField({
-  value,
-  onChange,
-}: {
-  value?: string[];
-  onChange: (value?: string[]) => void;
-}) {
+export function MonitorTypeField({ value, onChange, ...rest }: FieldProps) {
   const label = i18n.translate('xpack.synthetics.alerting.fields.type', {
     defaultMessage: 'Type',
   });
   return (
-    <PopoverExpression value={value?.join(', ') ?? allOptionText} title={label}>
+    <FieldPopoverExpression
+      value={value?.join(', ') ?? allOptionText}
+      title={label}
+      fieldName="monitorTypes"
+      selectedField={rest.selectedField}
+      setSelectedField={rest.setSelectedField}
+    >
       <FieldSelector
         value={value}
         onChange={onChange}
@@ -87,23 +94,24 @@ export function MonitorTypeField({
         })}
         dataTestSubj="monitorTypeField"
         fieldName="monitorTypes"
+        {...rest}
       />
-    </PopoverExpression>
+    </FieldPopoverExpression>
   );
 }
 
-export function LocationsField({
-  value,
-  onChange,
-}: {
-  value?: string[];
-  onChange: (value: string[]) => void;
-}) {
+export function LocationsField({ value, onChange, ...rest }: FieldProps) {
   const label = i18n.translate('xpack.synthetics.alerting.fields.location', {
     defaultMessage: 'Locations',
   });
   return (
-    <PopoverExpression value={value?.join(', ') ?? allOptionText} title={label}>
+    <FieldPopoverExpression
+      value={value?.join(', ') ?? allOptionText}
+      title={label}
+      fieldName="locations"
+      selectedField={rest.selectedField}
+      setSelectedField={rest.setSelectedField}
+    >
       <FieldSelector
         value={value}
         onChange={onChange}
@@ -112,7 +120,8 @@ export function LocationsField({
         })}
         dataTestSubj="monitorLocationField"
         fieldName="locations"
+        {...rest}
       />
-    </PopoverExpression>
+    </FieldPopoverExpression>
   );
 }
