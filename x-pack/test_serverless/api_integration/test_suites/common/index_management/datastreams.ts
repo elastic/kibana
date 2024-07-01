@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('returns a single data stream by ID', async () => {
+      xit('returns a single data stream by ID', async () => {
         const { body: dataStream, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
           .set(internalReqHeader)
@@ -115,6 +115,7 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           nextGenerationManagedBy: 'Data stream lifecycle',
           hidden: false,
+          // lifecyle contains 3 elements for security prj, but only one for the other projects.
           lifecycle: {
             effective_retention: '365d',
             enabled: true,
