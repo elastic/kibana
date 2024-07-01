@@ -518,8 +518,10 @@ export class DataGridService extends FtrService {
   }
 
   public async selectRow(rowIndex: number) {
-    const columns = await this.getRow({ rowIndex });
-    const checkbox = await columns[1].findByClassName('euiCheckbox__input');
+    const checkbox = await this.find.byCssSelector(
+      `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
+    );
+
     await checkbox.click();
   }
 
