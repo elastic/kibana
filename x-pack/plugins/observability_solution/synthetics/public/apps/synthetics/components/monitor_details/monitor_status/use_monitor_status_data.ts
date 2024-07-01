@@ -29,9 +29,11 @@ import {
   selectHeatmap,
 } from '../../../state/status_heatmap';
 
-type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & { initSize?: number };
+type Props = Pick<MonitorStatusPanelProps, 'from' | 'to'> & {
+  initialSizeRef?: React.MutableRefObject<HTMLDivElement | null>;
+};
 
-export const useMonitorStatusData = ({ from, to, initSize }: Props) => {
+export const useMonitorStatusData = ({ from, to, initialSizeRef }: Props) => {
   const { lastRefresh } = useSyntheticsRefreshContext();
   const { monitor } = useSelectedMonitor();
   const location = useSelectedLocation();
@@ -51,10 +53,10 @@ export const useMonitorStatusData = ({ from, to, initSize }: Props) => {
   const { heatmap: dateHistogram, loading } = useSelector(selectHeatmap);
 
   useEffect(() => {
-    if (binsAvailableByWidth === null && initSize) {
-      setBinsAvailableByWidth(Math.floor(initSize / CHART_CELL_WIDTH));
+    if (binsAvailableByWidth === null && initialSizeRef?.current) {
+      setBinsAvailableByWidth(Math.floor(initialSizeRef?.current?.clientWidth / CHART_CELL_WIDTH));
     }
-  }, [binsAvailableByWidth, initSize]);
+  }, [binsAvailableByWidth, initialSizeRef]);
 
   useEffect(() => {
     if (monitor?.id && location?.label && debouncedBinsCount !== null && minsPerBin !== null) {

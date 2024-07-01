@@ -33,7 +33,7 @@ export const MonitorStatusPanel = ({
   const { euiTheme, colorMode } = useEuiTheme();
   const initialSizeRef = useRef<HTMLDivElement | null>(null);
   const { loading, timeBins, handleResize, getTimeBinByXValue, xDomain, minsPerBin } =
-    useMonitorStatusData({ from, to, initSize: initialSizeRef.current?.clientWidth });
+    useMonitorStatusData({ from, to, initialSizeRef });
 
   const heatmap = useMemo(() => {
     return getMonitorStatusChartTheme(euiTheme, brushable);
