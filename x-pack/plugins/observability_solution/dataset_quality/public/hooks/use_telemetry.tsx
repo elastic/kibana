@@ -330,7 +330,7 @@ function getDatasetDetailsEbtProps(
   const totalDocs = details?.docsCount ?? 0;
   const degradedPercentage =
     totalDocs > 0 ? Number(((degradedDocs / totalDocs) * 100).toFixed(2)) : 0;
-  const health = mapPercentageToQuality(degradedPercentage * 100);
+  const health = mapPercentageToQuality(degradedPercentage);
   const { startDate: from, endDate: to } = getDateISORange(insightsTimeRange);
 
   return {
