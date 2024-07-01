@@ -564,7 +564,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
         );
 
         // negate

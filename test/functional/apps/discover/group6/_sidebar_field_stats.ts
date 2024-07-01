@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('TextBasedLangEditor-expand');
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| where \`bytes\`==0`
+          `from logstash-* [METADATA _index, _id] | sort @timestamp desc | limit 500\n| WHERE \`bytes\`==0`
         );
         await PageObjects.unifiedFieldList.closeFieldPopover();
       });
