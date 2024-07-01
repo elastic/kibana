@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const endpointArtifactsTestResources = getService('endpointArtifactTestResources');
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
   const esClient = getService('es');
@@ -76,13 +76,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Check edited artifact is in the list with new values (wait for list to be updated)
       let updatedArtifact: ArtifactElasticsearchProperties | undefined;
       await retry.waitForWithTimeout('fleet artifact is updated', 120_000, async () => {
-        const artifacts = await endpointArtifactTestResources.getArtifacts();
+        const artifacts = await endpointArtifactsTestResources.getArtifactsFromUnifiedManifestSO();
 
+        // This expects manifest artifact to come from unified so
         const manifestArtifact = artifacts.find((artifact) => {
           return (
-            artifact.artifactId ===
-              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}` &&
-            artifact.policyId === policy?.packagePolicy.id
+            artifact.artifactIds.includes(
+              `${expectedArtifact.identifier}-${expectedArtifact.decoded_sha256}`
+            ) && artifact.policyId === policy?.packagePolicy.id
           );
         });
 
