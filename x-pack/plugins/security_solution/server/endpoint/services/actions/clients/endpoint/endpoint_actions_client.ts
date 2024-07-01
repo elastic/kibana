@@ -204,7 +204,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       signature: signedAction.signature,
     };
 
-    this.log.debug(() => `Signed Fleet endpoint action request:\n${stringify(fleetActionDoc)}`);
+    this.log.debug(`Signed Fleet endpoint action request:\n${stringify(fleetActionDoc)}`);
 
     return fleetActionsService.create(fleetActionDoc).catch((err) => {
       const error = new ResponseActionsClientError(

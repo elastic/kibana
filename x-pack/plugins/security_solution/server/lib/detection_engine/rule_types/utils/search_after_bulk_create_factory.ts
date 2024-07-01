@@ -82,10 +82,9 @@ export const searchAfterAndBulkCreateFactory = async ({
       try {
         let mergedSearchResults = createSearchResultReturnType();
         ruleExecutionLogger.debug(
-          () =>
-            `[${cycleNum}] Searching events${
-              sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-            } in index pattern "${inputIndexPattern}"`
+          `[${cycleNum}] Searching events${
+            sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
+          } in index pattern "${inputIndexPattern}"`
         );
 
         if (hasSortId) {
@@ -126,20 +125,18 @@ export const searchAfterAndBulkCreateFactory = async ({
 
           if (totalHits === 0 || mergedSearchResults.hits.hits.length === 0) {
             ruleExecutionLogger.debug(
-              () =>
-                `[${cycleNum}] Found 0 events ${
-                  sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-                }`
+              `[${cycleNum}] Found 0 events ${
+                sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
+              }`
             );
             break;
           } else {
             ruleExecutionLogger.debug(
-              () =>
-                `[${cycleNum}] Found ${
-                  mergedSearchResults.hits.hits.length
-                } of total ${totalHits} events${
-                  sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
-                }, last cursor ${JSON.stringify(lastSortIds)}`
+              `[${cycleNum}] Found ${
+                mergedSearchResults.hits.hits.length
+              } of total ${totalHits} events${
+                sortIds ? ` after cursor ${JSON.stringify(sortIds)}` : ''
+              }, last cursor ${JSON.stringify(lastSortIds)}`
             );
           }
 
