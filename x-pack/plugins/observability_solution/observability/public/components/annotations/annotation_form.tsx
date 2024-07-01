@@ -47,37 +47,6 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
       />
       <EuiHorizontalRule margin="s" />
       <EuiFormRow
-        label={i18n.translate('xpack.observability.annotationForm.euiFormRow.nameLabel', {
-          defaultMessage: 'Name',
-        })}
-        display="columnCompressed"
-        fullWidth
-        error={formState.errors.name?.message}
-        isInvalid={Boolean(formState.errors.name?.message)}
-      >
-        <Controller
-          defaultValue=""
-          name="name"
-          control={control}
-          rules={{
-            required: 'Name is required',
-          }}
-          render={({ field, fieldState }) => (
-            <FieldText
-              {...field}
-              isInvalid={fieldState.invalid}
-              compressed
-              data-test-subj="annotationName"
-              onBlur={() => {
-                field.onBlur();
-                // this is done to avoid too many re-renders, watch on name is expensive
-                trigger();
-              }}
-            />
-          )}
-        />
-      </EuiFormRow>
-      <EuiFormRow
         label={i18n.translate('xpack.observability.annotationForm.euiFormRow.messageLabel', {
           defaultMessage: 'Message',
         })}
@@ -90,13 +59,44 @@ export function AnnotationForm({ editAnnotation }: { editAnnotation?: Annotation
           defaultValue=""
           name="message"
           control={control}
+          rules={{
+            required: 'message is required',
+          }}
+          render={({ field, fieldState }) => (
+            <FieldText
+              {...field}
+              isInvalid={fieldState.invalid}
+              compressed
+              data-test-subj="annotationMessage"
+              onBlur={() => {
+                field.onBlur();
+                // this is done to avoid too many re-renders, watch on name is expensive
+                trigger();
+              }}
+            />
+          )}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('xpack.observability.annotationForm.euiFormRow.descriptionLabel', {
+          defaultMessage: 'Description',
+        })}
+        display="columnCompressed"
+        fullWidth
+        error={formState.errors.description?.message}
+        isInvalid={Boolean(formState.errors.description?.message)}
+      >
+        <Controller
+          defaultValue=""
+          name="description"
+          control={control}
           render={({ field, fieldState }) => (
             <TextArea
               {...field}
               rows={3}
               isInvalid={fieldState.invalid}
               compressed
-              data-test-subj="annotationMessage"
+              data-test-subj="annotationDescription"
               onBlur={() => {
                 field.onBlur();
                 // this is done to avoid too many re-renders, watch on name is expensive

@@ -28,10 +28,10 @@ export function AnnotationTooltip({
 }) {
   const listItems = [
     {
-      title: i18n.translate('xpack.observability.annotationTooltip.name', {
-        defaultMessage: 'Name',
+      title: i18n.translate('xpack.observability.annotationTooltip.message', {
+        defaultMessage: 'Message',
       }),
-      description: annotation.name ?? '--',
+      description: annotation.message ?? '--',
     },
     {
       title: i18n.translate('xpack.observability.annotationTooltip.tags', {
@@ -40,8 +40,8 @@ export function AnnotationTooltip({
       description: <TagsList tags={annotation.tags} />,
     },
     {
-      title: i18n.translate('xpack.observability.annotationTooltip.message', {
-        defaultMessage: 'Message',
+      title: i18n.translate('xpack.observability.annotationTooltip.description', {
+        defaultMessage: 'Description',
       }),
       description: annotation.message ?? '--',
     },

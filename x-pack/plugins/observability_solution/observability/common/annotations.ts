@@ -52,7 +52,7 @@ export const createAnnotationRt = t.intersection([
     message: t.string,
   }),
   t.partial({
-    name: t.string,
+    description: t.string,
     tags: t.array(t.string),
     '@timestampEnd': dateAsStringRt,
     service: t.partial({

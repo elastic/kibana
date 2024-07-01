@@ -96,8 +96,8 @@ export function AnnotationsList() {
 
   const columns: Array<EuiBasicTableColumn<Annotation>> = [
     {
-      field: 'name',
-      name: NAME_LABEL,
+      field: 'message',
+      name: MESSAGE_LABEL,
       sortable: true,
     },
     {
@@ -110,8 +110,8 @@ export function AnnotationsList() {
       },
     },
     {
-      field: 'message',
-      name: MESSAGE_LABEL,
+      field: 'description',
+      name: DESCRIPTION_LABEL,
       sortable: true,
       truncateText: true,
     },
@@ -123,12 +123,20 @@ export function AnnotationsList() {
     {
       name: APPLY_TO_LABEL,
       render: (annotation: Annotation) => {
+        const sloID = annotation.slo?.id;
+        if (!sloID)
+          return (
+            <EuiText size="s">
+              {i18n.translate('xpack.observability.columns.TextLabel', { defaultMessage: '--' })}
+            </EuiText>
+          );
+
         return (
           <EuiText size="s">
             {i18n.translate('xpack.observability.columns.sloTextLabel', {
               defaultMessage: 'SLO:',
             })}
-            {annotation.slo?.id}
+            {sloID}
           </EuiText>
         );
       },
@@ -172,7 +180,9 @@ export function AnnotationsList() {
   );
 }
 
-const NAME_LABEL = i18n.translate('xpack.observability.nameLabel', { defaultMessage: 'Name' });
+const DESCRIPTION_LABEL = i18n.translate('xpack.observability.nameLabel', {
+  defaultMessage: 'Description',
+});
 const APPLY_TO_LABEL = i18n.translate('xpack.observability.applyTo', {
   defaultMessage: 'Apply to',
 });
