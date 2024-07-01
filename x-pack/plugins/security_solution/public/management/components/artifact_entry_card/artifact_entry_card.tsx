@@ -44,6 +44,8 @@ export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
   hideDescription?: boolean;
   // A flag to hide comments section, false by default
   hideComments?: boolean;
+  // Artifact specific decoration to be displayed in the card section
+  decorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
 }
 
 /**
@@ -58,6 +60,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
     actions,
     hideDescription = false,
     hideComments = false,
+    decorator,
     'data-test-subj': dataTestSubj,
     ...commonProps
   }) => {
@@ -103,6 +106,8 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
         <EuiHorizontalRule margin="none" />
 
         <CardSectionPanel className="bottom-section">
+          {decorator && decorator(item)}
+
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}
             entries={artifact.entries}

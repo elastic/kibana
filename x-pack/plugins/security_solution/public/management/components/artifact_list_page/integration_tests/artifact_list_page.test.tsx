@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { trustedAppsAllHttpMocks } from '../../../mocks';
 import type { ArtifactListPageProps } from '../artifact_list_page';
@@ -142,6 +143,21 @@ describe('When using the ArtifactListPage component', () => {
       await waitFor(() => {
         expect(history.location.search).toMatch(/pageSize=20/);
       });
+    });
+
+    it('should show per card decoration', async () => {
+      const mockCardDecorator: ArtifactListPageProps['cardDecorator'] = jest
+        .fn()
+        .mockReturnValueOnce(<p>{'mock decorator'}</p>)
+        .mockReturnValueOnce(<p>{'mock decorator'}</p>)
+        .mockReturnValueOnce(<p>{'mock decorator'}</p>);
+
+      const { getAllByText } = await renderWithListData({
+        cardDecorator: mockCardDecorator,
+      });
+
+      expect(mockCardDecorator).toBeCalledTimes(10);
+      expect(getAllByText('mock decorator')).toHaveLength(3);
     });
 
     it('should call useGetEndpointSpecificPolicies hook with specific perPage value', () => {

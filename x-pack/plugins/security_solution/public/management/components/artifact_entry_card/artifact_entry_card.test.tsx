@@ -268,5 +268,17 @@ describe.each([
 
       expect(renderResult.getByText('policy-1').textContent).not.toBeNull();
     });
+
+    it('should pass item to decorator function and display its result', () => {
+      const mockDecorator: ArtifactEntryCardProps['decorator'] = (actualItem) => {
+        expect(item).toEqual(actualItem);
+
+        return <p>{'mock decorator'}</p>;
+      };
+
+      render({ decorator: mockDecorator });
+
+      expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
+    });
   });
 });
