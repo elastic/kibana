@@ -29,11 +29,11 @@ import type { RuleOverviewPanelProps } from './document_details/rule_overview';
 import { RuleOverviewPanel } from './document_details/rule_overview';
 import { RuleOverviewPanelProvider } from './document_details/rule_overview/context';
 import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
-import { UserPanel, UserPanelKey } from './entity_details/user_right';
+import { UserPanel, UserPanelKey, UserPreviewPanelKey } from './entity_details/user_right';
 import type { UserDetailsPanelProps } from './entity_details/user_details_left';
 import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details_left';
 import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right';
-import { HostPanel, HostPanelKey } from './entity_details/host_right';
+import { HostPanel, HostPanelKey, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
 
@@ -93,6 +93,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: UserPreviewPanelKey,
+    component: (props) => (
+      <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} isPreviewMode />
+    ),
+  },
+  {
     key: HostPanelKey,
     component: (props) => <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} />,
   },
@@ -100,6 +106,12 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: HostDetailsPanelKey,
     component: (props) => (
       <HostDetailsPanel {...(props as HostDetailsExpandableFlyoutProps).params} />
+    ),
+  },
+  {
+    key: HostPreviewPanelKey,
+    component: (props) => (
+      <HostPanel {...(props as HostPanelExpandableFlyoutProps).params} isPreviewMode />
     ),
   },
 ];
