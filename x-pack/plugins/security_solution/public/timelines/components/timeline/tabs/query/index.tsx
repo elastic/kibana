@@ -14,6 +14,12 @@ import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
@@ -203,12 +209,54 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const { openFlyout } = useExpandableFlyoutApi();
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+  const onToggleShowNotes = useCallback(
+    (eventId?: string) => {
+      const indexName = selectedPatterns.join(',');
+      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          left: {
+            id: DocumentDetailsLeftPanelKey,
+            path: {
+              tab: LeftPanelNotesTab,
+            },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+        });
+      }
+    },
+    [
+      expandableFlyoutDisabled,
+      openFlyout,
+      securitySolutionNotesEnabled,
+      selectedPatterns,
+      timelineId,
+    ]
+  );
+
   const leadingControlColumns = useTimelineControlColumn({
     columns,
     sort,
     timelineId,
     activeTab: TimelineTabs.query,
     refetch,
+    onToggleShowNotes,
   });
 
   useEffect(() => {
