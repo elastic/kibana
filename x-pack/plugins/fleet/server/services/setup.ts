@@ -133,7 +133,7 @@ async function createLock(
       },
       { id: FLEET_SETUP_LOCK_TYPE }
     );
-    logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
+    logger.debug(() => `Fleet setup lock created: ${JSON.stringify(created)}`);
   } catch (error) {
     logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
     return { created: false, toReturn: { isInitialized: false, nonFatalErrors: [] } };

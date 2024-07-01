@@ -36,7 +36,7 @@ export const runAgent = async ({
   logger,
   state,
 }: RunAgentParams) => {
-  logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
+  logger.debug(() => `Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const knowledgeHistory = await dataClients?.kbDataClient?.getKnowledgeBaseDocuments({
     kbResource: 'user',

@@ -70,10 +70,12 @@ export function processRunResults({
   );
 
   if (logger) {
-    logger.debug(`deprecated ruleRunStatus for ${logPrefix}: ${JSON.stringify(executionStatus)}`);
-    logger.debug(`ruleRunStatus for ${logPrefix}: ${JSON.stringify(lastRun)}`);
+    logger.debug(
+      () => `deprecated ruleRunStatus for ${logPrefix}: ${JSON.stringify(executionStatus)}`
+    );
+    logger.debug(() => `ruleRunStatus for ${logPrefix}: ${JSON.stringify(lastRun)}`);
     if (executionMetrics) {
-      logger.debug(`ruleRunMetrics for ${logPrefix}: ${JSON.stringify(executionMetrics)}`);
+      logger.debug(() => `ruleRunMetrics for ${logPrefix}: ${JSON.stringify(executionMetrics)}`);
     }
   }
 

@@ -98,7 +98,7 @@ export const esqlExecutor = async ({
         exceptionFilter,
       });
 
-      ruleExecutionLogger.debug(`ES|QL query request: ${JSON.stringify(esqlRequest)}`);
+      ruleExecutionLogger.debug(() => `ES|QL query request: ${JSON.stringify(esqlRequest)}`);
       const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
       if (exceptionsWarning) {
         result.warningMessages.push(exceptionsWarning);

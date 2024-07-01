@@ -56,7 +56,7 @@ export async function installEntityDefinition({
   };
 
   try {
-    logger.debug(`Installing definition ${JSON.stringify(definition)}`);
+    logger.debug(() => `Installing definition ${JSON.stringify(definition)}`);
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
 

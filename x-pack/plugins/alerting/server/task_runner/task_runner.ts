@@ -631,9 +631,10 @@ export class TaskRunner<
             this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
           }
           this.logger.debug(
-            `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
-              executionStatus
-            )} - ${JSON.stringify(lastRun)}`
+            () =>
+              `Updating rule task for ${this.ruleType.id} rule with id ${ruleId} - ${JSON.stringify(
+                executionStatus
+              )} - ${JSON.stringify(lastRun)}`
           );
           await this.updateRuleSavedObjectPostRun(ruleId, namespace, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),

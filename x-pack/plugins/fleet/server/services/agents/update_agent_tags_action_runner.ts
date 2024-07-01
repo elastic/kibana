@@ -131,7 +131,7 @@ export async function updateTagsBatch(
     );
   }
 
-  appContextService.getLogger().debug(JSON.stringify(res).slice(0, 1000));
+  appContextService.getLogger().debug(() => JSON.stringify(res).slice(0, 1000));
 
   // creating unique ids to use as agentId, as we don't have all agent ids in case of action by kuery
   const getUuidArray = (count: number) => Array.from({ length: count }, () => uuidv4());

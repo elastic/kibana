@@ -196,9 +196,10 @@ export class UserProfileService {
 
     if (!userSession.value.userProfileId) {
       this.logger.debug(
-        `User profile missing from the current session [sid=${getPrintableSessionId(
-          userSession.value.sid
-        )}].`
+        () =>
+          `User profile missing from the current session [sid=${getPrintableSessionId(
+            userSession.value.sid
+          )}].`
       );
       return null;
     }

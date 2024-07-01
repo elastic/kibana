@@ -68,7 +68,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const invalidIds = ids.filter((id) => !validIds.includes(id));
 
     if (invalidIds.length) {
-      this.log.debug(`The following agent ids are not valid: ${JSON.stringify(invalidIds)}`);
+      this.log.debug(() => `The following agent ids are not valid: ${JSON.stringify(invalidIds)}`);
     }
 
     return {
@@ -185,7 +185,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       signature: signedAction.signature,
     };
 
-    this.log.debug(`Signed Fleet endpoint action request:\n${stringify(fleetActionDoc)}`);
+    this.log.debug(() => `Signed Fleet endpoint action request:\n${stringify(fleetActionDoc)}`);
 
     return fleetActionsService.create(fleetActionDoc).catch((err) => {
       const error = new ResponseActionsClientError(
