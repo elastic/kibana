@@ -15,6 +15,7 @@ import {
   Replacements,
   transformRawData,
   getAnonymizedValue,
+  ConversationResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -22,12 +23,11 @@ import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
   DEFAULT_PLUGIN_NAME,
-  UPGRADE_LICENSE_MESSAGE,
   appendAssistantMessageToConversation,
   createOrUpdateConversationWithUserInput,
   getPluginNameFromRequest,
-  hasAIAssistantLicense,
   langChainExecute,
+  performChecks,
 } from '../helpers';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
@@ -66,20 +66,17 @@ export const chatCompleteRoute = (
           const logger: Logger = ctx.elasticAssistant.logger;
           const telemetry = ctx.elasticAssistant.telemetry;
 
-          const license = ctx.licensing.license;
-          if (!hasAIAssistantLicense(license)) {
-            return response.forbidden({
-              body: {
-                message: UPGRADE_LICENSE_MESSAGE,
-              },
-            });
-          }
-          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
-          if (authenticatedUser == null) {
-            return assistantResponse.error({
-              body: `Authenticated user not found`,
-              statusCode: 401,
-            });
+          // Perform license, authenticated user and FF checks
+          const checkResponse = performChecks({
+            authenticatedUser: true,
+            capability: 'assistantKnowledgeBaseByDefault',
+            context: ctx,
+            license: true,
+            request,
+            response,
+          });
+          if (checkResponse) {
+            return checkResponse;
           }
 
           const conversationsDataClient =
@@ -151,6 +148,7 @@ export const chatCompleteRoute = (
             return transformedMessage;
           });
 
+          let updatedConversation: ConversationResponse | undefined | null;
           // Fetch any tools registered by the request's originating plugin
           const pluginName = getPluginNameFromRequest({
             request,
@@ -160,8 +158,12 @@ export const chatCompleteRoute = (
           const enableKnowledgeBaseByDefault =
             ctx.elasticAssistant.getRegisteredFeatures(pluginName).assistantKnowledgeBaseByDefault;
           // TODO: remove non-graph persistance when KB will be enabled by default
-          if (!enableKnowledgeBaseByDefault && request.body.persist && conversationsDataClient) {
-            const updatedConversation = await createOrUpdateConversationWithUserInput({
+          if (
+            (!enableKnowledgeBaseByDefault || (enableKnowledgeBaseByDefault && !conversationId)) &&
+            request.body.persist &&
+            conversationsDataClient
+          ) {
+            updatedConversation = await createOrUpdateConversationWithUserInput({
               actionsClient,
               actionTypeId,
               connectorId,
@@ -191,9 +193,9 @@ export const chatCompleteRoute = (
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
-            if (conversationId && conversationsDataClient) {
+            if (updatedConversation?.id && conversationsDataClient) {
               await appendAssistantMessageToConversation({
-                conversationId,
+                conversationId: updatedConversation?.id,
                 conversationsDataClient,
                 messageContent: content,
                 replacements: latestReplacements,

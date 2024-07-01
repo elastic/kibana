@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import {
+  Replacements,
+  replaceAnonymizedValuesWithOriginalValues,
+} from '@kbn/elastic-assistant-common';
 import { AgentState, NodeParamsBase } from '../types';
 import { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';
@@ -14,6 +17,7 @@ export interface PersistConversationChangesParams extends NodeParamsBase {
   conversationsDataClient?: AIAssistantConversationsDataClient;
   conversationId?: string;
   state: AgentState;
+  replacements?: Replacements;
 }
 
 export const PERSIST_CONVERSATION_CHANGES_NODE = 'persistConversationChanges';
@@ -23,6 +27,7 @@ export const persistConversationChanges = async ({
   conversationId,
   logger,
   state,
+  replacements = {},
 }: PersistConversationChangesParams) => {
   logger.debug(`Node state:\n ${JSON.stringify(state, null, 2)}`);
 
@@ -50,7 +55,7 @@ export const persistConversationChanges = async ({
       {
         content: replaceAnonymizedValuesWithOriginalValues({
           messageContent: state.input,
-          replacements: {},
+          replacements,
         }),
         role: 'user',
         timestamp: new Date().toISOString(),

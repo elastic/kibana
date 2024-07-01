@@ -60,6 +60,7 @@ export const getDefaultAssistantGraph = ({
   logger,
   responseLanguage,
   tools,
+  replacements,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -139,6 +140,7 @@ export const getDefaultAssistantGraph = ({
         state,
         conversationsDataClient: dataClients?.conversationsDataClient,
         conversationId,
+        replacements,
       });
     const shouldContinueEdge = (state: AgentState) => shouldContinue({ ...nodeParams, state });
     const shouldContinueGenerateTitleEdge = (state: AgentState) =>
