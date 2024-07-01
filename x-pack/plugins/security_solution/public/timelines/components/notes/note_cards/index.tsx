@@ -41,7 +41,7 @@ const NotesContainer = styled(EuiFlexGroup)`
 `;
 NotesContainer.displayName = 'NotesContainer';
 
-interface NoteCardsProps {
+export interface NoteCardsProps {
   ariaRowindex: number;
   associateNote: AssociateNote;
   className?: string;
