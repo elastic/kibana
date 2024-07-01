@@ -89,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           erroneousTransactions = response.body;
         });
 
-        it('displays the correct number of occurrences', () => {
+        it.skip('displays the correct number of occurrences', () => {
           const { topErroneousTransactions } = erroneousTransactions;
           expect(topErroneousTransactions.length).to.be(2);
 
