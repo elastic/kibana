@@ -12,7 +12,7 @@ import {
   cspmFindingsMockDataForMetering,
   defendForContainersHeartbeatsForMetering,
   kspmFindingsMockDataForMetering,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+} from './mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,

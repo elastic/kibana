@@ -14,33 +14,18 @@ import type { UsageRecord } from '../../types';
 
 // TODO remove once we have the CA available
 const agent = new https.Agent({ rejectUnauthorized: false });
-
 export class UsageReportingService {
   public async reportUsage(
     records: UsageRecord[],
     url = USAGE_SERVICE_USAGE_URL
   ): Promise<Response> {
-    try {
-      const isHttps = url.includes('https');
-      const response = await fetch(url, {
-        method: 'post',
-        body: JSON.stringify(records),
-        headers: { 'Content-Type': 'application/json' },
-        ...(isHttps && { agent }), // Conditionally add agent if URL is HTTPS for supporting integration tests.
-      });
-
-      if (!response.ok) {
-        console.error(`Error: ${response.statusText}`);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      console.log('Usage report completed successfully.');
-      return response;
-    } catch (error) {
-      console.error('Error during usage report:', JSON.stringify(error));
-      console.error('Error:', error.erros);
-      throw error;
-    }
+    const isHttps = url.includes('https');
+    return fetch(url, {
+      method: 'post',
+      body: JSON.stringify(records),
+      headers: { 'Content-Type': 'application/json' },
+      ...(isHttps && { agent }), // Conditionally add agent if URL is HTTPS for supporting integration tests.
+    });
   }
 }
 
