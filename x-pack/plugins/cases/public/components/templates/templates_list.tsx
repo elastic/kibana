@@ -15,6 +15,7 @@ import {
   EuiBadge,
   useEuiTheme,
   EuiButtonIcon,
+  EuiBadgeGroup,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TruncatedText } from '../truncated_text';
@@ -68,20 +69,22 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                           </h4>
                         </EuiText>
                       </EuiFlexItem>
-                      {template.tags?.length
-                        ? template.tags.map((tag, index) => (
-                            <EuiBadge
-                              css={css`
-                                max-width: 100px;
-                              `}
-                              key={`${template.key}-tag-${index}`}
-                              data-test-subj={`${template.key}-tag-${index}`}
-                              color={euiTheme.colors.body}
-                            >
-                              {tag}
-                            </EuiBadge>
-                          ))
-                        : null}
+                      <EuiBadgeGroup gutterSize="s">
+                        {template.tags?.length
+                          ? template.tags.map((tag, index) => (
+                              <EuiBadge
+                                css={css`
+                                  max-width: 100px;
+                                `}
+                                key={`${template.key}-tag-${index}`}
+                                data-test-subj={`${template.key}-tag-${index}`}
+                                color={euiTheme.colors.body}
+                              >
+                                {tag}
+                              </EuiBadge>
+                            ))
+                          : null}
+                      </EuiBadgeGroup>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
