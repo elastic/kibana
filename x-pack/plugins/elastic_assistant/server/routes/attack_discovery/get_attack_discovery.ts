@@ -14,6 +14,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { updateAttackDiscoveryLastViewedAt, getAttackDiscoveryStats } from './helpers';
 import { ATTACK_DISCOVERY_BY_CONNECTOR_ID } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
@@ -62,20 +63,24 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
               statusCode: 500,
             });
           }
-          const attackDiscovery = await dataClient.findAttackDiscoveryByConnectorId({
+          const attackDiscovery = await updateAttackDiscoveryLastViewedAt({
+            dataClient,
             connectorId,
             authenticatedUser,
           });
-
+          const stats = await getAttackDiscoveryStats({
+            dataClient,
+            authenticatedUser,
+          });
           return response.ok({
             body:
               attackDiscovery != null
                 ? {
                     data: attackDiscovery,
-                    entryExists: true,
+                    stats,
                   }
                 : {
-                    entryExists: false,
+                    stats,
                   },
           });
         } catch (err) {
