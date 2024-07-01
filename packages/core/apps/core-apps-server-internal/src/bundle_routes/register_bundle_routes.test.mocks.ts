@@ -19,6 +19,6 @@ jest.doMock('@kbn/ui-shared-deps-npm', () => ({
   distDir: 'uiSharedDepsNpmDistDir',
 }));
 
-jest.doMock('@kbn/monaco/server', () => ({
-  bundleDir: 'kbnMonacoBundleDir',
+jest.doMock('./bundles/monaco', () => ({
+  monacoBundleDir: 'kbnMonacoBundleDir',
 }));
