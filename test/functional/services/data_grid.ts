@@ -176,11 +176,13 @@ export class DataGridService extends FtrService {
 
     const rows: string[][] = [];
     let rowIdx = -1;
+    let prevVisibleRowIndex = -1;
     for (const cell of cells) {
-      if (await cell.elementHasClass('euiDataGridRowCell--firstColumn')) {
-        // first column contains expand icon
+      const visibleRowIndex = Number(await cell.getAttribute('data-gridcell-visible-row-index'));
+      if (prevVisibleRowIndex !== visibleRowIndex) {
         rowIdx++;
         rows[rowIdx] = [];
+        prevVisibleRowIndex = visibleRowIndex;
       }
       if (!(await cell.elementHasClass('euiDataGridRowCell--controlColumn'))) {
         rows[rowIdx].push(await cell.getVisibleText());
