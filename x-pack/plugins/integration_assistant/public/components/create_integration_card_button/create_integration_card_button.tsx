@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiLink,
   EuiPanel,
@@ -15,41 +15,53 @@ import {
   EuiIcon,
   EuiText,
   EuiTitle,
-  useEuiTheme,
+  useEuiPaddingCSS,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import integrationsImage from '../../common/images/integrations_light.svg';
+import { useKibana } from '../../common/hooks/use_kibana';
 
-const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
+const useStyles = (compressed: boolean) => {
+  const paddings = useEuiPaddingCSS();
   return {
     image: css`
-      width: 160px;
-      height: 155px;
+      width: ${compressed ? '140px' : '160px'};
+      height: ${compressed ? '90px' : '155px'};
       object-fit: cover;
       object-position: left center;
     `,
     container: css`
-      height: 135px;
+      height: ${compressed ? '80px' : '135px'};
     `,
     textContainer: css`
       height: 100%;
-      padding: ${euiTheme.size.l} 0 ${euiTheme.size.l} ${euiTheme.size.l};
+      ${compressed ? `${paddings.m.styles}` : `${paddings.l.styles} padding-right: 0;`}
     `,
   };
 };
 
 export interface CreateIntegrationCardButtonProps {
-  href: string;
+  compressed?: boolean;
 }
 export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButtonProps>(
-  ({ href }) => {
-    const styles = useStyles();
+  ({ compressed = false }) => {
+    const { getUrlForApp, navigateToUrl } = useKibana().services.application;
+    const styles = useStyles(compressed);
+
+    const href = useMemo(() => getUrlForApp('integrations', { path: '/create' }), [getUrlForApp]);
+    const navigate = useCallback(
+      (ev) => {
+        ev.preventDefault();
+        navigateToUrl(href);
+      },
+      [href, navigateToUrl]
+    );
+
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize="none">
         <EuiFlexGroup
-          justifyContent="flexEnd"
+          justifyContent="spaceBetween"
           gutterSize="none"
           css={styles.container}
           responsive={false}
@@ -70,18 +82,26 @@ export const CreateIntegrationCardButton = React.memo<CreateIntegrationCardButto
                     />
                   </h2>
                 </EuiTitle>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="xpack.integrationAssistant.createIntegrationDescription"
-                    defaultMessage="Create a custom one to fit your requirements"
-                  />
-                </EuiText>
+                {!compressed && (
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="xpack.integrationAssistant.createIntegrationDescription"
+                      defaultMessage="Create a custom one to fit your requirements"
+                    />
+                  </EuiText>
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink color="primary" href={href}>
-                  <EuiFlexGroup justifyContent="center" gutterSize="s" responsive={false}>
+                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+                <EuiLink color="primary" href={href} onClick={navigate}>
+                  <EuiFlexGroup
+                    justifyContent="center"
+                    alignItems="center"
+                    gutterSize={compressed ? 'xs' : 's'}
+                    responsive={false}
+                  >
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="plusInCircle" />
+                      <EuiIcon type="plusInCircle" size={compressed ? 's' : 'm'} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <FormattedMessage
