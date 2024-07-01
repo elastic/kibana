@@ -23,6 +23,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { schema } from '@kbn/config-schema';
+import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
 import { TlsTranslations } from '../../../common/rules/synthetics/translations';
@@ -144,6 +145,7 @@ export const registerSyntheticsTLSCheckRule = (
             alertsLocator,
             basePath.publicBaseUrl
           ),
+          ...updateState(ruleState, foundCerts),
           ...summary,
         };
 
