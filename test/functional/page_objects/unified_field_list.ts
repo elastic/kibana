@@ -56,7 +56,7 @@ export class UnifiedFieldListPageObject extends FtrService {
   public async waitUntilFieldlistHasCountOfFields(count: number) {
     await this.retry.waitFor('wait until fieldlist has updated number of fields', async () => {
       return (
-        (await this.find.allByCssSelector('.fieldListGroupedAvailableFields .kbnFieldButton'))
+        (await this.find.allByCssSelector('#fieldListGroupedAvailableFields .kbnFieldButton'))
           .length === count
       );
     });
