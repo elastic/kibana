@@ -310,7 +310,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       ((await doAnyChangesMatch([
         /^x-pack\/plugins\/osquery/,
         /^x-pack\/test\/osquery_cypress/,
-        /^x-pack\/plugins\/security_solution/
+        /^x-pack\/plugins\/security_solution/,
       ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
