@@ -224,4 +224,44 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         'from index | stats all_sorted_agents=mv_sort(values(agents.keyword))',
       ],
     },
+    {
+      name: 'top_list',
+      type: 'agg',
+      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.topListDoc', {
+        defaultMessage: 'Collects top N values per bucket.',
+      }),
+      supportedCommands: ['stats', 'metrics'],
+      signatures: [
+        {
+          params: [
+            {
+              name: 'field',
+              type: 'any',
+              // noNestingFunctions: true,
+              // supportsWildcard: true,
+              optional: false,
+            },
+            {
+              name: 'limit',
+              type: 'number',
+              // noNestingFunctions: true,
+              // supportsWildcard: true,
+              optional: false,
+            },
+            {
+              name: 'order',
+              type: 'string',
+              // noNestingFunctions: true,
+              // supportsWildcard: true,
+              optional: false,
+            },
+          ],
+          returnType: 'any',
+        },
+      ],
+      examples: [
+        `from employees | stats top_salaries = top_list(salary, 10, "desc")`,
+        `from employees | stats date = top_list(hire_date, 2, "asc"), double = top_list(salary_change, 2, "asc"),`,
+      ],
+    },
   ]);
