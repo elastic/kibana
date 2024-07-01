@@ -37,6 +37,8 @@ export interface CommonArtifactEntryCardProps extends CommonProps {
    */
   policies?: MenuItemPropsByPolicyId;
   loadingPoliciesList?: boolean;
+  // Artifact specific decoration to be displayed in the card section
+  decorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
 }
 
 export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
@@ -44,8 +46,6 @@ export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
   hideDescription?: boolean;
   // A flag to hide comments section, false by default
   hideComments?: boolean;
-  // Artifact specific decoration to be displayed in the card section
-  decorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
 }
 
 /**

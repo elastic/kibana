@@ -18,6 +18,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { CriteriaConditions } from './components/criteria_conditions';
 import type { AnyArtifact } from './types';
@@ -40,6 +41,7 @@ export interface ArtifactEntryCardMinifiedProps extends CommonProps {
   item: AnyArtifact;
   isSelected: boolean;
   onToggleSelectedArtifact: (selected: boolean) => void;
+  decorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
 }
 
 /**
@@ -52,6 +54,7 @@ export const ArtifactEntryCardMinified = memo(
     isSelected = false,
     onToggleSelectedArtifact,
     'data-test-subj': dataTestSubj,
+    decorator,
     ...commonProps
   }: ArtifactEntryCardMinifiedProps) => {
     const artifact = useNormalizedArtifact(item);
@@ -126,6 +129,8 @@ export const ArtifactEntryCardMinified = memo(
               {getAccordionTitle()}
             </EuiButtonEmpty>
             <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
+              {decorator && decorator(item)}
+
               <CriteriaConditions
                 os={artifact.os as CriteriaConditionsProps['os']}
                 entries={artifact.entries}

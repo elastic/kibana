@@ -119,4 +119,26 @@ describe.each([
 
     expect(renderResult.getByTestId(testSubjId).classList.contains('eui-textTruncate')).toBe(false);
   });
+
+  it('should pass item to decorator function and display its result when expanded', () => {
+    const mockDecorator: ArtifactEntryCollapsibleCardProps['decorator'] = (actualItem) => {
+      expect(item).toEqual(actualItem);
+
+      return <p>{'mock decorator'}</p>;
+    };
+
+    render({ decorator: mockDecorator, expanded: true });
+
+    expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
+  });
+
+  it('should not display decorator when collapsed', () => {
+    const mockDecorator: ArtifactEntryCollapsibleCardProps['decorator'] = () => {
+      return <p>{'mock decorator'}</p>;
+    };
+
+    render({ decorator: mockDecorator });
+
+    expect(renderResult.queryByText('mock decorator')).not.toBeInTheDocument();
+  });
 });

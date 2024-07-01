@@ -94,4 +94,21 @@ describe.each([
     expect(onToggleSelectedArtifactMock).toHaveBeenCalledTimes(1);
     expect(onToggleSelectedArtifactMock).toHaveBeenCalledWith(false);
   });
+
+  it('should pass item to decorator function and display its result when expanded', () => {
+    const mockDecorator: ArtifactEntryCardMinifiedProps['decorator'] = (actualItem) => {
+      expect(item).toEqual(actualItem);
+
+      return <p>{'mock decorator'}</p>;
+    };
+
+    render({
+      item,
+      isSelected: false,
+      onToggleSelectedArtifact: onToggleSelectedArtifactMock,
+      decorator: mockDecorator,
+    });
+
+    expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
+  });
 });
