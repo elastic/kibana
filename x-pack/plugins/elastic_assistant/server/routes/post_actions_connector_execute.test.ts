@@ -109,6 +109,10 @@ const mockContext = {
       elastic_cloud_user: false,
       metadata: { _reserved: false },
     }),
+    getAIAssistantKnowledgeBaseDataClient: jest.fn().mockResolvedValue({
+      indexTemplateAndPattern: {},
+      getKnowledgeBaseDocuments: jest.fn(),
+    }),
     getAIAssistantConversationsDataClient: jest.fn().mockResolvedValue({
       getConversation: jest.fn().mockResolvedValue(existingConversation),
       updateConversation: jest.fn().mockResolvedValue(existingConversation),

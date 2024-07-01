@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import Fs from 'fs';
-import { once, isEmpty, map, without } from 'lodash';
+import { isEmpty, map, without } from 'lodash';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from 'zod';
-import Path from 'path';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import type { StateGraphArgs } from '@langchain/langgraph';
@@ -17,7 +15,6 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { getESQLQueryColumns, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { promisify } from 'util';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import type { EditorError, ESQLMessage } from '@kbn/esql-ast';
@@ -27,10 +24,10 @@ import type {
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
+import type { ElasticsearchStore } from '@kbn/elastic-assistant-plugin/server/lib/langchain/elasticsearch_store/elasticsearch_store';
 import { APP_UI_ID } from '../../../../common';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import type { LangchainZodAny } from '..';
-import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from '../knowledge_base/knowledge_base_retrieval_tool';
 
 export const INLINE_ESQL_QUERY_REGEX = /```esql\s*(.*?)\s*```/gms;
 
@@ -94,18 +91,6 @@ const graphState: StateGraphArgs<IState>['channels'] = {
   },
 };
 
-const readFile = promisify(Fs.readFile);
-
-const loadSystemMessage = once(async () => {
-  const data = await readFile(
-    Path.join(
-      __dirname,
-      '../../../../../observability_solution/observability_ai_assistant_app/server/functions/query/system_message.txt'
-    )
-  );
-  return data.toString('utf-8');
-});
-
 const getDataStreams =
   ({ dataViews }: { dataViews: AssistantToolParams['dataViews'] }) =>
   async () => {
@@ -120,20 +105,25 @@ const getGenerateQuery =
   ({
     userQuery,
     llm,
+    esStore,
   }: {
     userQuery: string;
     llm: ActionsClientLlm | ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+    esStore: ElasticsearchStore;
   }) =>
   async (state: IState) => {
-    const [systemMessage] = await Promise.all([loadSystemMessage()]);
+    const knowledgeBaseDocs = await esStore.similaritySearch(userQuery);
+    const documentation = map(knowledgeBaseDocs, 'pageContent').join('\n');
 
     const answerPrompt = await ChatPromptTemplate.fromMessages([
       [
         'system',
-        `${systemMessage}
-        As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent. Under any circumstances wrap index in quotes.
+        `As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent. Under any circumstances wrap index in quotes.
 
         If multiple indices are matched please try to use wildcard to match all indices. If you are unsure about the index name, please refer to the context provided below.
+
+        ES|QL documentation:
+        {documentation}
 
         Available indices:
         {availableDataViews}
@@ -190,19 +180,19 @@ E.g., for SPL's LEN, use LENGTH. For IF, use CASE.`,
       ],
       ['ai', 'Please find the ESQL query below:'],
     ]).partial({
+      documentation,
       availableDataViews: state.availableDataViews.join('\n'),
       errors: state.errors.join('\n'),
       dataViewFields: state.dataViewFields.join('\n'),
       invalidQueries: state.invalidQueries.join('\n'),
     });
 
-    const finalChain = answerPrompt.pipe(llm).pipe(new StringOutputParser());
+    const finalChain = answerPrompt
+      .pipe(llm as ActionsClientChatOpenAI | ActionsClientSimpleChatModel)
+      .pipe(new StringOutputParser());
 
     const finalResult = await finalChain.invoke({
       query: userQuery,
-      date: 'date',
-      msg: 'msg',
-      ip: 'ip',
     });
 
     const correctedResult = finalResult.replaceAll(INLINE_ESQL_QUERY_REGEX, (_match, query) => {
@@ -292,16 +282,8 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { chain, dataViews, search, llm } = params;
-    if (!llm || !chain) return null;
-
-    const retrievalTool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool(params);
-
-    const boundModel = llm as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
-
-    if (retrievalTool && boundModel?.bindTools) {
-      boundModel.bindTools([retrievalTool]);
-    }
+    const { dataViews, search, llm, esStore } = params;
+    if (!llm) return null;
 
     return new DynamicStructuredTool({
       name: toolDetails.name,
@@ -314,10 +296,7 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
           channels: graphState,
         })
           .addNode('getDataStreams', getDataStreams({ dataViews }))
-          .addNode(
-            'generateQuery',
-            getGenerateQuery({ userQuery: input.question, llm: boundModel })
-          )
+          .addNode('generateQuery', getGenerateQuery({ userQuery: input.question, llm, esStore }))
           .addNode('validateQuery', getValidateQuery({ dataViews, search }))
           .addEdge(START, 'getDataStreams')
           .addEdge('getDataStreams', 'generateQuery')
