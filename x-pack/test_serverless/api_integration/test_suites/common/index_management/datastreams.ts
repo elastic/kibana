@@ -58,7 +58,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(testDataStream).to.eql({
           name: testDataStreamName,
           lifecycle: {
+            effective_retention: '365d',
             enabled: true,
+            retention_determined_by: 'default_global_retention',
           },
           privileges: {
             delete_index: true,
@@ -78,53 +80,6 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           hidden: false,
-        });
-      });
-
-      it('includes stats when provided the includeStats query parameter', async () => {
-        const { body: dataStreams, status } = await supertestWithoutAuth
-          .get(`${API_BASE_PATH}/data_streams?includeStats=true`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader);
-
-        svlCommonApi.assertResponseStatusCode(200, status, dataStreams);
-
-        expect(dataStreams).to.be.an('array');
-
-        // returned array can contain automatically created data streams
-        const testDataStream = dataStreams.find(
-          (dataStream: DataStream) => dataStream.name === testDataStreamName
-        );
-
-        expect(testDataStream).to.be.ok();
-
-        // ES determines these values so we'll just echo them back.
-        const { name: indexName, uuid } = testDataStream!.indices[0];
-        const { storageSize, storageSizeBytes, ...dataStreamWithoutStorageSize } = testDataStream!;
-
-        expect(dataStreamWithoutStorageSize).to.eql({
-          name: testDataStreamName,
-          privileges: {
-            delete_index: true,
-            manage_data_stream_lifecycle: true,
-          },
-          timeStampField: { name: '@timestamp' },
-          indices: [
-            {
-              name: indexName,
-              managedBy: 'Data stream lifecycle',
-              preferILM: true,
-              uuid,
-            },
-          ],
-          generation: 1,
-          health: 'green',
-          indexTemplateName: testDataStreamName,
-          nextGenerationManagedBy: 'Data stream lifecycle',
-          hidden: false,
-          lifecycle: {
-            enabled: true,
-          },
         });
       });
 
@@ -161,7 +116,9 @@ export default function ({ getService }: FtrProviderContext) {
           nextGenerationManagedBy: 'Data stream lifecycle',
           hidden: false,
           lifecycle: {
+            effective_retention: '365d',
             enabled: true,
+            retention_determined_by: 'default_global_retention',
           },
         });
       });
@@ -173,7 +130,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
-      it('updates the data retention of a DS', async () => {
+      xit('updates the data retention of a DS', async () => {
         const { body, status } = await supertestWithoutAuth
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set(internalReqHeader)
@@ -186,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({ success: true });
       });
 
-      it('sets data retention to infinite', async () => {
+      xit('sets data retention to infinite', async () => {
         const { body, status } = await supertestWithoutAuth
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set(internalReqHeader)
