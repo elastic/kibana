@@ -316,6 +316,9 @@ export const nonLangChainExecute = async ({
   });
   return response.ok({
     body: result,
+    ...(request.body.subAction === 'invokeAI'
+      ? { headers: { 'content-type': 'application/json' } }
+      : {}),
   });
 };
 
