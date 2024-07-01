@@ -42,6 +42,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 describe(
   'Machine Learning Detection Rules - Editing',
   {
+    // Skipping in MKI as it depends on feature flag alertSuppressionForMachineLearningRuleEnabled
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
