@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { LogsOverview } from './logs_overview';
+import React from 'react';
+import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
+import { dynamic } from '@kbn/shared-ux-utility';
 
-// Required for usage in React.lazy
-// eslint-disable-next-line import/no-default-export
-export default LogsOverview;
+export const UnifiedDocViewerLogsOverview = dynamic(() => import('./doc_viewer_logs_overview'), {
+  fallback: (
+    <EuiDelayRender delay={300}>
+      <EuiSkeletonText />
+    </EuiDelayRender>
+  ),
+});

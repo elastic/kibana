@@ -11,6 +11,7 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { LogsExplorerController } from '../controller';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
@@ -130,7 +131,19 @@ export const createLogsExplorerProfileCustomizations =
         },
       },
       docViewsRegistry: (registry) => {
-        registry.enableById('doc_view_logs_overview');
+        registry.add({
+          id: 'doc_view_logs_overview',
+          title: i18n.translate('xpack.logsExplorer.docViews.logsOverview.title', {
+            defaultMessage: 'Overview',
+          }),
+          order: 0,
+          component: (props) => (
+            <UnifiedDocViewerLogsOverview
+              {...props}
+              renderAIAssistant={plugins.logsShared.renderLogsAIAssistant}
+            />
+          ),
+        });
 
         return registry;
       },
