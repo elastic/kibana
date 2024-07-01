@@ -58,6 +58,7 @@ import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 import { RuleEditorFlyout } from '../../../components/rule_editor';
 
 const percentFocusChartHeight = 0.634;
+const minSvgHeight = 350;
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -93,7 +94,7 @@ const anomalyGrayScale = d3.scale
   .range(['#dce7ed', '#b0c5d6', '#b1a34e', '#b17f4e', '#c88686']);
 
 function getChartHeights(height) {
-  const actualHeight = height;
+  const actualHeight = height < minSvgHeight ? minSvgHeight : height;
   const focusChartHeight = Math.round(actualHeight * percentFocusChartHeight);
 
   const heights = {
@@ -105,8 +106,10 @@ function getChartHeights(height) {
 
 function getSvgHeight(showAnnotations, incomingHeight) {
   const adjustedAnnotationHeight = showAnnotations ? annotationHeight : 0;
+  const incomingHeightActual =
+    incomingHeight && incomingHeight < minSvgHeight ? minSvgHeight : incomingHeight;
   const { focusHeight: focusHeightIncoming } = incomingHeight
-    ? getChartHeights(incomingHeight)
+    ? getChartHeights(incomingHeightActual)
     : {};
 
   return (
