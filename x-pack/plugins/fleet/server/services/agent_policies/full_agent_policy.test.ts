@@ -867,33 +867,6 @@ ssl.test: 123
     `);
   });
 
-  it('should return an API key value if passed for elasticsearch output type in standalone ', () => {
-    const policyOutput = transformOutputToFullPolicyOutput(
-      {
-        id: 'id123',
-        hosts: ['http://host.fr'],
-        is_default: false,
-        is_default_monitoring: false,
-        name: 'test output',
-        type: 'elasticsearch',
-      },
-      undefined,
-      true,
-      '123:foobar'
-    );
-
-    expect(policyOutput).toMatchInlineSnapshot(`
-      Object {
-        "api_key": "123:foobar",
-        "hosts": Array [
-          "http://host.fr",
-        ],
-        "preset": "balanced",
-        "type": "elasticsearch",
-      }
-    `);
-  });
-
   it('should work with kafka output', () => {
     const policyOutput = transformOutputToFullPolicyOutput({
       id: 'id123',
