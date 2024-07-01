@@ -20,45 +20,6 @@ import { useTimeBucketsService } from '../../../util/time_buckets_service';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 import type { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
-
-const percentFocusZoomPanelHeight = 0.051;
-const percentFocusChartHeight = 0.634;
-const percentContextChartHeight = 0.122;
-const percentContextChartLineTopMargin = 0.006;
-const chartSpacing = 25;
-const marginTop = 10;
-const marginBottom = 15;
-const minSvgHeight = 350;
-
-interface Heights {
-  focusZoomPanelHeight: number;
-  focusChartHeight: number;
-  focusHeight: number;
-  contextChartHeight: number;
-  contextChartLineTopMargin: number;
-  chartSpacing: number;
-  marginTop: number;
-  marginBottom: number;
-}
-
-function getChartHeights(height: number) {
-  const actualHeight = height < minSvgHeight ? minSvgHeight : height;
-  const focusZoomPanelHeight = Math.round(actualHeight * percentFocusZoomPanelHeight);
-  const focusChartHeight = Math.round(actualHeight * percentFocusChartHeight);
-
-  const heights: Heights = {
-    focusZoomPanelHeight,
-    focusChartHeight,
-    focusHeight: focusZoomPanelHeight + focusChartHeight,
-    contextChartHeight: Math.round(actualHeight * percentContextChartHeight),
-    contextChartLineTopMargin: Math.round(actualHeight * percentContextChartLineTopMargin),
-    chartSpacing,
-    marginTop,
-    marginBottom,
-  };
-  return heights;
-}
-
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
@@ -175,11 +136,9 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     contextAggregationInterval,
   ]);
 
-  let heights: Heights | undefined;
-
   if (chartProps.svgHeight) {
     // 32 accounts for the height of the chart title
-    heights = getChartHeights(chartProps.svgHeight - 32);
+    chartProps.svgHeight -= 32;
   }
 
   return (
@@ -193,7 +152,6 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             bounds={bounds}
             detectorIndex={detectorIndex}
             embeddableMode={embeddableMode}
-            heights={heights}
             renderFocusChartOnly={renderFocusChartOnly}
             selectedJob={selectedJob}
             showAnnotations={showAnnotations}
