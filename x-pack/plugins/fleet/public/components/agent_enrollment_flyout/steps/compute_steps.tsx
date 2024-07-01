@@ -89,9 +89,9 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         if (!selectedPolicy?.id) {
           return;
         }
-        let query = { standalone: true, standalone_api_key: apiKey, kubernetes: false };
+        let query = { standalone: true, kubernetes: false };
         if (isK8s === 'IS_KUBERNETES') {
-          query = { standalone: true, standalone_api_key: apiKey, kubernetes: true };
+          query = { standalone: true, kubernetes: true };
         }
         const res = await sendGetOneAgentPolicyFull(selectedPolicy?.id, query);
         if (res.error) {

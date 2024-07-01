@@ -379,7 +379,6 @@ export const getFullAgentPolicy: FleetRequestHandler<
         request.params.agentPolicyId,
         {
           standalone: request.query.standalone === true,
-          standalone_api_key: request.query.standalone_api_key,
         }
       );
       if (fullAgentPolicy) {
@@ -444,7 +443,6 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
     try {
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(soClient, agentPolicyId, {
         standalone: request.query.standalone === true,
-        standalone_api_key: request.query.standalone_api_key,
       });
       if (fullAgentPolicy) {
         const body = fullAgentPolicyToYaml(fullAgentPolicy, safeDump);

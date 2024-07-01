@@ -57,7 +57,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
         if (!agentPolicy?.id) {
           return;
         }
-        const query = { standalone: true, standalone_api_key: apiKey, kubernetes: false };
+        const query = { standalone: true, kubernetes: false };
         const res = await sendGetOneAgentPolicyFull(agentPolicy?.id, query);
         if (res.error) {
           throw res.error;

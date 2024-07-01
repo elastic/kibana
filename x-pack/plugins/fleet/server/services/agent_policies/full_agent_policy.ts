@@ -67,10 +67,9 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone: boolean; standalone_api_key?: string }
+  options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
-  const standalone_api_key = options?.standalone_api_key;
 
   const agentPolicy = await fetchAgentPolicy(soClient, id);
   if (!agentPolicy) {
@@ -165,8 +164,7 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone,
-          standalone_api_key
+          standalone
         );
 
         return acc;
@@ -337,8 +335,7 @@ export function generateFleetConfig(
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false,
-  standalone_api_key?: string
+  standalone = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -494,11 +491,8 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (output.type === outputType.Elasticsearch && standalone) {
-    if (standalone_api_key) {
-      newOutput.api_key = standalone_api_key;
-    } else {
-      newOutput.api_key = '${API_KEY}';
-    }
+    // adding a place_holder as API_KEY
+    newOutput.api_key = '${API_KEY}';
   }
 
   if (output.type === outputType.RemoteElasticsearch) {

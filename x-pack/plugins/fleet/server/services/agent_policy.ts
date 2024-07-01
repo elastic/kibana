@@ -1273,7 +1273,7 @@ class AgentPolicyService {
   public async getFullAgentPolicy(
     soClient: SavedObjectsClientContract,
     id: string,
-    options?: { standalone: boolean; standalone_api_key?: string }
+    options?: { standalone: boolean }
   ): Promise<FullAgentPolicy | null> {
     return getFullAgentPolicy(soClient, id, options);
   }
