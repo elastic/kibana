@@ -10158,48 +10158,77 @@ describe('validation logic', () => {
       });
 
       describe('top_list', () => {
-        testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 3, "asc")', []);
+        describe('no errors on correct usage', () => {
+          testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 3, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top_list(stringField, 1, "desc")', []);
+          testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 5, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top_list(stringField, 5, "asc")', []);
+        });
 
-        testErrorsAndWarnings('from a_index | stats top_list(stringField, 1, "desc")', []);
+        describe('errors on invalid argument count', () => {
+          testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 3)', [
+            'Error: [top_list] function expects exactly 3 arguments, got 2.',
+          ]);
+          testErrorsAndWarnings('from a_index | stats var = top_list(stringField)', [
+            'Error: [top_list] function expects exactly 3 arguments, got 1.',
+          ]);
+        });
+
+        describe('limit must be a literal', () => {
+          testErrorsAndWarnings(
+            'from a_index | stats var = top_list(stringField, numberField, "asc")',
+            [
+              'Argument of [=] must be a constant, received [top_list(stringField,numberField,"asc")]',
+            ]
+          );
+          testErrorsAndWarnings(
+            'from a_index | stats var = top_list(stringField, 100 + numberField, "asc")',
+            [
+              'Argument of [=] must be a constant, received [top_list(stringField,100+numberField,"asc")]',
+            ]
+          );
+        });
+
+        describe('order must be "asc" or "desc"', () => {
+          testErrorsAndWarnings(
+            'from a_index | stats var = top_list(stringField, 1, stringField)',
+            ['The order argument must be a string literal with value "asc" or "desc".']
+          );
+          testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 1, "asdf")', [
+            'The order argument must be a string literal with value "asc" or "desc".',
+          ]);
+        });
+
+        testErrorsAndWarnings('from a_index | sort top_list(stringField, numberField, "asc")', [
+          'SORT does not support function top_list',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top_list(stringField, numberField, "asc")', [
+          'WHERE does not support function top_list',
+        ]);
 
         testErrorsAndWarnings(
-          'from a_index | sort top_list(stringField, numberField, stringField)',
-          ['SORT does not support function top_list']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | where top_list(stringField, numberField, stringField)',
+          'from a_index | where top_list(stringField, numberField, "asc") > 0',
           ['WHERE does not support function top_list']
         );
 
         testErrorsAndWarnings(
-          'from a_index | where top_list(stringField, numberField, stringField) > 0',
-          ['WHERE does not support function top_list']
-        );
-
-        testErrorsAndWarnings(
-          'from a_index | eval var = top_list(stringField, numberField, stringField)',
+          'from a_index | eval var = top_list(stringField, numberField, "asc")',
           ['EVAL does not support function top_list']
         );
 
         testErrorsAndWarnings(
-          'from a_index | eval var = top_list(stringField, numberField, stringField) > 0',
+          'from a_index | eval var = top_list(stringField, numberField, "asc") > 0',
           ['EVAL does not support function top_list']
         );
 
-        testErrorsAndWarnings(
-          'from a_index | eval top_list(stringField, numberField, stringField)',
-          ['EVAL does not support function top_list']
-        );
+        testErrorsAndWarnings('from a_index | eval top_list(stringField, numberField, "asc")', [
+          'EVAL does not support function top_list',
+        ]);
 
-        testErrorsAndWarnings(
-          'from a_index | eval top_list(stringField, numberField, stringField) > 0',
-          ['EVAL does not support function top_list']
-        );
-
-        testErrorsAndWarnings('from a_index | stats top_list(null, null, null)', []);
-        testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 5, "asc")', []);
-        testErrorsAndWarnings('from a_index | stats top_list(stringField, 5, "asc")', []);
+        testErrorsAndWarnings('from a_index | eval top_list(stringField, numberField, "asc") > 0', [
+          'EVAL does not support function top_list',
+        ]);
 
         testErrorsAndWarnings('from a_index | sort top_list(stringField, 5, "asc")', [
           'SORT does not support function top_list',
