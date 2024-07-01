@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import { useEffect } from 'react';
 import React, { useMemo, useState, useCallback } from 'react';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -61,6 +61,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
   isNewPanel,
 }) => {
   const {
+    data: { dataViews },
     unifiedSearch: {
       ui: { IndexPatternSelect },
     },
@@ -88,16 +89,23 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
     return {
       viewType,
       title: initialInput?.title ?? defaultTitle,
-      dataViewId: isEsqlMode ? undefined : dataViewId,
+      dataViewId,
       query: isEsqlMode ? esqlQuery : undefined,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataViewId, viewType, esqlQuery.esql, isEsqlMode]);
   const onESQLQuerySubmit = useCallback(
     async (query: AggregateQuery, abortController: AbortController) => {
+      const adhocDataView = await getESQLAdHocDataview(
+        getIndexPatternFromESQLQuery(query.esql),
+        dataViews
+      );
+      if (adhocDataView && adhocDataView.id){
+        setDataViewId(adhocDataView.id);
+      }
       await onPreview({
         viewType,
-        dataViewId: undefined,
+        dataViewId: adhocDataView?.id,
         query,
       });
     },
