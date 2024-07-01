@@ -81,7 +81,6 @@ export const registerSyntheticsTLSCheckRule = (
     isExportable: true,
     minimumLicenseRequired: 'basic',
     doesSetRecoveryContext: true,
-    // async executor({ state, params, services, spaceId, previousStartedAt, startedAt }) {
     executor: async (
       options: RuleExecutorOptions<
         TLSRuleTypeParams,
