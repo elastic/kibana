@@ -174,3 +174,14 @@ export const RESPONSE_ACTIONS_ZIP_PASSCODE: Readonly<Record<ResponseActionAgentT
     sentinel_one: 'Elastic@123',
     crowdstrike: 'tbd..',
   });
+
+/**
+ * Map of Agent Type to alert field that holds the Agent ID for that agent type
+ */
+export const RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELD: Readonly<
+  Record<ResponseActionAgentType, string>
+> = Object.freeze({
+  endpoint: 'agent.id',
+  sentinel_one: 'observer.serial_number',
+  crowdstrike: 'device.id',
+});

@@ -74,6 +74,8 @@ export const JobsListPage: FC<Props> = ({
   const [isPlatinumOrTrialLicense, setIsPlatinumOrTrialLicense] = useState(true);
   const [showSyncFlyout, setShowSyncFlyout] = useState(false);
   const [currentTabId, setCurrentTabId] = useState<MlSavedObjectType>('anomaly-detector');
+  // callback to allow import flyout to refresh jobs list
+  const [refreshJobs, setRefreshJobs] = useState<(() => void) | null>(null);
 
   const mlServices = useMemo(
     () => getMlGlobalServices(coreStart.http, data.dataViews, usageCollection),
@@ -109,6 +111,9 @@ export const JobsListPage: FC<Props> = ({
   }
 
   function onCloseSyncFlyout() {
+    if (typeof refreshJobs === 'function') {
+      refreshJobs();
+    }
     setShowSyncFlyout(false);
   }
 
@@ -203,10 +208,14 @@ export const JobsListPage: FC<Props> = ({
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <ImportJobsFlyout isDisabled={false} />
+                        <ImportJobsFlyout isDisabled={false} onImportComplete={refreshJobs} />
                       </EuiFlexItem>
                     </EuiFlexGroup>
-                    <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
+                    <SpaceManagement
+                      spacesApi={spacesApi}
+                      onTabChange={setCurrentTabId}
+                      onReload={setRefreshJobs}
+                    />
                   </EuiPageTemplate.Section>
                 </Router>
               </EnabledFeaturesContextProvider>
