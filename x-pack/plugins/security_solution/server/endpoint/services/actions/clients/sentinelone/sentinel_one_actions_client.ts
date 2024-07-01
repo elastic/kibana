@@ -230,7 +230,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (cachedEntry) {
       this.log.debug(
-        `Found agent details for UUID [${agentUUID}] in cache:\n${stringify(cachedEntry)}`
+        `Found cached agent details for UUID [${agentUUID}]:\n${stringify(cachedEntry)}`
       );
       return cachedEntry;
     }
@@ -277,11 +277,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     // validate that we have a `process_name`. We need this here because the schema for this command
     // specifically because `KillProcessRequestBody` allows 3 types of parameters.
     if (payload.command === 'kill-process') {
-      if (!payload.parameters || !('process_name' in payload.parameters)) {
+      if (
+        !payload.parameters ||
+        !('process_name' in payload.parameters) ||
+        !payload.parameters.process_name
+      ) {
         return {
           isValid: false,
           error: new ResponseActionsClientError(
-            '[body.parameters.process_name]: missing parameter'
+            '[body.parameters.process_name]: missing parameter or value is empty'
           ),
         };
       }
@@ -584,6 +588,16 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
+    if (
+      !this.options.endpointService.experimentalFeatures
+        .responseActionsSentinelOneKillProcessEnabled
+    ) {
+      throw new ResponseActionsClientError(
+        `kill-process not supported for ${this.agentType} agent type. Feature disabled`,
+        400
+      );
+    }
+
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
       ResponseActionParametersWithProcessName,
       KillProcessActionOutputContent,
@@ -761,7 +775,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!s1Script) {
       throw new ResponseActionsClientError(
-        `Unable to find a script from SentinelOne to handle ([${scriptType}][${osType}])`
+        `Unable to find a script from SentinelOne to handle [${scriptType}] response action for host running [${osType}])`
       );
     }
 
