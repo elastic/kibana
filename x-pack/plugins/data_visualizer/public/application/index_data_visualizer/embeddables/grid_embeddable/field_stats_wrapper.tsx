@@ -60,6 +60,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         timeRange={props.timeRange}
         visibleFieldNames={props.visibleFieldNames}
         resetData$={props.resetData$}
+        onRenderComplete={props.onRenderComplete}
       />
     );
   }
@@ -82,6 +83,7 @@ const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps
         timeRange={props.timeRange}
         visibleFieldNames={props.visibleFieldNames}
         resetData$={props.resetData$}
+        onRenderComplete={props.onRenderComplete}
       />
     );
   } else {
@@ -188,6 +190,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
             visibleFieldNames={props.visibleFieldNames}
             resetData$={props.resetData$}
             timeRange={props.timeRange}
+            onRenderComplete={props.onRenderComplete}
           />
         </DatePickerContextProvider>
       </KibanaContextProvider>

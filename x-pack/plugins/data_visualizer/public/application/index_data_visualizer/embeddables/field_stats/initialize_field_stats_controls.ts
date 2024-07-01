@@ -69,7 +69,7 @@ export const initializeFieldStatsControls = (rawState: FieldStatsInitialState) =
       showDistributions$,
     } as unknown as FieldStatsControlsApi,
     dataLoadingApi: {
-      dataLoading$,
+      dataLoading: dataLoading$,
       onRenderComplete,
       onLoading,
       onError,

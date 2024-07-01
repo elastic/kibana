@@ -23,7 +23,7 @@ const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
 const EmbeddableESQLFieldStatsTableWrapper = React.memo(
   (props: ESQLDataVisualizerGridEmbeddableState) => {
-    const { onTableUpdate } = props;
+    const { onTableUpdate, onRenderComplete } = props;
     const [dataVisualizerListState, setDataVisualizerListState] =
       useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
 
@@ -57,6 +57,12 @@ const EmbeddableESQLFieldStatsTableWrapper = React.memo(
       });
       return () => subscription?.unsubscribe();
     }, [props.resetData$, resetData]);
+
+    useEffect(() => {
+      if (progress === 100 && onRenderComplete) {
+        onRenderComplete();
+      }
+    }, [progress, onRenderComplete]);
 
     if (progress === 100 && configs.length === 0) {
       return <EmbeddableNoResultsEmptyPrompt />;

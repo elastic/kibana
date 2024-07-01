@@ -101,6 +101,7 @@ export interface FieldStatisticTableEmbeddableProps {
   renderFieldName?: (fieldName: string, item: DataVisualizerTableItem) => JSX.Element;
   resetData$?: Observable<number>;
   timeRange?: TimeRange;
+  onRenderComplete?: () => void;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<

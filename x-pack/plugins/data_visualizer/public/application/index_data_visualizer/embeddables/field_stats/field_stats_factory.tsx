@@ -148,7 +148,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         onFieldStatsTableDestroy,
         resetData$,
       } = initializeFieldStatsControls(state);
-      const { onError } = dataLoadingApi;
+      const { onError, dataLoading, blockingError } = dataLoadingApi;
 
       const defaultDataViewId = await deps.data.dataViews.getDefaultId();
       const validDataViewId: string =
@@ -203,7 +203,10 @@ export const getFieldStatsChartEmbeddableFactory = (
           ...timeRangeApi,
           ...titlesApi,
           ...fieldStatsControlsApi,
-          ...dataLoadingApi,
+          // PublishesDataLoading
+          dataLoading,
+          // PublishesBlockingError
+          blockingError,
           getTypeDisplayName: () =>
             i18n.translate('xpack.dataVisualizer.fieldStats.typeDisplayName', {
               defaultMessage: 'field statistics',
@@ -374,6 +377,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 onAddFilter={onAddFilter}
                 resetData$={reset$}
                 timeRange={timeRange}
+                onRenderComplete={dataLoadingApi.onRenderComplete}
               />
             </EuiFlexItem>
           );

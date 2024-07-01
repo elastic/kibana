@@ -9,6 +9,8 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type {
   HasEditCapabilities,
+  PublishesBlockingError,
+  PublishesDataLoading,
   PublishesDataViews,
   PublishesTimeRange,
 } from '@kbn/presentation-publishing';
@@ -32,4 +34,6 @@ export type FieldStatisticsTableEmbeddableApi =
     HasEditCapabilities &
     PublishesDataViews &
     PublishesTimeRange &
+    PublishesDataLoading &
+    PublishesBlockingError &
     FieldStatsControlsApi;
