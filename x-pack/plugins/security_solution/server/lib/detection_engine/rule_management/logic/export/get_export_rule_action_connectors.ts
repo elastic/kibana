@@ -76,8 +76,6 @@ export const getRuleActionConnectorsForExport = async (
     actionConnectorDetails: defaultActionConnectorDetails,
   };
 
-  // I should be able to undo the additional .filter
-  // check tomorrow
   const ids = [...new Set(rules.flatMap((rule) => rule.actions.map(({ id }) => id)))];
 
   let actionsIds = ids;
