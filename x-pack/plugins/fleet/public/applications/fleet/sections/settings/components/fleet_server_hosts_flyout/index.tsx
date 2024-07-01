@@ -29,8 +29,8 @@ import {
 } from '@elastic/eui';
 
 import { MultiRowInput } from '../multi_row_input';
+import { MAX_FLYOUT_WIDTH } from '../../../../constants';
 import { useStartServices } from '../../../../hooks';
-import { FLYOUT_MAX_WIDTH } from '../../constants';
 import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
@@ -61,7 +61,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
   );
 
   return (
-    <EuiFlyout maxWidth={FLYOUT_MAX_WIDTH} onClose={onClose}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
       <EuiFlyoutHeader hasBorder={true}>
         <>
           <EuiTitle size="m">
@@ -173,7 +173,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
                 )}
                 isUrl
                 helpText={
-                  inputs.hostUrlsInput.props.disabled && (
+                  cloud?.isServerlessEnabled && (
                     <FormattedMessage
                       id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessHostUrlsHelpText"
                       defaultMessage="Custom host URLs are not allowed in serverless."

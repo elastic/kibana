@@ -23,6 +23,7 @@ import {
   AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  INFERENCE_ENDPOINTS_PLUGIN,
 } from '../../../../common/constants';
 import {
   SEARCH_APPLICATIONS_PATH,
@@ -35,6 +36,8 @@ import {
   CRAWLERS_PATH,
   SEARCH_INDICES_PATH,
 } from '../../enterprise_search_content/routes';
+
+import { INFERENCE_ENDPOINTS_PATH } from '../../enterprise_search_relevance/routes';
 import { KibanaLogic } from '../kibana';
 
 import { generateNavLink } from './nav_link_helpers';
@@ -46,7 +49,8 @@ import { generateNavLink } from './nav_link_helpers';
  * @returns The Enterprise Search navigation items
  */
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
-  const { isSidebarEnabled, productAccess } = useValues(KibanaLogic);
+  const { isSearchHomepageEnabled, searchHomepage, isSidebarEnabled, productAccess } =
+    useValues(KibanaLogic);
   const indicesNavItems = useIndicesNav();
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 
@@ -63,7 +67,10 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       ...generateNavLink({
         shouldNotCreateHref: true,
         shouldShowActiveForSubroutes: true,
-        to: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        to:
+          isSearchHomepageEnabled && searchHomepage
+            ? searchHomepage.app.appRoute
+            : ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       }),
     },
     {
@@ -145,6 +152,25 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
         defaultMessage: 'Build',
+      }),
+    },
+    {
+      id: 'relevance',
+      items: [
+        {
+          id: 'inference_endpoints',
+          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+            defaultMessage: 'Inference Endpoints',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+        defaultMessage: 'Relevance',
       }),
     },
     {

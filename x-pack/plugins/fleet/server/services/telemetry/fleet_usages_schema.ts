@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RootSchema } from '@kbn/analytics-client';
+import type { RootSchema } from '@kbn/core/server';
 
 export const fleetAgentsSchema: RootSchema<any> = {
   agents_per_version: {
@@ -344,6 +344,19 @@ export const fleetUsagesSchema: RootSchema<any> = {
         items: {
           type: 'keyword',
           _meta: { description: 'Output types of agent policies' },
+        },
+      },
+      count_with_global_data_tags: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies using global data tags',
+        },
+      },
+      avg_number_global_data_tags_per_policy: {
+        type: 'long',
+        _meta: {
+          description:
+            'Average number of global data tags defined per agent policy (accross policies using global data tags)',
         },
       },
     },

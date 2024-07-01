@@ -9,9 +9,11 @@ import { EuiFlexGroup, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DockerCharts } from '../../../charts/docker_charts';
-import { INTEGRATIONS } from '../../../constants';
+import { DOCKER_METRIC_TYPES, INTEGRATIONS, KUBERNETES_METRIC_TYPES } from '../../../constants';
 import { useIntegrationCheck } from '../../../hooks/use_integration_check';
 import { KubernetesContainerCharts } from '../../../charts/kubernetes_charts';
+import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
+import { ContentTabIds } from '../../../types';
 
 interface Props {
   assetId: string;
@@ -20,10 +22,15 @@ interface Props {
 }
 
 export const ContainerMetrics = (props: Props) => {
+  const { showTab } = useTabSwitcherContext();
   const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
   const isKubernetesContainer = useIntegrationCheck({
     dependsOn: INTEGRATIONS.kubernetesContainer,
   });
+
+  const onClick = (metric: string) => {
+    showTab(ContentTabIds.METRICS, { scrollTo: metric });
+  };
 
   if (!isDockerContainer && !isKubernetesContainer) {
     return null;
@@ -32,20 +39,20 @@ export const ContainerMetrics = (props: Props) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
       <EuiFlexGrid columns={2} gutterSize="s">
-        {isDockerContainer && (
-          <>
-            <DockerCharts {...props} metric="cpu" />
-            <DockerCharts {...props} metric="memory" />
-            <DockerCharts {...props} metric="network" />
-            <DockerCharts {...props} metric="disk" />
-          </>
-        )}
-        {!isDockerContainer && isKubernetesContainer && (
-          <>
-            <KubernetesContainerCharts {...props} metric="cpu" />
-            <KubernetesContainerCharts {...props} metric="memory" />
-          </>
-        )}
+        {isDockerContainer &&
+          DOCKER_METRIC_TYPES.map((metric) => (
+            <DockerCharts key={metric} {...props} metric={metric} onShowAll={onClick} />
+          ))}
+        {!isDockerContainer &&
+          isKubernetesContainer &&
+          KUBERNETES_METRIC_TYPES.map((metric) => (
+            <KubernetesContainerCharts
+              key={metric}
+              {...props}
+              metric={metric}
+              onShowAll={onClick}
+            />
+          ))}
       </EuiFlexGrid>
     </EuiFlexGroup>
   );

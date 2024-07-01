@@ -1,0 +1,622 @@
+{
+  "id": "@kbn/content-management-user-profiles",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.ManagedAvatarTip",
+        "type": "Function",
+        "tags": [],
+        "label": "ManagedAvatarTip",
+        "description": [],
+        "signature": [
+          "({\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}: { entityName?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.ManagedAvatarTip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  entityName = i18n.translate('contentManagement.userProfiles.managedAvatarTip.defaultEntityName', {\n    defaultMessage: 'object',\n  }),\n}",
+            "description": [],
+            "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-common.ManagedAvatarTip.$1.entityName",
+                "type": "string",
+                "tags": [],
+                "label": "entityName",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/managed_avatar_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.NoCreatorTip",
+        "type": "Function",
+        "tags": [],
+        "label": "NoCreatorTip",
+        "description": [],
+        "signature": [
+          "(props: { iconType?: ",
+          "IconType",
+          " | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.NoCreatorTip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-common.NoCreatorTip.$1.iconType",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "iconType",
+                "description": [],
+                "signature": [
+                  "IconType",
+                  " | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.NoUpdaterTip",
+        "type": "Function",
+        "tags": [],
+        "label": "NoUpdaterTip",
+        "description": [],
+        "signature": [
+          "(props: { iconType?: string | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.NoUpdaterTip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-common.NoUpdaterTip.$1.iconType",
+                "type": "string",
+                "tags": [],
+                "label": "iconType",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/components/user_missing_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.UserAvatarTip",
+        "type": "Function",
+        "tags": [],
+        "label": "UserAvatarTip",
+        "description": [],
+        "signature": [
+          "(props: { uid: string; }) => JSX.Element | null"
+        ],
+        "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.UserAvatarTip.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-common.UserAvatarTip.$1.uid",
+                "type": "string",
+                "tags": [],
+                "label": "uid",
+                "description": [],
+                "path": "packages/content-management/user_profiles/src/components/user_avatar_tip.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.UserProfilesKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "UserProfilesKibanaProvider",
+        "description": [],
+        "signature": [
+          "({ children, core, }: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/content-management-user-profiles",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUserProfilesPluginApi",
+            "section": "def-common.UserProfilesKibanaDependencies",
+            "text": "UserProfilesKibanaDependencies"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.UserProfilesKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  core,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/content-management-user-profiles",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUserProfilesPluginApi",
+                "section": "def-common.UserProfilesKibanaDependencies",
+                "text": "UserProfilesKibanaDependencies"
+              },
+              ">>"
+            ],
+            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.UserProfilesProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "UserProfilesProvider",
+        "description": [],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          {
+            "pluginId": "@kbn/content-management-user-profiles",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUserProfilesPluginApi",
+            "section": "def-common.UserProfilesServices",
+            "text": "UserProfilesServices"
+          },
+          ">>) => JSX.Element"
+        ],
+        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.UserProfilesProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...services\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<",
+              {
+                "pluginId": "@kbn/content-management-user-profiles",
+                "scope": "common",
+                "docId": "kibKbnContentManagementUserProfilesPluginApi",
+                "section": "def-common.UserProfilesServices",
+                "text": "UserProfilesServices"
+              },
+              ">>"
+            ],
+            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.useUserProfile",
+        "type": "Function",
+        "tags": [],
+        "label": "useUserProfile",
+        "description": [],
+        "signature": [
+          "(uid: string) => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfileData",
+            "text": "UserProfileData"
+          },
+          ">, unknown>"
+        ],
+        "path": "packages/content-management/user_profiles/src/queries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.useUserProfile.$1",
+            "type": "string",
+            "tags": [],
+            "label": "uid",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/content-management/user_profiles/src/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.useUserProfiles",
+        "type": "Function",
+        "tags": [],
+        "label": "useUserProfiles",
+        "description": [],
+        "signature": [
+          "(uids: string[], opts?: { enabled?: boolean | undefined; } | undefined) => ",
+          "UseQueryResult",
+          "<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfileData",
+            "text": "UserProfileData"
+          },
+          ">[], unknown>"
+        ],
+        "path": "packages/content-management/user_profiles/src/queries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.useUserProfiles.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "uids",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/content-management/user_profiles/src/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.useUserProfiles.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "path": "packages/content-management/user_profiles/src/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-common.useUserProfiles.$2.enabled",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "enabled",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/content-management/user_profiles/src/queries.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.useUserProfilesServices",
+        "type": "Function",
+        "tags": [],
+        "label": "useUserProfilesServices",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/content-management-user-profiles",
+            "scope": "common",
+            "docId": "kibKbnContentManagementUserProfilesPluginApi",
+            "section": "def-common.UserProfilesServices",
+            "text": "UserProfilesServices"
+          }
+        ],
+        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.UserProfilesKibanaDependencies",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfilesKibanaDependencies",
+        "description": [],
+        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.UserProfilesKibanaDependencies.core",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              "{ userProfile: { bulkGet: <D extends ",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">(params: ",
+              {
+                "pluginId": "@kbn/core-user-profile-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
+                "section": "def-common.UserProfileBulkGetParams",
+                "text": "UserProfileBulkGetParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/core-user-profile-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUserProfileCommonPluginApi",
+                "section": "def-common.UserProfile",
+                "text": "UserProfile"
+              },
+              "<D>[]>; }; }"
+            ],
+            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-management-user-profiles",
+        "id": "def-common.UserProfilesServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserProfilesServices",
+        "description": [],
+        "path": "packages/content-management/user_profiles/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.UserProfilesServices.bulkGetUserProfiles",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGetUserProfiles",
+            "description": [],
+            "signature": [
+              "(uids: string[]) => Promise<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfile",
+                "text": "UserProfile"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">[]>"
+            ],
+            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-common.UserProfilesServices.bulkGetUserProfiles.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "uids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "packages/content-management/user_profiles/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-management-user-profiles",
+            "id": "def-common.UserProfilesServices.getUserProfile",
+            "type": "Function",
+            "tags": [],
+            "label": "getUserProfile",
+            "description": [],
+            "signature": [
+              "(uid: string) => Promise<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfile",
+                "text": "UserProfile"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.UserProfileData",
+                "text": "UserProfileData"
+              },
+              ">>"
+            ],
+            "path": "packages/content-management/user_profiles/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-management-user-profiles",
+                "id": "def-common.UserProfilesServices.getUserProfile.$1",
+                "type": "string",
+                "tags": [],
+                "label": "uid",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/content-management/user_profiles/src/services.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

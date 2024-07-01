@@ -300,3 +300,8 @@ export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
 }
+
+export interface ModelDownloadState {
+  total_parts: number;
+  downloaded_parts: number;
+}

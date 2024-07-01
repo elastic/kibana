@@ -242,9 +242,9 @@
             "signature": [
               "{ optIn: (optInConfig: ",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.OptInConfig",
                 "text": "OptInConfig"
               },
@@ -252,9 +252,9 @@
               "Observable",
               "<",
               {
-                "pluginId": "@kbn/analytics-client",
+                "pluginId": "@kbn/ebt",
                 "scope": "common",
-                "docId": "kibKbnAnalyticsClientPluginApi",
+                "docId": "kibKbnEbtPluginApi",
                 "section": "def-common.TelemetryCounter",
                 "text": "TelemetryCounter"
               },
@@ -1070,22 +1070,6 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisAppStateProps.stickyHistogram",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "stickyHistogram",
-            "description": [
-              "Option to make main histogram sticky"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_app_state.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "aiops",
             "id": "def-public.LogRateAnalysisAppStateProps.showFrozenDataTierChoice",
             "type": "CompoundType",
             "tags": [],
@@ -1133,22 +1117,6 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               }
-            ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisContentWrapperProps.stickyHistogram",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "stickyHistogram",
-            "description": [
-              "Option to make main histogram sticky"
-            ],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
             "deprecated": false,

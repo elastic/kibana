@@ -68,20 +68,24 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutDocsCountTotalText,
         value: '1,000',
+        userHasPrivilege: true,
       },
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
+        userHasPrivilege: true,
       },
       {
         title: flyoutServicesText,
         value: '3',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '3',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
         title: flyoutDegradedDocsText,
@@ -90,6 +94,7 @@ describe('getSummaryKpis', () => {
           label: flyoutShowAllText,
           href: degradedDocsHref,
         },
+        userHasPrivilege: true,
       },
     ]);
   });
@@ -122,20 +127,24 @@ describe('getSummaryKpis', () => {
       {
         title: flyoutDocsCountTotalText,
         value: '1,000',
+        userHasPrivilege: true,
       },
       {
         title: flyoutSizeText,
         value: formatNumber(dataStreamDetails.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
+        userHasPrivilege: true,
       },
       {
         title: flyoutServicesText,
         value: '50+',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
         title: flyoutHostsText,
         value: '54+',
         link: undefined,
+        userHasPrivilege: true,
       },
       {
         title: flyoutDegradedDocsText,
@@ -144,6 +153,7 @@ describe('getSummaryKpis', () => {
           label: flyoutShowAllText,
           href: degradedDocsHref,
         },
+        userHasPrivilege: true,
       },
     ]);
   });
