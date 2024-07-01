@@ -23,7 +23,11 @@ export function useCustomCardsForCategory(
   const history = useHistory();
   const location = useLocation();
   const {
-    services: { application, http /* TODO add before merge: ,context: { isServerless } */ },
+    services: {
+      application,
+      http,
+      context: { isServerless },
+    },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const getUrlForApp = application?.getUrlForApp;
 
@@ -110,7 +114,7 @@ export function useCustomCardsForCategory(
       return [
         toFeaturedCard('kubernetes'),
         toFeaturedCard('docker'),
-        // TODO enable before merge: isServerless ? toFeaturedCard('prometheus') : otelCard,
+        isServerless ? toFeaturedCard('prometheus') : otelCard,
         otelCard,
         {
           id: 'azure-virtual',
@@ -191,7 +195,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        // TODO enable before merge: isServerless ? toFeaturedCard('nginx') : otelCard,
+        isServerless ? toFeaturedCard('nginx') : otelCard,
         otelCard,
         {
           id: 'azure-logs-virtual',
