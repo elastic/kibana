@@ -14,7 +14,7 @@ import {
   AttackDiscoveryStatus,
   AttackDiscoveryUpdateProps,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 jest.mock('./get_attack_discovery');
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
@@ -68,6 +68,7 @@ const existingAttackDiscovery: AttackDiscoveryResponse = {
     connectorId: 'my-gpt4o-ai',
   },
   attackDiscoveries: [],
+  lastViewedAt: '2024-06-07T21:19:08.090Z',
   updatedAt: '2024-06-07T21:19:08.090Z',
   replacements: {
     'f19e1a0a-de3b-496c-8ace-dd91229e1084': 'root',
