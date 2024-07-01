@@ -21,7 +21,7 @@ steps:
         EC_REGION: aws-us-east-1
         RETRY_TESTS_ON_FAIL: "true"
       message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-staging.yaml)"
-
+  
   - label: ":rocket: Fleet synthetic monitor to check the long standing project"
     trigger: "serverless-quality-gates"
     build:

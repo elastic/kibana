@@ -7,7 +7,9 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
 import { encode } from '@kbn/rison';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -15,19 +17,18 @@ import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import { usePermissions } from '../../hooks/use_permissions';
+import { useCreateDataView } from '../../hooks/use_create_data_view';
 import { useCreateSlo } from '../../hooks/use_create_slo';
 import { useDeleteSlo } from '../../hooks/use_delete_slo';
 import { useDeleteSloInstance } from '../../hooks/use_delete_slo_instance';
 import { useFetchHistoricalSummary } from '../../hooks/use_fetch_historical_summary';
 import { useFetchSloList } from '../../hooks/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
-import { HeaderMenuPortal, TagsList } from '@kbn/observability-shared-plugin/public';
+import { usePermissions } from '../../hooks/use_permissions';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
-import { SlosPage } from './slos';
 import { useGetSettings } from '../slo_settings/use_get_settings';
-import { useCreateDataView } from '../../hooks/use_create_data_view';
+import { SlosPage } from './slos';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -46,6 +47,7 @@ jest.mock('../../hooks/use_fetch_historical_summary');
 jest.mock('../../hooks/use_permissions');
 jest.mock('../../hooks/use_capabilities');
 jest.mock('../../hooks/use_create_data_view');
+jest.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as jest.Mock;
 const useKibanaMock = useKibana as jest.Mock;
@@ -58,9 +60,10 @@ const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 const useCreateDataViewMock = useCreateDataView as jest.Mock;
 const TagsListMock = TagsList as jest.Mock;
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 TagsListMock.mockReturnValue(<div>Tags list</div>);
-
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
