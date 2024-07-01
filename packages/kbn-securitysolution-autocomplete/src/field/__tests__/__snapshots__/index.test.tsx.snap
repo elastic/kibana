@@ -17,6 +17,7 @@ Object {
           >
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 2;"
             >
               <div
                 class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
@@ -28,6 +29,7 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
+                  autocomplete="off"
                   class="euiComboBox__input"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
@@ -83,6 +85,7 @@ Object {
         >
           <div
             class="euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlRightIconsCount: 2;"
           >
             <div
               class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
@@ -94,6 +97,7 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
+                autocomplete="off"
                 class="euiComboBox__input"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
@@ -217,6 +221,7 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
+                  autocomplete="off"
                   class="euiComboBox__input"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
@@ -256,6 +261,7 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
+                autocomplete="off"
                 class="euiComboBox__input"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""
@@ -341,6 +347,7 @@ Object {
           >
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <div
                 class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
@@ -352,6 +359,7 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
+                  autocomplete="off"
                   class="euiComboBox__input"
                   data-test-subj="comboBoxSearchInput"
                   id="generated-id__eui-combobox-id"
@@ -396,6 +404,7 @@ Object {
         >
           <div
             class="euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlRightIconsCount: 1;"
           >
             <div
               class="euiComboBox__inputWrap euiFormControlLayout--1icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
@@ -407,6 +416,7 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
+                autocomplete="off"
                 class="euiComboBox__input"
                 data-test-subj="comboBoxSearchInput"
                 id="generated-id__eui-combobox-id"
@@ -508,6 +518,7 @@ Object {
           >
             <div
               class="euiFormControlLayout__childrenWrapper"
+              style="--euiFormControlRightIconsCount: 1;"
             >
               <div
                 class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
@@ -519,6 +530,7 @@ Object {
                   aria-controls=""
                   aria-expanded="false"
                   aria-invalid="false"
+                  autocomplete="off"
                   class="euiComboBox__input"
                   data-test-subj="comboBoxSearchInput"
                   disabled=""
@@ -556,6 +568,7 @@ Object {
         >
           <div
             class="euiFormControlLayout__childrenWrapper"
+            style="--euiFormControlRightIconsCount: 1;"
           >
             <div
               class="euiComboBox__inputWrap euiFormControlLayout--2icons euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--plainText"
@@ -567,6 +580,7 @@ Object {
                 aria-controls=""
                 aria-expanded="false"
                 aria-invalid="false"
+                autocomplete="off"
                 class="euiComboBox__input"
                 data-test-subj="comboBoxSearchInput"
                 disabled=""

@@ -554,7 +554,11 @@ export interface DocLinks {
     scalingKubernetesResourcesAndLimits: string;
     roleAndPrivileges: string;
     proxiesSettings: string;
+    unprivilegedMode: string;
   }>;
+  readonly integrationDeveloper: {
+    upload: string;
+  };
   readonly ecs: {
     readonly guide: string;
     readonly dataStreams: string;
