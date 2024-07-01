@@ -41,7 +41,7 @@ export function getSummaryKpis({
   hostsLocator?: ReturnType<
     typeof useKibanaContextForPlugin
   >['services']['observabilityShared']['locators']['infra']['hostsLocator'];
-  telemetry?: ReturnType<typeof useDatasetDetailsTelemetry>;
+  telemetry: ReturnType<typeof useDatasetDetailsTelemetry>;
 }): Array<{
   title: string;
   value: string;
@@ -60,9 +60,7 @@ export function getSummaryKpis({
     props: getRouterLinkProps({
       href: undefined,
       onClick: () => {
-        if (telemetry) {
-          telemetry.trackDetailsNavigated(NavigationTarget.Services, NavigationSource.Summary);
-        }
+        telemetry.trackDetailsNavigated(NavigationTarget.Services, NavigationSource.Summary);
       },
     }),
   };
@@ -89,7 +87,7 @@ export function getSummaryKpis({
       link: undefined,
       userHasPrivilege: true,
     },
-    getHostsKpi(dataStreamDetails?.hosts, timeRange, hostsLocator, telemetry),
+    getHostsKpi(dataStreamDetails?.hosts, timeRange, telemetry, hostsLocator),
     {
       title: flyoutDegradedDocsText,
       value: formatNumber(dataStreamDetails?.degradedDocsCount ?? 0, NUMBER_FORMAT),
@@ -108,10 +106,10 @@ export function getSummaryKpis({
 function getHostsKpi(
   dataStreamHosts: DataStreamDetails['hosts'],
   timeRange: TimeRangeConfig,
+  telemetry: ReturnType<typeof useDatasetDetailsTelemetry>,
   hostsLocator?: ReturnType<
     typeof useKibanaContextForPlugin
-  >['services']['observabilityShared']['locators']['infra']['hostsLocator'],
-  telemetry?: ReturnType<typeof useDatasetDetailsTelemetry>
+  >['services']['observabilityShared']['locators']['infra']['hostsLocator']
 ) {
   const hosts = dataStreamHosts ?? {};
   const hostKeys = Object.keys(hosts);
@@ -142,9 +140,7 @@ function getHostsKpi(
     props: getRouterLinkProps({
       href: hostsUrl,
       onClick: () => {
-        if (telemetry) {
-          telemetry.trackDetailsNavigated(NavigationTarget.Hosts, NavigationSource.Summary);
-        }
+        telemetry.trackDetailsNavigated(NavigationTarget.Hosts, NavigationSource.Summary);
       },
     }),
   };

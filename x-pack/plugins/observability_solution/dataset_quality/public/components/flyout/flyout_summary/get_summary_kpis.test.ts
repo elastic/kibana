@@ -7,6 +7,7 @@
 
 import { formatNumber } from '@elastic/eui';
 import type { useKibanaContextForPlugin } from '../../../utils';
+import type { useDatasetDetailsTelemetry } from '../../../hooks';
 import { TimeRangeConfig } from '../../../state_machines/dataset_quality_controller';
 
 import {
@@ -59,6 +60,10 @@ const hostsLocator = {
   typeof useKibanaContextForPlugin
 >['services']['observabilityShared']['locators']['infra']['hostsLocator'];
 
+const telemetry = {
+  trackDetailsNavigated: () => {},
+} as unknown as ReturnType<typeof useDatasetDetailsTelemetry>;
+
 describe('getSummaryKpis', () => {
   it('should return the correct KPIs', () => {
     const result = getSummaryKpis({
@@ -66,6 +71,7 @@ describe('getSummaryKpis', () => {
       timeRange,
       degradedDocsLinkProps,
       hostsLocator,
+      telemetry,
     });
 
     expect(result).toEqual([
@@ -125,6 +131,7 @@ describe('getSummaryKpis', () => {
       timeRange,
       degradedDocsLinkProps,
       hostsLocator,
+      telemetry,
     });
 
     expect(result).toEqual([
