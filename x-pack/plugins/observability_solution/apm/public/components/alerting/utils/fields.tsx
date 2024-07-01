@@ -42,7 +42,7 @@ export function ServiceField({
       <SuggestionsSelect
         customOptions={allowAll ? [{ label: allOptionText, value: undefined }] : undefined}
         customOptionText={i18n.translate('xpack.apm.serviceNamesSelectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new service name',
+          defaultMessage: `Add '{searchValue}' as a new service name`,
         })}
         defaultValue={currentValue}
         fieldName={SERVICE_NAME}
@@ -76,7 +76,7 @@ export function EnvironmentField({
       <SuggestionsSelect
         customOptions={[ENVIRONMENT_ALL]}
         customOptionText={i18n.translate('xpack.apm.environmentsSelectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new environment',
+          defaultMessage: `Add '{searchValue}' as a new environment`,
         })}
         defaultValue={getEnvironmentLabel(currentValue)}
         fieldName={SERVICE_ENVIRONMENT}
@@ -110,7 +110,7 @@ export function TransactionNameField({
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.alerting.transaction.name.custom.text', {
-          defaultMessage: 'Add \\{searchValue\\} as a new transaction name',
+          defaultMessage: `Add '{searchValue}' as a new transaction name`,
         })}
         defaultValue={currentValue}
         fieldName={TRANSACTION_NAME}
@@ -143,7 +143,7 @@ export function TransactionTypeField({
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.transactionTypesSelectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
+          defaultMessage: `Add '{searchValue}' as a new transaction type`,
         })}
         defaultValue={currentValue}
         fieldName={TRANSACTION_TYPE}
@@ -176,7 +176,7 @@ export function ErrorGroupingKeyField({
       <SuggestionsSelect
         customOptions={[{ label: allOptionText, value: undefined }]}
         customOptionText={i18n.translate('xpack.apm.errorKeySelectCustomOptionText', {
-          defaultMessage: 'Add \\{searchValue\\} as a new error grouping key',
+          defaultMessage: `Add '{searchValue}' as a new error grouping key`,
         })}
         defaultValue={currentValue}
         fieldName={ERROR_GROUP_ID}

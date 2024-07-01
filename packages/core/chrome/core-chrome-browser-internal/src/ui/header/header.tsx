@@ -190,7 +190,7 @@ export function Header({
                   button={
                     <HeaderMenuButton
                       data-test-subj="toggleNavButton"
-                      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                      aria-label={i18n.translate('core.ui.primaryNav.header.toggleNavAriaLabel', {
                         defaultMessage: 'Toggle primary navigation',
                       })}
                       onClick={() => setIsNavOpen(!isNavOpen)}

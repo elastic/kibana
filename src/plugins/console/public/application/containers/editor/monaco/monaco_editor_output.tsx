@@ -87,7 +87,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
     >
       <EuiScreenReaderOnly>
         <label htmlFor={'ConAppOutputTextarea'}>
-          {i18n.translate('console.outputTextarea', {
+          {i18n.translate('console.monaco.outputTextarea', {
             defaultMessage: 'Dev Tools Console output',
           })}
         </label>
