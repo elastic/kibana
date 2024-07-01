@@ -91,6 +91,29 @@ const ebtFilterObjectSchema: SchemaObject<DatasetEbtFilter> = {
   },
 };
 
+const sortSchema: SchemaObject<DatasetNavigatedEbtProps['sort']> = {
+  properties: {
+    field: {
+      type: 'keyword',
+      _meta: {
+        description: 'Field used for sorting on the main table',
+        optional: false,
+      },
+    },
+    direction: {
+      type: 'keyword',
+      _meta: {
+        description: 'Sort direction',
+        optional: false,
+      },
+    },
+  },
+  _meta: {
+    description: 'Represents the state of applied sorting on the dataset quality home page',
+    optional: false,
+  },
+};
+
 const filtersSchema: SchemaObject<DatasetNavigatedEbtProps['filters']> = {
   properties: {
     is_degraded: {
@@ -169,6 +192,7 @@ const datasetNavigatedEventType: DatasetQualityTelemetryEvent = {
   eventType: DatasetQualityTelemetryEventTypes.NAVIGATED,
   schema: {
     ...datasetCommonSchema,
+    sort: sortSchema,
     filters: filtersSchema,
   },
 };

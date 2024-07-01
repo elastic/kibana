@@ -50,6 +50,8 @@ describe('TelemetryService', () => {
     to: '2024-01-02T00:00:00.000Z',
   };
 
+  const defaultSort: DatasetNavigatedEbtProps['sort'] = { field: 'name', direction: 'asc' };
+
   const defaultFilters: DatasetNavigatedEbtProps['filters'] = {
     is_degraded: false,
     query_length: 0,
@@ -92,6 +94,7 @@ describe('TelemetryService', () => {
     const telemetry = service.start();
     const exampleEventData: DatasetNavigatedEbtProps = {
       ...defaultEbtProps,
+      sort: defaultSort,
       filters: defaultFilters,
     };
 

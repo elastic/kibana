@@ -99,6 +99,7 @@ export const useDatasetTelemetry = () => {
     service,
     (state) => state.context.datasetUserPrivileges.canViewIntegrations
   );
+  const sort = useSelector(service, (state) => state.context.table.sort);
   const appliedFilters = useDatasetQualityFilters();
 
   const trackDatasetNavigated = useCallback<(rawName: string, isIgnoredFilter: boolean) => void>(
@@ -107,6 +108,7 @@ export const useDatasetTelemetry = () => {
       if (foundDataset) {
         const ebtProps = getDatasetEbtProps(
           foundDataset,
+          sort,
           appliedFilters,
           nonAggregatableDatasets,
           isIgnoredFilter,
@@ -119,7 +121,14 @@ export const useDatasetTelemetry = () => {
         );
       }
     },
-    [appliedFilters, canUserViewIntegrations, datasets, nonAggregatableDatasets, telemetryClient]
+    [
+      sort,
+      appliedFilters,
+      canUserViewIntegrations,
+      datasets,
+      nonAggregatableDatasets,
+      telemetryClient,
+    ]
   );
 
   return { trackDatasetNavigated };
@@ -247,6 +256,7 @@ export const useDatasetDetailsTelemetry = () => {
 
 function getDatasetEbtProps(
   dataset: DataStreamStat,
+  sort: { field: string; direction: 'asc' | 'desc' },
   filters: ReturnType<typeof useDatasetQualityFilters>,
   nonAggregatableDatasets: string[],
   isIgnoredFilter: boolean,
@@ -296,6 +306,7 @@ function getDatasetEbtProps(
 
   return {
     ...datasetEbtProps,
+    sort,
     filters: ebtFilters,
   };
 }

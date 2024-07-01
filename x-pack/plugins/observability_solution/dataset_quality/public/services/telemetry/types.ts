@@ -73,6 +73,7 @@ export interface DatasetEbtFilter {
 }
 
 export interface DatasetNavigatedEbtProps extends DatasetEbtProps {
+  sort: { field: string; direction: 'asc' | 'desc' };
   filters: {
     is_degraded: boolean;
     query_length: number;
