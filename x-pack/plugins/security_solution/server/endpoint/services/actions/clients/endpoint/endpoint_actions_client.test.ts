@@ -27,7 +27,7 @@ describe('EndpointActionsClient', () => {
     'endpoint_ids' | 'case_ids'
   > => {
     return {
-      endpoint_ids: ['1-2-3', 'invalid-id'],
+      endpoint_ids: ['1-2-3', 'invalid-id', '1-2-3'],
       case_ids: ['case-a'],
     };
   };
@@ -42,8 +42,8 @@ describe('EndpointActionsClient', () => {
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
 
-    expect(classConstructorOptions.endpointService.createLogger().debug).toHaveBeenCalledWith(
-      'The following agent ids are not valid: ["invalid-id"]'
+    expect(classConstructorOptions.endpointService.createLogger().warn).toHaveBeenCalledWith(
+      'The following agent ids are not valid: ["invalid-id"] and will not be included in action request'
     );
   });
 
@@ -85,9 +85,85 @@ describe('EndpointActionsClient', () => {
     });
   });
 
-  it('should write action request document', async () => {
+  it('should write action request document to endpoint action request index with given set of valid/invalid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+    );
+
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      {
+        index: ENDPOINT_ACTIONS_INDEX,
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'isolate',
+              comment:
+                'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+              parameters: undefined,
+            },
+            expiration: expect.any(String),
+            input_type: 'endpoint',
+            type: 'INPUT_ACTION',
+          },
+          agent: {
+            id: ['1-2-3'],
+          },
+          user: {
+            id: 'foo',
+          },
+        },
+        refresh: 'wait_for',
+      },
+      expect.anything()
+    );
+  });
+
+  it('should write correct comment when invalid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions({
+        ...getCommonResponseActionOptions(),
+        comment: '',
+      })
+    );
+
+    expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+      {
+        index: ENDPOINT_ACTIONS_INDEX,
+        document: {
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: expect.any(String),
+            data: {
+              command: 'isolate',
+              comment:
+                '(WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+              parameters: undefined,
+            },
+            expiration: expect.any(String),
+            input_type: 'endpoint',
+            type: 'INPUT_ACTION',
+          },
+          agent: {
+            id: ['1-2-3'],
+          },
+          user: {
+            id: 'foo',
+          },
+        },
+        refresh: 'wait_for',
+      },
+      expect.anything()
+    );
+  });
+
+  it('should write action request document to endpoint action request index with given valid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions({
+        endpoint_ids: ['1-2-3'],
+        case_ids: ['case-a'],
+      })
     );
 
     expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
@@ -107,7 +183,7 @@ describe('EndpointActionsClient', () => {
             type: 'INPUT_ACTION',
           },
           agent: {
-            id: ['1-2-3', 'invalid-id'],
+            id: ['1-2-3'],
           },
           user: {
             id: 'foo',
@@ -119,9 +195,12 @@ describe('EndpointActionsClient', () => {
     );
   });
 
-  it('should update cases', async () => {
+  it('should update cases for valid agent ids', async () => {
     await endpointActionsClient.isolate(
-      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+      responseActionsClientMock.createIsolateOptions({
+        endpoint_ids: ['1-2-3'],
+        case_ids: ['case-a'],
+      })
     );
 
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
@@ -138,10 +217,38 @@ describe('EndpointActionsClient', () => {
                 endpointId: '1-2-3',
                 hostname: 'Host-ku5jy6j0pw',
               },
+            ],
+          },
+          externalReferenceStorage: {
+            type: 'elasticSearchDoc',
+          },
+          owner: 'securitySolution',
+          type: 'externalReference',
+        },
+      ],
+      caseId: 'case-a',
+    });
+  });
+
+  it('should update cases for valid/invalid agent ids', async () => {
+    await endpointActionsClient.isolate(
+      responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
+    );
+
+    expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
+      attachments: [
+        {
+          externalReferenceAttachmentTypeId: 'endpoint',
+          externalReferenceId: expect.any(String),
+          externalReferenceMetadata: {
+            command: 'isolate',
+            comment:
+              'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
+            targets: [
               {
                 agentType: 'endpoint',
-                endpointId: 'invalid-id',
-                hostname: '',
+                endpointId: '1-2-3',
+                hostname: 'Host-ku5jy6j0pw',
               },
             ],
           },
@@ -175,6 +282,7 @@ describe('EndpointActionsClient', () => {
       { meta: true }
     );
   });
+
   it('should create an action with error when agents are invalid', async () => {
     // @ts-expect-error mocking this for testing purposes
     endpointActionsClient.checkAgentIds = jest.fn().mockResolvedValueOnce({

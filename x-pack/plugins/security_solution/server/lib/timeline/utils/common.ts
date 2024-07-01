@@ -39,6 +39,16 @@ export const buildFrameworkRequest = async (
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
+export const getNotesPaginated = schema.object({
+  documentIds: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+  page: schema.maybe(schema.string()),
+  perPage: schema.maybe(schema.string()),
+  search: schema.maybe(schema.string()),
+  sortField: schema.maybe(schema.string()),
+  sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
+  filter: schema.maybe(schema.string()),
+});
+
 type ErrorFactory = (message: string) => Error;
 
 export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {

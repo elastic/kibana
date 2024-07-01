@@ -652,6 +652,10 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
+              },
+              {
                 "plugin": "@kbn/cloud",
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
@@ -702,6 +706,10 @@
               {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/public/analytics/index.ts"
+              },
+              {
+                "plugin": "integrationAssistant",
+                "path": "x-pack/plugins/integration_assistant/public/services/telemetry/service.ts"
               },
               {
                 "plugin": "fleet",
@@ -1330,6 +1338,10 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "@kbn/ebt",
