@@ -80,7 +80,7 @@ export const DashboardLinkComponent = ({
     }
     return {
       tooltipTitle: Boolean(dashboardDescription) ? linkLabel : undefined,
-      tooltipMessage: dashboardDescription ?? linkLabel,
+      tooltipMessage: dashboardDescription || linkLabel,
     };
   }, [link, linkLabel, dashboardDescription]);
 
