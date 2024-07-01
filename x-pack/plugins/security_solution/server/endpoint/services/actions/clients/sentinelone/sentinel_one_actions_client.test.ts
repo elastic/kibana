@@ -1220,31 +1220,78 @@ describe('SentinelOneActionsClient class', () => {
     it('should send execute script request to S1 for kill-process', async () => {
       await s1ActionsClient.killProcess(killProcessActionRequest);
 
-      expect(connectorActionsMock.execute).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: {
-            subAction: SUB_ACTION.EXECUTE_SCRIPT,
-            subActionParams: {
-              filter: { uuids: '1-2-3' },
-              script: {
-                scriptId: '1466645476786791838',
-                taskDescription: '',
-                requiresApproaval: false,
-                outputDestination: 'SentinelCloud',
-                inputParams: '',
-              },
+      expect(connectorActionsMock.execute).toHaveBeenCalledWith({
+        params: {
+          subAction: 'executeScript',
+          subActionParams: {
+            filter: { uuids: '1-2-3' },
+            script: {
+              inputParams: '--terminate --processes "foo" --force',
+              outputDestination: 'SentinelCloud',
+              requiresApproval: false,
+              scriptId: '1466645476786791838',
+              taskDescription: expect.stringContaining(
+                'Action triggered from Elastic Security by user [foo] for action [kill-process'
+              ),
             },
           },
-        })
+        },
+      });
+    });
+
+    it('should return action details on success', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(getActionDetailsByIdMock).toHaveBeenCalled();
+    });
+
+    it('should create action request doc with expected meta info', async () => {
+      await s1ActionsClient.killProcess(killProcessActionRequest);
+
+      expect(classConstructorOptions.esClient.index).toHaveBeenCalledWith(
+        {
+          document: {
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'kill-process',
+                comment: 'test comment',
+                parameters: { process_name: 'foo' },
+                hosts: {
+                  '1-2-3': {
+                    name: 'sentinelone-1460',
+                  },
+                },
+              },
+              expiration: expect.any(String),
+              input_type: 'sentinel_one',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['1-2-3'] },
+            user: { id: 'foo' },
+            meta: {
+              agentId: '1845174760470303882',
+              agentUUID: '1-2-3',
+              hostName: 'sentinelone-1460',
+              parentTaskId: 'task-789',
+            },
+          },
+          index: ENDPOINT_ACTIONS_INDEX,
+          refresh: 'wait_for',
+        },
+        { meta: true }
       );
     });
 
-    it.todo('should throw if an error is encountered in manual mode');
+    it('should update cases', async () => {
+      killProcessActionRequest = {
+        ...killProcessActionRequest,
+        case_ids: ['case-1'],
+      };
+      await s1ActionsClient.killProcess(killProcessActionRequest);
 
-    it.todo('should create action request doc with expected meta info');
-
-    it.todo('should return action details on success');
-
-    it.todo('should update cases');
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
+    });
   });
 });
