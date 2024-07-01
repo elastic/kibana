@@ -11,6 +11,7 @@ import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
+  AuthenticatedUser,
   ElasticsearchClient,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
@@ -20,7 +21,6 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -1008,15 +1008,21 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
+      const packagePoliciesToDelete = this.packagePoliciesWithoutMultiplePolicies(packagePolicies);
 
       await packagePolicyService.delete(
         soClient,
         esClient,
-        packagePolicies.map((p) => p.id),
+        packagePoliciesToDelete.map((p) => p.id),
         {
           force: options?.force,
           skipUnassignFromAgentPolicies: true,
         }
+      );
+      logger.debug(
+        `Deleted package policies with ids ${packagePoliciesToDelete
+          .map((policy) => policy.id)
+          .join(', ')}`
       );
     }
 
@@ -1549,6 +1555,16 @@ class AgentPolicyService {
         'supports_agentless is only allowed in serverless environments that support the agentless feature'
       );
     }
+  }
+
+  private packagePoliciesWithoutMultiplePolicies(packagePolicies: PackagePolicy[]) {
+    // Find package policies that don't have multiple agent policies and mark them for deletion
+    if (appContextService.getExperimentalFeatures().enableReusableIntegrationPolicies) {
+      return packagePolicies.filter(
+        (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
+      );
+    }
+    return packagePolicies;
   }
 }
 

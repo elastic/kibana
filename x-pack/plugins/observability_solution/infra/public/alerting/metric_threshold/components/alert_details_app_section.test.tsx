@@ -16,15 +16,35 @@ import {
   buildMetricThresholdRule,
 } from '../mocks/metric_threshold_rule';
 import { AlertDetailsAppSection } from './alert_details_app_section';
-import { ExpressionChart } from './expression_chart';
+import { RuleConditionChart } from '@kbn/observability-plugin/public';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
 const mockedChartStartContract = chartPluginMock.createStartContract();
+const mockedLensStartContract = lensPluginMock.createStartContract();
+
+Date.now = jest.fn(() => new Date('2024-06-13T07:00:33.381Z').getTime());
+
+jest.mock('../../../containers/metrics_source', () => ({
+  useMetricsDataViewContext: () => ({
+    metricsView: { dataViewReference: 'index' },
+  }),
+  withSourceProvider:
+    <ComponentProps extends {}>(Component: React.FC<ComponentProps>) =>
+    () => {
+      return function ComponentWithSourceProvider(props: ComponentProps) {
+        return <div />;
+      };
+    },
+}));
 
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
   AlertActiveTimeRangeAnnotation: () => {},
 }));
-
+jest.mock('@kbn/observability-alert-details', () => ({
+  AlertAnnotation: () => {},
+  AlertActiveTimeRangeAnnotation: () => {},
+}));
 jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   getPaddedAlertTimeRange: () => ({
     from: '2023-03-28T10:43:13.802Z',
@@ -32,8 +52,9 @@ jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   }),
 }));
 
-jest.mock('./expression_chart', () => ({
-  ExpressionChart: jest.fn(() => <div data-test-subj="ExpressionChart" />),
+jest.mock('@kbn/observability-plugin/public', () => ({
+  RuleConditionChart: jest.fn(() => <div data-test-subj="RuleConditionChart" />),
+  getGroupFilters: jest.fn(),
 }));
 
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -41,6 +62,7 @@ jest.mock('../../../hooks/use_kibana', () => ({
     services: {
       ...mockCoreMock.createStart(),
       charts: mockedChartStartContract,
+      lens: mockedLensStartContract,
     },
   }),
 }));
@@ -74,11 +96,11 @@ describe('AlertDetailsAppSection', () => {
   });
 
   it('should render annotations', async () => {
-    const mockedExpressionChart = jest.fn(() => <div data-test-subj="ExpressionChart" />);
-    (ExpressionChart as jest.Mock).mockImplementation(mockedExpressionChart);
+    const mockedRuleConditionChart = jest.fn(() => <div data-test-subj="RuleConditionChart" />);
+    (RuleConditionChart as jest.Mock).mockImplementation(mockedRuleConditionChart);
     renderComponent();
 
-    expect(mockedExpressionChart).toHaveBeenCalledTimes(3);
-    expect(mockedExpressionChart.mock.calls[0]).toMatchSnapshot();
+    expect(mockedRuleConditionChart).toHaveBeenCalledTimes(3);
+    expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
   });
 });
