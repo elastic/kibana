@@ -38,8 +38,8 @@ export const DataViewPicker = memo(() => {
 
   const { dataViewId } = useSelector(sourcererAdapterSelector);
 
-  const createNewDataView = useCallback(() => {
-    closeDataViewEditor.current = dataViewEditor.openEditor({
+  const createNewDataView = useCallback(async () => {
+    closeDataViewEditor.current = await dataViewEditor.openEditor({
       // eslint-disable-next-line no-console
       onSave: () => console.log('new data view saved'),
       allowAdHocDataView: true,
@@ -58,7 +58,7 @@ export const DataViewPicker = memo(() => {
       }
 
       const dataViewInstance = await data.dataViews.get(dataViewId);
-      closeFieldEditor.current = dataViewFieldEditor.openEditor({
+      closeFieldEditor.current = await dataViewFieldEditor.openEditor({
         ctx: {
           dataView: dataViewInstance,
         },

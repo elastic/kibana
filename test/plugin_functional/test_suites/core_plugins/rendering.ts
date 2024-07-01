@@ -220,7 +220,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
         'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
-        'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.cases.files.allowedMimeTypes (array)',
         'xpack.cases.files.maxSize (number)',
@@ -291,8 +290,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
         'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.enableDataStreamStats (any)',
         'xpack.index_management.editableIndexSettings (any)',
-        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.index_management.enableMappingsSourceFieldSection (any)',
         'xpack.index_management.dev.enableSemanticText (boolean)',
         'xpack.license_management.ui.enabled (boolean)',

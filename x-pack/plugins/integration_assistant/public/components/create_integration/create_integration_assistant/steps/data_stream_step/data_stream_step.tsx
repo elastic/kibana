@@ -30,6 +30,7 @@ export const InputTypeOptions: Array<{ value: InputType; text: string }> = [
   { value: 'aws_s3', text: 'AWS S3' },
   { value: 'azure_blob_storage', text: 'Azure Blob Storage' },
   { value: 'azure_eventhub', text: 'Azure Event Hub' },
+  { value: 'cel', text: 'Common Expression Language (CEL)' },
   { value: 'cloudfoundry', text: 'Cloud Foundry' },
   { value: 'filestream', text: 'File Stream' },
   { value: 'gcp_pubsub', text: 'GCP Pub/Sub' },
@@ -46,11 +47,11 @@ const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-
 
 interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];
-  connectorId: State['connectorId'];
+  connector: State['connector'];
   isGenerating: State['isGenerating'];
 }
 export const DataStreamStep = React.memo<DataStreamStepProps>(
-  ({ integrationSettings, connectorId, isGenerating }) => {
+  ({ integrationSettings, connector, isGenerating }) => {
     const { setIntegrationSettings, setIsGenerating, setStep, setResult } = useActions();
     const { isLoading: isLoadingPackageNames, packageNames } = useLoadPackageNames(); // this is used to avoid duplicate names
 
@@ -217,7 +218,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
           {isGenerating && (
             <GenerationModal
               integrationSettings={integrationSettings}
-              connectorId={connectorId}
+              connector={connector}
               onComplete={onGenerationCompleted}
               onClose={onGenerationClosed}
             />

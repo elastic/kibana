@@ -129,6 +129,7 @@ export const StdErrorLogs = ({
 
       <EuiInMemoryTable
         items={items}
+        rowHeader="@timestamp"
         columns={columns}
         tableLayout="auto"
         loading={loading}
