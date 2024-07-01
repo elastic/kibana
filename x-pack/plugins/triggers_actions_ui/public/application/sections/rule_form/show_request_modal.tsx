@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import {
   transformUpdateRuleBody as rewriteUpdateBodyRequest,
-  UPDATE_FIELDS,
+  UPDATE_FIELDS_WITH_ACTIONS,
 } from '@kbn/alerts-ui-shared/src/common/apis/update_rule';
 import { transformCreateRuleBody as rewriteCreateBodyRequest } from '@kbn/alerts-ui-shared/src/common/apis/create_rule';
 import * as i18n from '../translations';
@@ -30,7 +30,7 @@ import { BASE_ALERTING_API_PATH } from '../../constants';
 const stringify = (rule: RuleUpdates, edit: boolean): string => {
   try {
     const request = edit
-      ? rewriteUpdateBodyRequest(pick(rule, UPDATE_FIELDS))
+      ? rewriteUpdateBodyRequest(pick(rule, UPDATE_FIELDS_WITH_ACTIONS))
       : rewriteCreateBodyRequest(rule);
     return JSON.stringify(request, null, 2);
   } catch {
