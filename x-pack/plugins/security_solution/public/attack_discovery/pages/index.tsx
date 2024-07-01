@@ -80,6 +80,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     isLoadingPost,
     lastUpdated,
     replacements,
+    stats,
   } = useAttackDiscovery({
     connectorId,
     setLoadingConnectorId,
@@ -172,6 +173,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
             onConnectorIdSelected={onConnectorIdSelected}
             onGenerate={onGenerate}
             onCancel={onCancel}
+            stats={stats}
           />
           <EuiSpacer size="m" />
         </HeaderPage>
