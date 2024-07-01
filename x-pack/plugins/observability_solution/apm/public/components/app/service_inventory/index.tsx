@@ -6,23 +6,25 @@
  */
 import React from 'react';
 import { isEmpty } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmEnableMultiSignal } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceInventory } from './apm_signal_inventory';
 import { MultiSignalInventory } from './multi_signal_inventory';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { ApmPluginStartDeps } from '../../../plugin';
+import { useEntityManager } from '../../../hooks/use_entity_manager';
 
-export const ServiceInventory = () => {
-  const { core } = useApmPluginContext();
-  const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
+export function ServiceInventory() {
+  const [isEntityDiscoveryEnabled] = useEntityManager();
 
   const {
     query: { serviceGroup },
   } = useApmParams('/services');
 
-  return isMultiSignalEnabled && isEmpty(serviceGroup) ? (
+  return isEntityDiscoveryEnabled && isEmpty(serviceGroup) ? (
     <MultiSignalInventory />
   ) : (
     <ApmServiceInventory />
   );
-};
+}

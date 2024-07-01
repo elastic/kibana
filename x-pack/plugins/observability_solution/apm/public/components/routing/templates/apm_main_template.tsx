@@ -10,6 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { useDefaultAiAssistantStarterPromptsForAPM } from '../../../hooks/use_default_ai_assistant_starter_prompts_for_apm';
@@ -23,6 +24,7 @@ import { ServiceGroupsButtonGroup } from '../../app/service_groups/service_group
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { EntityEnablement } from '../../shared/entity_enablement';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings', '/diagnostics'];
@@ -45,6 +47,7 @@ export function ApmMainTemplate({
   environmentFilter = true,
   showServiceGroupSaveButton = false,
   showServiceGroupsNav = false,
+  showEnablementCallout = false,
   environmentFilterInTemplate = true,
   selectedNavButton,
   ...pageTemplateProps
@@ -55,6 +58,7 @@ export function ApmMainTemplate({
   environmentFilter?: boolean;
   showServiceGroupSaveButton?: boolean;
   showServiceGroupsNav?: boolean;
+  showEnablementCallout?: boolean;
   selectedNavButton?: 'serviceGroups' | 'allServices';
 } & KibanaPageTemplateProps &
   Pick<ObservabilityPageTemplateProps, 'pageSectionProps'>) {
@@ -126,6 +130,7 @@ export function ApmMainTemplate({
   const pageHeaderTitle = (
     <EuiFlexGroup justifyContent="spaceBetween" wrap={true}>
       {pageHeader?.pageTitle ?? pageTitle}
+      <EuiFlexItem grow={false} />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
@@ -152,10 +157,14 @@ export function ApmMainTemplate({
         rightSideItems,
         ...pageHeader,
         pageTitle: pageHeaderTitle,
-        children:
-          showServiceGroupsNav && selectedNavButton ? (
-            <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
-          ) : null,
+        children: (
+          <EuiFlexGroup direction="column">
+            {showEnablementCallout && <EntityEnablement />}
+            {showServiceGroupsNav && selectedNavButton && (
+              <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
+            )}
+          </EuiFlexGroup>
+        ),
       }}
       {...pageTemplateProps}
     >
