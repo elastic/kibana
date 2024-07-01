@@ -157,7 +157,7 @@ describe('logHealthMetrics', () => {
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const firstInfo = JSON.parse(
-      ((logger as jest.Mocked<Logger>).debug.mock.calls[0][0] as string).replace(
+      ((logger as jest.Mocked<Logger>).info.mock.calls[0][0] as string).replace(
         'Latest Monitored Stats: ',
         ''
       )
