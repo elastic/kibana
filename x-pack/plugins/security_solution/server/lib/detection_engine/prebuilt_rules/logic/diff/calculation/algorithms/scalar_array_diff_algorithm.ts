@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { difference, union } from 'lodash';
+import { difference, union, uniq } from 'lodash';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
 import type {
   ThreeVersionsOf,
@@ -58,13 +58,13 @@ export const scalarArrayDiffAlgorithm = <TValue>(
 
 interface MergeResult<TValue> {
   mergeOutcome: ThreeWayMergeOutcome;
-  mergedVersion: TValue;
+  mergedVersion: TValue[];
 }
 
 interface MergeArgs<TValue> {
-  baseVersion: TValue | MissingVersion;
-  currentVersion: TValue;
-  targetVersion: TValue;
+  baseVersion: TValue[] | MissingVersion;
+  currentVersion: TValue[];
+  targetVersion: TValue[];
   diffOutcome: ThreeWayDiffOutcome;
 }
 
@@ -73,40 +73,44 @@ const mergeVersions = <TValue>({
   currentVersion,
   targetVersion,
   diffOutcome,
-}: MergeArgs<TValue[]>): MergeResult<TValue[]> => {
+}: MergeArgs<TValue>): MergeResult<TValue> => {
+  const dedupedBaseVersion = baseVersion !== MissingVersion ? uniq(baseVersion) : MissingVersion;
+  const dedupedCurrentVersion = uniq(currentVersion);
+  const dedupedTargetVersion = uniq(targetVersion);
+
   switch (diffOutcome) {
     case ThreeWayDiffOutcome.StockValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueNoUpdate:
     case ThreeWayDiffOutcome.CustomizedValueSameUpdate: {
       return {
         mergeOutcome: ThreeWayMergeOutcome.Current,
-        mergedVersion: currentVersion,
+        mergedVersion: dedupedCurrentVersion,
       };
     }
     case ThreeWayDiffOutcome.StockValueCanUpdate: {
       return {
         mergeOutcome: ThreeWayMergeOutcome.Target,
-        mergedVersion: targetVersion,
+        mergedVersion: dedupedTargetVersion,
       };
     }
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
-      if (baseVersion === MissingVersion) {
+      if (dedupedBaseVersion === MissingVersion) {
         return {
           mergeOutcome: ThreeWayMergeOutcome.Merged,
           mergedVersion: union(currentVersion, targetVersion),
         };
       }
 
-      const addedCurrent = difference(currentVersion, baseVersion);
-      const removedCurrent = difference(baseVersion, currentVersion);
+      const addedCurrent = difference(dedupedCurrentVersion, dedupedBaseVersion);
+      const removedCurrent = difference(dedupedBaseVersion, dedupedCurrentVersion);
 
-      const addedTarget = difference(targetVersion, baseVersion);
-      const removedTarget = difference(baseVersion, targetVersion);
+      const addedTarget = difference(dedupedTargetVersion, dedupedBaseVersion);
+      const removedTarget = difference(dedupedBaseVersion, dedupedTargetVersion);
 
       const bothAdded = union(addedCurrent, addedTarget);
       const bothRemoved = union(removedCurrent, removedTarget);
 
-      const merged = difference(union(baseVersion, bothAdded), bothRemoved);
+      const merged = difference(union(dedupedBaseVersion, bothAdded), bothRemoved);
 
       return {
         mergeOutcome: ThreeWayMergeOutcome.Merged,

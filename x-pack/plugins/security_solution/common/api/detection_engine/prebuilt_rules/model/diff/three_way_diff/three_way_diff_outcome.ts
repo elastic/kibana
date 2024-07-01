@@ -54,16 +54,12 @@ export const determineOrderAgnosticDiffOutcome = <TValue>(
   currentVersion: TValue[],
   targetVersion: TValue[]
 ): ThreeWayDiffOutcome => {
-  let baseEqlCurrent: boolean;
-  let baseEqlTarget: boolean;
-  if (baseVersion !== MissingVersion) {
-    baseEqlCurrent = arraysHaveSameElements(baseVersion, currentVersion);
-    baseEqlTarget = arraysHaveSameElements(baseVersion, targetVersion);
-  } else {
-    baseEqlCurrent = false;
-    baseEqlTarget = false;
-  }
-  const currentEqlTarget = arraysHaveSameElements(currentVersion, targetVersion);
+  const baseSet = baseVersion === MissingVersion ? MissingVersion : new Set<TValue>(baseVersion);
+  const currentSet = new Set<TValue>(currentVersion);
+  const targetSet = new Set<TValue>(targetVersion);
+  const baseEqlCurrent = isEqual(baseSet, currentSet);
+  const baseEqlTarget = isEqual(baseSet, targetSet);
+  const currentEqlTarget = isEqual(currentSet, targetSet);
 
   return getThreeWayDiffOutcome({
     baseEqlCurrent,
@@ -117,30 +113,4 @@ export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolea
     diffCase === ThreeWayDiffOutcome.StockValueCanUpdate ||
     diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate
   );
-};
-
-/**
- * Returns a boolean if 2 arrays contain same the elements agnostic of order after being deduplicated
- *
- * NOTE: array equality is case insensitive
- */
-const arraysHaveSameElements = <T>(arr1: T[], arr2: T[]) => {
-  const set1 = new Set(
-    arr1.map((value) => (typeof value === 'string' ? value.toLowerCase() : value))
-  );
-  const set2 = new Set(
-    arr2.map((value) => (typeof value === 'string' ? value.toLowerCase() : value))
-  );
-
-  if (set1.size !== set2.size) {
-    return false;
-  }
-
-  for (const val of set1) {
-    if (!set2.has(val)) {
-      return false;
-    }
-  }
-
-  return true;
 };
