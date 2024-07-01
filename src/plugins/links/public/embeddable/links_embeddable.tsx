@@ -33,7 +33,7 @@ import {
   LinksRuntimeState,
   LinksSerializedState,
 } from '../types';
-import { APP_NAME } from '../../common';
+import { DISPLAY_NAME } from '../../common';
 import { initializeLinks } from './initialize_links';
 import { injectReferences } from '../../common/persistable_state';
 import { openEditorFlyout } from '../editor/open_editor_flyout';
@@ -114,8 +114,7 @@ export const getLinksEmbeddableFactory = () => {
           ...linksApi,
           libraryId$: savedObjectId$,
           savedObjectId$,
-          getTypeDisplayName: () => APP_NAME,
-          getTypeDisplayNameLowerCase: () => 'links',
+          getTypeDisplayName: () => DISPLAY_NAME,
           getByValueRuntimeSnapshot: () => {
             const snapshot = api.snapshotRuntimeState();
             delete snapshot.savedObjectId;
