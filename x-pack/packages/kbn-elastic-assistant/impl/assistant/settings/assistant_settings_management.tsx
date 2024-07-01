@@ -325,6 +325,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               resetSettings={resetSettings}
               selectedQuickPrompt={selectedQuickPrompt}
               setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+              promptsBulkActions={promptsBulkActions}
+              setPromptsBulkActions={setPromptsBulkActions}
             />
           )}
           {selectedSettingsTab === ANONYMIZATION_TAB && (

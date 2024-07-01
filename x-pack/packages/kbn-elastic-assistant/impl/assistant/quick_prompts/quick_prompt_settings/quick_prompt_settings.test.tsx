@@ -13,6 +13,7 @@ import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
 
 const onSelectedQuickPromptChange = jest.fn();
+const setPromptsBulkActions = jest.fn();
 const setUpdatedQuickPromptSettings = jest.fn().mockImplementation((fn) => {
   return fn(MOCK_QUICK_PROMPTS);
 });
@@ -22,6 +23,8 @@ const testProps = {
   quickPromptSettings: MOCK_QUICK_PROMPTS,
   selectedQuickPrompt: MOCK_QUICK_PROMPTS[0],
   setUpdatedQuickPromptSettings,
+  promptsBulkActions: {},
+  setPromptsBulkActions,
 };
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,

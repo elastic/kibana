@@ -20,6 +20,7 @@ const testProps = {
   setIsSettingsModalVisible,
   trackPrompt,
   isFlyoutMode: false,
+  allPrompts: MOCK_QUICK_PROMPTS,
 };
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {

@@ -8,7 +8,10 @@
 import React from 'react';
 import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
+  PromptResponse,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import * as i18n from './translations';
 import { QuickPromptSettingsEditor } from './quick_prompt_editor';
 
@@ -17,6 +20,8 @@ interface Props {
   quickPromptSettings: PromptResponse[];
   selectedQuickPrompt: PromptResponse | undefined;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
 /**
@@ -28,6 +33,8 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
     quickPromptSettings,
     selectedQuickPrompt,
     setUpdatedQuickPromptSettings,
+    promptsBulkActions,
+    setPromptsBulkActions,
   }) => {
     return (
       <>
@@ -43,6 +50,8 @@ export const QuickPromptSettings: React.FC<Props> = React.memo<Props>(
           quickPromptSettings={quickPromptSettings}
           selectedQuickPrompt={selectedQuickPrompt}
           setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+          promptsBulkActions={promptsBulkActions}
+          setPromptsBulkActions={setPromptsBulkActions}
         />
       </>
     );

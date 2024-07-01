@@ -8,18 +8,25 @@
 import {
   PromptResponse,
   PromptTypeEnum,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useCallback } from 'react';
+import { useAssistantContext } from '../../../..';
 
 export const DEFAULT_COLOR = '#D36086';
 
 export const useQuickPromptEditor = ({
   onSelectedQuickPromptChange,
   setUpdatedQuickPromptSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }: {
   onSelectedQuickPromptChange: (quickPrompt?: PromptResponse) => void;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }) => {
+  const { currentAppId } = useAssistantContext();
   const onQuickPromptDeleted = useCallback(
     (title: string) => {
       setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.name !== title));
@@ -39,6 +46,7 @@ export const useQuickPromptEditor = ({
             color: DEFAULT_COLOR,
             categories: [],
             promptType: PromptTypeEnum.quick,
+            consumer: currentAppId,
           }
         : quickPrompt;
 
@@ -52,11 +60,29 @@ export const useQuickPromptEditor = ({
 
           return prev;
         });
+
+        if (isNew) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            create: [
+              ...(promptsBulkActions.create ?? []),
+              {
+                ...newSelectedQuickPrompt,
+              },
+            ],
+          });
+        }
       }
 
       onSelectedQuickPromptChange(newSelectedQuickPrompt);
     },
-    [onSelectedQuickPromptChange, setUpdatedQuickPromptSettings]
+    [
+      currentAppId,
+      onSelectedQuickPromptChange,
+      promptsBulkActions,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
   return { onQuickPromptDeleted, onQuickPromptSelectionChange };

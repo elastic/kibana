@@ -7,14 +7,15 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useQuickPromptEditor, DEFAULT_COLOR } from './use_quick_prompt_editor';
-import { QuickPrompt } from '../types';
 import { mockAlertPromptContext } from '../../../mock/prompt_context';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 // Mock functions for the tests
 const mockOnSelectedQuickPromptChange = jest.fn();
 const mockSetUpdatedQuickPromptSettings = jest.fn();
 const mockPreviousQuickPrompts = [...MOCK_QUICK_PROMPTS];
+const setPromptsBulkActions = jest.fn();
 
 describe('useQuickPromptEditor', () => {
   beforeEach(() => {
@@ -26,6 +27,8 @@ describe('useQuickPromptEditor', () => {
       useQuickPromptEditor({
         onSelectedQuickPromptChange: mockOnSelectedQuickPromptChange,
         setUpdatedQuickPromptSettings: mockSetUpdatedQuickPromptSettings,
+        setPromptsBulkActions,
+        promptsBulkActions: {},
       })
     );
 
@@ -34,7 +37,7 @@ describe('useQuickPromptEditor', () => {
     });
 
     expect(mockSetUpdatedQuickPromptSettings.mock.calls[0][0]?.(mockPreviousQuickPrompts)).toEqual(
-      MOCK_QUICK_PROMPTS.filter((qp) => qp.title !== 'ALERT_SUMMARIZATION_TITLE')
+      MOCK_QUICK_PROMPTS.filter((qp) => qp.name !== 'ALERT_SUMMARIZATION_TITLE')
     );
   });
 
@@ -44,6 +47,8 @@ describe('useQuickPromptEditor', () => {
       useQuickPromptEditor({
         onSelectedQuickPromptChange: mockOnSelectedQuickPromptChange,
         setUpdatedQuickPromptSettings: mockSetUpdatedQuickPromptSettings,
+        setPromptsBulkActions,
+        promptsBulkActions: {},
       })
     );
 
@@ -51,11 +56,13 @@ describe('useQuickPromptEditor', () => {
       result.current.onQuickPromptSelectionChange(newPromptTitle);
     });
 
-    const newPrompt: QuickPrompt = {
-      title: newPromptTitle,
-      prompt: '',
+    const newPrompt: PromptResponse = {
+      name: newPromptTitle,
+      content: '',
       color: DEFAULT_COLOR,
       categories: [],
+      id: '',
+      promptType: 'quick',
     };
 
     expect(mockOnSelectedQuickPromptChange).toHaveBeenCalledWith(newPrompt);
@@ -70,17 +77,21 @@ describe('useQuickPromptEditor', () => {
       useQuickPromptEditor({
         onSelectedQuickPromptChange: mockOnSelectedQuickPromptChange,
         setUpdatedQuickPromptSettings: mockSetUpdatedQuickPromptSettings,
+        setPromptsBulkActions,
+        promptsBulkActions: {},
       })
     );
 
     const alertData = await mockAlertPromptContext.getPromptContext();
 
-    const expectedPrompt: QuickPrompt = {
-      title: mockAlertPromptContext.description,
-      prompt: alertData,
+    const expectedPrompt: PromptResponse = {
+      name: mockAlertPromptContext.description,
+      content: alertData.content ?? '',
       color: DEFAULT_COLOR,
       categories: [mockAlertPromptContext.category],
-    } as QuickPrompt;
+      id: '',
+      promptType: 'quick',
+    };
 
     act(() => {
       result.current.onQuickPromptSelectionChange(expectedPrompt);

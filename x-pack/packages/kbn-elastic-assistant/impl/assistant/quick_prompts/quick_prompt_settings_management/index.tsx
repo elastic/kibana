@@ -14,7 +14,10 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
+  PromptResponse,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { QuickPromptSettingsEditor } from '../quick_prompt_settings/quick_prompt_editor';
 import * as i18n from './translations';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
@@ -37,6 +40,8 @@ interface Props {
   resetSettings?: () => void;
   selectedQuickPrompt: PromptResponse | undefined;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
 const QuickPromptSettingsManagementComponent = ({
@@ -47,6 +52,8 @@ const QuickPromptSettingsManagementComponent = ({
   resetSettings,
   selectedQuickPrompt,
   setUpdatedQuickPromptSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }: Props) => {
   const { nameSpace, basePromptContexts } = useAssistantContext();
 
@@ -61,6 +68,8 @@ const QuickPromptSettingsManagementComponent = ({
   const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
     onSelectedQuickPromptChange,
     setUpdatedQuickPromptSettings,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   const onEditActionClicked = useCallback(
@@ -161,6 +170,8 @@ const QuickPromptSettingsManagementComponent = ({
           resetSettings={resetSettings}
           selectedQuickPrompt={selectedQuickPrompt}
           setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+          promptsBulkActions={promptsBulkActions}
+          setPromptsBulkActions={setPromptsBulkActions}
         />
       </Flyout>
       {deleteConfirmModalVisibility && deletedQuickPrompt && (

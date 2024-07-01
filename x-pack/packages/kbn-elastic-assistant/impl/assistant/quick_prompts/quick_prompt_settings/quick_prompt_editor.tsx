@@ -10,7 +10,10 @@ import { EuiFormRow, EuiColorPicker, EuiTextArea } from '@elastic/eui';
 
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
+  PromptResponse,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { PromptContextTemplate } from '../../../..';
 import * as i18n from './translations';
 import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
@@ -26,6 +29,8 @@ interface Props {
   resetSettings?: () => void;
   selectedQuickPrompt: PromptResponse | undefined;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
 const QuickPromptSettingsEditorComponent = ({
@@ -34,6 +39,8 @@ const QuickPromptSettingsEditorComponent = ({
   resetSettings,
   selectedQuickPrompt,
   setUpdatedQuickPromptSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }: Props) => {
   const { basePromptContexts } = useAssistantContext();
 
@@ -136,6 +143,8 @@ const QuickPromptSettingsEditorComponent = ({
   const { onQuickPromptDeleted, onQuickPromptSelectionChange } = useQuickPromptEditor({
     onSelectedQuickPromptChange,
     setUpdatedQuickPromptSettings,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   return (

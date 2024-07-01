@@ -347,6 +347,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     onSelectedQuickPromptChange={onHandleSelectedQuickPromptChange}
                     selectedQuickPrompt={selectedQuickPrompt}
                     setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
+                    setPromptsBulkActions={setPromptsBulkActions}
+                    promptsBulkActions={promptsBulkActions}
                   />
                 )}
                 {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
