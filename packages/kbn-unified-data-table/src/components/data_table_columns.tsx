@@ -26,6 +26,7 @@ import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+import { hasOnlySourceColumn, SOURCE_COLUMN } from '../utils/columns';
 
 const getColumnDisplayName = (
   columnName: string,
@@ -36,9 +37,9 @@ const getColumnDisplayName = (
     return columnDisplay;
   }
 
-  if (columnName === '_source') {
+  if (columnName === SOURCE_COLUMN) {
     return i18n.translate('unifiedDataTable.grid.documentHeader', {
-      defaultMessage: 'Document',
+      defaultMessage: 'Summary',
     });
   }
 
@@ -178,7 +179,7 @@ function buildEuiGridColumn({
     isSortable:
       isSortEnabled &&
       // TODO: would be great to have something like `sortable` flag for text based columns too
-      ((isPlainRecord && columnName !== '_source') || dataViewField?.sortable === true),
+      ((isPlainRecord && columnName !== SOURCE_COLUMN) || dataViewField?.sortable === true),
     display:
       showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
@@ -204,14 +205,10 @@ function buildEuiGridColumn({
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,
       additional: [
-        ...(columnName === '__source'
-          ? []
-          : [
-              buildCopyColumnNameButton({
-                columnDisplayName,
-                toastNotifications,
-              }),
-            ]),
+        buildCopyColumnNameButton({
+          columnDisplayName,
+          toastNotifications,
+        }),
         buildCopyColumnValuesButton({
           columnId: columnName,
           columnDisplayName,
@@ -344,7 +341,7 @@ export function canPrependTimeFieldColumn(
   }
 
   if (isPlainRecord) {
-    return !!columnsMeta && timeFieldName in columnsMeta && columns.includes('_source');
+    return !!columnsMeta && timeFieldName in columnsMeta && hasOnlySourceColumn(columns);
   }
 
   return true;

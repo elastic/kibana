@@ -53,6 +53,8 @@ export type {
   RenderFieldItemParams,
   SearchMode,
   AdditionalFieldGroups,
+  FieldsSubgroup,
+  GetFieldSubgroupId,
 } from './src/types';
 export { ExistenceFetchStatus, FieldsGroupNames } from './src/types';
 

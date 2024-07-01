@@ -10,6 +10,7 @@ import { EuiListGroupItemProps } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { SOURCE_COLUMN } from '../utils/columns';
 import { getFieldCapabilities } from '../utils/get_field_capabilities';
 
 export const buildEditFieldButton = ({
@@ -23,7 +24,7 @@ export const buildEditFieldButton = ({
   field: DataViewField;
   editField: (fieldName: string) => void;
 }) => {
-  if (field.name === '_source') {
+  if (field.name === SOURCE_COLUMN) {
     return null;
   }
 

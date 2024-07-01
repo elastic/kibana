@@ -131,7 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await filterBar.removeAllFilters();
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
         await retry.try(async function () {
-          const cell = await dataGrid.getCellElement(0, 3);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           expect(await cell.getVisibleText()).to.be('jpg');
           expect(await PageObjects.discover.getHitCount()).to.be('14,004');
         });
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
         await retry.try(async function () {
           expect(await filterBar.hasFilter('extension.raw', 'css', true, pinned)).to.be(true);
-          const cell = await dataGrid.getCellElement(0, 3);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           expect(await cell.getVisibleText()).to.be('css');
           expect(await PageObjects.discover.getHitCount()).to.be('2,159');
         });
@@ -153,7 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.try(async function () {
           expect(await filterBar.hasFilter('extension.raw', 'css', true, pinned)).to.be(true);
           expect(await PageObjects.discover.getHitCount()).to.be('2,159');
-          const cell = await dataGrid.getCellElement(0, 3);
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
           expect(await cell.getVisibleText()).to.be('css');
         });
       };

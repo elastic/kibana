@@ -6,21 +6,104 @@
  * Side Public License, v 1.
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { isDataViewSource, isEsqlSource } from '../../../../common/data_sources';
-import {
-  DataSourceCategory,
-  DataSourceProfileProvider,
-  DataSourceProfileProviderParams,
-} from '../../profiles';
+import { getLogLevelCoalescedValue, getLogLevelColor } from '@kbn/discover-utils';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { LogLevelBadgeCell } from '../../../components/data_types/logs/log_level_badge_cell';
+import { DataSourceCategory, DataSourceProfileProvider } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
+import { extractIndexPatternFrom } from '../extract_index_pattern_from';
 
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
-  profile: {},
+  profile: {
+    getRowIndicatorColor: () => getRowIndicatorColor,
+    getDefaultAppState: (prev) => (params) => {
+      const prevState = prev(params);
+      const columns = prevState?.columns ?? [];
+
+      if (params.dataView.isTimeBased()) {
+        columns.push({ name: params.dataView.timeFieldName, width: 212 });
+      }
+
+      columns.push({ name: 'log.level', width: 150 }, { name: 'message' });
+
+      return { columns, rowHeight: 0 };
+    },
+    getCellRenderers: (prev) => () => ({
+      ...prev(),
+      'log.level': LogLevelBadgeCell,
+    }),
+    getFieldListSubgroups: (prev) => () => {
+      const prevValue = prev();
+
+      return {
+        subgroups: [
+          ...prevValue.subgroups,
+          {
+            id: 'aws-s3',
+            title: 'AWS S3',
+          },
+          {
+            id: 'container',
+            title: 'Container',
+          },
+          {
+            id: 'event',
+            title: 'Event',
+          },
+          {
+            id: 'host',
+            title: 'Host',
+          },
+          {
+            id: 'http',
+            title: 'HTTP',
+          },
+          {
+            id: 'kubernetes',
+            title: 'Kubernetes',
+          },
+          {
+            id: 'log',
+            title: 'Log',
+          },
+          {
+            id: 'process',
+            title: 'Process',
+          },
+        ],
+        getSubgroupId: (field) => {
+          if (field.name.startsWith('aws.s3.')) {
+            return 'aws-s3';
+          }
+          if (field.name.startsWith('container.')) {
+            return 'container';
+          }
+          if (field.name.startsWith('event.')) {
+            return 'event';
+          }
+          if (field.name.startsWith('host.')) {
+            return 'host';
+          }
+          if (field.name.startsWith('http.')) {
+            return 'http';
+          }
+          if (field.name.startsWith('kubernetes.')) {
+            return 'kubernetes';
+          }
+          if (field.name.startsWith('log.') || field.name === 'message') {
+            return 'log';
+          }
+          if (field.name.startsWith('process.')) {
+            return 'process';
+          }
+          return prevValue.getSubgroupId(field);
+        },
+      };
+    },
+  },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
 
@@ -35,16 +118,13 @@ export const createLogsDataSourceProfileProvider = (
   },
 });
 
-const extractIndexPatternFrom = ({
-  dataSource,
-  dataView,
-  query,
-}: DataSourceProfileProviderParams) => {
-  if (isEsqlSource(dataSource) && isOfAggregateQueryType(query)) {
-    return getIndexPatternFromESQLQuery(query.esql);
-  } else if (isDataViewSource(dataSource) && dataView) {
-    return dataView.getIndexPattern();
+const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
+  const logLevel = row.flattened['log.level'] || row.flattened.log_level;
+  const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
+
+  if (logLevelCoalescedValue) {
+    return getLogLevelColor(logLevelCoalescedValue, euiTheme);
   }
 
-  return null;
+  return undefined;
 };

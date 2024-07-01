@@ -95,6 +95,21 @@ export class DataGridService extends FtrService {
     return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
+  public async getControlColumnsCount() {
+    const controlsHeaderSelector = '.euiDataGridHeaderCell--controlColumn';
+    return (await this.find.allByCssSelector(controlsHeaderSelector)).length;
+  }
+
+  public async getCellElementExcludingControlColumns(
+    rowIndex: number = 0,
+    columnIndexAfterControlColumns: number = 0
+  ) {
+    const controlsCount = await this.getControlColumnsCount();
+    return await this.find.byCssSelector(
+      this.getCellElementSelector(rowIndex, controlsCount + columnIndexAfterControlColumns)
+    );
+  }
+
   private async getCellActionButton(
     rowIndex: number = 0,
     columnIndex: number = 0,
@@ -254,14 +269,15 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0, columnIndex: 0 }
+    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<void> {
-    const rowColumns = await this.getRow(options);
     const testSubj = options.isAnchorRow
-      ? '~docTableExpandToggleColumnAnchor'
-      : '~docTableExpandToggleColumn';
+      ? 'docTableExpandToggleColumnAnchor'
+      : 'docTableExpandToggleColumn';
 
-    const toggle = await rowColumns[options.columnIndex ?? 0].findByTestSubject(testSubj);
+    const toggle = await this.find.byCssSelector(
+      `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex}"] [data-test-subj="${testSubj}"]`
+    );
 
     await toggle.scrollIntoViewIfNecessary();
     await toggle.click();

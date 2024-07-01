@@ -11,6 +11,7 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AdditionalFieldGroups, convertFieldsToFallbackFields } from '@kbn/unified-field-list';
 import { isEqual } from 'lodash';
 import { useMemo } from 'react';
+import { SOURCE_COLUMN } from '../../../utils/columns';
 
 export const MAX_COMPARISON_FIELDS = 100;
 
@@ -46,7 +47,7 @@ export const useComparisonFields = ({
 
   return useMemo(() => {
     let comparisonFields = convertFieldsToFallbackFields({
-      fields: selectedFieldNames,
+      fields: selectedFieldNames.filter((fieldName) => fieldName !== SOURCE_COLUMN),
       additionalFieldGroups,
     });
 

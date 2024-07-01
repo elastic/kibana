@@ -8,6 +8,7 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useProfilesEnabled } from '../../../../context_awareness/hooks/use_profiles_enabled';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useInspector } from '../../hooks/use_inspector';
@@ -43,6 +44,7 @@ export const useDiscoverTopNav = ({
   const dataView = useInternalStateSelector((state) => state.dataView);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const isEsqlMode = useIsEsqlMode();
+  const { profilesEnabled, setProfilesEnabled } = useProfilesEnabled();
   const onOpenInspector = useInspector({
     inspector: services.inspector,
     stateContainer,
@@ -58,13 +60,17 @@ export const useDiscoverTopNav = ({
         isEsqlMode,
         adHocDataViews,
         topNavCustomization,
+        profilesEnabled,
+        setProfilesEnabled,
       }),
     [
       adHocDataViews,
       dataView,
       isEsqlMode,
       onOpenInspector,
+      profilesEnabled,
       services,
+      setProfilesEnabled,
       stateContainer,
       topNavCustomization,
     ]

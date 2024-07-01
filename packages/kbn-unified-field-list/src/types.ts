@@ -62,6 +62,13 @@ export enum FieldsGroupNames {
   SmartFields = 'SmartFields',
 }
 
+export interface FieldsSubgroup {
+  id: string;
+  title: string;
+}
+
+export type GetFieldSubgroupId = <T extends FieldListItem>(field: T) => string | undefined;
+
 export interface FieldsGroupDetails {
   showInAccordion: boolean;
   isInitiallyOpen: boolean;

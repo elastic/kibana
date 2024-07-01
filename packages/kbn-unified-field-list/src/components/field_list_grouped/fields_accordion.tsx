@@ -15,10 +15,18 @@ import {
   EuiAccordion,
   EuiLoadingSpinner,
   EuiIconTip,
+  useEuiTheme,
+  mathWithUnits,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import { type FieldListItem, FieldsGroupNames, type RenderFieldItemParams } from '../../types';
+import type {
+  FieldListItem,
+  FieldsGroupNames,
+  RenderFieldItemParams,
+  FieldsSubgroup,
+  GetFieldSubgroupId,
+} from '../../types';
 import './fields_accordion.scss';
 
 export interface FieldsAccordionProps<T extends FieldListItem> {
@@ -39,6 +47,8 @@ export interface FieldsAccordionProps<T extends FieldListItem> {
   renderCallout: () => JSX.Element;
   showExistenceFetchError?: boolean;
   showExistenceFetchTimeout?: boolean;
+  fieldsSubgroups?: FieldsSubgroup[];
+  getFieldSubgroupId?: GetFieldSubgroupId;
 }
 
 function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
@@ -59,7 +69,11 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   renderCallout,
   showExistenceFetchError,
   showExistenceFetchTimeout,
+  fieldsSubgroups,
+  getFieldSubgroupId,
 }: FieldsAccordionProps<T>) {
+  const { euiTheme } = useEuiTheme();
+
   const renderButton = useMemo(() => {
     const titleClassname = classNames({
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -133,6 +147,32 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
     return <EuiLoadingSpinner size="m" data-test-subj={`${id}-countLoading`} />;
   }, [showExistenceFetchError, showExistenceFetchTimeout, hasLoaded, isFiltered, id, fieldsCount]);
 
+  const fields = useMemo(() => {
+    const subgroupIds = new Set(fieldsSubgroups?.map((subgroup) => subgroup.id));
+    const subgroups: Record<string, T[]> = {};
+    const ungrouped: T[] = [];
+
+    if (!fieldsSubgroups || !getFieldSubgroupId) {
+      return { subgroups, ungrouped: paginatedFields };
+    }
+
+    for (const field of paginatedFields) {
+      const subgroupdId = getFieldSubgroupId(field);
+
+      if (subgroupdId && subgroupIds.has(subgroupdId)) {
+        if (!subgroups[subgroupdId]) {
+          subgroups[subgroupdId] = [];
+        }
+
+        subgroups[subgroupdId].push(field);
+      } else {
+        ungrouped.push(field);
+      }
+    }
+
+    return { subgroups, ungrouped };
+  }, [fieldsSubgroups, getFieldSubgroupId, paginatedFields]);
+
   return (
     <EuiAccordion
       initialIsOpen={initialIsOpen}
@@ -145,21 +185,82 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
       <EuiSpacer size="s" />
       {hasLoaded &&
         (!!fieldsCount ? (
-          <ul>
-            {paginatedFields &&
-              paginatedFields.map((field, index) => (
-                <Fragment key={getFieldKey(field)}>
-                  {renderFieldItem({
-                    field,
-                    itemIndex: index,
-                    groupIndex,
-                    groupName,
-                    hideDetails,
-                    fieldSearchHighlight,
-                  })}
-                </Fragment>
-              ))}
-          </ul>
+          <>
+            {fields.ungrouped.length > 0 && (
+              <ul>
+                {fields.ungrouped.map((field, index) => (
+                  <Fragment key={getFieldKey(field)}>
+                    {renderFieldItem({
+                      field,
+                      itemIndex: index,
+                      groupIndex,
+                      groupName,
+                      hideDetails,
+                      fieldSearchHighlight,
+                    })}
+                  </Fragment>
+                ))}
+              </ul>
+            )}
+            {fieldsSubgroups?.map((subgroup) => {
+              const subgroupFields = fields.subgroups[subgroup.id];
+
+              if (!subgroupFields?.length) {
+                return null;
+              }
+
+              const subgroupId = `${id}-${subgroup.id}`;
+
+              return (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiAccordion
+                    key={subgroupId}
+                    data-test-subj={subgroupId}
+                    id={subgroupId}
+                    buttonContent={
+                      <EuiText size="xs">
+                        <strong>{subgroup.title}</strong>
+                      </EuiText>
+                    }
+                    extraAction={
+                      <EuiNotificationBadge
+                        size="m"
+                        color={isFiltered ? 'accent' : 'subdued'}
+                        data-test-subj={`${subgroupId}-count`}
+                      >
+                        {subgroupFields.length}
+                      </EuiNotificationBadge>
+                    }
+                    css={{
+                      '.euiAccordion__triggerWrapper, .euiAccordion__children': {
+                        paddingLeft: `${mathWithUnits(
+                          [euiTheme.size.xs, euiTheme.size.xxs],
+                          (x, y) => x + y
+                        )} !important`,
+                      },
+                    }}
+                  >
+                    <EuiSpacer size="xs" />
+                    <ul>
+                      {subgroupFields.map((field, index) => (
+                        <Fragment key={getFieldKey(field)}>
+                          {renderFieldItem({
+                            field,
+                            itemIndex: index,
+                            groupIndex,
+                            groupName,
+                            hideDetails,
+                            fieldSearchHighlight,
+                          })}
+                        </Fragment>
+                      ))}
+                    </ul>
+                  </EuiAccordion>
+                </>
+              );
+            })}
+          </>
         ) : (
           renderCallout()
         ))}

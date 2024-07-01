@@ -16,7 +16,10 @@ import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-
 import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import {
+  Setup as InspectorPublicPluginSetup,
+  Start as InspectorPublicPluginStart,
+} from '@kbn/inspector-plugin/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -134,6 +137,7 @@ export interface DiscoverSetupPlugins {
   share?: SharePluginSetup;
   uiActions: UiActionsSetup;
   urlForwarding: UrlForwardingSetup;
+  inspector: InspectorPublicPluginSetup;
 }
 
 /**

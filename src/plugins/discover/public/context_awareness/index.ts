@@ -11,3 +11,4 @@ export * from './profiles';
 export { getMergedAccessor } from './composable_profile';
 export { ProfilesManager } from './profiles_manager';
 export { useProfileAccessor, useRootProfile } from './hooks';
+export * from './inspector';

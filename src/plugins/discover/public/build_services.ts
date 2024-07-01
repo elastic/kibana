@@ -60,7 +60,7 @@ import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
-import type { ProfilesManager } from './context_awareness';
+import type { ProfilesAdapter, ProfilesManager } from './context_awareness';
 
 /**
  * Location state of internal Discover history instance
@@ -127,6 +127,7 @@ export interface DiscoverServices {
   contentClient: ContentClient;
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  profilesAdapter: ProfilesAdapter;
   profilesManager: ProfilesManager;
 }
 
@@ -141,6 +142,7 @@ export const buildServices = memoize(
     history,
     scopedHistory,
     urlTracker,
+    profilesAdapter,
     profilesManager,
     setHeaderActionMenu = noop,
   }: {
@@ -153,6 +155,7 @@ export const buildServices = memoize(
     history: History<HistoryLocationState>;
     scopedHistory?: ScopedHistory;
     urlTracker: UrlTracker;
+    profilesAdapter: ProfilesAdapter;
     profilesManager: ProfilesManager;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }): DiscoverServices => {
@@ -213,6 +216,7 @@ export const buildServices = memoize(
       contentClient: plugins.contentManagement.client,
       noDataPage: plugins.noDataPage,
       observabilityAIAssistant: plugins.observabilityAIAssistant,
+      profilesAdapter,
       profilesManager,
     };
   }
