@@ -232,7 +232,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
    */
-  unifiedManifestEnabled: false,
+  unifiedManifestEnabled: true,
 
   /**
    *  Enables Security AI Assistant's Flyout mode
