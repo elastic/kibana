@@ -6,23 +6,28 @@
  */
 
 import React, { useCallback, useMemo, useEffect } from 'react';
-import type { Criteria, DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiText, EuiBasicTable, EuiEmptyPrompt, EuiLoadingElastic, EuiButton } from '@elastic/eui';
+import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
 import {
   userSelectedPage,
   userSelectedPerPage,
+  userSelectedRow,
   userSortedNotes,
-  userFilteredNotes,
-  userSearchedNotes,
   selectAllNotes,
   selectNotesPagination,
   selectNotesTableSort,
   selectNotesTableTotalItems,
+  fetchNotes,
+  deleteNote,
+  deleteNotes,
+  selectNotesTableSelectedIds,
+  selectNotesTableSearch,
 } from '..';
+import { SearchRow } from '../components/search_row';
+import { NotesUtilityBar } from '../components/utility_bar';
 
 const columns: Array<EuiBasicTableColumn<Note>> = [
   {
@@ -42,7 +47,6 @@ const columns: Array<EuiBasicTableColumn<Note>> = [
   {
     field: 'timelineId',
     name: 'Timeline id',
-    sortable: true,
   },
   {
     field: 'note',
@@ -71,121 +75,122 @@ const BulkNoteDeleteButton = ({
  */
 export const NotesTable = () => {
   const dispatch = useDispatch();
+  const notes = useSelector(selectAllNotes);
+  const pagination = useSelector(selectNotesPagination);
+  const sort = useSelector(selectNotesTableSort);
+  const totalItems = useSelector(selectNotesTableTotalItems);
+  const selectedItems = useSelector(selectNotesTableSelectedIds);
+  const notesSearch = useSelector(selectNotesTableSearch);
 
-  const { index: page, size: perPage } = useSelector((state) => selectNotesPagination(state));
-
-  const onSelectionChange = useCallback(
-    (selectedItems: Note[]) => {
-      dispatch(appActions.notesTableSelectItems({ selectedItems }));
-    },
-    [dispatch]
-  );
+  const fetchData = useCallback(() => {
+    dispatch(
+      fetchNotes({
+        page: pagination.page,
+        perPage: pagination.perPage,
+        sortField: sort.field,
+        sortOrder: sort.direction,
+        filter: '',
+        search: notesSearch,
+      })
+    );
+  }, [dispatch, pagination.page, pagination.perPage, sort.field, sort.direction, notesSearch]);
 
   useEffect(() => {
-    dispatch(appActions.notesTableInitialize());
-  }, [dispatch]);
-
-  const selectedItems = useSelector((state) => appSelectors.selectNotesSelectedItems(state));
-
-  const selection: EuiTableSelectionType<Note> = useMemo(() => {
-    return {
-      onSelectionChange,
-      selectable: () => true,
-    };
-  }, [onSelectionChange]);
+    fetchData();
+  }, [fetchData]);
 
   const onTableChange = useCallback(
-    ({ page, sort }: Criteria<Note>) => {
-      if (page && sort) {
-        dispatch(appActions.notesTableChange({ page, sort }));
+    ({
+      page,
+      sort: newSort,
+    }: {
+      page?: { index: number; size: number };
+      sort?: { field: string; direction: string };
+    }) => {
+      if (page) {
+        dispatch(userSelectedPage(page.index + 1));
+        dispatch(userSelectedPerPage(page.size));
+      }
+      if (newSort) {
+        dispatch(userSortedNotes({ field: newSort.field, order: newSort.direction }));
       }
     },
     [dispatch]
   );
 
-  const bulkDeleteNote = useCallback(() => {
-    if (selectedItems.length > 0) {
-      dispatch(appActions.bulkDeleteNotes({ noteIds: selectedItems }));
-    }
-  }, [dispatch, selectedItems]);
-
-  const sorting = useSelector((state: State) => appSelectors.selectNotesTableSort(state));
-  const deleteNote = useCallback(
-    (note: Note) => dispatch(appActions.deleteNoteRequest({ note })),
+  const onDeleteNote = useCallback(
+    (id: string) => {
+      dispatch(deleteNote({ id }));
+    },
     [dispatch]
   );
 
-  const fetchLoading = useSelector((state: State) =>
-    appSelectors.selectLoadingFetchByDocument(state)
-  );
-  const fetchError = useSelector((state) => appSelectors.selectErrorFetchByDocument(state));
-
-  const totalItemCount = useSelector((state) => selectAllNotes(state).length);
-
-  const notes = useSelector((state: State) => appSelectors.selectNotesTableCurrentPageItems(state));
-  const startOfCurrentPage = pageIndex * pageSize + 1;
-  const endOfCurrentPage = Math.min((pageIndex + 1) * pageSize, totalItemCount);
-
-  const resultsCount =
-    pageSize === 0 ? (
-      <strong>{'All'}</strong>
-    ) : (
-      <>
-        <strong>
-          {startOfCurrentPage}
-          {'-'}
-          {endOfCurrentPage}
-        </strong>
-        {' of '} {totalItemCount}
-      </>
-    );
-
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount,
-    pageSizeOptions,
-  };
-
-  const itemIdSelector = useCallback(
-    (item: Note) => {
-      return selectedItems.includes(item.noteId) ? item.noteId : item.noteId;
+  const onSelectionChange = useCallback(
+    (selection: Note[]) => {
+      const rowIds = selection.map((item) => item.noteId);
+      dispatch(userSelectedRow(rowIds));
     },
-    [selectedItems]
+    [dispatch]
   );
 
-  const actions: Array<DefaultItemAction<Note>> = [
-    {
-      name: 'Delete',
-      description: 'Delete this note',
-      color: 'primary',
-      icon: 'trash',
-      type: 'icon',
-      onClick: (note: Note) => deleteNote(note),
-    },
-  ];
-  const columnWithActions = [
-    ...columns,
-    {
-      name: 'actions',
-      actions,
-    },
-  ];
+  const itemIdSelector = useCallback((item: Note) => {
+    return item.noteId;
+  }, []);
 
-  if (fetchLoading) {
-    return <EuiLoadingElastic size="xxl" />;
-  }
+  const deleteSelectedNotes = useCallback(() => {
+    dispatch(deleteNotes({ ids: selectedItems }));
+  }, [dispatch, selectedItems]);
 
-  if (fetchError) {
-    return (
-      <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
-        title={<h2>{'Unable to load your notes'}</h2>}
-        body={<p>{'No can do'}</p>}
-      />
-    );
-  }
+  const columnWithActions = useMemo(() => {
+    const actions: Array<DefaultItemAction<Note>> = [
+      {
+        name: 'Delete',
+        description: 'Delete this note',
+        color: 'primary',
+        icon: 'trash',
+        type: 'icon',
+        onClick: (note: Note) => deleteNote({ id: note.noteId }),
+      },
+    ];
+    return [
+      ...columns,
+      {
+        name: 'actions',
+        actions,
+      },
+    ];
+  }, []);
+
+  // if (fetchLoading) {
+  //   return <EuiLoadingElastic size="xxl" />;
+  // }
+
+  // if (fetchError) {
+  //   return (
+  //     <EuiEmptyPrompt
+  //       iconType="error"
+  //       color="danger"
+  //       title={<h2>{'Unable to load your notes'}</h2>}
+  //       body={<p>{'No can do'}</p>}
+  //     />
+  //   );
+  // }
+
+  const currentPagination = useMemo(() => {
+    return {
+      pageIndex: pagination.page - 1,
+      pageSize: pagination.perPage,
+      totalItemCount: totalItems,
+      pageSizeOptions,
+    };
+  }, [pagination, totalItems]);
+
+  const selection = useMemo(() => {
+    return {
+      onSelectionChange,
+      selectable: () => true,
+    };
+  }, [onSelectionChange]);
 
   if (notes.length === 0) {
     return (
@@ -199,19 +204,19 @@ export const NotesTable = () => {
 
   return (
     <>
-      <EuiText size="xs">
-        {'Showing'} {resultsCount} <strong>{'Notes'}</strong>
-      </EuiText>
-      <BulkNoteDeleteButton selectedItems={selectedItems} deleteSelectedNotes={bulkDeleteNote} />
+      <SearchRow />
+      <NotesUtilityBar />
+      <BulkNoteDeleteButton
+        selectedItems={selectedItems}
+        deleteSelectedNotes={deleteSelectedNotes}
+      />
       <EuiBasicTable
         items={notes}
-        pagination={pagination}
-        tableCaption="Demo of EuiBasicTable"
-        rowHeader="firstName"
+        pagination={currentPagination}
         columns={columnWithActions}
         onChange={onTableChange}
         selection={selection}
-        sorting={{ sort: sorting }}
+        sorting={{ sort }}
         itemId={itemIdSelector}
       />
     </>
