@@ -106,9 +106,6 @@ describe('helpers', () => {
         {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
-          description:
-            'Date/time when the event originated. For log events this is the date/time when the event was generated, and not when it was read. Required field for all events.',
-          example: '2016-05-23T08:05:34.853Z',
           format: '',
           id: '@timestamp',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -122,8 +119,6 @@ describe('helpers', () => {
         {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
-          description: 'IP address of the source. Can be one or multiple IPv4 or IPv6 addresses.',
-          example: '',
           format: '',
           id: 'source.ip',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -136,9 +131,6 @@ describe('helpers', () => {
         {
           aggregatable: true,
           columnHeaderType: 'not-filtered',
-          description:
-            'IP address of the destination. Can be one or multiple IPv4 or IPv6 addresses.',
-          example: '',
           format: '',
           id: 'destination.ip',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
@@ -168,9 +160,7 @@ describe('helpers', () => {
         {
           aggregatable: false,
           columnHeaderType: 'not-filtered',
-          description: 'Each document has an _id that uniquely identifies it',
           esTypes: [],
-          example: 'Y-6TfmcB0WOhS6qyMv3s',
           id: '_id',
           indexes: ['auditbeat', 'filebeat', 'packetbeat'],
           initialWidth: 180,

@@ -5296,10 +5296,6 @@
               "path": "x-pack/plugins/actions/server/plugin.ts"
             },
             {
-              "plugin": "data",
-              "path": "src/plugins/data/server/search/session/session_service.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
@@ -5475,14 +5471,6 @@
               "path": "x-pack/plugins/alerting/server/plugin.ts"
             },
             {
-              "plugin": "files",
-              "path": "src/plugins/files/server/routes/file_kind/create.ts"
-            },
-            {
-              "plugin": "cases",
-              "path": "x-pack/plugins/cases/server/client/factory.ts"
-            },
-            {
               "plugin": "observabilityAIAssistant",
               "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/index.ts"
             },
@@ -5492,67 +5480,7 @@
             },
             {
               "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/services/security/security.ts"
-            },
-            {
-              "plugin": "fleet",
               "path": "x-pack/plugins/fleet/server/services/api_keys/transform_api_keys.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/epm/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/agent_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
-            },
-            {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/package_policy/handlers.ts"
             },
             {
               "plugin": "fleet",
@@ -5563,20 +5491,12 @@
               "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
             },
             {
-              "plugin": "fleet",
-              "path": "x-pack/plugins/fleet/server/routes/settings/index.ts"
-            },
-            {
               "plugin": "cloudDefend",
               "path": "x-pack/plugins/cloud_defend/server/routes/setup_routes.ts"
             },
             {
               "plugin": "cloudSecurityPosture",
               "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
-            },
-            {
-              "plugin": "elasticAssistant",
-              "path": "x-pack/plugins/elastic_assistant/server/routes/request_context_factory.ts"
             },
             {
               "plugin": "enterpriseSearch",
@@ -5589,30 +5509,6 @@
             {
               "plugin": "lists",
               "path": "x-pack/plugins/lists/server/get_user.ts"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/routes/saved_query/create_saved_query_route.ts"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/routes/saved_query/update_saved_query_route.ts"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/routes/pack/create_pack_route.ts"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/routes/pack/update_pack_route.ts"
-            },
-            {
-              "plugin": "osquery",
-              "path": "x-pack/plugins/osquery/server/routes/asset/update_assets_route.ts"
             },
             {
               "plugin": "securitySolution",
@@ -5637,10 +5533,6 @@
             {
               "plugin": "securitySolution",
               "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-            },
-            {
-              "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/server/routes/common/get_user.ts"
             },
             {
               "plugin": "serverlessSearch",
