@@ -213,7 +213,9 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
               );
 
               return tag.key === INDEX_PATTERN_TYPE.ROLLUP ? (
-                <RollupDeprecationTooltip>{badge}</RollupDeprecationTooltip>
+                <>
+                  &nbsp;<RollupDeprecationTooltip>{badge}</RollupDeprecationTooltip>
+                </>
               ) : (
                 badge
               );
