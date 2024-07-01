@@ -9555,9 +9555,17 @@ Object {
       "required": false,
       "type": "date",
     },
+    "configId": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.message": Object {
       "required": false,
       "type": "text",
+    },
+    "host.name": Object {
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.context": Object {
       "array": false,
@@ -9595,11 +9603,24 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "location.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "location.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9654,9 +9675,17 @@ Object {
       "required": false,
       "type": "date",
     },
+    "configId": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.message": Object {
       "required": false,
       "type": "text",
+    },
+    "host.name": Object {
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.context": Object {
       "array": false,
@@ -9694,11 +9723,24 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "location.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "location.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9753,9 +9795,17 @@ Object {
       "required": false,
       "type": "date",
     },
+    "configId": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.message": Object {
       "required": false,
       "type": "text",
+    },
+    "host.name": Object {
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.context": Object {
       "array": false,
@@ -9793,11 +9843,24 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "location.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "location.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9852,9 +9915,17 @@ Object {
       "required": false,
       "type": "date",
     },
+    "configId": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.message": Object {
       "required": false,
       "type": "text",
+    },
+    "host.name": Object {
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.context": Object {
       "array": false,
@@ -9892,11 +9963,24 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "location.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "location.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },
@@ -9957,9 +10041,17 @@ Object {
       "required": false,
       "type": "date",
     },
+    "configId": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "error.message": Object {
       "required": false,
       "type": "text",
+    },
+    "host.name": Object {
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.context": Object {
       "array": false,
@@ -9997,11 +10089,24 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "location.id": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "location.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
     },
     "monitor.name": Object {
+      "required": false,
+      "type": "keyword",
+    },
+    "monitor.tags": Object {
+      "array": true,
       "required": false,
       "type": "keyword",
     },

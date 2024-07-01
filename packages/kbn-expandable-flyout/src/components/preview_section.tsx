@@ -69,10 +69,6 @@ interface PreviewSectionProps {
    */
   leftPosition: number;
   /**
-   * Display the back button in the header
-   */
-  showBackButton: boolean;
-  /**
    * Preview banner shown at the top of preview panel
    */
   banner?: PreviewBanner;
@@ -84,7 +80,6 @@ interface PreviewSectionProps {
  */
 export const PreviewSection: React.FC<PreviewSectionProps> = ({
   component,
-  showBackButton,
   leftPosition,
   banner,
 }: PreviewSectionProps) => {
@@ -103,7 +98,7 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
       />
     </EuiFlexItem>
   );
-  const header = showBackButton ? (
+  const header = (
     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
@@ -117,10 +112,6 @@ export const PreviewSection: React.FC<PreviewSectionProps> = ({
           {BACK_BUTTON}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      {closeButton}
-    </EuiFlexGroup>
-  ) : (
-    <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
       {closeButton}
     </EuiFlexGroup>
   );
