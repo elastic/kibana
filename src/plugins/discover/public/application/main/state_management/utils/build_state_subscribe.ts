@@ -55,14 +55,15 @@ export const buildStateSubscribe =
     const isEsqlMode = isDataSourceType(nextState.dataSource, DataSourceType.Esql);
     const queryChanged = !isEqual(nextQuery, prevQuery) || !isEqual(nextQuery, prevState.query);
 
-    if (
-      isEsqlMode &&
-      isEqualState(prevState, nextState, ['dataSource', 'viewMode']) &&
-      !queryChanged
-    ) {
-      // When there's a switch from data view to es|ql, this just leads to a cleanup of index and viewMode
-      // And there's no subsequent action in this function required
+    if (isEsqlMode && prevState.viewMode !== nextState.viewMode && !queryChanged) {
       savedSearchState.update({ nextState });
+      addLog('[appstate] subscribe $fetch ignored for es|ql', { prevState, nextState });
+      return;
+    }
+
+    if (isEsqlMode && isEqualState(prevState, nextState, ['dataSource']) && !queryChanged) {
+      // When there's a switch from data view to es|ql, this just leads to a cleanup of index
+      // And there's no subsequent action in this function required
       addLog('[appstate] subscribe update ignored for es|ql', { prevState, nextState });
       return;
     }
