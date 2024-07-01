@@ -54,6 +54,7 @@ export const LandingLinksImageCards: React.FC<LandingLinksImagesProps> = React.m
               direction="row"
               justifyContent="flexStart"
               alignItems="center"
+              data-test-subj="LandingImageCards-accordionButton"
             >
               <EuiFlexItem grow={false}>
                 <EuiIcon type="logoSecurity" />
