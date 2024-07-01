@@ -55,7 +55,7 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
           ids: [apiKey.id],
         });
 
-        return res.ok();
+        return res.ok({ body: { success: true } });
       } catch (err) {
         logger.error(err);
         return res.customError({ statusCode: 500, body: err });
