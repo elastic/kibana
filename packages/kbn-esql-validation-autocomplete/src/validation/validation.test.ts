@@ -10156,6 +10156,185 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
       });
+
+      describe('st_distance', () => {
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = st_distance(true, true)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(booleanField, booleanField)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(geoPointField, geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval st_distance(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField, extraArg)',
+          ['Error: [st_distance] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval st_distance(nullVar, nullVar)', []);
+      });
+
+      describe('top_list', () => {
+        testErrorsAndWarnings('row var = top_list(now(), 5, "a")', []);
+        testErrorsAndWarnings('row top_list(now(), 5, "a")', []);
+
+        testErrorsAndWarnings(
+          'row var = top_list(to_datetime(now()), to_integer(true), to_string(true))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = top_list(5, 5, "a")', []);
+        testErrorsAndWarnings('row top_list(5, 5, "a")', []);
+
+        testErrorsAndWarnings(
+          'row var = top_list(to_integer(true), to_integer(true), to_string(true))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = top_list(true, true, true)', [
+          'Argument of [top_list] must be [date], found value [true] type [boolean]',
+          'Argument of [top_list] must be [number], found value [true] type [boolean]',
+          'Argument of [top_list] must be [string], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where top_list(numberField, numberField, stringField) > 0',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where top_list(booleanField, booleanField, booleanField) > 0',
+          [
+            'Argument of [top_list] must be [date], found value [booleanField] type [boolean]',
+            'Argument of [top_list] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [top_list] must be [string], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top_list(dateField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval top_list(dateField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top_list(to_datetime(dateField), to_integer(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval top_list(booleanField, booleanField, booleanField)',
+          [
+            'Argument of [top_list] must be [date], found value [booleanField] type [boolean]',
+            'Argument of [top_list] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [top_list] must be [string], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top_list(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval top_list(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top_list(to_integer(booleanField), to_integer(booleanField), to_string(booleanField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval top_list(dateField, numberField, stringField, extraArg)',
+          ['Error: [top_list] function expects exactly 3 arguments, got 4.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort top_list(dateField, numberField, stringField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | stats top_list(null, null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats top_list(nullVar, nullVar, nullVar)', []);
+        testErrorsAndWarnings(
+          'from a_index | stats top_list("2022", numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats top_list(concat("20", "22"), numberField, stringField)',
+          []
+        );
+      });
     });
   });
 
