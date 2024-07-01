@@ -12,6 +12,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { isFilterProcessDescendantsEnabled } from '../../../../../common/endpoint/service/artifacts/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
@@ -146,32 +147,41 @@ export const EventFiltersList = memo(() => {
   const { canWriteEventFilters } = useUserPrivileges().endpointPrivileges;
   const http = useHttp();
   const eventFiltersApiClient = EventFiltersApiClient.getInstance(http);
+  const isProcessDescendantFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'filterProcessDescendantsForEventFiltersEnabled'
+  );
 
-  const eventFilterCardDecorator: ArtifactListPageProps['cardDecorator'] = useCallback((item) => {
-    if (isFilterProcessDescendantsEnabled(item as ExceptionListItemSchema)) {
-      return (
-        <>
-          <EuiText data-test-subj="EventFiltersListPage-processDescendantIndication">
-            <code>
-              <strong>
-                <FormattedMessage
-                  defaultMessage="Filtering descendants of process"
-                  id="xpack.securitySolution.eventFilters.filteringProcessDescendants"
-                />{' '}
-                <ProcessDescendantsTooltip
-                  indicateExtraEntry
-                  testIdPrefix="EventFiltersListPage-processDescendantIndication"
-                />
-              </strong>
-            </code>
-          </EuiText>
-          <EuiSpacer size="l" />
-        </>
-      );
-    }
+  const eventFilterCardDecorator: ArtifactListPageProps['cardDecorator'] = useCallback(
+    (item) => {
+      if (
+        isProcessDescendantFeatureEnabled &&
+        isFilterProcessDescendantsEnabled(item as ExceptionListItemSchema)
+      ) {
+        return (
+          <>
+            <EuiText data-test-subj="EventFiltersListPage-processDescendantIndication">
+              <code>
+                <strong>
+                  <FormattedMessage
+                    defaultMessage="Filtering descendants of process"
+                    id="xpack.securitySolution.eventFilters.filteringProcessDescendants"
+                  />{' '}
+                  <ProcessDescendantsTooltip
+                    indicateExtraEntry
+                    testIdPrefix="EventFiltersListPage-processDescendantIndication"
+                  />
+                </strong>
+              </code>
+            </EuiText>
+            <EuiSpacer size="l" />
+          </>
+        );
+      }
 
-    return null;
-  }, []);
+      return null;
+    },
+    [isProcessDescendantFeatureEnabled]
+  );
 
   return (
     <ArtifactListPage
