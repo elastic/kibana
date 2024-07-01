@@ -43,6 +43,7 @@ const previouslyRegisteredTypes = [
   'config-global',
   'connector_token',
   'core-usage-stats',
+  'counter',
   'csp-rule-template',
   'csp_rule',
   'dashboard',

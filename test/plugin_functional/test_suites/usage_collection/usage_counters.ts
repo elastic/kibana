@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     await new Promise((res) => setTimeout(res, 10 * 1000));
 
     return await supertest
-      .get('/api/saved_objects/_find?type=usage-counters')
+      .get('/api/saved_objects/_find?type=counter')
       .set('kbn-xsrf', 'true')
       .expect(200)
       .then(({ body }) => {
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         source: 'server',
       });
 
-      await supertest.delete(`/api/saved_objects/usage-counters/${key}`).set('kbn-xsrf', 'true');
+      await supertest.delete(`/api/saved_objects/counter/${key}`).set('kbn-xsrf', 'true');
     });
 
     it('stores usage counters sent during start and setup', async () => {
