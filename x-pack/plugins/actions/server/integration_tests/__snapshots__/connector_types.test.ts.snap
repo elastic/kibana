@@ -2276,11 +2276,6 @@ Object {
       "type": "array",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -2422,11 +2417,6 @@ Object {
       "type": "array",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -2465,11 +2455,6 @@ Object {
       "type": "array",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -2497,11 +2482,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -2545,11 +2525,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -2596,11 +2571,6 @@ Object {
         },
       },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
