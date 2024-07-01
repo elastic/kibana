@@ -7,6 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { uniq } from 'lodash/fp';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { ManageAlertTagsRequestBody } from '../../../../../common/api/detection_engine/alert_tags';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import {
@@ -14,7 +15,6 @@ import {
   DETECTION_ENGINE_ALERT_TAGS_URL,
 } from '../../../../../common/constants';
 import { buildSiemResponse } from '../utils';
-import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { validateAlertTagsArrays } from './helpers';
 
 export const setAlertTagsRoute = (router: SecuritySolutionPluginRouter) => {

@@ -1869,7 +1869,7 @@
         "signature": [
           "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
         ],
-        "path": "packages/analytics/client/src/schema/types.ts",
+        "path": "packages/analytics/ebt/client/src/schema/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

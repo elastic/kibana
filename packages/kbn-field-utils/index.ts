@@ -27,7 +27,3 @@ export {
 
 export { FieldIcon, type FieldIconProps, getFieldIconProps } from './src/components/field_icon';
 export { FieldDescription, type FieldDescriptionProps } from './src/components/field_description';
-export {
-  FieldDescriptionIconButton,
-  type FieldDescriptionIconButtonProps,
-} from './src/components/field_description_icon_button';
