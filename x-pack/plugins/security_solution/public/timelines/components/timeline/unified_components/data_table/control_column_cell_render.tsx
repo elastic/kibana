@@ -35,6 +35,7 @@ export const ControlColumnCellRender = memo(function ControlColumnCellRender(
       {...props}
       ariaRowindex={rowIndex}
       columnValues="columnValues"
+      disableExpandAction
       eventIdToNoteIds={eventIdToNoteIds}
       isEventPinned={isPinned}
       isEventViewer={false}
