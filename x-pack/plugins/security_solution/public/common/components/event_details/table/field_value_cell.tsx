@@ -18,7 +18,7 @@ export interface FieldValueCellProps {
   contextId: string;
   data: EventFieldsData | FieldsData;
   eventId: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<BrowserField>;
   getLinkValue?: (field: string) => string | null;
   isDraggable?: boolean;
   linkValue?: string | null | undefined;

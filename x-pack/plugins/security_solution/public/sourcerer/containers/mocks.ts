@@ -30,7 +30,6 @@ export const mockSourcererScope: SelectedDataView = {
           aggregatable: false,
           esTypes: undefined,
           format: undefined,
-          indexes: mockPatterns,
           name: '_id',
           searchable: true,
           subType: undefined,
@@ -58,5 +57,4 @@ export const mockSourcererScope: SelectedDataView = {
   loading: false,
   dataViewId: mockGlobalState.sourcerer.defaultDataView.id,
   runtimeMappings: mockRuntimeMappings,
-  patternList: mockPatterns,
 };
