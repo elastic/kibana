@@ -235,6 +235,7 @@ const notesSlice = createSlice({
         notesAdapter.setAll(state, action.payload.entities.notes);
         state.pagination.total = action.payload.totalCount;
         state.status.fetchNotes = ReqStatus.Succeeded;
+        state.selectedIds = [];
       })
       .addCase(fetchNotes.rejected, (state, action) => {
         state.status.fetchNotes = ReqStatus.Failed;
