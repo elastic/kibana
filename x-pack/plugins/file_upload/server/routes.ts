@@ -29,18 +29,20 @@ import {
 import type { StartDeps } from './types';
 import { checkFileUploadPrivileges } from './check_privileges';
 import { previewIndexTimeRange } from './preview_index_time_range';
+import { previewTikaContents } from './preview_tika_contents';
 
 function importData(
   client: IScopedClusterClient,
   id: string | undefined,
   index: string,
+  reuseIndex: boolean,
   settings: IndicesIndexSettings,
   mappings: MappingTypeMapping,
   ingestPipeline: IngestPipelineWrapper,
   data: InputData
 ) {
   const { importData: importDataFunc } = importDataProvider(client);
-  return importDataFunc(id, index, settings, mappings, ingestPipeline, data);
+  return importDataFunc(id, index, reuseIndex, settings, mappings, ingestPipeline, data);
 }
 
 /**
@@ -164,7 +166,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       async (context, request, response) => {
         try {
           const { id } = request.query;
-          const { index, data, settings, mappings, ingestPipeline } = request.body;
+          const { index, reuseIndex, data, settings, mappings, ingestPipeline } = request.body;
           const esClient = (await context.core).elasticsearch.client;
 
           // `id` being `undefined` tells us that this is a new import due to create a new index.
@@ -178,6 +180,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
             esClient,
             id,
             index,
+            !!reuseIndex,
             settings,
             mappings,
             // @ts-expect-error
@@ -313,6 +316,51 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           const { docs, pipeline, timeField } = request.body;
           const esClient = (await context.core).elasticsearch.client;
           const resp = await previewIndexTimeRange(esClient, timeField, pipeline, docs);
+
+          return response.ok({
+            body: resp,
+          });
+        } catch (e) {
+          return response.customError(wrapError(e));
+        }
+      }
+    );
+
+  /**
+   * @apiGroup FileDataVisualizer
+   *
+   * @api {post} /internal/file_upload/preview_index_time_range Predict the time range for an index using example documents
+   * @apiName PreviewIndexTimeRange
+   * @apiDescription Predict the time range for an index using example documents
+   */
+  router.versioned
+    .post({
+      path: '/internal/file_upload/preview_tika_contents',
+      access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+        body: {
+          accepts: ['application/json'],
+          maxBytes: MAX_FILE_SIZE_BYTES,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: {
+          request: {
+            body: schema.object({
+              base64File: schema.string(),
+            }),
+          },
+        },
+      },
+      async (context, request, response) => {
+        try {
+          const { base64File } = request.body;
+          const esClient = (await context.core).elasticsearch.client;
+          const resp = await previewTikaContents(esClient, base64File);
 
           return response.ok({
             body: resp,

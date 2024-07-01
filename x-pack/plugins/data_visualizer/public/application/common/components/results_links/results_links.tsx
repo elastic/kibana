@@ -16,6 +16,7 @@ import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
+import { FILE_FORMATS } from '../../../../../common/constants';
 import type { ResultLinks } from '../../../../../common/app';
 import type { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
@@ -44,7 +45,7 @@ export interface ResultLink {
 }
 
 interface Props {
-  fieldStats: FindFileStructureResponse['field_stats'];
+  results: FindFileStructureResponse;
   index: string;
   dataViewId: string;
   timeFieldName?: string;
@@ -62,7 +63,7 @@ interface GlobalState {
 const RECHECK_DELAY_MS = 3000;
 
 export const ResultsLinks: FC<Props> = ({
-  fieldStats,
+  results,
   index,
   dataViewId,
   timeFieldName,
@@ -78,7 +79,7 @@ export const ResultsLinks: FC<Props> = ({
       application: { getUrlForApp, capabilities },
     },
   } = useDataVisualizerKibana();
-
+  const fieldStats = results.field_stats;
   const [duration, setDuration] = useState({
     from: 'now-30m',
     to: 'now',
@@ -88,6 +89,7 @@ export const ResultsLinks: FC<Props> = ({
   const [discoverLink, setDiscoverLink] = useState('');
   const [indexManagementLink, setIndexManagementLink] = useState('');
   const [dataViewsManagementLink, setDataViewsManagementLink] = useState('');
+  const [playgroundLink, setPlaygroundLink] = useState('');
   const [asyncHrefCards, setAsyncHrefCards] = useState<LinkCardProps[]>();
 
   useEffect(() => {
@@ -116,13 +118,13 @@ export const ResultsLinks: FC<Props> = ({
     if (Array.isArray(getAdditionalLinks)) {
       Promise.all(
         getAdditionalLinks.map(async (asyncCardGetter) => {
-          const results = await asyncCardGetter({
+          const cardResults = await asyncCardGetter({
             dataViewId,
             globalState,
           });
-          if (Array.isArray(results)) {
+          if (Array.isArray(cardResults)) {
             return await Promise.all(
-              results.map(async (c) => ({
+              cardResults.map(async (c) => ({
                 ...c,
                 canDisplay: await c.canDisplay(),
                 href: await c.getUrl(),
@@ -140,6 +142,12 @@ export const ResultsLinks: FC<Props> = ({
     }
 
     if (!unmounted) {
+      setPlaygroundLink(
+        getUrlForApp('enterprise_search', {
+          path: `/applications/playground?default-index=${index}`,
+        })
+      );
+
       setIndexManagementLink(
         getUrlForApp('management', { path: '/data/index_management/indices' })
       );
@@ -228,7 +236,6 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-
       {indexManagementLink && (
         <EuiFlexItem>
           <EuiCard
@@ -245,7 +252,6 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-
       {dataViewsManagementLink && (
         <EuiFlexItem>
           <EuiCard
@@ -262,7 +268,6 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
-
       {resultLinks?.fileBeat?.enabled === false ? null : (
         <EuiFlexItem>
           <EuiCard
@@ -280,6 +285,24 @@ export const ResultsLinks: FC<Props> = ({
           />
         </EuiFlexItem>
       )}
+
+      {results.format === FILE_FORMATS.TIKA ? (
+        <EuiFlexItem>
+          <EuiCard
+            hasBorder
+            icon={<EuiIcon size="xxl" type={`logoEnterpriseSearch`} />}
+            data-test-subj="fileDataVisFilebeatConfigLink"
+            title={
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.resultsLinks.playground"
+                defaultMessage="Playground"
+              />
+            }
+            description=""
+            href={playgroundLink}
+          />
+        </EuiFlexItem>
+      ) : null}
 
       {Array.isArray(asyncHrefCards) &&
         asyncHrefCards.map((link) => (

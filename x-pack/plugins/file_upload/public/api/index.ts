@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { fromByteArray } from 'base64-js';
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
-import type { HasImportPermission, FindFileStructureResponse } from '../../common/types';
+import type {
+  HasImportPermission,
+  FindFileStructureResponse,
+  PreviewTikaResponse,
+} from '../../common/types';
 import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
 import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
 import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
@@ -22,6 +27,7 @@ export interface FileUploadStartApi {
   checkIndexExists: typeof checkIndexExists;
   getTimeFieldRange: typeof getTimeFieldRange;
   analyzeFile: typeof analyzeFile;
+  previewTikaFile: typeof previewTikaFile;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -36,7 +42,7 @@ export const IndexNameFormComponent = IndexNameFormAsyncWrapper;
 export async function importerFactory(
   format: string,
   options: ImportFactoryOptions
-): Promise<IImporter | undefined> {
+): Promise<IImporter> {
   const fileUploadModules = await lazyLoadModules();
   return fileUploadModules.importerFactory(format, options);
 }
@@ -55,6 +61,24 @@ export async function analyzeFile(
   const body = JSON.stringify(file);
   return await getHttp().fetch<FindFileStructureResponse>({
     path: `/internal/file_upload/analyze_file`,
+    method: 'POST',
+    version: '1',
+    body,
+    query: params,
+  });
+}
+
+export async function previewTikaFile(
+  data: ArrayBuffer,
+  params: Record<string, string> = {}
+): Promise<PreviewTikaResponse> {
+  const { getHttp } = await lazyLoadModules();
+  const base64File = fromByteArray(new Uint8Array(data));
+  const body = JSON.stringify({
+    base64File,
+  });
+  return await getHttp().fetch<PreviewTikaResponse>({
+    path: `/internal/file_upload/preview_tika_contents`,
     method: 'POST',
     version: '1',
     body,

@@ -18,7 +18,7 @@ import { CreateDataViewToolTip } from './create_data_view_tooltip';
 interface Props {
   index: string;
   initialized: boolean;
-  onIndexChange(): void;
+  onIndexChange(i: string): void;
   createDataView: boolean;
   onCreateDataViewChange(): void;
   indexNameError: string;
@@ -57,7 +57,7 @@ export const SimpleSettings: FC<Props> = ({
           )}
           value={index}
           disabled={initialized === true}
-          onChange={onIndexChange}
+          onChange={(e) => onIndexChange(e.target.value)}
           isInvalid={indexNameError !== ''}
           aria-label={i18n.translate(
             'xpack.dataVisualizer.file.simpleImportSettings.indexNameAriaLabel',
