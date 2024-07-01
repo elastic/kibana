@@ -130,7 +130,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     logger.info(`Deleting config ${service.name}/${service.environment} (${exactConfig.id})`);
 
     const deleteConfigurationResult = await deleteConfiguration({
-      configurationId: exactConfig.id,
+      configurationId: exactConfig.id!,
       internalESClient,
     });
 
@@ -266,7 +266,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
     if (willMarkAsApplied) {
       await markAppliedByAgent({
-        id: configuration._id,
+        id: configuration._id!,
         body: configuration._source,
         internalESClient,
       });

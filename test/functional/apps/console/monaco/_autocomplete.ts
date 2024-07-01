@@ -44,7 +44,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.monaco.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    describe('Autocomplete behavior', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186501
+    describe.skip('Autocomplete behavior', () => {
       beforeEach(async () => {
         await PageObjects.console.monaco.clearEditorText();
       });
@@ -371,7 +372,8 @@ GET _search
       });
     });
 
-    describe('index fields autocomplete', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/186935
+    describe.skip('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {

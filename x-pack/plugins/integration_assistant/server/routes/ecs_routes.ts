@@ -16,6 +16,7 @@ import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getEcsGraph } from '../graphs/ecs';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
 
 export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -37,11 +38,11 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
-        const { packageName, datastreamName, rawSamples, mapping } = req.body;
+      withAvailability(async (context, req, res): Promise<IKibanaResponse<EcsMappingResponse>> => {
+        const { packageName, dataStreamName, rawSamples, mapping } = req.body;
         const { getStartServices, logger } = await context.integrationAssistant;
-        const [, { actions: actionsPlugin }] = await getStartServices();
 
+        const [, { actions: actionsPlugin }] = await getStartServices();
         try {
           const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
           const connector = req.body.connectorId
@@ -73,20 +74,20 @@ export function registerEcsRoutes(router: IRouter<IntegrationAssistantRouteHandl
           if (req.body?.mapping) {
             results = await graph.invoke({
               packageName,
-              datastreamName,
+              dataStreamName,
               rawSamples,
               mapping,
             });
           } else
             results = await graph.invoke({
               packageName,
-              datastreamName,
+              dataStreamName,
               rawSamples,
             });
           return res.ok({ body: EcsMappingResponse.parse(results) });
         } catch (e) {
           return res.badRequest({ body: e });
         }
-      }
+      })
     );
 }
