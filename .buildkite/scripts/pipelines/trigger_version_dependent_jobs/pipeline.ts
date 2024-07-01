@@ -29,9 +29,13 @@ async function main() {
   const pipelineSetName: string | undefined = process.env.TRIGGER_PIPELINE_SET;
   const pipelineSteps: BuildkiteTriggerStep[] = [];
 
-  if (!isValidPipelineSet(pipelineSetName)) {
+  if (!pipelineSetName) {
     throw new Error(
       `Env var TRIGGER_PIPELINE_SET is required, and can be one of: ${pipelineSetNames}`
+    );
+  } else if (!pipelineSetNames.includes(pipelineSetName)) {
+    throw new Error(
+      `Invalid value for TRIGGER_PIPELINE_SET (${pipelineSetName}), can be one of: ${pipelineSetNames}`
     );
   }
 
@@ -56,23 +60,23 @@ async function main() {
   emitPipeline(pipelineSteps);
 }
 
+/**
+ * This pipeline is testing the forward compatibility of Kibana with different versions of Elasticsearch.
+ * Should be triggered for combinations of (Kibana@7.17 + ES@8.x {current open branches on the same major})
+ */
 function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
   const versions = getVersionsFile();
-  const prevMajorBranch = versions.find((v) => v.previousMajor)?.branch;
-  const targetESVersions = versions
-    .filter((v) => {
-      return v.currentMajor && (v.currentMinor || v.previousMinor);
-    })
-    .map((v) => v.version);
+  const kibanaPrevMajor = versions.find((v) => v.previousMajor)?.branch;
+  const targetESVersions = versions.filter((v) => v.currentMajor).map((v) => v.version);
 
   return targetESVersions.map((version) => {
     return {
       trigger: 'kibana-es-forward',
       async: true,
-      label: `ES ${version} forward compatibility`,
+      label: `Triggering Kibana ${kibanaPrevMajor} + ES ${version} forward compatibility`,
       build: {
-        message: `Triggering es-forward-compatibility test for ES ${version}`,
-        branch: prevMajorBranch,
+        message: process.env.MESSAGE || `ES forward-compatibility test for ES ${version}`,
+        branch: kibanaPrevMajor,
         commit: 'HEAD',
         env: {
           ES_SNAPSHOT_MANIFEST: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${version}/manifest-latest-verified.json`,
@@ -82,6 +86,10 @@ function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
   });
 }
 
+/**
+ * This pipeline creates Kibana artifact snapshots for all open branches.
+ * Should be triggered for all open branches in the versions.json: 7.x, 8.x
+ */
 function getArtifactSnapshotPipelineTriggers() {
   // Trigger for all named branches
   const versions = getVersionsFile();
@@ -91,9 +99,9 @@ function getArtifactSnapshotPipelineTriggers() {
     return {
       trigger: 'kibana-artifacts-snapshot',
       async: true,
-      label: `Snapshot artifacts for ${branch}`,
+      label: `Triggering snapshot artifact builds for ${branch}`,
       build: {
-        message: `Triggering artifact snapshot for ${branch}`,
+        message: process.env.MESSAGE || `Snapshot artifact build for ${branch}`,
         branch,
         commit: 'HEAD',
       },
@@ -101,6 +109,10 @@ function getArtifactSnapshotPipelineTriggers() {
   });
 }
 
+/**
+ * This pipeline creates Kibana artifacts for branches that are not the current main.
+ * Should be triggered for all open branches in the versions.json: 7.x, 8.x, but not main.
+ */
 function getArtifactStagingPipelineTriggers() {
   // Trigger for all branches, that are not current minor+major
   const versions = getVersionsFile();
@@ -110,24 +122,14 @@ function getArtifactStagingPipelineTriggers() {
     return {
       trigger: 'kibana-artifacts-staging',
       async: true,
-      label: `Staging artifacts for ${branch}`,
+      label: `Triggering staging artifact builds for ${branch}`,
       build: {
-        message: `Triggering artifact staging for ${branch}`,
+        message: process.env.MESSAGE || `Staging artifact build for ${branch}`,
         branch,
         commit: 'HEAD',
       },
     } as BuildkiteTriggerStep;
   });
-}
-
-function isValidPipelineSet(
-  pipelineSetName: string | undefined
-): pipelineSetName is keyof typeof pipelineSets {
-  if (!pipelineSetName) {
-    return false;
-  } else {
-    return Object.keys(pipelineSets).includes(pipelineSetName);
-  }
 }
 
 function getVersionsFile(): Array<{

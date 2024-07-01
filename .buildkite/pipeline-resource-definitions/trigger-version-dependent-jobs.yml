@@ -56,8 +56,10 @@ spec:
           message: Trigger artifact staging builds
           env:
             TRIGGER_PIPELINE_SET: artifacts-staging
+            MESSAGE: Daily staging build
         Trigger artifact snapshot builds:
           cronline: 0 7 * * * America/New_York
           message: Trigger artifact snapshot builds
           env:
               TRIGGER_PIPELINE_SET: artifacts-snapshot
+              MESSAGE: Daily snapshot build
