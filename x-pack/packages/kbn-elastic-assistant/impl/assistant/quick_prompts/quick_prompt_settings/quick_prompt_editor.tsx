@@ -45,21 +45,21 @@ const QuickPromptSettingsEditorComponent = ({
   const { basePromptContexts } = useAssistantContext();
 
   // Prompt
-  const prompt = useMemo(
+  const promptContent = useMemo(
     // Fixing Cursor Jump in text area
-    () => quickPromptSettings.find((p) => p.name === selectedQuickPrompt?.name)?.content ?? '',
-    [selectedQuickPrompt?.name, quickPromptSettings]
+    () => quickPromptSettings.find((p) => p.id === selectedQuickPrompt?.id)?.content ?? '',
+    [selectedQuickPrompt?.id, quickPromptSettings]
   );
 
   const handlePromptChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       if (selectedQuickPrompt != null) {
-        setUpdatedQuickPromptSettings((prev) => {
-          const alreadyExists = prev.some((qp) => qp.name === selectedQuickPrompt.name);
+        setUpdatedQuickPromptSettings((prev): PromptResponse[] => {
+          const alreadyExists = prev.some((qp) => qp.id === selectedQuickPrompt.id);
 
           if (alreadyExists) {
             return prev.map((qp) => {
-              if (qp.name === selectedQuickPrompt.name) {
+              if (qp.id === selectedQuickPrompt.id) {
                 return {
                   ...qp,
                   prompt: e.target.value,
@@ -71,9 +71,45 @@ const QuickPromptSettingsEditorComponent = ({
 
           return prev;
         });
+
+        const existingPrompt = quickPromptSettings.find((sp) => sp.id === selectedQuickPrompt.id);
+        if (existingPrompt) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            ...(selectedQuickPrompt.name !== selectedQuickPrompt.id
+              ? {
+                  update: [
+                    ...(promptsBulkActions.update ?? []).filter(
+                      (p) => p.id !== selectedQuickPrompt.id
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      content: e.target.value,
+                    },
+                  ],
+                }
+              : {
+                  create: [
+                    ...(promptsBulkActions.create ?? []).filter(
+                      (p) => p.name !== selectedQuickPrompt.name
+                    ),
+                    {
+                      ...selectedQuickPrompt,
+                      content: e.target.value,
+                    },
+                  ],
+                }),
+          });
+        }
       }
     },
-    [selectedQuickPrompt, setUpdatedQuickPromptSettings]
+    [
+      promptsBulkActions,
+      quickPromptSettings,
+      selectedQuickPrompt,
+      setPromptsBulkActions,
+      setUpdatedQuickPromptSettings,
+    ]
   );
 
   // Color
@@ -167,7 +203,7 @@ const QuickPromptSettingsEditorComponent = ({
           data-test-subj="quick-prompt-prompt"
           onChange={handlePromptChange}
           placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
-          value={prompt}
+          value={promptContent}
           css={css`
             min-height: 150px;
           `}

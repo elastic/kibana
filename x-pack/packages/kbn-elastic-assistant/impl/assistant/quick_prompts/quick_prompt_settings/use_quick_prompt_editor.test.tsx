@@ -86,7 +86,7 @@ describe('useQuickPromptEditor', () => {
 
     const expectedPrompt: PromptResponse = {
       name: mockAlertPromptContext.description,
-      content: alertData.content ?? '',
+      content: JSON.stringify(alertData ?? {}),
       color: DEFAULT_COLOR,
       categories: [mockAlertPromptContext.category],
       id: '',

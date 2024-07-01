@@ -83,7 +83,7 @@ const QuickPromptSettingsManagementComponent = ({
   const onDeleteActionClicked = useCallback(
     (prompt: PromptResponse) => {
       setDeletedQuickPrompt(prompt);
-      onQuickPromptDeleted(prompt.name);
+      onQuickPromptDeleted(prompt.id);
       openConfirmModal();
     },
     [onQuickPromptDeleted, openConfirmModal]

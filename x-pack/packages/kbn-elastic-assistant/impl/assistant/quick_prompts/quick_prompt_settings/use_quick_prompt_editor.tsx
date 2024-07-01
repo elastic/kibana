@@ -28,10 +28,16 @@ export const useQuickPromptEditor = ({
 }) => {
   const { currentAppId } = useAssistantContext();
   const onQuickPromptDeleted = useCallback(
-    (title: string) => {
-      setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.name !== title));
+    (id: string) => {
+      setUpdatedQuickPromptSettings((prev) => prev.filter((qp) => qp.id !== id));
+      setPromptsBulkActions({
+        ...promptsBulkActions,
+        delete: {
+          ids: [...(promptsBulkActions.delete?.ids ?? []), id],
+        },
+      });
     },
-    [setUpdatedQuickPromptSettings]
+    [promptsBulkActions, setPromptsBulkActions, setUpdatedQuickPromptSettings]
   );
 
   // When top level quick prompt selection changes

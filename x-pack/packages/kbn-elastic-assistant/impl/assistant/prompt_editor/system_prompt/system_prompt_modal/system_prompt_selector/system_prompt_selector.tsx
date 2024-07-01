@@ -59,6 +59,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
           isNewConversationDefault: sp.isNewConversationDefault ?? false,
         },
         label: sp.name,
+        id: sp.id,
         'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
       }))
     );
@@ -70,6 +71,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
                 isDefault: selectedSystemPrompt.isDefault ?? false,
                 isNewConversationDefault: selectedSystemPrompt.isNewConversationDefault ?? false,
               },
+              id: selectedSystemPrompt.id,
               label: selectedSystemPrompt.name,
             },
           ]
@@ -106,6 +108,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
 
         const newOption = {
           value: searchValue,
+          id: searchValue,
           label: searchValue,
         };
 
@@ -132,11 +135,12 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     // Callback for when user deletes a quick prompt
     const onDelete = useCallback(
       (label: string) => {
+        const deleteId = options.find((o) => o.label !== label)?.id;
         setOptions(options.filter((o) => o.label !== label));
         if (selectedOptions?.[0]?.label === label) {
           handleSelectionChange([]);
         }
-        onSystemPromptDeleted(label);
+        onSystemPromptDeleted(deleteId ?? label);
       },
       [handleSelectionChange, onSystemPromptDeleted, options, selectedOptions]
     );
