@@ -39,7 +39,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
-  const timeout = 60000; // ms
 
   const removeAllArtifacts = async () => {
     for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -54,8 +53,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
   // It's flaky only in Serverless
   // Failing: See https://github.com/elastic/kibana/issues/186004
-  describe.skip('For each artifact list under management', function () {
-    targetTags(this, ['@ess', '@serverless']);
+  describe('For each artifact list under management', function () {
+    targetTags(this, ['@ess', '@skipInServerless']);
+    this.timeout(60_000 * 5);
 
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
@@ -225,99 +225,83 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await removeAllArtifacts();
           await browser.refresh();
           await pageObjects.artifactEntriesList.navigateToList(testData.urlPath);
-        }, timeout);
+        });
 
         afterEach(async () => {
           await removeAllArtifacts();
           if (policyInfo) {
             await policyInfo.cleanup();
           }
-        }, timeout);
+        });
 
-        it(
-          `should not show page title if there is no ${testData.title} entry`,
-          async () => {
-            await testSubjects.missingOrFail('header-page-title');
-          },
-          timeout
-        );
+        it(`should not show page title if there is no ${testData.title} entry`, async () => {
+          await testSubjects.missingOrFail('header-page-title');
+        });
 
-        it(
-          `should be able to add a new ${testData.title} entry`,
-          async () => {
-            await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
-            // Check new artifact is in the list
-            for (const checkResult of testData.create.checkResults) {
-              expect(await testSubjects.getVisibleText(checkResult.selector)).to.equal(
-                checkResult.value
-              );
-            }
-            await toasts.dismiss();
-
-            // Title is shown after adding an item
-            expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
-
-            // Checks if fleet artifact has been updated correctly
-            await checkFleetArtifacts(
-              testData.fleetArtifact.identifier,
-              testData.fleetArtifact.getExpectedUpdatedtArtifactWhenCreate(),
-              testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenCreate(),
-              policyInfo
+        it(`should be able to add a new ${testData.title} entry`, async () => {
+          await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
+          // Check new artifact is in the list
+          for (const checkResult of testData.create.checkResults) {
+            expect(await testSubjects.getVisibleText(checkResult.selector)).to.equal(
+              checkResult.value
             );
-          },
-          timeout
-        );
+          }
+          await toasts.dismiss();
 
-        it(
-          `should be able to update an existing ${testData.title} entry`,
-          async () => {
-            await createArtifact(testData);
-            await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
+          // Title is shown after adding an item
+          expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
 
-            // Check edited artifact is in the list with new values (wait for list to be updated)
-            await retry.waitForWithTimeout('entry is updated in list', 20000, async () => {
-              const currentValue = await testSubjects.getVisibleText(
-                `${testData.pagePrefix}-card-criteriaConditions${
-                  testData.pagePrefix === 'EventFiltersListPage' ? '-condition' : ''
-                }`
-              );
-              return currentValue === testData.update.waitForValue;
-            });
+          // Checks if fleet artifact has been updated correctly
+          await checkFleetArtifacts(
+            testData.fleetArtifact.identifier,
+            testData.fleetArtifact.getExpectedUpdatedtArtifactWhenCreate(),
+            testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenCreate(),
+            policyInfo
+          );
+        });
 
-            for (const checkResult of testData.update.checkResults) {
-              expect(await testSubjects.getVisibleText(checkResult.selector)).to.equal(
-                checkResult.value
-              );
-            }
+        it(`should be able to update an existing ${testData.title} entry`, async () => {
+          await createArtifact(testData);
+          await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
-            await toasts.dismiss();
-
-            // Title still shown after editing an item
-            expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
-
-            // Checks if fleet artifact has been updated correctly
-            await checkFleetArtifacts(
-              testData.fleetArtifact.identifier,
-              testData.fleetArtifact.getExpectedUpdatedArtifactWhenUpdate(),
-              testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenUpdate(),
-              policyInfo
+          // Check edited artifact is in the list with new values (wait for list to be updated)
+          await retry.waitForWithTimeout('entry is updated in list', 20000, async () => {
+            const currentValue = await testSubjects.getVisibleText(
+              `${testData.pagePrefix}-card-criteriaConditions${
+                testData.pagePrefix === 'EventFiltersListPage' ? '-condition' : ''
+              }`
             );
-          },
-          timeout
-        );
+            return currentValue === testData.update.waitForValue;
+          });
 
-        it(
-          `should be able to delete the existing ${testData.title} entry`,
-          async () => {
-            await createArtifact(testData);
-            await deleteArtifact(testData);
-            // We only expect one artifact to have been visible
-            await testSubjects.missingOrFail(testData.delete.card);
-            // Header has gone because there is no artifact
-            await testSubjects.missingOrFail('header-page-title');
-          },
-          timeout
-        );
+          for (const checkResult of testData.update.checkResults) {
+            expect(await testSubjects.getVisibleText(checkResult.selector)).to.equal(
+              checkResult.value
+            );
+          }
+
+          await toasts.dismiss();
+
+          // Title still shown after editing an item
+          expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
+
+          // Checks if fleet artifact has been updated correctly
+          await checkFleetArtifacts(
+            testData.fleetArtifact.identifier,
+            testData.fleetArtifact.getExpectedUpdatedArtifactWhenUpdate(),
+            testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenUpdate(),
+            policyInfo
+          );
+        });
+
+        it(`should be able to delete the existing ${testData.title} entry`, async () => {
+          await createArtifact(testData);
+          await deleteArtifact(testData);
+          // We only expect one artifact to have been visible
+          await testSubjects.missingOrFail(testData.delete.card);
+          // Header has gone because there is no artifact
+          await testSubjects.missingOrFail('header-page-title');
+        });
       });
     }
 
@@ -335,7 +319,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await removeAllArtifacts();
         await browser.refresh();
         await pageObjects.artifactEntriesList.navigateToList(testData.urlPath);
-      }, timeout);
+      });
 
       afterEach(async () => {
         await removeAllArtifacts();
@@ -345,55 +329,51 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         if (secondPolicy) {
           await secondPolicy.cleanup();
         }
-      }, timeout);
+      });
 
       const testData = getCreateMultipleData();
-      it(
-        `should get correct atifact when multiple entries are created`,
-        async () => {
-          // Create first trusted app
-          await createArtifact(testData, {
-            policyId: firstPolicy.packagePolicy.id,
-            suffix: firstSuffix,
-          });
-          await toasts.dismiss();
+      it(`should get correct atifact when multiple entries are created`, async () => {
+        // Create first trusted app
+        await createArtifact(testData, {
+          policyId: firstPolicy.packagePolicy.id,
+          suffix: firstSuffix,
+        });
+        await toasts.dismiss();
 
-          // Create second trusted app
-          await createArtifact(testData, {
-            policyId: secondPolicy.packagePolicy.id,
-            suffix: secondSuffix,
-            createButton: 'pageAddButton',
-          });
-          await toasts.dismiss();
+        // Create second trusted app
+        await createArtifact(testData, {
+          policyId: secondPolicy.packagePolicy.id,
+          suffix: secondSuffix,
+          createButton: 'pageAddButton',
+        });
+        await toasts.dismiss();
 
-          // Create third trusted app
-          await createArtifact(testData, { suffix: thirdSuffix, createButton: 'pageAddButton' });
-          await toasts.dismiss();
+        // Create third trusted app
+        await createArtifact(testData, { suffix: thirdSuffix, createButton: 'pageAddButton' });
+        await toasts.dismiss();
 
-          // Checks if fleet artifact has been updated correctly
-          await checkFleetArtifacts(
-            testData.fleetArtifact.identifier,
-            testData.fleetArtifact.getExpectedUpdatedArtifactWhenCreateMultipleFirst(),
-            testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenCreateMultipleFirst(
-              thirdSuffix,
-              firstSuffix
-            ),
-            firstPolicy
-          );
+        // Checks if fleet artifact has been updated correctly
+        await checkFleetArtifacts(
+          testData.fleetArtifact.identifier,
+          testData.fleetArtifact.getExpectedUpdatedArtifactWhenCreateMultipleFirst(),
+          testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenCreateMultipleFirst(
+            thirdSuffix,
+            firstSuffix
+          ),
+          firstPolicy
+        );
 
-          // Checks if fleet artifact has been updated correctly
-          await checkFleetArtifacts(
-            testData.fleetArtifact.identifier,
-            testData.fleetArtifact.getExpectedUpdatedArtifactWhenCreateMultipleSecond(),
-            testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenCreateMultipleSecond(
-              thirdSuffix,
-              secondSuffix
-            ),
-            secondPolicy
-          );
-        },
-        timeout
-      );
+        // Checks if fleet artifact has been updated correctly
+        await checkFleetArtifacts(
+          testData.fleetArtifact.identifier,
+          testData.fleetArtifact.getExpectedUpdatedArtifactWhenCreateMultipleSecond(),
+          testData.fleetArtifact.getExpectedUpdatedArtifactBodyWhenCreateMultipleSecond(
+            thirdSuffix,
+            secondSuffix
+          ),
+          secondPolicy
+        );
+      });
     });
   });
 };

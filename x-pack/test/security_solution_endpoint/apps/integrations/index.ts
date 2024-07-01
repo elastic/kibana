@@ -12,15 +12,12 @@ import {
   getRegistryUrlFromTestEnv,
   isRegistryEnabled,
 } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint_api_int/registry';
-import { targetTags } from '../../target_tags';
 
 export default function (providerContext: FtrProviderContext) {
   const { loadTestFile, getService, getPageObjects } = providerContext;
 
   // Flaky: https://github.com/elastic/kibana/issues/186086
   describe('endpoint', function () {
-    targetTags(this, ['@skipInServerless']);
-
     const ingestManager = getService('ingestManager');
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');

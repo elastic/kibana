@@ -24,6 +24,7 @@ import {
   MultipleArtifactActionsType,
 } from './mocks';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'artifactEntriesList']);
@@ -51,8 +52,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
+  // It's flaky only in Serverless
   // Failing: See https://github.com/elastic/kibana/issues/183860
-  describe.skip('@ess @serverless For each artifact list under management', function () {
+  describe('For each artifact list under management', function () {
+    targetTags(this, ['@ess', '@skipInServerless']);
+
+    this.timeout(60_000 * 5);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 
