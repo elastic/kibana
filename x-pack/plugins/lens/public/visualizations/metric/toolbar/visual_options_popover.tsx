@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { MetricStyle } from '@elastic/charts';
+import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { ToolbarPopover } from '../../../shared_components';
 import { MetricVisualizationState } from '../types';
 import { metricStateDefaults } from '../constants';
@@ -92,6 +93,11 @@ function ValueFontOption({
   onChangeMode: (mode: ValueFontMode) => void;
   onChangeFontSize: (fontSize: number) => void;
 }) {
+  const dbFontValue = useDebouncedValue<number>({
+    onChange: onChangeFontSize,
+    value: fontSize,
+  });
+
   const label = i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
     defaultMessage: 'Value fontSize',
   });
@@ -118,9 +124,9 @@ function ValueFontOption({
             append="px"
             data-test-subj="lens-value-font-size"
             aria-label="Metric value font size"
-            value={fontSize}
+            value={dbFontValue.inputValue}
             disabled={mode !== 'custom'}
-            onChange={({ target }) => onChangeFontSize(+target.value)}
+            onChange={({ target }) => dbFontValue.handleInputChange(+target.value)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
