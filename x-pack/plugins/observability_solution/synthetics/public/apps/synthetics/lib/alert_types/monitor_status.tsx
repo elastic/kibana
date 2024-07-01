@@ -14,7 +14,7 @@ import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/p
 import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
 import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
-import { StatusRuleParams } from '../../../../../common/rules/status_rule';
+import type { StatusRuleParams } from '../../../../../common/rules/status_rule';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '../../../../../common/constants/synthetics_alerts';
 import { AlertTypeInitializer } from '.';
 const { defaultActionMessage, defaultRecoveryMessage, description } =
