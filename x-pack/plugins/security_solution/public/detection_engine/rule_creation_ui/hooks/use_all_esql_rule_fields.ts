@@ -13,7 +13,7 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { useQuery } from '@tanstack/react-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { parseEsqlQuery } from '../../rule_creation/logic/esql_validator';
+import { parseSecurityRuleEsqlQuery } from '../../rule_creation/logic/esql_validator';
 
 import { getEsqlQueryConfig } from '../../rule_creation/logic/get_esql_query_config';
 
@@ -90,7 +90,7 @@ export const useAllEsqlRuleFields: UseAllEsqlRuleFields = ({ esqlQuery, indexPat
   const { fields: esqlFields, isLoading } = useEsqlFields(debouncedEsqlQuery);
 
   const { isEsqlQueryAggregating } = useMemo(
-    () => parseEsqlQuery(debouncedEsqlQuery ?? ''),
+    () => parseSecurityRuleEsqlQuery(debouncedEsqlQuery ?? ''),
     [debouncedEsqlQuery]
   );
 

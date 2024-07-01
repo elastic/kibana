@@ -10,9 +10,9 @@ import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DataLoadingState } from '@kbn/unified-data-table';
+import type { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
@@ -26,12 +26,11 @@ import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { withDataView } from '../../../../common/components/with_data_view';
+import { isEqual } from 'lodash';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { defaultHeaders } from '../body/column_headers/default_headers';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
@@ -84,9 +83,6 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
       .euiFlexItem:last-child {
         /* padding-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS}; */
       }
-      .unifiedFieldListSidebar__list {
-        padding-left: 0px;
-      }
 
       .unifiedFieldListSidebar__addBtn {
         margin-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS};
@@ -98,7 +94,7 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
 export const SAMPLE_SIZE_SETTING = 500;
 export const HIDE_FOR_SIZES = ['xs', 's'];
 
-interface Props {
+type Props = {
   columns: ColumnHeaderOptions[];
   isSortEnabled?: boolean;
   rowRenderers: RowRenderer[];
@@ -122,7 +118,19 @@ interface Props {
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
   pinnedEventIds: TimelineModel['pinnedEventIds'];
   eventIdToNoteIds: TimelineModel['eventIdToNoteIds'];
-}
+  /*
+   *
+   * Suppors ESQL queries that result in dynamic columns
+   *
+   * */
+  textBasedDataViewFields?: DataViewField[];
+  /*
+   * table consumers can pass a callback which handles the change in visible
+   * columns in the Table. All non-visible columns will still be visible in
+   * the FieldList sidebar.
+   * */
+  onVisibleColumnsChange?: (columns: ColumnHeaderOptions[]) => void;
+} & Pick<UnifiedDataTableProps, 'columnsMeta' | 'onSort'>;
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
   columns,
@@ -148,6 +156,10 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   leadingControlColumns,
   pinnedEventIds,
   eventIdToNoteIds,
+  textBasedDataViewFields,
+  columnsMeta,
+  onSort: onSortProp,
+  onVisibleColumnsChange,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -229,7 +241,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     );
   }, [sort]);
 
-  const onSort = useCallback(
+  const onSortDefaultCallback = useCallback(
     (nextSort: string[][]) => {
       dispatch(
         timelineActions.updateSort({
@@ -252,18 +264,29 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     [dispatch, timelineId, columns]
   );
 
+  const onSort = useMemo(
+    () => onSortProp ?? onSortDefaultCallback,
+    [onSortProp, onSortDefaultCallback]
+  );
+
   const setAppState = useCallback(
     (newState: { columns: string[]; sort?: string[][] }) => {
       if (newState.sort) {
         onSort(newState.sort);
-      } else {
+      }
+
+      if (!isEqual(columnIds, newState.columns)) {
         const columnsStates = newState.columns.map((columnId) =>
           getColumnHeader(columnId, defaultUdtHeaders)
         );
-        dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
+        if (onVisibleColumnsChange) {
+          onVisibleColumnsChange(columnsStates);
+        } else {
+          dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
+        }
       }
     },
-    [dispatch, onSort, timelineId]
+    [dispatch, onSort, timelineId, onVisibleColumnsChange, columnIds]
   );
 
   const {
@@ -315,19 +338,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
 
-  const onToggleColumn = useCallback(
-    (columnId: string) => {
-      dispatch(
-        timelineActions.upsertColumn({
-          column: getColumnHeader(columnId, defaultHeaders),
-          id: timelineId,
-          index: 1,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
-
   const isDropAllowed = useMemo(() => {
     if (!draggingFieldName || columnIds.includes(draggingFieldName)) {
       return false;
@@ -338,31 +348,21 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const onDropFieldToTable = useCallback(() => {
     if (draggingFieldName) {
       onAddColumn(draggingFieldName);
-      onToggleColumn(draggingFieldName);
     }
-  }, [draggingFieldName, onAddColumn, onToggleColumn]);
+  }, [draggingFieldName, onAddColumn]);
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
       onAddColumn(field.name);
-      onToggleColumn(field.name);
     },
-    [onAddColumn, onToggleColumn]
+    [onAddColumn]
   );
 
   const onRemoveFieldFromWorkspace = useCallback(
     (field: DataViewField) => {
-      if (columns.some(({ id }) => id === field.name)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId: field.name,
-            id: timelineId,
-          })
-        );
-      }
       onRemoveColumn(field.name);
     },
-    [columns, dispatch, onRemoveColumn, timelineId]
+    [onRemoveColumn]
   );
 
   const onFieldEdited = useCallback(() => {
@@ -372,6 +372,10 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const wrappedOnFieldEdited = useCallback(async () => {
     onFieldEdited();
   }, [onFieldEdited]);
+
+  const sideBarFields = useMemo(() => {
+    return textBasedDataViewFields ?? dataView.fields;
+  }, [textBasedDataViewFields, dataView]);
 
   const cellContext: TimelineDataGridCellContext = useMemo(() => {
     return {
@@ -401,7 +405,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                   services={fieldListSidebarServices}
                   dataView={dataView}
                   fullWidth
-                  allFields={dataView.fields}
+                  allFields={sideBarFields}
                   workspaceSelectedFieldNames={columnIds}
                   onAddFieldToWorkspace={onAddFieldToWorkspace}
                   onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
@@ -435,6 +439,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                 <DropOverlayWrapper isVisible={isDropAllowed}>
                   <EventDetailsWidthProvider>
                     <DataGridMemoized
+                      columnsMeta={columnsMeta}
                       columns={columns}
                       columnIds={currentColumnIds}
                       rowRenderers={rowRenderers}
@@ -474,6 +479,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 };
 
-export const UnifiedTimeline = React.memo(withDataView<Props>(UnifiedTimelineComponent));
+export const UnifiedTimeline = React.memo(UnifiedTimelineComponent);
 // eslint-disable-next-line import/no-default-export
 export { UnifiedTimeline as default };

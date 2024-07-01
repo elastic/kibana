@@ -42,6 +42,7 @@ export const useGetStatefulQueryBar = () => {
   }, [CustomSearchBar, createTopNavWithCustomContext, unifiedSearch]);
 
   return {
+    CustomSearchBar,
     CustomStatefulTopNavKqlQueryBar,
   };
 };

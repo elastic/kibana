@@ -67,6 +67,7 @@ import {
   updateColumnWidth,
   setConfirmingNoteId,
   deleteNoteFromEvent,
+  updateESQLOptions,
 } from './actions';
 
 import {
@@ -622,6 +623,19 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           [eventId]: state.timelineById[id].eventIdToNoteIds[eventId].filter(
             (note) => note !== noteId
           ),
+        },
+      },
+    },
+  }))
+  .case(updateESQLOptions, (state, { id, esqlOptions }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        esqlOptions: {
+          ...state.timelineById[id].esqlOptions,
+          ...esqlOptions,
         },
       },
     },

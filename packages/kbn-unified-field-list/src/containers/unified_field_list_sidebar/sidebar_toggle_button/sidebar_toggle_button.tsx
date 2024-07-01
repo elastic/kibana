@@ -37,7 +37,7 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
   onChange,
 }) => {
   return (
-    <div data-test-subj={dataTestSubj}>
+    <div className="unfiedFieldListSidebar__toggle" data-test-subj={dataTestSubj}>
       <IconButtonGroup
         legend={i18n.translate('unifiedFieldList.fieldListSidebar.toggleSidebarLegend', {
           defaultMessage: 'Toggle sidebar',

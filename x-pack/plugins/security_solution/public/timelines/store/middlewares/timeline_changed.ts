@@ -31,6 +31,7 @@ import {
   setSavedQueryId,
   setChanged,
   updateSavedSearch,
+  updateESQLOptions,
 } from '../actions';
 
 /**
@@ -60,6 +61,8 @@ export const timelineChangedTypes = new Set([
   upsertColumn.type,
 
   updateSavedSearch.type,
+
+  updateESQLOptions.type,
 ]);
 
 /**

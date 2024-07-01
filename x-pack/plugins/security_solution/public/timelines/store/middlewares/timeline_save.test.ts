@@ -339,6 +339,19 @@ describe('Timeline save middleware', () => {
         savedSearch: null,
         isDataProviderVisible: true,
         sampleSize: 500,
+        esqlOptions: {
+          query: {
+            esql: '',
+          },
+          sort: [
+            {
+              columnId: '@timestamp',
+              columnType: 'date',
+              sortDirection: Direction.desc,
+            },
+          ],
+          visibleColumns: [],
+        },
       };
 
       expect(

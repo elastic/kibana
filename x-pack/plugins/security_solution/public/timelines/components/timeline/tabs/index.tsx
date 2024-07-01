@@ -82,6 +82,7 @@ const NotesTab = tabWithSuspense(lazy(() => import('./notes')));
 const PinnedTab = tabWithSuspense(lazy(() => import('./pinned')));
 const SessionTab = tabWithSuspense(lazy(() => import('./session')));
 const EsqlTab = tabWithSuspense(lazy(() => import('./esql')));
+const UnifiedEsqlTab = tabWithSuspense(lazy(() => import('./esql/unified_esql')));
 interface BasicTimelineTab {
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
@@ -174,6 +175,12 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       }
     }, [activeTimelineTab, setConversationTitle, showTimeline]);
 
+    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineEnabled'
+    );
+
+    const esqlTabEnabled = showTimeline && activeTimelineTab === TimelineTabs.esql;
+
     /* Future developer -> why are we doing that
      * It is really expansive to re-render the QueryTab because the drag/drop
      * Therefore, we are only hiding its dom when switching to another tab
@@ -191,12 +198,16 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
             timelineId={timelineId}
           />
         </HideShowContainer>
-        {showTimeline && shouldShowESQLTab && activeTimelineTab === TimelineTabs.esql && (
+        {esqlTabEnabled && (
           <HideShowContainer
             $isVisible={true}
             data-test-subj={`timeline-tab-content-${TimelineTabs.esql}`}
           >
-            <EsqlTab timelineId={timelineId} />
+            {unifiedComponentsInTimelineEnabled ? (
+              <UnifiedEsqlTab timelineId={timelineId} />
+            ) : (
+              <EsqlTab timelineId={timelineId} />
+            )}
           </HideShowContainer>
         )}
         <HideShowContainer

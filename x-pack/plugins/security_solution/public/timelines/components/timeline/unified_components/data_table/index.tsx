@@ -13,10 +13,10 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
+import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
-import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
@@ -84,6 +84,7 @@ type CommonDataTableProps = {
   | 'renderCustomGridBody'
   | 'trailingControlColumns'
   | 'isSortEnabled'
+  | 'columnsMeta'
 >;
 
 interface DataTableProps extends CommonDataTableProps {
@@ -119,6 +120,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     leadingControlColumns,
     cellContext,
     eventIdToNoteIds,
+    columnsMeta,
   }) {
     const dispatch = useDispatch();
 
@@ -164,8 +166,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     );
 
     const tableRows = useMemo(
-      () => transformTimelineItemToUnifiedRows({ events, dataView }),
-      [events, dataView]
+      () => (isTextBasedQuery ? events : transformTimelineItemToUnifiedRows({ events, dataView })),
+      [events, dataView, isTextBasedQuery]
     );
 
     const handleOnEventDetailPanelOpened = useCallback(
@@ -273,12 +275,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const customColumnRenderers = useMemo(
       () =>
-        getFormattedFields({
-          dataTableRows: tableRows,
-          scopeId: 'timeline',
-          headers: columns,
-        }),
-      [columns, tableRows]
+        isTextBasedQuery
+          ? undefined
+          : getFormattedFields({
+              dataTableRows: tableRows,
+              scopeId: 'timeline',
+              headers: columns,
+            }),
+      [columns, tableRows, isTextBasedQuery]
     );
 
     const handleFetchMoreRecords = useCallback(() => {
@@ -430,7 +434,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             onFilter={onFilter}
             onResize={onResizeDataGrid}
             onSetColumns={onSetColumns}
-            onSort={!isTextBasedQuery ? onSort : undefined}
+            onSort={onSort}
             rows={tableRows}
             sampleSizeState={sampleSize || 500}
             onUpdateSampleSize={onUpdateSampleSize}
@@ -444,11 +448,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             onUpdateRowsPerPage={onChangeItemsPerPage}
             onUpdateRowHeight={onUpdateRowHeight}
             onFieldEdited={onFieldEdited}
-            cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
+            cellActionsTriggerId={isTextBasedQuery ? undefined : SecurityCellActionsTrigger.DEFAULT}
             services={dataGridServices}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
-            renderDocumentView={EmptyComponent}
+            renderDocumentView={isTextBasedQuery ? undefined : EmptyComponent}
             rowsPerPageOptions={itemsPerPageOptions}
             showFullScreenButton={false}
             useNewFieldsApi={true}
@@ -460,10 +464,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={renderCustomBodyCallback}
-            trailingControlColumns={trailingControlColumns}
+            trailingControlColumns={isTextBasedQuery ? undefined : trailingControlColumns}
+            renderCustomGridBody={isTextBasedQuery ? undefined : renderCustomBodyCallback}
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
+            columnsMeta={columnsMeta}
           />
           {showExpandedDetails && isExpandableFlyoutDisabled && (
             <DetailsPanel

@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import type { QueryClient } from '@tanstack/react-query';
-import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
+import { computeIsESQLQueryAggregating, getESQLMetadataFields } from '@kbn/securitysolution-utils';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 
@@ -35,13 +35,6 @@ const constructValidationError = (error: Error) => {
 };
 
 /**
- * checks whether query has metadata _id operator
- */
-export const computeHasMetadataOperator = (esqlQuery: string) => {
-  return /(?<!\|[\s\S.]*)\s*metadata[\s\S.]*_id[\s\S.]*/i.test(esqlQuery?.split('|')?.[0]);
-};
-
-/**
  * form validator for ES|QL queryBar
  */
 export const esqlValidator = async (
@@ -61,7 +54,7 @@ export const esqlValidator = async (
     const queryClient = (customData.value as { queryClient: QueryClient | undefined })?.queryClient;
 
     const services = KibanaServices.get();
-    const { isEsqlQueryAggregating, isMissingMetadataOperator } = parseEsqlQuery(query);
+    const { isEsqlQueryAggregating, isMissingMetadataOperator } = parseSecurityRuleEsqlQuery(query);
 
     if (isMissingMetadataOperator) {
       return {
@@ -96,12 +89,14 @@ export const esqlValidator = async (
  * check if esql query valid for Security rule:
  * - if it's non aggregation query it must have metadata operator
  */
-export const parseEsqlQuery = (query: string) => {
+export const parseSecurityRuleEsqlQuery = (query: string) => {
   const isEsqlQueryAggregating = computeIsESQLQueryAggregating(query);
+  const metadataFields = getESQLMetadataFields(query);
+  const hasMetadataWithId = metadataFields && metadataFields.includes('_id');
 
   return {
     isEsqlQueryAggregating,
     // non-aggregating query which does not have [metadata], is not a valid one
-    isMissingMetadataOperator: !isEsqlQueryAggregating && !computeHasMetadataOperator(query),
+    isMissingMetadataOperator: !isEsqlQueryAggregating && !hasMetadataWithId,
   };
 };

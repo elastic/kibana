@@ -274,6 +274,13 @@ export const defaultTimelineToTimelineModel = (
     title: getTimelineTitle(timeline, duplicate, timelineType),
     templateTimelineId: getTemplateTimelineId(timeline, duplicate, timelineType),
     templateTimelineVersion: duplicate && isTemplate ? 1 : timeline.templateTimelineVersion,
+    esqlOptions: {
+      query: {
+        esql: timeline.esqlOptions?.query ?? timelineDefaults.esqlOptions.query.esql,
+      },
+      sort: timeline.esqlOptions?.sort ?? timelineDefaults.esqlOptions.sort,
+      queryValidation: timelineDefaults.esqlOptions.queryValidation,
+    },
   };
   return Object.entries(timelineEntries).reduce(
     (acc: TimelineModel, [key, value]) => (value != null ? set(key, value, acc) : acc),
