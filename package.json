@@ -373,7 +373,7 @@
     "remark-parse-no-trim": "^8.0.4",
     "remark-stringify": "^8.0.3",
     "require-in-the-middle": "^7.3.0",
-    "reselect": "^4.1.8",
+    "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.1",
     "rison-node": "1.0.2",
     "rxjs": "^6.5.5",
