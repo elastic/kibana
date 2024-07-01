@@ -41,7 +41,7 @@ const NotesContainer = styled(EuiFlexGroup)`
 `;
 NotesContainer.displayName = 'NotesContainer';
 
-interface Props {
+interface NoteCardsProps {
   ariaRowindex: number;
   associateNote: AssociateNote;
   className?: string;
@@ -54,7 +54,7 @@ interface Props {
 }
 
 /** A view for entering and reviewing notes */
-export const NoteCards = React.memo<Props>(
+export const NoteCards = React.memo<NoteCardsProps>(
   ({
     ariaRowindex,
     associateNote,

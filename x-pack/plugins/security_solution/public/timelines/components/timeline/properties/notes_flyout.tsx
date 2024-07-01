@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ComponentProps } from 'react';
 import React from 'react';
 import {
   EuiFlyout,
@@ -16,6 +15,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import type { NoteCardsProps } from '../../notes/note_cards';
 import { NoteCards } from '../../notes/note_cards';
 import * as i18n from './translations';
 
@@ -24,7 +24,7 @@ export type NotesFlyoutProps = {
   onClose: () => void;
   eventId?: string;
 } & Pick<
-  ComponentProps<typeof NoteCards>,
+  NoteCardsProps,
   'notes' | 'associateNote' | 'toggleShowAddNote' | 'timelineId' | 'onCancel'
 >;
 

@@ -76,6 +76,7 @@ export const useCreateTimeline = ({
           selectedPatterns,
         })
       );
+
       dispatch(
         timelineActions.createTimeline({
           columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
