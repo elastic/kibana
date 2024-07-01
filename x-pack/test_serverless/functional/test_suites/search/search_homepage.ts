@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Enable Homepage Feature Flag
       await uiSettings.setUiSetting(roleAuthc, HOMEPAGE_FF_UI_SETTING, true);
 
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {
@@ -32,8 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Disable Homepage Feature Flag
       await uiSettings.deleteUISetting(roleAuthc, HOMEPAGE_FF_UI_SETTING);
-
-      await pageObjects.svlCommonPage.forceLogout();
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('has search homepage with Home sidenav', async () => {
@@ -52,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('has embedded dev console', async () => {
-      testHasEmbeddedConsole(pageObjects);
+      await testHasEmbeddedConsole(pageObjects);
     });
   });
 }

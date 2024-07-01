@@ -6,6 +6,7 @@
  */
 
 import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import { useMemo } from 'react';
 import { PLI_PRODUCT_FEATURES } from '../../../common/pli/pli_config';
 
 export const getProductTypeByPLI = (requiredPLI: ProductFeatureKeyType): string | null => {
@@ -28,4 +29,8 @@ export const getProductTypeByPLI = (requiredPLI: ProductFeatureKeyType): string 
     return 'Cloud Complete';
   }
   return null;
+};
+
+export const useProductTypeByPLI = (requiredPLI: ProductFeatureKeyType): string => {
+  return useMemo(() => getProductTypeByPLI(requiredPLI) ?? '', [requiredPLI]);
 };
