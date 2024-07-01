@@ -83,19 +83,19 @@ export class DashboardPlugin
         return {
           '2023-10-31': {
             inTransform: (data: Dashboard_v2023_10_31) => data,
-            outTransform: ({ id, attributes }: DashboardItem) => ({
-              id,
-              description: attributes.description,
-              title: attributes.title,
-              kibanaSavedObjectMeta: attributes.kibanaSavedObjectMeta,
-              timeRestore: attributes.timeRestore,
-              timeFrom: attributes.timeFrom,
-              optionsJSON: attributes.optionsJSON,
-              panelsJSON: attributes.panelsJSON,
-              controlGroupInput: attributes.controlGroupInput,
-              refreshInterval: attributes.refreshInterval,
-              timeTo: attributes.timeTo,
-            }),
+            // outTransform: ({ id, attributes }: DashboardItem) => ({
+            //   id,
+            //   description: attributes.description,
+            //   title: attributes.title,
+            //   kibanaSavedObjectMeta: attributes.kibanaSavedObjectMeta,
+            //   timeRestore: attributes.timeRestore,
+            //   timeFrom: attributes.timeFrom,
+            //   optionsJSON: attributes.optionsJSON,
+            //   panelsJSON: attributes.panelsJSON,
+            //   controlGroupInput: attributes.controlGroupInput,
+            //   refreshInterval: attributes.refreshInterval,
+            //   timeTo: attributes.timeTo,
+            // }),
           },
           '2024-06-24': {
             inTransform: (data: Dashboard_v2024_06_24) => {
@@ -111,12 +111,12 @@ export class DashboardPlugin
                 optionsJSON: JSON.stringify(data.options),
               };
             },
-            outTransform: ({ id, attributes }: DashboardItem) => {
+            outTransform: ({ attributes, ...restItem }: DashboardItem) => {
               const { panelsJSON, optionsJSON, version, ...restAttributes } = attributes;
               const { searchSourceJSON, ...restKibanaSavedObjectMeta } =
                 attributes.kibanaSavedObjectMeta;
               return {
-                id,
+                ...restItem,
                 ...restAttributes,
                 kibanaSavedObjectMeta: {
                   ...restKibanaSavedObjectMeta,

@@ -6,13 +6,30 @@
  * Side Public License, v 1.
  */
 
-export const API_CONTENT_PATH = '/api/{appName}/{contentId}';
-
-export const SPECIFIC_ITEM_PATH = `${API_CONTENT_PATH}/{id}`;
-
-export const MAYBE_SPECIFIC_ITEM_PATH = `${API_CONTENT_PATH}/{id?}`;
+import { schema } from '@kbn/config-schema';
 
 export const contentManagementApiVersions = {
   '2023-10-31': '2023-10-31',
   '2024-06-24': '2024-06-24',
 } as const;
+
+export const baseGetSchema = schema.object({
+  id: schema.string(),
+  type: schema.string(),
+  references: schema.arrayOf(
+    schema.object({
+      name: schema.string(),
+      type: schema.string(),
+      id: schema.string(),
+    }),
+    { defaultValue: [] }
+  ),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
+  updatedAt: schema.maybe(schema.string()),
+  updatedBy: schema.maybe(schema.string()),
+  createdAt: schema.maybe(schema.string()),
+  createdBy: schema.maybe(schema.string()),
+  managed: schema.maybe(schema.boolean()),
+  version: schema.maybe(schema.string()),
+  attributes: schema.maybe(schema.any()),
+});

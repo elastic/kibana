@@ -10,11 +10,11 @@
  * Given a JS object, will return a JSON.stringified result with consistently
  * sorted keys.
  */
-export function prettyPrintAndSortKeys(object: object): string {
+export function prettyPrintAndSortKeys(object: object, pretty = true): string {
   const keys = new Set<string>();
   JSON.stringify(object, (key, value) => {
     keys.add(key);
     return value;
   });
-  return JSON.stringify(object, Array.from(keys).sort(), 2);
+  return JSON.stringify(object, Array.from(keys).sort(), pretty ? 2 : 0);
 }

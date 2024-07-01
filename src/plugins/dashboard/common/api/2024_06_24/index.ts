@@ -145,8 +145,10 @@ const optionsSchema = schema.object({
 
 export const baseDashboard = schema.object({
   // General
-  title: schema.string({ meta: { description: 'A human-readable title for the dashboard' } }),
-  description: schema.string({ defaultValue: '', meta: { description: 'A short description.' } }),
+  title: schema.maybe(
+    schema.string({ meta: { description: 'A human-readable title for the dashboard' } })
+  ),
+  description: schema.maybe(schema.string({ meta: { description: 'A short description.' } })),
 
   // Search
   kibanaSavedObjectMeta: schema.object(
@@ -217,7 +219,7 @@ export const baseDashboard = schema.object({
 
   // Legacy
   // hits: schema.maybe(schema.number()),
-  // version: schema.maybe(schema.number()),
+  version: schema.maybe(schema.number()),
 });
 
 export const dashboardCreate = baseDashboard.extends(
