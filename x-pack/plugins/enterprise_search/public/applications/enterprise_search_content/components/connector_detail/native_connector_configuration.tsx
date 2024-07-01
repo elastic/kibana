@@ -150,6 +150,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   </EuiTitle>
                   <EuiSpacer />
                   <ResearchConfiguration nativeConnector={nativeConnector} />
+                  <EuiSpacer size="m" />
                   <NativeConnectorConfigurationConfig
                     connector={connector}
                     nativeConnector={nativeConnector}
@@ -167,6 +168,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                       )}
                     </h4>
                   </EuiTitle>
+                  <EuiSpacer size="m" />
                   <ApiKeyConfig
                     indexName={connector.index_name || ''}
                     hasApiKey={hasApiKey}

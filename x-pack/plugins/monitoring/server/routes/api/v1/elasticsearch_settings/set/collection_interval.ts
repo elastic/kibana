@@ -18,6 +18,9 @@ export function setCollectionIntervalRoute(server: MonitoringCore) {
     method: 'put',
     path: '/api/monitoring/v1/elasticsearch_settings/set/collection_interval',
     validate: {},
+    options: {
+      access: 'internal',
+    },
     async handler(req) {
       try {
         const response = await setCollectionInterval(req);

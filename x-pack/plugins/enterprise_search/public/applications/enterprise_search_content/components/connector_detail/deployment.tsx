@@ -184,7 +184,7 @@ export const ConnectorDeployment: React.FC = () => {
                         <RunFromSourceStep
                           connectorId={connectorId ?? ''}
                           serviceType={connector.service_type ?? ''}
-                          apiKeyData={generatedData?.apiKey}
+                          apiKeyData={apiKey}
                           isWaitingForConnector={isWaitingForConnector}
                         />
                       ) : (
@@ -193,6 +193,7 @@ export const ConnectorDeployment: React.FC = () => {
                           hasApiKey={hasApiKey}
                           serviceType={connector.service_type ?? ''}
                           isWaitingForConnector={isWaitingForConnector}
+                          apiKeyData={apiKey}
                         />
                       )}
                     </>

@@ -22,7 +22,7 @@ type LoadSuggestionsFn = (
 ) => void;
 export type CurryLoadSuggestionsType = (loadSuggestions: LoadSuggestionsFn) => LoadSuggestionsFn;
 
-interface Props {
+export interface RuleFlyoutKueryBarProps {
   derivedIndexPattern: DataViewBase;
   onSubmit: (query: string) => void;
   onChange?: (query: string) => void;
@@ -49,7 +49,7 @@ export function RuleFlyoutKueryBar({
   placeholder,
   curryLoadSuggestions = defaultCurryLoadSuggestions,
   compressed,
-}: Props) {
+}: RuleFlyoutKueryBarProps) {
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
 
@@ -100,3 +100,6 @@ const defaultCurryLoadSuggestions: CurryLoadSuggestionsType =
   (loadSuggestions) =>
   (...args) =>
     loadSuggestions(...args);
+
+// eslint-disable-next-line import/no-default-export
+export default RuleFlyoutKueryBar;

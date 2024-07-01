@@ -5,7 +5,6 @@ pageLoadAssetSize:
   aiops: 10000
   alerting: 106936
   apm: 64385
-  assetManager: 25000
   banners: 17946
   bfetch: 22837
   canvas: 29355
@@ -42,6 +41,7 @@ pageLoadAssetSize:
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
+  entityManager: 17175
   esqlDataGrid: 24582
   esUiShared: 326654
   eventAnnotation: 30000
@@ -102,13 +102,13 @@ pageLoadAssetSize:
   maps: 90000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 82187
+  ml: 82210
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 167673
+  observability: 76678
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityAiAssistantManagement: 19279
