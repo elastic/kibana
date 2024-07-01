@@ -7,9 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ESQLFunction, ESQLMessage, ESQLLiteral } from '@kbn/esql-ast';
 import type { FunctionDefinition, FunctionParameterType } from './types';
-import { isLiteralItem } from '../shared/helpers';
 
 function createNumericAggDefinition({
   name,
