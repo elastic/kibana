@@ -64,7 +64,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
         const packagePolicyService = osqueryContext.service.getPackagePolicyService();
-        const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
+        const currentUser = coreContext.security.authc.getCurrentUser()?.username;
 
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { name, description, queries, enabled, policy_ids, shards = {} } = request.body;

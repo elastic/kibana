@@ -121,7 +121,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   }
 
   if (browserBinaryPath) {
-    options.setChromeBinaryPath(browserBinaryPath);
+    options.setBinaryPath(browserBinaryPath);
   }
 
   if (noCache === '1') {
