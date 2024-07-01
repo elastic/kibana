@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     before(async () => {
       proxy = await createLlmProxy(log);
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('admin');
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
         deepLinkId: 'searchPlayground',
       });

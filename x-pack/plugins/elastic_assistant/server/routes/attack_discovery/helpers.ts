@@ -12,6 +12,7 @@ import {
   AttackDiscovery,
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryResponse,
+  AttackDiscoveryStat,
   AttackDiscoveryStatus,
   ExecuteConnectorRequestBody,
   GenerationInterval,
@@ -413,4 +414,59 @@ export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginN
   // get the attack discovery tool:
   const assistantTools = getRegisteredTools(pluginName);
   return assistantTools.find((tool) => tool.id === 'attack-discovery');
+};
+
+export const updateAttackDiscoveryLastViewedAt = async ({
+  connectorId,
+  authenticatedUser,
+  dataClient,
+}: {
+  connectorId: string;
+  authenticatedUser: AuthenticatedUser;
+  dataClient: AttackDiscoveryDataClient;
+}): Promise<AttackDiscoveryResponse | null> => {
+  const attackDiscovery = await dataClient.findAttackDiscoveryByConnectorId({
+    connectorId,
+    authenticatedUser,
+  });
+
+  if (attackDiscovery == null) {
+    return null;
+  }
+
+  // update lastViewedAt time as this is the function used for polling by connectorId
+  return dataClient.updateAttackDiscovery({
+    attackDiscoveryUpdateProps: {
+      id: attackDiscovery.id,
+      lastViewedAt: new Date().toISOString(),
+      backingIndex: attackDiscovery.backingIndex,
+    },
+    authenticatedUser,
+  });
+};
+
+export const getAttackDiscoveryStats = async ({
+  authenticatedUser,
+  dataClient,
+}: {
+  authenticatedUser: AuthenticatedUser;
+  dataClient: AttackDiscoveryDataClient;
+}): Promise<AttackDiscoveryStat[]> => {
+  const attackDiscoveries = await dataClient.findAllAttackDiscoveries({
+    authenticatedUser,
+  });
+
+  return attackDiscoveries.map((ad) => {
+    const updatedAt = moment(ad.updatedAt);
+    const lastViewedAt = moment(ad.lastViewedAt);
+    const timeSinceLastViewed = updatedAt.diff(lastViewedAt);
+    const hasViewed = timeSinceLastViewed <= 0;
+    const discoveryCount = ad.attackDiscoveries.length;
+    return {
+      hasViewed,
+      status: ad.status,
+      count: discoveryCount,
+      connectorId: ad.apiConfig.connectorId,
+    };
+  });
 };
