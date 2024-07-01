@@ -21,12 +21,15 @@ export const ASK_ASSISTANT_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ASK_ASSISTANT_USER_PROMPT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantUserPrompt',
-  {
-    defaultMessage: 'Explain errors in query and generate query where all errors fixed',
-  }
-);
+export const ASK_ASSISTANT_USER_PROMPT = (language: string | undefined) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantUserPrompt',
+    {
+      defaultMessage:
+        'Explain all the errors present in the {language} query above. Generate a new working query, making sure all the errors are resolved in your response.',
+      values: { language },
+    }
+  );
 
 export const ASK_ASSISTANT_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.askAssistantToolTip',

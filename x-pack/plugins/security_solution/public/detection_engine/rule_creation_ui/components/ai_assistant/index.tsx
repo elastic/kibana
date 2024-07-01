@@ -19,35 +19,50 @@ import type { FormHook, ValidationError } from '../../../../shared_imports';
 
 import * as i18n from './translations';
 
-interface AiAssistantProps {
-  getFields: FormHook<DefineStepRule>['getFields'];
-}
+const getLanguageName = (language: string | undefined) => {
+  let modifiedLanguage = language;
+  if (language === 'eql') {
+    modifiedLanguage = 'EQL(Event Query Language)';
+  }
+  if (language === 'esql') {
+    modifiedLanguage = 'ES|QL(The Elasticsearch Query Language)';
+  }
+
+  return modifiedLanguage;
+};
 
 const retrieveErrorMessages = (errors: ValidationError[]): string =>
   errors
     .flatMap(({ message, messages }) => [message, ...(Array.isArray(messages) ? messages : [])])
     .join(', ');
 
-const AiAssistantComponent: React.FC<AiAssistantProps> = ({ getFields }) => {
+interface AiAssistantProps {
+  getFields: FormHook<DefineStepRule>['getFields'];
+  language?: string | undefined;
+}
+
+const AiAssistantComponent: React.FC<AiAssistantProps> = ({ getFields, language }) => {
   const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
+
+  const languageName = getLanguageName(language);
 
   const getPromptContext = useCallback(async () => {
     const queryField = getFields().queryBar;
-    const { query, language } = (queryField.value as DefineStepRule['queryBar']).query;
+    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
 
     if (!query) {
       return '';
     }
 
     if (queryField.errors.length === 0) {
-      return `No errors in ${language} language query detected. Current query: ${query.trim()}`;
+      return `No errors in ${languageName} language query detected. Current query: ${query.trim()}`;
     }
 
-    return `${language} language query written for Elastic Security Detection rules: \"${query.trim()}\"
+    return `${languageName} language query written for Elastic Security Detection rules: \"${query.trim()}\"
 returns validation error on form: \"${retrieveErrorMessages(queryField.errors)}\"
-Fix ${language} language query and give an example of it in markdown format that can be copied.
+Fix ${languageName} language query and give an example of it in markdown format that can be copied.
 Proposed solution should be valid and must not contain new line symbols (\\n)`;
-  }, [getFields]);
+  }, [getFields, languageName]);
 
   const onShowOverlay = useCallback(() => {
     track(METRIC_TYPE.COUNT, TELEMETRY_EVENT.OPEN_ASSISTANT_ON_RULE_QUERY_ERROR);
@@ -72,7 +87,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
               conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
               description={i18n.ASK_ASSISTANT_DESCRIPTION}
               getPromptContext={getPromptContext}
-              suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+              suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT(languageName)}
               tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
               iconType={null}
               onShowOverlay={onShowOverlay}
