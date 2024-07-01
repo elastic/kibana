@@ -25902,6 +25902,129 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats var = top_list(stringField, 3, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top_list(stringField, 1, \"desc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort top_list(stringField, numberField, stringField)",
+      "error": [
+        "SORT does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top_list(stringField, numberField, stringField)",
+      "error": [
+        "WHERE does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top_list(stringField, numberField, stringField) > 0",
+      "error": [
+        "WHERE does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top_list(stringField, numberField, stringField)",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top_list(stringField, numberField, stringField) > 0",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top_list(stringField, numberField, stringField)",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top_list(stringField, numberField, stringField) > 0",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top_list(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top_list(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top_list(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort top_list(stringField, 5, \"asc\")",
+      "error": [
+        "SORT does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top_list(stringField, 5, \"asc\")",
+      "error": [
+        "WHERE does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top_list(stringField, 5, \"asc\") > 0",
+      "error": [
+        "WHERE does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top_list(stringField, 5, \"asc\")",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top_list(stringField, 5, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top_list(stringField, 5, \"asc\")",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top_list(stringField, 5, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top_list"
+      ],
+      "warning": []
+    },
+    {
       "query": "f",
       "error": [
         "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"

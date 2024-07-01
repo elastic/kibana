@@ -10156,6 +10156,79 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval repeat(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
       });
+
+      describe('top_list', () => {
+        testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 3, "asc")', []);
+
+        testErrorsAndWarnings('from a_index | stats top_list(stringField, 1, "desc")', []);
+
+        testErrorsAndWarnings(
+          'from a_index | sort top_list(stringField, numberField, stringField)',
+          ['SORT does not support function top_list']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where top_list(stringField, numberField, stringField)',
+          ['WHERE does not support function top_list']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where top_list(stringField, numberField, stringField) > 0',
+          ['WHERE does not support function top_list']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top_list(stringField, numberField, stringField)',
+          ['EVAL does not support function top_list']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top_list(stringField, numberField, stringField) > 0',
+          ['EVAL does not support function top_list']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval top_list(stringField, numberField, stringField)',
+          ['EVAL does not support function top_list']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval top_list(stringField, numberField, stringField) > 0',
+          ['EVAL does not support function top_list']
+        );
+
+        testErrorsAndWarnings('from a_index | stats top_list(null, null, null)', []);
+        testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 5, "asc")', []);
+        testErrorsAndWarnings('from a_index | stats top_list(stringField, 5, "asc")', []);
+
+        testErrorsAndWarnings('from a_index | sort top_list(stringField, 5, "asc")', [
+          'SORT does not support function top_list',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top_list(stringField, 5, "asc")', [
+          'WHERE does not support function top_list',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top_list(stringField, 5, "asc") > 0', [
+          'WHERE does not support function top_list',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top_list(stringField, 5, "asc")', [
+          'EVAL does not support function top_list',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top_list(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top_list',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top_list(stringField, 5, "asc")', [
+          'EVAL does not support function top_list',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top_list(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top_list',
+        ]);
+      });
     });
   });
 
