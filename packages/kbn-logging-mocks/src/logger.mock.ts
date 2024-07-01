@@ -45,14 +45,26 @@ const clearLoggerMock = (logger: MockedLogger) => {
 
 const convertMessageSource = (
   value: [message: LogMessageSource, meta?: LogMeta | undefined]
-): [string, LogMeta | undefined] => {
-  return [typeof value[0] === 'function' ? value[0]() : value[0], value[1]];
+): [string] | [string, LogMeta | undefined] => {
+  const message = typeof value[0] === 'function' ? value[0]() : value[0];
+  const meta = value[1];
+  if (meta) {
+    return [message, meta];
+  } else {
+    return [message];
+  }
 };
 
 const convertMessageSourceOrError = (
   value: [message: LogMessageSource | Error, meta?: LogMeta | undefined]
-): [string | Error, LogMeta | undefined] => {
-  return [typeof value[0] === 'function' ? value[0]() : value[0], value[1]];
+): [string | Error] | [string | Error, LogMeta | undefined] => {
+  const message = typeof value[0] === 'function' ? value[0]() : value[0];
+  const meta = value[1];
+  if (meta) {
+    return [message, meta];
+  } else {
+    return [message];
+  }
 };
 
 const collectLoggerMock = (logger: MockedLogger) => {
