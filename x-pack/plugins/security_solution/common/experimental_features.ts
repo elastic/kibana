@@ -154,6 +154,11 @@ export const allowedExperimentalValues = Object.freeze({
   protectionUpdatesEnabled: true,
 
   /**
+   * Enables AI assistant on rule creation form when query has error
+   */
+  AIAssistantOnRuleCreationFormEnabled: false,
+
+  /**
    * Disables the timeline save tour.
    * This flag is used to disable the tour in cypress tests.
    */
