@@ -5265,6 +5265,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/keyboard-shortcut-utils@link:packages/kbn-keyboard-shortcut-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/kibana-cors-test-plugin@link:x-pack/test/functional_cors/plugins/kibana_cors_test":
   version "0.0.0"
   uid ""

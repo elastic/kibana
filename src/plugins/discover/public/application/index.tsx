@@ -9,6 +9,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { registerGlobalKeyboardShortcuts } from '@kbn/keyboard-shortcut-utils';
 import type { Observable } from 'rxjs';
 import { ExperimentalFeatures } from '../../common/config';
 import { DiscoverRouter } from './discover_router';
@@ -51,7 +52,18 @@ export const renderApp = ({
     core
   )(element);
 
+  const unregisterKbShortcuts = registerGlobalKeyboardShortcuts({
+    core,
+    appName: 'Discover', // TODO i18n
+    copyPaste: {
+      topicId: 'timerange',
+      onCopy: () => services.data.query.timefilter.timefilter.getTime(),
+      onPaste: (timeRange) => services.data.query.timefilter.timefilter.setTime(timeRange),
+    },
+  });
+
   return () => {
+    unregisterKbShortcuts();
     unmount();
     data.search.session.clear();
   };

@@ -550,6 +550,7 @@
     "@kbn/kbn-top-nav-plugin": "link:test/plugin_functional/plugins/kbn_top_nav",
     "@kbn/kbn-tp-custom-visualizations-plugin": "link:test/plugin_functional/plugins/kbn_tp_custom_visualizations",
     "@kbn/kbn-tp-run-pipeline-plugin": "link:test/interpreter_functional/plugins/kbn_tp_run_pipeline",
+    "@kbn/keyboard-shortcut-utils": "link:packages/kbn-keyboard-shortcut-utils",
     "@kbn/kibana-cors-test-plugin": "link:x-pack/test/functional_cors/plugins/kibana_cors_test",
     "@kbn/kibana-overview-plugin": "link:src/plugins/kibana_overview",
     "@kbn/kibana-react-plugin": "link:src/plugins/kibana_react",
