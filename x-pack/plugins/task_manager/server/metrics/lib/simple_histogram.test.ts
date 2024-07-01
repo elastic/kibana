@@ -28,6 +28,7 @@ describe('SimpleHistogram', () => {
       { value: 90, count: 0 },
       { value: 100, count: 0 },
     ]);
+    expect(histogram.getAllValues()).toEqual([]);
   });
 
   test('should correctly initialize when bucketSize does not evenly divides range', () => {
@@ -49,6 +50,7 @@ describe('SimpleHistogram', () => {
       { value: 98, count: 0 },
       { value: 105, count: 0 },
     ]);
+    expect(histogram.getAllValues()).toEqual([]);
   });
 
   test('should correctly record values', () => {
@@ -77,6 +79,7 @@ describe('SimpleHistogram', () => {
       { value: 90, count: 0 },
       { value: 100, count: 1 },
     ]);
+    expect(histogram.getAllValues()).toEqual([0, 10, 23, 34, 21, 56, 78, 33, 99, 1, 2]);
   });
 
   test('should correctly record values with specific increment', () => {
@@ -104,6 +107,9 @@ describe('SimpleHistogram', () => {
       { value: 90, count: 0 },
       { value: 100, count: 5 },
     ]);
+    expect(histogram.getAllValues()).toEqual([
+      0, 23, 23, 34, 21, 56, 78, 33, 33, 33, 33, 99, 99, 99, 99, 99, 1, 2,
+    ]);
   });
 
   test('should ignore values less than 0 and greater than max', () => {
@@ -119,11 +125,13 @@ describe('SimpleHistogram', () => {
     histogram.record(2);
 
     const hist1 = histogram.get();
+    const hist1AllValues = histogram.getAllValues();
 
     histogram.record(-1);
     histogram.record(200);
 
     expect(histogram.get()).toEqual(hist1);
+    expect(histogram.getAllValues()).toEqual(hist1AllValues);
   });
 
   test('should correctly reset values', () => {
@@ -150,6 +158,7 @@ describe('SimpleHistogram', () => {
       { value: 90, count: 0 },
       { value: 100, count: 1 },
     ]);
+    expect(histogram.getAllValues()).toEqual([23, 34, 21, 56, 78, 33, 99, 1, 2]);
 
     histogram.reset();
 
@@ -165,6 +174,7 @@ describe('SimpleHistogram', () => {
       { value: 90, count: 0 },
       { value: 100, count: 0 },
     ]);
+    expect(histogram.getAllValues()).toEqual([]);
   });
 
   test('should correctly truncate zero values', () => {
@@ -189,6 +199,7 @@ describe('SimpleHistogram', () => {
       { value: 90, count: 0 },
       { value: 100, count: 0 },
     ]);
+    expect(histogram.getAllValues()).toEqual([23, 34, 21, 56, 33, 1, 2]);
 
     expect(histogram.get(true)).toEqual([
       { value: 10, count: 2 },
@@ -204,6 +215,7 @@ describe('SimpleHistogram', () => {
     const histogram = new SimpleHistogram(100, 10);
 
     expect(histogram.get(true)).toEqual([]);
+    expect(histogram.getAllValues()).toEqual([]);
   });
 
   test('should correctly serialize histogram data', () => {
