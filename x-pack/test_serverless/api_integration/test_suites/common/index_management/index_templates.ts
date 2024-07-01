@@ -296,9 +296,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(status).to.eql(400);
 
-        let { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
+        // let { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
 
-        const { name, version } = indexTemplate;
+        // const { name, version } = indexTemplate;
 
         // Error: expected undefined to equal '1'
         // expect(
@@ -314,7 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(updateStatus).to.eql(404);
 
-        ({ body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName));
+        // ({ body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName));
 
         // Error: expected undefined to equal '2'
         // expect(
@@ -347,7 +347,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // Update template with an error in the runtime field script
         payload.template!.mappings.runtime.myRuntimeField.script = 'emit("hello with error';
-        const { status: updateStatus, body } = await svlTemplatesApi.updateTemplate(
+        const { status: updateStatus /* , body */ } = await svlTemplatesApi.updateTemplate(
           payload,
           templateName,
           roleAuthc
