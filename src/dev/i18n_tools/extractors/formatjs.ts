@@ -17,18 +17,6 @@ type TypeScript = typeof ts;
 import { extractMessagesFromCallExpression, MessageDescriptor } from './call_expt';
 import { extractMessageFromJsxComponent } from './react';
 
-export function isI18nTranslateFunction(node: ts.Node) {
-  return ts.isCallExpression(node);
-
-  //   return (
-  //     ts.isCallExpression(node) &&
-  //     (ts.isIdentifier(node.callee, { name: 'i18n' }) ||
-  //       (ts.isMemberExpression(node.callee) &&
-  //         ts.isIdentifier(node.callee.object, { name: 'i18n' }) &&
-  //         ts.isIdentifier(node.callee.property, { name: 'translate' })))
-  //   );
-}
-
 function getVisitor(
   typescript: TypeScript,
   ctx: ts.TransformationContext,
@@ -124,9 +112,13 @@ export const verifyMessagesWithValues = (
 };
 
 export const verifyMessageDescriptor = (
-  defaultMessage: string,
+  defaultMessage: string | undefined,
   messageDescriptor: MessageDescriptor
 ) => {
+  if (typeof defaultMessage !== 'string') {
+    throw new Error('We require each i18n definition to include a `defaultMessage`.');
+  }
+
   const elements = icuParser.parse(defaultMessage, {
     requiresOtherClause: true,
     shouldParseSkeletons: false,
@@ -206,26 +198,3 @@ export async function extractI18nMessageDescriptors(fileName: string, source: st
 
   return extractedMessages;
 }
-
-// import { readFile } from 'fs/promises';
-// const formatJsRunner = async (filePaths: string[]) => {
-//   for (const filePath of filePaths) {
-//     const source = await readFile(filePath, 'utf8');
-//     const extractedMessages = await extractI18nMessageDescriptors(filePath, source);
-
-//     console.log('final extractedMessages::', extractedMessages);
-//   }
-// }
-
-// formatJsRunner(['src/dev/i18n_tools/__fixtures__/extraction_signatures/not_defined_value.ts']);
-
-// formatJsRunner(['src/dev/i18n_tools/__fixtures__/extraction_signatures/unused_value.ts']);
-// formatJsRunner(['src/dev/i18n_tools/__fixtures__/extraction_signatures/malformed_icu.ts']);
-// formatJsRunner(['src/dev/i18n_tools/__fixtures__/extraction_signatures/malformed_icu.ts']);
-
-// formatJsRunner(['src/dev/i18n_tools/__fixtures__/extraction_signatures/i18n_translate.ts']);
-
-// React
-// formatJsRunner(['src/dev/i18n_tools/__fixtures__/extraction_signatures/intl_prop.tsx']);
-// formatJsRunner(['src/dev/i18n_tools/__fixtures__/extraction_signatures/react_component.tsx']);
-// formatJsRunner(['packages/core/apps/core-apps-browser-internal/src/status/components/version_header.tsx']);

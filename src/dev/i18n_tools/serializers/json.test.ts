@@ -8,20 +8,20 @@
 
 import { serializeToJson } from './json';
 
-describe('dev/i18n/serializers/json', () => {
-  // TODO: fix in i18n tooling upgrade https://github.com/elastic/kibana/pull/180617
-  test.skip('should serialize default messages to JSON', () => {
-    const messages: Array<[string, { message: string; description?: string }]> = [
-      ['plugin1.message.id-1', { message: 'Message text 1 ' }],
-      [
-        'plugin2.message.id-2',
+describe('i18n json serializer', () => {
+  test('should serialize default messages to JSON', () => {
+    expect(
+      serializeToJson([
         {
-          message: 'Message text 2',
+          id: 'plugin1.message.id-1',
+          defaultMessage: 'Message text 1 ',
+        },
+        {
+          id: 'plugin2.message.id-2',
+          defaultMessage: 'Message text 2',
           description: 'Message description',
         },
-      ],
-    ];
-
-    expect(serializeToJson(messages)).toMatchSnapshot();
+      ])
+    ).toMatchSnapshot();
   });
 });

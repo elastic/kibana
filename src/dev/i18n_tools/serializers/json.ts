@@ -9,13 +9,13 @@
 import { defaultEnFormats } from '@kbn/i18n/src/core';
 import { Serializer, FileOutput } from './types';
 
-export const serializeToJson: Serializer = (messages, formats = defaultEnFormats) => {
+export const serializeToJson: Serializer = (messageDescriptors, formats = defaultEnFormats) => {
   const resultJsonObject: FileOutput = {
     formats,
     messages: {},
   };
 
-  for (const messageDescriptor of messages) {
+  for (const messageDescriptor of messageDescriptors) {
     const { id, defaultMessage, description } = messageDescriptor;
 
     if (typeof id !== 'string' || typeof defaultMessage !== 'string') {

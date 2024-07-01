@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`dev/i18n/serializers/json should serialize default messages to JSON 1`] = `
+exports[`i18n json serializer should serialize default messages to JSON 1`] = `
 "{
   \\"formats\\": {
     \\"number\\": {
@@ -59,22 +59,22 @@ exports[`dev/i18n/serializers/json should serialize default messages to JSON 1`]
     },
     \\"relative\\": {
       \\"years\\": {
-        \\"units\\": \\"year\\"
+        \\"style\\": \\"long\\"
       },
       \\"months\\": {
-        \\"units\\": \\"month\\"
+        \\"style\\": \\"long\\"
       },
       \\"days\\": {
-        \\"units\\": \\"day\\"
+        \\"style\\": \\"long\\"
       },
       \\"hours\\": {
-        \\"units\\": \\"hour\\"
+        \\"style\\": \\"long\\"
       },
       \\"minutes\\": {
-        \\"units\\": \\"minute\\"
+        \\"style\\": \\"long\\"
       },
       \\"seconds\\": {
-        \\"units\\": \\"second\\"
+        \\"style\\": \\"long\\"
       }
     }
   },

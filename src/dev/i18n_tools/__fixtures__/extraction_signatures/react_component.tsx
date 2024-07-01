@@ -8,22 +8,28 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-// export const SomeComponent = () => {
-//   const label = '123';
+export const SomeComponent = () => {
+  const label = '123';
 
-//   return (
-//     <legend>
-//       <FormattedMessage
-//         id="with_value"
-//         defaultMessage="Set color for value {legendDataLabel}"
-//         values={{ legendDataLabel: label }}
-//       />
+  const regularI18n = i18n.translate('i_am_inside_a_react_component', {
+    defaultMessage: 'i18n.translate inside a react component',
+  });
 
-//       <FormattedMessage id="standard_message" defaultMessage="Reset color" />
-//     </legend>
-//   )
-// }
+  return (
+    <legend>
+      <FormattedMessage
+        id="with_value"
+        defaultMessage="Set color for value {legendDataLabel}"
+        values={{ legendDataLabel: label }}
+      />
+
+      <FormattedMessage id="standard_message" defaultMessage="Reset color" />
+      {regularI18n}
+    </legend>
+  );
+};
 
 const ignoreTagAsAFlag = (
   <FormattedMessage

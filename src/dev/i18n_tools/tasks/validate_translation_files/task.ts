@@ -36,30 +36,13 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
   }
 
   const namespaces = Object.keys(config.paths);
-
-  /**
-   * 1. group messages by namespace so we can filter the verification per namespace
-   * 2. remove messages defined in the translation file but not in the extracted messages
-   * 3. parse each message in the file and compare it to the one extracted:
-   *    a. if the message fails to parse remove it from the file
-   *    b. if variables do not match exactly remove it from the file.
-   * 4. if --fix flag: update file, otherwise just stdout the errors.
-   */
-
-  /**
-   * 1. Group translation file messages by namespace
-   * remove unused translations from filtered namespace
-   *    a. if not in the filtered namespace just keep as is
-   * 2.
-   *
-   */
   return task.newListr(
     (parent) => [
       {
         title: `Verifying messages inside translation files`,
         task: async () => {
           const translationFiles = getLocalesFromFiles(config.translations);
-          for (const [locale, filePath] of translationFiles.entries()) {
+          for (const filePath of translationFiles.values()) {
             const translationInput = await parseTranslationFile(filePath);
             if (filterTranslationFiles && filterTranslationFiles.length) {
               const matchingFilteredFile = filterTranslationFiles.find((filterTranslationFile) => {
@@ -70,22 +53,30 @@ export const validateTranslationFiles: TaskSignature<TaskOptions> = (context, ta
               }
             }
 
+            parent.title = `Verifying transltion file ${filePath}`;
+            task.output = `Grouping by namespace`;
             const namespacedTranslatedMessages = groupMessagesByNamespace(
               translationInput,
               namespaces
             );
+
+            parent.title = `Removing unused translations`;
             const withoutUnusedTranslation = removeUnusedTranslations({
               namespacedTranslatedMessages,
               filterNamespaces,
               context,
             });
 
+            parent.title = `Removing outdated translations`;
             const withoutOutdatedTranslations = removeOutdatedTranslations({
               namespacedTranslatedMessages: withoutUnusedTranslation,
               filterNamespaces,
               context,
             });
 
+            parent.title = fix
+              ? `Updating translation file`
+              : `Dry-run detected. No fixes will be commited to file.`;
             if (fix) {
               await updateTranslationFile({
                 formats: translationInput.formats,
