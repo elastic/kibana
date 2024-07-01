@@ -17,6 +17,8 @@ import { SEARCHABLE_FIELDS } from '../../constants';
 import { parseQueryFilterToKQL } from '../../../../common/utils';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { ExceptionsListItemGenerator } from '../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
 
 jest.mock('../../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
@@ -67,6 +69,34 @@ describe('When on the Event Filters list page', () => {
         }),
       })
     );
+  });
+
+  describe('filtering process descendants', () => {
+    it('should indicate to user if event filter filters process descendants', async () => {
+      const generator = new ExceptionsListItemGenerator();
+
+      apiMocks.responseProvider.exceptionsFind.mockReturnValue({
+        data: [
+          generator.generateEventFilter(),
+          generator.generateEventFilter({ tags: [FILTER_PROCESS_DESCENDANTS_TAG] }),
+          generator.generateEventFilter({ tags: [FILTER_PROCESS_DESCENDANTS_TAG] }),
+        ],
+        total: 3,
+        per_page: 3,
+        page: 1,
+      });
+
+      const { getAllByTestId } = render();
+
+      await act(async () => {
+        await waitFor(() => {
+          expect(renderResult.getByTestId('EventFiltersListPage-list')).toBeTruthy();
+        });
+      });
+
+      expect(getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
+      expect(getAllByTestId('EventFiltersListPage-processDescendantIndication')).toHaveLength(2);
+    });
   });
 
   describe('RBAC Event Filters', () => {

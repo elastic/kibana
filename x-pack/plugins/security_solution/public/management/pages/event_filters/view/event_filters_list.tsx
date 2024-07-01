@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
-import { EuiLink } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { isFilterProcessDescendantsEnabled } from '../../../../../common/endpoint/service/artifacts/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
@@ -18,6 +20,7 @@ import { ArtifactListPage } from '../../../components/artifact_list_page';
 import { EventFiltersApiClient } from '../service/api_client';
 import { EventFiltersForm } from './components/form';
 import { SEARCHABLE_FIELDS } from '../constants';
+import { ProcessDescendantsTooltip } from './components/process_descendant_tooltip';
 
 export const ABOUT_EVENT_FILTERS = i18n.translate('xpack.securitySolution.eventFilters.aboutInfo', {
   defaultMessage:
@@ -144,6 +147,29 @@ export const EventFiltersList = memo(() => {
   const http = useHttp();
   const eventFiltersApiClient = EventFiltersApiClient.getInstance(http);
 
+  const eventFilterCardDecorator: ArtifactListPageProps['cardDecorator'] = useCallback((item) => {
+    if (isFilterProcessDescendantsEnabled(item as ExceptionListItemSchema)) {
+      return (
+        <>
+          <EuiText data-test-subj="EventFiltersListPage-processDescendantIndication">
+            <code>
+              <strong>
+                <FormattedMessage
+                  defaultMessage="Filtering descendants of process"
+                  id="xpack.securitySolution.eventFilters.filteringProcessDescendants"
+                />{' '}
+                <ProcessDescendantsTooltip />
+              </strong>
+            </code>
+          </EuiText>
+          <EuiSpacer size="l" />
+        </>
+      );
+    }
+
+    return null;
+  }, []);
+
   return (
     <ArtifactListPage
       apiClient={eventFiltersApiClient}
@@ -155,6 +181,7 @@ export const EventFiltersList = memo(() => {
       allowCardCreateAction={canWriteEventFilters}
       allowCardEditAction={canWriteEventFilters}
       allowCardDeleteAction={canWriteEventFilters}
+      cardDecorator={eventFilterCardDecorator}
     />
   );
 });
