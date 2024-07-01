@@ -48,6 +48,8 @@ const getSelectedTabId = (selectedTabId?: string) => {
 
 interface PageProps {
   capabilities: Capabilities;
+  allowFeatureVisibility: boolean; // FIXME: handle this
+  solutionNavExperiment: Promise<boolean>; // FIXME: handle this
   getFeatures: FeaturesPluginStart['getFeatures'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
