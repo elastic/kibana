@@ -86,12 +86,7 @@ export const getSearchControlFactory = ({
       );
       const editorStateManager = { searchTechnique };
 
-      const {
-        dataControlApi,
-        dataControlComparators,
-        dataControlStateManager,
-        serializeDataControl,
-      } = initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
+      const dataControl = initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
         uuid,
         SEARCH_CONTROL_TYPE,
         initialState,
@@ -105,13 +100,13 @@ export const getSearchControlFactory = ({
 
       const api = buildApi(
         {
-          ...dataControlApi,
+          ...dataControl.api,
           getTypeDisplayName: () =>
             i18n.translate('controlsExamples.searchControl.displayName', {
               defaultMessage: 'Search',
             }),
           serializeState: () => {
-            const { rawState: dataControlState, references } = serializeDataControl();
+            const { rawState: dataControlState, references } = dataControl.serialize();
             return {
               rawState: {
                 ...dataControlState,
@@ -126,7 +121,7 @@ export const getSearchControlFactory = ({
           },
         },
         {
-          ...dataControlComparators,
+          ...dataControl.comparators,
           searchTechnique: [
             searchTechnique,
             (newTechnique: SearchControlTechniques | undefined) =>
@@ -146,8 +141,8 @@ export const getSearchControlFactory = ({
       const onSearchStringChanged = combineLatest([searchString, searchTechnique])
         .pipe(debounceTime(200), distinctUntilChanged(deepEqual))
         .subscribe(([newSearchString, currentSearchTechnnique]) => {
-          const currentDataView = dataControlApi.dataViews.getValue()?.[0];
-          const currentField = dataControlStateManager.fieldName.getValue();
+          const currentDataView = dataControl.api.dataViews.getValue()?.[0];
+          const currentField = dataControl.stateManager.fieldName.getValue();
 
           if (currentDataView && currentField) {
             if (newSearchString) {
@@ -179,8 +174,8 @@ export const getSearchControlFactory = ({
        *  clear the previous search string.
        */
       const onFieldChanged = combineLatest([
-        dataControlStateManager.fieldName,
-        dataControlStateManager.dataViewId,
+        dataControl.stateManager.fieldName,
+        dataControl.stateManager.dataViewId,
       ])
         .pipe(distinctUntilChanged(deepEqual))
         .subscribe(() => {
@@ -199,6 +194,7 @@ export const getSearchControlFactory = ({
           useEffect(() => {
             return () => {
               // cleanup on unmount
+              dataControl.cleanup();
               onSearchStringChanged.unsubscribe();
               onFieldChanged.unsubscribe();
             };

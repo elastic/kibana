@@ -660,10 +660,10 @@ export const UnifiedDataTable = ({
   const editField = useMemo(
     () =>
       onFieldEdited
-        ? (fieldName: string) => {
+        ? async (fieldName: string) => {
             closeFieldEditor.current =
               onFieldEdited &&
-              services?.dataViewFieldEditor?.openEditor({
+              (await services?.dataViewFieldEditor?.openEditor({
                 ctx: {
                   dataView,
                 },
@@ -671,7 +671,7 @@ export const UnifiedDataTable = ({
                 onSave: async () => {
                   await onFieldEdited();
                 },
-              });
+              }));
           }
         : undefined,
     [dataView, onFieldEdited, services?.dataViewFieldEditor]

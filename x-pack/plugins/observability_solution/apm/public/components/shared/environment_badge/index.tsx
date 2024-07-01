@@ -8,18 +8,22 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ItemsBadge } from '../item_badge';
+import { NotAvailableEnvironment } from '../not_available_environment';
 
 interface Props {
   environments: string[];
 }
+
 export function EnvironmentBadge({ environments = [] }: Props) {
-  return (
+  return environments && environments.length > 0 ? (
     <ItemsBadge
-      items={environments ?? []}
+      items={environments}
       multipleItemsMessage={i18n.translate('xpack.apm.servicesTable.environmentCount', {
         values: { environmentCount: environments.length },
         defaultMessage: '{environmentCount, plural, one {1 environment} other {# environments}}',
       })}
     />
+  ) : (
+    <NotAvailableEnvironment />
   );
 }

@@ -297,11 +297,11 @@
     "rule_read:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_read ess",
     "rule_read:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_read ess essEnv",
 
-    "rules_management:essentials:server:serverless": "npm run initialize-server:rm:basic_essentials  rule_management serverless",
-    "rules_management:essentials:runner:serverless": "npm run run-tests:rm:basic_essentials  rule_management serverless serverlessEnv",
-    "rules_management:essentials:qa:serverless": "npm run run-tests:rm:basic_essentials  rule_management serverless qaPeriodicEnv",
-    "rules_management:essentials:qa:serverless:release": "npm run run-tests:rm:basic_essentials  rule_management serverless qaEnv",
-    "rules_management:basic:server:ess": "npm run initialize-server:rm:basic_essentials  rule_management ess",
-    "rules_management:basic:runner:ess": "npm run run-tests:rm:basic_essentials  rule_management ess essEnv"
+    "rules_management:essentials:server:serverless": "npm run initialize-server:rm:basic_essentials rule_management serverless",
+    "rules_management:essentials:runner:serverless": "npm run run-tests:rm:basic_essentials rule_management serverless serverlessEnv",
+    "rules_management:essentials:qa:serverless": "npm run run-tests:rm:basic_essentials rule_management serverless qaPeriodicEnv",
+    "rules_management:essentials:qa:serverless:release": "npm run run-tests:rm:basic_essentials rule_management serverless qaEnv",
+    "rules_management:basic:server:ess": "npm run initialize-server:rm:basic_essentials rule_management ess",
+    "rules_management:basic:runner:ess": "npm run run-tests:rm:basic_essentials rule_management ess essEnv"
   }
 }

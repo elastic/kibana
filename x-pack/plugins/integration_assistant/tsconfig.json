@@ -5,6 +5,7 @@
   },
   "include": [
     "index.ts",
+    "public/**/*",
     "server/**/*.ts",
     "common/**/*.ts",
     "__jest__/**/*",
@@ -18,6 +19,22 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/actions-plugin",
     "@kbn/data-plugin",
-    "@kbn/zod-helpers"
+    "@kbn/i18n-react",
+    "@kbn/shared-ux-page-kibana-template",
+    "@kbn/i18n",
+    "@kbn/core-http-browser",
+    "@kbn/elastic-assistant",
+    "@kbn/kibana-react-plugin",
+    "@kbn/code-editor",
+    "@kbn/monaco",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/zod-helpers",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/core-analytics-browser",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server"
   ]
 }

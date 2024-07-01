@@ -64,14 +64,15 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
 
     useLayoutEffect(() => {
       if (typeof ref !== 'function' && ref?.current) {
+        const panelRef = ref.current;
         if (scrollToPanelId === id) {
-          container.scrollToPanel(ref.current);
+          container.scrollToPanel(panelRef);
         }
         if (highlightPanelId === id) {
-          container.highlightPanel(ref.current);
+          container.highlightPanel(panelRef);
         }
 
-        ref.current.querySelectorAll('*').forEach((e) => {
+        panelRef.querySelectorAll('*').forEach((e) => {
           if (blurPanel) {
             // remove blurred panels and nested elements from tab order
             e.setAttribute('tabindex', '-1');

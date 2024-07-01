@@ -31,16 +31,16 @@ import type {
 import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { TimeRange } from '@kbn/es-query';
+import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
-import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField } from '../../../..';
 import { AlertParams } from '../../types';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
-import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { RuleConditionChart } from '../../../rule_condition_chart/rule_condition_chart';
 import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
 import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
