@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { Conversation, Prompt } from '../../../../..';
 import { ConversationsBulkActions } from '../../../api';
@@ -21,4 +22,6 @@ export interface SystemPromptSettingsProps {
     React.SetStateAction<ConversationsBulkActions>
   >;
   defaultConnector?: AIConnector;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }

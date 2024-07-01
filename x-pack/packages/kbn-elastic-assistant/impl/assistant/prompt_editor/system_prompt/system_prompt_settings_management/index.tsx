@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { Conversation, ConversationsBulkActions, useAssistantContext } from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
 import { AIConnector } from '../../../../connectorland/connector_selector';
@@ -26,7 +27,6 @@ import {
   useSessionPagination,
 } from '../../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { CANCEL, DELETE } from '../../../settings/translations';
-import { Prompt } from '../../../types';
 import { SystemPromptEditor } from '../system_prompt_modal/system_prompt_editor';
 import { SETTINGS_TITLE } from '../system_prompt_modal/translations';
 import { useSystemPromptEditor } from '../system_prompt_modal/use_system_prompt_editor';
@@ -37,11 +37,11 @@ interface Props {
   connectors: AIConnector[] | undefined;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
-  onSelectedSystemPromptChange: (systemPrompt?: Prompt) => void;
-  selectedSystemPrompt: Prompt | undefined;
-  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
+  onSelectedSystemPromptChange: (systemPrompt?: PromptResponse) => void;
+  selectedSystemPrompt: PromptResponse | undefined;
+  setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
-  systemPromptSettings: Prompt[];
+  systemPromptSettings: PromptResponse[];
   setConversationsSettingsBulkActions: React.Dispatch<
     React.SetStateAction<ConversationsBulkActions>
   >;
@@ -73,7 +73,7 @@ const SystemPromptSettingsManagementComponent = ({
     openFlyout: openConfirmModal,
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
-  const [deletedPrompt, setDeletedPrompt] = useState<Prompt | null>();
+  const [deletedPrompt, setDeletedPrompt] = useState<PromptResponse | null>();
 
   const onCreate = useCallback(() => {
     onSelectedSystemPromptChange({
@@ -91,7 +91,7 @@ const SystemPromptSettingsManagementComponent = ({
   });
 
   const onEditActionClicked = useCallback(
-    (prompt: Prompt) => {
+    (prompt: PromptResponse) => {
       onSystemPromptSelectionChange(prompt);
       openFlyout();
     },
@@ -99,7 +99,7 @@ const SystemPromptSettingsManagementComponent = ({
   );
 
   const onDeleteActionClicked = useCallback(
-    (prompt: Prompt) => {
+    (prompt: PromptResponse) => {
       setDeletedPrompt(prompt);
       onSystemPromptDeleted(prompt.id);
       openConfirmModal();

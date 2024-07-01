@@ -66,13 +66,8 @@ const mockValues = {
 };
 
 const updatedValues = {
-<<<<<<< HEAD
-  conversations: { [customConvo.title]: customConvo },
-  allSystemPrompts: { update: [mockSuperheroSystemPrompt] },
-=======
   conversations: { ...mockConversations },
   allSystemPrompts: [mockSuperheroSystemPrompt],
->>>>>>> upstream/main
   allQuickPrompts: [{ title: 'Prompt 2', prompt: 'Prompt 2', color: 'red' }],
   updatedAnonymizationData: {
     total: 2,
@@ -106,11 +101,7 @@ describe('useSettingsUpdater', () => {
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-<<<<<<< HEAD
-        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
-=======
-        useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
->>>>>>> upstream/main
+        useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields, mockSystemPrompts)
       );
       await waitForNextUpdate();
       const {
@@ -158,11 +149,7 @@ describe('useSettingsUpdater', () => {
   it('should update all state variables to their updated values when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-<<<<<<< HEAD
-        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
-=======
         useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
->>>>>>> upstream/main
       );
       await waitForNextUpdate();
       const {
@@ -201,11 +188,7 @@ describe('useSettingsUpdater', () => {
   it('should track which toggles have been updated when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-<<<<<<< HEAD
-        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
-=======
         useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
->>>>>>> upstream/main
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
@@ -222,11 +205,7 @@ describe('useSettingsUpdater', () => {
   it('should track only toggles that updated', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-<<<<<<< HEAD
-        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
-=======
         useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
->>>>>>> upstream/main
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
@@ -244,11 +223,7 @@ describe('useSettingsUpdater', () => {
   it('if no toggles update, do not track anything', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-<<<<<<< HEAD
-        useSettingsUpdater(mockConversations, anonymizationFields, mockSystemPrompts)
-=======
         useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
->>>>>>> upstream/main
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;

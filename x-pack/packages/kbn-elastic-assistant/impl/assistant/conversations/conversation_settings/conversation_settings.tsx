@@ -34,12 +34,8 @@ import { getConversationApiConfig } from '../../use_conversation/helpers';
 
 export interface ConversationSettingsProps {
   actionTypeRegistry: ActionTypeRegistryContract;
-<<<<<<< HEAD
   allSystemPrompts: PromptResponse[];
-=======
-  allSystemPrompts: Prompt[];
   connectors?: AIConnector[];
->>>>>>> upstream/main
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultConnector?: AIConnector;
@@ -125,29 +121,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           onConversationSelectionChange={onConversationSelectionChange}
         />
 
-<<<<<<< HEAD
-        <EuiFormRow
-          data-test-subj="prompt-field"
-          display="rowCompressed"
-          fullWidth
-          label={i18n.SETTINGS_PROMPT_TITLE}
-          helpText={i18n.SETTINGS_PROMPT_HELP_TEXT_TITLE}
-        >
-          <SelectSystemPrompt
-            allPrompts={allSystemPrompts}
-            compressed
-            conversation={selectedConversation}
-            isEditing={true}
-            isDisabled={isDisabled}
-            onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
-            selectedPrompt={selectedSystemPrompt}
-            showTitles={true}
-            isSettingsModalVisible={true}
-            setIsSettingsModalVisible={noop} // noop, already in settings
-            isFlyoutMode={isFlyoutMode}
-          />
-        </EuiFormRow>
-=======
         <ConversationSettingsEditor
           allSystemPrompts={allSystemPrompts}
           conversationSettings={conversationSettings}
@@ -159,7 +132,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           setConversationSettings={setConversationSettings}
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
         />
->>>>>>> upstream/main
 
         <EuiSpacer size="l" />
         <EuiTitle size={'s'}>

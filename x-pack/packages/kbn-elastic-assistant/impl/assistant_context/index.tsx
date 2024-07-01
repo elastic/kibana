@@ -122,13 +122,7 @@ export interface UseAssistantContext {
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
-<<<<<<< HEAD
-  selectedSettingsTab: SettingsTabs;
-=======
   selectedSettingsTab: SettingsTabs | null;
-  setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
-  setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
->>>>>>> upstream/main
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;

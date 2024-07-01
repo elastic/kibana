@@ -24,16 +24,10 @@ import * as i18n from './translations';
 interface Props {
   isDisabled?: boolean;
   onQuickPromptDeleted: (quickPromptTitle: string) => void;
-<<<<<<< HEAD
   onQuickPromptSelectionChange: (quickPrompt?: PromptResponse | string) => void;
   quickPrompts: PromptResponse[];
   selectedQuickPrompt?: PromptResponse;
-=======
-  onQuickPromptSelectionChange: (quickPrompt?: QuickPrompt | string) => void;
-  quickPrompts: QuickPrompt[];
   resetSettings?: () => void;
-  selectedQuickPrompt?: QuickPrompt;
->>>>>>> upstream/main
 }
 
 export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boolean }>;

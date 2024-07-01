@@ -28,17 +28,10 @@ export const SYSTEM_PROMPT_SELECTOR_CLASSNAME = 'systemPromptSelector';
 interface Props {
   autoFocus?: boolean;
   onSystemPromptDeleted: (systemPromptTitle: string) => void;
-<<<<<<< HEAD
   onSystemPromptSelectionChange: (systemPrompt?: PromptResponse | string) => void;
   systemPrompts: PromptResponse[];
-  autoFocus?: boolean;
   selectedSystemPrompt?: PromptResponse;
-=======
-  onSystemPromptSelectionChange: (systemPrompt?: Prompt | string) => void;
   resetSettings?: () => void;
-  selectedSystemPrompt?: Prompt;
-  systemPrompts: Prompt[];
->>>>>>> upstream/main
 }
 
 export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{

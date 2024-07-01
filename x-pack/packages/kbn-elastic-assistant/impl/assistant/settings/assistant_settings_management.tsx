@@ -28,15 +28,11 @@ import { KnowledgeBaseSettings, EvaluationSettings } from '.';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { getDefaultConnector } from '../helpers';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
-<<<<<<< HEAD
-import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
-=======
 import { ConnectorsSettingsManagement } from '../../connectorland/connector_settings_management';
 import { ConversationSettingsManagement } from '../conversations/conversation_settings_management';
 import { QuickPromptSettingsManagement } from '../quick_prompts/quick_prompt_settings_management';
 import { SystemPromptSettingsManagement } from '../prompt_editor/system_prompt/system_prompt_settings_management';
 import { AnonymizationSettingsManagement } from '../../data_anonymization/settings/anonymization_settings_management';
->>>>>>> upstream/main
 
 import {
   ANONYMIZATION_TAB,
@@ -78,12 +74,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     const { data: anonymizationFields } = useFetchAnonymizationFields();
 
-<<<<<<< HEAD
     const { data: allPrompts } = useFetchPrompts();
 
     // Connector details
-=======
->>>>>>> upstream/main
     const { data: connectors } = useLoadConnectors({
       http,
     });
@@ -116,13 +109,9 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
       resetSettings,
     } = useSettingsUpdater(
       conversations,
-<<<<<<< HEAD
-      anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] },
-      allPrompts
-=======
+      allPrompts,
       conversationsLoaded,
       anonymizationFields ?? { page: 0, perPage: 0, total: 0, data: [] }
->>>>>>> upstream/main
     );
 
     // Local state for saving previously selected items so tab switching is friendlier
@@ -312,11 +301,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               connectors={connectors}
               conversationSettings={conversationSettings}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-<<<<<<< HEAD
-              setUpdatedSystemPromptSettings={handleChange(setUpdatedSystemPromptSettings)}
-              promptsBulkActions={promptsBulkActions}
-              setPromptsBulkActions={handleChange(setPromptsBulkActions)}
-=======
               defaultConnector={defaultConnector}
               handleSave={handleSave}
               onCancelClick={onCancelClick}
@@ -338,7 +322,6 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               resetSettings={resetSettings}
               selectedQuickPrompt={selectedQuickPrompt}
               setUpdatedQuickPromptSettings={setUpdatedQuickPromptSettings}
->>>>>>> upstream/main
             />
           )}
           {selectedSettingsTab === ANONYMIZATION_TAB && (

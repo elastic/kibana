@@ -25,11 +25,7 @@ import styled from 'styled-components';
 import { css } from '@emotion/react';
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { AIConnector } from '../../connectorland/connector_selector';
-<<<<<<< HEAD
-import { Conversation } from '../../..';
-=======
-import { Conversation, Prompt, QuickPrompt, useLoadConnectors } from '../../..';
->>>>>>> upstream/main
+import { Conversation, useLoadConnectors } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { TEST_IDS } from '../constants';
@@ -43,9 +39,6 @@ import {
   SystemPromptSettings,
 } from '.';
 import { useFetchAnonymizationFields } from '../api/anonymization_fields/use_fetch_anonymization_fields';
-<<<<<<< HEAD
-import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
-=======
 import {
   ANONYMIZATION_TAB,
   CONVERSATIONS_TAB,
@@ -54,7 +47,7 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
->>>>>>> upstream/main
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 const StyledEuiModal = styled(EuiModal)`
   width: 800px;
@@ -130,13 +123,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       anonymizationFieldsBulkActions,
       setAnonymizationFieldsBulkActions,
       setUpdatedAnonymizationData,
-<<<<<<< HEAD
       setPromptsBulkActions,
       setUpdatedSystemPromptSettings,
-    } = useSettingsUpdater(conversations, anonymizationFields, allPrompts);
-=======
-    } = useSettingsUpdater(conversations, conversationsLoaded, anonymizationFields);
->>>>>>> upstream/main
+    } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, anonymizationFields);
 
     // Local state for saving previously selected items so tab switching is friendlier
     // Conversation Selection State
