@@ -54,7 +54,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 29700
+  expressionPartitionVis: 44720
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -102,13 +102,13 @@ pageLoadAssetSize:
   maps: 90000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 82210
+  ml: 97259
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 76678
+  observability: 118191
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityAiAssistantManagement: 19279
