@@ -15,7 +15,6 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts
   - x-pack/test/security_solution_endpoint/configs/config.base.ts
-  - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -406,7 +405,7 @@ enabled:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
-  - x-pack/test/security_solution_endpoint_api_int/serverless.config.ts
+  - x-pack/test/security_solution_endpoint_api_int/configs/serverless.config.ts
   - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/integrations.config.ts
