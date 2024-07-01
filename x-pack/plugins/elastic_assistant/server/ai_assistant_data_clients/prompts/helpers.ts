@@ -11,7 +11,7 @@ import {
   PromptResponse,
   PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import { CreatePromptSchema, EsPromptsSchema, UpdatePromptSchema } from './types';
 
 export const transformESToPrompts = (response: EsPromptsSchema[]): PromptResponse[] => {

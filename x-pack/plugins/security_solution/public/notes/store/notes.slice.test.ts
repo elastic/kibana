@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import * as uuid from 'uuid';
 import {
   createNote,
   deleteNote,
@@ -23,10 +23,22 @@ import {
   selectNoteIds,
   selectNotesByDocumentId,
 } from './notes.slice';
-import { generateNoteMock } from '../api/api';
 import { mockGlobalState } from '../../common/mock';
 
 const initalEmptyState = initialNotesState;
+
+export const generateNoteMock = (documentIds: string[]) =>
+  documentIds.map((documentId: string) => ({
+    noteId: uuid.v4(),
+    version: 'WzU1MDEsMV0=',
+    timelineId: '',
+    eventId: documentId,
+    note: 'This is a mocked note',
+    created: new Date().getTime(),
+    createdBy: 'elastic',
+    updated: new Date().getTime(),
+    updatedBy: 'elastic',
+  }));
 
 const mockNote = { ...generateNoteMock(['1'])[0] };
 const initialNonEmptyState = {
