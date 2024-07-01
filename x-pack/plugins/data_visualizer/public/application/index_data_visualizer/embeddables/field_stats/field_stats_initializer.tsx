@@ -141,7 +141,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
                     'xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.samplingTooltip',
                     {
                       defaultMessage:
-                        'Field statistics are calculated from a smaller subset of documents to increase performance, so some accuracy might be lost.',
+                        'Field statistics uses the random sampling aggregation to increase performance, but some accuracy might be lost.',
                     }
                   )}
                 />
@@ -191,7 +191,7 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
               title={
                 <FormattedMessage
                   id="xpack.dataVisualizer.fieldStatisticsDashboardPanel.config.description"
-                  defaultMessage="Field statistics provides an approximate summary and statistics for the data content along with how the field is populated."
+                  defaultMessage="The visualization displays summarized information and statistics to show how each field in your data is populated."
                 />
               }
             />
