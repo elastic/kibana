@@ -8,7 +8,8 @@ paths:
       x-labels: [ess]
       operationId: GetAlertsMigrationStatus
       x-codegen-enabled: true
-      summary: Returns an alerts migration status
+      summary: Retrieve the status of detection alert migrations
+      description: Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
       tags:
         - Alerts migration API
       parameters:

@@ -9,7 +9,8 @@ paths:
       x-codegen-enabled: true
       operationId: BulkDeleteRules
       deprecated: true
-      description: Deletes multiple rules.
+      summary: Delete multiple detection rules
+      description: Delete detection rules in bulk.
       tags:
         - Bulk API
       requestBody:
