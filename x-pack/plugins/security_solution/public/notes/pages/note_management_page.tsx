@@ -7,10 +7,11 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
+import { FormattedRelativePreferenceDate } from '../../common/components/formatted_date';
 import {
   userSelectedPage,
   userSelectedPerPage,
@@ -21,54 +22,45 @@ import {
   selectNotesTableSort,
   selectNotesTableTotalItems,
   fetchNotes,
-  deleteNote,
-  deleteNotes,
-  selectNotesTableSelectedIds,
   selectNotesTableSearch,
+  selectFetchNotesStatus,
+  selectNotesTablePendingDeleteIds,
+  userSelectedRowForDeletion,
+  selectFetchNotesError,
+  ReqStatus,
 } from '..';
 import { SearchRow } from '../components/search_row';
 import { NotesUtilityBar } from '../components/utility_bar';
+import { DeleteConfirmModal } from '../components/delete_confirm_modal';
+import * as i18n from '../components/translations';
 
 const columns: Array<EuiBasicTableColumn<Note>> = [
   {
     field: 'created',
-    name: 'Last Edited',
+    name: i18n.CREATED_COLUMN,
     sortable: true,
+    render: (created: Note['created']) => <FormattedRelativePreferenceDate value={created} />,
   },
   {
     field: 'createdBy',
-    name: 'Created by',
+    name: i18n.CREATED_BY_COLUMN,
   },
   {
     field: 'eventId',
-    name: 'Document id',
+    name: i18n.EVENT_ID_COLUMN,
     sortable: true,
   },
   {
     field: 'timelineId',
-    name: 'Timeline id',
+    name: i18n.TIMELINE_ID_COLUMN,
   },
   {
     field: 'note',
-    name: 'Note',
+    name: i18n.NOTE_CONTENT_COLUMN,
   },
 ];
 
 const pageSizeOptions = [50, 25, 10, 0];
-
-const BulkNoteDeleteButton = ({
-  selectedItems,
-  deleteSelectedNotes,
-}: {
-  selectedItems: string[];
-  deleteSelectedNotes: () => void;
-}) => {
-  return selectedItems.length > 0 ? (
-    <EuiButton color="danger" iconType="trash" onClick={deleteSelectedNotes}>
-      {`Delete ${selectedItems.length} Notes`}
-    </EuiButton>
-  ) : null;
-};
 
 /**
  *
@@ -79,8 +71,13 @@ export const NotesTable = () => {
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
   const totalItems = useSelector(selectNotesTableTotalItems);
-  const selectedItems = useSelector(selectNotesTableSelectedIds);
   const notesSearch = useSelector(selectNotesTableSearch);
+  const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
+  const isDeleteModalVisible = pendingDeleteIds.length > 0;
+  const fetchNotesStatus = useSelector(selectFetchNotesStatus);
+  const fetchLoading = fetchNotesStatus === ReqStatus.Loading;
+  const fetchError = fetchNotesStatus === ReqStatus.Failed;
+  const fetchErrorData = useSelector(selectFetchNotesError);
 
   const fetchData = useCallback(() => {
     dispatch(
@@ -118,9 +115,9 @@ export const NotesTable = () => {
     [dispatch]
   );
 
-  const onDeleteNote = useCallback(
-    (id: string) => {
-      dispatch(deleteNote({ id }));
+  const selectRowForDeletion = useCallback(
+    (ids) => {
+      dispatch(userSelectedRowForDeletion(ids));
     },
     [dispatch]
   );
@@ -137,19 +134,15 @@ export const NotesTable = () => {
     return item.noteId;
   }, []);
 
-  const deleteSelectedNotes = useCallback(() => {
-    dispatch(deleteNotes({ ids: selectedItems }));
-  }, [dispatch, selectedItems]);
-
   const columnWithActions = useMemo(() => {
     const actions: Array<DefaultItemAction<Note>> = [
       {
-        name: 'Delete',
-        description: 'Delete this note',
+        name: i18n.DELETE,
+        description: i18n.DELETE_SINGLE_NOTE_DESCRIPTION,
         color: 'primary',
         icon: 'trash',
         type: 'icon',
-        onClick: (note: Note) => deleteNote({ id: note.noteId }),
+        onClick: (note: Note) => selectRowForDeletion(note.noteId),
       },
     ];
     return [
@@ -159,22 +152,7 @@ export const NotesTable = () => {
         actions,
       },
     ];
-  }, []);
-
-  // if (fetchLoading) {
-  //   return <EuiLoadingElastic size="xxl" />;
-  // }
-
-  // if (fetchError) {
-  //   return (
-  //     <EuiEmptyPrompt
-  //       iconType="error"
-  //       color="danger"
-  //       title={<h2>{'Unable to load your notes'}</h2>}
-  //       body={<p>{'No can do'}</p>}
-  //     />
-  //   );
-  // }
+  }, [selectRowForDeletion]);
 
   const currentPagination = useMemo(() => {
     return {
@@ -192,12 +170,29 @@ export const NotesTable = () => {
     };
   }, [onSelectionChange]);
 
+  const sorting: { sort: { field: keyof Note; direction: 'asc' | 'desc' } } = useMemo(() => {
+    return {
+      sort,
+    };
+  }, [sort]);
+
+  if (fetchError) {
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>{i18n.TABLE_ERROR}</h2>}
+        body={<p>{fetchErrorData}</p>}
+      />
+    );
+  }
+
   if (notes.length === 0) {
     return (
       <EuiEmptyPrompt
         iconType="editorStrike"
-        title={<h2>{'No notes'}</h2>}
-        body={<p>{'Add a note to get started'}</p>}
+        title={<h2>{i18n.TABLE_EMPTY}</h2>}
+        body={<p>{i18n.TABLE_EMPTY_HELP}</p>}
       />
     );
   }
@@ -206,19 +201,17 @@ export const NotesTable = () => {
     <>
       <SearchRow />
       <NotesUtilityBar />
-      <BulkNoteDeleteButton
-        selectedItems={selectedItems}
-        deleteSelectedNotes={deleteSelectedNotes}
-      />
       <EuiBasicTable
         items={notes}
         pagination={currentPagination}
         columns={columnWithActions}
         onChange={onTableChange}
         selection={selection}
-        sorting={{ sort }}
+        sorting={sorting}
         itemId={itemIdSelector}
+        loading={fetchLoading}
       />
+      {isDeleteModalVisible && <DeleteConfirmModal />}
     </>
   );
 };

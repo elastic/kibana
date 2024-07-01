@@ -6,7 +6,7 @@
  */
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { EuiContextMenuItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem } from '@elastic/eui';
 import {
   UtilityBarGroup,
   UtilityBarText,
@@ -15,19 +15,18 @@ import {
   UtilityBarAction,
 } from '../../common/components/utility_bar';
 import {
-  selectAllNotes,
   selectNotesPagination,
   selectNotesTableSort,
   selectNotesTableTotalItems,
   fetchNotes,
-  deleteNotes,
   selectNotesTableSelectedIds,
   selectNotesTableSearch,
+  userSelectedBulkDelete,
 } from '..';
+import * as i18n from './translations';
 
 export const NotesUtilityBar = React.memo(() => {
   const dispatch = useDispatch();
-  const notes = useSelector(selectAllNotes);
   const pagination = useSelector(selectNotesPagination);
   const sort = useSelector(selectNotesTableSort);
   const totalItems = useSelector(selectNotesTableTotalItems);
@@ -39,17 +38,14 @@ export const NotesUtilityBar = React.memo(() => {
     return perPage === 0 ? 'All' : `${startOfCurrentPage}-${endOfCurrentPage} of ${totalItems}`;
   }, [pagination, totalItems]);
   const deleteSelectedNotes = useCallback(() => {
-    dispatch(deleteNotes({ ids: selectedItems }));
-  }, [dispatch, selectedItems]);
+    dispatch(userSelectedBulkDelete());
+  }, [dispatch]);
   const notesSearch = useSelector(selectNotesTableSearch);
 
   const BulkActionPopoverContent = useCallback(
     (closePopover) => {
       return (
         <div>
-          <EuiText size="s">
-            <p>{'Bulk actions'}</p>
-          </EuiText>
           <EuiContextMenuItem
             data-test-subj="delete-notes"
             onClick={deleteSelectedNotes}
@@ -57,7 +53,7 @@ export const NotesUtilityBar = React.memo(() => {
             icon="trash"
             key="DeleteItemKey"
           >
-            {'Delete selected notes'}
+            {i18n.DELETE_SELECTED}
           </EuiContextMenuItem>
         </div>
       );
@@ -95,7 +91,7 @@ export const NotesUtilityBar = React.memo(() => {
             popoverContent={BulkActionPopoverContent}
             data-test-subj="utility-bar-action"
           >
-            <span data-test-subj="utility-bar-action-button">{'Bulk Actions'}</span>
+            <span data-test-subj="utility-bar-action-button">{i18n.BATCH_ACTIONS}</span>
           </UtilityBarAction>
           <UtilityBarAction
             dataTestSubj="refreshButton"
@@ -103,7 +99,7 @@ export const NotesUtilityBar = React.memo(() => {
             iconType="refresh"
             onClick={refresh}
           >
-            {`Refresh`}
+            {i18n.REFRESH}
           </UtilityBarAction>
         </UtilityBarGroup>
       </UtilityBarSection>

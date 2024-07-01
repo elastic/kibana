@@ -7,3 +7,4 @@
 
 export { SearchRow } from './search_row';
 export { NotesUtilityBar } from './utility_bar';
+export { DeleteConfirmModal } from './delete_confirm_modal';

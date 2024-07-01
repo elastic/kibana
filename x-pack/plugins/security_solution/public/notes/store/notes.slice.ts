@@ -38,12 +38,14 @@ export interface NotesState extends EntityState<Note> {
     createNote: ReqStatus;
     deleteNote: ReqStatus;
     fetchNotes: ReqStatus;
+    deleteNotes: ReqStatus;
   };
   error: {
     fetchNotesByDocumentIds: SerializedError | HttpError | null;
     createNote: SerializedError | HttpError | null;
     deleteNote: SerializedError | HttpError | null;
     fetchNotes: SerializedError | HttpError | null;
+    deleteNotes: SerializedError | HttpError | null;
   };
   pagination: {
     page: number;
@@ -51,12 +53,13 @@ export interface NotesState extends EntityState<Note> {
     total: number;
   };
   sort: {
-    field: string;
-    direction: string;
+    field: keyof Note;
+    direction: 'asc' | 'desc';
   };
   filter: string;
   search: string;
   selectedIds: string[];
+  pendingDeleteIds: string[];
 }
 
 const notesAdapter = createEntityAdapter<Note>({
@@ -69,11 +72,13 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
     createNote: ReqStatus.Idle,
     deleteNote: ReqStatus.Idle,
     fetchNotes: ReqStatus.Idle,
+    deleteNotes: ReqStatus.Idle,
   },
   error: {
     fetchNotesByDocumentIds: null,
     createNote: null,
     deleteNote: null,
+    deleteNotes: null,
     fetchNotes: null,
   },
   pagination: {
@@ -88,6 +93,7 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
   filter: '',
   search: '',
   selectedIds: [],
+  pendingDeleteIds: [],
 });
 
 export const fetchNotesByDocumentIds = createAsyncThunk<
@@ -166,6 +172,15 @@ const notesSlice = createSlice({
     userSelectedRow: (state, action) => {
       state.selectedIds = action.payload;
     },
+    userClosedDeleteModal: (state) => {
+      state.pendingDeleteIds = [];
+    },
+    userSelectedRowForDeletion: (state, action) => {
+      state.pendingDeleteIds = [action.payload];
+    },
+    userSelectedBulkDelete: (state) => {
+      state.pendingDeleteIds = state.selectedIds;
+    },
   },
   extraReducers(builder) {
     builder
@@ -201,6 +216,17 @@ const notesSlice = createSlice({
       .addCase(deleteNote.rejected, (state, action) => {
         state.status.deleteNote = ReqStatus.Failed;
         state.error.deleteNote = action.payload ?? action.error;
+      })
+      .addCase(deleteNotes.pending, (state, action) => {
+        state.status.deleteNotes = ReqStatus.Loading;
+      })
+      .addCase(deleteNotes.fulfilled, (state, action) => {
+        notesAdapter.removeMany(state, action.payload);
+        state.status.deleteNotes = ReqStatus.Succeeded;
+      })
+      .addCase(deleteNotes.rejected, (state, action) => {
+        state.status.deleteNotes = ReqStatus.Failed;
+        state.error.deleteNotes = action.payload ?? action.error;
       })
       .addCase(fetchNotes.pending, (state) => {
         state.status.fetchNotes = ReqStatus.Loading;
@@ -249,6 +275,14 @@ export const selectNotesTableSelectedIds = (state: State) => state.notes.selecte
 
 export const selectNotesTableSearch = (state: State) => state.notes.search;
 
+export const selectNotesTablePendingDeleteIds = (state: State) => state.notes.pendingDeleteIds;
+
+export const selectDeleteNotesStatus = (state: State) => state.notes.status.deleteNotes;
+
+export const selectFetchNotesError = (state: State) => state.notes.error.fetchNotes;
+
+export const selectFetchNotesStatus = (state: State) => state.notes.status.fetchNotes;
+
 export const selectNotesByDocumentId = createSelector(
   [selectAllNotes, (state, documentId) => documentId],
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
@@ -261,4 +295,7 @@ export const {
   userFilteredNotes,
   userSearchedNotes,
   userSelectedRow,
+  userClosedDeleteModal,
+  userSelectedRowForDeletion,
+  userSelectedBulkDelete,
 } = notesSlice.actions;
