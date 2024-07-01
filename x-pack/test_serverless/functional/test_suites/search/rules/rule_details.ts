@@ -75,11 +75,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {
-      await svlCommonPage.forceLogout();
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
