@@ -10,6 +10,7 @@ import {
   PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useCallback } from 'react';
+import { useAssistantContext } from '../../../../..';
 
 interface Props {
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<PromptResponse[]>>;
@@ -24,6 +25,7 @@ export const useSystemPromptEditor = ({
   promptsBulkActions,
   setPromptsBulkActions,
 }: Props) => {
+  const { currentAppId } = useAssistantContext();
   // When top level system prompt selection changes
   const onSystemPromptSelectionChange = useCallback(
     (systemPrompt?: PromptResponse | string) => {
@@ -34,6 +36,7 @@ export const useSystemPromptEditor = ({
             content: '',
             name: systemPrompt ?? '',
             promptType: 'system',
+            consumer: currentAppId,
           }
         : systemPrompt;
 
@@ -48,20 +51,23 @@ export const useSystemPromptEditor = ({
           return prev;
         });
 
-        setPromptsBulkActions({
-          ...promptsBulkActions,
-          create: [
-            ...(promptsBulkActions.create ?? []),
-            {
-              ...newSelectedSystemPrompt,
-            },
-          ],
-        });
+        if (isNew) {
+          setPromptsBulkActions({
+            ...promptsBulkActions,
+            create: [
+              ...(promptsBulkActions.create ?? []),
+              {
+                ...newSelectedSystemPrompt,
+              },
+            ],
+          });
+        }
       }
 
       onSelectedSystemPromptChange(newSelectedSystemPrompt);
     },
     [
+      currentAppId,
       onSelectedSystemPromptChange,
       promptsBulkActions,
       setPromptsBulkActions,

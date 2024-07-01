@@ -21,6 +21,7 @@ import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { useObservable } from 'react-use';
 import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
@@ -115,7 +116,7 @@ export const createConversations = async (
  */
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, currentAppId$ },
     http,
     notifications,
     storage,
@@ -127,6 +128,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const baseConversations = useBaseConversations();
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
+  const currentAppId = useObservable(currentAppId$, '');
 
   useEffect(() => {
     const migrateConversationsFromLocalStorage = once(async () => {
@@ -170,6 +172,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       navigateToApp={navigateToApp}
       title={ASSISTANT_TITLE}
       toasts={toasts}
+      currentAppId={currentAppId ?? 'securitySolutionUI'}
     >
       {children}
     </ElasticAssistantProvider>

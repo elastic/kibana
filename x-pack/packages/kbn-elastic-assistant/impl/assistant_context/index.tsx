@@ -81,6 +81,7 @@ export interface AssistantProviderProps {
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
   toasts?: IToasts;
+  currentAppId: string;
 }
 
 export interface UserAvatar {
@@ -139,6 +140,7 @@ export interface UseAssistantContext {
   traceOptions: TraceOptions;
   basePromptContexts: PromptContextTemplate[];
   unRegisterPromptContext: UnRegisterPromptContext;
+  currentAppId: string;
 }
 
 const AssistantContext = React.createContext<UseAssistantContext | undefined>(undefined);
@@ -160,6 +162,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
+  currentAppId,
 }) => {
   /**
    * Session storage for traceOptions, including APM URL and LangSmith Project/API Key
@@ -286,6 +289,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getLastConversationId,
       setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
+      currentAppId,
     }),
     [
       actionTypeRegistry,
@@ -317,6 +321,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getLastConversationId,
       setLocalStorageLastConversationId,
       baseConversations,
+      currentAppId,
     ]
   );
 
