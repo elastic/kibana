@@ -121,7 +121,6 @@ export default function ({ getService }: FtrProviderContext) {
           health: 'green',
           indexTemplateName: testDataStreamName,
           nextGenerationManagedBy: 'Data stream lifecycle',
-          maxTimeStamp: 0,
           hidden: false,
           lifecycle: {
             enabled: true,
