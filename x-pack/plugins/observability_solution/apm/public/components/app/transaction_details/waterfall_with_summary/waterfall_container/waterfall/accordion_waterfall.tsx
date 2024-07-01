@@ -30,6 +30,7 @@ import {
 import { WaterfallItem } from './waterfall_item';
 import { WaterfallContextProvider } from './context/waterfall_context';
 import { useWaterfallContext } from './context/use_waterfall';
+import { TraceMap } from './trace_map';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
@@ -102,6 +103,7 @@ export function AccordionWaterfall({
       isOpen={isOpen}
     >
       <Waterfall {...props} />
+      <TraceMap />
     </WaterfallContextProvider>
   );
 }

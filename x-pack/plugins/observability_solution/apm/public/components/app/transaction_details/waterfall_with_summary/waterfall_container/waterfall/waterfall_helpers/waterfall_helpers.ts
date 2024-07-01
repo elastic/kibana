@@ -549,7 +549,6 @@ function buildTree({
 
   return tree;
 }
-
 export function buildTraceTree({
   waterfall,
   maxLevelOpen,
@@ -597,8 +596,8 @@ export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFl
     result.push(nodeWithoutChildren);
 
     if (node.expanded) {
-      for (let i = node.children.length - 1; i >= 0; i--) {
-        stack.push(node.children[i]);
+      for (let i = children.length - 1; i >= 0; i--) {
+        stack.push(children[i]);
       }
     }
   }
