@@ -16,7 +16,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
+  PromptResponse,
+  PerformBulkActionRequestBody as PromptsPerformBulkActionRequestBody,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { Conversation, ConversationsBulkActions, useAssistantContext } from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
 import { AIConnector } from '../../../../connectorland/connector_selector';
@@ -49,6 +52,8 @@ interface Props {
   handleSave: (shouldRefetchConversation?: boolean) => void;
   onCancelClick: () => void;
   resetSettings: () => void;
+  promptsBulkActions: PromptsPerformBulkActionRequestBody;
+  setPromptsBulkActions: React.Dispatch<React.SetStateAction<PromptsPerformBulkActionRequestBody>>;
 }
 
 const SystemPromptSettingsManagementComponent = ({
@@ -65,6 +70,8 @@ const SystemPromptSettingsManagementComponent = ({
   handleSave,
   onCancelClick,
   resetSettings,
+  promptsBulkActions,
+  setPromptsBulkActions,
 }: Props) => {
   const { nameSpace } = useAssistantContext();
   const { isFlyoutOpen: editFlyoutVisible, openFlyout, closeFlyout } = useFlyoutModalVisibility();
@@ -88,6 +95,8 @@ const SystemPromptSettingsManagementComponent = ({
   const { onSystemPromptSelectionChange, onSystemPromptDeleted } = useSystemPromptEditor({
     setUpdatedSystemPromptSettings,
     onSelectedSystemPromptChange,
+    promptsBulkActions,
+    setPromptsBulkActions,
   });
 
   const onEditActionClicked = useCallback(
@@ -200,6 +209,8 @@ const SystemPromptSettingsManagementComponent = ({
           setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
           defaultConnector={defaultConnector}
           resetSettings={resetSettings}
+          promptsBulkActions={promptsBulkActions}
+          setPromptsBulkActions={setPromptsBulkActions}
         />
       </Flyout>
       {deleteConfirmModalVisibility && deletedPrompt?.name && (

@@ -43,6 +43,7 @@ import {
   QUICK_PROMPTS_TAB,
   SYSTEM_PROMPTS_TAB,
 } from './const';
+import { useFetchPrompts } from '../api/prompts/use_fetch_prompts';
 
 interface Props {
   conversations: Record<string, Conversation>;
@@ -311,6 +312,8 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
               setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
               setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
               systemPromptSettings={systemPromptSettings}
+              promptsBulkActions={promptsBulkActions}
+              setPromptsBulkActions={setPromptsBulkActions}
             />
           )}
           {selectedSettingsTab === QUICK_PROMPTS_TAB && (
