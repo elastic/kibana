@@ -153,6 +153,10 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
 
   const handleShowVisualization = useCallback(() => setShowVisualization(true), []);
 
+  const handleToogleTableView = useCallback(() => setIsTableVisible((prev) => !prev), []);
+
+  const handleCloseSaveModal = useCallback(() => setIsSaveModalOpen(false), []);
+
   return (
     <>
       <EuiPanel
@@ -202,7 +206,16 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
       </EuiPanel>
       {showVisualization && (queryResultsError || formattedColumnsError || dataViewError) && (
         <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
-          <EuiCallOut title="Unable to retrieve search results" color="danger" iconType="error">
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.securitySolution.lensESQLFunction.visualizeQueryCalloutErrorTitle',
+              {
+                defaultMessage: 'Unable to retrieve search results',
+              }
+            )}
+            color="danger"
+            iconType="error"
+          >
             <p>{`${queryResultsError || formattedColumnsError || dataViewError}`}</p>
           </EuiCallOut>
         </EuiPanel>
@@ -234,7 +247,7 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
                           iconType={
                             isTableVisible ? 'visBarVerticalStacked' : 'tableDensityExpanded'
                           }
-                          onClick={() => setIsTableVisible(!isTableVisible)}
+                          onClick={handleToogleTableView}
                           data-test-subj="securityAiAssistantLensESQLDisplayTableButton"
                           aria-label={
                             isTableVisible
@@ -311,9 +324,7 @@ const EsqlCodeBlockComponent = ({ value, actionsDisabled, timestamp }: EsqlCodeB
       {isSaveModalOpen ? (
         <lens.SaveModalComponent
           initialInput={lensInput}
-          onClose={() => {
-            setIsSaveModalOpen(() => false);
-          }}
+          onClose={handleCloseSaveModal}
           // For now, we don't want to allow saving ESQL charts to the library
           isSaveable={false}
         />
