@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart } from '@kbn/core/public';
 import type * as H from 'history';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
