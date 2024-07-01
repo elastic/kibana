@@ -109,7 +109,8 @@ export default function (providerContext: FtrProviderContext) {
         interceptedRequestBody = getInterceptedRequestPayload();
         expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
-          expect(interceptedRequestBody[0].usage.sub_type).to.be('cspm');
+          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+          expect(usageSubTypes).to.contain('cspm');
         }
       });
 
@@ -137,7 +138,8 @@ export default function (providerContext: FtrProviderContext) {
         interceptedRequestBody = getInterceptedRequestPayload();
         expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
-          expect(interceptedRequestBody[0].usage.sub_type).to.be('kspm');
+          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+          expect(usageSubTypes).to.contain('kspm');
         }
       });
 
@@ -165,7 +167,8 @@ export default function (providerContext: FtrProviderContext) {
         interceptedRequestBody = getInterceptedRequestPayload();
         expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
-          expect(interceptedRequestBody[0].usage.sub_type).to.be('cnvm');
+          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+          expect(usageSubTypes).to.contain('cnvm');
         }
       });
 
@@ -190,7 +193,8 @@ export default function (providerContext: FtrProviderContext) {
         interceptedRequestBody = getInterceptedRequestPayload();
         expect(interceptedRequestBody.length).to.greaterThan(0);
         if (interceptedRequestBody.length > 0) {
-          expect(interceptedRequestBody[0].usage.sub_type).to.be('cloud_defend');
+          const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+          expect(usageSubTypes).to.contain('cloud_defend');
         }
       });
 

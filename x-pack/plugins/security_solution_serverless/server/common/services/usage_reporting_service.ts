@@ -20,25 +20,13 @@ export class UsageReportingService {
     records: UsageRecord[],
     url = USAGE_SERVICE_USAGE_URL
   ): Promise<Response> {
-    console.log('Starting usage report...');
-
     try {
-      // agent.defaultPort = 8080;
-      const response2 = await fetch('http://localhost:8081/user', {
-        method: 'POST',
-        body: JSON.stringify(records),
-        headers: { 'Content-Type': 'application/json' },
-      });
-      console.log('response2:', response2);
-    } catch (error) {
-      console.log('error in response 2 :', error);
-    }
-    try {
-      const response = await fetch('https://localhost:8081/user', {
+      const isHttps = url.includes('https');
+      const response = await fetch(url, {
         method: 'post',
         body: JSON.stringify(records),
         headers: { 'Content-Type': 'application/json' },
-        agent,
+        ...(isHttps && { agent }), // Conditionally add agent if URL is HTTPS for supporting integration tests.
       });
 
       if (!response.ok) {
