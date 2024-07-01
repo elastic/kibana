@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Trained models list', function () {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await ml.api.syncSavedObjects();
     });
 
