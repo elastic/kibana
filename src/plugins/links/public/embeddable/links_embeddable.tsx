@@ -154,7 +154,10 @@ export const getLinksEmbeddableFactory = () => {
           onEdit: async () => {
             try {
               const newState = await openEditorFlyout({
-                initialState: state,
+                initialState: {
+                  links: linksApi.links$.value,
+                  layout: linksApi.layout$.value,
+                },
                 parentDashboard: parentApi,
               });
               if (newState) {
