@@ -158,7 +158,10 @@ export const EventFiltersList = memo(() => {
                   defaultMessage="Filtering descendants of process"
                   id="xpack.securitySolution.eventFilters.filteringProcessDescendants"
                 />{' '}
-                <ProcessDescendantsTooltip />
+                <ProcessDescendantsTooltip
+                  indicateExtraEntry
+                  testIdPrefix="EventFiltersListPage-processDescendantIndication"
+                />
               </strong>
             </code>
           </EuiText>

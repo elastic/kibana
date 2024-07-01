@@ -72,30 +72,58 @@ describe('When on the Event Filters list page', () => {
   });
 
   describe('filtering process descendants', () => {
-    it('should indicate to user if event filter filters process descendants', async () => {
-      const generator = new ExceptionsListItemGenerator();
+    let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
 
-      apiMocks.responseProvider.exceptionsFind.mockReturnValue({
-        data: [
-          generator.generateEventFilter(),
-          generator.generateEventFilter({ tags: [FILTER_PROCESS_DESCENDANTS_TAG] }),
-          generator.generateEventFilter({ tags: [FILTER_PROCESS_DESCENDANTS_TAG] }),
-        ],
-        total: 3,
-        per_page: 3,
-        page: 1,
-      });
+    beforeEach(() => {
+      renderWithData = async () => {
+        const generator = new ExceptionsListItemGenerator();
 
-      const { getAllByTestId } = render();
-
-      await act(async () => {
-        await waitFor(() => {
-          expect(renderResult.getByTestId('EventFiltersListPage-list')).toBeTruthy();
+        apiMocks.responseProvider.exceptionsFind.mockReturnValue({
+          data: [
+            generator.generateEventFilter(),
+            generator.generateEventFilter({ tags: [FILTER_PROCESS_DESCENDANTS_TAG] }),
+            generator.generateEventFilter({ tags: [FILTER_PROCESS_DESCENDANTS_TAG] }),
+          ],
+          total: 3,
+          per_page: 3,
+          page: 1,
         });
-      });
 
-      expect(getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
-      expect(getAllByTestId('EventFiltersListPage-processDescendantIndication')).toHaveLength(2);
+        render();
+
+        await act(async () => {
+          await waitFor(() => {
+            expect(renderResult.getByTestId('EventFiltersListPage-list')).toBeTruthy();
+          });
+        });
+
+        return renderResult;
+      };
+    });
+
+    it('should indicate to user if event filter filters process descendants', async () => {
+      await renderWithData();
+
+      expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
+      expect(
+        renderResult.getAllByTestId('EventFiltersListPage-processDescendantIndication')
+      ).toHaveLength(2);
+    });
+
+    it('should display additional `event.category is process` entry in tooltip', async () => {
+      const prefix = 'EventFiltersListPage-processDescendantIndication';
+
+      await renderWithData();
+
+      expect(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)).toHaveLength(2);
+      expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
+
+      userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
+
+      expect(await renderResult.findByTestId(`${prefix}-tooltipText`)).toBeInTheDocument();
+      expect(renderResult.getByTestId(`${prefix}-tooltipText`).textContent).toContain(
+        'event.category is process'
+      );
     });
   });
 
