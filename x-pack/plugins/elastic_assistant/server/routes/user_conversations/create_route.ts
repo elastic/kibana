@@ -41,10 +41,9 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
         const assistantResponse = buildResponse(response);
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          // Perform license, authenticated user and FF checks
+          // Perform license and authenticated user checks
           const checkResponse = performChecks({
             authenticatedUser: true,
-            capability: 'assistantKnowledgeBaseByDefault',
             context: ctx,
             license: true,
             request,
