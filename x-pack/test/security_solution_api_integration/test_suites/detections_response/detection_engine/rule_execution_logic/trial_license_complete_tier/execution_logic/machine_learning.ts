@@ -86,15 +86,49 @@ export default ({ getService }: FtrProviderContext) => {
     rule_id: 'ml-rule-id',
   };
 
+  const logAnomalyDebugData = async (index = '.ml-anomalies-custom*') => {
+    const indexMappings = await es.indices.getMapping({ index });
+    console.log('ML Anomaly Index Mappings:', JSON.stringify(indexMappings, null, 2));
+    const anomalyData = await es.search({
+      index,
+      body: {
+        query: {
+          match_all: {},
+        },
+      },
+    });
+
+    console.log('ML Anomaly Data:', JSON.stringify(anomalyData, null, 2));
+  };
+
   // FLAKY: https://github.com/elastic/kibana/issues/171426
-  describe.skip('@ess @serverless @serverlessQA Machine learning type rules', () => {
+  describe('@ess @serverless @serverlessQA Machine learning type rules', () => {
     before(async () => {
+      logAnomalyDebugData();
+      console.log('BEFORE MACHINE LEARNING RULES');
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
       await esArchiver.load(auditPath);
-      await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
-      await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
+      console.log('loaded auditbeat data', auditPath);
+      const moduleResponse = await executeSetupModuleRequest({
+        module: siemModule,
+        rspCode: 200,
+        supertest,
+      });
+      console.log('modules set up', JSON.stringify(moduleResponse), null, 2);
+      const datafeedResponse = await forceStartDatafeeds({
+        jobId: mlJobId,
+        rspCode: 200,
+        supertest,
+      });
+      // Thought: is there a race condition where the datafeed and es_archiver are both attempting to create an index?
+      console.log('datafeed set up', JSON.stringify(datafeedResponse, null, 2));
+      const loadResp = await esArchiver.load(
+        'x-pack/test/functional/es_archives/security_solution/anomalies'
+      );
+      console.log('anomalies loaded', JSON.stringify(loadResp, null, 2));
+      logAnomalyDebugData();
+      console.log('/BEFORE MACHINE LEARNING RULES');
     });
 
     after(async () => {
@@ -111,8 +145,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     // First test creates a real rule - remaining tests use preview API
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
+      console.log('STARTING TEST');
+      logAnomalyDebugData();
       const createdRule = await createRule(supertest, log, rule);
+      console.log('created rule', JSON.stringify(createdRule, null, 2));
       const alerts = await getAlerts(supertest, log, es, createdRule);
+      console.log('alerts got', JSON.stringify(alerts, null, 2));
       expect(alerts.hits.hits.length).toBe(1);
       const alert = alerts.hits.hits[0];
 
@@ -186,6 +224,7 @@ export default ({ getService }: FtrProviderContext) => {
           ]),
         })
       );
+      console.log('ENDING TEST');
     });
 
     it('classifies ml job missing errors as user errors', async () => {

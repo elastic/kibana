@@ -39,7 +39,9 @@ export const getAlerts: GetAlerts = async (
   size,
   afterDate
 ) => {
+  console.log('waiting for rule to be successful');
   await waitForRuleStatus(status, { supertest, log, id: rule.id, afterDate });
+  console.log('rule was successful');
   // Critically important that we wait for rule success AND refresh the write index in that order before we
   // assert that no Alerts were created. Otherwise, Alerts could be written but not available to query yet
   // when we search, causing tests that check that Alerts are NOT created to pass when they should fail.
