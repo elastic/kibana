@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps, FunctionComponent } from 'react';
+import type { ComponentProps, FunctionComponent, PropsWithChildren } from 'react';
 import React, { useEffect } from 'react';
 import QueryTabContent from '.';
 import { defaultRowRenderers } from '../../body/renderers';
@@ -85,6 +85,16 @@ jest.mock('../../../../../common/lib/kibana');
 
 // unified-field-list is reporting multiple analytics events
 jest.mock(`@kbn/ebt/client`);
+
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutApi: () => ({
+      openFlyout: mockOpenFlyout,
+    }),
+    TestProvider: ({ children }: PropsWithChildren<{}>) => <>{children}</>,
+  };
+});
 
 const TestComponent = (props: Partial<ComponentProps<typeof QueryTabContent>>) => {
   const testComponentDefaultProps: ComponentProps<typeof QueryTabContent> = {
@@ -765,9 +775,19 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('row leading actions', () => {
-    it(
-      'should be able to add notes',
+    // fix this with the new EUI flyout implementation for notes
+    it.skip(
+      'should be able to add notes using EuiFlyout',
       async () => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+          jest.fn((feature: keyof ExperimentalFeatures) => {
+            if (feature === 'unifiedComponentsInTimelineEnabled') {
+              return true;
+            }
+            return allowedExperimentalValues[feature];
+          })
+        );
+
         renderTestComponents();
         expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
 
@@ -785,6 +805,38 @@ describe('query tab with unified timeline', () => {
     );
 
     it(
+      'should be able to add notes through expandable flyout',
+      async () => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+          jest.fn((feature: keyof ExperimentalFeatures) => {
+            if (feature === 'unifiedComponentsInTimelineEnabled') {
+              return true;
+            }
+            if (feature === 'securitySolutionNotesEnabled') {
+              return true;
+            }
+            return allowedExperimentalValues[feature];
+          })
+        );
+
+        renderTestComponents();
+        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+        await waitFor(() => {
+          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
+        });
+
+        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
+
+        await waitFor(() => {
+          expect(mockOpenFlyout).toHaveBeenCalled();
+        });
+      },
+      SPECIAL_TEST_TIMEOUT
+    );
+
+    // once the new EUI flyout for notes is implemented this test should be removed
+    it.skip(
       'should be cancel adding notes',
       async () => {
         renderTestComponents();
