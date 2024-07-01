@@ -74,5 +74,11 @@ export class SimpleMemCache implements SimpleMemCacheInterface {
     this.cache.delete(key);
   }
 
-  public cleanup(): void {}
+  public cleanup(): void {
+    for (const [cacheKey, cacheData] of this.cache.entries()) {
+      if (this.isExpired(cacheData)) {
+        this.delete(cacheKey);
+      }
+    }
+  }
 }
