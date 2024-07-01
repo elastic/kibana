@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { NotesTable } from './pages/note_management_page';
+export { NoteManagementPage } from './pages/note_management_page';
 export * from './store/notes.slice';

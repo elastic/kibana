@@ -76,17 +76,6 @@ export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
 };
 
 /**
- * Deletes a note
- */
-export const deleteNote = async (noteId: string) => {
-  const response = await KibanaServices.get().http.delete<{ data: unknown }>(NOTE_URL, {
-    body: JSON.stringify({ noteId }),
-    version: '2023-10-31',
-  });
-  return response;
-};
-
-/**
  * Deletes multiple notes
  */
 export const deleteNotes = async (noteIds: string[]) => {

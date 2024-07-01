@@ -19,6 +19,8 @@ import {
 export const DeleteConfirmModal = React.memo(() => {
   const dispatch = useDispatch();
   const pendingDeleteIds = useSelector(selectNotesTablePendingDeleteIds);
+  const deleteNotesStatus = useSelector(selectDeleteNotesStatus);
+  const deleteLoading = deleteNotesStatus === ReqStatus.Loading;
 
   const onCancel = useCallback(() => {
     dispatch(userClosedDeleteModal());
@@ -28,17 +30,13 @@ export const DeleteConfirmModal = React.memo(() => {
     dispatch(deleteNotes({ ids: pendingDeleteIds }));
   }, [dispatch, pendingDeleteIds]);
 
-  const deleteNotesStatus = useSelector(selectDeleteNotesStatus);
-
-  const isLoading = deleteNotesStatus === ReqStatus.Loading;
-
   return (
     <EuiConfirmModal
       aria-labelledby={'delete-notes-modal'}
       title={i18n.DELETE_NOTES_MODAL_TITLE}
       onCancel={onCancel}
       onConfirm={onConfirm}
-      isLoading={isLoading}
+      isLoading={deleteLoading}
       cancelButtonText={i18n.DELETE_NOTES_CANCEL}
       confirmButtonText={i18n.DELETE}
       buttonColor="danger"

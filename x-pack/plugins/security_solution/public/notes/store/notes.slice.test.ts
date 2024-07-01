@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as uuid from 'uuid';
 import {
   createNote,
-  deleteNote,
+  deleteNotes,
   fetchNotesByDocumentIds,
   initialNotesState,
   notesReducer,
@@ -15,103 +14,117 @@ import {
   selectAllNotes,
   selectCreateNoteError,
   selectCreateNoteStatus,
-  selectDeleteNoteError,
-  selectDeleteNoteStatus,
+  selectDeleteNotesError,
+  selectDeleteNotesStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
   selectNoteById,
   selectNoteIds,
   selectNotesByDocumentId,
+  userClosedDeleteModal,
+  userFilteredNotes,
+  userSearchedNotes,
+  userSelectedBulkDelete,
+  userSelectedPage,
+  userSelectedPerPage,
+  userSelectedRow,
+  userSelectedRowForDeletion,
+  userSortedNotes,
 } from './notes.slice';
 import { mockGlobalState } from '../../common/mock';
+import type { Note } from '../../../common/api/timeline';
+import * as uuid from 'uuid';
 
 const initalEmptyState = initialNotesState;
 
-export const generateNoteMock = (documentIds: string[]) =>
-  documentIds.map((documentId: string) => ({
-    noteId: uuid.v4(),
-    version: 'WzU1MDEsMV0=',
-    timelineId: '',
-    eventId: documentId,
-    note: 'This is a mocked note',
-    created: new Date().getTime(),
-    createdBy: 'elastic',
-    updated: new Date().getTime(),
-    updatedBy: 'elastic',
-  }));
+const generateNoteMock = (documentId: string): Note => ({
+  noteId: uuid.v4(),
+  version: 'WzU1MDEsMV0=',
+  timelineId: '',
+  eventId: documentId,
+  note: 'This is a mocked note',
+  created: new Date().getTime(),
+  createdBy: 'elastic',
+  updated: new Date().getTime(),
+  updatedBy: 'elastic',
+});
 
-const mockNote = { ...generateNoteMock(['1'])[0] };
+const mockNote1 = generateNoteMock('1');
+const mockNote2 = generateNoteMock('2');
+
 const initialNonEmptyState = {
   entities: {
-    [mockNote.noteId]: mockNote,
+    [mockNote1.noteId]: mockNote1,
+    [mockNote2.noteId]: mockNote2,
   },
-  ids: [mockNote.noteId],
+  ids: [mockNote1.noteId, mockNote2.noteId],
   status: {
     fetchNotesByDocumentIds: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
-    deleteNote: ReqStatus.Idle,
+    deleteNotes: ReqStatus.Idle,
+    fetchNotes: ReqStatus.Idle,
   },
-  error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
+  error: { fetchNotesByDocumentIds: null, createNote: null, deleteNotes: null, fetchNotes: null },
+  pagination: {
+    page: 1,
+    perPage: 10,
+    total: 0,
+  },
+  sort: {
+    field: 'created' as const,
+    direction: 'desc' as const,
+  },
+  filter: '',
+  search: '',
+  selectedIds: [],
+  pendingDeleteIds: [],
 };
 
 describe('notesSlice', () => {
   describe('notesReducer', () => {
     it('should handle an unknown action and return the initial state', () => {
-      expect(notesReducer(initalEmptyState, { type: 'unknown' })).toEqual({
-        entities: {},
-        ids: [],
-        status: {
-          fetchNotesByDocumentIds: ReqStatus.Idle,
-          createNote: ReqStatus.Idle,
-          deleteNote: ReqStatus.Idle,
-        },
-        error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
-      });
+      expect(notesReducer(initalEmptyState, { type: 'unknown' })).toEqual(initalEmptyState);
     });
 
     describe('fetchNotesByDocumentIds', () => {
-      it('should set correct status state when fetching notes by document id', () => {
+      it('should set correct status state when fetching notes by document ids', () => {
         const action = { type: fetchNotesByDocumentIds.pending.type };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
-          entities: {},
-          ids: [],
+          ...initalEmptyState,
           status: {
+            ...initalEmptyState.status,
             fetchNotesByDocumentIds: ReqStatus.Loading,
-            createNote: ReqStatus.Idle,
-            deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
-      it('should set correct state when success on fetch notes by document id on an empty state', () => {
+      it('should set correct state when success on fetch notes by document ids on an empty state', () => {
         const action = {
           type: fetchNotesByDocumentIds.fulfilled.type,
           payload: {
             entities: {
               notes: {
-                [mockNote.noteId]: mockNote,
+                [mockNote1.noteId]: mockNote1,
               },
             },
-            result: [mockNote.noteId],
+            result: [mockNote1.noteId],
           },
         };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
           entities: action.payload.entities.notes,
           ids: action.payload.result,
           status: {
+            ...initalEmptyState.status,
             fetchNotesByDocumentIds: ReqStatus.Succeeded,
-            createNote: ReqStatus.Idle,
-            deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
-      it('should replace notes when success on fetch notes by document id on a non-empty state', () => {
-        const newMockNote = { ...mockNote, timelineId: 'timelineId' };
+      it('should replace notes when success on fetch notes by document ids on a non-empty state', () => {
+        const newMockNote = { ...mockNote1, timelineId: 'timelineId' };
         const action = {
           type: fetchNotesByDocumentIds.fulfilled.type,
           payload: {
@@ -125,148 +138,252 @@ describe('notesSlice', () => {
         };
 
         expect(notesReducer(initialNonEmptyState, action)).toEqual({
-          entities: action.payload.entities.notes,
-          ids: action.payload.result,
-          status: {
-            fetchNotesByDocumentIds: ReqStatus.Succeeded,
-            createNote: ReqStatus.Idle,
-            deleteNote: ReqStatus.Idle,
+          ...initalEmptyState,
+          entities: {
+            [newMockNote.noteId]: newMockNote,
+            [mockNote2.noteId]: mockNote2,
           },
-          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
+          ids: [newMockNote.noteId, mockNote2.noteId],
+          status: {
+            ...initalEmptyState.status,
+            fetchNotesByDocumentIds: ReqStatus.Succeeded,
+          },
         });
       });
 
-      it('should set correct error state when failing to fetch notes by document id', () => {
+      it('should set correct error state when failing to fetch notes by document ids', () => {
         const action = { type: fetchNotesByDocumentIds.rejected.type, error: 'error' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
-          entities: {},
-          ids: [],
+          ...initalEmptyState,
           status: {
+            ...initalEmptyState.status,
             fetchNotesByDocumentIds: ReqStatus.Failed,
-            createNote: ReqStatus.Idle,
-            deleteNote: ReqStatus.Idle,
           },
           error: {
+            ...initalEmptyState.error,
             fetchNotesByDocumentIds: 'error',
-            createNote: null,
-            deleteNote: null,
           },
         });
       });
     });
 
     describe('createNote', () => {
-      it('should set correct status state when creating a note by document id', () => {
+      it('should set correct status state when creating a note', () => {
         const action = { type: createNote.pending.type };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
-          entities: {},
-          ids: [],
+          ...initalEmptyState,
           status: {
-            fetchNotesByDocumentIds: ReqStatus.Idle,
+            ...initalEmptyState.status,
             createNote: ReqStatus.Loading,
-            deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
-      it('should set correct state when success on create a note by document id on an empty state', () => {
+      it('should set correct state when success on create a note on an empty state', () => {
         const action = {
           type: createNote.fulfilled.type,
           payload: {
             entities: {
               notes: {
-                [mockNote.noteId]: mockNote,
+                [mockNote1.noteId]: mockNote1,
               },
             },
-            result: mockNote.noteId,
+            result: mockNote1.noteId,
           },
         };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
           entities: action.payload.entities.notes,
           ids: [action.payload.result],
           status: {
-            fetchNotesByDocumentIds: ReqStatus.Idle,
+            ...initalEmptyState.status,
             createNote: ReqStatus.Succeeded,
-            deleteNote: ReqStatus.Idle,
           },
-          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
-      it('should set correct error state when failing to create a note by document id', () => {
+      it('should set correct error state when failing to create a note', () => {
         const action = { type: createNote.rejected.type, error: 'error' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
-          entities: {},
-          ids: [],
+          ...initalEmptyState,
           status: {
-            fetchNotesByDocumentIds: ReqStatus.Idle,
+            ...initalEmptyState.status,
             createNote: ReqStatus.Failed,
-            deleteNote: ReqStatus.Idle,
           },
           error: {
-            fetchNotesByDocumentIds: null,
+            ...initalEmptyState.error,
             createNote: 'error',
-            deleteNote: null,
           },
         });
       });
     });
 
-    describe('deleteNote', () => {
-      it('should set correct status state when deleting a note', () => {
-        const action = { type: deleteNote.pending.type };
+    describe('deleteNotes', () => {
+      it('should set correct status state when deleting notes', () => {
+        const action = { type: deleteNotes.pending.type };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
-          entities: {},
-          ids: [],
+          ...initalEmptyState,
           status: {
-            fetchNotesByDocumentIds: ReqStatus.Idle,
-            createNote: ReqStatus.Idle,
-            deleteNote: ReqStatus.Loading,
+            ...initalEmptyState.status,
+            deleteNotes: ReqStatus.Loading,
           },
-          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
         });
       });
 
-      it('should set correct state when success on deleting a note', () => {
+      it('should set correct state when success on deleting notes', () => {
         const action = {
-          type: deleteNote.fulfilled.type,
-          payload: mockNote.noteId,
+          type: deleteNotes.fulfilled.type,
+          payload: [mockNote1.noteId],
+        };
+        const state = {
+          ...initialNonEmptyState,
+          pendingDeleteIds: [mockNote1.noteId],
         };
 
-        expect(notesReducer(initialNonEmptyState, action)).toEqual({
-          entities: {},
-          ids: [],
-          status: {
-            fetchNotesByDocumentIds: ReqStatus.Idle,
-            createNote: ReqStatus.Idle,
-            deleteNote: ReqStatus.Succeeded,
+        expect(notesReducer(state, action)).toEqual({
+          ...initialNonEmptyState,
+          entities: {
+            [mockNote2.noteId]: mockNote2,
           },
-          error: { fetchNotesByDocumentIds: null, createNote: null, deleteNote: null },
+          ids: [mockNote2.noteId],
+          status: {
+            ...initialNonEmptyState.status,
+            deleteNotes: ReqStatus.Succeeded,
+          },
+          pendingDeleteIds: [],
         });
       });
 
-      it('should set correct state when failing to create a note by document id', () => {
-        const action = { type: deleteNote.rejected.type, error: 'error' };
+      it('should set correct state when failing to delete notes', () => {
+        const action = { type: deleteNotes.rejected.type, error: 'error' };
 
         expect(notesReducer(initalEmptyState, action)).toEqual({
-          entities: {},
-          ids: [],
+          ...initalEmptyState,
           status: {
-            fetchNotesByDocumentIds: ReqStatus.Idle,
-            createNote: ReqStatus.Idle,
-            deleteNote: ReqStatus.Failed,
+            ...initalEmptyState.status,
+            deleteNotes: ReqStatus.Failed,
           },
           error: {
-            fetchNotesByDocumentIds: null,
-            createNote: null,
-            deleteNote: 'error',
+            ...initalEmptyState.error,
+            deleteNotes: 'error',
           },
+        });
+      });
+    });
+
+    describe('userSelectedPage', () => {
+      it('should set correct value for the selected page', () => {
+        const action = { type: userSelectedPage.type, payload: 2 };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          pagination: {
+            ...initalEmptyState.pagination,
+            page: 2,
+          },
+        });
+      });
+    });
+
+    describe('userSelectedPerPage', () => {
+      it('should set correct value for number of notes per page', () => {
+        const action = { type: userSelectedPerPage.type, payload: 25 };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          pagination: {
+            ...initalEmptyState.pagination,
+            perPage: 25,
+          },
+        });
+      });
+    });
+
+    describe('userSortedNotes', () => {
+      it('should set correct value for sorting notes', () => {
+        const action = { type: userSortedNotes.type, payload: { field: 'note', direction: 'asc' } };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          sort: {
+            field: 'note',
+            direction: 'asc',
+          },
+        });
+      });
+    });
+
+    describe('userFilteredNotes', () => {
+      it('should set correct value to filter notes', () => {
+        const action = { type: userFilteredNotes.type, payload: 'abc' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          filter: 'abc',
+        });
+      });
+    });
+
+    describe('userSearchedNotes', () => {
+      it('should set correct value to search notes', () => {
+        const action = { type: userSearchedNotes.type, payload: 'abc' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          search: 'abc',
+        });
+      });
+    });
+
+    describe('userSelectedRow', () => {
+      it('should set correct ids for selected rows', () => {
+        const action = { type: userSelectedRow.type, payload: ['1'] };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          selectedIds: ['1'],
+        });
+      });
+    });
+
+    describe('userClosedDeleteModal', () => {
+      it('should reset pendingDeleteIds when closing modal', () => {
+        const action = { type: userClosedDeleteModal.type };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          pendingDeleteIds: [],
+        });
+      });
+    });
+
+    describe('userSelectedRowForDeletion', () => {
+      it('should set correct id when user selects a row', () => {
+        const action = { type: userSelectedRowForDeletion.type, payload: '1' };
+
+        expect(notesReducer(initalEmptyState, action)).toEqual({
+          ...initalEmptyState,
+          pendingDeleteIds: ['1'],
+        });
+      });
+    });
+
+    describe('userSelectedBulkDelete', () => {
+      it('should update pendingDeleteIds when user chooses bulk delete', () => {
+        const action = { type: userSelectedBulkDelete.type };
+        const state = {
+          ...initalEmptyState,
+          selectedIds: ['1'],
+        };
+
+        expect(notesReducer(state, action)).toEqual({
+          ...state,
+          pendingDeleteIds: ['1'],
         });
       });
     });
@@ -274,24 +391,17 @@ describe('notesSlice', () => {
 
   describe('selectors', () => {
     it('should return all notes', () => {
-      const state = mockGlobalState;
-      state.notes.entities = initialNonEmptyState.entities;
-      state.notes.ids = initialNonEmptyState.ids;
-      expect(selectAllNotes(state)).toEqual([mockNote]);
+      expect(selectAllNotes(mockGlobalState)).toEqual(
+        Object.values(mockGlobalState.notes.entities)
+      );
     });
 
     it('should return note by id', () => {
-      const state = mockGlobalState;
-      state.notes.entities = initialNonEmptyState.entities;
-      state.notes.ids = initialNonEmptyState.ids;
-      expect(selectNoteById(state, mockNote.noteId)).toEqual(mockNote);
+      expect(selectNoteById(mockGlobalState, '1')).toEqual(mockGlobalState.notes.entities['1']);
     });
 
     it('should return note ids', () => {
-      const state = mockGlobalState;
-      state.notes.entities = initialNonEmptyState.entities;
-      state.notes.ids = initialNonEmptyState.ids;
-      expect(selectNoteIds(state)).toEqual([mockNote.noteId]);
+      expect(selectNoteIds(mockGlobalState)).toEqual(['1']);
     });
 
     it('should return fetch notes by document id status', () => {
@@ -311,19 +421,21 @@ describe('notesSlice', () => {
     });
 
     it('should return delete note status', () => {
-      expect(selectDeleteNoteStatus(mockGlobalState)).toEqual(ReqStatus.Idle);
+      expect(selectDeleteNotesStatus(mockGlobalState)).toEqual(ReqStatus.Idle);
     });
 
     it('should return delete note error', () => {
-      expect(selectDeleteNoteError(mockGlobalState)).toEqual(null);
+      expect(selectDeleteNotesError(mockGlobalState)).toEqual(null);
     });
 
     it('should return all notes for an existing document id', () => {
-      expect(selectNotesByDocumentId(mockGlobalState, '1')).toEqual([mockNote]);
+      expect(selectNotesByDocumentId(mockGlobalState, 'document-id-1')).toEqual([
+        mockGlobalState.notes.entities['1'],
+      ]);
     });
 
     it('should return no notes if document id does not exist', () => {
-      expect(selectNotesByDocumentId(mockGlobalState, '2')).toHaveLength(0);
+      expect(selectNotesByDocumentId(mockGlobalState, 'wrong-document-id')).toHaveLength(0);
     });
   });
 });
