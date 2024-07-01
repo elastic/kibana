@@ -10,56 +10,30 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { PublicAppInfo } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { CasesUIActionProps } from './types';
+import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Services } from './types';
 
 const coreStart = coreMock.createStart();
 
-export class MockEmbeddable {
-  public type;
-  private input;
-  constructor(
-    type: string,
-    input?: {
-      attributes: TypedLensByValueInput['attributes'];
-      id: string;
-      timeRange: { from: string; to: string; fromStr: string; toStr: string };
-    }
-  ) {
-    this.type = type;
-    this.input = input;
-  }
-  getFilters() {}
-  getQuery() {}
-  getInput() {
-    return this.input;
-  }
-  getFullAttributes() {
-    return this.input?.attributes;
-  }
-}
-
-export const mockAttributes = {
-  title: 'mockTitle',
-  description: 'mockDescription',
-  references: [],
-  state: {
-    visualization: {
-      id: 'mockId',
-      type: 'mockType',
-      title: 'mockTitle',
-      visualizationType: 'mockVisualizationType',
-      references: [],
-      state: {
-        datasourceStates: {
-          indexpattern: {},
-        },
-      },
-    },
+export const mockLensApi = {
+  type: 'lens',
+  getSavedVis: () => {},
+  canViewUnderlyingData: () => {},
+  getViewUnderlyingDataArgs: () => {},
+  getFullAttributes: () => {
+    return {} as unknown as LensSavedObjectAttributes;
   },
-} as unknown as TypedLensByValueInput['attributes'];
-
-export const mockTimeRange = { from: '', to: '', fromStr: '', toStr: '' };
+  panelTitle: new BehaviorSubject('myPanel'),
+  hidePanelTitle: new BehaviorSubject('false'),
+  timeslice$: new BehaviorSubject<[number, number] | undefined>(undefined),
+  timeRange$: new BehaviorSubject<TimeRange | undefined>({
+    from: 'now-24h',
+    to: 'now',
+  }),
+  filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
+  query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
+};
 
 export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');
 export const getMockApplications$ = () =>
@@ -67,26 +41,17 @@ export const getMockApplications$ = () =>
     new Map([['securitySolutionUI', { category: { label: 'Test' } } as unknown as PublicAppInfo]])
   );
 
-export const getMockCaseUiActionProps = () => {
-  const core = {
-    ...coreStart,
-    application: { currentAppId$: getMockCurrentAppId$(), capabilities: {} },
-    uiSettings: {
-      get: jest.fn().mockReturnValue(true),
+export const getMockServices = () => {
+  return {
+    core: {
+      ...coreStart,
+      application: { currentAppId$: getMockCurrentAppId$(), capabilities: {} },
+      uiSettings: {
+        get: jest.fn().mockReturnValue(true),
+      },
     },
-  };
-  const plugins = {};
-  const storage = {};
-  const history = createBrowserHistory();
-  const caseContextProps = {};
-
-  const caseUiActionProps = {
-    core,
-    plugins,
-    storage,
-    history,
-    caseContextProps,
-  } as unknown as CasesUIActionProps;
-
-  return caseUiActionProps;
+    plugins: {},
+    storage: {},
+    history: createBrowserHistory(),
+  } as unknown as Services;
 };

@@ -11,7 +11,7 @@ import type { LensApi } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ActionWrapper } from './action_wrapper';
-import type { CasesUIActionProps } from './types';
+import type { CasesActionContextProps, Services } from './types';
 import type { CaseUI } from '../../../../common';
 import { getLensCaseAttachment } from './utils';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
@@ -49,7 +49,8 @@ AddExistingCaseModalWrapper.displayName = 'AddExistingCaseModalWrapper';
 export function openModal(
   lensApi: LensApi,
   currentAppId: string | undefined,
-  casesProps: CasesUIActionProps
+  casesActionContextProps: CasesActionContextProps,
+  services: Services
 ) {
   const targetDomElement = document.createElement('div');
 
@@ -75,16 +76,13 @@ export function openModal(
   };
   const mount = toMountPoint(
     <ActionWrapper
-      core={casesProps.core}
-      caseContextProps={casesProps.caseContextProps}
-      storage={casesProps.storage}
-      plugins={casesProps.plugins}
-      history={casesProps.history}
+      casesActionContextProps={casesActionContextProps}
       currentAppId={currentAppId}
+      services={services}
     >
       <AddExistingCaseModalWrapper lensApi={lensApi} onClose={onClose} onSuccess={onSuccess} />
     </ActionWrapper>,
-    { i18n: casesProps.core.i18n, theme: casesProps.core.theme }
+    { i18n: services.core.i18n, theme: services.core.theme }
   );
 
   mount(targetDomElement);
