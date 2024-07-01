@@ -6,12 +6,16 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import { isLensApi } from "@kbn/lens-plugin/public";
-import { hasBlockingError } from "@kbn/presentation-publishing";
+import { isLensApi } from '@kbn/lens-plugin/public';
+import { hasBlockingError } from '@kbn/presentation-publishing';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 
-export function isCompatible(embeddable: unknown, currentAppId: string | undefined, core: CoreStart) {
+export function isCompatible(
+  embeddable: unknown,
+  currentAppId: string | undefined,
+  core: CoreStart
+) {
   if (!isLensApi(embeddable) || hasBlockingError(embeddable)) return false;
   if (!embeddable.getFullAttributes()) {
     return false;
@@ -21,11 +25,6 @@ export function isCompatible(embeddable: unknown, currentAppId: string | undefin
     return false;
   }
   const owner = getCaseOwnerByAppId(currentAppId);
-  const casePermissions = canUseCases(core.application.capabilities)(
-    owner ? [owner] : undefined
-  );
-  return (
-    casePermissions.update &&
-    casePermissions.create
-  );
+  const casePermissions = canUseCases(core.application.capabilities)(owner ? [owner] : undefined);
+  return casePermissions.update && casePermissions.create;
 }

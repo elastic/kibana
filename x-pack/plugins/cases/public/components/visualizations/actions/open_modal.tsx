@@ -7,14 +7,14 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { LensApi } from "@kbn/lens-plugin/public";
+import type { LensApi } from '@kbn/lens-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { ActionWrapper } from "./action_wrapper";
-import { CasesUIActionProps } from "./types";
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { ActionWrapper } from './action_wrapper';
+import type { CasesUIActionProps } from './types';
 import type { CaseUI } from '../../../../common';
 import { getLensCaseAttachment } from './utils';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 interface Props {
   lensApi: LensApi;
@@ -44,8 +44,13 @@ const AddExistingCaseModalWrapper: React.FC<Props> = ({ lensApi, onClose, onSucc
 
   return null;
 };
+AddExistingCaseModalWrapper.displayName = 'AddExistingCaseModalWrapper';
 
-export function openModal(lensApi: LensApi, currentAppId: string | undefined, casesProps: CasesUIActionProps) {  
+export function openModal(
+  lensApi: LensApi,
+  currentAppId: string | undefined,
+  casesProps: CasesUIActionProps
+) {
   const targetDomElement = document.createElement('div');
 
   const cleanupDom = (shouldCleanup?: boolean) => {
@@ -77,11 +82,7 @@ export function openModal(lensApi: LensApi, currentAppId: string | undefined, ca
       history={casesProps.history}
       currentAppId={currentAppId}
     >
-      <AddExistingCaseModalWrapper
-        lensApi={lensApi}
-        onClose={onClose}
-        onSuccess={onSuccess}
-      />
+      <AddExistingCaseModalWrapper lensApi={lensApi} onClose={onClose} onSuccess={onSuccess} />
     </ActionWrapper>,
     { i18n: casesProps.core.i18n, theme: casesProps.core.theme }
   );

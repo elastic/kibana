@@ -7,9 +7,9 @@
 
 import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { CasesUIActionProps } from './types';
 import { ADD_TO_EXISTING_CASE_DISPLAYNAME } from './translations';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 
 export const ACTION_ID = 'embeddable_addToExistingCase';
 
