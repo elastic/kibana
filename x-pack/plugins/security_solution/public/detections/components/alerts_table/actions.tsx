@@ -46,6 +46,7 @@ import {
 import {
   isEqlRule,
   isEsqlRule,
+  isMlRule,
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../common/detection_engine/utils';
@@ -281,6 +282,7 @@ const isNewTermsAlert = (ecsData: Ecs): boolean => isNewTermsRule(getRuleType(ec
 const isEsqlAlert = (ecsData: Ecs): boolean => isEsqlRule(getRuleType(ecsData));
 const isEqlAlert = (ecsData: Ecs): boolean => isEqlRule(getRuleType(ecsData));
 const isThresholdAlert = (ecsData: Ecs): boolean => isThresholdRule(getRuleType(ecsData));
+const isMlAlert = (ecsData: Ecs): boolean => isMlRule(getRuleType(ecsData));
 
 const isSuppressedAlert = (ecsData: Ecs): boolean => {
   return getField(ecsData, ALERT_SUPPRESSION_DOCS_COUNT) != null;
@@ -1025,8 +1027,12 @@ export const sendAlertToTimelineAction = async ({
             getExceptionFilter
           );
           // The Query field should remain unpopulated with the suppressed EQL/ES|QL alert.
-          // TODO do we need additional logic for ML alerts here?
-        } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData) && !isEsqlAlert(ecsData)) {
+        } else if (
+          isSuppressedAlert(ecsData) &&
+          !isEqlAlert(ecsData) &&
+          !isEsqlAlert(ecsData) &&
+          !isMlAlert(ecsData)
+        ) {
           return createSuppressedTimeline(
             ecsData,
             createTimeline,
@@ -1097,7 +1103,12 @@ export const sendAlertToTimelineAction = async ({
   } else if (isNewTermsAlert(ecsData)) {
     return createNewTermsTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
     // The Query field should remain unpopulated with the suppressed EQL/ES|QL alert.
-  } else if (isSuppressedAlert(ecsData) && !isEqlAlert(ecsData) && !isEsqlAlert(ecsData)) {
+  } else if (
+    isSuppressedAlert(ecsData) &&
+    !isEqlAlert(ecsData) &&
+    !isEsqlAlert(ecsData) &&
+    !isMlAlert(ecsData)
+  ) {
     return createSuppressedTimeline(ecsData, createTimeline, noteContent, {}, getExceptionFilter);
   } else {
     let { dataProviders, filters } = buildTimelineDataProviderOrFilter(
