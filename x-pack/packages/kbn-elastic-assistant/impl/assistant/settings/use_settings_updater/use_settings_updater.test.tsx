@@ -101,14 +101,22 @@ describe('useSettingsUpdater', () => {
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields, mockSystemPrompts)
+        useSettingsUpdater(
+          mockConversations,
+          {
+            data: mockSystemPrompts,
+            page: 1,
+            perPage: 100,
+            total: 10,
+          },
+          conversationsLoaded,
+          anonymizationFields
+        )
       );
       await waitForNextUpdate();
       const {
         setConversationSettings,
         setConversationsSettingsBulkActions,
-        setUpdatedQuickPromptSettings,
-        setUpdatedSystemPromptSettings,
         setUpdatedKnowledgeBaseSettings,
         setUpdatedAssistantStreamingEnabled,
         resetSettings,
@@ -117,7 +125,7 @@ describe('useSettingsUpdater', () => {
 
       setConversationSettings(updatedValues.conversations);
       setConversationsSettingsBulkActions({});
-      setPromptsBulkActions(updatedValues.allSystemPrompts);
+      setPromptsBulkActions({});
       setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
       setUpdatedAssistantStreamingEnabled(updatedValues.assistantStreamingEnabled);
@@ -149,7 +157,17 @@ describe('useSettingsUpdater', () => {
   it('should update all state variables to their updated values when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
+        useSettingsUpdater(
+          mockConversations,
+          {
+            data: mockSystemPrompts,
+            page: 1,
+            perPage: 100,
+            total: 10,
+          },
+          conversationsLoaded,
+          anonymizationFields
+        )
       );
       await waitForNextUpdate();
       const {
@@ -163,7 +181,7 @@ describe('useSettingsUpdater', () => {
       setConversationSettings(updatedValues.conversations);
       setConversationsSettingsBulkActions({ delete: { ids: ['1'] } });
       setAnonymizationFieldsBulkActions({ delete: { ids: ['1'] } });
-      setPromptsBulkActions(updatedValues.allSystemPrompts);
+      setPromptsBulkActions({});
       setUpdatedAnonymizationData(updatedValues.updatedAnonymizationData);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
 
@@ -188,7 +206,17 @@ describe('useSettingsUpdater', () => {
   it('should track which toggles have been updated when saveSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
+        useSettingsUpdater(
+          mockConversations,
+          {
+            data: mockSystemPrompts,
+            page: 1,
+            perPage: 100,
+            total: 10,
+          },
+          conversationsLoaded,
+          anonymizationFields
+        )
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
@@ -205,7 +233,17 @@ describe('useSettingsUpdater', () => {
   it('should track only toggles that updated', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
+        useSettingsUpdater(
+          mockConversations,
+          {
+            data: mockSystemPrompts,
+            page: 1,
+            perPage: 100,
+            total: 10,
+          },
+          conversationsLoaded,
+          anonymizationFields
+        )
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
@@ -223,7 +261,17 @@ describe('useSettingsUpdater', () => {
   it('if no toggles update, do not track anything', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() =>
-        useSettingsUpdater(mockConversations, conversationsLoaded, anonymizationFields)
+        useSettingsUpdater(
+          mockConversations,
+          {
+            data: mockSystemPrompts,
+            page: 1,
+            perPage: 100,
+            total: 10,
+          },
+          conversationsLoaded,
+          anonymizationFields
+        )
       );
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;

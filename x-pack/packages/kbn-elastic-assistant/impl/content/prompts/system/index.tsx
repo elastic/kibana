@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Prompt } from '../../../..';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import {
   DEFAULT_SYSTEM_PROMPT_LABEL,
   DEFAULT_SYSTEM_PROMPT_NAME,
@@ -18,19 +18,19 @@ import {
 /**
  * Base System Prompts for Elastic AI Assistant (if not overridden on initialization).
  */
-export const BASE_SYSTEM_PROMPTS: Prompt[] = [
+export const BASE_SYSTEM_PROMPTS: PromptResponse[] = [
   {
     id: 'default-system-prompt',
     content: DEFAULT_SYSTEM_PROMPT_NON_I18N,
     name: DEFAULT_SYSTEM_PROMPT_NAME,
     promptType: 'system',
-    label: DEFAULT_SYSTEM_PROMPT_LABEL,
+    // label: DEFAULT_SYSTEM_PROMPT_LABEL,
   },
   {
     id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
     content: SUPERHERO_SYSTEM_PROMPT_NON_I18N,
     name: SUPERHERO_SYSTEM_PROMPT_NAME,
     promptType: 'system',
-    label: SUPERHERO_SYSTEM_PROMPT_LABEL,
+    // label: SUPERHERO_SYSTEM_PROMPT_LABEL,
   },
 ];
