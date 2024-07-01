@@ -17,16 +17,6 @@ export const registerUIActions = ({
   history,
   storage,
 }: CasesUIActionProps) => {
-  registerLensActions({ core, plugins, caseContextProps, history, storage });
-};
-
-const registerLensActions = ({
-  core,
-  plugins,
-  caseContextProps,
-  history,
-  storage,
-}: CasesUIActionProps) => {
   const addToExistingCaseAction = createAddToExistingCaseLensAction({
     core,
     plugins,

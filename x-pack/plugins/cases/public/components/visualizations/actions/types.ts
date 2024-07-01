@@ -6,11 +6,9 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { Embeddable } from '@kbn/lens-plugin/public';
 import type * as H from 'history';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { CasesPublicStartDependencies } from '../../../types';
 import type { CasesContextProps } from '../../cases_context';
 
@@ -28,7 +26,3 @@ export interface CasesUIActionProps {
   history: H.History;
   storage: Storage;
 }
-
-export type ActionContext = ActionExecutionContext<{
-  embeddable: Embeddable;
-}>;
