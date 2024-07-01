@@ -7,7 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ESQLFunction, ESQLMessage, ESQLLiteral } from '@kbn/esql-ast';
 import type { FunctionDefinition, FunctionParameterType } from './types';
+import { isLiteralItem } from '../shared/helpers';
 
 function createNumericAggDefinition({
   name,
@@ -263,5 +265,32 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         `from employees | stats top_salaries = top_list(salary, 10, "desc")`,
         `from employees | stats date = top_list(hire_date, 2, "asc"), double = top_list(salary_change, 2, "asc"),`,
       ],
+      validate: (fn: ESQLFunction) => {
+        const messages: ESQLMessage[] = [];
+        const args = fn.args;
+        if (args.length >= 3) {
+          const [, , order] = args;
+          if (!isLiteralItem(order) || !/^"(asc|desc)"$/i.test(String(order.value))) {
+            const item = order as ESQLLiteral;
+            messages.push({
+              location: item.location,
+              text: i18n.translate(
+                'kbn-esql-validation-autocomplete.esql.validation.functions.topList.invalidOrder',
+                {
+                  defaultMessage:
+                    'The order argument must be a string literal with value "asc" or "desc".',
+                  values: {
+                    expression: item.text,
+                  },
+                }
+              ),
+              type: 'error' as const,
+              code: 'invalidOrder',
+            });
+            return messages;
+          }
+        }
+        return messages;
+      },
     },
   ]);
