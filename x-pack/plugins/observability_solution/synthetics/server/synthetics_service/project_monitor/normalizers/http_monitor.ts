@@ -55,7 +55,7 @@ export const getNormalizeHTTPFields = ({
   const urls = getUrlsField(monitor.urls);
   if (urls.length !== 1) {
     errors.push(getInvalidUrlsOrHostsError(monitor, 'urls', version));
-  } else if (isValidURL(urls[0]) === false) {
+  } else if (!isValidURL(urls[0])) {
     errors.push(getUnparseableUrlError(monitor, version));
   }
   if (unsupportedKeys.length) {
