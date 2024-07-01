@@ -165,7 +165,8 @@ export const AssistantHeader: React.FC<Props> = ({
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                aria-label="xxx"
+                aria-label="euiFlyoutCloseButton"
+                data-test-subj="euiFlyoutCloseButton"
                 iconType="cross"
                 color="text"
                 size="xs"
