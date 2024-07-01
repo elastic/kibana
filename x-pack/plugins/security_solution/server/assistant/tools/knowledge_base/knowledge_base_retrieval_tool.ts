@@ -22,7 +22,6 @@ const toolDetails = {
   id: 'knowledge-base-retrieval-tool',
   name: 'KnowledgeBaseRetrievalTool',
 };
-
 export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,

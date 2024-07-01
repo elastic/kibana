@@ -19,7 +19,6 @@ const toolDetails = {
   id: 'esql-knowledge-base-tool',
   name: 'ESQLKnowledgeBaseTool',
 };
-
 export const ESQL_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,

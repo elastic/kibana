@@ -23,7 +23,6 @@ const toolDetails = {
   id: 'knowledge-base-write-tool',
   name: 'KnowledgeBaseWriteTool',
 };
-
 export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,

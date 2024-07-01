@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Origin: x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/query/correct_common_esql_mistakes.ts
+
 const STRING_DELIMITER_TOKENS = ['`', "'", '"'];
 const ESCAPE_TOKEN = '\\\\';
 

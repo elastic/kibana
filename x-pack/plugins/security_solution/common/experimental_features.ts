@@ -125,7 +125,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
    */
-  assistantKnowledgeBaseByDefault: true,
+  assistantKnowledgeBaseByDefault: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
@@ -257,7 +257,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Adds a new langgraph-based ESQL generation tool
    */
-  aiAssistantGraphEsqlTool: true,
+  aiAssistantGraphEsqlTool: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

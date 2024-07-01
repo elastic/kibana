@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+// Origin: x-pack/plugins/observability_solution/observability_ai_assistant_app/server/functions/query/correct_common_esql_mistakes.test.ts
+
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 
 describe('correctCommonEsqlMistakes', () => {
