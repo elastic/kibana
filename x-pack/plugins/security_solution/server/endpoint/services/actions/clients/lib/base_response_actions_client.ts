@@ -13,6 +13,7 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { SimpleMemCache } from './simple_mem_cache';
 import { validateActionId } from '../../utils/validate_action_id';
 import {
   fetchActionResponses,
@@ -187,6 +188,8 @@ export interface ResponseActionsClientPendingAction<
  */
 export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
+
+  protected readonly cache = new SimpleMemCache();
 
   protected abstract readonly agentType: ResponseActionAgentType;
 

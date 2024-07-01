@@ -226,8 +226,14 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   private async getAgentDetails(
     agentUUID: string
   ): Promise<SentinelOneGetAgentsResponse['data'][number]> {
-    // FIXME:PT We should cache the results for a "short time" so that we don't keep querying the API.
-    //        This method is sometimes called multiple times from different methods in this class, so caching it would improve performance
+    const cachedEntry = this.cache.get<SentinelOneGetAgentsResponse['data'][number]>(agentUUID);
+
+    if (cachedEntry) {
+      this.log.debug(
+        `Found agent details for UUID [${agentUUID}] in cache:\n${stringify(cachedEntry)}`
+      );
+      return cachedEntry;
+    }
 
     let s1ApiResponse: SentinelOneGetAgentsResponse | undefined;
 
@@ -248,6 +254,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     if (!s1ApiResponse || !s1ApiResponse.data[0]) {
       throw new ResponseActionsClientError(`SentinelOne agent id [${agentUUID}] not found`, 404);
     }
+
+    this.cache.set(agentUUID, s1ApiResponse.data[0]);
 
     return s1ApiResponse.data[0];
   }
