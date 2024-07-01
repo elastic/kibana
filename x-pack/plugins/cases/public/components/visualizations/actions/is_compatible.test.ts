@@ -35,23 +35,23 @@ describe('isCompatible', () => {
     jest.clearAllMocks();
   });
 
-  it('should return false if error embeddable', async () => {
+  test('should return false if error embeddable', async () => {
     const errorApi = {
       blockingError: new BehaviorSubject<Error | undefined>(new Error('Simulated blocking error')),
     };
     expect(isCompatible(errorApi, appId, mockCoreStart)).toBe(false);
   });
 
-  it('should return false if not lens embeddable', async () => {
+  test('should return false if not lens embeddable', async () => {
     expect(isCompatible({}, appId, mockCoreStart)).toBe(false);
   });
 
-  it('should return false if no permission', async () => {
+  test('should return false if no permission', async () => {
     mockCasePermissions.mockReturnValue({ create: false, update: false });
     expect(isCompatible(mockLensApi, appId, mockCoreStart)).toBe(false);
   });
 
-  it('should return true if is lens embeddable', async () => {
+  test('should return true if is lens embeddable', async () => {
     expect(isCompatible(mockLensApi, appId, mockCoreStart)).toBe(true);
   });
 });

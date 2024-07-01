@@ -10,11 +10,31 @@ import { BehaviorSubject } from 'rxjs';
 
 import type { PublicAppInfo } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
+import type { LensApi, LensSavedObjectAttributes } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Services } from './types';
 
 const coreStart = coreMock.createStart();
+
+export const mockLensAttributes = {
+  title: 'mockTitle',
+  description: 'mockDescription',
+  references: [],
+  state: {
+    visualization: {
+      id: 'mockId',
+      type: 'mockType',
+      title: 'mockTitle',
+      visualizationType: 'mockVisualizationType',
+      references: [],
+      state: {
+        datasourceStates: {
+          indexpattern: {},
+        },
+      },
+    },
+  },
+} as unknown as LensSavedObjectAttributes;
 
 export const mockLensApi = {
   type: 'lens',
@@ -22,7 +42,7 @@ export const mockLensApi = {
   canViewUnderlyingData: () => {},
   getViewUnderlyingDataArgs: () => {},
   getFullAttributes: () => {
-    return {} as unknown as LensSavedObjectAttributes;
+    return mockLensAttributes;
   },
   panelTitle: new BehaviorSubject('myPanel'),
   hidePanelTitle: new BehaviorSubject('false'),
@@ -33,7 +53,7 @@ export const mockLensApi = {
   }),
   filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
   query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
-};
+} as unknown as LensApi;
 
 export const getMockCurrentAppId$ = () => new BehaviorSubject<string>('securitySolutionUI');
 export const getMockApplications$ = () =>
