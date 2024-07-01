@@ -29,7 +29,7 @@ import { v4 as generateUUI } from 'uuid';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
-import type { AnyArtifact } from '../artifact_entry_card';
+import type { ArtifactEntryCardDecoratorProps } from '../artifact_entry_card';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
@@ -54,7 +54,7 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
   /** Classname applied to the area that holds the content items */
   contentClassName?: string;
   // Artifact specific decorations to display in the cards
-  cardDecorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
+  CardDecorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
   /**
    * Children can be used to define custom content if the default creation of items is not sufficient
    * to accommodate a use case.
@@ -142,7 +142,7 @@ export const PaginatedContent = memo(
     'data-test-subj': dataTestSubj,
     'aria-label': ariaLabel,
     className,
-    cardDecorator,
+    CardDecorator,
     children,
   }: PaginatedContentProps<T, C>) => {
     const [itemKeys] = useState<WeakMap<T, string>>(new WeakMap());
@@ -227,7 +227,7 @@ export const PaginatedContent = memo(
             }
           }
 
-          return <Item {...itemComponentProps(item)} key={key} decorator={cardDecorator} />;
+          return <Item {...itemComponentProps(item)} key={key} Decorator={CardDecorator} />;
         });
       }
       if (!loading)
@@ -241,7 +241,7 @@ export const PaginatedContent = memo(
       getTestId,
       itemId,
       itemComponentProps,
-      cardDecorator,
+      CardDecorator,
       itemKeys,
     ]);
 

@@ -108,7 +108,9 @@ describe('When on the Event Filters list page', () => {
 
       expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
       expect(
-        renderResult.queryAllByTestId('EventFiltersListPage-processDescendantIndication')
+        renderResult.queryAllByTestId(
+          'EventFiltersListPage-card-decorator-processDescendantIndication'
+        )
       ).toHaveLength(0);
     });
 
@@ -119,13 +121,15 @@ describe('When on the Event Filters list page', () => {
 
       expect(renderResult.getAllByTestId('EventFiltersListPage-card')).toHaveLength(3);
       expect(
-        renderResult.getAllByTestId('EventFiltersListPage-processDescendantIndication')
+        renderResult.getAllByTestId(
+          'EventFiltersListPage-card-decorator-processDescendantIndication'
+        )
       ).toHaveLength(2);
     });
 
     it('should display additional `event.category is process` entry in tooltip', async () => {
       mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-      const prefix = 'EventFiltersListPage-processDescendantIndication';
+      const prefix = 'EventFiltersListPage-card-decorator-processDescendantIndication';
 
       await renderWithData();
 

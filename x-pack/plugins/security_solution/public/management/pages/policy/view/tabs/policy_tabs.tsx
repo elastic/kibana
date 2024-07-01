@@ -43,7 +43,6 @@ import {
   policyIdFromParams,
   isOnProtectionUpdatesView,
 } from '../../store/policy_details/selectors';
-import type { PolicyArtifactsLayoutProps } from '../artifacts/layout/policy_artifacts_layout';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
@@ -183,11 +182,6 @@ export const PolicyTabs = React.memo(() => {
     [http]
   );
 
-  const eventFilterCardDecorator: PolicyArtifactsLayoutProps['cardDecorator'] = useCallback(
-    (item) => <EventFiltersProcessDescendantIndicator item={item} />,
-    []
-  );
-
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
       ...POLICY_ARTIFACT_TRUSTED_APPS_LABELS,
@@ -297,7 +291,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getEventFiltersListPath}
                   getPolicyArtifactsPath={getPolicyEventFiltersPath}
                   canWriteArtifact={canWriteEventFilters}
-                  cardDecorator={eventFilterCardDecorator}
+                  CardDecorator={EventFiltersProcessDescendantIndicator}
                 />
               </>
             ),
@@ -385,7 +379,6 @@ export const PolicyTabs = React.memo(() => {
     canReadEventFilters,
     getEventFiltersApiClientInstance,
     canWriteEventFilters,
-    eventFilterCardDecorator,
     canReadHostIsolationExceptions,
     getHostIsolationExceptionsApiClientInstance,
     canWriteHostIsolationExceptions,

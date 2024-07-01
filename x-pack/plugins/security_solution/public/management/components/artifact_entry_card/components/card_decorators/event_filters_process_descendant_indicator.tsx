@@ -10,17 +10,11 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
-import type { MaybeImmutable } from '../../../../../../common/endpoint/types';
-import type { AnyArtifact } from '../../types';
 import { ProcessDescendantsTooltip } from '../../../../pages/event_filters/view/components/process_descendant_tooltip';
+import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 
-export interface EventFiltersProcessDescendantIndicatorProps {
-  item: MaybeImmutable<AnyArtifact>;
-  testIdPrefix?: string;
-}
-
-export const EventFiltersProcessDescendantIndicator =
-  memo<EventFiltersProcessDescendantIndicatorProps>(({ item, testIdPrefix }) => {
+export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDecoratorProps>(
+  ({ item, testIdPrefix }) => {
     const isProcessDescendantFeatureEnabled = useIsExperimentalFeatureEnabled(
       'filterProcessDescendantsForEventFiltersEnabled'
     );
@@ -51,5 +45,6 @@ export const EventFiltersProcessDescendantIndicator =
     }
 
     return <></>;
-  });
+  }
+);
 EventFiltersProcessDescendantIndicator.displayName = 'EventFiltersProcessDescendantIndicator';

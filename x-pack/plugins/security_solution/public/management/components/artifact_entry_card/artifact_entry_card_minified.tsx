@@ -18,7 +18,6 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
 import { CriteriaConditions } from './components/criteria_conditions';
 import type { AnyArtifact } from './types';
@@ -26,6 +25,7 @@ import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { DESCRIPTION_LABEL } from './components/translations';
 import { DescriptionField } from './components/description_field';
+import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {
@@ -41,7 +41,7 @@ export interface ArtifactEntryCardMinifiedProps extends CommonProps {
   item: AnyArtifact;
   isSelected: boolean;
   onToggleSelectedArtifact: (selected: boolean) => void;
-  decorator?: (item: MaybeImmutable<AnyArtifact>) => React.ReactNode;
+  Decorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
 }
 
 /**
@@ -54,7 +54,7 @@ export const ArtifactEntryCardMinified = memo(
     isSelected = false,
     onToggleSelectedArtifact,
     'data-test-subj': dataTestSubj,
-    decorator,
+    Decorator,
     ...commonProps
   }: ArtifactEntryCardMinifiedProps) => {
     const artifact = useNormalizedArtifact(item);
@@ -129,7 +129,7 @@ export const ArtifactEntryCardMinified = memo(
               {getAccordionTitle()}
             </EuiButtonEmpty>
             <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
-              {decorator && decorator(item)}
+              {Decorator && <Decorator item={item} testIdPrefix={getTestId('decorator')} />}
 
               <CriteriaConditions
                 os={artifact.os as CriteriaConditionsProps['os']}

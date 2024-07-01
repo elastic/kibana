@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinks } from '@kbn/doc-links';
@@ -145,13 +145,6 @@ export const EventFiltersList = memo(() => {
   const http = useHttp();
   const eventFiltersApiClient = EventFiltersApiClient.getInstance(http);
 
-  const eventFilterCardDecorator: ArtifactListPageProps['cardDecorator'] = useCallback(
-    (item) => (
-      <EventFiltersProcessDescendantIndicator item={item} testIdPrefix="EventFiltersListPage" />
-    ),
-    []
-  );
-
   return (
     <ArtifactListPage
       apiClient={eventFiltersApiClient}
@@ -163,7 +156,7 @@ export const EventFiltersList = memo(() => {
       allowCardCreateAction={canWriteEventFilters}
       allowCardEditAction={canWriteEventFilters}
       allowCardDeleteAction={canWriteEventFilters}
-      cardDecorator={eventFilterCardDecorator}
+      CardDecorator={EventFiltersProcessDescendantIndicator}
     />
   );
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import type { ArtifactEntryCardMinifiedProps } from './artifact_entry_card_minified';
@@ -13,6 +13,7 @@ import { ArtifactEntryCardMinified } from './artifact_entry_card_minified';
 import { act, fireEvent } from '@testing-library/react';
 import type { AnyArtifact } from './types';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
+import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -95,20 +96,22 @@ describe.each([
     expect(onToggleSelectedArtifactMock).toHaveBeenCalledWith(false);
   });
 
-  it('should pass item to decorator function and display its result when expanded', () => {
-    const mockDecorator: ArtifactEntryCardMinifiedProps['decorator'] = (actualItem) => {
-      expect(item).toEqual(actualItem);
-
+  it('should pass item to Decorator component and display the component', () => {
+    let passedItem: ArtifactEntryCardDecoratorProps['item'] | null = null;
+    const MockDecorator = memo<ArtifactEntryCardDecoratorProps>(({ item: actualItem }) => {
+      passedItem = actualItem;
       return <p>{'mock decorator'}</p>;
-    };
+    });
+    MockDecorator.displayName = 'MockDecorator';
 
     render({
       item,
       isSelected: false,
       onToggleSelectedArtifact: onToggleSelectedArtifactMock,
-      decorator: mockDecorator,
+      Decorator: MockDecorator,
     });
 
     expect(renderResult.getByText('mock decorator')).toBeInTheDocument();
+    expect(passedItem).toBe(item);
   });
 });

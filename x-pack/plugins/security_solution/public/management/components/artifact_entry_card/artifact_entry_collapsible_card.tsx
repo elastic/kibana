@@ -29,7 +29,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
     actions,
     expanded = false,
     'data-test-subj': dataTestSubj,
-    decorator,
+    Decorator,
     ...commonProps
   }) => {
     const artifact = useNormalizedArtifact(item);
@@ -52,7 +52,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
             <EuiHorizontalRule margin="xs" />
 
             <CardSectionPanel>
-              {decorator && decorator(item)}
+              {Decorator && <Decorator item={item} testIdPrefix={getTestId('decorator')} />}
 
               <CriteriaConditions
                 os={artifact.os as CriteriaConditionsProps['os']}
