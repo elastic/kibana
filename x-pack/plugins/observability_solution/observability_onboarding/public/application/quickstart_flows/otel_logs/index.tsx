@@ -24,6 +24,7 @@ import {
   EuiCopy,
   EuiLink,
   EuiImage,
+  EuiCallOut,
 } from '@elastic/eui';
 import {
   AllDatasetsLocatorParams,
@@ -67,12 +68,11 @@ export const OtelLogsPanel: React.FC = () => {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  const AGENT_CDN_BASE_URL = 'snapshots.elastic.co/8.15.0-af44b0a5/downloads/beats/elastic-agent';
+  const AGENT_CDN_BASE_URL = 'snapshots.elastic.co/8.15.0-5d6d1bc4/downloads/beats/elastic-agent';
   const agentVersion = '8.15.0-SNAPSHOT';
   // TODO uncomment before merge
   // const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
   // const agentVersion = isServerless ? setup?.elasticAgentVersion : stackVersion;
-  // const agentVersion = '8.14.2-45882135';
 
   const allDatasetsLocator =
     share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
@@ -129,7 +129,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
-    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+    app.kubernetes.io/version: "${agentVersion}"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -137,7 +137,7 @@ metadata:
   name: elastic-otel-collector-agent
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
-    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+    app.kubernetes.io/version: "${agentVersion}"
 rules:
   - apiGroups: [""]
     resources: ["pods", "namespaces", "nodes"]
@@ -164,7 +164,7 @@ metadata:
   name: elastic-otel-collector-agent
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
-    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+    app.kubernetes.io/version: "${agentVersion}"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -181,7 +181,7 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
-    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+    app.kubernetes.io/version: "${agentVersion}"
 data:
   otel.yaml: |
     exporters:
@@ -191,15 +191,11 @@ data:
         endpoints: 
         - \${env:ES_ENDPOINT}
         api_key: \${env:ES_API_KEY}
-        logs_index: logs-otel.generic-default
+        #logs_index: logs-otel.generic-default
         # Metrics are not supported yet
         #metrics_index: metrics-otel.generic-default
         mapping:
           mode: ecs
-        sending_queue:
-          enabled: true
-          num_consumers: 20
-          queue_size: 1000
     processors:
       elasticinframetrics:
         add_system_metrics: true
@@ -221,6 +217,11 @@ data:
           - key: service.name
             from_attribute: app.label.component
             action: insert
+      attributes/dataset:
+        actions:
+          - key: event.dataset
+            from_attribute: data_stream.dataset
+            action: upsert
       resource/cloud:
         attributes:
           - key: cloud.instance.id
@@ -320,19 +321,6 @@ data:
             metrics:
               system.memory.utilization:
                 enabled: true
-          process:
-            mute_process_exe_error: true
-            mute_process_io_error: true
-            mute_process_user_error: true
-            metrics:
-              process.threads:
-                enabled: true
-              process.open_file_descriptors:
-                enabled: true
-              process.memory.utilization:
-                enabled: true
-              process.disk.operations:
-                enabled: true
           network:
           processes:
           load:
@@ -417,7 +405,7 @@ data:
         logs:
           exporters:
           - elasticsearch 
-          #- debug
+          - debug
           processors:
           - k8sattributes
           - resourcedetection/system
@@ -430,14 +418,16 @@ data:
         metrics:
           exporters:
           - debug
+          - elasticsearch
           processors:
-          - elasticinframetrics
           - k8sattributes
+          - elasticinframetrics
           - resourcedetection/system
           - resourcedetection/eks
           - resourcedetection/gcp
           - resource/k8s
           - resource/cloud
+          - attributes/dataset
           receivers:
           - kubeletstats
           - hostmetrics
@@ -449,17 +439,17 @@ metadata:
   namespace: default
   labels:
     app.kubernetes.io/name: elastic-opentelemetry-collector
-    app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+    app.kubernetes.io/version: "${agentVersion}"
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: elastic-opentelemetry-collector
-      app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+      app.kubernetes.io/version: "${agentVersion}"
   template:
     metadata:
       labels:
         app.kubernetes.io/name: elastic-opentelemetry-collector
-        app.kubernetes.io/version: "8.15.0-SNAPSHOT"
+        app.kubernetes.io/version: "${agentVersion}"
     spec:
       serviceAccountName: elastic-otel-collector-agent
       securityContext:
@@ -713,6 +703,25 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
                 }),
                 children: (
                   <EuiFlexGroup direction="column">
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'xpack.observability_onboarding.otelLogsPanel.historicalDataTitle',
+                        { defaultMessage: 'Historical logs will not be collected' }
+                      )}
+                      color="warning"
+                      iconType="iInCircle"
+                    >
+                      <p>
+                        {i18n.translate(
+                          'xpack.observability_onboarding.otelLogsPanel.historicalDataDescription',
+                          {
+                            defaultMessage:
+                              'We only collect new log messages from the setup onward.',
+                          }
+                        )}
+                      </p>
+                    </EuiCallOut>
+
                     {selectedContent.prompt}
                     {selectedContent.start && (
                       <>
@@ -739,7 +748,7 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && se
                     <EuiText>
                       <p>
                         {i18n.translate(
-                          'xpack.observability_onboarding.otelLogsPanel.p.waitForTheDataLabel',
+                          'xpack.observability_onboarding.otelLogsPanel.waitForTheDataLabel',
                           {
                             defaultMessage:
                               'After running the previous command, come back and view your data.',
