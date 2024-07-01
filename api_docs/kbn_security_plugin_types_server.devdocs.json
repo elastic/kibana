@@ -3269,10 +3269,6 @@
                 "path": "x-pack/plugins/alerting/server/plugin.ts"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.ts"
-              },
-              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/plugins/observability_solution/observability_ai_assistant/server/service/index.ts"
               },
