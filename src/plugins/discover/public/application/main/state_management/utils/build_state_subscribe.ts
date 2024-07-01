@@ -62,6 +62,7 @@ export const buildStateSubscribe =
     ) {
       // When there's a switch from data view to es|ql, this just leads to a cleanup of index and viewMode
       // And there's no subsequent action in this function required
+      savedSearchState.update({ nextState });
       addLog('[appstate] subscribe update ignored for es|ql', { prevState, nextState });
       return;
     }
