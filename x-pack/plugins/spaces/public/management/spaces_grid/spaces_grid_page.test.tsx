@@ -143,8 +143,8 @@ describe('SpacesGridPage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
-        maxSpaces={1000}
         solutionNavExperiment={Promise.resolve(true)}
+        {...spacesGridCommonProps}
       />
     );
 
