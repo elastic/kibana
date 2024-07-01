@@ -42,7 +42,6 @@ import {
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
-import { DataTier } from './types';
 
 type SettingsConfig = Record<string, UiSettingsParams<unknown>>;
 
@@ -342,7 +341,7 @@ export const initUiSettings = (
       ),
       type: 'array',
       schema: schema.arrayOf(
-        schema.oneOf([schema.literal(DataTier.data_cold), schema.literal(DataTier.data_frozen)])
+        schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
       ),
       value: [],
       category: [APP_ID],

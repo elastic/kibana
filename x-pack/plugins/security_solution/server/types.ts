@@ -77,11 +77,3 @@ export interface HapiReadableStream extends Readable {
     headers: Record<string, string>;
   };
 }
-
-export enum DataTier {
-  data_content = 'data_content',
-  data_hot = 'data_hot',
-  data_warm = 'data_warm',
-  data_cold = 'data_cold',
-  data_frozen = 'data_frozen',
-}
