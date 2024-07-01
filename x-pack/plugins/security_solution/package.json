@@ -15,7 +15,7 @@
     "cypress:dw:run": "yarn cypress:dw run",
     "cypress:dw:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ./scripts/start_cypress_parallel --config-file ./public/management/cypress/cypress_serverless.config.ts --ftr-config-file ../../test/defend_workflows_cypress/serverless_config",
     "cypress:dw:serverless:open": "yarn cypress:dw:serverless open",
-    "cypress:dw:serverless:run": "yarn cypress:dw:serverless run",
+    "cypress:dw:serverless:run": "yarn cypress:dw:serverless run --spec ./public/management/cypress/e2e/automated_response_actions/automated_response_actions.ts",
     "cypress:dw:qa:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ./scripts/start_cypress_parallel_serverless --config-file ./public/management/cypress/cypress_serverless_qa.config.ts",
     "cypress:dw:qa:serverless:run": "yarn cypress:dw:qa:serverless run",
     "cypress:dw:serverless:changed-specs-only": "yarn cypress:dw:serverless run --changed-specs-only --env burn=2",
