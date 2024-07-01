@@ -105,7 +105,9 @@ export function createTheme(
   };
 }
 
-export const buildDarkTheme = () => createTheme(darkTheme, '#343551');
-export const buildLightTheme = () => createTheme(lightTheme, '#E3E4ED');
-export const buildDarkTransparentTheme = () => createTheme(darkTheme, '#343551', '#00000000');
-export const buildLightTransparentTheme = () => createTheme(lightTheme, '#E3E4ED', '#00000000');
+export const buildDarkTheme = () => createTheme(darkTheme, darkTheme.euiColorMediumShade);
+export const buildLightTheme = () => createTheme(lightTheme, lightTheme.euiColorMediumShade);
+export const buildDarkTransparentTheme = () =>
+  createTheme(darkTheme, darkTheme.euiColorMediumShade, '#00000000');
+export const buildLightTransparentTheme = () =>
+  createTheme(lightTheme, lightTheme.euiColorMediumShade, '#00000000');
