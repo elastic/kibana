@@ -11,7 +11,6 @@ import { createSelector } from 'reselect';
 import type { State } from '../../common/store';
 import {
   createNote as createNoteApi,
-  deleteNote as deleteNoteApi,
   deleteNotes as deleteNotesApi,
   fetchNotes as fetchNotesApi,
   fetchNotesByDocumentIds as fetchNotesByDocumentIdsApi,
@@ -36,16 +35,14 @@ export interface NotesState extends EntityState<Note> {
   status: {
     fetchNotesByDocumentIds: ReqStatus;
     createNote: ReqStatus;
-    deleteNote: ReqStatus;
-    fetchNotes: ReqStatus;
     deleteNotes: ReqStatus;
+    fetchNotes: ReqStatus;
   };
   error: {
     fetchNotesByDocumentIds: SerializedError | HttpError | null;
     createNote: SerializedError | HttpError | null;
-    deleteNote: SerializedError | HttpError | null;
-    fetchNotes: SerializedError | HttpError | null;
     deleteNotes: SerializedError | HttpError | null;
+    fetchNotes: SerializedError | HttpError | null;
   };
   pagination: {
     page: number;
@@ -70,14 +67,12 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
   status: {
     fetchNotesByDocumentIds: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
-    deleteNote: ReqStatus.Idle,
-    fetchNotes: ReqStatus.Idle,
     deleteNotes: ReqStatus.Idle,
+    fetchNotes: ReqStatus.Idle,
   },
   error: {
     fetchNotesByDocumentIds: null,
     createNote: null,
-    deleteNote: null,
     deleteNotes: null,
     fetchNotes: null,
   },
@@ -132,15 +127,6 @@ export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareN
   }
 );
 
-export const deleteNote = createAsyncThunk<string, { id: string }, {}>(
-  'notes/deleteNote',
-  async (args) => {
-    const { id } = args;
-    await deleteNoteApi(id);
-    return id;
-  }
-);
-
 export const deleteNotes = createAsyncThunk<string[], { ids: string[] }, {}>(
   'notes/deleteNotes',
   async (args) => {
@@ -154,28 +140,31 @@ const notesSlice = createSlice({
   name: 'notes',
   initialState: initialNotesState,
   reducers: {
-    userSelectedPage: (state, action) => {
+    userSelectedPage: (state, action: { payload: number }) => {
       state.pagination.page = action.payload;
     },
-    userSelectedPerPage: (state, action) => {
+    userSelectedPerPage: (state, action: { payload: number }) => {
       state.pagination.perPage = action.payload;
     },
-    userSortedNotes: (state, action) => {
+    userSortedNotes: (
+      state,
+      action: { payload: { field: keyof Note; direction: 'asc' | 'desc' } }
+    ) => {
       state.sort = action.payload;
     },
-    userFilteredNotes: (state, action) => {
+    userFilteredNotes: (state, action: { payload: string }) => {
       state.filter = action.payload;
     },
-    userSearchedNotes: (state, action) => {
+    userSearchedNotes: (state, action: { payload: string }) => {
       state.search = action.payload;
     },
-    userSelectedRow: (state, action) => {
+    userSelectedRow: (state, action: { payload: string[] }) => {
       state.selectedIds = action.payload;
     },
     userClosedDeleteModal: (state) => {
       state.pendingDeleteIds = [];
     },
-    userSelectedRowForDeletion: (state, action) => {
+    userSelectedRowForDeletion: (state, action: { payload: string }) => {
       state.pendingDeleteIds = [action.payload];
     },
     userSelectedBulkDelete: (state) => {
@@ -206,23 +195,15 @@ const notesSlice = createSlice({
         state.status.createNote = ReqStatus.Failed;
         state.error.createNote = action.payload ?? action.error;
       })
-      .addCase(deleteNote.pending, (state) => {
-        state.status.deleteNote = ReqStatus.Loading;
-      })
-      .addCase(deleteNote.fulfilled, (state, action) => {
-        notesAdapter.removeOne(state, action.payload);
-        state.status.deleteNote = ReqStatus.Succeeded;
-      })
-      .addCase(deleteNote.rejected, (state, action) => {
-        state.status.deleteNote = ReqStatus.Failed;
-        state.error.deleteNote = action.payload ?? action.error;
-      })
-      .addCase(deleteNotes.pending, (state, action) => {
+      .addCase(deleteNotes.pending, (state) => {
         state.status.deleteNotes = ReqStatus.Loading;
       })
       .addCase(deleteNotes.fulfilled, (state, action) => {
         notesAdapter.removeMany(state, action.payload);
         state.status.deleteNotes = ReqStatus.Succeeded;
+        state.pendingDeleteIds = state.pendingDeleteIds.filter(
+          (value) => !action.payload.includes(value)
+        );
       })
       .addCase(deleteNotes.rejected, (state, action) => {
         state.status.deleteNotes = ReqStatus.Failed;
@@ -262,9 +243,9 @@ export const selectCreateNoteStatus = (state: State) => state.notes.status.creat
 
 export const selectCreateNoteError = (state: State) => state.notes.error.createNote;
 
-export const selectDeleteNoteStatus = (state: State) => state.notes.status.deleteNote;
+export const selectDeleteNotesStatus = (state: State) => state.notes.status.deleteNotes;
 
-export const selectDeleteNoteError = (state: State) => state.notes.error.deleteNote;
+export const selectDeleteNotesError = (state: State) => state.notes.error.deleteNotes;
 
 export const selectNotesPagination = (state: State) => state.notes.pagination;
 
@@ -277,8 +258,6 @@ export const selectNotesTableSelectedIds = (state: State) => state.notes.selecte
 export const selectNotesTableSearch = (state: State) => state.notes.search;
 
 export const selectNotesTablePendingDeleteIds = (state: State) => state.notes.pendingDeleteIds;
-
-export const selectDeleteNotesStatus = (state: State) => state.notes.status.deleteNotes;
 
 export const selectFetchNotesError = (state: State) => state.notes.error.fetchNotes;
 

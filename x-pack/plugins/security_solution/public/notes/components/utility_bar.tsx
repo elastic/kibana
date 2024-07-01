@@ -42,24 +42,19 @@ export const NotesUtilityBar = React.memo(() => {
   }, [dispatch]);
   const notesSearch = useSelector(selectNotesTableSearch);
 
-  const BulkActionPopoverContent = useCallback(
-    (closePopover) => {
-      return (
-        <div>
-          <EuiContextMenuItem
-            data-test-subj="delete-notes"
-            onClick={deleteSelectedNotes}
-            disabled={selectedItems.length === 0}
-            icon="trash"
-            key="DeleteItemKey"
-          >
-            {i18n.DELETE_SELECTED}
-          </EuiContextMenuItem>
-        </div>
-      );
-    },
-    [deleteSelectedNotes, selectedItems.length]
-  );
+  const BulkActionPopoverContent = useCallback(() => {
+    return (
+      <EuiContextMenuItem
+        data-test-subj="notes-management-delete-notes"
+        onClick={deleteSelectedNotes}
+        disabled={selectedItems.length === 0}
+        icon="trash"
+        key="DeleteItemKey"
+      >
+        {i18n.DELETE_SELECTED}
+      </EuiContextMenuItem>
+    );
+  }, [deleteSelectedNotes, selectedItems.length]);
   const refresh = useCallback(() => {
     dispatch(
       fetchNotes({
@@ -76,25 +71,26 @@ export const NotesUtilityBar = React.memo(() => {
     <UtilityBar border>
       <UtilityBarSection>
         <UtilityBarGroup>
-          <UtilityBarText data-test-subj="query-message">
+          <UtilityBarText data-test-subj="notes-management-pagination-count">
             {`Showing: ${resultsCount}`}
           </UtilityBarText>
         </UtilityBarGroup>
         <UtilityBarGroup>
-          <UtilityBarText data-test-subj="selected-count">
+          <UtilityBarText data-test-subj="notes-management-selected-count">
             {selectedItems.length > 0 ? `${selectedItems.length} selected` : ''}
           </UtilityBarText>
           <UtilityBarAction
-            dataTestSubj="batchActions"
+            dataTestSubj="notes-management-utility-bar-actions"
             iconSide="right"
             iconType="arrowDown"
             popoverContent={BulkActionPopoverContent}
-            data-test-subj="utility-bar-action"
           >
-            <span data-test-subj="utility-bar-action-button">{i18n.BATCH_ACTIONS}</span>
+            <span data-test-subj="notes-management-utility-bar-action-button">
+              {i18n.BATCH_ACTIONS}
+            </span>
           </UtilityBarAction>
           <UtilityBarAction
-            dataTestSubj="refreshButton"
+            dataTestSubj="notes-management-utility-bar-refresh-button"
             iconSide="right"
             iconType="refresh"
             onClick={refresh}

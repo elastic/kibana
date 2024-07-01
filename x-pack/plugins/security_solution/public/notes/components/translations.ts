@@ -60,20 +60,16 @@ export const DELETE_SINGLE_NOTE_DESCRIPTION = i18n.translate(
   }
 );
 
+export const NOTES_MANAGEMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.notes.management.pageTitle',
+  {
+    defaultMessage: 'Notes management',
+  }
+);
+
 export const TABLE_ERROR = i18n.translate('xpack.securitySolution.notes.management.tableError', {
   defaultMessage: 'Unable to load notes',
 });
-
-export const TABLE_EMPTY = i18n.translate('xpack.securitySolution.notes.management.tableEmpty', {
-  defaultMessage: 'No notes found',
-});
-
-export const TABLE_EMPTY_HELP = i18n.translate(
-  'xpack.securitySolution.notes.management.tableEmptyHelp',
-  {
-    defaultMessage: 'Add a note to get started',
-  }
-);
 
 export const DELETE_NOTES_MODAL_TITLE = i18n.translate(
   'xpack.securitySolution.notes.management.deleteNotesModalTitle',
@@ -86,7 +82,7 @@ export const DELETE_NOTES_CONFIRM = (selectedNotes: number) =>
   i18n.translate('xpack.securitySolution.notes.management.deleteNotesConfirm', {
     values: { selectedNotes },
     defaultMessage:
-      'Are you sure you want to delete {selectedNotes} {selectedNotes, plural, =1 {note} other {notes}?}',
+      'Are you sure you want to delete {selectedNotes} {selectedNotes, plural, one {note} other {notes}}?',
   });
 
 export const DELETE_NOTES_CANCEL = i18n.translate(

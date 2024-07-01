@@ -196,7 +196,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          deleteNote: ReqStatus.Loading,
+          deleteNotes: ReqStatus.Loading,
         },
       },
     });
@@ -217,11 +217,11 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          deleteNote: ReqStatus.Failed,
+          deleteNotes: ReqStatus.Failed,
         },
         error: {
           ...mockGlobalState.notes.error,
-          deleteNote: { type: 'http', status: 500 },
+          deleteNotes: { type: 'http', status: 500 },
         },
       },
     });

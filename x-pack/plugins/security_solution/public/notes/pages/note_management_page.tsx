@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
@@ -29,10 +29,12 @@ import {
   selectFetchNotesError,
   ReqStatus,
 } from '..';
+import type { NotesState } from '..';
 import { SearchRow } from '../components/search_row';
 import { NotesUtilityBar } from '../components/utility_bar';
 import { DeleteConfirmModal } from '../components/delete_confirm_modal';
 import * as i18n from '../components/translations';
+import { NOTES_MANAGEMENT_TITLE } from '../components/translations';
 
 const columns: Array<EuiBasicTableColumn<Note>> = [
   {
@@ -63,9 +65,11 @@ const columns: Array<EuiBasicTableColumn<Note>> = [
 const pageSizeOptions = [50, 25, 10, 0];
 
 /**
- *
+ * Allows user to search and delete notes.
+ * This component uses the same slices of state as the notes functionality of the rest of the Security Solution applicaiton.
+ * Therefore, changes made in this page (like fetching or deleting notes) will have an impact everywhere.
  */
-export const NotesTable = () => {
+export const NoteManagementPage = () => {
   const dispatch = useDispatch();
   const notes = useSelector(selectAllNotes);
   const pagination = useSelector(selectNotesPagination);
@@ -102,22 +106,22 @@ export const NotesTable = () => {
       sort: newSort,
     }: {
       page?: { index: number; size: number };
-      sort?: { field: string; direction: string };
+      sort?: NotesState['sort'];
     }) => {
       if (page) {
         dispatch(userSelectedPage(page.index + 1));
         dispatch(userSelectedPerPage(page.size));
       }
       if (newSort) {
-        dispatch(userSortedNotes({ field: newSort.field, order: newSort.direction }));
+        dispatch(userSortedNotes({ field: newSort.field, direction: newSort.direction }));
       }
     },
     [dispatch]
   );
 
   const selectRowForDeletion = useCallback(
-    (ids) => {
-      dispatch(userSelectedRowForDeletion(ids));
+    (id: string) => {
+      dispatch(userSelectedRowForDeletion(id));
     },
     [dispatch]
   );
@@ -187,18 +191,12 @@ export const NotesTable = () => {
     );
   }
 
-  if (notes.length === 0) {
-    return (
-      <EuiEmptyPrompt
-        iconType="editorStrike"
-        title={<h2>{i18n.TABLE_EMPTY}</h2>}
-        body={<p>{i18n.TABLE_EMPTY_HELP}</p>}
-      />
-    );
-  }
-
   return (
     <>
+      <EuiTitle size={'l'}>
+        <h1>{NOTES_MANAGEMENT_TITLE}</h1>
+      </EuiTitle>
+      <EuiSpacer />
       <SearchRow />
       <NotesUtilityBar />
       <EuiBasicTable
@@ -216,4 +214,4 @@ export const NotesTable = () => {
   );
 };
 
-NotesTable.displayName = 'NotesTable';
+NoteManagementPage.displayName = 'NoteManagementPage';
