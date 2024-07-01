@@ -1,16 +1,16 @@
 on:
   pull_request:
-    branches-ignore:
+    branches:
       - main
     types:
       - opened
 
 jobs:
   approve:
-    name: Auto-approve backport
+    name: Auto-approve API docs
     runs-on: ubuntu-latest
     if: |
-      startsWith(github.event.pull_request.head.ref, 'backport') &&
+      startsWith(github.event.pull_request.head.ref, 'api_docs') &&
       github.event.pull_request.user.login == 'kibanamachine'
     permissions:
       pull-requests: write
