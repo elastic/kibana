@@ -69,13 +69,11 @@ export function processRunResults({
     (err: ElasticsearchError) => lastRunFromError(err)
   );
 
-  if (logger) {
-    logger.debug(
-      () => `deprecated ruleRunStatus for ${logPrefix}: ${JSON.stringify(executionStatus)}`
-    );
-    logger.debug(() => `ruleRunStatus for ${logPrefix}: ${JSON.stringify(lastRun)}`);
+  if (logger && logger.isLevelEnabled('debug')) {
+    logger.debug(`deprecated ruleRunStatus for ${logPrefix}: ${JSON.stringify(executionStatus)}`);
+    logger.debug(`ruleRunStatus for ${logPrefix}: ${JSON.stringify(lastRun)}`);
     if (executionMetrics) {
-      logger.debug(() => `ruleRunMetrics for ${logPrefix}: ${JSON.stringify(executionMetrics)}`);
+      logger.debug(`ruleRunMetrics for ${logPrefix}: ${JSON.stringify(executionMetrics)}`);
     }
   }
 
