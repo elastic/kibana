@@ -221,7 +221,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   );
 
   const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading && allowQueryCancellation) {
+    if (isQueryLoading && isLoading && allowQueryCancellation) {
       abortController?.abort();
       setIsQueryLoading(false);
     } else {
@@ -235,7 +235,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+  }, [
+    isQueryLoading,
+    isLoading,
+    allowQueryCancellation,
+    abortController,
+    onTextLangQuerySubmit,
+    language,
+  ]);
 
   const onCommentLine = useCallback(() => {
     const currentSelection = editor1?.current?.getSelection();
@@ -691,9 +698,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     },
     quickSuggestions: true,
     readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+      isDisabled || Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
     renderLineHighlight: !isCodeEditorExpanded ? 'none' : 'line',
     renderLineHighlightOnlyWhenFocus: true,
     scrollbar: {

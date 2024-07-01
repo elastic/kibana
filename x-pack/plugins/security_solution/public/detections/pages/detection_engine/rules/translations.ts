@@ -103,6 +103,13 @@ export const BULK_ACTION_EXPORT = i18n.translate(
   }
 );
 
+export const BULK_ACTION_MANUAL_RULE_RUN = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRunTitle',
+  {
+    defaultMessage: 'Manual run',
+  }
+);
+
 export const BULK_ACTION_DUPLICATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicateTitle',
   {
@@ -240,6 +247,15 @@ export const BULK_EXPORT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
     }
   );
 
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunConfirmationDeniedTitle',
+    {
+      values: { rulesCount },
+      defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} cannot be scheduled',
+    }
+  );
+
 export const BULK_EDIT_CONFIRMATION_REJECTED_TITLE = (rulesCount: number) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkEditConfirmationDeniedTitle',
@@ -291,6 +307,40 @@ export const BULK_EXPORT_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
         'Export {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
     }
   );
+
+export const BULK_MANUAL_RULE_RUN_CONFIRMATION_CONFIRM = (customRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkManualRuleRunConfirmation.confirmButtonLabel',
+    {
+      values: { customRulesCount },
+      defaultMessage:
+        'Schedule {customRulesCount, plural, =1 {# custom rule} other {# custom rules}}',
+    }
+  );
+
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorMessage',
+  {
+    defaultMessage: 'This action can only be applied',
+  }
+);
+
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_MESSAGE = (rulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorTitle',
+    {
+      values: { rulesCount },
+      defaultMessage:
+        'Manual rule run cannot be scheduled for more than {rulesCount, plural, =1 {# rule} other {# rules}}',
+    }
+  );
+
+export const BULK_MANUAL_RULE_RUN_LIMIT_ERROR_CLOSE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.bulkManualRuleRunLimitErrorCloseButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
 
 export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.saveButtonLabel',
@@ -581,6 +631,13 @@ export const MANUAL_RULE_RUN = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunDescription',
   {
     defaultMessage: 'Manual run',
+  }
+);
+
+export const MANUAL_RULE_RUN_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.actions.manualRuleRunTooltip',
+  {
+    defaultMessage: 'Manual run available only for enabled rules',
   }
 );
 
@@ -1191,6 +1248,44 @@ export const RULES_BULK_DISABLE_FAILURE_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule is} other {# rules are}} failed to disable.',
+    }
+  );
+
+/**
+ * Bulk Manual Rule Run
+ */
+
+export const RULES_BULK_MANUAL_RULE_RUN_SUCCESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.successToastTitle',
+  {
+    defaultMessage: 'Rules scheduled',
+  }
+);
+
+export const RULES_BULK_MANUAL_RULE_RUN_FAILURE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.errorToastTitle',
+  {
+    defaultMessage: 'Error scheduling manual rule run',
+  }
+);
+
+export const RULES_BULK_MANUAL_RULE_RUN_SUCCESS_DESCRIPTION = (totalRules: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.successToastDescription',
+    {
+      values: { totalRules },
+      defaultMessage:
+        'Successfully scheduled manual rule run for {totalRules, plural, =1 {{totalRules} rule} other {{totalRules} rules}}',
+    }
+  );
+
+export const RULES_BULK_MANUAL_RULE_RUN_FAILURE_DESCRIPTION = (failedRulesCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.manualRuleRun.errorToastDescription',
+    {
+      values: { failedRulesCount },
+      defaultMessage:
+        '{failedRulesCount, plural, =0 {} =1 {# rule} other {# rules}} failed to schedule manual rule run.',
     }
   );
 

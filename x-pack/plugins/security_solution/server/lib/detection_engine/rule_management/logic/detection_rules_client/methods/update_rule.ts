@@ -6,13 +6,22 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { stringifyZodError } from '@kbn/zod-helpers';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
-import type { RuleAlertType } from '../../../../rule_schema';
 import type { UpdateRuleArgs } from '../detection_rules_client_interface';
 import { getIdError } from '../../../utils/utils';
-import { convertUpdateAPIToInternalSchema } from '../../../normalization/rule_converters';
+import {
+  convertUpdateAPIToInternalSchema,
+  internalRuleToAPIResponse,
+} from '../../../normalization/rule_converters';
+import { RuleResponse } from '../../../../../../../common/api/detection_engine/model/rule_schema';
 
-import { validateMlAuth, ClientError, toggleRuleEnabledOnUpdate } from '../utils';
+import {
+  validateMlAuth,
+  ClientError,
+  toggleRuleEnabledOnUpdate,
+  RuleResponseValidationError,
+} from '../utils';
 
 import { readRules } from '../read_rules';
 
@@ -20,7 +29,7 @@ export const updateRule = async (
   rulesClient: RulesClient,
   args: UpdateRuleArgs,
   mlAuthz: MlAuthz
-): Promise<RuleAlertType> => {
+): Promise<RuleResponse> => {
   const { ruleUpdate } = args;
   const { rule_id: ruleId, id } = ruleUpdate;
 
@@ -42,12 +51,28 @@ export const updateRule = async (
     ruleUpdate,
   });
 
-  const update = await rulesClient.update({
+  const updatedInternalRule = await rulesClient.update({
     id: existingRule.id,
     data: newInternalRule,
   });
 
-  await toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleUpdate.enabled);
+  const { enabled } = await toggleRuleEnabledOnUpdate(
+    rulesClient,
+    existingRule,
+    ruleUpdate.enabled
+  );
 
-  return { ...update, enabled: ruleUpdate.enabled ?? existingRule.enabled };
+  /* Trying to convert the internal rule to a RuleResponse object */
+  const parseResult = RuleResponse.safeParse(
+    internalRuleToAPIResponse({ ...updatedInternalRule, enabled })
+  );
+
+  if (!parseResult.success) {
+    throw new RuleResponseValidationError({
+      message: stringifyZodError(parseResult.error),
+      ruleId: updatedInternalRule.params.ruleId,
+    });
+  }
+
+  return parseResult.data;
 };

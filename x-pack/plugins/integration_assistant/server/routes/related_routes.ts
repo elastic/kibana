@@ -16,6 +16,7 @@ import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getRelatedGraph } from '../graphs/related';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
 
 export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
   router.versioned
@@ -37,8 +38,8 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<RelatedResponse>> => {
-        const { packageName, datastreamName, rawSamples, currentPipeline } = req.body;
+      withAvailability(async (context, req, res): Promise<IKibanaResponse<RelatedResponse>> => {
+        const { packageName, dataStreamName, rawSamples, currentPipeline } = req.body;
         const services = await context.resolve(['core']);
         const { client } = services.core.elasticsearch;
         const { getStartServices, logger } = await context.integrationAssistant;
@@ -71,7 +72,7 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
           const graph = await getRelatedGraph(client, model);
           const results = await graph.invoke({
             packageName,
-            datastreamName,
+            dataStreamName,
             rawSamples,
             currentPipeline,
           });
@@ -79,6 +80,6 @@ export function registerRelatedRoutes(router: IRouter<IntegrationAssistantRouteH
         } catch (e) {
           return res.badRequest({ body: e });
         }
-      }
+      })
     );
 }
