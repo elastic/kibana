@@ -7,10 +7,8 @@
 
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import {
-  DEFAULT_SYSTEM_PROMPT_LABEL,
   DEFAULT_SYSTEM_PROMPT_NAME,
   DEFAULT_SYSTEM_PROMPT_NON_I18N,
-  SUPERHERO_SYSTEM_PROMPT_LABEL,
   SUPERHERO_SYSTEM_PROMPT_NAME,
   SUPERHERO_SYSTEM_PROMPT_NON_I18N,
 } from './translations';
