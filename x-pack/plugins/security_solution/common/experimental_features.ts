@@ -120,7 +120,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
-  assistantModelEvaluation: true,
+  assistantModelEvaluation: false,
 
   /**
    * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
@@ -156,7 +156,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI assistant on rule creation form when query has error
    */
-  AIAssistantOnRuleCreationFormEnabled: true,
+  AIAssistantOnRuleCreationFormEnabled: false,
 
   /**
    * Disables the timeline save tour.
