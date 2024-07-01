@@ -63,3 +63,9 @@ spec:
           env:
               TRIGGER_PIPELINE_SET: artifacts-snapshot
               MESSAGE: Daily snapshot build
+        Run kibana-artifacts-trigger:
+          cronline: 0 */2 * * * America/New_York
+          message: Trigger 'kibana-artifacts-trigger'
+          env:
+            TRIGGER_PIPELINE_SET: artifacts-trigger
+            MESSAGE: Daily build

@@ -19,6 +19,7 @@ const pipelineSets = {
   'es-forward': 'kibana-es-forward',
   'artifacts-snapshot': 'kibana-artifacts-snapshot',
   'artifacts-staging': 'kibana-artifacts-staging',
+  'artifacts-trigger': 'kibana-artifacts-trigger',
 };
 
 /**
@@ -51,6 +52,9 @@ async function main() {
     case 'artifacts-staging': {
       pipelineSteps.push(...getArtifactStagingPipelineTriggers());
       break;
+    }
+    case 'artifacts-trigger': {
+      pipelineSteps.push(...getArtifactBuildTriggers());
     }
     default: {
       throw new Error(`Unknown pipeline set: ${pipelineSetName}`);
@@ -130,6 +134,33 @@ function getArtifactStagingPipelineTriggers() {
       },
     } as BuildkiteTriggerStep;
   });
+}
+
+/**
+ * This pipeline checks if there are any changes in the incorporated $BEATS_MANIFEST_LATEST_URL (beats version)
+ * and triggers a staging artifact build.
+ * Should be triggered only for the active minor versions that are not `main` and not `7.17`.
+ *
+ * TODO: we could basically do the check logic of .buildkite/scripts/steps/artifacts/trigger.sh in here, and remove kibana-artifacts-trigger
+ */
+function getArtifactBuildTriggers() {
+  const branches = getVersionsFile()
+    .filter((v) => v.branch !== 'main' && v.branch !== '7.17')
+    .map((v) => v.branch);
+
+  return branches.map(
+    (branch) =>
+      ({
+        trigger: 'kibana-artifacts-trigger',
+        async: true,
+        label: `Triggering artifact build for ${branch}`,
+        build: {
+          message: process.env.MESSAGE || `Artifact build for ${branch}`,
+          branch,
+          commit: 'HEAD',
+        },
+      } as BuildkiteTriggerStep)
+  );
 }
 
 function getVersionsFile(): Array<{
