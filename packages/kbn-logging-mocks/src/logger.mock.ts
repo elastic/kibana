@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Logger } from '@kbn/logging';
+import type { Logger, LogMeta, LogMessageSource } from '@kbn/logging';
 
 export type MockedLogger = jest.Mocked<Logger> & { context: string[] };
 
@@ -43,15 +43,27 @@ const clearLoggerMock = (logger: MockedLogger) => {
   logger.log.mockClear();
 };
 
+const convertMessageSource = (
+  value: [message: LogMessageSource, meta?: LogMeta | undefined]
+): [string, LogMeta | undefined] => {
+  return [typeof value[0] === 'function' ? value[0]() : value[0], value[1]];
+};
+
+const convertMessageSourceOrError = (
+  value: [message: LogMessageSource | Error, meta?: LogMeta | undefined]
+): [string | Error, LogMeta | undefined] => {
+  return [typeof value[0] === 'function' ? value[0]() : value[0], value[1]];
+};
+
 const collectLoggerMock = (logger: MockedLogger) => {
   return {
-    debug: logger.debug.mock.calls,
-    error: logger.error.mock.calls,
-    fatal: logger.fatal.mock.calls,
-    info: logger.info.mock.calls,
+    debug: logger.debug.mock.calls.map(convertMessageSource),
+    error: logger.error.mock.calls.map(convertMessageSourceOrError),
+    fatal: logger.fatal.mock.calls.map(convertMessageSourceOrError),
+    info: logger.info.mock.calls.map(convertMessageSource),
     log: logger.log.mock.calls,
-    trace: logger.trace.mock.calls,
-    warn: logger.warn.mock.calls,
+    trace: logger.trace.mock.calls.map(convertMessageSource),
+    warn: logger.warn.mock.calls.map(convertMessageSourceOrError),
   };
 };
 
