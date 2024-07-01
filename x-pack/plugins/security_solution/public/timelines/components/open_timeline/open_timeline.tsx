@@ -30,7 +30,7 @@ import { TimelinesTable } from './timelines_table';
 import * as i18n from './translations';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import type { OpenTimelineProps, ActionTimelineToShow, OpenTimelineResult } from './types';
-import { NotesTable } from '../../../notes';
+import { NoteManagementPage } from '../../../notes';
 
 const QueryText = styled.span`
   white-space: normal;
@@ -312,7 +312,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
               />
             </>
           ) : (
-            <NotesTable />
+            <NoteManagementPage />
           )}
         </div>
       </>

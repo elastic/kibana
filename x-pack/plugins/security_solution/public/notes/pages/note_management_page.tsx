@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiEmptyPrompt, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiBasicTable, EuiEmptyPrompt } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
@@ -34,7 +34,6 @@ import { SearchRow } from '../components/search_row';
 import { NotesUtilityBar } from '../components/utility_bar';
 import { DeleteConfirmModal } from '../components/delete_confirm_modal';
 import * as i18n from '../components/translations';
-import { NOTES_MANAGEMENT_TITLE } from '../components/translations';
 
 const columns: Array<EuiBasicTableColumn<Note>> = [
   {
@@ -193,10 +192,6 @@ export const NoteManagementPage = () => {
 
   return (
     <>
-      <EuiTitle size={'l'}>
-        <h1>{NOTES_MANAGEMENT_TITLE}</h1>
-      </EuiTitle>
-      <EuiSpacer />
       <SearchRow />
       <NotesUtilityBar />
       <EuiBasicTable
