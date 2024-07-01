@@ -182,12 +182,7 @@ const AssistantComponent: React.FC<Props> = ({
     isFetched: isFetchedAnonymizationFields,
   } = useFetchAnonymizationFields();
 
-  const {
-    data: allPrompts,
-    isLoading: isLoadingPrompts,
-    isError: isErrorPrompts,
-    isFetched: isFetchedPrompts,
-  } = useFetchPrompts();
+  const { data: allPrompts } = useFetchPrompts();
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({

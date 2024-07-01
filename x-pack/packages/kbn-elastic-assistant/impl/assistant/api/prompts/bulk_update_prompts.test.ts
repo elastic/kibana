@@ -12,16 +12,20 @@ import {
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { bulkUpdatePrompts } from './bulk_update_prompts';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
 const prompt1 = {
   id: 'field1',
-  field: 'Prompt field 1',
-  allowed: true,
+  content: 'Prompt field 1',
+  name: 'test',
+  promptType: PromptTypeEnum.system,
 };
 const prompt2 = {
   ...prompt1,
   id: 'field2',
-  field: 'field 2',
+  content: 'Prompt field 2',
+  name: 'test2',
+  promptType: PromptTypeEnum.system,
 };
 const toasts = {
   addError: jest.fn(),
@@ -100,7 +104,7 @@ describe('bulkUpdatePrompts', () => {
           {
             statusCode: 400,
             message: 'Error updating prompt',
-            prompts: [{ id: prompt1.id, name: prompt1.field }],
+            prompts: [{ id: prompt1.id, name: prompt1.content }],
           },
         ],
       },

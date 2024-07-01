@@ -36,6 +36,8 @@ const testProps = {
   systemPromptSettings: mockSystemPrompts,
   conversationsSettingsBulkActions: {},
   setConversationsSettingsBulkActions: jest.fn(),
+  promptsBulkActions: {},
+  setPromptsBulkActions: jest.fn(),
 };
 
 jest.mock('./system_prompt_selector/system_prompt_selector', () => ({

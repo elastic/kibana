@@ -21,7 +21,6 @@ import {
   PromptResponse,
   PromptTypeEnum,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
-import { QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { QUICK_PROMPTS_TAB } from '../settings/const';
@@ -79,10 +78,10 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     const closeOverflowPopover = useCallback(() => setIsOverflowPopoverOpen(false), []);
 
     const onClickAddQuickPrompt = useCallback(
-      (badge: QuickPrompt) => {
-        setInput(badge.prompt);
+      (badge: PromptResponse) => {
+        setInput(badge.content);
         if (badge.isDefault) {
-          trackPrompt(badge.title);
+          trackPrompt(badge.name);
         } else {
           trackPrompt('Custom');
         }
@@ -91,7 +90,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     );
 
     const onClickOverflowQuickPrompt = useCallback(
-      (badge: QuickPrompt) => {
+      (badge: PromptResponse) => {
         onClickAddQuickPrompt(badge);
         closeOverflowPopover();
       },
