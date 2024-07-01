@@ -111,7 +111,43 @@ In this project, you can run various commands to execute tests and workflows, ea
          ```shell
          npm run initialize-server:dr:default exceptions/workflows ess   
          ```
-      5. **Run tests for "exception_workflows" using the ess runner in the "essEnv" environment:**   
+      5. **Run tests for "exception_workflows" using the ess runner in the "essEnv" environment:**
          ```shell
          npm run run-tests:dr:default exceptions/workflows ess essEnv
-      ```
+         ```
+
+## Testing with serverless roles
+
+The `supertest` service is logged with the `admin` role by default on serverless. Ideally, every test that runs on serverless should use the most appropriate role.
+
+The `securitySolutionUtils` helper exports the `createSuperTest` function, which accepts the role as a parameter.
+You need to call `createSuperTest` from a lifecycle hook and wait for it to return the `supertest` instance.
+All API calls using the returned instance will inject the required auth headers.
+
+**On ESS, `createSuperTest` returns a basic `supertest` instance without headers.*
+
+```js
+import TestAgent from 'supertest/lib/agent';
+
+export default ({ getService }: FtrProviderContext) => {
+   const utils = getService('securitySolutionUtils');
+
+   describe('@ess @serverless my_test', () => {
+      let supertest: TestAgent;
+
+      before(async () => {
+         supertest = await utils.createSuperTest('admin');
+      });
+   ...
+```
+
+If you need to use multiple roles in a single test, you can instantiate multiple `supertest` versions.
+```js
+before(async () => {
+   adminSupertest = await utils.createSuperTest('admin');
+   viewerSupertest = await utils.createSuperTest('viewer');
+});
+...
+```
+
+The helper keeps track of only one active session per role. So, if you instantiate `supertest` twice for the same role, the first instance will have an invalid API key.

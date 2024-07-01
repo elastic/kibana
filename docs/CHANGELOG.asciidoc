@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.14.2>>
 * <<release-notes-8.14.1>>
 * <<release-notes-8.14.0>>
 * <<release-notes-8.13.4>>
@@ -67,6 +68,25 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+
+[[release-notes-8.14.2]]
+== {kib} 8.14.2
+
+The 8.14.2 release includes the following bug fixes.
+
+[float]
+[[fixes-v8.14.2]]
+=== Bug Fixes
+
+Alerting::
+* Rule runs recovered actions without ever running active actions ({kibana-pull}183646[#183646]).
+Fleet::
+* Updates health_check endpoint to accept hosts ids ({kibana-pull}185014[#185014]).
+Machine Learning::
+* AIOps Log Rate Analysis: Fixes text field selection ({kibana-pull}186176[#186176]).
+Presentation::
+* Fixes PresentationPanelError component throwing when error.message is empty string ({kibana-pull}186098[#186098]).
+
 [[release-notes-8.14.1]]
 == {kib} 8.14.1
 
@@ -6247,7 +6267,7 @@ Before you upgrade to 8.1.0, review the breaking changes, then mitigate the impa
 The `/api/reporting/generate/csv` endpoint has been removed. For more information, refer to {kibana-pull}121435[#121435].
 
 *Impact* +
-If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatatically generate CSV reports.
+If you are using 7.13.0 and earlier, {kibana-ref-all}/8.1/automating-report-generation.html[regenerate the POST URLs] that you use to automatically generate CSV reports.
 ====
 
 [discrete]
