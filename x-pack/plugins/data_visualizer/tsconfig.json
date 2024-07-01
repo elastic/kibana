@@ -86,7 +86,8 @@
     "@kbn/content-management-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-containers",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/visualizations-plugin"
   ],
   "exclude": [
     "target/**/*",
