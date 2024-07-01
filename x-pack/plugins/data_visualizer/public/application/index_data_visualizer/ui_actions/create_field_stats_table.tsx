@@ -17,6 +17,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
+import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../embeddables/field_stats/constants';
 import type { DataVisualizerStartDependencies } from '../../common/types/data_visualizer_plugin';
 import type {
@@ -132,6 +133,8 @@ export function createAddFieldStatsTableAction(
 ): UiActionsActionDefinition<FieldStatsActionContext> {
   return {
     id: 'create-field-stats-table',
+    grouping: COMMON_VISUALIZATION_GROUPING,
+    order: 10,
     getIconType: () => 'inspect',
     getDisplayName: () =>
       i18n.translate('xpack.dataVisualizer.fieldStatistics.displayName', {
