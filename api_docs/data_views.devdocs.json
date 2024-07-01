@@ -6882,23 +6882,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "dataViews",
-        "id": "def-public.UserIdGetter",
-        "type": "Type",
-        "tags": [],
-        "label": "UserIdGetter",
-        "description": [],
-        "signature": [
-          "() => Promise<string | undefined>"
-        ],
-        "path": "src/plugins/data_views/public/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
       }
     ],
     "objects": [],

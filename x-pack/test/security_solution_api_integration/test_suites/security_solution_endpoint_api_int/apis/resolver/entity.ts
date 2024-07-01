@@ -41,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
               parent: 'process.parent.entity_id',
               name: 'process.name',
             },
-            // this value is from the es archive
+            // this value comes from the es archive
             id: '{98da333e-2060-5fc9-2e01-000000003f00}',
           },
         ]);
@@ -84,9 +84,11 @@ export default function ({ getService }: FtrProviderContext) {
               parent: 'process.parent.entity_id',
               ancestry: 'process.Ext.ancestry',
               name: 'process.name',
+              agentId: 'agent.id',
             },
-            // this value is from the es archive
+            // these values come from the es archive
             id: 'MTIwNWY1NWQtODRkYS00MzkxLWIyNWQtYTNkNGJmNDBmY2E1LTc1NTItMTMyNDM1NDY1MTQuNjI0MjgxMDA=',
+            agentId: '1205f55d-84da-4391-b25d-a3d4bf40fca5',
           },
         ]);
       });

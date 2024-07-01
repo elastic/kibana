@@ -17,14 +17,12 @@ import type {
   ResponseError,
   RouteMethod,
 } from '@kbn/core/server';
-import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FileServiceStart } from '../file_service';
 import { Counters } from '../usage';
 import { AnyEndpoint } from './api_routes';
 
 export interface FilesRequestHandlerContext extends RequestHandlerContext {
   files: Promise<{
-    security?: SecurityPluginStart;
     fileService: {
       asCurrentUser: () => FileServiceStart;
       asInternalUser: () => FileServiceStart;
