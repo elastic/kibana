@@ -30,9 +30,8 @@ import { useStartServices } from '../../../hooks';
 
 export const ConfigureStandaloneAgentStep = ({
   isK8s,
-  selectedPolicyId,
   yaml,
-  downloadLink,
+  downloadYaml,
   apiKey,
   onCreateApiKey,
   isComplete,
@@ -41,7 +40,7 @@ export const ConfigureStandaloneAgentStep = ({
   isK8s?: K8sMode;
   selectedPolicyId?: string;
   yaml: string;
-  downloadLink: string;
+  downloadYaml: () => void;
   apiKey: string | undefined;
   onCreateApiKey: () => void;
   isComplete?: boolean;
@@ -195,14 +194,13 @@ export const ConfigureStandaloneAgentStep = ({
                 </EuiCopy>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButton
                   iconType="download"
-                  href={downloadLink}
                   onClick={() => {
                     if (onCopy) onCopy();
+                    downloadYaml();
                   }}
-                  isDisabled={!downloadLink}
+                  isDisabled={!downloadYaml}
                 >
                   <>{downloadMsg}</>
                 </EuiButton>

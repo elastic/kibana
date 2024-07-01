@@ -13,9 +13,8 @@ import { safeDump } from 'js-yaml';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
-import { API_VERSIONS } from '../../../../common/constants';
 import { getRootIntegrations } from '../../../../common/services';
-import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { fullAgentPolicyToYaml } from '../../../services';
 
 import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
 
@@ -69,19 +68,15 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
   const [yaml, setYaml] = useState<any | undefined>('');
   const { apiKey, onCreateApiKey } = useGetCreateApiKey();
 
-  const downloadLink = useMemo(() => {
-    if (!selectedPolicy?.id) {
-      return '';
-    }
-    const downloadLinkOptions = `${
-      isK8s === 'IS_KUBERNETES' ? 'kubernetes=true&' : ''
-    }standalone=true${apiKey ? `&standalone_api_key=${apiKey}` : ''}&apiVersion=${
-      API_VERSIONS.public.v1
-    }`;
-    return core.http.basePath.prepend(
-      `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicy.id)}?${downloadLinkOptions}`
-    );
-  }, [apiKey, core.http.basePath, isK8s, selectedPolicy?.id]);
+  const downloadYaml = useMemo(
+    () => () => {
+      const link = document.createElement('a');
+      link.href = `data:text/json;charset=utf-8,${yaml}`;
+      link.download = `elastic-agent.yaml`;
+      link.click();
+    },
+    [yaml]
+  );
 
   useEffect(() => {
     async function fetchFullPolicy() {
@@ -126,9 +121,9 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
       if (typeof fullAgentPolicy === 'string') {
         return;
       }
-      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
+      setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump, apiKey));
     }
-  }, [fullAgentPolicy, isK8s]);
+  }, [fullAgentPolicy, isK8s, apiKey]);
 
   const agentVersion = useAgentVersion();
 
@@ -159,7 +154,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         isK8s,
         selectedPolicyId: selectedPolicy?.id,
         yaml,
-        downloadLink,
+        downloadYaml,
         apiKey,
         onCreateApiKey,
       })
@@ -187,7 +182,7 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
     selectionType,
     isK8s,
     yaml,
-    downloadLink,
+    downloadYaml,
     apiKey,
     onCreateApiKey,
     cloudSecurityIntegration,

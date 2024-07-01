@@ -13,17 +13,13 @@ import { safeDump } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 
 import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
-import { API_VERSIONS } from '../../../../../../../../../../common/constants';
 import { getRootIntegrations } from '../../../../../../../../../../common/services';
 import {
   AgentStandaloneBottomBar,
   StandaloneModeWarningCallout,
   NotObscuredByBottomBar,
 } from '../..';
-import {
-  fullAgentPolicyToYaml,
-  agentPolicyRouteService,
-} from '../../../../../../../../../services';
+import { fullAgentPolicyToYaml } from '../../../../../../../../../services';
 import { useGetCreateApiKey } from '../../../../../../../../../components/agent_enrollment_flyout/hooks';
 
 import { Error as FleetError } from '../../../../../../../components';
@@ -83,8 +79,8 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       return;
     }
 
-    setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump));
-  }, [fullAgentPolicy]);
+    setYaml(fullAgentPolicyToYaml(fullAgentPolicy, safeDump, apiKey));
+  }, [apiKey, fullAgentPolicy]);
 
   if (!agentPolicy) {
     return (
@@ -102,16 +98,17 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
 
   const installManagedCommands = StandaloneInstructions(kibanaVersion);
 
-  const downloadLink = core.http.basePath.prepend(
-    `${agentPolicyRouteService.getInfoFullDownloadPath(
-      agentPolicy?.id
-    )}?standalone=true&apiVersion=${API_VERSIONS.public.v1}`
-  );
+  const downloadYaml = () => {
+    const link = document.createElement('a');
+    link.href = `data:text/json;charset=utf-8,${yaml}`;
+    link.download = `elastic-agent.yaml`;
+    link.click();
+  };
   const steps = [
     ConfigureStandaloneAgentStep({
       selectedPolicyId: agentPolicy?.id,
       yaml,
-      downloadLink,
+      downloadYaml,
       apiKey,
       onCreateApiKey,
       isComplete: policyCopied,
