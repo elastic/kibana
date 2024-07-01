@@ -6,11 +6,12 @@
  */
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
-import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { UnsavedChangesConfirmModal } from './unsaved_changes_confirm_modal';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -42,6 +43,7 @@ import {
   policyIdFromParams,
   isOnProtectionUpdatesView,
 } from '../../store/policy_details/selectors';
+import type { PolicyArtifactsLayoutProps } from '../artifacts/layout/policy_artifacts_layout';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translations';
@@ -57,6 +59,8 @@ import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../e
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { ProcessDescendantsTooltip } from '../../../event_filters/view/components/process_descendant_tooltip';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -181,6 +185,42 @@ export const PolicyTabs = React.memo(() => {
     [http]
   );
 
+  const isProcessDescendantFeatureEnabled = useIsExperimentalFeatureEnabled(
+    'filterProcessDescendantsForEventFiltersEnabled'
+  );
+
+  const eventFilterCardDecorator: PolicyArtifactsLayoutProps['cardDecorator'] = useCallback(
+    (item) => {
+      if (
+        isProcessDescendantFeatureEnabled &&
+        isFilterProcessDescendantsEnabled(item as ExceptionListItemSchema)
+      ) {
+        return (
+          <>
+            <EuiText data-test-subj="processDescendantIndication">
+              <code>
+                <strong>
+                  <FormattedMessage
+                    defaultMessage="Filtering descendants of process"
+                    id="xpack.securitySolution.eventFilters.filteringProcessDescendants"
+                  />{' '}
+                  <ProcessDescendantsTooltip
+                    indicateExtraEntry
+                    testIdPrefix="processDescendantIndication"
+                  />
+                </strong>
+              </code>
+            </EuiText>
+            <EuiSpacer size="l" />
+          </>
+        );
+      }
+
+      return null;
+    },
+    [isProcessDescendantFeatureEnabled]
+  );
+
   const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     const trustedAppsLabels = {
       ...POLICY_ARTIFACT_TRUSTED_APPS_LABELS,
@@ -290,6 +330,7 @@ export const PolicyTabs = React.memo(() => {
                   getArtifactPath={getEventFiltersListPath}
                   getPolicyArtifactsPath={getPolicyEventFiltersPath}
                   canWriteArtifact={canWriteEventFilters}
+                  cardDecorator={eventFilterCardDecorator}
                 />
               </>
             ),
@@ -377,6 +418,7 @@ export const PolicyTabs = React.memo(() => {
     canReadEventFilters,
     getEventFiltersApiClientInstance,
     canWriteEventFilters,
+    eventFilterCardDecorator,
     canReadHostIsolationExceptions,
     getHostIsolationExceptionsApiClientInstance,
     canWriteHostIsolationExceptions,

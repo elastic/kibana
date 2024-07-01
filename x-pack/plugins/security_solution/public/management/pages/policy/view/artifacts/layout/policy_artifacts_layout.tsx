@@ -39,7 +39,7 @@ import { policyArtifactsPageLabels } from '../translations';
 import { PolicyArtifactsDeleteModal } from '../delete_modal';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
 
-interface PolicyArtifactsLayoutProps {
+export interface PolicyArtifactsLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
   /** A list of labels for the given policy artifact page. Not all have to be defined, only those that should override the defaults */
   labels: PolicyArtifactsPageLabels;
