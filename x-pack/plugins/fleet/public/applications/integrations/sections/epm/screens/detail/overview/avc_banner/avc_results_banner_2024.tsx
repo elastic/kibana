@@ -17,9 +17,12 @@ import avcBannerBackground from './avc_banner_background.svg';
 export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
   const { docLinks } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const bannerTitle = i18n.translate('xpack.fleet.integrations.epm.elasticDefend.avcResultsBanner.title', {
-    defaultMessage: '100% protection with zero false positives.',
-  });
+  const bannerTitle = i18n.translate(
+    'xpack.fleet.integrations.epm.elasticDefend.avcResultsBanner.title',
+    {
+      defaultMessage: '100% protection with zero false positives.',
+    }
+  );
 
   const calloutStyles = css({
     paddingLeft: `${euiTheme.size.xl}`,
