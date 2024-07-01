@@ -34,7 +34,6 @@ import {
   skip,
   switchMap,
   distinctUntilChanged,
-  of,
 } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -186,11 +185,11 @@ export const getFieldStatsChartEmbeddableFactory = (
             .pipe(
               skip(1),
               skipWhile((dataViewId) => !dataViewId && !defaultDataViewId),
-              switchMap((dataViewId) => {
+              switchMap(async (dataViewId) => {
                 try {
-                  return deps.data.dataViews.get(dataViewId ?? defaultDataViewId);
+                  return await deps.data.dataViews.get(dataViewId ?? defaultDataViewId);
                 } catch (error) {
-                  return of(undefined);
+                  return undefined;
                 }
               })
             )
@@ -233,7 +232,6 @@ export const getFieldStatsChartEmbeddableFactory = (
                 chartState,
                 fieldStatsControlsApi
               );
-
               fieldStatsControlsApi.updateUserInput(nextUpdate);
             } catch (e) {
               toasts.addError(e, { title: ERROR_MSG.UPDATE_CONFIG_ERROR });
