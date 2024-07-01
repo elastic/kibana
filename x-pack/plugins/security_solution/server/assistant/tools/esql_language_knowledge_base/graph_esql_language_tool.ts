@@ -30,38 +30,9 @@ import type {
 import { APP_UI_ID } from '../../../../common';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 import type { LangchainZodAny } from '..';
+import { KNOWLEDGE_BASE_RETRIEVAL_TOOL } from '../knowledge_base/knowledge_base_retrieval_tool';
 
 export const INLINE_ESQL_QUERY_REGEX = /```esql\s*(.*?)\s*```/gms;
-
-export const ECS_MAIN_PROMPT = ChatPromptTemplate.fromMessages([
-  [
-    'system',
-    `As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent. Under any circumstances wrap index in quotes.
-
-    If multiple indices are matched please try to use wildcard to match all indices. If you are unsure about the index name, please refer to the context provided below.
-
-Here is some context for you to reference for your task, read it carefully as you will get questions about it later:
-<context>
-<availableDataViews>
-{availableDataViews}
-</availableDataViews>
-</context>`,
-  ],
-  [
-    'human',
-    `{input}.
-Example response format:
-<example>
-A: Please find the ESQL query below:
-\`\`\`esql
-FROM logs-*
-| SORT @timestamp DESC
-| LIMIT 5
-\`\`\`
-</example_response>"`,
-  ],
-  ['ai', 'Please find the ESQL query below:'],
-]);
 
 export type GraphESQLToolParams = AssistantToolParams;
 
@@ -160,6 +131,9 @@ const getGenerateQuery =
       [
         'system',
         `${systemMessage}
+        As an expert user of Elastic Security, please generate an accurate and valid ESQL query to detect the use case below. Your response should be formatted to be able to use immediately in an Elastic Security timeline or detection rule. Take your time with the answer, check your knowledge really well on all the functions I am asking for. For ES|QL answers specifically, you should only ever answer with what's available in your private knowledge. I cannot afford for queries to be inaccurate. Assume I am using the Elastic Common Schema and Elastic Agent. Under any circumstances wrap index in quotes.
+
+        If multiple indices are matched please try to use wildcard to match all indices. If you are unsure about the index name, please refer to the context provided below.
 
         Available indices:
         {availableDataViews}
@@ -214,6 +188,7 @@ as mentioned in the system message. When converting queries from one language
 to ES|QL, make sure that the functions are available and documented in ES|QL.
 E.g., for SPL's LEN, use LENGTH. For IF, use CASE.`,
       ],
+      ['ai', 'Please find the ESQL query below:'],
     ]).partial({
       availableDataViews: state.availableDataViews.join('\n'),
       errors: state.errors.join('\n'),
@@ -287,8 +262,6 @@ const getValidateQuery =
           dataViewFields = map(indexFields, (field) => `${field.name} (${field.type})`);
         }
 
-        // console.error('eeeeee', e);
-
         return {
           errors: e?.message.match(new RegExp(/Unknown column.*/)) ?? e?.message,
           dataViewFields,
@@ -322,6 +295,14 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
     const { chain, dataViews, search, llm } = params;
     if (!llm || !chain) return null;
 
+    const retrievalTool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool(params);
+
+    const boundModel = llm as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
+
+    if (retrievalTool && boundModel?.bindTools) {
+      boundModel.bindTools([retrievalTool]);
+    }
+
     return new DynamicStructuredTool({
       name: toolDetails.name,
       description: toolDetails.description,
@@ -333,7 +314,10 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
           channels: graphState,
         })
           .addNode('getDataStreams', getDataStreams({ dataViews }))
-          .addNode('generateQuery', getGenerateQuery({ userQuery: input.question, llm }))
+          .addNode(
+            'generateQuery',
+            getGenerateQuery({ userQuery: input.question, llm: boundModel })
+          )
           .addNode('validateQuery', getValidateQuery({ dataViews, search }))
           .addEdge(START, 'getDataStreams')
           .addEdge('getDataStreams', 'generateQuery')
@@ -348,8 +332,6 @@ export const GRAPH_ESQL_TOOL: AssistantTool = {
         } catch (e) {
           return e;
         }
-
-        // console.error('query', query.esqlQuery);
 
         return query.esqlQuery;
       },
