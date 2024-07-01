@@ -1188,7 +1188,7 @@
           "defaultModel": {
             "type": "string",
             "description": "The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.\n",
-            "default": "anthropic.claude-3-sonnet-20240229-v1:0"
+            "default": "anthropic.claude-3-5-sonnet-20240620-v1:0"
           }
         }
       },
@@ -1228,7 +1228,7 @@
           "defaultModel": {
             "type": "string",
             "description": "The generative artificial intelligence model for Google Gemini to use.",
-            "default": "gemini-1.5-pro-preview-0409"
+            "default": "gemini-1.5-pro-001"
           },
           "gcpRegion": {
             "type": "string",

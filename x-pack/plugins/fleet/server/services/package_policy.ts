@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
 import type {
+  AuthenticatedUser,
   KibanaRequest,
   ElasticsearchClient,
   SavedObjectsClientContract,
@@ -24,8 +25,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
-
-import { type AuthenticatedUser } from '@kbn/security-plugin/server';
 
 import pMap from 'p-map';
 

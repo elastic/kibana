@@ -133,3 +133,11 @@
 .console__monaco_editor__selectedRequests {
   background: transparentize($euiColorLightShade, .3);
 }
+/*
+ * The z-index for the autocomplete suggestions popup
+ */
+
+.kibanaCodeEditor .monaco-editor .suggest-widget {
+  // the value needs to be above the z-index of the resizer bar
+  z-index: $euiZLevel1 + 2;
+}
