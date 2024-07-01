@@ -36,9 +36,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
-import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
-import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import type { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType, getStepDataDataSource } from '../../pages/rule_creation/helpers';
 import type {
@@ -94,7 +91,6 @@ import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
 import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
-import { useMlRuleValidations } from '../../../../common/components/ml/hooks/use_ml_rule_validations';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
@@ -106,7 +102,7 @@ import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
 import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
-import { useRuleFields } from '../../../rule_management/logic/use_rule_fields';
+import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -205,18 +201,18 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const [threatIndexModified, setThreatIndexModified] = useState(false);
   const license = useLicense();
 
-  const mlCapabilities = useMlCapabilities();
   const [{ machineLearningJobId }] = useFormData<DefineStepRule>({
     form,
     watch: ['machineLearningJobId'],
   });
-  const { someJobsStarted: someMlJobsStarted, noJobsStarted: noMlJobsStarted } =
-    useMlRuleValidations({ machineLearningJobId });
-  const { loading: mlFieldsLoading, fields: mlFields } = useRuleFields({ machineLearningJobId });
-  const mlSuppressionFields = useMemo(
-    () => getTermsAggregationFields(mlFields as BrowserField[]),
-    [mlFields]
-  );
+  const {
+    hasMlAdminPermissions,
+    hasMlLicense,
+    mlFieldsLoading,
+    mlSuppressionFields,
+    noMlJobsStarted,
+    someMlJobsStarted,
+  } = useMLRuleConfig({ machineLearningJobId });
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
 
@@ -900,10 +896,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     () => ({
       describedByIds: ['detectionEngineStepDefineRuleType'],
       isUpdateView,
-      hasValidLicense: hasMlLicense(mlCapabilities),
-      isMlAdmin: hasMlAdminPermissions(mlCapabilities),
+      hasValidLicense: hasMlLicense,
+      isMlAdmin: hasMlAdminPermissions,
     }),
-    [isUpdateView, mlCapabilities]
+    [hasMlAdminPermissions, hasMlLicense, isUpdateView]
   );
 
   return (
