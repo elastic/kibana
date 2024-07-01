@@ -41,13 +41,13 @@ export const getNotesRoute = (
         try {
           const queryParams = request.query;
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
-          const alertIds = queryParams.alertIds ?? null;
-          if (alertIds != null) {
-            if (Array.isArray(alertIds)) {
-              const alertIdSearchString = alertIds?.join(' | ');
+          const documentIds = queryParams.documentIds ?? null;
+          if (documentIds != null) {
+            if (Array.isArray(documentIds)) {
+              const docIdSearchString = documentIds?.join(' | ');
               const options = {
                 type: noteSavedObjectType,
-                search: alertIdSearchString,
+                search: docIdSearchString,
                 page: 1,
                 perPage: MAX_UNASSOCIATED_NOTES,
               };
@@ -57,7 +57,7 @@ export const getNotesRoute = (
             } else {
               const options = {
                 type: noteSavedObjectType,
-                search: alertIds,
+                search: documentIds,
                 page: 1,
                 perPage: MAX_UNASSOCIATED_NOTES,
               };

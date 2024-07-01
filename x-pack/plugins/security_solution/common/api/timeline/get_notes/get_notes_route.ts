@@ -9,7 +9,7 @@ import * as runtimeTypes from 'io-ts';
 import { unionWithNullType } from '../../../utility_types';
 
 export const getNotesSchema = runtimeTypes.partial({
-  alertIds: runtimeTypes.union([runtimeTypes.array(runtimeTypes.string), runtimeTypes.string]),
+  documentIds: runtimeTypes.union([runtimeTypes.array(runtimeTypes.string), runtimeTypes.string]),
   page: unionWithNullType(runtimeTypes.number),
   perPage: unionWithNullType(runtimeTypes.number),
   search: unionWithNullType(runtimeTypes.string),

@@ -12,8 +12,9 @@ import type { State } from '../../common/store';
 import {
   createNote as createNoteApi,
   deleteNote as deleteNoteApi,
-  fetchNotesByDocumentId as fetchNotesByDocumentIdApi,
+  deleteNotes as deleteNotesApi,
   fetchNotes as fetchNotesApi,
+  fetchNotesByDocumentIds as fetchNotesByDocumentIdsApi,
 } from '../api/api';
 import type { NormalizedEntities, NormalizedEntity } from './normalize';
 import { normalizeEntities, normalizeEntity } from './normalize';
@@ -33,13 +34,13 @@ interface HttpError {
 
 export interface NotesState extends EntityState<Note> {
   status: {
-    fetchNotesByDocumentId: ReqStatus;
+    fetchNotesByDocumentIds: ReqStatus;
     createNote: ReqStatus;
     deleteNote: ReqStatus;
     fetchNotes: ReqStatus;
   };
   error: {
-    fetchNotesByDocumentId: SerializedError | HttpError | null;
+    fetchNotesByDocumentIds: SerializedError | HttpError | null;
     createNote: SerializedError | HttpError | null;
     deleteNote: SerializedError | HttpError | null;
     fetchNotes: SerializedError | HttpError | null;
@@ -51,7 +52,7 @@ export interface NotesState extends EntityState<Note> {
   };
   sort: {
     field: string;
-    order: string;
+    direction: string;
   };
   filter: string;
   search: string;
@@ -64,13 +65,13 @@ const notesAdapter = createEntityAdapter<Note>({
 
 export const initialNotesState: NotesState = notesAdapter.getInitialState({
   status: {
-    fetchNotesByDocumentId: ReqStatus.Idle,
+    fetchNotesByDocumentIds: ReqStatus.Idle,
     createNote: ReqStatus.Idle,
     deleteNote: ReqStatus.Idle,
     fetchNotes: ReqStatus.Idle,
   },
   error: {
-    fetchNotesByDocumentId: null,
+    fetchNotesByDocumentIds: null,
     createNote: null,
     deleteNote: null,
     fetchNotes: null,
@@ -81,26 +82,26 @@ export const initialNotesState: NotesState = notesAdapter.getInitialState({
     total: 0,
   },
   sort: {
-    field: '@timestamp',
-    order: 'desc',
+    field: 'created',
+    direction: 'desc',
   },
   filter: '',
   search: '',
   selectedIds: [],
 });
 
-export const fetchNotesByDocumentId = createAsyncThunk<
+export const fetchNotesByDocumentIds = createAsyncThunk<
   NormalizedEntities<Note>,
-  { documentId: string },
+  { documentIds: string[] },
   {}
->('notes/fetchNotesByDocumentId', async (args) => {
-  const { documentId } = args;
-  const res = await fetchNotesByDocumentIdApi(documentId);
+>('notes/fetchNotesByDocumentIds', async (args) => {
+  const { documentIds } = args;
+  const res = await fetchNotesByDocumentIdsApi(documentIds);
   return normalizeEntities(res.notes);
 });
 
 export const fetchNotes = createAsyncThunk<
-  NormalizedEntities<Note>,
+  NormalizedEntities<Note> & { totalCount: number },
   {
     page: number;
     perPage: number;
@@ -111,8 +112,9 @@ export const fetchNotes = createAsyncThunk<
   },
   {}
 >('notes/fetchNotes', async (args) => {
-  const res = await fetchNotesApi(args);
-  return normalizeEntities(res.notes);
+  const { page, perPage, sortField, sortOrder, filter, search } = args;
+  const res = await fetchNotesApi({ page, perPage, sortField, sortOrder, filter, search });
+  return { ...normalizeEntities(res.notes), totalCount: res.totalCount };
 });
 
 export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareNote }, {}>(
@@ -130,6 +132,15 @@ export const deleteNote = createAsyncThunk<string, { id: string }, {}>(
     const { id } = args;
     await deleteNoteApi(id);
     return id;
+  }
+);
+
+export const deleteNotes = createAsyncThunk<string[], { ids: string[] }, {}>(
+  'notes/deleteNotes',
+  async (args) => {
+    const { ids } = args;
+    await deleteNotesApi(ids);
+    return ids;
   }
 );
 
@@ -153,25 +164,21 @@ const notesSlice = createSlice({
       state.search = action.payload;
     },
     userSelectedRow: (state, action) => {
-      if (state.selectedIds.includes(action.payload)) {
-        state.selectedIds.push(action.payload);
-      } else {
-        state.selectedIds = state.selectedIds.filter((id) => id !== action.payload);
-      }
+      state.selectedIds = action.payload;
     },
   },
   extraReducers(builder) {
     builder
-      .addCase(fetchNotesByDocumentId.pending, (state) => {
-        state.status.fetchNotesByDocumentId = ReqStatus.Loading;
+      .addCase(fetchNotesByDocumentIds.pending, (state) => {
+        state.status.fetchNotesByDocumentIds = ReqStatus.Loading;
       })
-      .addCase(fetchNotesByDocumentId.fulfilled, (state, action) => {
+      .addCase(fetchNotesByDocumentIds.fulfilled, (state, action) => {
         notesAdapter.upsertMany(state, action.payload.entities.notes);
-        state.status.fetchNotesByDocumentId = ReqStatus.Succeeded;
+        state.status.fetchNotesByDocumentIds = ReqStatus.Succeeded;
       })
-      .addCase(fetchNotesByDocumentId.rejected, (state, action) => {
-        state.status.fetchNotesByDocumentId = ReqStatus.Failed;
-        state.error.fetchNotesByDocumentId = action.payload ?? action.error;
+      .addCase(fetchNotesByDocumentIds.rejected, (state, action) => {
+        state.status.fetchNotesByDocumentIds = ReqStatus.Failed;
+        state.error.fetchNotesByDocumentIds = action.payload ?? action.error;
       })
       .addCase(createNote.pending, (state) => {
         state.status.createNote = ReqStatus.Loading;
@@ -200,6 +207,7 @@ const notesSlice = createSlice({
       })
       .addCase(fetchNotes.fulfilled, (state, action) => {
         notesAdapter.setAll(state, action.payload.entities.notes);
+        state.pagination.total = action.payload.totalCount;
         state.status.fetchNotes = ReqStatus.Succeeded;
       })
       .addCase(fetchNotes.rejected, (state, action) => {
@@ -217,11 +225,11 @@ export const {
   selectIds: selectNoteIds,
 } = notesAdapter.getSelectors((state: State) => state.notes);
 
-export const selectFetchNotesByDocumentIdStatus = (state: State) =>
-  state.notes.status.fetchNotesByDocumentId;
+export const selectFetchNotesByDocumentIdsStatus = (state: State) =>
+  state.notes.status.fetchNotesByDocumentIds;
 
-export const selectFetchNotesByDocumentIdError = (state: State) =>
-  state.notes.error.fetchNotesByDocumentId;
+export const selectFetchNotesByDocumentIdsError = (state: State) =>
+  state.notes.error.fetchNotesByDocumentIds;
 
 export const selectCreateNoteStatus = (state: State) => state.notes.status.createNote;
 
@@ -237,6 +245,10 @@ export const selectNotesTableSort = (state: State) => state.notes.sort;
 
 export const selectNotesTableTotalItems = (state: State) => state.notes.pagination.total;
 
+export const selectNotesTableSelectedIds = (state: State) => state.notes.selectedIds;
+
+export const selectNotesTableSearch = (state: State) => state.notes.search;
+
 export const selectNotesByDocumentId = createSelector(
   [selectAllNotes, (state, documentId) => documentId],
   (notes, documentId) => notes.filter((note) => note.eventId === documentId)
@@ -248,4 +260,5 @@ export const {
   userSortedNotes,
   userFilteredNotes,
   userSearchedNotes,
+  userSelectedRow,
 } = notesSlice.actions;
