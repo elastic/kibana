@@ -64,17 +64,17 @@ export function registerCategorizationRoutes(
             const isOpenAI = connector.actionTypeId === '.gen-ai';
             const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
-          const model = new llmClass({
-            actionsClient,
-            connectorId: connector.id,
-            logger,
-            llmType: isOpenAI ? 'openai' : 'bedrock',
-            model: connector.config?.defaultModel,
-            temperature: 0.05,
-            maxTokens: 4096,
-            signal: abortSignal,
-            streaming: false,
-          });
+            const model = new llmClass({
+              actionsClient,
+              connectorId: connector.id,
+              logger,
+              llmType: isOpenAI ? 'openai' : 'bedrock',
+              model: connector.config?.defaultModel,
+              temperature: 0.05,
+              maxTokens: 4096,
+              signal: abortSignal,
+              streaming: false,
+            });
 
             const graph = await getCategorizationGraph(client, model);
             const results = await graph.invoke({
