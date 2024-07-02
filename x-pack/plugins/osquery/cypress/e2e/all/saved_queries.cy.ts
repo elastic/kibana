@@ -58,7 +58,6 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   it.skip('checks that user cant add a saved query with an ID that already exists', () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
-
     cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
 
     cy.contains('ID must be unique').should('not.exist');
@@ -76,8 +75,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  // FAILING ES SERVERLESS PROMOTION: https://github.com/elastic/kibana/issues/169787
-  describe.skip('prebuilt', () => {
+  describe('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;
