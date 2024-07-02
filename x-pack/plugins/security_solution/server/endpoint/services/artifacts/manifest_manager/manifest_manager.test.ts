@@ -44,6 +44,8 @@ import {
   createFetchAllArtifactsIterableMock,
   generateArtifactMock,
 } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
+import type { ExperimentalFeatures } from '../../../../../common';
+import { allowedExperimentalValues } from '../../../../../common';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -93,6 +95,8 @@ describe('ManifestManager', () => {
   let ARTIFACT_TRUSTED_APPS_MACOS: InternalArtifactCompleteSchema;
   let ARTIFACT_TRUSTED_APPS_WINDOWS: InternalArtifactCompleteSchema;
 
+  let defaultFeatures: ExperimentalFeatures;
+
   beforeAll(async () => {
     ARTIFACTS = await getMockArtifacts();
     ARTIFACTS_BY_ID = {
@@ -106,6 +110,7 @@ describe('ManifestManager', () => {
     ARTIFACT_EXCEPTIONS_WINDOWS = ARTIFACTS[1];
     ARTIFACT_TRUSTED_APPS_MACOS = ARTIFACTS[3];
     ARTIFACT_TRUSTED_APPS_WINDOWS = ARTIFACTS[4];
+    defaultFeatures = allowedExperimentalValues;
   });
 
   describe('getLastComputedManifest from Unified Manifest SO', () => {
@@ -463,29 +468,33 @@ describe('ManifestManager', () => {
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[5])).toStrictEqual({
-        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[8])).toStrictEqual({
-        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1'),
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[11])).toStrictEqual({
-        entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
       });
       expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[14])).toStrictEqual({
-        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
       });
 
       for (const artifact of artifacts) {
@@ -553,22 +562,26 @@ describe('ManifestManager', () => {
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[5])).toStrictEqual({
-        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[8])).toStrictEqual({
-        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1'),
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[11])).toStrictEqual({
-        entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
       });
       expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[14])).toStrictEqual({
-        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
       });
 
       for (const artifact of artifacts) {
@@ -647,16 +660,20 @@ describe('ManifestManager', () => {
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[1])).toStrictEqual({
-        entries: translateToEndpointExceptions([duplicatedEndpointExceptionInDifferentOS], 'v1'),
+        entries: translateToEndpointExceptions(
+          [duplicatedEndpointExceptionInDifferentOS],
+          'v1',
+          defaultFeatures
+        ),
       });
       expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[5])).toStrictEqual({
-        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
@@ -664,16 +681,21 @@ describe('ManifestManager', () => {
       expect(getArtifactObject(artifacts[9])).toStrictEqual({
         entries: translateToEndpointExceptions(
           [eventFiltersListItem, duplicatedEventFilterInDifferentPolicy],
-          'v1'
+          'v1',
+          defaultFeatures
         ),
       });
       expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[11])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[12])).toStrictEqual({
-        entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
       });
       expect(getArtifactObject(artifacts[13])).toStrictEqual({
-        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[14])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[15])).toStrictEqual({ entries: [] });
@@ -750,19 +772,20 @@ describe('ManifestManager', () => {
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[5])).toStrictEqual({
-        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({
         entries: translateToEndpointExceptions(
           [trustedAppListItem, trustedAppListItemPolicy2],
-          'v1'
+          'v1',
+          defaultFeatures
         ),
       });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
@@ -855,19 +878,19 @@ describe('ManifestManager', () => {
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[5])).toStrictEqual({
-        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[8])).toStrictEqual({
-        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1'),
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
@@ -875,7 +898,7 @@ describe('ManifestManager', () => {
       expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[14])).toStrictEqual({
-        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
       });
 
       for (const artifact of artifacts) {
@@ -936,29 +959,33 @@ describe('ManifestManager', () => {
       expect(getArtifactIds(artifacts)).toStrictEqual(SUPPORTED_ARTIFACT_NAMES);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([exceptionListItem], 'v1'),
+        entries: translateToEndpointExceptions([exceptionListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[1])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[2])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[3])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[4])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[5])).toStrictEqual({
-        entries: translateToEndpointExceptions([trustedAppListItem], 'v1'),
+        entries: translateToEndpointExceptions([trustedAppListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[6])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[7])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[8])).toStrictEqual({
-        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1'),
+        entries: translateToEndpointExceptions([eventFiltersListItem], 'v1', defaultFeatures),
       });
       expect(getArtifactObject(artifacts[9])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[10])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[11])).toStrictEqual({
-        entries: translateToEndpointExceptions([hostIsolationExceptionsItem], 'v1'),
+        entries: translateToEndpointExceptions(
+          [hostIsolationExceptionsItem],
+          'v1',
+          defaultFeatures
+        ),
       });
       expect(getArtifactObject(artifacts[12])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[13])).toStrictEqual({ entries: [] });
       expect(getArtifactObject(artifacts[14])).toStrictEqual({
-        entries: translateToEndpointExceptions([blocklistsListItem], 'v1'),
+        entries: translateToEndpointExceptions([blocklistsListItem], 'v1', defaultFeatures),
       });
 
       for (const artifact of artifacts) {
@@ -1079,7 +1106,7 @@ describe('ManifestManager', () => {
       expect(artifacts.length).toBe(15);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
+        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1', defaultFeatures),
       });
     });
 
@@ -1119,7 +1146,7 @@ describe('ManifestManager', () => {
       expect(artifacts.length).toBe(15);
 
       expect(getArtifactObject(artifacts[0])).toStrictEqual({
-        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1'),
+        entries: translateToEndpointExceptions([expectedExceptionListItem], 'v1', defaultFeatures),
       });
     });
   });
