@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { render } from '@testing-library/react';
 import { OnboardingComponent } from './onboarding';
 import {
   AddIntegrationsSteps,
@@ -16,12 +15,13 @@ import {
 } from './types';
 import { ProductLine, ProductTier } from './configs';
 import { useCurrentUser } from '../../../lib/kibana';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../mock/endpoint';
+import type { AppContextTestRender } from '../../../mock/endpoint';
+import { createAppRootMockRenderer } from '../../../mock/endpoint';
 
 jest.mock('./toggle_panel');
 jest.mock('../../../lib/kibana');
 
-(useCurrentUser as jest.Mock).mockReturnValue({ fullName: 'UserFullName' })
+(useCurrentUser as jest.Mock).mockReturnValue({ fullName: 'UserFullName' });
 
 describe('OnboardingComponent', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -40,12 +40,10 @@ describe('OnboardingComponent', () => {
     spaceId: 'spaceId',
   };
 
-
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
     render = () => (renderResult = mockedContext.render(<OnboardingComponent {...props} />));
   });
-
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -76,13 +74,16 @@ describe('OnboardingComponent', () => {
   });
   describe('AVC 2024 Results banner', () => {
     it('should render on the page', () => {
-    render();
-    expect(renderResult.getByTestId('avcResultsBanner')).toBeTruthy();
+      render();
+      expect(renderResult.getByTestId('avcResultsBanner')).toBeTruthy();
     });
 
     it('should link to the blog post', () => {
       render();
-      expect(renderResult.getByTestId('avcReadTheBlog')).toHaveAttribute('href', 'https://www.elastic.co/blog/elastic-security-malware-protection-test-av-comparatives');
+      expect(renderResult.getByTestId('avcReadTheBlog')).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/blog/elastic-security-malware-protection-test-av-comparatives'
+      );
     });
 
     it('should stay stay dismissed', () => {
