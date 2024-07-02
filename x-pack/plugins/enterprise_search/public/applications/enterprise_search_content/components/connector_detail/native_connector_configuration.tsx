@@ -89,105 +89,102 @@ export const NativeConnectorConfiguration: React.FC = () => {
       ) : null}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiPanel hasShadow={false} hasBorder>
-            <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
-              {iconPath && (
-                <EuiFlexItem grow={false}>
-                  <EuiIcon size="xl" type={iconPath} />
-                </EuiFlexItem>
-              )}
+          <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
+            {iconPath && (
               <EuiFlexItem grow={false}>
-                <EuiTitle size="s">
-                  <h2>{nativeConnector?.name ?? connector.name}</h2>
-                </EuiTitle>
+                <EuiIcon size="xl" type={iconPath} />
               </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer />
-            {config.host && config.canDeployEntSearch && errorConnectingMessage && (
-              <>
-                <EuiCallOut
-                  color="warning"
-                  size="m"
-                  title={i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.title',
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2>{nativeConnector?.name ?? connector.name}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {config.host && config.canDeployEntSearch && errorConnectingMessage && (
+            <>
+              <EuiCallOut
+                color="warning"
+                size="m"
+                title={i18n.translate(
+                  'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.title',
+                  {
+                    defaultMessage: 'No running Enterprise Search instance detected',
+                  }
+                )}
+                iconType="warning"
+              >
+                <p>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.text',
                     {
-                      defaultMessage: 'No running Enterprise Search instance detected',
+                      defaultMessage:
+                        'Native connectors require a running Enterprise Search instance to sync content from source.',
                     }
                   )}
-                  iconType="warning"
-                >
-                  <p>
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.entSearchWarning.text',
-                      {
-                        defaultMessage:
-                          'Native connectors require a running Enterprise Search instance to sync content from source.',
-                      }
-                    )}
-                  </p>
-                </EuiCallOut>
+                </p>
+              </EuiCallOut>
 
+              <EuiSpacer />
+            </>
+          )}
+          {
+            <>
+              <EuiSpacer />
+              <AttachIndexBox connector={connector} />
+            </>
+          }
+          {connector.index_name && (
+            <>
+              <EuiSpacer />
+              <EuiPanel hasBorder>
+                <EuiTitle size="s">
+                  <h3>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.configuration.title',
+                      { defaultMessage: 'Configuration' }
+                    )}
+                  </h3>
+                </EuiTitle>
                 <EuiSpacer />
-              </>
-            )}
-            {
-              <>
-                <EuiSpacer />
-                <AttachIndexBox connector={connector} />
-              </>
-            }
-            {connector.index_name && (
-              <>
-                <EuiSpacer />
-                <EuiPanel hasBorder>
-                  <EuiTitle size="s">
-                    <h3>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.configuration.title',
-                        { defaultMessage: 'Configuration' }
-                      )}
-                    </h3>
-                  </EuiTitle>
-                  <EuiSpacer />
-                  <ResearchConfiguration nativeConnector={nativeConnector} />
-                  <EuiSpacer size="m" />
-                  <NativeConnectorConfigurationConfig
-                    connector={connector}
-                    nativeConnector={nativeConnector}
-                    status={connector.status}
-                  />
-                  <EuiSpacer />
-                </EuiPanel>
-                <EuiSpacer />
-                <EuiPanel hasBorder>
-                  <EuiTitle size="s">
-                    <h4>
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.apiKey.title',
-                        { defaultMessage: 'API Key' }
-                      )}
-                    </h4>
-                  </EuiTitle>
-                  <EuiSpacer size="m" />
-                  <ApiKeyConfig
-                    indexName={connector.index_name || ''}
-                    hasApiKey={hasApiKey}
-                    isNative
-                  />
-                </EuiPanel>
-                <EuiSpacer />
-                <EuiPanel hasBorder>
-                  <ConvertConnector />
-                </EuiPanel>
-                <EuiSpacer />
-                <WhatsNextBox
-                  connectorId={connector.id}
-                  connectorStatus={connector.status}
-                  connectorIndex={connector.index_name}
+                <ResearchConfiguration nativeConnector={nativeConnector} />
+                <EuiSpacer size="m" />
+                <NativeConnectorConfigurationConfig
+                  connector={connector}
+                  nativeConnector={nativeConnector}
+                  status={connector.status}
                 />
-              </>
-            )}
-          </EuiPanel>
+                <EuiSpacer />
+              </EuiPanel>
+              <EuiSpacer />
+              <EuiPanel hasBorder>
+                <EuiTitle size="s">
+                  <h4>
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.content.connector_detail.nativeConfigurationConnector.apiKey.title',
+                      { defaultMessage: 'API Key' }
+                    )}
+                  </h4>
+                </EuiTitle>
+                <EuiSpacer size="m" />
+                <ApiKeyConfig
+                  indexName={connector.index_name || ''}
+                  hasApiKey={hasApiKey}
+                  isNative
+                />
+              </EuiPanel>
+              <EuiSpacer />
+              <EuiPanel hasBorder>
+                <ConvertConnector />
+              </EuiPanel>
+              <EuiSpacer />
+              <WhatsNextBox
+                connectorId={connector.id}
+                connectorStatus={connector.status}
+                connectorIndex={connector.index_name}
+              />
+            </>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

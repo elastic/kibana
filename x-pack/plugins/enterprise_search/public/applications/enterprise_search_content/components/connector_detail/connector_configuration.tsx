@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSkeletonLoading,
   EuiSpacer,
@@ -25,6 +26,7 @@ import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-co
 import { Status } from '../../../../../common/types/api';
 import { docLinks } from '../../../shared/doc_links';
 import { HttpLogic } from '../../../shared/http';
+import { KibanaLogic } from '../../../shared/kibana';
 import { LicensingLogic } from '../../../shared/licensing';
 import { hasNonEmptyAdvancedSnippet, isExampleConnector } from '../../utils/connector_helpers';
 
@@ -43,10 +45,16 @@ import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { connector, updateConnectorConfigurationStatus } = useValues(ConnectorViewLogic);
+  const { connectorTypes: connectors } = useValues(KibanaLogic);
   const { isSyncing, isWaitingForSync } = useValues(IndexViewLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { http } = useValues(HttpLogic);
   const { advancedSnippet } = useValues(ConnectorFilteringLogic);
+
+  const NATIVE_CONNECTORS = useMemo(
+    () => connectors.filter(({ isNative }) => isNative),
+    [connectors]
+  );
 
   const { updateConnectorConfiguration } = useActions(ConnectorViewLogic);
 
@@ -60,6 +68,22 @@ export const ConnectorConfiguration: React.FC = () => {
 
   const isWaitingForConnector = !connector.status || connector.status === ConnectorStatus.CREATED;
 
+  const nativeConnector = NATIVE_CONNECTORS.find(
+    (connectorDefinition) => connectorDefinition.serviceType === connector.service_type
+  ) || {
+    docsUrl: '',
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    iconPath: 'custom.svg',
+    isBeta: true,
+    isNative: true,
+    keywords: [],
+    name: connector.name,
+    serviceType: connector.service_type ?? '',
+  };
+
+  const iconPath = nativeConnector.iconPath;
+
   return (
     <>
       {
@@ -68,6 +92,19 @@ export const ConnectorConfiguration: React.FC = () => {
       }
       <EuiFlexGroup>
         <EuiFlexItem>
+          <EuiFlexGroup gutterSize="m" direction="row" alignItems="center">
+            {iconPath && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="xl" type={iconPath} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2>{nativeConnector?.name ?? connector.name}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
           <AttachIndexBox connector={connector} />
           <EuiSpacer />
           {connector.index_name && (
