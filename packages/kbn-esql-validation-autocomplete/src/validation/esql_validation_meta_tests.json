@@ -25902,6 +25902,104 @@
       "warning": []
     },
     {
+      "query": "row var = st_distance(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_distance(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")), to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_distance(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(to_geopoint(to_geopoint(\"POINT (30 10)\")), to_geopoint(to_geopoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(true, true)",
+      "error": [
+        "Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]",
+        "Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(booleanField, booleanField)",
+      "error": [
+        "Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]",
+        "Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_distance] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort st_distance(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_distance(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "f",
       "error": [
         "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
