@@ -10,15 +10,24 @@ import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
 import { INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
+import { INDEX_TO_ROLLUP_MAPPINGS } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
+  const { createIndexWithMappings, createMockRollupIndex, getJobPayload, createJob, cleanUp } =
     registerHelpers(getService);
 
-  // Failing: See https://github.com/elastic/kibana/issues/184227
-  describe.skip('index patterns extension', () => {
+  describe('index patterns extension', () => {
+    // The step below is done for the 7.17 ES 8.15 forward compatibility tests
+    // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+    // We will simulate rollup usage by creating a mock-up rollup index
+    before(async () => {
+      await createMockRollupIndex();
+    });
+
+    after(() => cleanUp());
+
     describe('Fields for wildcards', () => {
       const BASE_URI = `${INDEX_PATTERNS_EXTENSION_BASE_PATH}/_fields_for_wildcard`;
 
