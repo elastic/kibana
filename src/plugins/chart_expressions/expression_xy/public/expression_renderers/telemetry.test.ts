@@ -1,24 +1,28 @@
-import { CommonXYLayerConfig, LayerTypes } from '@kbn/expression-xy-plugin/common';
-import {
-  AnnotationLayerConfig,
-  DataLayerConfig,
-  XYProps,
-} from '@kbn/expression-xy-plugin/common/types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { CommonXYLayerConfig, LayerTypes } from '../../common';
+import { AnnotationLayerConfig, DataLayerConfig, XYProps } from '../../common/types';
 import {
   createArgsWithLayers,
   sampleAnnotationLayer,
   sampleLayer,
   sampleReferenceLineLayer,
-} from '@kbn/expression-xy-plugin/common/__mocks__';
+} from '../../common/__mocks__';
 import { getDataLayers } from '../helpers';
 import { extractCounterEvents } from './xy_chart_renderer';
 
-type possibleLayerTypes =
+type PossibleLayerTypes =
   | typeof LayerTypes.DATA
   | typeof LayerTypes.ANNOTATIONS
   | typeof LayerTypes.REFERENCELINE;
 
-function createLayer(type: possibleLayerTypes) {
+function createLayer(type: PossibleLayerTypes) {
   switch (type) {
     case LayerTypes.ANNOTATIONS: {
       return { ...sampleAnnotationLayer };

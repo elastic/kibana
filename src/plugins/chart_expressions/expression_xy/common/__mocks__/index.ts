@@ -10,7 +10,14 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { LayerTypes } from '../constants';
-import { AnnotationLayerConfig, CommonXYLayerConfig, DataLayerConfig, ExtendedDataLayerConfig, ReferenceLineLayerConfig, XYProps } from '../types';
+import {
+  AnnotationLayerConfig,
+  CommonXYLayerConfig,
+  DataLayerConfig,
+  ExtendedDataLayerConfig,
+  ReferenceLineLayerConfig,
+  XYProps,
+} from '../types';
 
 export const mockPaletteOutput: PaletteOutput = {
   type: 'palette',
@@ -51,8 +58,18 @@ export const sampleAnnotationLayer: AnnotationLayerConfig = {
   type: 'annotationLayer',
   layerType: LayerTypes.ANNOTATIONS,
   annotations: [
-    { type: 'manual_point_event_annotation', id: 'ann1', time: '2021-01-01T00:00:00.000Z', label: 'Manual annotation point' },
-    { type: 'query_point_event_annotation', id: 'ann2', filter: { type: 'kibana_query', language: 'kql', query: 'a: *' }, label: 'Query annotation point' },
+    {
+      type: 'manual_point_event_annotation',
+      id: 'ann1',
+      time: '2021-01-01T00:00:00.000Z',
+      label: 'Manual annotation point',
+    },
+    {
+      type: 'query_point_event_annotation',
+      id: 'ann2',
+      filter: { type: 'kibana_query', language: 'kql', query: 'a: *' },
+      label: 'Query annotation point',
+    },
   ],
 };
 
@@ -63,7 +80,7 @@ export const sampleReferenceLineLayer: ReferenceLineLayerConfig = {
   accessors: ['b', 'c'],
   columnToLabel: '{"b": "Label B", "c": "Label C"}',
   decorations: [],
-  table: createSampleDatatableWithRows([])
+  table: createSampleDatatableWithRows([]),
 };
 
 export const sampleLayer: DataLayerConfig = {
