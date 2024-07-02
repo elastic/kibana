@@ -18,13 +18,13 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
     rows: data.rows.map((row) => {
       const mappedRow: Record<string, unknown> = {};
 
-      Object.entries(row).forEach(([id, value]) => {
+      for (const id in row) {
         if (id in idMap) {
-          idMap[id].forEach(({ id: originalId }) => {
-            mappedRow[originalId] = value;
-          });
+          for (const cachedEntry of idMap[id]) {
+            mappedRow[cachedEntry.id] = row[id]; // <= I wrote idMap rather than mappedRow
+          }
         }
-      });
+      }
 
       return mappedRow;
     }),
