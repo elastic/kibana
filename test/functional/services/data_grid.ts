@@ -313,7 +313,11 @@ export class DataGridService extends FtrService {
         options.isAnchorRow
           ? ''
           : `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex || 0}"]`
-      } .euiDataGridRowCell[data-gridcell-column-id="openDetails"] [data-test-subj="${testSubj}"]`
+      } ${
+        typeof options.columnIndex === 'number'
+          ? `.euiDataGridRowCell[data-gridcell-column-index="${options.columnIndex}"]`
+          : '.euiDataGridRowCell[data-gridcell-column-id="openDetails"]'
+      } [data-test-subj="${testSubj}"]`
     );
 
     await toggle.scrollIntoViewIfNecessary();
