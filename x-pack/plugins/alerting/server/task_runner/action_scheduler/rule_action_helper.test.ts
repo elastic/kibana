@@ -6,13 +6,12 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { RuleAction } from '../types';
+import { RuleAction } from '../../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
   isActionOnInterval,
   isSummaryAction,
-  isSummaryActionOnInterval,
   isSummaryActionThrottled,
   getSummaryActionTimeBounds,
 } from './rule_action_helper';
@@ -288,30 +287,6 @@ describe('rule_action_helper', () => {
       expect(logger.debug).toHaveBeenCalledWith(
         "Action'slack:1', has an invalid throttle interval"
       );
-    });
-  });
-
-  describe('isSummaryActionOnInterval', () => {
-    test('returns true for a summary action on interval', () => {
-      expect(isSummaryActionOnInterval(mockSummaryAction)).toBe(true);
-    });
-
-    test('returns false for a non-summary ', () => {
-      expect(
-        isSummaryActionOnInterval({
-          ...mockAction,
-          frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
-        })
-      ).toBe(false);
-    });
-
-    test('returns false for a summary per rule run ', () => {
-      expect(
-        isSummaryActionOnInterval({
-          ...mockAction,
-          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
-        })
-      ).toBe(false);
     });
   });
 
