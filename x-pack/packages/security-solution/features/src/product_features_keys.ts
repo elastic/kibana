@@ -72,6 +72,11 @@ export enum ProductFeatureSecurityKey {
    * enables Cloud Security Posture - CSPM, KSPM, CNVM
    */
   cloudSecurityPosture = 'cloud_security_posture',
+
+  /**
+   * enables the integration assistant
+   */
+  integrationAssistant = 'integration_assistant',
 }
 
 export enum ProductFeatureCasesKey {

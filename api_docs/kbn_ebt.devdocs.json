@@ -1787,6 +1787,10 @@
                 "path": "x-pack/plugins/security/server/analytics/analytics_service.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
+              },
+              {
                 "plugin": "@kbn/cloud",
                 "path": "packages/cloud/connection_details/kibana/kibana_connection_details_provider.tsx"
               },
@@ -1887,16 +1891,24 @@
                 "path": "x-pack/plugins/elastic_assistant/server/routes/attack_discovery/helpers.ts"
               },
               {
-                "plugin": "globalSearchBar",
-                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/helpers.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
               },
               {
                 "plugin": "globalSearchBar",
                 "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
-                "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/public/services/telemetry/telemetry_client.ts"
+                "plugin": "globalSearchBar",
+                "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
                 "plugin": "infra",
@@ -1925,6 +1937,118 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/observability_solution/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/plugins/observability_solution/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "osquery",
@@ -1953,114 +2077,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_score/tasks/risk_scoring_task.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
-              },
-              {
-                "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/common/lib/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -2325,6 +2341,10 @@
               {
                 "plugin": "@kbn/core-analytics-server-mocks",
                 "path": "packages/core/analytics/core-analytics-server-mocks/src/analytics_service.mock.ts"
+              },
+              {
+                "plugin": "actions",
+                "path": "x-pack/plugins/actions/server/lib/action_executor.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-internal",
