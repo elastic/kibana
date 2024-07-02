@@ -18,14 +18,10 @@ import {
 
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 
-const createMockSavedObjectDoc = (
-  updatedAt: moment.Moment,
-  id: string,
-  type: string = USAGE_COUNTERS_SAVED_OBJECT_TYPE
-) =>
+const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
   ({
     id,
-    type,
+    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     attributes: {
       count: 3,
       counterName: 'testName',
@@ -111,11 +107,7 @@ describe('rollUsageCountersIndices', () => {
       createMockSavedObjectDoc(moment().subtract(5, 'days'), 'doc-id-1'),
       createMockSavedObjectDoc(moment().subtract(9, 'days'), 'doc-id-1'),
       createMockSavedObjectDoc(moment().subtract(1, 'days'), 'doc-id-2'),
-      createMockSavedObjectDoc(
-        moment().subtract(6, 'days'),
-        'doc-id-3',
-        USAGE_COUNTERS_SAVED_OBJECT_TYPE
-      ),
+      createMockSavedObjectDoc(moment().subtract(6, 'days'), 'doc-id-3'),
     ];
 
     savedObjectClient.find.mockImplementation(async ({ type, page = 1, perPage = 10 }) => {

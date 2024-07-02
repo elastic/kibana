@@ -74,7 +74,7 @@ export const registerUsageCountersSavedObjectTypes = (
 
 /**
  * Parameters to the `serializeCounterKey` method
- * @internal bused in kibana_usage_collectors
+ * @internal used in kibana_usage_collectors
  */
 export interface SerializeCounterKeyParams {
   /** The domain ID registered in the UsageCounter **/
