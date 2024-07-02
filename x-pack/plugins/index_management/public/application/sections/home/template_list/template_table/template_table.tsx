@@ -12,6 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
 
+import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
 import { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
 import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
@@ -188,17 +189,19 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const pagination = {
-    initialPageSize: 20,
-    pageSizeOptions: [10, 20, 50],
-  };
-
-  const sorting = {
-    sort: {
+  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+    tableId: 'indexTemplates',
+    initialPageSize: 25,
+    initialSort: {
       field: 'name',
       direction: 'asc',
     },
-  } as const;
+  });
+
+  const pagination = {
+    pageSize,
+    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+  };
 
   const selectionConfig = {
     onSelectionChange: setSelection,
@@ -281,9 +284,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
         itemId="name"
         columns={columns}
         search={searchConfig}
-        sorting={sorting}
+        sorting={{ sort }}
         selection={selectionConfig}
         pagination={pagination}
+        onTableChange={onTableChange}
         rowProps={() => ({
           'data-test-subj': 'row',
         })}

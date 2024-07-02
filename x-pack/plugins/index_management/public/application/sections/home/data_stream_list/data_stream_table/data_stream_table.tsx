@@ -18,6 +18,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { ScopedHistory } from '@kbn/core/public';
+import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
 
 import { MAX_DATA_RETENTION } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
@@ -230,18 +231,6 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ],
   });
 
-  const pagination = {
-    initialPageSize: 20,
-    pageSizeOptions: [10, 20, 50],
-  };
-
-  const sorting = {
-    sort: {
-      field: 'name',
-      direction: 'asc',
-    },
-  } as const;
-
   const selectionConfig = {
     onSelectionChange: setSelection,
   };
@@ -282,6 +271,20 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     ],
   };
 
+  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+    tableId: 'dataStreams',
+    initialPageSize: 25,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
+  });
+
+  const pagination = {
+    pageSize,
+    pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
+  };
+
   return (
     <>
       {dataStreamsToDelete && dataStreamsToDelete.length > 0 ? (
@@ -301,7 +304,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         itemId="name"
         columns={columns}
         search={searchConfig}
-        sorting={sorting}
+        sorting={{ sort }}
         selection={selectionConfig}
         pagination={pagination}
         rowProps={() => ({
@@ -318,6 +321,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
           />
         }
         tableLayout={'auto'}
+        onTableChange={onTableChange}
       />
     </>
   );

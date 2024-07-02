@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
+import { useEuiTablePersist, DEFAULT_PAGE_SIZE_OPTIONS } from '@kbn/shared-ux-table-persist';
 import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
@@ -114,6 +115,12 @@ export const PipelineTable: FunctionComponent<Props> = ({
 
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
+
+  const { pageSize, sort, onTableChange } = useEuiTablePersist({
+    tableId: 'ingestPipelines',
+    initialPageSize: 25,
+    initialSort: { field: 'name', direction: 'asc' },
+  });
 
   const filteredPipelines = useMemo(() => {
     // Filter pipelines list by whatever the user entered in the search bar
@@ -211,7 +218,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
     'data-test-subj': 'pipelinesTable',
-    sorting: { sort: { field: 'name', direction: 'asc' } },
+    sorting: { sort },
     selection: {
       onSelectionChange: setSelection,
     },
@@ -296,9 +303,10 @@ export const PipelineTable: FunctionComponent<Props> = ({
       ],
     },
     pagination: {
-      initialPageSize: 10,
-      pageSizeOptions: [10, 20, 50],
+      initialPageSize: pageSize,
+      pageSizeOptions: DEFAULT_PAGE_SIZE_OPTIONS,
     },
+    onTableChange,
     columns: [
       {
         width: '25%',
