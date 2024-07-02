@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 
@@ -99,6 +99,7 @@ describe('Assistant', () => {
     ];
     jest.mocked(useLoadConnectors).mockReturnValue({
       isFetched: true,
+      isFetchedAfterMount: true,
       data: connectors,
     } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
 
@@ -235,21 +236,14 @@ describe('Assistant', () => {
       expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.welcome_id.id);
     });
     it('should refetchConversationsState after clear chat history button click', async () => {
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
-      const setConversationTitle = jest.fn();
-
-      renderAssistant({ setConversationTitle });
-
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: mockData.welcome_id,
-        })
-      );
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('clear-chat'));
+      renderAssistant({ isFlyoutMode: true });
+      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('clear-chat'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
+        expect(clearConversation).toHaveBeenCalled();
+        expect(refetchResults).toHaveBeenCalled();
       });
-      expect(clearConversation).toHaveBeenCalled();
-      expect(refetchResults).toHaveBeenCalled();
     });
   });
   describe('when selected conversation changes and some connectors are loaded', () => {
