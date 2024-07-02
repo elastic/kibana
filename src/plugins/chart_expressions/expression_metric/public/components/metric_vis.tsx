@@ -215,56 +215,45 @@ export const MetricVis = ({
   ).map((row, rowIdx) => {
     const value: MetricDatum['value'] =
       row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
-    const title = breakdownByColumn
-      ? formatBreakdownValue(row[breakdownByColumn.id])
-      : primaryMetricColumn.name;
-    const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
+
+    const sharedMetric = {
+      title: breakdownByColumn
+        ? formatBreakdownValue(row[breakdownByColumn.id])
+        : primaryMetricColumn.name,
+      subtitle: breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle,
+      icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+      color: config.metric.color ?? defaultColor,
+    };
 
     if (typeof value === 'string') {
       const nonNumericMetric: MetricWText = {
+        ...sharedMetric,
         value: formatPrimaryMetric(value),
-        title: String(title),
-        subtitle,
-        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: renderSecondaryMetric(data.columns, row, config),
-        color: config.metric.color ?? defaultColor,
       };
       return nonNumericMetric;
     }
 
     if (isArrayOfStrings(value)) {
-      const formattedValues = value.map((v) => formatPrimaryMetric(v));
       const nonNumericArrayMetric: MetricWStringArrayValues = {
-        value: formattedValues,
-        title: String(title),
-        subtitle,
-        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: renderSecondaryMetric(data.columns, row, config),
-        color: config.metric.color ?? defaultColor,
+        ...sharedMetric,
+        value: value.map((v) => formatPrimaryMetric(v)),
       };
       return nonNumericArrayMetric;
     }
 
     if (isArrayOfNumbers(value)) {
       const numericArrayMetric: MetricWNumberArrayValues = {
+        ...sharedMetric,
         value,
         valueFormatter: formatPrimaryMetric,
-        title: String(title),
-        subtitle,
-        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: renderSecondaryMetric(data.columns, row, config),
-        color: config.metric.color ?? defaultColor,
       };
       return numericArrayMetric;
     }
 
-    const baseMetric: MetricWNumber | MetricWNumberArrayValues = {
+    const numericMetric: MetricWNumber = {
+      ...sharedMetric,
       value,
       valueFormatter: formatPrimaryMetric,
-      title: String(title),
-      subtitle,
-      icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: renderSecondaryMetric(data.columns, row, config),
       color:
         config.metric.palette && value != null
           ? getColor(
@@ -284,7 +273,7 @@ export const MetricVis = ({
     const trendId = breakdownByColumn ? row[breakdownByColumn.id] : DEFAULT_TRENDLINE_NAME;
     if (config.metric.trends && config.metric.trends[trendId]) {
       const metricWTrend: MetricWTrend = {
-        ...baseMetric,
+        ...numericMetric,
         trend: config.metric.trends[trendId],
         trendShape: 'area',
         trendA11yTitle: i18n.translate('expressionMetricVis.trendA11yTitle', {
@@ -303,7 +292,7 @@ export const MetricVis = ({
 
     if (maxColId && config.metric.progressDirection) {
       const metricWProgress: MetricWProgress = {
-        ...baseMetric,
+        ...numericMetric,
         domainMax: row[maxColId],
         progressBarDirection: config.metric.progressDirection,
       };
@@ -311,7 +300,7 @@ export const MetricVis = ({
       return metricWProgress;
     }
 
-    return baseMetric;
+    return numericMetric;
   });
 
   if (config.metric.minTiles) {
