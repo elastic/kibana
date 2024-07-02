@@ -24,9 +24,10 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
@@ -53,7 +54,7 @@ export const REQUIRED_FOR_ATTACK_DISCOVERY: AnonymizationFieldResponse[] = [
 ];
 
 export const getAssistantToolParams = ({
-  actions,
+  actionsClient,
   alertsIndexPattern,
   anonymizationFields,
   apiConfig,
@@ -68,7 +69,7 @@ export const getAssistantToolParams = ({
   request,
   size,
 }: {
-  actions: ActionsPluginStart;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
   apiConfig: ApiConfig;
@@ -99,11 +100,10 @@ export const getAssistantToolParams = ({
   };
 
   const llm = new ActionsClientLlm({
-    actions,
+    actionsClient,
     connectorId: apiConfig.connectorId,
     llmType: getLlmType(apiConfig.actionTypeId),
     logger,
-    request,
     temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,

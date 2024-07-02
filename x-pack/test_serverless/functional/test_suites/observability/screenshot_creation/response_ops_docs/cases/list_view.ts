@@ -55,15 +55,11 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         roleAuthc
       );
       caseIdMonitoring = caseMonitoring.id;
+      await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await pageObjects.svlCommonPage.forceLogout();
-    });
-
-    beforeEach(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
     it('cases list screenshot', async () => {
