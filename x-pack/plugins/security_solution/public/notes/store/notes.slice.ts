@@ -129,9 +129,21 @@ export const createNote = createAsyncThunk<NormalizedEntity<Note>, { note: BareN
 
 export const deleteNotes = createAsyncThunk<string[], { ids: string[] }, {}>(
   'notes/deleteNotes',
-  async (args) => {
+  async (args, { dispatch, getState }) => {
     const { ids } = args;
     await deleteNotesApi(ids);
+    const state = getState() as State;
+    const { search, pagination, sort } = state.notes;
+    dispatch(
+      fetchNotes({
+        page: pagination.page,
+        perPage: pagination.perPage,
+        sortField: sort.field,
+        sortOrder: sort.direction,
+        filter: '',
+        search,
+      })
+    );
     return ids;
   }
 );
