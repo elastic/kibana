@@ -9,7 +9,12 @@
 
 export interface SimpleMemCacheInterface {
   /** Store a piece of data in cache */
-  set(key: any, value: any, ttl?: number): void;
+  set(
+    key: any,
+    value: any,
+    /** Time-to-live for this entry only (in seconds) */
+    ttl?: number
+  ): void;
   /** Retrieve a piece of data from cache */
   get<TValue = any>(key: any): TValue | undefined;
   /** Delete a piece of data from cache */
