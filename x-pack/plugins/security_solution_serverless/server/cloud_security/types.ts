@@ -40,9 +40,7 @@ export interface MinTimestamp {
 }
 
 export interface ResourceSubtypeCounter {
-  [key: string]: {
-    unique_assets: number;
-  };
+  [key: string]: number;
 }
 
 export type CloudSecuritySolutions = typeof CSPM | typeof KSPM | typeof CNVM | typeof CLOUD_DEFEND;

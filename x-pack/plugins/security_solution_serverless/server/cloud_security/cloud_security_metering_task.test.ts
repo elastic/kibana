@@ -128,12 +128,9 @@ describe('getCloudSecurityUsageRecord', () => {
             instance_group_id: projectId,
             metadata: {
               tier: 'essentials',
-              [randomBillableAsset]: {
-                unique_assets: 10,
-              },
-              not_billable_asset: {
-                unique_assets: 11,
-              },
+              [randomBillableAsset]: 10,
+
+              not_billable_asset: 11,
             },
           },
         },

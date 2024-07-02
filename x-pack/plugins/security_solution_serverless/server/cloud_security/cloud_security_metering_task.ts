@@ -49,9 +49,7 @@ export const getUsageRecords = (
 
     resourceSubtypeCounterMap = assetCountAggregation.resource_sub_type.buckets.reduce(
       (resourceMap, item) => {
-        resourceMap[item.key] = {
-          unique_assets: item.unique_assets.value,
-        };
+        resourceMap[item.key] = item.unique_assets.value;
         return resourceMap;
       },
       {} as ResourceSubtypeCounter
