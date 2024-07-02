@@ -264,6 +264,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               1500,
               async () => {
                 return (await testSubjects.getVisibleText('endpointDetailsFlyoutTitle')) !== '';
+                expect(testSubjects.getVisibleText('endpointDetailsFlyoutTitle')).to.equal(
+                  endpointDetailTitleInitial
+                );
               }
             );
           });
