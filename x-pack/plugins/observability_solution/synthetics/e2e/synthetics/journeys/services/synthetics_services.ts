@@ -9,10 +9,10 @@ import axios from 'axios';
 import type { Client } from '@elastic/elasticsearch';
 import { KbnClient } from '@kbn/test';
 import pMap from 'p-map';
+import { makeDownSummary, makeUpSummary } from '@kbn/observability-synthetics-test-data';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { journeyStart, journeySummary, step1, step2 } from './data/browser_docs';
-import { firstDownHit, getUpHit } from './data/sample_docs';
 
 export class SyntheticsServices {
   kibanaUrl: string;
@@ -178,19 +178,19 @@ export class SyntheticsServices {
         break;
       case 'summaryDown':
         document = {
-          ...firstDownHit(commonData),
+          ...makeDownSummary(commonData),
           ...document,
         };
         break;
       case 'summaryUp':
         document = {
-          ...getUpHit(commonData),
+          ...makeUpSummary(commonData),
           ...document,
         };
         break;
       default:
         document = {
-          ...getUpHit(commonData),
+          ...makeUpSummary(commonData),
           ...document,
         };
     }

@@ -31,6 +31,11 @@ export const SyntheticsMonitorStatusAlertStateCodec = t.type({
   errorStartedAt: t.string,
   lastErrorMessage: t.string,
   stateId: t.string,
+  checks: t.type({
+    total: t.number,
+    down: t.number,
+  }),
+  downThreshold: t.number,
 });
 
 export type SyntheticsMonitorStatusAlertState = t.TypeOf<

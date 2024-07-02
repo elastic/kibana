@@ -5,132 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { omit } from 'lodash';
-import { TlsTranslations } from '@kbn/synthetics-plugin/common/rules/synthetics/translations';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import {
+  SyntheticsMonitorStatusTranslations,
+  TlsTranslations,
+} from '@kbn/synthetics-plugin/common/rules/synthetics/translations';
 
-// eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const server = getService('kibanaServer');
-
-  const testActions = [
-    'custom.ssl.noCustom',
-    'notification-email',
-    'preconfigured-es-index-action',
-    'my-deprecated-servicenow',
-    'my-slack1',
-  ];
-
-  describe('SyntheticsRules', () => {
-    before(async () => {
-      await server.savedObjects.cleanStandardList();
-    });
-
-    after(async () => {
-      await server.savedObjects.cleanStandardList();
-    });
-
-    it('creates rule when settings are configured', async () => {
-      await supertest
-        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
-        .set('kbn-xsrf', 'true')
-        .send({
-          certExpirationThreshold: 30,
-          certAgeThreshold: 730,
-          defaultConnectors: testActions.slice(0, 2),
-          defaultEmail: { to: ['test@gmail.com'], cc: [], bcc: [] },
-        })
-        .expect(200);
-
-      const response = await supertest
-        .post(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
-        .send();
-      const statusResult = response.body.statusRule;
-      const tlsResult = response.body.tlsRule;
-      expect(statusResult.actions.length).eql(4);
-      expect(tlsResult.actions.length).eql(4);
-
-      compareRules(statusResult, statusRule);
-      compareRules(tlsResult, tlsRule);
-
-      testActions.slice(0, 2).forEach((action) => {
-        const { recoveredAction, firingAction } = getActionById(statusRule, action);
-        const resultAction = getActionById(statusResult, action);
-        expect(firingAction).eql(resultAction.firingAction);
-        expect(recoveredAction).eql(resultAction.recoveredAction);
-      });
-
-      testActions.slice(0, 2).forEach((action) => {
-        const { recoveredAction, firingAction } = getActionById(tlsRule, action);
-        const resultAction = getActionById(tlsResult, action);
-        expect(firingAction).eql(resultAction.firingAction);
-        expect(recoveredAction).eql(resultAction.recoveredAction);
-      });
-    });
-
-    it('updates rules when settings are updated', async () => {
-      await supertest
-        .put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS)
-        .set('kbn-xsrf', 'true')
-        .send({
-          certExpirationThreshold: 30,
-          certAgeThreshold: 730,
-          defaultConnectors: testActions,
-          defaultEmail: { to: ['test@gmail.com'], cc: [], bcc: [] },
-        })
-        .expect(200);
-
-      const response = await supertest
-        .put(SYNTHETICS_API_URLS.ENABLE_DEFAULT_ALERTING)
-        .set('kbn-xsrf', 'true')
-        .send();
-
-      const statusResult = response.body.statusRule;
-      const tlsResult = response.body.tlsRule;
-      expect(statusResult.actions.length).eql(9);
-      expect(tlsResult.actions.length).eql(9);
-
-      compareRules(statusResult, statusRule);
-      compareRules(tlsResult, tlsRule);
-
-      testActions.forEach((action) => {
-        const { recoveredAction, firingAction } = getActionById(statusRule, action);
-        const resultAction = getActionById(statusResult, action);
-        expect(firingAction).eql(resultAction.firingAction);
-        expect(recoveredAction).eql(resultAction.recoveredAction);
-      });
-      testActions.forEach((action) => {
-        const { recoveredAction, firingAction } = getActionById(tlsRule, action);
-        const resultAction = getActionById(tlsResult, action);
-        expect(firingAction).eql(resultAction.firingAction);
-        expect(recoveredAction).eql(resultAction.recoveredAction);
-      });
-    });
-  });
-}
-const compareRules = (rule1: SanitizedRule, rule2: SanitizedRule) => {
-  expect(rule1.alertTypeId).eql(rule2.alertTypeId);
-  expect(rule1.schedule).eql(rule2.schedule);
-};
-
-const getActionById = (rule: SanitizedRule, id: string) => {
-  const actions = rule.actions.filter((action) => action.id === id);
-  const recoveredAction = actions.find(
-    (action) => 'group' in action && action.group === 'recovered'
-  );
-  const firingAction = actions.find((action) => 'group' in action && action.group !== 'recovered');
-  return {
-    recoveredAction: omit(recoveredAction, ['uuid']),
-    firingAction: omit(firingAction, ['uuid']),
-  };
-};
-
-const statusRule = {
+export const statusRule = {
   id: 'dbbc39f0-1781-11ee-80b9-6522650f1d50',
   notifyWhen: null,
   consumer: 'uptime',
@@ -152,7 +32,7 @@ const statusRule = {
     {
       group: 'recovered',
       params: {
-        body: 'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        body: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '789f2b81-e098-4f33-9802-1d355f4fabbe',
@@ -162,7 +42,7 @@ const statusRule = {
     {
       group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
       params: {
-        body: '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        body: SyntheticsMonitorStatusTranslations.defaultActionMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '1b3f3958-f019-4ca0-b6b1-ccc4cf51d501',
@@ -173,10 +53,8 @@ const statusRule = {
       group: 'recovered',
       params: {
         to: ['test@gmail.com'],
-        subject:
-          '"{{context.monitorName}}" ({{context.locationName}}) {{context.recoveryStatus}} - Elastic Synthetics',
-        message:
-          'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        subject: SyntheticsMonitorStatusTranslations.defaultRecoverySubjectMessage,
+        message: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
         messageHTML: null,
         cc: [],
         bcc: [],
@@ -191,10 +69,8 @@ const statusRule = {
       group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
       params: {
         to: ['test@gmail.com'],
-        subject:
-          '"{{context.monitorName}}" ({{context.locationName}}) is down - Elastic Synthetics',
-        message:
-          '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        subject: SyntheticsMonitorStatusTranslations.defaultSubjectMessage,
+        message: SyntheticsMonitorStatusTranslations.defaultActionMessage,
         messageHTML: null,
         cc: [],
         bcc: [],
@@ -250,10 +126,8 @@ const statusRule = {
         subAction: 'pushToService',
         subActionParams: {
           incident: {
-            short_description:
-              '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
-            description:
-              '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+            short_description: SyntheticsMonitorStatusTranslations.defaultActionMessage,
+            description: SyntheticsMonitorStatusTranslations.defaultActionMessage,
             impact: '2',
             severity: '2',
             urgency: '2',
@@ -275,8 +149,7 @@ const statusRule = {
     {
       group: 'recovered',
       params: {
-        message:
-          'The alert for "{{context.monitorName}}" from {{context.locationName}} is no longer active: {{context.recoveryReason}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- From: {{context.locationName}}  \n- Last error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        message: SyntheticsMonitorStatusTranslations.defaultRecoveryMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '2d73f370-a90c-4347-8480-753cbeae719f',
@@ -286,8 +159,7 @@ const statusRule = {
     {
       group: 'xpack.synthetics.alerts.actionGroups.monitorStatus',
       params: {
-        message:
-          '"{{context.monitorName}}" is {{{context.status}}} from {{context.locationName}}. - Elastic Synthetics\n\nDetails:\n\n- Monitor name: {{context.monitorName}}  \n- {{context.monitorUrlLabel}}: {{{context.monitorUrl}}}  \n- Monitor type: {{context.monitorType}}  \n- Checked at: {{context.checkedAt}}  \n- From: {{context.locationName}}  \n- Error received: {{{context.lastErrorMessage}}}  \n{{{context.linkMessage}}}',
+        message: SyntheticsMonitorStatusTranslations.defaultActionMessage,
       },
       frequency: { notifyWhen: 'onActionGroupChange', throttle: null, summary: false },
       uuid: '1c5d0dd1-c360-4e14-8e4f-f24aa5c640c6',
@@ -339,7 +211,8 @@ const statusRule = {
   },
   ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
 } as unknown as SanitizedRule;
-const tlsRule = {
+
+export const tlsRule = {
   id: 'dbbc12e0-1781-11ee-80b9-6522650f1d50',
   notifyWhen: null,
   consumer: 'uptime',

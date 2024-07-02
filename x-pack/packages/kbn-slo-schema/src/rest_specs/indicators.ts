@@ -44,6 +44,27 @@ type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
 type QuerySchema = t.TypeOf<typeof querySchema>;
 type FiltersSchema = t.TypeOf<typeof filtersSchema>;
+
+const filters: FiltersSchema = [
+  {
+    meta: {
+      alias: null,
+      disabled: false,
+      field: 'log.file.path.keyword',
+      index: 'logging-*:service-puppetserver*-id',
+      key: 'log.file.path.keyword',
+      negate: false,
+      params: { query: '/hostfs/var/log/puppetlabs/puppetserver/puppetserver-access.log.json' },
+      type: 'phrase',
+    },
+    query: {
+      match_phrase: {
+        'log.file.path.keyword':
+          '/hostfs/var/log/puppetlabs/puppetserver/puppetserver-access.log.json',
+      },
+    },
+  },
+];
 type GroupingsSchema = t.TypeOf<typeof groupingsSchema>;
 
 export type {

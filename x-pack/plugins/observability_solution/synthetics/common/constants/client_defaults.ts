@@ -92,6 +92,15 @@ export const FINAL_SUMMARY_FILTER = {
   },
 };
 
+export const getRangeFilter = ({ from, to }: { from: string; to: string }) => ({
+  range: {
+    '@timestamp': {
+      gte: from,
+      lte: to,
+    },
+  },
+});
+
 export const SUMMARY_FILTER = { exists: { field: 'summary' } };
 
 export const getLocationFilter = ({

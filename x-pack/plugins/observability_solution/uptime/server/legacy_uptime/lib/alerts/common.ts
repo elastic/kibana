@@ -16,7 +16,7 @@ import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { AlertInstanceState } from '@kbn/alerting-plugin/server';
 import { AlertInstanceContext } from '@kbn/alerting-plugin/server';
-import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
+import { syntheticsRuleFieldMap } from '@kbn/synthetics-plugin/common/rules/synthetics_rule_field_map';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
 import { UptimeCommonState, UptimeCommonStateType } from '../../../../common/runtime_types';
 import { ALERT_DETAILS_URL } from './action_variables';
@@ -126,7 +126,7 @@ export const setRecoveredAlertsContext = async <ActionGroupIds extends string>({
   }
 };
 
-export const uptimeRuleTypeFieldMap = { ...uptimeRuleFieldMap, ...legacyExperimentalFieldMap };
+export const uptimeRuleTypeFieldMap = { ...syntheticsRuleFieldMap, ...legacyExperimentalFieldMap };
 
 export const UptimeRuleTypeAlertDefinition: IRuleTypeAlerts<ObservabilityUptimeAlert> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,

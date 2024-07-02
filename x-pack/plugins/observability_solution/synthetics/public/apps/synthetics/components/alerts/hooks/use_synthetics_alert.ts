@@ -20,6 +20,7 @@ import {
 import { SYNTHETICS_TLS_RULE } from '../../../../../../common/constants/synthetics_alerts';
 import {
   selectAlertFlyoutVisibility,
+  selectIsNewrule,
   selectMonitorListState,
   setAlertFlyoutVisible,
 } from '../../../state';
@@ -31,6 +32,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   const defaultRules = useSelector(selectSyntheticsAlerts);
   const loading = useSelector(selectSyntheticsAlertsLoading);
   const alertFlyoutVisible = useSelector(selectAlertFlyoutVisibility);
+  const isNewRule = useSelector(selectIsNewrule);
 
   const { canSave } = useSyntheticsSettingsContext();
 
@@ -64,7 +66,7 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
   const { triggersActionsUi } = useKibana<ClientPluginsStart>().services;
 
   const EditAlertFlyout = useMemo(() => {
-    if (!defaultRules) {
+    if (!defaultRules || isNewRule) {
       return null;
     }
     return triggersActionsUi.getEditRuleFlyout({
@@ -73,7 +75,21 @@ export const useSyntheticsAlert = (isOpen: boolean) => {
       initialRule:
         alertFlyoutVisible === SYNTHETICS_TLS_RULE ? defaultRules.tlsRule : defaultRules.statusRule,
     });
-  }, [defaultRules, dispatch, triggersActionsUi, alertFlyoutVisible]);
+  }, [defaultRules, isNewRule, triggersActionsUi, alertFlyoutVisible, dispatch]);
 
-  return useMemo(() => ({ loading, EditAlertFlyout }), [EditAlertFlyout, loading]);
+  const NewRuleFlyout = useMemo(() => {
+    if (!defaultRules || !isNewRule || !alertFlyoutVisible) {
+      return null;
+    }
+    return triggersActionsUi.getAddRuleFlyout({
+      consumer: 'uptime',
+      ruleTypeId: alertFlyoutVisible,
+      onClose: () => dispatch(setAlertFlyoutVisible(null)),
+    });
+  }, [defaultRules, isNewRule, triggersActionsUi, dispatch, alertFlyoutVisible]);
+
+  return useMemo(
+    () => ({ loading, EditAlertFlyout, NewRuleFlyout }),
+    [EditAlertFlyout, loading, NewRuleFlyout]
+  );
 };
