@@ -32736,12 +32736,7 @@ zip-stream@^4.1.0:
     compress-commons "^4.1.0"
     readable-stream "^3.6.0"
 
-zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.5:
-  version "3.22.5"
-  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.22.5.tgz#3646e81cfc318dbad2a22519e5ce661615418673"
-  integrity sha512-+akaPo6a0zpVCCseDed504KBJUQpEW5QZw7RMneNmKw+fGaML1Z9tUNLnHHAC8x6dzVRO1eB2oEMyZRnuBZg7Q==
-
-zod-to-json-schema@^3.23.0:
+zod-to-json-schema@^3.22.3, zod-to-json-schema@^3.22.5, zod-to-json-schema@^3.23.0:
   version "3.23.0"
   resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.23.0.tgz#4fc60e88d3c709eedbfaae3f92f8a7bf786469f2"
   integrity sha512-az0uJ243PxsRIa2x1WmNE/pnuA05gUq/JB8Lwe1EDCCL/Fz9MgjYQ0fPlyc2Tcv6aF2ZA7WM5TWaRZVEFaAIag==
