@@ -192,7 +192,6 @@ export class AirdropService {
     }
 
     this.airdrop$.next(airdrop);
-    console.log(airdrop);
   }
 
   private async getAirdropApp({ app }: { app?: string }) {
@@ -218,7 +217,7 @@ export class AirdropService {
     const kibanaBody = await this.getKibanaBody();
     if (!kibanaBody) {
       // probably debug something here
-      console.log('Kibana body not found');
+      // console.log('Kibana body not found');
       return null;
     }
     this.dropElement = document.createElement('div');

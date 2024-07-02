@@ -264,7 +264,7 @@ export const getTopNavLinks = ({
       renderItem: ({ key }) => (
         <AirdropPopover
           key={key}
-          description="Share the state of the app with another Kibana instance."
+          description="Share the state of Discover with another Kibana instance."
           group="searchBar"
         />
       ),

@@ -10,6 +10,7 @@ import React, { type FC, useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
@@ -19,9 +20,11 @@ import {
 import { of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
+import { useAirdrop } from '../services';
+import type { AirdropContent } from '../types';
 import { type Props as AirdropDragButtonProps } from './airdrop_drag_button';
 import { DragWrapper } from './drag_wrapper';
-import { useAirdrop } from '../services';
+import { GroupContentSelector } from './group_content_selector';
 
 interface Props extends Omit<AirdropDragButtonProps, 'content'> {
   description: string;
@@ -37,32 +40,32 @@ export const AirdropPopover: FC<Props> = ({
   content: _content,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedContent, setSelectedContent] = useState<AirdropContent[]>([]);
   const { getContents$ForGroup } = useAirdrop();
   const contents$ = useMemo(() => {
     if (!group) return of([]);
     return getContents$ForGroup(group);
   }, [getContents$ForGroup, group]);
   const contents = useObservable(contents$, []);
-  console.log('Airdrop contents for group', group, contents);
 
   const content = useMemo<AirdropDragButtonProps['content']>(() => {
     if (_content) return _content;
 
     return {
       id: '__group__',
-      get: () => contents.reduce((acc, c) => ({ ...acc, [c.id]: c.get() }), {}),
+      get: () => selectedContent.reduce((acc, c) => ({ ...acc, [c.id]: c.get() }), {}),
     };
-  }, [_content, contents]);
+  }, [_content, selectedContent]);
 
   return (
     <EuiPopover
       button={
         <EuiButtonIcon
-          display="base"
+          display="empty"
           iconSize={iconSize}
           size={size}
-          iconType="watchesApp"
-          aria-label="Next"
+          iconType="share"
+          aria-label="Share"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
         />
       }
@@ -70,7 +73,9 @@ export const AirdropPopover: FC<Props> = ({
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downCenter"
     >
-      <EuiPopoverTitle>Airdrop</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        Airdrop <EuiIcon type="watchesApp" css={{ marginLeft: '8px' }} />
+      </EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText size="s">
           <p>{description}</p>
@@ -78,11 +83,7 @@ export const AirdropPopover: FC<Props> = ({
 
         <EuiSpacer />
 
-        <ul>
-          {contents.map((c) => (
-            <li key={c.id}>{c.label ?? c.id}</li>
-          ))}
-        </ul>
+        <GroupContentSelector contents={contents} onSelectionChange={setSelectedContent} />
       </div>
       <EuiPopoverFooter>
         <DragWrapper content={content}>

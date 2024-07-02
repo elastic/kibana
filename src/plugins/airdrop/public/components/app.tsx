@@ -104,7 +104,7 @@ export const AirdropApp = ({ basename, notifications, http }: AirdropAppDeps) =>
               form={formState}
               onChange={setFormState}
               onSubmit={() => {
-                console.log('submit', formState);
+                // console.log('submit', formState);
               }}
             />
 
