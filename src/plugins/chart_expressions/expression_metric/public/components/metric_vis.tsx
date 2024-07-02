@@ -222,6 +222,7 @@ export const MetricVis = ({
         : primaryMetricColumn.name,
       subtitle: breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+      extra: renderSecondaryMetric(data.columns, row, config),
       color: config.metric.color ?? defaultColor,
     };
 
