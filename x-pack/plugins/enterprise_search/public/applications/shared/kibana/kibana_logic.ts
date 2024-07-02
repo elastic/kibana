@@ -26,7 +26,6 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { IndexMappingProps } from '@kbn/index-management';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
@@ -99,7 +98,6 @@ export interface KibanaValues {
   isSidebarEnabled: boolean;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
-  licensing?: LicensingPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
@@ -140,7 +138,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens || null, {}],
     ml: [props.ml || null, {}],
-    licensing: [props.licensing || null, {}],
     navigateToUrl: [
       (url: string, options?: CreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };

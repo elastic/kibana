@@ -10,7 +10,7 @@ import React from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import * as i18n from '../../../../common/translations';
 import { useActions } from './render_actions/use_actions';
-import { RenderEndpoint } from './render_endpoint/render_endpoint';
+import { EndpointInfo } from './render_endpoint/endpoint_info';
 import { ServiceProvider } from './render_service_provider/service_provider';
 import { TaskType } from './render_task_type/task_type';
 import { DeploymentStatus } from './render_deployment_status/deployment_status';
@@ -39,7 +39,7 @@ export const useTableColumns = () => {
       name: i18n.ENDPOINT,
       render: (endpoint: InferenceAPIConfigResponse) => {
         if (endpoint != null) {
-          return <RenderEndpoint endpoint={endpoint} />;
+          return <EndpointInfo endpoint={endpoint} />;
         }
 
         return null;

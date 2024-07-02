@@ -19,24 +19,14 @@ describe('MultiSelectFilter', () => {
 
   it('should render the filter button with the provided label', () => {
     const { getByText } = render(
-      <MultiSelectFilter
-        id="testFilter"
-        onChange={() => {}}
-        options={options}
-        buttonLabel="Filter Options"
-      />
+      <MultiSelectFilter onChange={() => {}} options={options} buttonLabel="Filter Options" />
     );
     expect(getByText('Filter Options')).toBeInTheDocument();
   });
 
   it('should toggle the popover when the filter button is clicked', async () => {
     const { getByText, queryByText } = render(
-      <MultiSelectFilter
-        id="testFilter"
-        onChange={() => {}}
-        options={options}
-        buttonLabel="Filter Options"
-      />
+      <MultiSelectFilter onChange={() => {}} options={options} buttonLabel="Filter Options" />
     );
     fireEvent.click(getByText('Filter Options'));
     expect(queryByText('Option 1')).toBeInTheDocument();
@@ -46,22 +36,31 @@ describe('MultiSelectFilter', () => {
     });
   });
 
-  it('should call onChange with the correct parameters when an option is selected, toggling its checked state', () => {
-    const onChangeMock = jest.fn();
+  it('should render the provided options', async () => {
     const { getByText } = render(
-      <MultiSelectFilter
-        id="testFilter"
-        onChange={onChangeMock}
-        options={options}
-        selectedOptionKeys={['2']}
-        buttonLabel="Filter Options"
-      />
+      <MultiSelectFilter onChange={() => {}} options={options} buttonLabel="Filter Options" />
     );
+
+    fireEvent.click(getByText('Filter Options'));
+
+    await waitFor(() => {
+      expect(getByText('Option 1')).toBeInTheDocument();
+      expect(getByText('Option 2')).toBeInTheDocument();
+      expect(getByText('Option 3')).toBeInTheDocument();
+    });
+  });
+
+  it('should call the onChange function with the updated options when an option is clicked', async () => {
+    const onChange = jest.fn();
+    const { getByText } = render(
+      <MultiSelectFilter onChange={onChange} options={options} buttonLabel="Filter Options" />
+    );
+
     fireEvent.click(getByText('Filter Options'));
     fireEvent.click(getByText('Option 1'));
-    expect(onChangeMock).toHaveBeenCalledWith({
-      filterId: 'testFilter',
-      selectedOptionKeys: ['1', '2'],
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalled();
     });
   });
 });

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { FilterOptions, TaskTypes } from '../types';
-import type { MultiSelectFilterOption } from './multi_select_filter';
-import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
+import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
 import * as i18n from './translations';
 
 interface Props {
@@ -17,35 +15,27 @@ interface Props {
   onChange: (newFilterOptions: Partial<FilterOptions>) => void;
 }
 
-const options = mapToMultiSelectOption(Object.values(TaskTypes));
+const options = Object.values(TaskTypes).map((option) => ({
+  key: option,
+  label: option,
+}));
 
 export const TaskTypeFilter: React.FC<Props> = ({ optionKeys, onChange }) => {
-  const onSystemFilterChange = ({
-    filterId,
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: Array<string | null>;
-  }) => {
+  const filterId: string = 'type';
+  const onSystemFilterChange = (newOptions: MultiSelectFilterOption[]) => {
     onChange({
-      [filterId]: selectedOptionKeys,
+      [filterId]: newOptions
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.key),
     });
-  };
-  const renderOption = (option: MultiSelectFilterOption) => {
-    return (
-      <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
-        <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
   };
 
   return (
     <MultiSelectFilter
       buttonLabel={i18n.TASK_TYPE}
-      id={'type'}
       onChange={onSystemFilterChange}
       options={options}
-      renderOption={renderOption}
+      renderOption={(option) => option.label}
       selectedOptionKeys={optionKeys}
     />
   );

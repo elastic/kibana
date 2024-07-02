@@ -7,7 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { RenderEndpoint } from './render_endpoint';
+import { EndpointInfo } from './endpoint_info';
 
 describe('RenderEndpoint component tests', () => {
   describe('with cohere service', () => {
@@ -27,7 +27,7 @@ describe('RenderEndpoint component tests', () => {
     } as any;
 
     it('renders the component with endpoint details for Cohere service', () => {
-      render(<RenderEndpoint endpoint={mockEndpoint} />);
+      render(<EndpointInfo endpoint={mockEndpoint} />);
 
       expect(screen.getByText('cohere-2')).toBeInTheDocument();
       expect(screen.getByText('byte')).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe('RenderEndpoint component tests', () => {
         ...mockEndpoint,
         service_settings: { ...mockEndpoint.service_settings, model_id: undefined },
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.queryByText('embed-english-light-v3.0')).not.toBeInTheDocument();
     });
@@ -49,7 +49,7 @@ describe('RenderEndpoint component tests', () => {
         ...mockEndpoint,
         service_settings: { model_id: 'embed-english-light-v3.0' },
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('embed-english-light-v3.0')).toBeInTheDocument();
       expect(screen.queryByText(',')).not.toBeInTheDocument();
@@ -68,7 +68,7 @@ describe('RenderEndpoint component tests', () => {
     } as any;
 
     it('renders the component with endpoint model_id and model settings', () => {
-      render(<RenderEndpoint endpoint={mockEndpoint} />);
+      render(<EndpointInfo endpoint={mockEndpoint} />);
 
       expect(screen.getByText('model-123')).toBeInTheDocument();
       expect(screen.getByText('settings-model-123')).toBeInTheDocument();
@@ -82,7 +82,7 @@ describe('RenderEndpoint component tests', () => {
         num_allocations: undefined,
       };
       const modifiedEndpoint = { ...mockEndpoint, service_settings: modifiedSettings };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('model-123')).toBeInTheDocument();
       expect(screen.getByText('settings-model-123')).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe('RenderEndpoint component tests', () => {
     } as any;
 
     it('renders the component with endpoint details', () => {
-      render(<RenderEndpoint endpoint={mockEndpoint} />);
+      render(<EndpointInfo endpoint={mockEndpoint} />);
 
       expect(screen.getByText('azure-ai-1')).toBeInTheDocument();
       expect(screen.getByText('microsoft_phi, realtime, westus')).toBeInTheDocument();
@@ -113,7 +113,7 @@ describe('RenderEndpoint component tests', () => {
         ...mockEndpoint,
         service_settings: { target: 'westus', provider: 'microsoft_phi' },
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('microsoft_phi, westus')).toBeInTheDocument();
     });
@@ -123,7 +123,7 @@ describe('RenderEndpoint component tests', () => {
         ...mockEndpoint,
         service_settings: { target: 'westus' },
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('westus')).toBeInTheDocument();
       expect(screen.queryByText(',')).not.toBeInTheDocument();
@@ -134,7 +134,7 @@ describe('RenderEndpoint component tests', () => {
         ...mockEndpoint,
         service_settings: {},
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('azure-ai-1')).toBeInTheDocument();
       expect(screen.queryByText('westus')).not.toBeInTheDocument();
@@ -155,7 +155,7 @@ describe('RenderEndpoint component tests', () => {
     } as any;
 
     it('renders the component with all required endpoint details', () => {
-      render(<RenderEndpoint endpoint={mockEndpoint} />);
+      render(<EndpointInfo endpoint={mockEndpoint} />);
 
       expect(screen.getByText('azure-openai-1')).toBeInTheDocument();
       expect(screen.getByText('resource-xyz, deployment-123, v1')).toBeInTheDocument();
@@ -176,7 +176,7 @@ describe('RenderEndpoint component tests', () => {
     } as any;
 
     it('renders the component with endpoint details', () => {
-      render(<RenderEndpoint endpoint={mockEndpoint} />);
+      render(<EndpointInfo endpoint={mockEndpoint} />);
 
       expect(screen.getByText('mistral-ai-1')).toBeInTheDocument();
       expect(screen.getByText('model-xyz')).toBeInTheDocument();
@@ -191,7 +191,7 @@ describe('RenderEndpoint component tests', () => {
           max_input_tokens: 512,
         },
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('max_input_tokens: 512')).toBeInTheDocument();
     });
@@ -201,7 +201,7 @@ describe('RenderEndpoint component tests', () => {
         ...mockEndpoint,
         service_settings: { model: 'model-xyz' },
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('model-xyz')).toBeInTheDocument();
       expect(screen.queryByText(',')).not.toBeInTheDocument();
@@ -212,7 +212,7 @@ describe('RenderEndpoint component tests', () => {
         ...mockEndpoint,
         service_settings: {},
       };
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('mistral-ai-1')).toBeInTheDocument();
       expect(screen.queryByText('model-xyz')).not.toBeInTheDocument();
@@ -234,7 +234,7 @@ describe('RenderEndpoint component tests', () => {
     } as any;
 
     it('renders the component with endpoint details', () => {
-      render(<RenderEndpoint endpoint={mockEndpoint} />);
+      render(<EndpointInfo endpoint={mockEndpoint} />);
 
       expect(screen.getByText('model-abc')).toBeInTheDocument();
       expect(screen.getByText('rate_limit: 500')).toBeInTheDocument();
@@ -248,7 +248,7 @@ describe('RenderEndpoint component tests', () => {
         },
       };
 
-      render(<RenderEndpoint endpoint={modifiedEndpoint} />);
+      render(<EndpointInfo endpoint={modifiedEndpoint} />);
 
       expect(screen.getByText('model-abc')).toBeInTheDocument();
       expect(screen.queryByText('Rate limit:')).not.toBeInTheDocument();

@@ -17,8 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isEqual } from 'lodash/fp';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import * as i18n from './translations';
 
 export interface MultiSelectFilterOption {
@@ -27,78 +26,29 @@ export interface MultiSelectFilterOption {
   checked?: 'on' | 'off';
 }
 
-export const mapToMultiSelectOption = (options: string[], labelsMap?: Record<string, string>) => {
-  return options.map((option) => {
-    return {
-      key: option,
-      label: labelsMap ? labelsMap[option] : option,
-    };
-  });
-};
-
-const fromRawOptionsToEuiSelectableOptions = (
-  options: MultiSelectFilterOption[],
-  selectedOptionKeys: string[]
-): MultiSelectFilterOption[] => {
-  return options.map(({ key, label }) => {
-    const selectableOption: MultiSelectFilterOption = {
-      label,
-      key,
-      checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
-    };
-    return selectableOption;
-  });
-};
-
-const fromEuiSelectableOptionToRawOption = (options: MultiSelectFilterOption[]): string[] => {
-  return options.map((option) => option.key);
-};
-
-const getEuiSelectableCheckedOptions = (options: MultiSelectFilterOption[]) =>
-  options.filter((option) => option.checked === 'on');
-
 interface UseFilterParams {
   buttonLabel?: string;
-  id: string;
-  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
+  onChange: (newOptions: MultiSelectFilterOption[]) => void;
   options: MultiSelectFilterOption[];
   renderOption?: (option: MultiSelectFilterOption) => React.ReactNode;
   selectedOptionKeys?: string[];
 }
-export const MultiSelectFilter = ({
+
+export const MultiSelectFilter: React.FC<UseFilterParams> = ({
   buttonLabel,
-  id,
   onChange,
   options: rawOptions,
   selectedOptionKeys = [],
   renderOption,
-}: UseFilterParams) => {
+}) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
-  const options = fromRawOptionsToEuiSelectableOptions(rawOptions, selectedOptionKeys);
-
-  useEffect(() => {
-    const newSelectedOptions = selectedOptionKeys.filter((selectedOptionKey) =>
-      rawOptions.some(({ key: optionKey }) => optionKey === selectedOptionKey)
-    );
-
-    if (!isEqual(newSelectedOptions, selectedOptionKeys)) {
-      onChange({
-        filterId: id,
-        selectedOptionKeys: newSelectedOptions,
-      });
-    }
-  }, [selectedOptionKeys, rawOptions, id, onChange]);
-
-  const _onChange = (newOptions: MultiSelectFilterOption[]) => {
-    const newSelectedOptions = getEuiSelectableCheckedOptions(newOptions);
-
-    onChange({
-      filterId: id,
-      selectedOptionKeys: fromEuiSelectableOptionToRawOption(newSelectedOptions),
-    });
-  };
+  const options: MultiSelectFilterOption[] = rawOptions.map(({ key, label }) => ({
+    label,
+    key,
+    checked: selectedOptionKeys.includes(key) ? 'on' : undefined,
+  }));
 
   return (
     <EuiFilterGroup>
@@ -124,14 +74,14 @@ export const MultiSelectFilter = ({
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <EuiSelectable<MultiSelectFilterOption>
+        <EuiSelectable
           options={options}
           searchable
           searchProps={{
             placeholder: buttonLabel,
           }}
           emptyMessage="No options"
-          onChange={_onChange}
+          onChange={onChange}
           singleSelection={false}
           renderOption={renderOption}
         >
