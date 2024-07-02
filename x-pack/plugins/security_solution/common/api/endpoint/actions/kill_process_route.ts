@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { BaseActionRequestSchema } from './common/base';
 
+// --------------------------------------------------
+// Tests for this module are at:
+// x-pack/plugins/security_solution/common/endpoint/schema/actions.test.ts:604
+// --------------------------------------------------
+
 export const KillProcessRouteRequestSchema = {
   body: schema.object(
     {
