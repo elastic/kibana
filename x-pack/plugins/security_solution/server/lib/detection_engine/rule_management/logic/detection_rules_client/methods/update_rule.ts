@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
@@ -26,6 +27,7 @@ import {
 import { readRules } from '../read_rules';
 
 export const updateRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   args: UpdateRuleArgs,
   mlAuthz: MlAuthz
@@ -49,6 +51,7 @@ export const updateRule = async (
   const newInternalRule = convertUpdateAPIToInternalSchema({
     existingRule,
     ruleUpdate,
+    actionsClient,
   });
 
   const updatedInternalRule = await rulesClient.update({

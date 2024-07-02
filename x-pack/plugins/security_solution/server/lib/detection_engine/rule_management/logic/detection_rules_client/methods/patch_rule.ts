@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { PatchRuleArgs } from '../detection_rules_client_interface';
@@ -26,6 +27,7 @@ import {
 import { readRules } from '../read_rules';
 
 export const patchRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   args: PatchRuleArgs,
   mlAuthz: MlAuthz
@@ -46,7 +48,7 @@ export const patchRule = async (
 
   await validateMlAuth(mlAuthz, nextParams.type ?? existingRule.params.type);
 
-  const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
+  const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule, actionsClient);
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,

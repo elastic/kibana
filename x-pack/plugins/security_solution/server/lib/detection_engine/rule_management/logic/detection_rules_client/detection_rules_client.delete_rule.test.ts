@@ -6,6 +6,8 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
@@ -17,10 +19,11 @@ describe('DetectionRulesClient.deleteRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient: jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
   });
 
   it('should call rulesClient.delete passing the expected ruleId', async () => {

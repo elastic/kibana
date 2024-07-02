@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import type { MlAuthz } from '../../../../machine_learning/authz';
 
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
@@ -31,30 +33,31 @@ import { importRule } from './methods/import_rule';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 
 export const createDetectionRulesClient = (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   mlAuthz: MlAuthz
 ): IDetectionRulesClient => ({
   async createCustomRule(args: CreateCustomRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.createCustomRule', async () => {
-      return createCustomRule(rulesClient, args, mlAuthz);
+      return createCustomRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
   async createPrebuiltRule(args: CreatePrebuiltRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.createPrebuiltRule', async () => {
-      return createPrebuiltRule(rulesClient, args, mlAuthz);
+      return createPrebuiltRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
   async updateRule(args: UpdateRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.updateRule', async () => {
-      return updateRule(rulesClient, args, mlAuthz);
+      return updateRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
   async patchRule(args: PatchRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.patchRule', async () => {
-      return patchRule(rulesClient, args, mlAuthz);
+      return patchRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
@@ -66,13 +69,13 @@ export const createDetectionRulesClient = (
 
   async upgradePrebuiltRule(args: UpgradePrebuiltRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.upgradePrebuiltRule', async () => {
-      return upgradePrebuiltRule(rulesClient, args, mlAuthz);
+      return upgradePrebuiltRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 
   async importRule(args: ImportRuleArgs): Promise<RuleResponse> {
     return withSecuritySpan('DetectionRulesClient.importRule', async () => {
-      return importRule(rulesClient, args, mlAuthz);
+      return importRule(actionsClient, rulesClient, args, mlAuthz);
     });
   },
 });

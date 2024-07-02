@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import {
   getCreateEqlRuleSchemaMock,
@@ -31,10 +32,11 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient: jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
   });
 
   it('throws if no matching rule_id is found', async () => {

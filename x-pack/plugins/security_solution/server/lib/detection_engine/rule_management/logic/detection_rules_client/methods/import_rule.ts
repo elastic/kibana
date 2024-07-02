@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { ImportRuleArgs } from '../detection_rules_client_interface';
@@ -23,6 +25,7 @@ import { validateMlAuth, RuleResponseValidationError } from '../utils';
 import { readRules } from '../read_rules';
 
 export const importRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   importRulePayload: ImportRuleArgs,
   mlAuthz: MlAuthz
@@ -51,6 +54,7 @@ export const importRule = async (
     const ruleUpdateParams = convertUpdateAPIToInternalSchema({
       existingRule,
       ruleUpdate: ruleToImport,
+      actionsClient,
     });
 
     importedInternalRule = await rulesClient.update({
@@ -59,7 +63,7 @@ export const importRule = async (
     });
   } else {
     /* Rule does not exist, so we'll create it */
-    const ruleCreateParams = convertCreateAPIToInternalSchema(ruleToImport, {
+    const ruleCreateParams = convertCreateAPIToInternalSchema(ruleToImport, actionsClient, {
       immutable: false,
     });
 

@@ -6,6 +6,8 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import { readRules } from './read_rules';
 import { getCreateRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
@@ -25,6 +27,8 @@ describe('DetectionRulesClient.importRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
+  let actionsClient: jest.Mocked<ActionsClient>;
+
   const immutable = false as const; // Can only take value of false
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
@@ -44,7 +48,7 @@ describe('DetectionRulesClient.importRule', () => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
   });
 
   it('calls rulesClient.create with the correct parameters when rule_id does not match an installed rule', async () => {

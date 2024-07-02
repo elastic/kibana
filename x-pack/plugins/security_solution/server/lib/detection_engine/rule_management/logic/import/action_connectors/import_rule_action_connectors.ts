@@ -105,9 +105,9 @@ export const importRuleActionConnectors = async ({
 async function fetchPreconfiguredActionConnectors(
   actionsClient: ActionsClient
 ): Promise<ConnectorWithExtraFindData[]> {
-  const knownConnectors = await actionsClient.getAll();
+  const knownConnectors = await actionsClient.getAll({ includeSystemActions: true });
 
-  return knownConnectors.filter((c) => c.isPreconfigured);
+  return knownConnectors.filter((c) => c.isPreconfigured || c.isSystemAction);
 }
 
 async function filterOutPreconfiguredConnectors(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { CreateCustomRuleArgs } from '../detection_rules_client_interface';
@@ -18,6 +19,7 @@ import {
 import { validateMlAuth, RuleResponseValidationError } from '../utils';
 
 export const createCustomRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   args: CreateCustomRuleArgs,
   mlAuthz: MlAuthz
@@ -25,7 +27,9 @@ export const createCustomRule = async (
   const { params } = args;
   await validateMlAuth(mlAuthz, params.type);
 
-  const internalRule = convertCreateAPIToInternalSchema(params, { immutable: false });
+  const internalRule = convertCreateAPIToInternalSchema(params, actionsClient, {
+    immutable: false,
+  });
   const rule = await rulesClient.create<RuleParams>({
     data: internalRule,
   });

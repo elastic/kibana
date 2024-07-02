@@ -6,6 +6,8 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+
 import { stringifyZodError } from '@kbn/zod-helpers';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleParams } from '../../../../rule_schema';
@@ -23,6 +25,7 @@ import { validateMlAuth, ClientError, RuleResponseValidationError } from '../uti
 import { readRules } from '../read_rules';
 
 export const upgradePrebuiltRule = async (
+  actionsClient: ActionsClient,
   rulesClient: RulesClient,
   upgradePrebuiltRulePayload: UpgradePrebuiltRuleArgs,
   mlAuthz: MlAuthz
@@ -56,6 +59,7 @@ export const upgradePrebuiltRule = async (
         timeline_id: existingRule.params.timelineId,
         timeline_title: existingRule.params.timelineTitle,
       },
+      actionsClient,
       { immutable: true, defaultEnabled: existingRule.enabled }
     );
 
@@ -78,7 +82,7 @@ export const upgradePrebuiltRule = async (
   }
 
   // Else, simply patch it.
-  const patchedRule = convertPatchAPIToInternalSchema(ruleAsset, existingRule);
+  const patchedRule = convertPatchAPIToInternalSchema(ruleAsset, existingRule, actionsClient);
 
   const patchedInternalRule = await rulesClient.update({
     id: existingRule.id,

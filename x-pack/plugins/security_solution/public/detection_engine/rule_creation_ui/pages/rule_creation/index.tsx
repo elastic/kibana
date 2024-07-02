@@ -125,6 +125,7 @@ const CreateRulePageComponent: React.FC = () => {
   const {
     application,
     data: { dataViews },
+    triggersActionsUi,
   } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
@@ -379,7 +380,8 @@ const CreateRulePageComponent: React.FC = () => {
               {
                 ...localActionsStepData,
                 enabled,
-              }
+              },
+              triggersActionsUi.actionTypeRegistry
             )
           ),
         ]);
@@ -405,6 +407,7 @@ const CreateRulePageComponent: React.FC = () => {
       ruleType,
       startMlJobs,
       defineFieldsTransform,
+      triggersActionsUi.actionTypeRegistry,
     ]
   );
 

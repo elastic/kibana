@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { partition } from 'lodash/fp';
+import { partition, isEmpty } from 'lodash/fp';
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -224,18 +224,23 @@ export const swapActionIds = async (
  */
 export const migrateLegacyActionsIds = async (
   rules: PromiseFromStreams[],
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  actionsClient: ActionsClient
 ): Promise<PromiseFromStreams[]> => {
   const isImportRule = (r: unknown): r is RuleToImport => !(r instanceof Error);
 
   const toReturn = await pMap(
     rules,
     async (rule) => {
-      if (isImportRule(rule)) {
+      if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
+        const [systemActions, extActions] = partition<RuleAction>(
+          (action) =>
+            action.action_type_id != null && actionsClient.isSystemAction(action.action_type_id)
+        )(rule.actions);
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
         const newActions: Array<RuleAction | Error> = await pMap(
-          (rule.actions as RuleAction[]) ?? [],
+          (extActions as RuleAction[]) ?? [],
           (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
@@ -250,7 +255,7 @@ export const migrateLegacyActionsIds = async (
         }
 
         return [
-          { ...rule, actions: newlyMigratedActions },
+          { ...rule, actions: [...newlyMigratedActions, ...systemActions] },
           new Error(
             JSON.stringify(
               createBulkErrorObject({

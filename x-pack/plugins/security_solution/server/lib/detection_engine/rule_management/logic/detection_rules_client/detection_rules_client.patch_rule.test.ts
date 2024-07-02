@@ -6,6 +6,7 @@
  */
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getMlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
@@ -30,9 +31,13 @@ describe('DetectionRulesClient.patchRule', () => {
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
 
+  const actionsClient = {
+    isSystemAction: jest.fn((id: string) => id === 'system_action:id'),
+  } as unknown as jest.Mocked<ActionsClient>;
+
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
   });
 
   it('calls the rulesClient with expected params', async () => {
