@@ -14,7 +14,9 @@ import {
   EuiOutsideClickDetector,
   EuiToolTip,
   useEuiTheme,
+  EuiDatePicker,
 } from '@elastic/eui';
+import moment from 'moment';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -32,6 +34,7 @@ import { ESQLLang, ESQL_LANG_ID, ESQL_THEME_ID, monaco, type ESQLCallbacks } fro
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { EditorFooter } from './editor_footer';
 import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
@@ -163,6 +166,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   hideQueryHistory,
   hideHeaderWhenExpanded,
 }: TextBasedLanguagesEditorProps) {
+  const popoverRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
@@ -177,7 +181,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
-
+  const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
+  const [timePickerDate, setTimePickerDate] = useState(moment());
   const [measuredEditorWidth, setMeasuredEditorWidth] = useState(0);
   const [measuredContentWidth, setMeasuredContentWidth] = useState(0);
 
@@ -281,6 +286,22 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     setIsHistoryOpen(status);
   }, []);
 
+  const openTimePickerPopover = useCallback(() => {
+    const currentCursorPosition = editor1.current?.getPosition();
+    const editorCoords = editor1.current?.getDomNode()!.getBoundingClientRect();
+    if (currentCursorPosition && editorCoords) {
+      const editorPosition = editor1.current!.getScrolledVisiblePosition(currentCursorPosition);
+      const editorTop = editorCoords.top;
+      const editorLeft = editorCoords.left;
+
+      // Calculate the absolute position of the popover
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
+      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+
+      setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
+    }
+  }, []);
+
   // Registers a command to redirect users to the index management page
   // to create a new policy. The command is called by the buildNoPoliciesAvailableDefinition
   monaco.editor.registerCommand('esql.policies.create', (...args) => {
@@ -288,6 +309,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       path: 'data/index_management/enrich_policies/create',
       openInNewTab: true,
     });
+  });
+
+  monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
+    openTimePickerPopover();
   });
 
   const styles = textBasedLanguageEditorStyles(
@@ -1094,6 +1119,59 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           onKeyDownResizeHandler={onKeyDownResizeHandler}
           editorIsInline={editorIsInline}
         />
+      )}
+
+      {createPortal(
+        Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (
+          <div
+            tabIndex={0}
+            style={{
+              ...popoverPosition,
+              backgroundColor: 'white',
+              position: 'absolute',
+              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+              overflow: 'auto',
+            }}
+            ref={popoverRef}
+            data-test-subj="TextBasedLangEditor-macro-menu"
+          >
+            <EuiDatePicker
+              selected={timePickerDate}
+              onChange={(date) => {
+                if (date) {
+                  setTimePickerDate(date);
+                  const currentCursorPosition = editor1.current?.getPosition();
+                  const lineContent = editorModel.current?.getLineContent(
+                    currentCursorPosition?.lineNumber ?? 0
+                  );
+                  const contentAfterCursor = lineContent?.substring(
+                    (currentCursorPosition?.column ?? 0) - 1,
+                    lineContent.length + 1
+                  );
+
+                  const addition = `to_datetime("${date.toISOString()}")${contentAfterCursor}`;
+                  editor1.current?.executeEdits('time', [
+                    {
+                      range: {
+                        startLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        startColumn: currentCursorPosition?.column ?? 0,
+                        endLineNumber: currentCursorPosition?.lineNumber ?? 0,
+                        endColumn: (currentCursorPosition?.column ?? 0) + addition.length + 1,
+                      },
+                      text: addition,
+                      forceMoveMarkers: true,
+                    },
+                  ]);
+                  setPopoverPosition({});
+                }
+              }}
+              inline
+              showTimeSelect={true}
+              shadow={true}
+            />
+          </div>
+        ),
+        document.body
       )}
     </>
   );
