@@ -725,8 +725,8 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiFieldPassword.maskPassword': i18n.translate('core.euiFieldPassword.maskPassword', {
       defaultMessage: 'Mask password',
     }),
-    'euiFilePicker.clearSelectedFiles': i18n.translate('core.euiFilePicker.clearSelectedFiles', {
-      defaultMessage: 'Clear selected files',
+    'euiFilePicker.removeSelectedAriaLabel': i18n.translate('core.euiFilePicker.removeSelectedAriaLabel', {
+      defaultMessage: 'Remove selected files',
     }),
     'euiFilePicker.filesSelected': ({ fileCount }: EuiValues) =>
       i18n.translate('core.euiFilePicker.filesSelected', {
