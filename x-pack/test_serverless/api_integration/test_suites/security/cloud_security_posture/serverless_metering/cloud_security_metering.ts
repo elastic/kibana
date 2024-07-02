@@ -46,11 +46,6 @@ export default function (providerContext: FtrProviderContext) {
       mockUsageApiServer.listen(8081); // Start the usage api mock server on port 8081
     });
 
-    after(async () => {
-      // server.disable();
-      console.log('Mock server is stopped');
-    });
-
     beforeEach(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
@@ -103,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
         internalRequestHeader
       );
       await addIndex(es, cspmFindingsMockDataForMetering, LATEST_FINDINGS_INDEX_DEFAULT_NS);
-      // await new Promise(() => {});
+
       let interceptedRequestBody: UsageRecord[] = [];
       await retry.try(async () => {
         interceptedRequestBody = getInterceptedRequestPayload();
