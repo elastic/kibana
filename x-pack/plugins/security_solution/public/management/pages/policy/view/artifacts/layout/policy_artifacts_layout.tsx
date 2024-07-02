@@ -210,6 +210,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             searchableFields={[...searchableFields]}
             onClose={handleOnCloseFlyout}
             labels={labels}
+            CardDecorator={CardDecorator}
           />
         )}
         {exceptionItemToDelete && (
