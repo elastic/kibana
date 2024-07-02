@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SchemaTypeError, Type } from '@kbn/config-schema';
+import { ObjectType, SchemaTypeError, Type } from '@kbn/config-schema';
 
 /**
  * Error to return when the validation is not successful.
@@ -83,7 +83,11 @@ export interface ZodEsque<V> {
  *
  * @public
  */
-export type RouteValidationSpec<T> = Type<T> | ZodEsque<T> | RouteValidationFunction<T>;
+export type RouteValidationSpec<T> =
+  | ObjectType
+  | Type<T>
+  | ZodEsque<T>
+  | RouteValidationFunction<T>;
 
 /**
  * The configuration object to the RouteValidator class.
