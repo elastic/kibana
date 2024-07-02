@@ -51,7 +51,7 @@ export function EmptyBanner() {
 
   // Since we're absolutely positioned, we need to get the full width and
   // subtract the space for controls and margins.
-  const width = cy.width() - parseInt(theme.eui.euiSizeXXL, 10) - parseInt(theme.eui.euiSizeL, 10);
+  const width = cy.width() - parseInt(theme.size.xxl, 10) - parseInt(theme.size.l, 10);
 
   return (
     <EmptyBannerContainer style={{ width }}>

@@ -67,14 +67,14 @@ export function DependencyOperationDistributionChart() {
 
   const chartData: DurationDistributionChartData[] = [
     {
-      areaSeriesColor: euiTheme.eui.euiColorVis1,
+      areaSeriesColor: euiTheme.euiPaletteColorBlind.euiColorVis1,
       histogram: data?.allSpansDistribution.overallHistogram ?? [],
       id: i18n.translate('xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel', {
         defaultMessage: 'All spans',
       }),
     },
     {
-      areaSeriesColor: euiTheme.eui.euiColorVis7,
+      areaSeriesColor: euiTheme.euiPaletteColorBlind.euiColorVis7,
       histogram: data?.failedSpansDistribution?.overallHistogram ?? [],
       id: i18n.translate('xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel', {
         defaultMessage: 'Failed spans',

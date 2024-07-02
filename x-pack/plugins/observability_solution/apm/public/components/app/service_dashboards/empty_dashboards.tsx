@@ -25,7 +25,7 @@ export function EmptyDashboards({ actions }: Props) {
         icon={
           <EuiImage
             size="fullWidth"
-            src={theme.darkMode ? dashboardsDark : dashboardsLight}
+            src={theme.isDarkColorMode ? dashboardsDark : dashboardsLight}
             alt=""
           />
         }

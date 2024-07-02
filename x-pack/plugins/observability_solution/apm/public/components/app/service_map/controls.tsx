@@ -110,7 +110,7 @@ export function Controls() {
   );
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);
-  const duration = parseInt(theme.eui.euiAnimSpeedFast, 10);
+  const duration = parseInt(String(theme.animation.fast), 10);
   const downloadUrl = useDebugDownloadUrl(cy);
   const viewFullMapUrl = getLegacyApmHref({
     basePath,

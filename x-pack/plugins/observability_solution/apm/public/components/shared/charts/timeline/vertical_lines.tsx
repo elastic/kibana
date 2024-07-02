@@ -53,7 +53,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x2={position}
             y1={0}
             y2="100%"
-            stroke={theme.eui.euiColorLightestShade}
+            stroke={theme.colors.lightestShade}
           />
         ))}
         {markPositions.map((position) => (
@@ -63,7 +63,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x2={position}
             y1={0}
             y2="100%"
-            stroke={theme.eui.euiColorMediumShade}
+            stroke={theme.colors.mediumShade}
           />
         ))}
         {Number.isFinite(topTraceDurationPosition) && (
@@ -73,7 +73,7 @@ export function VerticalLines({ topTraceDuration, plotValues, marks = [] }: Vert
             x2={topTraceDurationPosition}
             y1={0}
             y2="100%"
-            stroke={theme.eui.euiColorMediumShade}
+            stroke={theme.colors.mediumShade}
           />
         )}
       </g>

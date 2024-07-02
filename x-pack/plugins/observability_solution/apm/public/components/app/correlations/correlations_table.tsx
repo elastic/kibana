@@ -105,7 +105,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
             selectedTerm.fieldValue === term.fieldValue &&
             selectedTerm.fieldName === term.fieldName
               ? {
-                  backgroundColor: euiTheme.eui.euiColorLightestShade,
+                  backgroundColor: euiTheme.colors.lightestShade,
                 }
               : null,
         };
