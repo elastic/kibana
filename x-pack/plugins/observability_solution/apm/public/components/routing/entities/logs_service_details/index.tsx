@@ -18,6 +18,7 @@ import { ApmTimeRangeMetadataContextProvider } from '../../../../context/time_ra
 import { ServiceDashboards } from '../../../app/service_dashboards';
 import { ServiceLogs } from '../../../app/service_logs';
 import { LogsServiceOverview } from '../../../app/entities/logs/logs_service_overview';
+import { RedirectToDefaultLogsServiceRouteView } from '../../service_detail/redirect_to_default_service_route_view';
 
 export function page({
   title,
@@ -139,6 +140,9 @@ export const logsServiceDetailsRoute = {
             dashboardId: t.string,
           }),
         }),
+      },
+      '/logs-services/{serviceName}/': {
+        element: <RedirectToDefaultLogsServiceRouteView />,
       },
     },
   },
