@@ -851,7 +851,7 @@ describe('UnifiedDataTable', () => {
     it('should render the color indicator control', async () => {
       const component = await getComponent({
         ...getProps(),
-        getRowIndicatorColor: jest.fn(() => 'blur'),
+        getRowIndicatorColor: jest.fn(() => 'blue'),
       });
 
       expect(findTestSubject(component, 'dataGridHeaderCell-colorIndicator').exists()).toBeTruthy();

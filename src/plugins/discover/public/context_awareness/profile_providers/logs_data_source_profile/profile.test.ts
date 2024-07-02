@@ -84,7 +84,7 @@ describe('logsDataSourceProfileProvider', () => {
       const euiTheme = { euiTheme: { colors: {} } } as unknown as EuiThemeComputed;
       expect(
         logsDataSourceProfileProvider.profile.getRowIndicatorColor?.(undefined)?.(row, euiTheme)
-      ).toBe('#6092C0');
+      ).toBe('#90B0D1');
     });
 
     it('should not return a color for a missing log level', () => {
