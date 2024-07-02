@@ -348,7 +348,7 @@ function RelatedErrors({
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <EuiBadge
           href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
-          color={theme.eui.euiColorDanger}
+          color={theme.colors.danger}
           iconType="arrowRight"
         >
           {i18n.translate('xpack.apm.waterfall.errorCount', {

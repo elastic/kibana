@@ -140,7 +140,7 @@ export function InstanceDetails({ serviceName, serviceNodeName, kuery }: Props) 
           title={i18n.translate('xpack.apm.serviceOverview.instanceTable.details.serviceTitle', {
             defaultMessage: 'Service',
           })}
-          icon={getAgentIcon(data.agent?.name, theme.darkMode)}
+          icon={getAgentIcon(data.agent?.name, theme.isDarkColorMode)}
           keyValueList={serviceDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />

@@ -74,7 +74,7 @@ export function AnomalyDetectionSetupLink() {
       data-test-subj="apmAnomalyDetectionHeaderLink"
     >
       {pre}
-      <span style={{ marginInlineStart: theme.eui.euiSizeS }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
+      <span style={{ marginInlineStart: theme.size.s }}>{ANOMALY_DETECTION_LINK_LABEL}</span>
     </EuiHeaderLink>
   );
 

@@ -134,16 +134,16 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
           display: flex;
           position: sticky;
           top: var(--euiFixedHeadersOffset, 0);
-          z-index: ${theme.eui.euiZLevel2};
-          background-color: ${theme.eui.euiColorEmptyShade};
-          border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
+          z-index: ${theme.levels.header};
+          background-color: ${theme.colors.emptyShade};
+          border-bottom: 1px solid ${theme.colors.mediumShade};
         `}
       >
         <EuiButtonEmpty
           data-test-subj="apmWaterfallButton"
           css={css`
             position: absolute;
-            z-index: ${theme.eui.euiZLevel2};
+            z-index: ${theme.levels.header};
           `}
           iconType={isAccordionOpen ? 'fold' : 'unfold'}
           onClick={() => {

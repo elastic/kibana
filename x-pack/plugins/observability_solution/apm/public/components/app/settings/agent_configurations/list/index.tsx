@@ -110,7 +110,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
     {
       field: 'applied_by_agent',
       align: 'center',
-      width: theme.eui.euiSizeXL,
+      width: theme.size.xl,
       name: '',
       sortable: true,
       render: (_, { applied_by_agent: appliedByAgent }) => (
@@ -125,7 +125,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
                 })
           }
         >
-          <EuiHealth color={appliedByAgent ? 'success' : theme.eui.euiColorLightShade} />
+          <EuiHealth color={appliedByAgent ? 'success' : theme.colors.lightShade} />
         </EuiToolTip>
       ),
     },
@@ -172,12 +172,14 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
     ...(canSave
       ? [
           {
-            width: theme.eui.euiSizeXL,
+            width: theme.size.xl,
             name: '',
             render: (config: Config) => (
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label="Edit"
+                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.editLabel', {
+                  defaultMessage: 'Edit',
+                })}
                 iconType="pencil"
                 href={apmRouter.link('/settings/agent-configuration/edit', {
                   query: {
@@ -189,12 +191,14 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
             ),
           },
           {
-            width: theme.eui.euiSizeXL,
+            width: theme.size.xl,
             name: '',
             render: (config: Config) => (
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label="Delete"
+                aria-label={i18n.translate('xpack.apm.columns.euiButtonIcon.deleteLabel', {
+                  defaultMessage: 'Delete',
+                })}
                 iconType="trash"
                 onClick={() => setConfigToBeDeleted(config)}
               />

@@ -110,7 +110,7 @@ export function SparkPlotItem({
   };
 
   const chartSize = {
-    height: theme.eui.euiSizeL,
+    height: theme.size.l,
     width: compact ? unit * 4 : unit * 5,
   };
 
@@ -201,7 +201,7 @@ export function SparkPlotItem({
         justifyContent: 'center',
       }}
     >
-      <EuiIcon type="visLine" color={theme.eui.euiColorMediumShade} />
+      <EuiIcon type="visLine" color={theme.colors.mediumShade} />
     </div>
   );
 }
