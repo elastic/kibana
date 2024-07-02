@@ -7,6 +7,7 @@
  */
 
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ComponentType } from 'react';
 import type { FormatSelectEditorProps } from '../field_format_editor';
 
@@ -18,6 +19,7 @@ export interface FormatEditorProps<P> {
   fieldType: string;
   format: FieldFormat;
   formatParams: { type?: string } & P;
+  fieldFormats: FieldFormatsStart;
   onChange: (newParams: FieldFormatParams) => void;
   onError: FormatSelectEditorProps['onError'];
 }

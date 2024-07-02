@@ -9,12 +9,31 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import ReactDOM from 'react-dom/server';
+import { css } from '@emotion/react';
+import { EuiBadge } from '@elastic/eui';
 import { findLast, cloneDeep, escape } from 'lodash';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
+
+const TRANSFORM_OPTIONS = [
+  {
+    kind: 'none',
+    text: i18n.translate('fieldFormats.color.transformOptions.none', {
+      defaultMessage: '- None -',
+    }),
+  },
+  {
+    kind: 'badge',
+    text: i18n.translate('fieldFormats.color.transformOptions.badge', {
+      defaultMessage: 'Badge',
+    }),
+  },
+];
+const DEFAULT_TRANSFORM_OPTION = 'badge';
+const LEGACY_TRANSFORM_OPTION = 'none';
 
 /** @public */
 export class ColorFormat extends FieldFormat {
@@ -23,11 +42,14 @@ export class ColorFormat extends FieldFormat {
     defaultMessage: 'Color',
   });
   static fieldType = [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.STRING];
+  static transformOptions = TRANSFORM_OPTIONS;
+  static legacyTransformOption = LEGACY_TRANSFORM_OPTION;
 
   getParamDefaults() {
     return {
       fieldType: null, // populated by editor, see controller below
       colors: [cloneDeep(DEFAULT_CONVERTER_COLOR)],
+      transform: DEFAULT_TRANSFORM_OPTION,
     };
   }
 
@@ -60,6 +82,20 @@ export class ColorFormat extends FieldFormat {
     const displayVal = escape(asPrettyString(val, options));
     if (!color) return displayVal;
 
+    if (this.param('transform') === 'badge') {
+      return ReactDOM.renderToStaticMarkup(
+        <EuiBadge
+          color={color.background}
+          css={css`
+            color: ${color.text};
+          `}
+        >
+          {displayVal}
+        </EuiBadge>
+      );
+    }
+
+    // if the transform option is empty, it should have the legacy behavior
     return ReactDOM.renderToStaticMarkup(
       <span
         style={{
