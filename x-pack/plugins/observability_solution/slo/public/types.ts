@@ -22,7 +22,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -44,12 +43,10 @@ import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
 import { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -67,7 +64,7 @@ export interface SloPublicPluginsSetup {
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
   serverless?: ServerlessPluginSetup;
-  presentationUtil?: PresentationUtilPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   usageCollection: UsageCollectionSetup;
 }
@@ -83,8 +80,6 @@ export interface SloPublicPluginsStart {
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  navigation: NavigationPublicPluginStart;
-  security: SecurityPluginStart;
   spaces?: SpacesPluginStart;
   share: SharePluginStart;
   licensing: LicensingPluginStart;
@@ -99,9 +94,8 @@ export interface SloPublicPluginsStart {
   lens: LensPublicStart;
   charts: ChartsPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  uiSettings: IUiSettingsClient;
   usageCollection: UsageCollectionStart;
-  discover: DiscoverStart;
+  discover?: DiscoverStart;
   dataViewFieldEditor: DataViewFieldEditorStart;
   toastNotifications: ToastsStart;
 }

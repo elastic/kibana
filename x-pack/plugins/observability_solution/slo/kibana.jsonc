@@ -11,12 +11,11 @@
       "slo"
     ],
     "requiredPlugins": [
+      "actionTypeRegistry",
       "aiops",
       "alerting",
       "cases",
       "charts",
-      "contentManagement",
-      "controls",
       "dashboard",
       "data",
       "dataViews",
@@ -27,7 +26,7 @@
       "observability",
       "observabilityShared",
       "ruleRegistry",
-      "security",
+      "ruleTypeRegistry",
       "taskManager",
       "triggersActionsUi",
       "share",
@@ -37,6 +36,7 @@
       "presentationUtil",
       "features",
       "licensing",
+      "toastNotifications",
       "usageCollection",
     ],
     "optionalPlugins": [
