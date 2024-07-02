@@ -63,7 +63,13 @@ const managementSchema = schema.recordOf(
   listOfCapabilitiesSchema
 );
 const catalogueSchema = listOfCapabilitiesSchema;
-const alertingSchema = schema.arrayOf(schema.string());
+const alertingSchema = schema.arrayOf(
+  schema.object({
+    ruleTypeId: schema.string(),
+    consumers: schema.arrayOf(schema.string()),
+  })
+);
+
 const casesSchema = schema.arrayOf(schema.string());
 
 const appCategorySchema = schema.object({
@@ -289,7 +295,9 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
 
   const unseenCatalogue = new Set(catalogue);
 
-  const unseenAlertTypes = new Set(alerting);
+  const unseenAlertTypes = new Set(
+    alerting.flatMap(({ ruleTypeId, consumers }) => [ruleTypeId, ...consumers])
+  );
 
   const unseenCasesTypes = new Set(cases);
 
@@ -320,13 +328,31 @@ export function validateKibanaFeature(feature: KibanaFeatureConfig) {
   }
 
   function validateAlertingEntry(privilegeId: string, entry: FeatureKibanaPrivileges['alerting']) {
-    const all: string[] = [...(entry?.rule?.all ?? []), ...(entry?.alert?.all ?? [])];
-    const read: string[] = [...(entry?.rule?.read ?? []), ...(entry?.alert?.read ?? [])];
+    const getRuleTypeIdAndConsumers = ({
+      ruleTypeId,
+      consumers,
+    }: {
+      ruleTypeId: string;
+      consumers: readonly string[];
+    }) => [ruleTypeId, ...consumers];
+
+    const all: string[] = [
+      ...(entry?.rule?.all?.flatMap(getRuleTypeIdAndConsumers) ?? []),
+      ...(entry?.alert?.all?.flatMap(getRuleTypeIdAndConsumers) ?? []),
+    ];
+    const read: string[] = [
+      ...(entry?.rule?.read?.flatMap(getRuleTypeIdAndConsumers) ?? []),
+      ...(entry?.alert?.read?.flatMap(getRuleTypeIdAndConsumers) ?? []),
+    ];
 
     all.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
     read.forEach((privilegeAlertTypes) => unseenAlertTypes.delete(privilegeAlertTypes));
 
-    const unknownAlertingEntries = difference([...all, ...read], alerting);
+    const unknownAlertingEntries = difference(
+      [...all, ...read],
+      alerting.flatMap(({ ruleTypeId, consumers }) => [ruleTypeId, ...consumers])
+    );
+
     if (unknownAlertingEntries.length > 0) {
       throw new Error(
         `Feature privilege ${

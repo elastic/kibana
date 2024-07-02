@@ -81,6 +81,11 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
 
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
+    const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: [sloFeatureId],
+    }));
+
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.slo.featureRegistry.linkSloTitle', {
@@ -90,7 +95,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
       category: DEFAULT_APP_CATEGORIES.observability,
       app: [sloFeatureId, 'kibana'],
       catalogue: [sloFeatureId, 'observability'],
-      alerting: sloRuleTypes,
+      alerting: alertingFeatures,
       privileges: {
         all: {
           app: [sloFeatureId, 'kibana'],
@@ -102,10 +107,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           },
           alerting: {
             rule: {
-              all: sloRuleTypes,
+              all: alertingFeatures,
             },
             alert: {
-              all: sloRuleTypes,
+              all: alertingFeatures,
             },
           },
           ui: ['read', 'write'],
@@ -120,10 +125,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
           },
           alerting: {
             rule: {
-              read: sloRuleTypes,
+              read: alertingFeatures,
             },
             alert: {
-              read: sloRuleTypes,
+              read: alertingFeatures,
             },
           },
           ui: ['read'],

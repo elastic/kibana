@@ -30,6 +30,11 @@ const UPTIME_RULE_TYPES = [
 
 const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
 
+const alertingFeatures = ruleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [PLUGIN.ID],
+}));
+
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
   privileges: [
@@ -58,7 +63,7 @@ export const uptimeFeature = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: ruleTypes,
+  alerting: alertingFeatures,
   privileges: {
     all: {
       app: ['uptime', 'kibana', 'synthetics'],
@@ -78,10 +83,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          all: ruleTypes,
+          all: alertingFeatures,
         },
         alert: {
-          all: ruleTypes,
+          all: alertingFeatures,
         },
       },
       management: {
@@ -107,10 +112,10 @@ export const uptimeFeature = {
       },
       alerting: {
         rule: {
-          read: ruleTypes,
+          read: alertingFeatures,
         },
         alert: {
-          read: ruleTypes,
+          read: alertingFeatures,
         },
       },
       management: {
