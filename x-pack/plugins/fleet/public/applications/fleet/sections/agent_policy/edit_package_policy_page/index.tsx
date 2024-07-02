@@ -128,6 +128,7 @@ export const EditPackagePolicyForm = memo<{
   } = usePackagePolicyWithRelatedData(packagePolicyId, {
     forceUpgrade,
   });
+  const hasAgentlessAgentPolicy = packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID);
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
   useSetIsReadOnly(!canWriteIntegrationPolicies);
@@ -241,7 +242,7 @@ export const EditPackagePolicyForm = memo<{
     }
     if (
       (agentCount !== 0 || agentPoliciesToAdd.length > 0 || agentPoliciesToRemove.length > 0) &&
-      !packagePolicy.policy_ids.includes(AGENTLESS_POLICY_ID) &&
+      !hasAgentlessAgentPolicy &&
       formState !== 'CONFIRM'
     ) {
       setFormState('CONFIRM');
@@ -521,7 +522,7 @@ export const EditPackagePolicyForm = memo<{
                 <EuiSpacer size="xxl" />
               </>
             )}
-            {canUseMultipleAgentPolicies ? (
+            {canUseMultipleAgentPolicies && !hasAgentlessAgentPolicy ? (
               <StepsWithLessPadding steps={steps} />
             ) : (
               replaceConfigurePackage || configurePackage
