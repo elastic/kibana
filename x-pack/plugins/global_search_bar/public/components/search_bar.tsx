@@ -132,7 +132,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
-        if (searchValue.length !== 0) {
+
+        if (searchValue.length !== 0 && searchValue.length <= 1000) {
           reportEvent.searchRequest();
         }
 
