@@ -63,10 +63,11 @@ export const generate = async (config: GeneratorConfig) => {
       };
     })
   );
-  // If there are no operations or components to generate, skip this file
+
+  // If there are no operations or component schemas to generate, skip this file
   parsedSources = parsedSources.filter(
     ({ generationContext }) =>
-      generationContext.operations.length > 0 || generationContext.components !== undefined
+      generationContext.operations.length > 0 || generationContext.components?.schemas !== undefined
   );
 
   console.log(`🧹  Cleaning up any previously generated artifacts`);
