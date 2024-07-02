@@ -29,32 +29,37 @@ export function disableEntityDiscoveryRoute<T extends RequestHandlerContext>({
       validate: false,
     },
     async (context, req, res) => {
-      server.logger.debug('reading entity discovery API key from saved object');
-      const apiKey = await readEntityDiscoveryAPIKey(server);
+      try {
+        server.logger.debug('reading entity discovery API key from saved object');
+        const apiKey = await readEntityDiscoveryAPIKey(server);
 
-      if (apiKey === undefined) {
-        return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_FOUND } });
+        if (apiKey === undefined) {
+          return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_FOUND } });
+        }
+
+        server.logger.debug('validating existing entity discovery API key');
+        const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
+
+        if (!isValid) {
+          return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_VALID } });
+        }
+
+        const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
+        const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
+        const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+
+        await uninstallBuiltInEntityDefinitions({ soClient, esClient, logger });
+
+        await deleteEntityDiscoveryAPIKey((await context.core).savedObjects.client);
+        await server.security.authc.apiKeys.invalidateAsInternalUser({
+          ids: [apiKey.id],
+        });
+
+        return res.ok({ body: { success: true } });
+      } catch (err) {
+        logger.error(err);
+        return res.customError({ statusCode: 500, body: err });
       }
-
-      server.logger.debug('validating existing entity discovery API key');
-      const isValid = await checkIfEntityDiscoveryAPIKeyIsValid(server, apiKey);
-
-      if (!isValid) {
-        return res.ok({ body: { success: false, reason: ERROR_API_KEY_NOT_VALID } });
-      }
-
-      const fakeRequest = getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey });
-      const soClient = server.core.savedObjects.getScopedClient(fakeRequest);
-      const esClient = server.core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-
-      await uninstallBuiltInEntityDefinitions({ soClient, esClient, logger });
-
-      await deleteEntityDiscoveryAPIKey((await context.core).savedObjects.client);
-      await server.security.authc.apiKeys.invalidateAsInternalUser({
-        ids: [apiKey.id],
-      });
-
-      return res.ok();
     }
   );
 }
