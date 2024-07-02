@@ -25902,162 +25902,162 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField, 3, \"asc\")",
+      "query": "from a_index | stats var = top(stringField, 3, \"asc\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats top_list(stringField, 1, \"desc\")",
+      "query": "from a_index | stats top(stringField, 1, \"desc\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField, 5, \"asc\")",
+      "query": "from a_index | stats var = top(stringField, 5, \"asc\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats top_list(stringField, 5, \"asc\")",
+      "query": "from a_index | stats top(stringField, 5, \"asc\")",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField, 3)",
+      "query": "from a_index | stats var = top(stringField, 3)",
       "error": [
-        "Error: [top_list] function expects exactly 3 arguments, got 2."
+        "Error: [top] function expects exactly 3 arguments, got 2."
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField)",
+      "query": "from a_index | stats var = top(stringField)",
       "error": [
-        "Error: [top_list] function expects exactly 3 arguments, got 1."
+        "Error: [top] function expects exactly 3 arguments, got 1."
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField, numberField, \"asc\")",
+      "query": "from a_index | stats var = top(stringField, numberField, \"asc\")",
       "error": [
-        "Argument of [=] must be a constant, received [top_list(stringField,numberField,\"asc\")]"
+        "Argument of [=] must be a constant, received [top(stringField,numberField,\"asc\")]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField, 100 + numberField, \"asc\")",
+      "query": "from a_index | stats var = top(stringField, 100 + numberField, \"asc\")",
       "error": [
-        "Argument of [=] must be a constant, received [top_list(stringField,100+numberField,\"asc\")]"
+        "Argument of [=] must be a constant, received [top(stringField,100+numberField,\"asc\")]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField, 1, stringField)",
+      "query": "from a_index | stats var = top(stringField, 1, stringField)",
       "error": [
-        "Argument of [=] must be a constant, received [top_list(stringField,1,stringField)]"
+        "Argument of [=] must be a constant, received [top(stringField,1,stringField)]"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = top_list(stringField, 1, \"asdf\")",
+      "query": "from a_index | stats var = top(stringField, 1, \"asdf\")",
       "error": [],
       "warning": [
-        "Invalid option [\"asdf\"] for top_list. Supported options: [\"asc\", \"desc\"]."
+        "Invalid option [\"asdf\"] for top. Supported options: [\"asc\", \"desc\"]."
       ]
     },
     {
-      "query": "from a_index | sort top_list(stringField, numberField, \"asc\")",
+      "query": "from a_index | sort top(stringField, numberField, \"asc\")",
       "error": [
-        "SORT does not support function top_list"
+        "SORT does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where top_list(stringField, numberField, \"asc\")",
+      "query": "from a_index | where top(stringField, numberField, \"asc\")",
       "error": [
-        "WHERE does not support function top_list"
+        "WHERE does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where top_list(stringField, numberField, \"asc\") > 0",
+      "query": "from a_index | where top(stringField, numberField, \"asc\") > 0",
       "error": [
-        "WHERE does not support function top_list"
+        "WHERE does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = top_list(stringField, numberField, \"asc\")",
+      "query": "from a_index | eval var = top(stringField, numberField, \"asc\")",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = top_list(stringField, numberField, \"asc\") > 0",
+      "query": "from a_index | eval var = top(stringField, numberField, \"asc\") > 0",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval top_list(stringField, numberField, \"asc\")",
+      "query": "from a_index | eval top(stringField, numberField, \"asc\")",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval top_list(stringField, numberField, \"asc\") > 0",
+      "query": "from a_index | eval top(stringField, numberField, \"asc\") > 0",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | sort top_list(stringField, 5, \"asc\")",
+      "query": "from a_index | sort top(stringField, 5, \"asc\")",
       "error": [
-        "SORT does not support function top_list"
+        "SORT does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where top_list(stringField, 5, \"asc\")",
+      "query": "from a_index | where top(stringField, 5, \"asc\")",
       "error": [
-        "WHERE does not support function top_list"
+        "WHERE does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where top_list(stringField, 5, \"asc\") > 0",
+      "query": "from a_index | where top(stringField, 5, \"asc\") > 0",
       "error": [
-        "WHERE does not support function top_list"
+        "WHERE does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = top_list(stringField, 5, \"asc\")",
+      "query": "from a_index | eval var = top(stringField, 5, \"asc\")",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = top_list(stringField, 5, \"asc\") > 0",
+      "query": "from a_index | eval var = top(stringField, 5, \"asc\") > 0",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval top_list(stringField, 5, \"asc\")",
+      "query": "from a_index | eval top(stringField, 5, \"asc\")",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval top_list(stringField, 5, \"asc\") > 0",
+      "query": "from a_index | eval top(stringField, 5, \"asc\") > 0",
       "error": [
-        "EVAL does not support function top_list"
+        "EVAL does not support function top"
       ],
       "warning": []
     },

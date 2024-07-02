@@ -225,7 +225,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       ],
     },
     {
-      name: 'top_list',
+      name: 'top',
       type: 'agg',
       description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.topListDoc', {
         defaultMessage: 'Collects top N values per bucket.',
@@ -260,8 +260,8 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         },
       ],
       examples: [
-        `from employees | stats top_salaries = top_list(salary, 10, "desc")`,
-        `from employees | stats date = top_list(hire_date, 2, "asc"), double = top_list(salary_change, 2, "asc"),`,
+        `from employees | stats top_salaries = top(salary, 10, "desc")`,
+        `from employees | stats date = top(hire_date, 2, "asc"), double = top(salary_change, 2, "asc"),`,
       ],
     },
   ]);
