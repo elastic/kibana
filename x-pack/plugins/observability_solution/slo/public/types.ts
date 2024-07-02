@@ -74,14 +74,14 @@ export interface SloPublicPluginsSetup {
 
 export interface SloPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
-  aiops: AiopsPluginStart;
+  // aiops: AiopsPluginStart;
   cases: CasesPublicStart;
   cloud?: CloudStart;
   dashboard: DashboardStart;
   dataViewEditor: DataViewEditorStart;
   fieldFormats: FieldFormatsStart;
-  observability: ObservabilityPublicStart;
-  observabilityShared: ObservabilitySharedPluginStart;
+  // observability: ObservabilityPublicStart;
+  // observabilityShared: ObservabilitySharedPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   navigation: NavigationPublicPluginStart;
   security: SecurityPluginStart;
