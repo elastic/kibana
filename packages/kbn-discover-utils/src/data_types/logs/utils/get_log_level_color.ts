@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { EuiThemeComputed } from '@elastic/eui';
 import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
 export const getLogLevelColor = (
-  logLevelCoalescedValue: LogLevelCoalescedValue
-  // euiTheme: EuiThemeComputed
+  logLevelCoalescedValue: LogLevelCoalescedValue,
+  euiTheme: EuiThemeComputed
 ): string | undefined => {
   switch (logLevelCoalescedValue) {
     case LogLevelCoalescedValue.debug:
