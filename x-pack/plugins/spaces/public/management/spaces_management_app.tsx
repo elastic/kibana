@@ -33,7 +33,13 @@ interface CreateParams {
 
 export const spacesManagementApp = Object.freeze({
   id: 'spaces',
-  create({ getStartServices, spacesManager, config, solutionNavExperiment }: CreateParams) {
+  create({
+    getStartServices,
+    spacesManager,
+    config,
+    solutionNavExperiment,
+    getRolesAPIClient,
+  }: CreateParams) {
     const title = i18n.translate('xpack.spaces.displayName', {
       defaultMessage: 'Spaces',
     });
@@ -160,6 +166,7 @@ export const spacesManagementApp = Object.freeze({
               onLoadSpace={onLoadSpace}
               spaceId={spaceId}
               selectedTabId={selectedTabId}
+              getRolesAPIClient={getRolesAPIClient}
             />
           );
         };

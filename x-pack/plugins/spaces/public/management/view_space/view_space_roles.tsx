@@ -30,15 +30,20 @@ import type {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
 
+import { useViewSpaceServices, type ViewSpaceServices } from './hooks/view_space_context_provider';
 import type { Space } from '../../../common';
 import { FeatureTable } from '../edit_space/enabled_features/feature_table';
+
+type RolesAPIClient = ReturnType<ViewSpaceServices['getRolesAPIClient']> extends Promise<infer R>
+  ? R
+  : never;
 
 interface Props {
   space: Space;
@@ -60,6 +65,19 @@ const filterRolesAssignedToSpace = (roles: Role[], space: Space) => {
 
 export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) => {
   const [showRolesPrivilegeEditor, setShowRolesPrivilegeEditor] = useState(false);
+
+  const rolesAPIClient = useRef<RolesAPIClient>();
+
+  const { getRolesAPIClient } = useViewSpaceServices();
+
+  useEffect(() => {
+    async function resolveRolesAPIClient() {
+      rolesAPIClient.current = await getRolesAPIClient();
+    }
+
+    resolveRolesAPIClient();
+  }, [getRolesAPIClient]);
+
   const getRowProps = (item: Role) => {
     const { name } = item;
     return {
@@ -134,6 +152,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) =>
             window.alert('your wish is granted');
             setShowRolesPrivilegeEditor(false);
           }}
+          roleAPIClient={rolesAPIClient.current}
         />
       )}
       <EuiFlexGroup direction="column">
@@ -179,10 +198,13 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) =>
 interface PrivilegesRolesFormProps extends Props {
   closeFlyout: () => void;
   onSaveClick: () => void;
+  roleAPIClient: RolesAPIClient;
 }
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
-  const { space, roles, onSaveClick, closeFlyout, features } = props;
+  const { roles, onSaveClick, closeFlyout, features, roleAPIClient } = props;
+
+  const [space, setSpaceState] = useState(props.space);
 
   const [selectedRoles, setSelectedRoles] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [spacePrivilege, setSpacePrivilege] = useState<'all' | 'read' | 'custom'>('all');
@@ -286,7 +308,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   };
 
   return (
-    <EuiFlyout onClose={closeFlyout}>
+    <EuiFlyout onClose={closeFlyout} size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>Assign role to {space.name}</h2>

@@ -21,7 +21,7 @@ import {
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 import type { FC } from 'react';
 
-import type { ApplicationStart, Capabilities, ScopedHistory } from '@kbn/core/public';
+import type { Capabilities, ScopedHistory } from '@kbn/core/public';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -29,11 +29,13 @@ import type { Role } from '@kbn/security-plugin-types-common';
 
 import { TAB_ID_CONTENT, TAB_ID_FEATURES, TAB_ID_ROLES } from './constants';
 import { useTabs } from './hooks/use_tabs';
-import { ViewSpaceContextProvider } from './hooks/view_space_context_provider';
+import {
+  ViewSpaceContextProvider,
+  type ViewSpaceServices,
+} from './hooks/view_space_context_provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
-import type { SpacesManager } from '../../spaces_manager';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
@@ -47,19 +49,15 @@ const getSelectedTabId = (selectedTabId?: string) => {
     : TAB_ID_CONTENT;
 };
 
-interface PageProps {
+interface PageProps extends ViewSpaceServices {
+  spaceId?: string;
+  history: ScopedHistory;
+  selectedTabId?: string;
   capabilities: Capabilities;
   allowFeatureVisibility: boolean; // FIXME: handle this
   solutionNavExperiment?: Promise<boolean>;
   getFeatures: FeaturesPluginStart['getFeatures'];
-  getUrlForApp: ApplicationStart['getUrlForApp'];
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  serverBasePath: string;
-  spacesManager: SpacesManager;
-  history: ScopedHistory;
   onLoadSpace: (space: Space) => void;
-  spaceId?: string;
-  selectedTabId?: string;
 }
 
 const handleApiError = (error: Error) => {
@@ -80,6 +78,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     capabilities,
     getUrlForApp,
     navigateToUrl,
+    getRolesAPIClient,
   } = props;
 
   const selectedTabId = getSelectedTabId(_selectedTabId);
@@ -123,6 +122,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
       setIsLoadingRoles(false);
     };
 
+    // maybe we do not make this call if user can't view roles? 🤔
     getRoles().catch(handleApiError);
   }, [spaceId, spacesManager]);
 
@@ -220,6 +220,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
 
   return (
     <ViewSpaceContextProvider
+      getRolesAPIClient={getRolesAPIClient}
       spacesManager={spacesManager}
       serverBasePath={props.serverBasePath}
       navigateToUrl={navigateToUrl}
