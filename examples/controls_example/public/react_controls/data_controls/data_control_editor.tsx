@@ -81,11 +81,13 @@ const CompatibleControlTypesComponent = ({
   selectedControlType?: string;
   setSelectedControlType: (type: string) => void;
 }) => {
-  const dataControlFactories = getAllControlTypes()
-    .map((type) => getControlFactory(type))
-    .filter((factory) => {
-      return isDataControlFactory(factory);
-    });
+  const dataControlFactories = useMemo(() => {
+    return getAllControlTypes()
+      .map((type) => getControlFactory(type))
+      .filter((factory) => {
+        return isDataControlFactory(factory);
+      });
+  }, []);
 
   return (
     <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
