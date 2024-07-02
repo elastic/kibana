@@ -20,10 +20,10 @@ import { useProfileAccessor } from '../../context_awareness';
  * @constructor
  */
 export const DiscoverGrid: React.FC<UnifiedDataTableProps> = (props) => {
-  const getRowIndicatorColorAccessor = useProfileAccessor('getRowIndicatorColor');
+  const setRowIndicatorColorAccessor = useProfileAccessor('setRowIndicatorColor');
   const getRowIndicatorColor = useMemo(() => {
-    return getRowIndicatorColorAccessor(undefined);
-  }, [getRowIndicatorColorAccessor]);
+    return setRowIndicatorColorAccessor(() => undefined)({ dataView: props.dataView });
+  }, [setRowIndicatorColorAccessor, props.dataView]);
 
   return (
     <UnifiedDataTable

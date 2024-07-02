@@ -18,12 +18,23 @@ import {
 } from '../../profiles';
 import { ProfileProviderServices } from '../profile_provider_services';
 
+const LOG_LEVEL_FIELDS = ['log.level', 'log_level'];
+
 export const createLogsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): DataSourceProfileProvider => ({
   profileId: 'logs-data-source-profile',
   profile: {
-    getRowIndicatorColor: () => getRowIndicatorColor,
+    setRowIndicatorColor:
+      () =>
+      ({ dataView }) => {
+        // Check if the data view has any of the log level fields.
+        if (!LOG_LEVEL_FIELDS.some((field) => dataView.getFieldByName(field))) {
+          // Otherwise, don't set the row indicator color so the color indicator control column is not added to the grid at all.
+          return undefined;
+        }
+        return getRowIndicatorColor;
+      },
   },
   resolve: (params) => {
     const indexPattern = extractIndexPatternFrom(params);
@@ -54,7 +65,10 @@ const extractIndexPatternFrom = ({
 };
 
 const getRowIndicatorColor: UnifiedDataTableProps['getRowIndicatorColor'] = (row, euiTheme) => {
-  const logLevel = row.flattened['log.level'] || row.flattened.log_level;
+  const logLevel = LOG_LEVEL_FIELDS.reduce((acc: unknown, field) => {
+    return acc || row.flattened[field];
+  }, undefined);
+
   const logLevelCoalescedValue = getLogLevelCoalescedValue(logLevel);
 
   if (logLevelCoalescedValue) {
