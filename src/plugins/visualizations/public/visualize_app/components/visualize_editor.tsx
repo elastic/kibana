@@ -13,6 +13,7 @@ import { useParams } from 'react-router-dom';
 import { parse } from 'query-string';
 import './visualize_editor.scss';
 
+import { decode } from '@kbn/rison';
 import { Query } from '@kbn/es-query';
 import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
 import { DefaultEditor } from '@kbn/vis-default-editor-plugin/public';
@@ -30,6 +31,7 @@ import {
 import { useInitialVisState } from '../utils/use/use_initial_vis_state';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { useVisEditorBreadcrumbs } from '../utils/use/use_vis_editor_breadcrumbs';
+import { PersistedState } from '../../persisted_state';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
@@ -42,6 +44,12 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
   const { search } = services.history.location;
   const searchParams = useMemo(() => parse(search), [search]);
+  const uiState = useMemo(() => {
+    const uiStateFromURL = searchParams._a
+      ? (decode(searchParams._a as string) as Record<string, any>)?.uiState ?? {}
+      : {};
+    return new PersistedState(uiStateFromURL);
+  }, [searchParams]);
 
   const {
     timefilter: { timefilter },
@@ -152,6 +160,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
           filters={filterManager.getFilters()}
           query={queryString.getQuery() as Query}
           dataView={currentAppState?.dataView}
+          uiState={uiState}
         />
       </EuiErrorBoundary>
     </VisualizeEditorCommon>

@@ -44,3 +44,4 @@ export {
   type TrackContentfulRender,
   type TracksQueryPerformance,
 } from './interfaces/performance_trackers';
+export { apiPublishesDataView, type PublishesDataView } from './interfaces/publishes_data_view';
