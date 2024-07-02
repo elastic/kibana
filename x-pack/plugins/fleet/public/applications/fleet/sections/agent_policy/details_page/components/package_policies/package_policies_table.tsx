@@ -144,7 +144,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
             {canUseMultipleAgentPolicies &&
               canReadAgentPolicies &&
-              canWriteIntegrationPolicies &&
+              canReadIntegrationPolicies &&
               getSharedPoliciesNumber(packagePolicy) > 1 && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
@@ -163,9 +163,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                       className="eui-textNoWrap"
                     >
                       <FormattedMessage
-                        id="xpack.fleet.fleetServerSetup.sharedText"
+                        id="xpack.fleet.agentPolicyList.agentsColumn.sharedText"
                         defaultMessage="Shared"
-                      />
+                      />{' '}
                       <EuiIcon type="iInCircle" />
                     </EuiText>
                   </EuiToolTip>
