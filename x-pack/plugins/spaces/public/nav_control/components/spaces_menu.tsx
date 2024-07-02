@@ -31,6 +31,7 @@ import { ManageSpacesButton } from './manage_spaces_button';
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import { SpaceSolutionBadge } from '../../space_solution_badge';
 
 const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
@@ -46,6 +47,7 @@ interface Props {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   readonly activeSpace: Space | null;
+  isSolutionNavEnabled: boolean;
 }
 class SpacesMenuUI extends Component<Props> {
   public render() {
@@ -99,7 +101,7 @@ class SpacesMenuUI extends Component<Props> {
           noMatchesMessage={noSpacesMessage}
           options={spaceOptions}
           singleSelection={'always'}
-          style={{ width: 300 }}
+          style={{ minWidth: 300, maxWidth: 320 }}
           onChange={this.spaceSelectionChange}
           listProps={{
             rowHeight: 40,
@@ -136,6 +138,9 @@ class SpacesMenuUI extends Component<Props> {
             <LazySpaceAvatar space={space} size={'s'} announceSpaceName={false} />
           </Suspense>
         ),
+        ...(this.props.isSolutionNavEnabled && {
+          append: <SpaceSolutionBadge solution={space.solution} />,
+        }),
         checked: this.props.activeSpace?.id === space.id ? 'on' : undefined,
         'data-test-subj': `${space.id}-selectableSpaceItem`,
         className: 'selectableSpaceItem',

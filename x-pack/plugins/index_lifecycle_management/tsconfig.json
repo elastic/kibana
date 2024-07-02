@@ -41,6 +41,7 @@
     "@kbn/index-management",
     "@kbn/react-kibana-context-render",
     "@kbn/airdrops",
+    "@kbn/unsaved-changes-prompt",
   ],
   "exclude": [
     "target/**/*",

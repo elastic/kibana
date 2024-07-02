@@ -100,6 +100,7 @@ export function getIndexManagementDependencies({
     url,
     docLinks,
     kibanaVersion,
+    overlays: core.overlays,
   };
 }
 

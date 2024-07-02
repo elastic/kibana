@@ -16,7 +16,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  describe('URL capture', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/186675
+  describe.skip('URL capture', function () {
     this.tags('includeFirefox');
 
     before(async () => {

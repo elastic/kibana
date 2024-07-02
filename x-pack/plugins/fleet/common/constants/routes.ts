@@ -36,6 +36,8 @@ export const EPM_API_ROUTES = {
   INSTALL_BY_UPLOAD_PATTERN: EPM_PACKAGES_MANY,
   CUSTOM_INTEGRATIONS_PATTERN: `${EPM_API_ROOT}/custom_integrations`,
   DELETE_PATTERN: EPM_PACKAGES_ONE,
+  INSTALL_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
+  DELETE_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
@@ -208,6 +210,15 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   CREATE_PATTERN: `${API_ROOT}/agent_download_sources`,
   UPDATE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
+};
+
+export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
+
+// Fleet debug routes
+export const FLEET_DEBUG_ROUTES = {
+  INDEX_PATTERN: `${INTERNAL_ROOT}/debug/index`,
+  SAVED_OBJECTS_PATTERN: `${INTERNAL_ROOT}/debug/saved_objects`,
+  SAVED_OBJECT_NAMES_PATTERN: `${INTERNAL_ROOT}/debug/saved_object_names`,
 };
 
 // API versioning constants

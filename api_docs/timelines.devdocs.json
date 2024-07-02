@@ -1481,6 +1481,30 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
@@ -1510,11 +1534,7 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -1525,30 +1545,6 @@
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
           },
           {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
           },
@@ -1595,14 +1591,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
           },
           {
             "plugin": "securitySolution",
@@ -1614,6 +1602,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
           },
           {
@@ -1622,11 +1618,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
           },
           {
             "plugin": "securitySolution",
@@ -1685,45 +1681,6 @@
             "tags": [],
             "label": "aggregatable",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.category",
-            "type": "string",
-            "tags": [],
-            "label": "category",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.description",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.example",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "example",
-            "description": [],
-            "signature": [
-              "string | number | null"
-            ],
             "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3979,6 +3936,34 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
@@ -4060,14 +4045,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
           },
           {
@@ -4135,34 +4112,6 @@
             "path": "x-pack/plugins/security_solution/public/common/containers/source/mock.ts"
           },
           {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/sourcerer/store/model.ts"
           },
@@ -4224,42 +4173,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
           },
           {
@@ -4300,6 +4213,38 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
           },
           {
@@ -4308,15 +4253,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/index.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4444,19 +4393,11 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
+            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
           },
           {
             "plugin": "securitySolution",
