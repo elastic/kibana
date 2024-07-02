@@ -12,24 +12,23 @@ import { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SearchSource } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { PublishesSavedSearch } from '@kbn/discover-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { LicenseCheckState } from '@kbn/licensing-plugin/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
-import {
-  ActionContext,
-  type PanelActionDependencies,
-  ReportingCsvPanelAction,
-} from './get_csv_panel_action';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { BehaviorSubject } from 'rxjs';
+import { ReportingCsvPanelAction, type PanelActionDependencies } from './get_csv_panel_action';
 
 const core = coreMock.createSetup();
 let apiClient: ReportingAPIClient;
 
 describe('GetCsvReportPanelAction', () => {
   let csvConfig: ClientConfigType['csv'];
-  let context: ActionContext;
+  let context: EmbeddableApiContext;
   let mockLicenseState: LicenseCheckState;
   let mockSearchSource: SearchSource;
   let mockStartServicesPayload: [CoreStart, PanelActionDependencies, unknown];
@@ -93,9 +92,7 @@ describe('GetCsvReportPanelAction', () => {
     context = {
       embeddable: {
         type: 'search',
-        getSavedSearch: () => {
-          return { searchSource: mockSearchSource };
-        },
+        savedSearch$: new BehaviorSubject({ searchSource: mockSearchSource }),
         getTitle: () => `The Dude`,
         getInspectorAdapters: () => null,
         getInput: () => ({
@@ -106,8 +103,11 @@ describe('GetCsvReportPanelAction', () => {
           },
         }),
         hasTimeRange: () => true,
+        parentApi: {
+          viewMode: new BehaviorSubject('view'),
+        },
       },
-    } as unknown as ActionContext;
+    } as EmbeddableApiContext;
   });
 
   afterEach(() => {
@@ -145,12 +145,10 @@ describe('GetCsvReportPanelAction', () => {
       getField: jest.fn((name) => (name === 'index' ? dataViewMock : undefined)),
       getSerializedFields: jest.fn().mockImplementation(() => ({ testData: 'testDataValue' })),
     } as unknown as SearchSource;
-    context.embeddable.getSavedSearch = () => {
-      return {
-        searchSource: mockSearchSource,
-        columns: ['column_a', 'column_b'],
-      } as unknown as SavedSearch;
-    };
+    (context.embeddable as PublishesSavedSearch).savedSearch$ = new BehaviorSubject({
+      searchSource: mockSearchSource,
+      columns: ['column_a', 'column_b'],
+    } as unknown as SavedSearch);
 
     const panel = new ReportingCsvPanelAction({
       core,

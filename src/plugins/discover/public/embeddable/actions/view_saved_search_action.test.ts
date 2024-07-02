@@ -6,34 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { ContactCardEmbeddable } from '@kbn/embeddable-plugin/public/lib/test_samples';
-import { ViewSavedSearchAction } from './view_saved_search_action';
-import { SavedSearchEmbeddable } from './saved_search_embeddable';
-import { createStartContractMock } from '../__mocks__/start_contract';
-import { discoverServiceMock } from '../__mocks__/services';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { SavedSearch } from '@kbn/saved-search-plugin/common';
 import { BehaviorSubject } from 'rxjs';
+
+import { discoverServiceMock } from '../../__mocks__/services';
+import { createStartContractMock } from '../../__mocks__/start_contract';
+import { SearchEmbeddableApi } from '../types';
+import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
+import { ViewSavedSearchAction } from './view_saved_search_action';
 
 const applicationMock = createStartContractMock();
 const services = discoverServiceMock;
-const searchInput = {
-  timeRange: {
-    from: '2021-09-15',
-    to: '2021-09-16',
+
+const compatibleEmbeddableApi: SearchEmbeddableApi = {
+  type: SEARCH_EMBEDDABLE_TYPE,
+  savedSearch$: new BehaviorSubject({
+    searchSource: { getField: jest.fn() },
+  } as unknown as SavedSearch),
+  parentApi: {
+    viewMode: new BehaviorSubject('view'),
   },
-  id: '1',
-  savedObjectId: 'mock-saved-object-id',
-  viewMode: ViewMode.VIEW,
-};
-const executeTriggerActions = async (triggerId: string, context: object) => {
-  return Promise.resolve(undefined);
-};
-const embeddableConfig = {
-  editable: true,
-  services,
-  executeTriggerActions,
-};
+} as unknown as SearchEmbeddableApi;
 
 jest
   .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
@@ -42,47 +37,33 @@ jest
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
-    const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
-    expect(await action.isCompatible({ embeddable })).toBe(true);
+    expect(await action.isCompatible({ embeddable: compatibleEmbeddableApi })).toBe(true);
   });
 
   it('is not compatible when embeddable not of type saved search', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
-    const embeddable = new ContactCardEmbeddable(
-      {
-        id: '123',
-        firstName: 'sue',
-        viewMode: ViewMode.EDIT,
-      },
-      {
-        execAction: () => Promise.resolve(undefined),
-      }
-    );
     expect(
       await action.isCompatible({
-        embeddable,
+        embeddable: { ...compatibleEmbeddableApi, type: 'CONTACT_CARD_EMBEDDABLE' },
       })
     ).toBe(false);
   });
 
   it('is not visible when in edit mode', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
-    const input = { ...searchInput, viewMode: ViewMode.EDIT };
-    const embeddable = new SavedSearchEmbeddable(embeddableConfig, input);
     expect(
       await action.isCompatible({
-        embeddable,
+        embeddable: { ...compatibleEmbeddableApi, viewMode: new BehaviorSubject(ViewMode.EDIT) },
       })
     ).toBe(false);
   });
 
   it('execute navigates to a saved search', async () => {
     const action = new ViewSavedSearchAction(applicationMock, services.locator);
-    const embeddable = new SavedSearchEmbeddable(embeddableConfig, searchInput);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    await action.execute({ embeddable });
+    await action.execute({ embeddable: compatibleEmbeddableApi });
     expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
-      getDiscoverLocatorParams(embeddable)
+      getDiscoverLocatorParams(compatibleEmbeddableApi)
     );
   });
 });
