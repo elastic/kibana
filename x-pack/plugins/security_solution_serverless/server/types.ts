@@ -25,6 +25,7 @@ import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
+import type { ResourceSubtypeCounter } from './cloud_security/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -76,6 +77,7 @@ export interface UsageSource {
 
 export interface UsageSourceMetadata {
   tier?: Tier;
+  resource_sub_type_count?: ResourceSubtypeCounter;
 }
 
 export type Tier = ProductTier | 'none';
