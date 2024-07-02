@@ -19,8 +19,6 @@ interface PipelineGenerationProps {
   connector: State['connector'];
 }
 
-export type ProgressItem = 'build' | 'install';
-
 export const useDeployIntegration = ({
   integrationSettings,
   result,

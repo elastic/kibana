@@ -14,6 +14,7 @@ import type {
   CustomRequestHandlerContext,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
+import { MINIMUM_LICENSE_TYPE } from '../common/constants';
 import { registerRoutes } from './routes';
 import type {
   IntegrationAssistantPluginSetup,
@@ -79,7 +80,7 @@ export class IntegrationAssistantPlugin
     const { licensing } = dependencies;
 
     licensing.license$.subscribe((license) => {
-      this.hasLicense = license.hasAtLeast('enterprise');
+      this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
     });
 
     return {};
