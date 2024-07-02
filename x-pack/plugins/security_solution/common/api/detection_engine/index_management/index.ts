@@ -9,4 +9,4 @@ export * from './create_index/create_index.gen';
 export * from './delete_index/delete_index.gen';
 export * from './read_alerts_index_exists/read_alerts_index_exists_route';
 export * from './read_index/read_index.gen';
-export * from './read_privileges/read_privileges_route';
+export * from './read_privileges/read_privileges.gen';
