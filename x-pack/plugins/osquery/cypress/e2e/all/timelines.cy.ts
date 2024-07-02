@@ -23,7 +23,7 @@ describe('ALL - Timelines', { tags: ['@ess'] }, () => {
       cy.getBySel('timeline-bottom-bar-title-button').click();
     });
     cy.getBySel('timelineQueryInput').type(
-      'NOT host.name: "dev-fleet-server.8220"{enter} and component.type: "osquery"'
+      'NOT host.name: "dev-fleet-server*"{enter} and component.type: "osquery"'
     );
     // Filter out alerts
     cy.getBySel('timeline-sourcerer-trigger').click();
