@@ -113,7 +113,7 @@ export class SecuritySolutionServerlessPlugin
     this.cloudSecurityUsageReportingTask
       ?.start({
         taskManager: pluginsSetup.taskManager,
-        interval: cloudSecurityMetringTaskProperties.interval,
+        interval: this.config.cloudSecurityUsageReportingTaskInterval,
       })
       .catch(() => {});
 
