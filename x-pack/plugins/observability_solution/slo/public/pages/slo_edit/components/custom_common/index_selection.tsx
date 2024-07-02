@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { DataView, DataViewLazy } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
@@ -104,19 +104,18 @@ export function IndexSelection({ selectedDataView }: { selectedDataView?: DataVi
             onDataViewCreated={() => {
               dataViewEditor.openEditor({
                 allowAdHocDataView: true,
-                onSave: async (dataViewLazy: DataViewLazy) => {
-                  if (!dataViewLazy.isPersisted()) {
-                    const dataView = await dataViewsService.toDataView(dataViewLazy);
+                onSave: (dataView: DataView) => {
+                  if (!dataView.isPersisted()) {
                     setAdHocDataViews([...adHocDataViews, dataView]);
-                    field.onChange(dataViewLazy.id);
-                    setValue(INDEX_FIELD, dataViewLazy.getIndexPattern());
+                    field.onChange(dataView.id);
+                    setValue(INDEX_FIELD, dataView.getIndexPattern());
                   } else {
                     refetch();
-                    field.onChange(dataViewLazy.id);
-                    setValue(INDEX_FIELD, dataViewLazy.getIndexPattern());
+                    field.onChange(dataView.id);
+                    setValue(INDEX_FIELD, dataView.getIndexPattern());
                   }
-                  if (dataViewLazy.timeFieldName) {
-                    setValue(TIMESTAMP_FIELD, dataViewLazy.timeFieldName);
+                  if (dataView.timeFieldName) {
+                    setValue(TIMESTAMP_FIELD, dataView.timeFieldName);
                   }
                 },
               });

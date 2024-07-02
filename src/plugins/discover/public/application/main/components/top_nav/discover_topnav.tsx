@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { DataViewType, type DataViewLazy } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
@@ -120,14 +120,12 @@ export const DiscoverTopNav = ({
   }, [dataViewEditor, stateContainer]);
 
   const onEditDataView = useCallback(
-    async (editedDataView: DataViewLazy) => {
+    async (editedDataView: DataView) => {
       if (editedDataView.isPersisted()) {
         // Clear the current data view from the cache and create a new instance
         // of it, ensuring we have a new object reference to trigger a re-render
         dataViews.clearInstanceCache(editedDataView.id);
-        stateContainer.actions.setDataView(
-          await dataViews.create(await editedDataView.toSpec(), true)
-        );
+        stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
       } else {
         await stateContainer.actions.updateAdHocDataViewId();
       }

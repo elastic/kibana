@@ -31,11 +31,11 @@ export function getDataViewAppState(
 
   if (modifyColumns) {
     const currentUnknownColumns = columns.filter(
-      (column) => !currentDataView.getFieldByName(column) && !defaultColumns.includes(column)
+      (column) => !currentDataView.fields.getByName(column) && !defaultColumns.includes(column)
     );
     const currentColumnsRefreshed = uniq([...columns, ...defaultColumns]);
     columns = currentColumnsRefreshed.filter(
-      (column) => nextDataView.getFieldByName(column) || currentUnknownColumns.includes(column)
+      (column) => nextDataView.fields.getByName(column) || currentUnknownColumns.includes(column)
     );
   }
 

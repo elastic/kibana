@@ -30,7 +30,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AggregateQuery, getLanguageDisplayName } from '@kbn/es-query';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
-import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { type DataViewPickerPropsExtended } from './data_view_picker';
 import type { DataViewListItemEnhanced } from './dataview_list';
@@ -55,7 +55,7 @@ export const TextBasedLanguagesTransitionModal = (
   </React.Suspense>
 );
 
-const mapAdHocDataView = (adHocDataView: DataView | DataViewLazy): DataViewListItemEnhanced => {
+const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => {
   return {
     title: adHocDataView.title,
     name: adHocDataView.name,
@@ -198,7 +198,7 @@ export function ChangeDataView({
             data-test-subj="indexPattern-manage-field"
             onClick={async () => {
               if (onEditDataView) {
-                const dataView = await dataViews.getDataViewLazy(currentDataViewId!);
+                const dataView = await dataViews.get(currentDataViewId!);
                 dataViewEditor.openEditor({
                   editData: dataView,
                   onSave: (updatedDataView) => {

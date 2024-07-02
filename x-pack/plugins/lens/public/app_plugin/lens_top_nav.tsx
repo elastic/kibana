@@ -946,18 +946,17 @@ export const LensTopNavMenu = ({
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
-      onSave: async (dataViewLazy) => {
-        if (dataViewLazy.id) {
+      onSave: async (dataView) => {
+        if (dataView.id) {
           if (isOnTextBasedMode) {
             dispatch(
               switchAndCleanDatasource({
                 newDatasourceId: 'formBased',
                 visualizationId: visualization?.activeId,
-                currentIndexPatternId: dataViewLazy?.id,
+                currentIndexPatternId: dataView?.id,
               })
             );
           }
-          const dataView = await dataViewsService.toDataView(dataViewLazy);
           dispatchChangeIndexPattern(dataView);
           setCurrentIndexPattern(dataView);
         }
@@ -970,7 +969,6 @@ export const LensTopNavMenu = ({
     dispatchChangeIndexPattern,
     isOnTextBasedMode,
     visualization?.activeId,
-    dataViewsService,
   ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
@@ -1055,9 +1053,8 @@ export const LensTopNavMenu = ({
         // update list of index patterns to pick up mutations in the changed data view
         setCurrentIndexPattern(updatedCurrentIndexPattern);
       } else {
-        const dataView = await data.dataViews.toDataView(updatedDataViewStub);
         // if it was an ad-hoc data view, we need to switch to a new data view anyway
-        indexPatternService.replaceDataViewId(dataView);
+        indexPatternService.replaceDataViewId(updatedDataViewStub);
       }
     },
   };

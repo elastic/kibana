@@ -42,10 +42,15 @@ export interface DataViewEditorContext {
 /** @public */
 export interface DataViewEditorProps {
   /**
-   * Handler for the "save" footer button
-   * @param indexPattern - newly created index pattern
+   * Handler for the "save" footer button, returning DataView
+   * @param dataView - newly created index pattern
    */
-  onSave: (dataView: DataViewLazy) => void;
+  onSave?: (dataView: DataView) => void;
+  /**
+   * Handler for the "save" footer button, returning DataViewLazy
+   * @param dataView - newly created index pattern
+   */
+  onSaveLazy?: (dataView: DataViewLazy) => void;
   /**
    * Handler for the "cancel" footer button
    */

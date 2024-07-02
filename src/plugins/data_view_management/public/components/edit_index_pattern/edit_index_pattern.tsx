@@ -177,7 +177,7 @@ export const EditIndexPattern = withRouter(
       dataViews.getRollupsEnabled();
     const displayIndexPatternEditor = showEditDialog ? (
       <IndexPatternEditor
-        onSave={async (saveResponse) => {
+        onSaveLazy={async (saveResponse) => {
           const fieldMap = (await saveResponse.getFields({ fieldName: ['*'] })).getFieldMapSorted();
           setFields(Object.values(fieldMap));
           setShowEditDialog(false);

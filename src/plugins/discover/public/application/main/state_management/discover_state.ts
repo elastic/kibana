@@ -19,12 +19,7 @@ import {
   noSearchSessionStorageCapabilityMessage,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
-import {
-  DataView,
-  DataViewSpec,
-  DataViewType,
-  type DataViewLazy,
-} from '@kbn/data-views-plugin/public';
+import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
@@ -173,12 +168,12 @@ export interface DiscoverStateContainer {
      * Triggered when a new data view is created
      * @param dataView
      */
-    onDataViewCreated: (dataView: DataViewLazy) => Promise<void>;
+    onDataViewCreated: (dataView: DataView) => Promise<void>;
     /**
      * Triggered when a new data view is edited
      * @param dataView
      */
-    onDataViewEdited: (dataView: DataViewLazy) => Promise<void>;
+    onDataViewEdited: (dataView: DataView) => Promise<void>;
     /**
      * Triggered when a saved search is opened in the savedObject finder
      * @param savedSearchId
@@ -357,25 +352,23 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const onDataViewCreated = async (nextDataView: DataViewLazy) => {
-    const legacyDataView = await services.dataViews.toDataView(nextDataView);
+  const onDataViewCreated = async (nextDataView: DataView) => {
     if (!nextDataView.isPersisted()) {
-      internalStateContainer.transitions.appendAdHocDataViews(legacyDataView);
+      internalStateContainer.transitions.appendAdHocDataViews(nextDataView);
     } else {
       await loadDataViewList();
     }
     if (nextDataView.id) {
-      await onChangeDataView(legacyDataView);
+      await onChangeDataView(nextDataView);
     }
   };
 
-  const onDataViewEdited = async (editedDataView: DataViewLazy) => {
-    const legacyDataView = await services.dataViews.toDataView(editedDataView);
+  const onDataViewEdited = async (editedDataView: DataView) => {
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
       services.dataViews.clearInstanceCache(editedDataView.id);
-      setDataView(await services.dataViews.create(legacyDataView.toSpec(), true));
+      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
     } else {
       await updateAdHocDataViewId();
     }
