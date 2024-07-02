@@ -14,9 +14,8 @@ const TEST_SUBJ = Object.freeze({
   actionLogFlyout: 'responderActionLogFlyout',
 });
 
-// TODO: 8.15 Include `scan` in return type when responseActionsScanEnabled when `scan` is categorized in PLIs
 export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
-  Exclude<ConsoleResponseActionCommands, 'scan'>,
+  ConsoleResponseActionCommands,
   string
 > => {
   return {
@@ -28,8 +27,7 @@ export const getConsoleHelpPanelResponseActionTestSubj = (): Record<
     'get-file': 'endpointResponseActionsConsole-commandList-Responseactions-get-file',
     execute: 'endpointResponseActionsConsole-commandList-Responseactions-execute',
     upload: 'endpointResponseActionsConsole-commandList-Responseactions-upload',
-    // TODO: 8.15 Include `scan` in return type when responseActionsScanEnabled when `scan` is categorized in PLIs
-    // scan: 'endpointResponseActionsConsole-commandList-Responseactions-scan',
+    scan: 'endpointResponseActionsConsole-commandList-Responseactions-scan',
   };
 };
 
