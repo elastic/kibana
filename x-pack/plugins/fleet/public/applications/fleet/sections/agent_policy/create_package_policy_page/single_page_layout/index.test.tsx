@@ -801,7 +801,7 @@ describe('When on the package policy create page', () => {
         (sendCreatePackagePolicy as jest.MockedFunction<any>).mockResolvedValue({
           data: { item: { id: 'policy-1', inputs: [], policy_ids: ['agentless-policy-1'] } },
         });
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true } as any);
         (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
           getMockPackageInfo({ requiresRoot: false, dataStreamRequiresRoot: false })
         );
