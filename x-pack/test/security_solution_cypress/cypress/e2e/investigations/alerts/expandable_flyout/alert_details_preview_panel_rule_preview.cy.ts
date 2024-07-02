@@ -120,7 +120,7 @@ describe(
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER).should('be.visible');
         cy.get(DOCUMENT_DETAILS_FLYOUT_RULE_PREVIEW_FOOTER_LINK).should(
           'contain.text',
-          'Show rule details'
+          'Show full rule details'
         );
       });
     });
