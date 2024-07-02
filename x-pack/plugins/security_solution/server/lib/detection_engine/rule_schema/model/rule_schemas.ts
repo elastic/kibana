@@ -8,7 +8,6 @@ import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import type {
   RuleActionArrayCamel,
   RuleActionNotifyWhen,
-  RuleActionThrottle,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EQL_RULE_TYPE_ID,
@@ -25,6 +24,7 @@ import * as z from 'zod';
 import { RuleResponseAction } from '../../../../../common/api/detection_engine';
 import type {
   IsRuleEnabled,
+  RuleActionThrottle,
   RuleName,
   RuleTagArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
