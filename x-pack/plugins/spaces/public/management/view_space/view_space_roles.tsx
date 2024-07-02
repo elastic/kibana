@@ -49,6 +49,7 @@ interface Props {
   space: Space;
   roles: Role[];
   features: KibanaFeature[];
+  isReadOnly: boolean;
 }
 
 const filterRolesAssignedToSpace = (roles: Role[], space: Space) => {
@@ -63,7 +64,7 @@ const filterRolesAssignedToSpace = (roles: Role[], space: Space) => {
   );
 };
 
-export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) => {
+export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isReadOnly }) => {
   const [showRolesPrivilegeEditor, setShowRolesPrivilegeEditor] = useState(false);
 
   const rolesAPIClient = useRef<RolesAPIClient>();
@@ -75,8 +76,10 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) =>
       rolesAPIClient.current = await getRolesAPIClient();
     }
 
-    resolveRolesAPIClient();
-  }, [getRolesAPIClient]);
+    if (!isReadOnly) {
+      resolveRolesAPIClient();
+    }
+  }, [getRolesAPIClient, isReadOnly]);
 
   const getRowProps = (item: Role) => {
     const { name } = item;
@@ -113,7 +116,10 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) =>
         });
       },
     },
-    {
+  ];
+
+  if (!isReadOnly) {
+    columns.push({
       name: 'Actions',
       actions: [
         {
@@ -129,8 +135,8 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) =>
           },
         },
       ],
-    },
-  ];
+    });
+  }
 
   const rolesInUse = filterRolesAssignedToSpace(roles, space);
 
@@ -168,17 +174,19 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) =>
                 </p>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false} color="primary">
-              <EuiButton
-                onClick={() => {
-                  setShowRolesPrivilegeEditor(true);
-                }}
-              >
-                {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign', {
-                  defaultMessage: 'Assign role',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+            {!isReadOnly && (
+              <EuiFlexItem grow={false} color="primary">
+                <EuiButton
+                  onClick={() => {
+                    setShowRolesPrivilegeEditor(true);
+                  }}
+                >
+                  {i18n.translate('xpack.spaces.management.spaceDetails.roles.assign', {
+                    defaultMessage: 'Assign role',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -195,19 +203,30 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features }) =>
   );
 };
 
-interface PrivilegesRolesFormProps extends Props {
+interface PrivilegesRolesFormProps extends Omit<Props, 'isReadOnly'> {
   closeFlyout: () => void;
   onSaveClick: () => void;
   roleAPIClient: RolesAPIClient;
 }
 
+const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOption<string>> =>
+  roles.map((role) => ({
+    label: role.name,
+  }));
+
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const { roles, onSaveClick, closeFlyout, features, roleAPIClient } = props;
 
   const [space, setSpaceState] = useState(props.space);
+  const [selectedRoles, setSelectedRoles] = useState(
+    createRolesComboBoxOptions(filterRolesAssignedToSpace(roles, space))
+  );
 
-  const [selectedRoles, setSelectedRoles] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [spacePrivilege, setSpacePrivilege] = useState<'all' | 'read' | 'custom'>('all');
+
+  const assignRolesToSpace = useCallback(() => {
+    onSaveClick();
+  }, [onSaveClick]);
 
   const getForm = () => {
     return (
@@ -219,9 +238,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
               values: { spaceName: space.name },
             })}
             placeholder="Select roles"
-            options={roles.map((role) => ({
-              label: role.name,
-            }))}
+            options={createRolesComboBoxOptions(roles)}
             selectedOptions={selectedRoles}
             onChange={(value) => {
               setSelectedRoles(value);
@@ -289,7 +306,7 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                 </p>
               </EuiText>
               <EuiSpacer />
-              <FeatureTable space={space} features={features} />
+              <FeatureTable space={space} features={features} onChange={setSpaceState} />
             </>
           </EuiFormRow>
         )}
@@ -299,7 +316,11 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
   const getSaveButton = () => {
     return (
-      <EuiButton onClick={onSaveClick} fill data-test-subj={'createRolesPrivilegeButton'}>
+      <EuiButton
+        fill
+        onClick={() => assignRolesToSpace()}
+        data-test-subj={'createRolesPrivilegeButton'}
+      >
         {i18n.translate('xpack.spaces.management.spaceDetails.roles.assignRoleButton', {
           defaultMessage: 'Assign roles',
         })}

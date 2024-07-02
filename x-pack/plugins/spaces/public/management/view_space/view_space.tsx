@@ -42,9 +42,12 @@ const LazySpaceAvatar = lazy(() =>
   getSpaceAvatarComponent().then((component) => ({ default: component }))
 );
 
-const getSelectedTabId = (selectedTabId?: string) => {
+const getSelectedTabId = (canUserViewRoles: boolean, selectedTabId?: string) => {
   // Validation of the selectedTabId routing parameter, default to the Content tab
-  return selectedTabId && [TAB_ID_FEATURES, TAB_ID_ROLES].includes(selectedTabId)
+  return selectedTabId &&
+    [TAB_ID_FEATURES, canUserViewRoles ? TAB_ID_ROLES : null]
+      .filter(Boolean)
+      .includes(selectedTabId)
     ? selectedTabId
     : TAB_ID_CONTENT;
 };
@@ -81,7 +84,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     getRolesAPIClient,
   } = props;
 
-  const selectedTabId = getSelectedTabId(_selectedTabId);
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
   const [features, setFeatures] = useState<KibanaFeature[] | null>(null);
@@ -89,8 +91,15 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [isLoadingSpace, setIsLoadingSpace] = useState(true);
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
-  const [tabs, selectedTabContent] = useTabs(space, features, roles, selectedTabId);
   const [isSolutionNavEnabled, setIsSolutionNavEnabled] = useState(false);
+  const selectedTabId = getSelectedTabId(Boolean(capabilities?.roles?.view), _selectedTabId);
+  const [tabs, selectedTabContent] = useTabs({
+    space,
+    features,
+    roles,
+    capabilities,
+    currentSelectedTabId: selectedTabId,
+  });
 
   useEffect(() => {
     if (!spaceId) {
