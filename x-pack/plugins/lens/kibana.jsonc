@@ -57,6 +57,7 @@
       "fieldFormats",
       "charts",
       "textBasedLanguages",
+      "esqlDataGrid",
     ],
     "extraPublicDirs": [
       "common/constants"

@@ -65,6 +65,7 @@ export async function executeEditAction({
           if (overlayTracker) overlayTracker.clearOverlays();
           overlayRef.close();
         },
+        isResizable: true,
         outsideClickCloses: true,
       }
     );
