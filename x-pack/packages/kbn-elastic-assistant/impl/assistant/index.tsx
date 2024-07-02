@@ -182,7 +182,7 @@ const AssistantComponent: React.FC<Props> = ({
     isFetched: isFetchedAnonymizationFields,
   } = useFetchAnonymizationFields();
 
-  const { data: allPrompts } = useFetchPrompts();
+  const { data: allPrompts, refetch: refetchPrompts } = useFetchPrompts();
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({
@@ -642,6 +642,7 @@ const AssistantComponent: React.FC<Props> = ({
                 setSelectedPromptContexts={setSelectedPromptContexts}
                 isFlyoutMode={isFlyoutMode}
                 allSystemPrompts={allPrompts.data}
+                refetchPrompts={refetchPrompts}
               />
             </ModalPromptEditorWrapper>
           )}
@@ -649,6 +650,7 @@ const AssistantComponent: React.FC<Props> = ({
     ),
     [
       getComments,
+      refetchPrompts,
       abortStream,
       currentConversation,
       showAnonymizedValues,
@@ -962,6 +964,7 @@ const AssistantComponent: React.FC<Props> = ({
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
                     isAssistantEnabled={isAssistantEnabled}
+                    refetchPrompts={refetchPrompts}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -1132,6 +1135,7 @@ const AssistantComponent: React.FC<Props> = ({
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
             allPrompts={allPrompts.data}
+            refetchPrompts={refetchPrompts}
           />
         )}
 

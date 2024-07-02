@@ -14,6 +14,7 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
@@ -42,6 +43,9 @@ interface OwnProps {
   conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
   allPrompts: PromptResponse[];
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 type Props = OwnProps;
@@ -67,6 +71,7 @@ export const AssistantHeader: React.FC<Props> = ({
   conversationsLoaded,
   refetchConversationsState,
   allPrompts,
+  refetchPrompts,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -160,6 +165,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   conversationsLoaded={conversationsLoaded}
                   refetchConversationsState={refetchConversationsState}
                   isFlyoutMode={false}
+                  refetchPrompts={refetchPrompts}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
