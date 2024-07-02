@@ -12,7 +12,9 @@ import {
   mockSystemPrompts,
 } from '../../../../mock/system_prompt';
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { useAssistantContext } from '../../../../assistant_context';
 
+jest.mock('../../../../assistant_context');
 // Mock functions for the tests
 const mockOnSelectedSystemPromptChange = jest.fn();
 const mockSetUpdatedSystemPromptSettings = jest.fn();
@@ -22,6 +24,9 @@ const mockPreviousSystemPrompts = [...mockSystemPrompts];
 describe('useSystemPromptEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      currentAppId: 'securitySolutionUI',
+    });
   });
 
   test('should delete a system prompt by id', () => {
@@ -84,6 +89,7 @@ describe('useSystemPromptEditor', () => {
       content: '',
       name: newPromptId,
       promptType: 'system',
+      consumer: 'securitySolutionUI',
     };
 
     expect(mockOnSelectedSystemPromptChange).toHaveBeenCalledWith(newPrompt);

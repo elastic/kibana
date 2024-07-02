@@ -49,6 +49,7 @@ describe('useFetchPrompts', () => {
         query: {
           page: 1,
           per_page: 1000,
+          filter: 'consumer:*',
         },
         version: API_VERSIONS.internal.v1,
         signal: undefined,

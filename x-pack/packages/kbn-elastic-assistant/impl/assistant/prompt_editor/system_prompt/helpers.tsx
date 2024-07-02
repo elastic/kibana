@@ -11,6 +11,7 @@ import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
+import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { EMPTY_PROMPT } from './translations';
@@ -23,9 +24,30 @@ export const getOptionFromPrompt = ({
   content,
   id,
   name,
-}: PromptResponse & { showTitles?: boolean }): EuiSuperSelectOption<string> => ({
+  showTitles = false,
+  isFlyoutMode,
+}: PromptResponse & {
+  showTitles?: boolean;
+  isFlyoutMode: boolean;
+}): EuiSuperSelectOption<string> => ({
   value: id,
-  inputDisplay: name,
+  inputDisplay: isFlyoutMode ? (
+    name
+  ) : (
+    <EuiText
+      color="subdued"
+      data-test-subj="systemPromptText"
+      css={css`
+        overflow: hidden;
+        &:hover {
+          cursor: pointer;
+          text-decoration: underline;
+        }
+      `}
+    >
+      {showTitles ? name : content}
+    </EuiText>
+  ),
   dropdownDisplay: (
     <>
       <Strong data-test-subj="name">{name}</Strong>
@@ -48,5 +70,6 @@ interface GetOptionsProps {
 export const getOptions = ({
   prompts,
   showTitles = false,
+  isFlyoutMode,
 }: GetOptionsProps): Array<EuiSuperSelectOption<string>> =>
-  prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles })) ?? [];
+  prompts?.map((p) => getOptionFromPrompt({ ...p, showTitles, isFlyoutMode })) ?? [];

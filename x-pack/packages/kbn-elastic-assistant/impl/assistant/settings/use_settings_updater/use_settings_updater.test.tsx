@@ -9,11 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { DEFAULT_LATEST_ALERTS } from '../../../assistant_context/constants';
 import { alertConvo, welcomeConvo } from '../../../mock/conversation';
 import { useSettingsUpdater } from './use_settings_updater';
-import {
-  defaultSystemPrompt,
-  mockSuperheroSystemPrompt,
-  mockSystemPrompt,
-} from '../../../mock/system_prompt';
+import { defaultQuickPrompt, mockSystemPrompt } from '../../../mock/system_prompt';
 import { HttpSetup } from '@kbn/core/public';
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 
@@ -28,7 +24,7 @@ const mockHttp = {
 } as unknown as HttpSetup;
 
 const mockSystemPrompts: PromptResponse[] = [mockSystemPrompt];
-const mockQuickPrompts: PromptResponse[] = [defaultSystemPrompt];
+const mockQuickPrompts: PromptResponse[] = [defaultQuickPrompt];
 
 const anonymizationFields = {
   total: 2,
@@ -40,8 +36,6 @@ const anonymizationFields = {
   ],
 };
 
-const setAllQuickPromptsMock = jest.fn();
-const setAllSystemPromptsMock = jest.fn();
 const setAssistantStreamingEnabled = jest.fn();
 const setKnowledgeBaseMock = jest.fn();
 const reportAssistantSettingToggled = jest.fn();
@@ -58,8 +52,6 @@ const mockValues = {
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   baseConversations: {},
-  setAllQuickPrompts: setAllQuickPromptsMock,
-  setAllSystemPrompts: setAllSystemPromptsMock,
   setKnowledgeBase: setKnowledgeBaseMock,
   http: mockHttp,
   anonymizationFieldsBulkActions: {},
@@ -67,8 +59,18 @@ const mockValues = {
 
 const updatedValues = {
   conversations: { ...mockConversations },
-  allSystemPrompts: [mockSuperheroSystemPrompt],
-  allQuickPrompts: [{ title: 'Prompt 2', prompt: 'Prompt 2', color: 'red' }],
+  allSystemPrompts: [mockSystemPrompt],
+  allQuickPrompts: [
+    {
+      consumer: 'securitySolutionUI',
+      content:
+        'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:',
+      id: 'default-system-prompt',
+      name: 'Default system prompt',
+      promptType: 'quick',
+      color: 'red',
+    },
+  ],
   updatedAnonymizationData: {
     total: 2,
     page: 1,
@@ -104,7 +106,7 @@ describe('useSettingsUpdater', () => {
         useSettingsUpdater(
           mockConversations,
           {
-            data: mockSystemPrompts,
+            data: [...mockSystemPrompts, ...mockQuickPrompts],
             page: 1,
             perPage: 100,
             total: 10,
@@ -195,8 +197,6 @@ describe('useSettingsUpdater', () => {
           body: '{"delete":{"ids":["1"]}}',
         }
       );
-      expect(setAllQuickPromptsMock).toHaveBeenCalledWith(updatedValues.allQuickPrompts);
-      expect(setAllSystemPromptsMock).toHaveBeenCalledWith(updatedValues.allSystemPrompts);
       expect(setUpdatedAnonymizationData).toHaveBeenCalledWith(
         updatedValues.updatedAnonymizationData
       );

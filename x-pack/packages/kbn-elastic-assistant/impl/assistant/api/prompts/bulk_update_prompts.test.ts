@@ -16,14 +16,14 @@ import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/promp
 
 const prompt1 = {
   id: 'field1',
-  content: 'Prompt field 1',
+  content: 'Prompt 1',
   name: 'test',
   promptType: PromptTypeEnum.system,
 };
 const prompt2 = {
   ...prompt1,
   id: 'field2',
-  content: 'Prompt field 2',
+  content: 'Prompt 2',
   name: 'test2',
   promptType: PromptTypeEnum.system,
 };
@@ -116,7 +116,7 @@ describe('bulkUpdatePrompts', () => {
     };
     await bulkUpdatePrompts(httpMock, promptsActions, toasts as unknown as IToasts);
     expect(toasts.addError.mock.calls[0][0]).toEqual(
-      new Error('Error message: Error updating prompt for Prompt 1')
+      new Error('Error message: Error updating prompt for prompt Prompt 1')
     );
   });
 

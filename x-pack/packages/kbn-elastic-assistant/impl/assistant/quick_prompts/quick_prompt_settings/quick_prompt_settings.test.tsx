@@ -94,8 +94,11 @@ describe('QuickPromptSettings', () => {
     const customOption = {
       categories: [],
       color: '#D36086',
-      prompt: '',
-      title: 'sooper custom prompt',
+      consumer: undefined,
+      content: '',
+      id: 'sooper custom prompt',
+      name: 'sooper custom prompt',
+      promptType: 'quick',
     };
     expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([...MOCK_QUICK_PROMPTS, customOption]);
     expect(onSelectedQuickPromptChange).toHaveBeenCalledWith(customOption);
@@ -133,7 +136,7 @@ describe('QuickPromptSettings', () => {
     const previousFirstElementOfTheArray = mutatableQuickPrompts.shift();
 
     expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([
-      { ...previousFirstElementOfTheArray, prompt: 'what does this do' },
+      { ...previousFirstElementOfTheArray, content: 'what does this do' },
       ...mutatableQuickPrompts,
     ]);
   });

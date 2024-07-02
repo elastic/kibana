@@ -98,6 +98,7 @@ describe('SystemPromptSettings', () => {
     );
     fireEvent.click(getByTestId('change-sp-custom'));
     const customOption = {
+      consumer: 'test',
       content: '',
       id: 'sooper custom prompt',
       name: 'sooper custom prompt',

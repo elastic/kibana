@@ -29,12 +29,12 @@ export const assistantPromptsFieldMap: FieldMap = {
     required: false,
   },
   color: {
-    type: 'text',
+    type: 'keyword',
     array: false,
     required: false,
   },
   categories: {
-    type: 'text',
+    type: 'keyword',
     array: true,
     required: false,
   },

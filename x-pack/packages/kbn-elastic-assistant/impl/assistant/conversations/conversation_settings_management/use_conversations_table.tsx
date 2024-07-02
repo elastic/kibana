@@ -135,10 +135,10 @@ export const useConversationsTable = () => {
         });
 
         const systemPromptTitle =
-          systemPrompt?.id ||
           systemPrompt?.name ||
-          defaultSystemPrompt?.id ||
-          defaultSystemPrompt?.name;
+          systemPrompt?.id ||
+          defaultSystemPrompt?.name ||
+          defaultSystemPrompt?.id;
 
         return {
           ...conversation,

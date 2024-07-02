@@ -10,7 +10,9 @@ import { useQuickPromptEditor, DEFAULT_COLOR } from './use_quick_prompt_editor';
 import { mockAlertPromptContext } from '../../../mock/prompt_context';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { useAssistantContext } from '../../../assistant_context';
 
+jest.mock('../../../assistant_context');
 // Mock functions for the tests
 const mockOnSelectedQuickPromptChange = jest.fn();
 const mockSetUpdatedQuickPromptSettings = jest.fn();
@@ -20,6 +22,9 @@ const setPromptsBulkActions = jest.fn();
 describe('useQuickPromptEditor', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useAssistantContext as jest.Mock).mockReturnValue({
+      currentAppId: 'securitySolutionUI',
+    });
   });
 
   test('should delete a quick prompt by title', () => {
@@ -61,8 +66,9 @@ describe('useQuickPromptEditor', () => {
       content: '',
       color: DEFAULT_COLOR,
       categories: [],
-      id: '',
+      id: newPromptTitle,
       promptType: 'quick',
+      consumer: 'securitySolutionUI',
     };
 
     expect(mockOnSelectedQuickPromptChange).toHaveBeenCalledWith(newPrompt);
