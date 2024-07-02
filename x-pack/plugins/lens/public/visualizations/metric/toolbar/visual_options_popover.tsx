@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFieldNumber,
   EuiSelect,
+  EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -67,7 +68,7 @@ export const VisualOptionsPopover: FC<VisualOptionsPopoverProps> = ({ state, set
 
 type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number> | 'custom';
 
-const valueFontModes: Array<{ value: ValueFontMode; text: string }> = [
+const valueFontModes: Array<{ value: ValueFontMode } & Pick<EuiSelectOption, 'text'>> = [
   {
     value: 'default',
     text: 'Default',
