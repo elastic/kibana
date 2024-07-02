@@ -27,6 +27,7 @@
     "*/plugins/**/*",
     "*/packages/**/*",
     "*/*/packages/**/*",
+    "security_solution_api_integration/**/*"
   ],
   "kbn_references": [
     {
