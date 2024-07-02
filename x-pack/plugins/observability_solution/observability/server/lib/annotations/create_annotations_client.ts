@@ -83,7 +83,7 @@ export function createAnnotationsClient(params: {
         if (!indexExists) {
           await initIndex();
         } else {
-          updateMappings();
+          await updateMappings();
         }
 
         const annotation = {
@@ -175,7 +175,6 @@ export function createAnnotationsClient(params: {
       const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
 
       const shouldClauses: QueryDslQueryContainer[] = [];
-      const mustNotClauses: QueryDslQueryContainer[] = [];
       if (sloId) {
         shouldClauses.push({
           term: {
@@ -183,13 +182,6 @@ export function createAnnotationsClient(params: {
           },
         });
       }
-      // else {
-      //   mustNotClauses.push({
-      //     exists: {
-      //       field: 'slo.id',
-      //     },
-      //   });
-      // }
       if (sloInstanceId && sloInstanceId !== '*') {
         shouldClauses.push({
           term: {
@@ -204,13 +196,6 @@ export function createAnnotationsClient(params: {
           },
         });
       }
-      // else {
-      //   mustNotClauses.push({
-      //     exists: {
-      //       field: 'service.name',
-      //     },
-      //   });
-      // }
 
       const result = await esClient.search({
         index: readIndex,
@@ -227,9 +212,13 @@ export function createAnnotationsClient(params: {
                   },
                 },
               },
+              {
+                bool: {
+                  should: shouldClauses,
+                  minimum_should_match: 1,
+                },
+              },
             ],
-            should: shouldClauses,
-            must_not: mustNotClauses,
           },
         },
       });
