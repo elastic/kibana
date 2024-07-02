@@ -129,7 +129,7 @@ describe('When on the Event Filters list page', () => {
 
     it('should display additional `event.category is process` entry in tooltip', async () => {
       mockedContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-      const prefix = 'EventFiltersListPage-card-decorator-processDescendantIndication';
+      const prefix = 'EventFiltersListPage-card-decorator-processDescendantIndicationTooltip';
 
       await renderWithData();
 

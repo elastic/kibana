@@ -67,7 +67,7 @@ describe('EventFiltersProcessDescendantIndicator', () => {
   });
 
   it('should mention additional `event.category is process` entry in tooltip', async () => {
-    const prefix = 'test-processDescendantIndication';
+    const prefix = 'test-processDescendantIndicationTooltip';
     appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
     render({ item: PROCESS_DESCENDANT_EVENT_FILTER });
 
