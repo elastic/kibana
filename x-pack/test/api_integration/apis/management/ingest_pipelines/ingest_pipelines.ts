@@ -115,6 +115,17 @@ export default function ({ getService }: FtrProviderContext) {
           message: `There is already a pipeline with name '${PIPELINE_ID}'.`,
         });
       });
+
+      it(`doesn't allow to create a pipeline with a too long name`, async () => {
+        const pipelineRequestBody = {
+          name: 'testtesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttesttest1',
+        };
+        await supertest
+          .post(API_BASE_PATH)
+          .set('kbn-xsrf', 'xxx')
+          .send(pipelineRequestBody)
+          .expect(400);
+      });
     });
 
     describe('Update', () => {
