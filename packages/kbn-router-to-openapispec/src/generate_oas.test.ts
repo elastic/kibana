@@ -14,7 +14,7 @@ import {
   sharedOas,
   createZodSharedSchema,
   createSharedConfigSchema,
-} from './generate_oas.test.shared.fixture';
+} from './generate_oas.test.fixture';
 
 interface RecursiveType {
   name: string;
