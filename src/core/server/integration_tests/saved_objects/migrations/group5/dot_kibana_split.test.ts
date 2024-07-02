@@ -173,7 +173,7 @@ describe('split .kibana index into multiple system indices', () => {
         })
       );
 
-      const typesMap = indicesInfo[`.kibana_${currentVersion}_001`].mappings?._meta?.typesMap;
+      const typesMap = indicesInfo[`.kibana_${currentVersion}_001`].mappings?._meta?.indexTypesMap;
 
       expect(Array.isArray(typesMap['.kibana'])).toEqual(true);
       expect(typesMap['.kibana'].length > 50).toEqual(true);
