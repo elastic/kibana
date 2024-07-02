@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { invalidateAPIKeys } from './security';
-export { generateLogstashApiKey, canCreateLogstashApiKey } from './logstash_api_keys';
-export * from './enrollment_api_key';
-export { createStandaloneAgentApiKey } from './create_standalone_agent_api_key';
+import { schema } from '@kbn/config-schema';
+
+export const PostStandaloneAgentAPIKeyRequestSchema = {
+  body: schema.object({
+    name: schema.string(),
+  }),
+};
