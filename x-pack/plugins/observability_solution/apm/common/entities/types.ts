@@ -9,6 +9,7 @@ import { AgentName } from '../../typings/es_schemas/ui/fields/agent';
 
 export enum SignalTypes {
   METRICS = 'metrics',
+  TRACES = 'traces',
   LOGS = 'logs',
 }
 

@@ -16,6 +16,7 @@ import { TransactionLink } from '../app/transaction_link';
 import { homeRoute } from './home';
 import { serviceDetailRoute } from './service_detail';
 import { mobileServiceDetailRoute } from './mobile_service_detail';
+import { logsServiceDetailsRoute } from './entities/logs_service_details';
 import { settingsRoute } from './settings';
 import { onboarding } from './onboarding';
 import { tutorialRedirectRoute } from './onboarding/redirect';
@@ -130,6 +131,7 @@ const apmRoutes = {
       ...settingsRoute,
       ...serviceDetailRoute,
       ...mobileServiceDetailRoute,
+      ...logsServiceDetailsRoute,
       ...homeRoute,
     },
   },
