@@ -104,7 +104,7 @@ jest.mock('../../../../../../component_templates/component_templates_context', (
 }));
 
 jest.mock('../../../../../../../services/api', () => ({
-  getInferenceModels: jest.fn().mockResolvedValue({
+  getInferenceEndpoints: jest.fn().mockResolvedValue({
     data: [
       {
         model_id: 'e5',
