@@ -16,6 +16,111 @@ import { createAlertEventLogRecordObject } from '../../lib/create_alert_event_lo
 import { RulesClientContext } from '../types';
 import { RuleAttributes } from '../../data/rule/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { isErr } from '../../lib/result_type';
+
+export const bulkUntrackRuleAlerts = async (
+  context: RulesClientContext,
+  rules: Array<{ id: string; attributes: RuleAttributes }>
+) => {
+  return withSpan({ name: 'bulkUntrackRuleAlerts', type: 'rules' }, async () => {
+    if (!context.eventLogger) return;
+
+    const filteredRules = rules.filter((rule) => !!rule.attributes.scheduledTaskId);
+
+    try {
+      const tasks = (
+        await context.taskManager.bulkGet(
+          filteredRules.map((rule) => rule.attributes.scheduledTaskId!)
+        )
+      ).map((result) => {
+        if (isErr(result)) {
+          throw new Error(result.error.error.message);
+        }
+        return result.value;
+      });
+
+      const ruleTypesToUntrackAAD: string[] = [];
+      const ruleIdsToUntrackAAD: string[] = [];
+
+      for (const task of tasks) {
+        const { id, attributes } = filteredRules.find(
+          (r) => r.attributes.scheduledTaskId === task.id
+        )!;
+        const taskInstance = taskInstanceToAlertTaskInstance(
+          task,
+          attributes as unknown as SanitizedRule
+        );
+
+        const { state } = taskInstance;
+
+        const untrackedAlerts = mapValues<Record<string, RawAlert>, Alert>(
+          state.alertInstances ?? {},
+          (rawAlertInstance, alertId) => new Alert(alertId, rawAlertInstance)
+        );
+
+        const untrackedAlertIds = Object.keys(untrackedAlerts);
+
+        const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
+
+        const { autoRecoverAlerts: isLifecycleAlert } = ruleType;
+
+        // Untrack Stack alerts
+        // TODO: Replace this loop with an Alerts As Data implmentation when Stack Rules use Alerts As Data
+        // instead of the Kibana Event Log
+        for (const alertId of untrackedAlertIds) {
+          const { group: actionGroup } = untrackedAlerts[alertId].getLastScheduledActions() ?? {};
+          const instanceState = untrackedAlerts[alertId].getState();
+          const message = `instance '${alertId}' has been untracked because the rule was disabled`;
+          const alertUuid = untrackedAlerts[alertId].getUuid();
+
+          const event = createAlertEventLogRecordObject({
+            ruleId: id,
+            ruleName: attributes.name,
+            ruleRevision: attributes.revision,
+            ruleType,
+            consumer: attributes.consumer,
+            instanceId: alertId,
+            alertUuid,
+            action: EVENT_LOG_ACTIONS.untrackedInstance,
+            message,
+            state: instanceState,
+            group: actionGroup,
+            namespace: context.namespace,
+            spaceId: context.spaceId,
+            savedObjects: [
+              {
+                id,
+                type: RULE_SAVED_OBJECT_TYPE,
+                typeId: attributes.alertTypeId,
+                relation: SAVED_OBJECT_REL_PRIMARY,
+              },
+            ],
+          });
+          context.eventLogger.logEvent(event);
+        }
+
+        // Untrack Lifecycle alerts (Alerts As Data-enabled)
+        if (isLifecycleAlert) {
+          if (ruleTypesToUntrackAAD.indexOf(ruleType.id) === -1) {
+            ruleTypesToUntrackAAD.push(ruleType.id);
+          }
+          ruleIdsToUntrackAAD.push(id);
+        }
+      }
+
+      if (ruleTypesToUntrackAAD.length > 0 && ruleIdsToUntrackAAD.length > 0) {
+        const indices = context.getAlertIndicesAlias(ruleTypesToUntrackAAD, context.spaceId);
+        if (!context.alertsService) {
+          throw new Error('Could not access alertsService to untrack alerts');
+        }
+        await context.alertsService.setAlertsToUntracked({ indices, ruleIds: ruleIdsToUntrackAAD });
+      }
+    } catch (e) {
+      // this should not block the rest of the disable process
+      context.logger.warn(`Could not write untrack events - ${e.message}`);
+    }
+  });
+};
 
 export const untrackRuleAlerts = async (
   context: RulesClientContext,

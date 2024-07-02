@@ -6,6 +6,7 @@
  */
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { chunk } from 'lodash';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -37,7 +38,7 @@ import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '
 import { ruleDomainSchema } from '../../schemas';
 import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
-import { untrackRuleAlerts } from '../../../../rules_client/lib';
+import { bulkUntrackRuleAlerts } from '../../../../rules_client/lib';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -188,8 +189,11 @@ const bulkDeleteWithOCC = async (
     }
   );
 
-  for (const { id, attributes } of rulesToDelete) {
-    await untrackRuleAlerts(context, id, attributes as RuleAttributes);
+  for (const batch of chunk(rulesToDelete, 100)) {
+    await bulkUntrackRuleAlerts(
+      context,
+      batch.map((b) => ({ id: b.id, attributes: b.attributes as RuleAttributes }))
+    );
   }
 
   const result = await withSpan(
