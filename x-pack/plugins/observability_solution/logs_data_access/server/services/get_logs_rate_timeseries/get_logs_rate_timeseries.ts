@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { existsQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
 import { getBucketSizeFromTimeRangeAndBucketCount } from '../../utils';
+import { LOG_LEVEL } from '../../es_fields';
 
 export interface LogsRateTimeseries {
   esClient: ElasticsearchClient;
