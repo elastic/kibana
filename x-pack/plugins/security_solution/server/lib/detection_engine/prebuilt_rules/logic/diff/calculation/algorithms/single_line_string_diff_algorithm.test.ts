@@ -141,8 +141,8 @@ describe('singleLineStringDiffAlgorithm', () => {
       expect(result).toEqual(
         expect.objectContaining({
           merged_version: mockVersions.target_version,
-          diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-          merge_outcome: ThreeWayMergeOutcome.Target,
+          diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          merge_outcome: ThreeWayMergeOutcome.Merged,
           has_conflict: false,
         })
       );
