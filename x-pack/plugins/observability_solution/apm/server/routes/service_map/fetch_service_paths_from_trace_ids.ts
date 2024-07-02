@@ -154,9 +154,8 @@ export async function fetchServicePathsFromTraceIds({
               }
 
               state.eventsById[id] = copy;
+              state.docCount++;
             }
-
-            state.docCount++;
           `,
         },
         combine_script: {
