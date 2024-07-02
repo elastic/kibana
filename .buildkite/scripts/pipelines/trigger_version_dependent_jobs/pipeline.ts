@@ -16,7 +16,7 @@ function emitPipeline(pipelineSteps: BuildkiteTriggerStep[]) {
 }
 
 const pipelineSets = {
-  'es-forward': 'kibana-es-forward',
+  'es-forward': 'kibana-es-forward-compatibility-testing',
   'artifacts-snapshot': 'kibana-artifacts-snapshot',
   'artifacts-staging': 'kibana-artifacts-staging',
   'artifacts-trigger': 'kibana-artifacts-trigger',
@@ -75,7 +75,7 @@ function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
 
   return targetESVersions.map((version) => {
     return {
-      trigger: 'kibana-es-forward',
+      trigger: pipelineSets['es-forward'],
       async: true,
       label: `Triggering Kibana ${kibanaPrevMajor} + ES ${version} forward compatibility`,
       build: {
@@ -101,7 +101,7 @@ function getArtifactSnapshotPipelineTriggers() {
 
   return branches.map((branch) => {
     return {
-      trigger: 'kibana-artifacts-snapshot',
+      trigger: pipelineSets['artifacts-snapshot'],
       async: true,
       label: `Triggering snapshot artifact builds for ${branch}`,
       build: {
@@ -124,7 +124,7 @@ function getArtifactStagingPipelineTriggers() {
 
   return branches.map((branch) => {
     return {
-      trigger: 'kibana-artifacts-staging',
+      trigger: pipelineSets['artifacts-staging'],
       async: true,
       label: `Triggering staging artifact builds for ${branch}`,
       build: {
@@ -151,7 +151,7 @@ function getArtifactBuildTriggers() {
   return branches.map(
     (branch) =>
       ({
-        trigger: 'kibana-artifacts-trigger',
+        trigger: pipelineSets['artifacts-trigger'],
         async: true,
         label: `Triggering artifact build for ${branch}`,
         build: {
