@@ -27,11 +27,9 @@ import {
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
-  isComma,
   isFunctionItem,
   isIncompleteItem,
   isLiteralItem,
-  isMathFunction,
   isOptionItem,
   isRestartingExpression,
   isSourceCommand,
@@ -81,7 +79,6 @@ import {
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
 import {
-  findMissingBrackets,
   fixupQuery,
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
@@ -147,12 +144,12 @@ export async function suggest(
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
   const innerText = fullText.substring(0, offset);
-  const finalText = fixupQuery(fullText, offset, context);
-  const { ast } = await astProvider(finalText);
+  const fixedQuery = fixupQuery(fullText, offset, context);
+  const { ast } = await astProvider(fixedQuery);
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, finalText), ast);
+  const queryForFields = getQueryForFields(buildQueryUntilPreviousCommand(ast, fixedQuery), ast);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
