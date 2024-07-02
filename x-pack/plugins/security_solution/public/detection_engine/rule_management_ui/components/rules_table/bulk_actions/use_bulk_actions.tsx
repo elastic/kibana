@@ -12,6 +12,8 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
+import { MAX_MANUAL_RULE_RUN_BULK_SIZE } from '../../../../../../common/constants';
+import type { TimeRange } from '../../../../rule_gaps/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
@@ -53,6 +55,8 @@ interface UseBulkActionsArgs {
     action: BulkActionForConfirmation
   ) => Promise<boolean>;
   showBulkDuplicateConfirmation: () => Promise<string | null>;
+  showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
+  showManualRuleRunLimitError: () => void;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -64,6 +68,8 @@ export const useBulkActions = ({
   confirmDeletion,
   showBulkActionConfirmation,
   showBulkDuplicateConfirmation,
+  showManualRuleRunConfirmation,
+  showManualRuleRunLimitError,
   completeBulkEditForm,
   executeBulkActionsDryRun,
 }: UseBulkActionsArgs) => {
@@ -200,6 +206,53 @@ export const useBulkActions = ({
         }
 
         await downloadExportedRules(response);
+      };
+
+      const handleScheduleRuleRunAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.MANUAL_RULE_RUN });
+        closePopover();
+
+        setIsPreflightInProgress(true);
+
+        const dryRunResult = await executeBulkActionsDryRun({
+          type: BulkActionTypeEnum.run,
+          ...(isAllSelected
+            ? { query: convertRulesFilterToKQL(filterOptions) }
+            : { ids: selectedRuleIds }),
+          runPayload: { start_date: new Date().toISOString() },
+        });
+
+        setIsPreflightInProgress(false);
+
+        if ((dryRunResult?.succeededRulesCount ?? 0) > MAX_MANUAL_RULE_RUN_BULK_SIZE) {
+          showManualRuleRunLimitError();
+          return;
+        }
+
+        // User has cancelled edit action or there are no custom rules to proceed
+        const hasActionBeenConfirmed = await showBulkActionConfirmation(
+          dryRunResult,
+          BulkActionTypeEnum.run
+        );
+        if (hasActionBeenConfirmed === false) {
+          return;
+        }
+
+        const modalManualRuleRunConfirmationResult = await showManualRuleRunConfirmation();
+        if (modalManualRuleRunConfirmationResult === null) {
+          return;
+        }
+
+        const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
+
+        await executeBulkAction({
+          type: BulkActionTypeEnum.run,
+          ...(isAllSelected ? { query: kql } : { ids: enabledIds }),
+          runPayload: {
+            start_date: modalManualRuleRunConfirmationResult.startDate.toISOString(),
+            end_date: modalManualRuleRunConfirmationResult.endDate.toISOString(),
+          },
+        });
       };
 
       const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
@@ -392,6 +445,14 @@ export const useBulkActions = ({
               icon: undefined,
             },
             {
+              key: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+              name: i18n.BULK_ACTION_MANUAL_RULE_RUN,
+              'data-test-subj': 'scheduleRuleRunBulk',
+              disabled: containsLoading || (!containsEnabled && !isAllSelected),
+              onClick: handleScheduleRuleRunAction,
+              icon: undefined,
+            },
+            {
               key: i18n.BULK_ACTION_DISABLE,
               name: i18n.BULK_ACTION_DISABLE,
               'data-test-subj': 'disableRuleBulk',
@@ -520,6 +581,8 @@ export const useBulkActions = ({
       kql,
       toasts,
       showBulkDuplicateConfirmation,
+      showManualRuleRunConfirmation,
+      showManualRuleRunLimitError,
       clearRulesSelection,
       confirmDeletion,
       bulkExport,

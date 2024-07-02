@@ -6,10 +6,11 @@
  */
 
 import { EuiModalBody, EuiModalHeader, EuiSpacer } from '@elastic/eui';
-import React, { Fragment, memo, useMemo } from 'react';
+import type { EuiBasicTable } from '@elastic/eui';
+import React, { Fragment, memo, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
-import type { OpenTimelineProps, ActionTimelineToShow } from '../types';
+import type { OpenTimelineProps, ActionTimelineToShow, OpenTimelineResult } from '../types';
 import { SearchRow } from '../search_row';
 import { TimelinesTable } from '../timelines_table';
 import { TitleRow } from '../title_row';
@@ -49,6 +50,8 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
     title,
     totalSearchResultsCount,
   }) => {
+    const tableRef = useRef<EuiBasicTable<OpenTimelineResult> | null>(null);
+
     const actionsToShow = useMemo(() => {
       const actions: ActionTimelineToShow[] = ['createFrom', 'duplicate'];
 
@@ -118,6 +121,7 @@ export const OpenTimelineModalBody = memo<OpenTimelineProps>(
               sortField={sortField}
               timelineType={timelineType}
               totalSearchResultsCount={totalSearchResultsCount}
+              tableRef={tableRef}
             />
           </>
         </EuiModalBody>
