@@ -13,6 +13,7 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { SimpleMemCache } from './simple_mem_cache';
 import { validateActionId } from '../../utils/validate_action_id';
 import {
   fetchActionResponses,
@@ -49,14 +50,13 @@ import type {
   EndpointActionDataParameterTypes,
   EndpointActionResponseDataOutput,
   GetProcessesActionOutputContent,
-  KillOrSuspendProcessRequestBody,
   KillProcessActionOutputContent,
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionScanOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
@@ -65,6 +65,8 @@ import type {
   SuspendProcessActionOutputContent,
   UploadedFileInfo,
   WithAllKeys,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -78,6 +80,17 @@ import type {
 import { stringify } from '../../../../utils/stringify';
 import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
 import { EMPTY_COMMENT } from '../../../../utils/translations';
+
+const ELASTIC_RESPONSE_ACTION_MESSAGE = (
+  username: string = 'system',
+  command: ResponseActionsApiCommandNames,
+  responseActionId: string
+): string => {
+  return i18n.translate('xpack.securitySolution.responseActions.comment.message', {
+    values: { username, command, responseActionId },
+    defaultMessage: `Action triggered from Elastic Security by user [{username}] for action [{command} (action id: {responseActionId})]`,
+  });
+};
 
 const ENTERPRISE_LICENSE_REQUIRED_MSG = i18n.translate(
   'xpack.securitySolution.responseActionsList.error.licenseTooLow',
@@ -175,6 +188,8 @@ export interface ResponseActionsClientPendingAction<
  */
 export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
+
+  protected readonly cache = new SimpleMemCache();
 
   protected abstract readonly agentType: ResponseActionAgentType;
 
@@ -560,6 +575,26 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     usageService.notifyUsage(featureKey);
   }
 
+  /**
+   * Builds a comment for use in response action requests sent to external EDR systems
+   * @protected
+   */
+  protected buildExternalComment(
+    actionRequestIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+  ): string {
+    const { actionId = uuidv4(), comment, command } = actionRequestIndexOptions;
+
+    // If the action request index options does not yet have an actionId assigned to it, then do it now.
+    // Need to ensure we have an action id for cross-reference.
+    if (!actionRequestIndexOptions.actionId) {
+      actionRequestIndexOptions.actionId = actionId;
+    }
+
+    return (
+      ELASTIC_RESPONSE_ACTION_MESSAGE(this.options.username, command, actionId) +
+      (comment ? `: ${comment}` : '')
+    );
+  }
   protected async ensureValidActionId(actionId: string): Promise<void> {
     return validateActionId(this.options.esClient, actionId, this.agentType);
   }
@@ -650,19 +685,19 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   public async killProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: KillProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('kill-process');
   }
 
   public async suspendProcess(
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: SuspendProcessRequestBody,
     options?: CommonResponseActionMethodOptions
   ): Promise<
-    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithProcessData>
   > {
     throw new ResponseActionsNotSupportedError('suspend-process');
   }

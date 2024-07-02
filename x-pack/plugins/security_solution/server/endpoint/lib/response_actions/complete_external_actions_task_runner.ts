@@ -152,7 +152,7 @@ export class CompleteExternalActionsTaskRunner
                 return null;
               }
 
-              this.errors.push(err.message);
+              this.errors.push(err.stack);
             });
         }
       )
@@ -164,7 +164,7 @@ export class CompleteExternalActionsTaskRunner
     if (this.errors.length) {
       this.log.error(
         `${this.errors.length} errors were encountered while running task:\n${this.errors.join(
-          '\n'
+          '\n----'
         )}`
       );
     }

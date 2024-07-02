@@ -47,10 +47,11 @@ import {
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
-  KillOrSuspendProcessRequestBody,
-  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionParametersWithProcessData,
   ResponseActionsExecuteParameters,
   ResponseActionScanParameters,
+  KillProcessRequestBody,
+  SuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -165,7 +166,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canKillProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'kill-process'
         )
@@ -188,7 +189,7 @@ export function registerResponseActionRoutes(
       withEndpointAuthz(
         { all: ['canSuspendProcess'] },
         logger,
-        responseActionRequestHandler<ResponseActionParametersWithPidOrEntityId>(
+        responseActionRequestHandler<ResponseActionParametersWithProcessData>(
           endpointContext,
           'suspend-process'
         )
@@ -374,14 +375,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
         case 'suspend-process':
           action = await responseActionsClient.suspendProcess(
-            req.body as KillOrSuspendProcessRequestBody
+            req.body as SuspendProcessRequestBody
           );
           break;
 
         case 'kill-process':
-          action = await responseActionsClient.killProcess(
-            req.body as KillOrSuspendProcessRequestBody
-          );
+          action = await responseActionsClient.killProcess(req.body as KillProcessRequestBody);
           break;
 
         case 'get-file':
