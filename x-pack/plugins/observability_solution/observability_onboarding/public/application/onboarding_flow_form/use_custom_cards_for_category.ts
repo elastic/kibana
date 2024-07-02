@@ -8,7 +8,8 @@
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { CustomCard, FeaturedCard } from '../packages_list/types';
+import { ObservabilityOnboardingAppServices } from '../..';
+import { CustomCard, FeaturedCard, VirtualCard } from '../packages_list/types';
 import { Category } from './types';
 
 function toFeaturedCard(name: string): FeaturedCard {
@@ -22,12 +23,37 @@ export function useCustomCardsForCategory(
   const history = useHistory();
   const location = useLocation();
   const {
-    services: { application, http },
-  } = useKibana();
+    services: {
+      application,
+      http,
+      context: { isServerless },
+    },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const getUrlForApp = application?.getUrlForApp;
 
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
+  const { href: otelLogsUrl } = reactRouterNavigate(history, `/otel-logs/${location.search}`);
+
+  const otelCard: VirtualCard = {
+    id: 'otel-logs',
+    type: 'virtual',
+    release: 'preview',
+    title: 'OpenTelemetry',
+    description:
+      'Collect Logs and host metrics using the Elastic distribution of the OpenTelemetry Collector',
+    name: 'custom-logs-virtual',
+    categories: ['observability'],
+    icons: [
+      {
+        type: 'svg',
+        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+      },
+    ],
+    url: otelLogsUrl,
+    version: '',
+    integration: '',
+  };
 
   switch (category) {
     case 'apm':
@@ -87,8 +113,8 @@ export function useCustomCardsForCategory(
     case 'infra':
       return [
         toFeaturedCard('kubernetes'),
-        toFeaturedCard('prometheus'),
         toFeaturedCard('docker'),
+        isServerless ? toFeaturedCard('prometheus') : otelCard,
         {
           id: 'azure-virtual',
           type: 'virtual',
@@ -168,7 +194,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        toFeaturedCard('nginx'),
+        isServerless ? toFeaturedCard('nginx') : otelCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',
