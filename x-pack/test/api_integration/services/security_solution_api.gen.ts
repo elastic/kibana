@@ -32,6 +32,7 @@ import {
 } from '@kbn/security-solution-plugin/common/api/endpoint/protection_updates_note/protection_updates_note.gen';
 import { DeleteRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/delete_rule/delete_rule_route.gen';
 import { EndpointIsolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/isolate_route.gen';
+import { EndpointUnisolateRedirectRequestBodyInput } from '@kbn/security-solution-plugin/common/api/endpoint/actions/unisolate_route.gen';
 import {
   ExportRulesRequestQueryInput,
   ExportRulesRequestBodyInput,
@@ -190,6 +191,14 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
     endpointIsolateRedirect(props: EndpointIsolateRedirectProps) {
       return supertest
         .post('/api/endpoint/isolate')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
+    endpointUnisolateRedirect(props: EndpointUnisolateRedirectProps) {
+      return supertest
+        .post('/api/endpoint/unisolate')
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -456,6 +465,9 @@ export interface DeleteRuleProps {
 }
 export interface EndpointIsolateRedirectProps {
   body: EndpointIsolateRedirectRequestBodyInput;
+}
+export interface EndpointUnisolateRedirectProps {
+  body: EndpointUnisolateRedirectRequestBodyInput;
 }
 export interface ExportRulesProps {
   query: ExportRulesRequestQueryInput;

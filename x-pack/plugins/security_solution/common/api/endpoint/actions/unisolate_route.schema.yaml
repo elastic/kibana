@@ -7,7 +7,7 @@ paths:
     post:
       summary: Permanently redirects to a new location
       operationId: EndpointUnisolateRedirect
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       requestBody:
         required: true
         content:
