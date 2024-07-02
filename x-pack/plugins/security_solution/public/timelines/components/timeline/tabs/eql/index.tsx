@@ -17,6 +17,7 @@ import type { EuiDataGridControlColumn } from '@elastic/eui';
 
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../../common/lib/kibana';
 import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsRightPanelKey,
@@ -85,6 +86,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   pinnedEventIds,
   eventIdToNoteIds,
 }) => {
+  const { telemetry } = useKibana().services;
   const dispatch = useDispatch();
   const { query: eqlQuery = '', ...restEqlOption } = eqlOptions;
   const { portalNode: eqlEventsCountPortalNode } = useEqlEventsCountPortal();
@@ -171,6 +173,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+        telemetry.reportOpenNoteInExpandableFlyoutClicked({
+          location: timelineId,
+        });
+        telemetry.reportDetailsFlyoutOpened({
+          location: timelineId,
+          panel: 'left',
+        });
       }
     },
     [
@@ -178,6 +187,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
       openFlyout,
       securitySolutionNotesEnabled,
       selectedPatterns,
+      telemetry,
       timelineId,
     ]
   );

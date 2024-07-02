@@ -11,6 +11,7 @@ import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEventBuildingBlockType } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
@@ -110,6 +111,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   leadingControlColumns,
   trailingControlColumns,
 }) => {
+  const { telemetry } = useKibana().services;
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
@@ -211,6 +213,13 @@ const StatefulEventComponent: React.FC<Props> = ({
           },
         },
       });
+      telemetry.reportOpenNoteInExpandableFlyoutClicked({
+        location: timelineId,
+      });
+      telemetry.reportDetailsFlyoutOpened({
+        location: timelineId,
+        panel: 'left',
+      });
     } else {
       setShowNotes((prevShowNotes) => {
         if (prevShowNotes[eventId]) {
@@ -227,12 +236,13 @@ const StatefulEventComponent: React.FC<Props> = ({
       });
     }
   }, [
-    eventId,
     expandableFlyoutDisabled,
-    indexName,
     securitySolutionNotesEnabled,
     openFlyout,
+    eventId,
+    indexName,
     timelineId,
+    telemetry,
   ]);
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
@@ -256,6 +266,10 @@ const StatefulEventComponent: React.FC<Props> = ({
           },
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: timelineId,
+        panel: 'right',
+      });
     } else {
       // opens the panel when clicking on the table row action
       dispatch(
@@ -273,6 +287,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     expandableFlyoutDisabled,
     openFlyout,
     timelineId,
+    telemetry,
     dispatch,
     tabType,
   ]);
