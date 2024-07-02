@@ -8,110 +8,119 @@
 import { EntityDefinition, entityDefinitionSchema } from '@kbn/entities-schema';
 import { BUILT_IN_ID_PREFIX } from './constants';
 
-export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitionSchema.parse({
-  id: `${BUILT_IN_ID_PREFIX}services_raw_transaction`,
-  name: 'Services from logs',
-  type: 'service',
-  managed: true,
-  filter: '@timestamp >= now-5m',
-  indexPatterns: [
-    'logs-*',
-    'filebeat*',
-    'apm*',
-    'traces-*',
-    'remote_cluster:logs*',
-    'remote_cluster:filebeat*',
-    'remote_cluster:apm*',
-    'remote_cluster:traces-*',
-  ],
-  history: {
-    timestampField: '@timestamp',
-    interval: '1m',
-  },
-  latest: {
-    lookback: '5m',
-  },
-  identityFields: ['service.name', { field: 'service.environment', optional: true }],
-  displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
-  metadata: [
-    'data_stream.type',
-    'service.environment',
-    'service.name',
-    'service.namespace',
-    'service.version',
-    'service.runtime.name',
-    'service.runtime.version',
-    'service.language.name',
-    'cloud.provider',
-    'cloud.availability_zone',
-    'cloud.machine.type',
-  ],
-  metrics: [
-    {
-      name: 'latency',
-      equation: 'A',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'avg',
-          filter: 'processor.event: "transaction"',
-          field: 'transaction.duration.us',
-        },
-      ],
+export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
+  entityDefinitionSchema.parse({
+    id: `${BUILT_IN_ID_PREFIX}services_from_logs`,
+    name: 'Services from logs',
+    type: 'service',
+    managed: true,
+    filter: '@timestamp >= now-15m',
+    indexPatterns: [
+      'logs-*',
+      'filebeat*',
+      'apm*',
+      'metrics-*',
+      'remote_cluster:logs*',
+      'remote_cluster:filebeat*',
+      'remote_cluster:apm*',
+      'remote_cluster:metrics-*',
+    ],
+    history: {
+      timestampField: '@timestamp',
+      interval: '1m',
+      settings: {
+        frequency: '5m',
+        syncDelay: '5m',
+      },
     },
-    {
-      name: 'throughput',
-      equation: 'A',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'processor.event: "transaction"',
-        },
-      ],
+    latest: {
+      lookback: '5m',
     },
-    {
-      name: 'failedTransactionRate',
-      equation: 'A / B',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'processor.event: "transaction" AND event.outcome: "failure"',
-        },
-        {
-          name: 'B',
-          aggregation: 'doc_count',
-          filter: 'processor.event: "transaction" AND event.outcome: *',
-        },
-      ],
-    },
-    {
-      name: 'logErrorRate',
-      equation: 'A / B',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'log.level: "error" OR error.log.level: "error"',
-        },
-        {
-          name: 'B',
-          aggregation: 'doc_count',
-          filter: 'log.level: * OR error.log.level: *',
-        },
-      ],
-    },
-    {
-      name: 'logRate',
-      equation: 'A',
-      metrics: [
-        {
-          name: 'A',
-          aggregation: 'doc_count',
-          filter: 'log.level: * OR error.log.level: *',
-        },
-      ],
-    },
-  ],
-});
+    identityFields: ['service.name', { field: 'service.environment', optional: true }],
+    displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
+    metadata: [
+      'data_stream.type',
+      'service.environment',
+      'service.name',
+      'service.namespace',
+      'service.version',
+      'service.runtime.name',
+      'service.runtime.version',
+      'service.language.name',
+      'cloud.provider',
+      'cloud.availability_zone',
+      'cloud.machine.type',
+    ],
+    metrics: [
+      {
+        name: 'latency',
+        equation: 'A',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'avg',
+            filter:
+              'processor.event: "metric" AND metricset.name: "transaction" AND data_stream.dataset: "apm.transaction.1m"',
+            field: 'transaction.duration.histogram',
+          },
+        ],
+      },
+      {
+        name: 'throughput',
+        equation: 'A',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'doc_count',
+            filter:
+              'processor.event: "metric" AND metricset.name: "transaction" AND data_stream.dataset: "apm.transaction.1m"',
+          },
+        ],
+      },
+      {
+        name: 'failedTransactionRate',
+        equation: 'A / B',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'doc_count',
+            filter:
+              'processor.event: "metric" AND metricset.name: "transaction" AND event.outcome: "failure"',
+          },
+          {
+            name: 'B',
+            aggregation: 'doc_count',
+            filter:
+              'processor.event: "metric" AND metricset.name: "transaction" AND event.outcome: *',
+          },
+        ],
+      },
+      {
+        name: 'logErrorRate',
+        equation: 'A / B',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'doc_count',
+            filter: 'log.level: "error" OR error.log.level: "error"',
+          },
+          {
+            name: 'B',
+            aggregation: 'doc_count',
+            filter: 'log.level: * OR error.log.level: *',
+          },
+        ],
+      },
+      {
+        name: 'logRate',
+        equation: 'A',
+        metrics: [
+          {
+            name: 'A',
+            aggregation: 'doc_count',
+            filter: 'log.level: * OR error.log.level: *',
+          },
+        ],
+      },
+    ],
+  });
