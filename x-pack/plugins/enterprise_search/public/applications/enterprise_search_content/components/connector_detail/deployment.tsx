@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiSteps,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -96,6 +97,16 @@ export const ConnectorDeployment: React.FC = () => {
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder>
           <>
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.content.connector_detail.configurationConnector.DeploymentTitle',
+                  {
+                    defaultMessage: 'Deployment',
+                  }
+                )}
+              </h3>
+            </EuiTitle>
             <EuiSpacer />
             <EuiSteps
               steps={[
