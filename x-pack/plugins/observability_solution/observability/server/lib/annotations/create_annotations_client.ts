@@ -197,34 +197,6 @@ export function createAnnotationsClient(params: {
         });
       }
 
-      console.log(
-        JSON.stringify({
-          index: readIndex,
-          size: 10000,
-          ignore_unavailable: true,
-          query: {
-            bool: {
-              filter: [
-                {
-                  range: {
-                    '@timestamp': {
-                      gte: start,
-                      lte: end,
-                    },
-                  },
-                },
-                {
-                  bool: {
-                    should: shouldClauses,
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-        })
-      );
-
       const result = await esClient.search({
         index: readIndex,
         size: 10000,
