@@ -5,42 +5,38 @@
  * 2.0.
  */
 
-import { ExecutionHandler } from './execution_handler';
+import { ActionScheduler } from './action_scheduler';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   actionsClientMock,
   actionsMock,
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
-import { KibanaRequest } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { InjectActionParamsOpts, injectActionParams } from './inject_action_params';
-import { NormalizedRuleType } from '../rule_type_registry';
-import {
-  ThrottledActions,
-  RuleTypeParams,
-  RuleTypeState,
-  SanitizedRule,
-  GetViewInAppRelativeUrlFnOpts,
-} from '../types';
-import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
+import { InjectActionParamsOpts, injectActionParams } from '../inject_action_params';
+import { RuleTypeParams, SanitizedRule, GetViewInAppRelativeUrlFnOpts } from '../../types';
+import { RuleRunMetricsStore } from '../../lib/rule_run_metrics_store';
+import { alertingEventLoggerMock } from '../../lib/alerting_event_logger/alerting_event_logger.mock';
 import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
+import { RuleNotifyWhen } from '../../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
 import sinon from 'sinon';
-import { mockAAD } from './fixtures';
+import { mockAAD } from '../fixtures';
 import { schema } from '@kbn/config-schema';
-import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
-import { alertsClientMock } from '../alerts_client/alerts_client.mock';
+import { alertsClientMock } from '../../alerts_client/alerts_client.mock';
 import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
-import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
-import { TaskRunnerContext } from './types';
+import {
+  generateAlert,
+  generateRecoveredAlert,
+  getDefaultSchedulerContext,
+  getRule,
+  getRuleType,
+} from './test_fixtures';
 
-jest.mock('./inject_action_params', () => ({
+jest.mock('../inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
 
@@ -51,100 +47,16 @@ const actionsClient = actionsClientMock.create();
 const alertsClient = alertsClientMock.create();
 const mockActionsPlugin = actionsMock.createStart();
 const apiKey = Buffer.from('123:abc').toString('base64');
-const ruleType: NormalizedRuleType<
-  RuleTypeParams,
-  RuleTypeParams,
-  RuleTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  'default' | 'other-group',
-  'recovered',
-  {}
-> = {
-  id: 'test',
-  name: 'Test',
-  actionGroups: [
-    { id: 'default', name: 'Default' },
-    { id: 'recovered', name: 'Recovered' },
-    { id: 'other-group', name: 'Other Group' },
-  ],
-  defaultActionGroupId: 'default',
-  minimumLicenseRequired: 'basic',
-  isExportable: true,
-  recoveryActionGroup: {
-    id: 'recovered',
-    name: 'Recovered',
-  },
-  executor: jest.fn(),
-  category: 'test',
-  producer: 'alerts',
-  validate: {
-    params: schema.any(),
-  },
-  alerts: {
-    context: 'context',
-    mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
-  },
-  autoRecoverAlerts: false,
-  validLegacyConsumers: [],
-};
-const rule = {
-  id: '1',
-  name: 'name-of-alert',
-  tags: ['tag-A', 'tag-B'],
-  mutedInstanceIds: [],
-  params: {
-    foo: true,
-    contextVal: 'My other {{context.value}} goes here',
-    stateVal: 'My other {{state.value}} goes here',
-  },
-  schedule: { interval: '1m' },
-  notifyWhen: 'onActiveAlert',
-  actions: [
-    {
-      id: '1',
-      group: 'default',
-      actionTypeId: 'test',
-      params: {
-        foo: true,
-        contextVal: 'My {{context.value}} goes here',
-        stateVal: 'My {{state.value}} goes here',
-        alertVal:
-          'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
-      },
-      uuid: '111-111',
-    },
-  ],
-  consumer: 'test-consumer',
-} as unknown as SanitizedRule<RuleTypeParams>;
 
-const defaultExecutionParams = {
-  rule,
-  ruleType,
-  logger: loggingSystemMock.create().get(),
-  taskRunnerContext: {
-    actionsConfigMap: {
-      default: {
-        max: 1000,
-      },
-    },
-    actionsPlugin: mockActionsPlugin,
-    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-  } as unknown as TaskRunnerContext,
-  apiKey,
-  ruleConsumer: 'rule-consumer',
-  executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-  alertUuid: 'uuid-1',
-  ruleLabel: 'rule-label',
-  request: {} as KibanaRequest,
+const rule = getRule();
+const ruleType = getRuleType();
+const defaultSchedulerContext = getDefaultSchedulerContext(
+  loggingSystemMock.create().get(),
+  mockActionsPlugin,
   alertingEventLogger,
-  previousStartedAt: null,
-  taskInstance: {
-    params: { spaceId: 'test1', alertId: '1' },
-  } as unknown as ConcreteTaskInstance,
   actionsClient,
-  alertsClient,
-};
+  alertsClient
+);
 
 const defaultExecutionResponse = {
   errors: false,
@@ -153,74 +65,11 @@ const defaultExecutionResponse = {
 
 let ruleRunMetricsStore: RuleRunMetricsStore;
 let clock: sinon.SinonFakeTimers;
-type ActiveActionGroup = 'default' | 'other-group';
-const generateAlert = ({
-  id,
-  group = 'default',
-  context,
-  state,
-  scheduleActions = true,
-  throttledActions = {},
-  lastScheduledActionsGroup = 'default',
-  maintenanceWindowIds,
-  pendingRecoveredCount,
-  activeCount,
-}: {
-  id: number;
-  group?: ActiveActionGroup | 'recovered';
-  context?: AlertInstanceContext;
-  state?: AlertInstanceState;
-  scheduleActions?: boolean;
-  throttledActions?: ThrottledActions;
-  lastScheduledActionsGroup?: string;
-  maintenanceWindowIds?: string[];
-  pendingRecoveredCount?: number;
-  activeCount?: number;
-}) => {
-  const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
-    String(id),
-    {
-      state: state || { test: true },
-      meta: {
-        maintenanceWindowIds,
-        lastScheduledActions: {
-          date: new Date().toISOString(),
-          group: lastScheduledActionsGroup,
-          actions: throttledActions,
-        },
-        pendingRecoveredCount,
-        activeCount,
-      },
-    }
-  );
-  if (scheduleActions) {
-    alert.scheduleActions(group as ActiveActionGroup);
-  }
-  if (context) {
-    alert.setContext(context);
-  }
-
-  return { [id]: alert };
-};
-
-const generateRecoveredAlert = ({ id, state }: { id: number; state?: AlertInstanceState }) => {
-  const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'recovered'>(String(id), {
-    state: state || { test: true },
-    meta: {
-      lastScheduledActions: {
-        date: new Date().toISOString(),
-        group: 'recovered',
-        actions: {},
-      },
-    },
-  });
-  return { [id]: alert };
-};
 
 // @ts-ignore
-const generateExecutionParams = (params = {}) => {
+const getSchedulerContext = (params = {}) => {
   return {
-    ...defaultExecutionParams,
+    ...defaultSchedulerContext,
     ...params,
     ruleRunMetricsStore,
   };
@@ -228,11 +77,11 @@ const generateExecutionParams = (params = {}) => {
 
 const DATE_1970 = new Date('1970-01-01T00:00:00.000Z');
 
-describe('Execution Handler', () => {
+describe('Action Scheduler', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest
-      .requireMock('./inject_action_params')
+      .requireMock('../inject_action_params')
       .injectActionParams.mockImplementation(
         ({ actionParams }: InjectActionParamsOpts) => actionParams
       );
@@ -252,8 +101,8 @@ describe('Execution Handler', () => {
 
   test('enqueues execution per selected action', async () => {
     const alerts = generateAlert({ id: 1 });
-    const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.run(alerts);
+    const actionScheduler = new ActionScheduler(getSchedulerContext());
+    await actionScheduler.run(alerts);
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
@@ -302,7 +151,7 @@ describe('Execution Handler', () => {
       alertGroup: 'default',
     });
 
-    expect(jest.requireMock('./inject_action_params').injectActionParams).toHaveBeenCalledWith({
+    expect(jest.requireMock('../inject_action_params').injectActionParams).toHaveBeenCalledWith({
       actionTypeId: 'test',
       actionParams: {
         alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 1 goes here',
@@ -321,10 +170,10 @@ describe('Execution Handler', () => {
     mockActionsPlugin.isActionExecutable.mockReturnValueOnce(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValueOnce(true);
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
               id: '2',
@@ -351,7 +200,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run(generateAlert({ id: 1 }));
+    await actionScheduler.run(generateAlert({ id: 1 }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -388,10 +237,10 @@ describe('Execution Handler', () => {
     mockActionsPlugin.inMemoryConnectors = [];
     mockActionsPlugin.isActionExecutable.mockReturnValue(false);
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(false);
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
               id: '2',
@@ -416,19 +265,19 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run(generateAlert({ id: 2 }));
+    await actionScheduler.run(generateAlert({ id: 2 }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(2);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
 
     mockActionsPlugin.isActionExecutable.mockImplementation(() => true);
-    const executionHandlerForPreconfiguredAction = new ExecutionHandler({
-      ...defaultExecutionParams,
+    const actionSchedulerForPreconfiguredAction = new ActionScheduler({
+      ...defaultSchedulerContext,
       ruleRunMetricsStore,
     });
 
-    await executionHandlerForPreconfiguredAction.run(generateAlert({ id: 2 }));
+    await actionSchedulerForPreconfiguredAction.run(generateAlert({ id: 2 }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
@@ -449,11 +298,11 @@ describe('Execution Handler', () => {
         },
       },
     ];
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           actionsConfigMap: {
             default: {
               max: 2,
@@ -461,30 +310,30 @@ describe('Execution Handler', () => {
           },
         },
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions,
         },
       })
     );
 
     try {
-      await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+      await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     } catch (err) {
       expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
     }
   });
 
   test('limits actionsPlugin.execute per action group', async () => {
-    const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.run(generateAlert({ id: 2, group: 'other-group' }));
+    const actionScheduler = new ActionScheduler(getSchedulerContext());
+    await actionScheduler.run(generateAlert({ id: 2, group: 'other-group' }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(0);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(0);
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
   });
 
   test('context attribute gets parameterized', async () => {
-    const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.run(generateAlert({ id: 2, context: { value: 'context-val' } }));
+    const actionScheduler = new ActionScheduler(getSchedulerContext());
+    await actionScheduler.run(generateAlert({ id: 2, context: { value: 'context-val' } }));
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(1);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
@@ -526,8 +375,8 @@ describe('Execution Handler', () => {
   });
 
   test('state attribute gets parameterized', async () => {
-    const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    const actionScheduler = new ActionScheduler(getSchedulerContext());
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -567,12 +416,12 @@ describe('Execution Handler', () => {
   });
 
   test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
-    const executionHandler = new ExecutionHandler(generateExecutionParams());
-    await executionHandler.run(
+    const actionScheduler = new ActionScheduler(getSchedulerContext());
+    await actionScheduler.run(
       generateAlert({ id: 2, group: 'invalid-group' as 'default' | 'other-group' })
     );
 
-    expect(defaultExecutionParams.logger.error).toHaveBeenCalledWith(
+    expect(defaultSchedulerContext.logger.error).toHaveBeenCalledWith(
       'Invalid action group "invalid-group" for rule "test".'
     );
 
@@ -629,11 +478,11 @@ describe('Execution Handler', () => {
         },
       },
     ];
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           actionsConfigMap: {
             default: {
               max: 2,
@@ -641,17 +490,17 @@ describe('Execution Handler', () => {
           },
         },
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions,
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
@@ -678,7 +527,7 @@ describe('Execution Handler', () => {
       ],
     });
     const actions = [
-      ...defaultExecutionParams.rule.actions,
+      ...defaultSchedulerContext.rule.actions,
       {
         id: '2',
         group: 'default',
@@ -720,11 +569,11 @@ describe('Execution Handler', () => {
         },
       },
     ];
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           actionsConfigMap: {
             default: {
               max: 4,
@@ -735,12 +584,12 @@ describe('Execution Handler', () => {
           },
         },
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions,
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(4);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(5);
@@ -809,21 +658,21 @@ describe('Execution Handler', () => {
         },
       },
     ];
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions,
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    await actionScheduler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
 
     expect(ruleRunMetricsStore.getNumberOfTriggeredActions()).toBe(2);
     expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toBe(3);
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.PARTIAL);
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
   });
 
@@ -842,16 +691,16 @@ describe('Execution Handler', () => {
         },
       },
     ];
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions,
         },
       })
     );
-    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
+    await actionScheduler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -892,11 +741,11 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule alerts with recovered actions that are muted', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['1'],
           actions: [
             {
@@ -915,46 +764,46 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
+    await actionScheduler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultExecutionParams.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultExecutionParams.ruleLabel}: rule is muted`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`
     );
   });
 
   test('does not schedule active alerts that are throttled', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           notifyWhen: 'onThrottleInterval',
           throttle: '1m',
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 1 }));
+    await actionScheduler.run(generateAlert({ id: 1 }));
 
     clock.tick(30000);
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultExecutionParams.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultExecutionParams.ruleLabel}: rule is throttled`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`
     );
   });
 
   test('does not schedule actions that are throttled', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
-              ...defaultExecutionParams.rule.actions[0],
+              ...defaultSchedulerContext.rule.actions[0],
               frequency: {
                 summary: false,
                 notifyWhen: 'onThrottleInterval',
@@ -965,7 +814,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.run(
+    await actionScheduler.run(
       generateAlert({
         id: 1,
         throttledActions: { '111-111': { date: new Date(DATE_1970).toISOString() } },
@@ -975,21 +824,21 @@ describe('Execution Handler', () => {
     clock.tick(30000);
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultExecutionParams.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultExecutionParams.ruleLabel}: rule is throttled`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is throttled`
     );
   });
 
   test('schedule actions that are throttled but alert has a changed action group', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
-              ...defaultExecutionParams.rule.actions[0],
+              ...defaultSchedulerContext.rule.actions[0],
               frequency: {
                 summary: false,
                 notifyWhen: 'onThrottleInterval',
@@ -1000,7 +849,7 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' }));
+    await actionScheduler.run(generateAlert({ id: 1, lastScheduledActionsGroup: 'recovered' }));
 
     clock.tick(30000);
 
@@ -1009,21 +858,21 @@ describe('Execution Handler', () => {
   });
 
   test('does not schedule active alerts that are muted', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['1'],
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 1 }));
+    await actionScheduler.run(generateAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(0);
-    expect(defaultExecutionParams.logger.debug).nthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).nthCalledWith(
       1,
-      `skipping scheduling of actions for '1' in rule ${defaultExecutionParams.ruleLabel}: rule is muted`
+      `skipping scheduling of actions for '1' in rule ${defaultSchedulerContext.ruleLabel}: rule is muted`
     );
   });
 
@@ -1046,10 +895,10 @@ describe('Execution Handler', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['foo'],
           actions: [
             {
@@ -1071,7 +920,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run(generateAlert({ id: 1 }));
+    await actionScheduler.run(generateAlert({ id: 1 }));
 
     expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       executionUuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1125,10 +974,10 @@ describe('Execution Handler', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
               id: '1',
@@ -1150,7 +999,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({});
+    await actionScheduler.run({});
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
@@ -1175,10 +1024,10 @@ describe('Execution Handler', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['foo'],
           actions: [
             {
@@ -1201,7 +1050,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    const result = await executionHandler.run({});
+    const result = await actionScheduler.run({});
 
     expect(alertsClient.getSummarizedAlerts).toHaveBeenCalledWith({
       start: new Date('1969-12-31T00:01:30.000Z'),
@@ -1263,10 +1112,10 @@ describe('Execution Handler', () => {
       ongoing: { count: 0, alerts: [] },
       recovered: { count: 0, alerts: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
               id: '1',
@@ -1286,18 +1135,18 @@ describe('Execution Handler', () => {
           ],
         },
         taskInstance: {
-          ...defaultExecutionParams.taskInstance,
+          ...defaultSchedulerContext.taskInstance,
           state: {
-            ...defaultExecutionParams.taskInstance.state,
+            ...defaultSchedulerContext.taskInstance.state,
             summaryActions: { '111-111': { date: new Date() } },
           },
         } as unknown as ConcreteTaskInstance,
       })
     );
 
-    await executionHandler.run({});
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+    await actionScheduler.run({});
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
       "skipping scheduling the action 'testActionTypeId:1', summary action is still being throttled"
     );
     expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
@@ -1311,10 +1160,10 @@ describe('Execution Handler', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
               id: '1',
@@ -1344,9 +1193,9 @@ describe('Execution Handler', () => {
           ],
         },
         taskInstance: {
-          ...defaultExecutionParams.taskInstance,
+          ...defaultSchedulerContext.taskInstance,
           state: {
-            ...defaultExecutionParams.taskInstance.state,
+            ...defaultSchedulerContext.taskInstance.state,
             summaryActions: {
               '111-111': { date: new Date() },
               '222-222': { date: new Date() },
@@ -1357,7 +1206,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    const result = await executionHandler.run({});
+    const result = await actionScheduler.run({});
     expect(result).toEqual({
       throttledSummaryActions: {
         '111-111': {
@@ -1373,15 +1222,15 @@ describe('Execution Handler', () => {
   test(`skips scheduling actions if the ruleType doesn't have alerts mapping`, async () => {
     const { alerts, ...ruleTypeWithoutAlertsMapping } = ruleType;
 
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         ruleType: ruleTypeWithoutAlertsMapping,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
-              ...defaultExecutionParams.rule.actions[0],
+              ...defaultSchedulerContext.rule.actions[0],
               frequency: {
                 summary: true,
                 notifyWhen: 'onThrottleInterval',
@@ -1392,9 +1241,9 @@ describe('Execution Handler', () => {
         },
       })
     );
-    await executionHandler.run(generateAlert({ id: 2 }));
+    await actionScheduler.run(generateAlert({ id: 2 }));
 
-    expect(defaultExecutionParams.logger.error).toHaveBeenCalledWith(
+    expect(defaultSchedulerContext.logger.error).toHaveBeenCalledWith(
       'Skipping action "1" for rule "1" because the rule type "Test" does not support alert-as-data.'
     );
 
@@ -1441,16 +1290,16 @@ describe('Execution Handler', () => {
         },
       },
     ];
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions,
         },
       })
     );
-    await executionHandler.run(generateRecoveredAlert({ id: 1 }));
+    await actionScheduler.run(generateRecoveredAlert({ id: 1 }));
 
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
     expect(actionsClient.bulkEnqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -1541,10 +1390,10 @@ describe('Execution Handler', () => {
       },
       recovered: { count: 0, data: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['foo'],
           actions: [
             {
@@ -1570,7 +1419,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1 }),
       ...generateAlert({ id: 2 }),
     });
@@ -1586,8 +1435,8 @@ describe('Execution Handler', () => {
     });
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
     expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
       '(2) alerts have been filtered out for: testActionTypeId:111'
     );
   });
@@ -1614,10 +1463,10 @@ describe('Execution Handler', () => {
       },
       recovered: { count: 0, data: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['foo'],
           actions: [
             {
@@ -1643,7 +1492,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1 }),
       ...generateAlert({ id: 2 }),
     });
@@ -1684,10 +1533,10 @@ describe('Execution Handler', () => {
       },
       recovered: { count: 0, data: [] },
     });
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['foo'],
           actions: [
             {
@@ -1710,7 +1559,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1 }),
       ...generateAlert({ id: 2 }),
       ...generateAlert({ id: 3 }),
@@ -1746,8 +1595,8 @@ describe('Execution Handler', () => {
       id: '1',
       typeId: 'testActionTypeId',
     });
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
       '(2) alerts have been filtered out for: testActionTypeId:111'
     );
   });
@@ -1790,10 +1639,10 @@ describe('Execution Handler', () => {
       '2': newAlert2[2],
     });
 
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['foo'],
           actions: [
             {
@@ -1817,16 +1666,16 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
       ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
       ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
 
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
       '(3) alerts have been filtered out for: testActionTypeId:1'
     );
@@ -1839,10 +1688,10 @@ describe('Execution Handler', () => {
       recovered: { count: 0, data: [] },
     });
 
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           mutedInstanceIds: ['foo'],
           actions: [
             {
@@ -1866,53 +1715,53 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
       ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
       ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(1);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(1);
 
-    expect(defaultExecutionParams.logger.debug).toHaveBeenNthCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenNthCalledWith(
       1,
       '(3) alerts have been filtered out for: testActionTypeId:1'
     );
   });
 
   test('does not schedule actions for alerts with maintenance window IDs', async () => {
-    const executionHandler = new ExecutionHandler(generateExecutionParams());
+    const actionScheduler = new ActionScheduler(getSchedulerContext());
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1, maintenanceWindowIds: ['test-id-1'] }),
       ...generateAlert({ id: 2, maintenanceWindowIds: ['test-id-2'] }),
       ...generateAlert({ id: 3, maintenanceWindowIds: ['test-id-3'] }),
     });
 
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledTimes(3);
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledTimes(3);
 
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
       'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-1.'
     );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
       'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-2.'
     );
-    expect(defaultExecutionParams.logger.debug).toHaveBeenCalledWith(
+    expect(defaultSchedulerContext.logger.debug).toHaveBeenCalledWith(
       'no scheduling of summary actions "1" for rule "1": has active maintenance windows test-id-3.'
     );
   });
 
   test('does not schedule actions with notifyWhen not set to "on status change" for alerts that are flapping', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
-              ...defaultExecutionParams.rule.actions[0],
+              ...defaultSchedulerContext.rule.actions[0],
               frequency: {
                 summary: false,
                 notifyWhen: RuleNotifyWhen.ACTIVE,
@@ -1924,7 +1773,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
       ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
       ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
@@ -1934,14 +1783,14 @@ describe('Execution Handler', () => {
   });
 
   test('does schedule actions with notifyWhen is set to "on status change" for alerts that are flapping', async () => {
-    const executionHandler = new ExecutionHandler(
-      generateExecutionParams({
-        ...defaultExecutionParams,
+    const actionScheduler = new ActionScheduler(
+      getSchedulerContext({
+        ...defaultSchedulerContext,
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           actions: [
             {
-              ...defaultExecutionParams.rule.actions[0],
+              ...defaultSchedulerContext.rule.actions[0],
               frequency: {
                 summary: false,
                 notifyWhen: RuleNotifyWhen.CHANGE,
@@ -1953,7 +1802,7 @@ describe('Execution Handler', () => {
       })
     );
 
-    await executionHandler.run({
+    await actionScheduler.run({
       ...generateAlert({ id: 1, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
       ...generateAlert({ id: 2, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
       ...generateAlert({ id: 3, pendingRecoveredCount: 1, lastScheduledActionsGroup: 'recovered' }),
@@ -2091,16 +1940,16 @@ describe('Execution Handler', () => {
 
     it('populates the rule.url in the action params when the base url and rule id are specified', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 'http://localhost:12345',
         },
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2124,16 +1973,16 @@ describe('Execution Handler', () => {
 
     it('populates the rule.url in the action params when the base url contains pathname', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 'http://localhost:12345/kbn',
         },
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0][0].actionParams).toEqual({
         val: 'rule url: http://localhost:12345/kbn/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1',
@@ -2159,7 +2008,7 @@ describe('Execution Handler', () => {
         recovered: { count: 0, data: [] },
       });
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         ruleType: {
           ...ruleType,
           getViewInAppRelativeUrl: (opts: GetViewInAppRelativeUrlFnOpts<RuleTypeParams>) =>
@@ -2167,13 +2016,13 @@ describe('Execution Handler', () => {
         },
         rule: summaryRuleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 'http://localhost:12345/basePath',
         },
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2197,10 +2046,10 @@ describe('Execution Handler', () => {
 
     it('populates the rule.url without the space specifier when the spaceId is the string "default"', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 'http://localhost:12345',
         },
         taskInstance: {
@@ -2208,8 +2057,8 @@ describe('Execution Handler', () => {
         } as unknown as ConcreteTaskInstance,
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2233,16 +2082,16 @@ describe('Execution Handler', () => {
 
     it('populates the rule.url in the action params when the base url has a trailing slash and removes the trailing slash', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 'http://localhost:12345/',
         },
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2266,16 +2115,16 @@ describe('Execution Handler', () => {
 
     it('does not populate the rule.url when the base url is not specified', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: undefined,
         },
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2293,10 +2142,10 @@ describe('Execution Handler', () => {
 
     it('does not populate the rule.url when base url is not a valid url', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 'localhost12345',
         },
         taskInstance: {
@@ -2304,8 +2153,8 @@ describe('Execution Handler', () => {
         } as unknown as ConcreteTaskInstance,
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2323,10 +2172,10 @@ describe('Execution Handler', () => {
 
     it('does not populate the rule.url when base url is a number', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 1,
         },
         taskInstance: {
@@ -2334,8 +2183,8 @@ describe('Execution Handler', () => {
         } as unknown as ConcreteTaskInstance,
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2353,10 +2202,10 @@ describe('Execution Handler', () => {
 
     it('sets the rule.url to the value from getViewInAppRelativeUrl when the rule type has it defined', async () => {
       const execParams = {
-        ...defaultExecutionParams,
+        ...defaultSchedulerContext,
         rule: ruleWithUrl,
         taskRunnerContext: {
-          ...defaultExecutionParams.taskRunnerContext,
+          ...defaultSchedulerContext.taskRunnerContext,
           kibanaBaseUrl: 'http://localhost:12345',
         },
         ruleType: {
@@ -2367,8 +2216,8 @@ describe('Execution Handler', () => {
         },
       };
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
-      await executionHandler.run(generateAlert({ id: 1 }));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(execParams));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -2409,9 +2258,9 @@ describe('Execution Handler', () => {
         recovered: { count: 0, data: [] },
       });
 
-      const executorParams = generateExecutionParams({
+      const executorParams = getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           systemActions: [
             {
               id: '1',
@@ -2434,9 +2283,9 @@ describe('Execution Handler', () => {
       executorParams.actionsClient.isSystemAction.mockReturnValue(true);
       executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      const res = await executionHandler.run(generateAlert({ id: 1 }));
+      const res = await actionScheduler.run(generateAlert({ id: 1 }));
 
       /**
        * Verifies that system actions are not throttled
@@ -2535,9 +2384,9 @@ describe('Execution Handler', () => {
         recovered: { count: 0, data: [] },
       });
 
-      const executorParams = generateExecutionParams({
+      const executorParams = getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           systemActions: [
             {
               id: 'action-id',
@@ -2554,9 +2403,9 @@ describe('Execution Handler', () => {
       executorParams.actionsClient.isSystemAction.mockReturnValue(true);
       executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      const res = await executionHandler.run(generateAlert({ id: 1 }));
+      const res = await actionScheduler.run(generateAlert({ id: 1 }));
 
       /**
        * Verifies that system actions are not throttled
@@ -2587,13 +2436,13 @@ describe('Execution Handler', () => {
     test('do not execute if the rule type does not support summarized alerts', async () => {
       const actionsParams = { myParams: 'test' };
 
-      const executorParams = generateExecutionParams({
+      const executorParams = getSchedulerContext({
         ruleType: {
           ...ruleType,
           alerts: undefined,
         },
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           systemActions: [
             {
               id: 'action-id',
@@ -2610,9 +2459,9 @@ describe('Execution Handler', () => {
       executorParams.actionsClient.isSystemAction.mockReturnValue(true);
       executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      const res = await executionHandler.run(generateAlert({ id: 1 }));
+      const res = await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(res).toEqual({ throttledSummaryActions: {} });
       expect(buildActionParams).not.toHaveBeenCalled();
@@ -2625,9 +2474,9 @@ describe('Execution Handler', () => {
     test('do not execute system actions if the rule type does not support summarized alerts', async () => {
       const actionsParams = { myParams: 'test' };
 
-      const executorParams = generateExecutionParams({
+      const executorParams = getSchedulerContext({
         rule: {
-          ...defaultExecutionParams.rule,
+          ...defaultSchedulerContext.rule,
           systemActions: [
             {
               id: '1',
@@ -2638,7 +2487,7 @@ describe('Execution Handler', () => {
           ],
         },
         ruleType: {
-          ...defaultExecutionParams.ruleType,
+          ...defaultSchedulerContext.ruleType,
           alerts: undefined,
         },
       });
@@ -2648,9 +2497,9 @@ describe('Execution Handler', () => {
       executorParams.actionsClient.isSystemAction.mockReturnValue(true);
       executorParams.taskRunnerContext.kibanaBaseUrl = 'https://example.com';
 
-      const executionHandler = new ExecutionHandler(generateExecutionParams(executorParams));
+      const actionScheduler = new ActionScheduler(getSchedulerContext(executorParams));
 
-      await executionHandler.run(generateAlert({ id: 1 }));
+      await actionScheduler.run(generateAlert({ id: 1 }));
 
       expect(alertsClient.getSummarizedAlerts).not.toHaveBeenCalled();
       expect(buildActionParams).not.toHaveBeenCalled();

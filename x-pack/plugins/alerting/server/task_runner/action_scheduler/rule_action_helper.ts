@@ -12,7 +12,7 @@ import {
   RuleAction,
   RuleNotifyWhenTypeValues,
   ThrottledActions,
-} from '../../common';
+} from '../../../common';
 
 export const isSummaryAction = (action?: RuleAction) => {
   return action?.frequency?.summary ?? false;
@@ -26,10 +26,6 @@ export const isActionOnInterval = (action?: RuleAction) => {
     action?.frequency.notifyWhen === RuleNotifyWhenTypeValues[2] &&
     typeof action?.frequency.throttle === 'string'
   );
-};
-
-export const isSummaryActionOnInterval = (action: RuleAction) => {
-  return isActionOnInterval(action) && action.frequency?.summary;
 };
 
 export const isSummaryActionThrottled = ({
@@ -128,4 +124,26 @@ export const getSummaryActionTimeBounds = (
   }
 
   return { start: startDate.valueOf(), end: now.valueOf() };
+};
+
+interface LogNumberOfFilteredAlertsOpts {
+  logger: Logger;
+  numberOfAlerts: number;
+  numberOfSummarizedAlerts: number;
+  action: RuleAction;
+}
+export const logNumberOfFilteredAlerts = ({
+  logger,
+  numberOfAlerts = 0,
+  numberOfSummarizedAlerts = 0,
+  action,
+}: LogNumberOfFilteredAlertsOpts) => {
+  const count = numberOfAlerts - numberOfSummarizedAlerts;
+  if (count > 0) {
+    logger.debug(
+      `(${count}) alert${count > 1 ? 's' : ''} ${
+        count > 1 ? 'have' : 'has'
+      } been filtered out for: ${action.actionTypeId}:${action.uuid}`
+    );
+  }
 };
