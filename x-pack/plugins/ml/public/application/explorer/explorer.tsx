@@ -621,6 +621,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
               {...{
                 ...chartsData,
                 severity,
+                tableData,
                 timefilter,
                 mlLocator,
                 timeBuckets,
