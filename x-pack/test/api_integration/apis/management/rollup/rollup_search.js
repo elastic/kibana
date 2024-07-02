@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { registerHelpers } from './rollup.test_helpers';
-import { API_BASE_PATH, INDEX_TO_ROLLUP_MAPPINGS } from './constants';
+import { API_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
 export default function ({ getService }) {

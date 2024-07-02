@@ -10,7 +10,6 @@ import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
 import { INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
-import { INDEX_TO_ROLLUP_MAPPINGS } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
