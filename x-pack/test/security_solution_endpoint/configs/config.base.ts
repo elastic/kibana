@@ -11,7 +11,7 @@ import { pageObjects } from '../page_objects';
 import {
   getRegistryUrlAsArray,
   createEndpointDockerConfig,
-} from '../../security_solution_endpoint_api_int/registry';
+} from '../../security_solution_api_integration/test_suites/security_solution_endpoint_api_int/registry';
 import type { TargetTags } from '../target_tags';
 
 export const SUITE_TAGS: Record<
@@ -48,7 +48,7 @@ export const generateConfig = async ({
   const { readConfigFile } = ftrConfigProviderContext;
 
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../../../functional/config.base.js')
+    require.resolve('../../functional/config.base.js')
   );
 
   return {

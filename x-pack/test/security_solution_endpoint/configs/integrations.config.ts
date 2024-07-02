@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { generateConfig } from './config.base';
 import { services } from '../services';
 
+// eslint-disable-next-line import/no-default-export
 export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
   const { readConfigFile } = ftrConfigProviderContext;
 
   const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../../../../functional/config.base.js')
+    require.resolve('../../functional/config.base.js')
   );
 
   return generateConfig({
     ftrConfigProviderContext,
     baseConfig: xpackFunctionalConfig,
-    testFiles: [resolve(__dirname, '../apps/endpoint')],
-    junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
+    testFiles: [resolve(__dirname, '../apps/integrations')],
+    junitReportName: 'X-Pack Endpoint Integrations Functional Tests on ESS',
     target: 'ess',
+    kbnServerArgs: [
+      // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
+      '--xpack.securitySolution.packagerTaskInterval=5s',
+    ],
     services,
   });
 }
