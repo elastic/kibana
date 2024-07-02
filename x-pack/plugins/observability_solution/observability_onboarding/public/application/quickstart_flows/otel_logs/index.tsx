@@ -225,6 +225,12 @@ data:
           - key: cloud.instance.id
             from_attribute: host.id
             action: insert
+      resource/process:
+        attributes:
+          - key: process.executable.name
+            action: delete
+          - key: process.executable.path
+            action: delete
       resourcedetection/system:
         detectors: ["system", "ec2"]
         system:
@@ -291,6 +297,9 @@ data:
             - tag_name: app.label.component
               key: app.kubernetes.io/component
               from: pod
+    extensions:
+      file_storage:
+        directory: /var/lib/otelcol
     receivers:
       filelog:
         retry_on_failure:
@@ -302,6 +311,7 @@ data:
         - /var/log/pods/*/*/*.log
         include_file_name: false
         include_file_path: true
+        storage: file_storage
         operators:
         - id: container-parser
           type: container
@@ -318,6 +328,19 @@ data:
           memory:
             metrics:
               system.memory.utilization:
+                enabled: true
+          process:
+            mute_process_exe_error: true
+            mute_process_io_error: true
+            mute_process_user_error: true
+            metrics:
+              process.threads:
+                enabled: true
+              process.open_file_descriptors:
+                enabled: true
+              process.memory.utilization:
+                enabled: true
+              process.disk.operations:
                 enabled: true
           network:
           processes:
@@ -399,6 +422,7 @@ data:
           - container.id
 
     service:
+      extensions: [file_storage]
       pipelines:
         logs:
           exporters:
@@ -426,6 +450,7 @@ data:
           - resource/k8s
           - resource/cloud
           - attributes/dataset
+          - resource/process
           receivers:
           - kubeletstats
           - hostmetrics
