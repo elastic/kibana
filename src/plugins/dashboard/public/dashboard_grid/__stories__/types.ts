@@ -6,4 +6,20 @@
  * Side Public License, v 1.
  */
 
-module.exports = require('@kbn/storybook').defaultConfig;
+export interface GridLayout {
+  [key: string]: GridData;
+}
+
+export interface GridData {
+  id: string;
+  column: number;
+  row: number;
+  width: number;
+  height: number;
+}
+
+export interface GridSettings {
+  gutterSize: number;
+  rowHeight: number;
+  columnCount: number;
+}
