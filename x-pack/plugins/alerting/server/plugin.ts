@@ -541,19 +541,20 @@ export class AlertingPlugin {
       backfillClient: this.backfillClient!,
       connectorAdapterRegistry: this.connectorAdapterRegistry,
       uiSettings: core.uiSettings,
+      securityService: core.security,
     });
 
     rulesSettingsClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
-      securityPluginStart: plugins.security,
+      securityService: core.security,
       isServerless: !!plugins.serverless,
     });
 
     maintenanceWindowClientFactory.initialize({
       logger: this.logger,
       savedObjectsService: core.savedObjects,
-      securityPluginStart: plugins.security,
+      securityService: core.security,
       uiSettings: core.uiSettings,
     });
 
