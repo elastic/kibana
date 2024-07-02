@@ -1481,6 +1481,30 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
@@ -1519,30 +1543,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -3936,6 +3936,34 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+          },
+          {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
@@ -4082,34 +4110,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/common/containers/source/mock.ts"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "securitySolution",
