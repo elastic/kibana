@@ -793,7 +793,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         component={QueryBarDefineRule}
         componentProps={
           {
-            browserFields,
             idAria: 'detectionEngineStepDefineRuleQueryBar',
             indexPattern,
             isDisabled: isLoading || shouldLoadQueryDynamically || timelineQueryLoading,
@@ -813,7 +812,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [
       handleOpenTimelineSearch,
       shouldLoadQueryDynamically,
-      browserFields,
       indexPattern,
       isLoading,
       timelineQueryLoading,

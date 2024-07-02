@@ -60,7 +60,7 @@ describe('getColumns', () => {
 
   describe('column actions', () => {
     let actionsColumn: Column;
-    const mockDataToUse = mockBrowserFields.agent;
+    const mockDataToUse = mockBrowserFields.agent.fields;
     const testValue = 'testValue';
     const testData = {
       type: 'someType',

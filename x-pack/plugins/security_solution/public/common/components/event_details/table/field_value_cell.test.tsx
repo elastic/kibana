@@ -21,7 +21,6 @@ const hostIpData: EventFieldsData = {
   aggregatable: true,
   ariaRowindex: 35,
   field: 'host.ip',
-  fields: {},
   format: '',
   indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
   isObjectArray: false,
@@ -87,7 +86,6 @@ describe('FieldValueCell', () => {
       aggregatable: false,
       ariaRowindex: 50,
       field: 'message',
-      fields: {},
       format: '',
       indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       isObjectArray: false,
@@ -102,7 +100,6 @@ describe('FieldValueCell', () => {
 
     const messageFieldFromBrowserField: BrowserField = {
       aggregatable: false,
-      fields: {},
       format: '',
       indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'message',
@@ -139,7 +136,6 @@ describe('FieldValueCell', () => {
   describe('when `BrowserField` metadata IS available', () => {
     const hostIpFieldFromBrowserField: BrowserField = {
       aggregatable: true,
-      fields: {},
       format: '',
       indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
       name: 'host.ip',

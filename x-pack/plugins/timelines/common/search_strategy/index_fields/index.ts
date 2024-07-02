@@ -76,7 +76,6 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  */
 export interface BrowserField {
   aggregatable: boolean;
-  fields: Record<string, Partial<BrowserField>>; // FIXME: missing in FieldSpec
   format: string;
   indexes: string[]; // FIXME: missing in FieldSpec
   name: string;
@@ -88,6 +87,12 @@ export interface BrowserField {
   runtimeField?: RuntimeField;
 }
 
+type FieldCategoryName = string;
+
+export interface FieldCategory {
+  fields: Record<string, Partial<BrowserField>>;
+}
+
 /**
  * @deprecated use fields list on dataview / "indexPattern"
  * about to use browserFields? Reconsider! Maybe you can accomplish
@@ -95,7 +100,7 @@ export interface BrowserField {
  * you are working with? Or perhaps you need a description for a
  * particular field? Consider using the EcsFlat module from `@kbn/ecs`
  */
-export type BrowserFields = Record<string, Partial<BrowserField>>;
+export type BrowserFields = Record<FieldCategoryName, FieldCategory>;
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];
