@@ -35,7 +35,7 @@ describe('QuickPromptSelector', () => {
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     // there is only one delete quick prompt because there is only one custom option
     fireEvent.click(getByTestId('delete-quick-prompt'));
-    expect(onQuickPromptDeleted).toHaveBeenCalledWith('ALERT_SUMMARIZATION_TITLE');
+    expect(onQuickPromptDeleted).toHaveBeenCalledWith('A_CUSTOM_OPTION');
   });
   it('Selects existing quick prompt from the search  input', () => {
     const { getByTestId } = render(<QuickPromptSelector {...testProps} />);
