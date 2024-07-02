@@ -125,7 +125,7 @@ export class SentinelOneConnector extends SubActionConnector<
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.DOWNLAOD_REMOTE_SCRIPT_RESULTS,
+      name: SUB_ACTION.DOWNLOAD_REMOTE_SCRIPT_RESULTS,
       method: 'downloadRemoteScriptResults',
       schema: SentinelOneDownloadRemoteScriptResultsParamsSchema,
     });
