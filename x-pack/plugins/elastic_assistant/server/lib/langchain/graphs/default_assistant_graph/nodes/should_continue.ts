@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NEW_CHAT } from '../../../../../routes/helpers';
 import { AgentState, NodeParamsBase } from '../types';
 
 export interface ShouldContinueParams extends NodeParamsBase {
@@ -21,6 +22,34 @@ export const shouldContinue = ({ logger, state }: ShouldContinueParams) => {
   logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
 
   if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
+    return 'end';
+  }
+
+  return 'continue';
+};
+
+export const shouldContinueGenerateTitle = ({ logger, state }: ShouldContinueParams) => {
+  logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
+
+  if (state.conversation?.title !== NEW_CHAT) {
+    return 'end';
+  }
+
+  return 'continue';
+};
+
+export interface ShouldContinueGetConversation extends NodeParamsBase {
+  state: AgentState;
+  conversationId?: string;
+}
+export const shouldContinueGetConversation = ({
+  logger,
+  state,
+  conversationId,
+}: ShouldContinueGetConversation) => {
+  logger.debug(`Node state:\n${JSON.stringify(state, null, 2)}`);
+
+  if (!conversationId) {
     return 'end';
   }
 

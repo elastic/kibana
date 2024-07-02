@@ -68,7 +68,12 @@ export function getServiceColumns({
       sortable: true,
       width: `${unit * 9}px`,
       dataType: 'number',
-      render: (_, { environments }) => <EnvironmentBadge environments={environments} />,
+      render: (_, { environments, signalTypes }) => (
+        <EnvironmentBadge
+          environments={environments}
+          isMetricsSignalType={signalTypes.includes(SignalTypes.METRICS)}
+        />
+      ),
       align: RIGHT_ALIGNMENT,
     },
     {

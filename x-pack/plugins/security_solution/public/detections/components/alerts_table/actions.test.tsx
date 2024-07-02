@@ -384,7 +384,7 @@ describe('alert actions', () => {
             },
             eventIdToNoteIds: {},
             eventType: 'all',
-            excludedRowRendererIds: [],
+            excludedRowRendererIds: defaultTimelineProps.timeline.excludedRowRendererIds,
             expandedDetail: {},
             filters: [
               {
