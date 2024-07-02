@@ -50,6 +50,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   request,
   size,
   traceOptions,
+  search,
+  dataViews,
   dataClients,
 }) => {
   const isOpenAI = llmType === 'openai';
@@ -105,6 +107,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     anonymizationFields,
     chain,
     esClient,
+    esStore,
     isEnabledKnowledgeBase,
     llm,
     logger,
@@ -113,6 +116,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     replacements,
     request,
     size,
+    search,
+    dataViews,
   };
 
   const tools: ToolInterface[] = assistantTools.flatMap(

@@ -445,6 +445,8 @@ export const langChainExecute = async ({
     replacements,
     responseLanguage,
     size: request.body.size,
+    search: assistantContext.search,
+    dataViews: assistantContext.dataViews,
     traceOptions: {
       projectName: request.body.langSmithProject,
       tracers: getLangSmithTracer({

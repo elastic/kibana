@@ -203,6 +203,8 @@ export const postEvaluateRoute = (
                     llmType: 'openai',
                     logger,
                     request: skeletonRequest,
+                    search: assistantContext.search,
+                    dataViews: assistantContext.dataViews,
                     traceOptions: {
                       exampleId,
                       projectName,

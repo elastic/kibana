@@ -88,11 +88,11 @@ describe('useConversation helpers', () => {
 
   describe('analyzeMarkdown', () => {
     it('should identify dsl Query successfully.', () => {
-      const result = analyzeMarkdown(markDownWithDSLQuery);
+      const result = analyzeMarkdown(markDownWithDSLQuery, new Date().toISOString());
       expect(result[0].type).toBe('dsl');
     });
     it('should identify kql Query successfully.', () => {
-      const result = analyzeMarkdown(markDownWithKQLQuery);
+      const result = analyzeMarkdown(markDownWithKQLQuery, new Date().toISOString());
       expect(result[0].type).toBe('kql');
     });
   });

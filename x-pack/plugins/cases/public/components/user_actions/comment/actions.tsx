@@ -54,7 +54,7 @@ export const createActionAttachmentUserActionBuilder = ({
         timelineAvatarAriaLabel: actionIconName,
         actions: <UserActionCopyLink id={comment.id} />,
         children: comment.comment.trim().length > 0 && (
-          <ScrollableMarkdown content={comment.comment} />
+          <ScrollableMarkdown content={comment.comment} timestamp={userAction.createdAt} />
         ),
       },
     ];
