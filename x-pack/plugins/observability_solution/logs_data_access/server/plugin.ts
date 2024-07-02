@@ -35,10 +35,7 @@ export class LogsDataAccessPlugin
   public setup(core: CoreSetup, plugins: LogsDataAccessPluginSetupDeps) {}
 
   public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {
-    const services = registerServices({
-      logger: this.logger,
-      deps: {},
-    });
+    const services = registerServices();
 
     return {
       services,
