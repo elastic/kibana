@@ -278,7 +278,11 @@ export class DataGridService extends FtrService {
       : 'docTableExpandToggleColumn';
 
     const toggle = await this.find.byCssSelector(
-      `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex}"] [data-test-subj="${testSubj}"]`
+      `${
+        options.isAnchorRow
+          ? ''
+          : `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex || 0}"]`
+      } .euiDataGridRowCell[data-gridcell-column-id="openDetails"] [data-test-subj="${testSubj}"]`
     );
 
     await toggle.scrollIntoViewIfNecessary();

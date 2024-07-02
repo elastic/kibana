@@ -153,6 +153,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
         expect(await cell.getVisibleText()).to.be(' - ');
         expect(await dataGrid.getHeaders()).to.eql([
+          '',
           'Control column',
           'Select column',
           'Numberbytes',
