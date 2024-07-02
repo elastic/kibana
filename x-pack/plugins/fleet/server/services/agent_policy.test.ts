@@ -680,7 +680,7 @@ describe('Agent policy', () => {
           [
             {
               id: 'package-1',
-              policy_id: '',
+              policy_id: 'int_policy_2',
               policy_ids: ['int_policy_2'],
             },
           ]

@@ -1029,11 +1029,14 @@ class AgentPolicyService {
       await packagePolicyService.bulkUpdate(
         soClient,
         esClient,
-        policiesWithMultipleAP.map((policy) => ({
-          ...policy,
-          policy_id: '',
-          policy_ids: policy.policy_ids.filter((policyId) => policyId !== id),
-        }))
+        policiesWithMultipleAP.map((policy) => {
+          const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
+          return {
+            ...policy,
+            policy_id: newPolicyIds[0],
+            policy_ids: newPolicyIds,
+          };
+        })
       );
       logger.debug(
         `Updated package policies with ids ${policiesWithMultipleAP
