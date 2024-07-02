@@ -517,10 +517,9 @@ export const mockGlobalState: State = {
   discover: getMockDiscoverInTimelineState(),
   dataViewPicker: dataViewPickerInitialState,
   notes: {
-    ids: ['1'],
     entities: {
       '1': {
-        eventId: '1', // ids based on mock Timeline Data
+        eventId: '1', // should be a valid id based on mockTimelineData
         noteId: '1',
         note: 'note-1',
         timelineId: 'timeline-1',
@@ -531,15 +530,31 @@ export const mockGlobalState: State = {
         version: 'version',
       },
     },
+    ids: ['1'],
     status: {
       fetchNotesByDocumentIds: ReqStatus.Idle,
       createNote: ReqStatus.Idle,
-      deleteNote: ReqStatus.Idle,
+      deleteNotes: ReqStatus.Idle,
+      fetchNotes: ReqStatus.Idle,
     },
     error: {
       fetchNotesByDocumentIds: null,
       createNote: null,
-      deleteNote: null,
+      deleteNotes: null,
+      fetchNotes: null,
     },
+    pagination: {
+      page: 1,
+      perPage: 10,
+      total: 0,
+    },
+    sort: {
+      field: 'created' as const,
+      direction: 'desc' as const,
+    },
+    filter: '',
+    search: '',
+    selectedIds: [],
+    pendingDeleteIds: [],
   },
 };
