@@ -45,7 +45,7 @@ export function AddAPMCallOut() {
           <EuiTitle size="xs">
             <h1>
               <FormattedMessage
-                id="xpack.apm.portalPanel.zeroProjects.title"
+                id="xpack.apm.addAPMCallOut.title"
                 defaultMessage="Detect and resolve issues faster with deep visibility into your application"
               />
             </h1>
@@ -56,7 +56,7 @@ export function AddAPMCallOut() {
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.apm.portalPanel.zeroProjects.title"
+                id="xpack.apm.addAPMCallOut.description"
                 defaultMessage="Understanding your application performance, relationships and dependencies by
     instrumenting with APM."
               />

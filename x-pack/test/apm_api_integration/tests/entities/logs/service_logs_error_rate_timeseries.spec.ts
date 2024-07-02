@@ -20,9 +20,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   const hostName = 'synth-host';
 
-  type LogsErrorRateTimeseriesReturnType =
-    APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries'>;
-
   async function getLogsErrorRateTimeseries(
     overrides?: RecursivePartial<
       APIClientRequestParamsOf<'GET /internal/apm/entities/services/{serviceName}/logs_error_rate_timeseries'>['params']

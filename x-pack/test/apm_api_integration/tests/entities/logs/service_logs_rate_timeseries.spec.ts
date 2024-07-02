@@ -147,7 +147,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns log rate timeseries', async () => {
         const response = await getLogsRateTimeseries();
         expect(response.status).to.be(200);
-        console.log(response.body.currentPeriod[serviceName]);
         expect(
           response.body.currentPeriod[serviceName].every(({ y }) => y === 0.06666666666666667)
         ).to.be(true);
