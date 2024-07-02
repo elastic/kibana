@@ -117,6 +117,7 @@ export const createConversations = async (
  */
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
+    application: { navigateToApp },
     http,
     notifications,
     storage,
@@ -170,6 +171,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}
+      navigateToApp={navigateToApp}
       title={ASSISTANT_TITLE}
       toasts={toasts}
     >

@@ -23,7 +23,7 @@ export type TagFilter = (tag: string) => boolean;
 const POLICY_ID_START_POSITION = BY_POLICY_ARTIFACT_TAG_PREFIX.length;
 
 export const isArtifactGlobal = (item: Partial<Pick<ExceptionListItemSchema, 'tags'>>): boolean => {
-  return (item.tags ?? []).find((tag) => tag === GLOBAL_ARTIFACT_TAG) !== undefined;
+  return (item.tags ?? []).includes(GLOBAL_ARTIFACT_TAG);
 };
 
 export const isArtifactByPolicy = (item: Pick<ExceptionListItemSchema, 'tags'>): boolean => {
@@ -96,7 +96,7 @@ export const getEffectedPolicySelectionByTags = (
 
 export const isFilterProcessDescendantsEnabled = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
-): boolean => (item.tags ?? []).find((tag) => tag === FILTER_PROCESS_DESCENDANTS_TAG) !== undefined;
+): boolean => (item.tags ?? []).includes(FILTER_PROCESS_DESCENDANTS_TAG);
 
 export const isFilterProcessDescendantsTag: TagFilter = (tag) =>
   tag === FILTER_PROCESS_DESCENDANTS_TAG;

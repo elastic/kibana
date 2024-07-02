@@ -78,7 +78,7 @@ export async function executeCreateAction({
   });
 
   const context = {
-    dataViewSpec: dataView.toSpec(),
+    dataViewSpec: dataView.toSpec(false),
     fieldName: '',
     textBasedColumns: columns,
     query: defaultEsqlQuery,

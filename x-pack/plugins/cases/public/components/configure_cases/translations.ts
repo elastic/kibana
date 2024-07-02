@@ -160,3 +160,14 @@ export const CASES_WEBHOOK_MAPPINGS = i18n.translate(
       'Webhook - Case Management field mappings are configured in the connector settings in the third-party REST API JSON.',
   }
 );
+
+export const ADD_CUSTOM_FIELD = i18n.translate(
+  'xpack.cases.configureCases.customFields.addCustomField',
+  {
+    defaultMessage: 'Add field',
+  }
+);
+
+export const CREATE_TEMPLATE = i18n.translate('xpack.cases.configureCases.templates.flyoutTitle', {
+  defaultMessage: 'Create template',
+});

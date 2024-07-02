@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+
 import {
   EuiButton,
   EuiButtonGroup,
@@ -31,9 +35,9 @@ import {
   ViewMode as ViewModeType,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React, { useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+
 import { ControlGroupApi } from '../react_controls/control_group/types';
+import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
 
@@ -51,6 +55,7 @@ const toggleViewButtons = [
 ];
 
 const searchControlId = 'searchControl1';
+const rangeSliderControlId = 'rangeSliderControl1';
 const timesliderControlId = 'timesliderControl1';
 const controlGroupPanels = {
   [searchControlId]: {
@@ -65,6 +70,20 @@ const controlGroupPanels = {
       grow: true,
       width: 'medium',
       searchString: 'this',
+      enhancements: {},
+    },
+  },
+  [rangeSliderControlId]: {
+    type: RANGE_SLIDER_CONTROL_TYPE,
+    order: 0,
+    grow: true,
+    width: 'medium',
+    explicitInput: {
+      id: rangeSliderControlId,
+      fieldName: 'bytes',
+      title: 'Bytes',
+      grow: true,
+      width: 'medium',
       enhancements: {},
     },
   },
@@ -93,6 +112,15 @@ export const ReactControlExample = ({
   const dataLoading$ = useMemo(() => {
     return new BehaviorSubject<boolean | undefined>(false);
   }, []);
+  const controlGroupFilters$ = useMemo(() => {
+    return new BehaviorSubject<Filter[] | undefined>(undefined);
+  }, []);
+  const filters$ = useMemo(() => {
+    return new BehaviorSubject<Filter[] | undefined>(undefined);
+  }, []);
+  const unifiedSearchFilters$ = useMemo(() => {
+    return new BehaviorSubject<Filter[] | undefined>(undefined);
+  }, []);
   const timeRange$ = useMemo(() => {
     return new BehaviorSubject<TimeRange | undefined>({
       from: 'now-24h',
@@ -114,15 +142,15 @@ export const ReactControlExample = ({
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const [dataViewNotFound, setDataViewNotFound] = useState(false);
 
-  const dashboardApi = useMemo(() => {
+  const dashboardApi = useMount(() => {
     const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+    const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
     return {
       dataLoading: dataLoading$,
-      viewMode: viewMode$,
-      filters$,
+      unifiedSearchFilters$,
       query$,
       timeRange$,
       timeslice$,
@@ -130,6 +158,8 @@ export const ReactControlExample = ({
       publishFilters: (newFilters: Filter[] | undefined) => filters$.next(newFilters),
       setChild: (child: HasUniqueId) =>
         children$.next({ ...children$.getValue(), [child.uuid]: child }),
+      setViewMode: (newViewMode) => viewMode.next(newViewMode),
+      setChild: (child) => children$.next({ ...children$.getValue(), [child.uuid]: child }),
       removePanel: () => {},
       replacePanel: () => {
         return Promise.resolve('');
@@ -181,13 +211,13 @@ export const ReactControlExample = ({
     if (!controlGroupApi) return;
 
     const subscription = controlGroupApi.filters$.subscribe((controlGroupFilters) => {
-      if (dashboardApi) dashboardApi.publishFilters(controlGroupFilters);
+      controlGroupFilters$.next(controlGroupFilters);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [dashboardApi, controlGroupApi]);
+  }, [controlGroupFilters$, controlGroupApi]);
 
   useEffect(() => {
     if (!controlGroupApi) return;
@@ -200,6 +230,18 @@ export const ReactControlExample = ({
       subscription.unsubscribe();
     };
   }, [controlGroupApi, timeslice$]);
+
+  useEffect(() => {
+    const subscription = combineLatest([controlGroupFilters$, unifiedSearchFilters$]).subscribe(
+      ([controlGroupFilters, unifiedSearchFilters]) => {
+        filters$.next([...(controlGroupFilters ?? []), ...(unifiedSearchFilters ?? [])]);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupFilters$, filters$, unifiedSearchFilters$]);
 
   return (
     <>
@@ -288,6 +330,11 @@ export const ReactControlExample = ({
             references: [
               {
                 name: `controlGroup_${searchControlId}:${SEARCH_CONTROL_TYPE}DataView`,
+                type: 'index-pattern',
+                id: WEB_LOGS_DATA_VIEW_ID,
+              },
+              {
+                name: `controlGroup_${rangeSliderControlId}:${RANGE_SLIDER_CONTROL_TYPE}DataView`,
                 type: 'index-pattern',
                 id: WEB_LOGS_DATA_VIEW_ID,
               },
