@@ -36,9 +36,9 @@ describe('correctCommonEsqlMistakes', () => {
     );
   });
 
-  it(`replaces " or ' escaping in FROM statements with backticks`, () => {
-    expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
-    expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
+  it("replaces ` or ' escaping in FROM statements with backticks", () => {
+    expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM "logs-*"\n| LIMIT 10');
+    expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM "logs-*"\n| LIMIT 10');
     expectQuery(`FROM logs-* | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
   });
 
@@ -143,7 +143,7 @@ describe('correctCommonEsqlMistakes', () => {
       | EVAL "@timestamp" = TO_DATETIME(timestamp)
       | WHERE statement LIKE 'SELECT%'
       | STATS avg_duration = AVG(duration)`,
-      `FROM postgres-logs*
+      `FROM "postgres-logs*"
     | GROK message "%{TIMESTAMP_ISO8601:timestamp} %{TZ} \[%{NUMBER:process_id}\]: \[%{NUMBER:log_line}\] user=%{USER:user},db=%{USER:database},app=\[%{DATA:application}\],client=%{IP:client_ip} LOG:  duration: %{NUMBER:duration:float} ms  statement: %{GREEDYDATA:statement}"
     | EVAL @timestamp = TO_DATETIME(timestamp)
     | WHERE statement LIKE "SELECT%"
