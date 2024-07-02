@@ -110,9 +110,7 @@ export const OtelLogsPanel: React.FC = () => {
             </p>
           </EuiText>
           <CopyableCodeBlock
-            content={`kubectl create secret generic elastic-secret-otel \\
---from-literal=es_endpoint='${setup?.elasticsearchUrl}' \\                 
---from-literal=es_api_key='${apiKeyData?.apiKeyEncoded}'
+            content={`kubectl create secret generic elastic-secret-otel --from-literal=es_endpoint='${setup?.elasticsearchUrl}' --from-literal=es_api_key='${apiKeyData?.apiKeyEncoded}'
 
 kubectl apply -f otel-collector-k8s.yml`}
           />
