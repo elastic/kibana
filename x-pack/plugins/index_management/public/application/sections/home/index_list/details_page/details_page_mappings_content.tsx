@@ -227,7 +227,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       if (!error) {
         notificationService.showSuccessToast(
           i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
-            defaultMessage: 'Index Mapping was successfully updated',
+            defaultMessage: 'Updated index mapping',
           })
         );
         refetchMapping();
