@@ -8,13 +8,11 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import {
   GetViewInAppRelativeUrlFnOpts,
   AlertInstanceContext as AlertContext,
   RuleExecutorOptions,
   AlertsClientError,
-  IRuleTypeAlerts,
 } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
@@ -55,16 +53,15 @@ type MonitorStatusAlert = ObservabilityUptimeAlert;
 export const registerSyntheticsStatusCheckRule = (
   server: SyntheticsServerSetup,
   plugins: SyntheticsPluginsSetupDependencies,
-  syntheticsMonitorClient: SyntheticsMonitorClient,
-  alerting: PluginSetupContract
+  syntheticsMonitorClient: SyntheticsMonitorClient
 ) => {
-  if (!alerting) {
+  if (!plugins.alerting) {
     throw new Error(
       'Cannot register the synthetics monitor status rule type. The alerting plugin needs to be enabled.'
     );
   }
 
-  alerting.registerType({
+  plugins.alerting.registerType({
     id: SYNTHETICS_ALERT_RULE_TYPES.MONITOR_STATUS,
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'uptime',
@@ -172,10 +169,7 @@ export const registerSyntheticsStatusCheckRule = (
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
-    alerts: {
-      ...SyntheticsRuleTypeAlertDefinition,
-      shouldWrite: true,
-    } as IRuleTypeAlerts<MonitorStatusAlert>,
+    alerts: SyntheticsRuleTypeAlertDefinition,
     fieldsForAAD: Object.keys(syntheticsRuleFieldMap),
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),
