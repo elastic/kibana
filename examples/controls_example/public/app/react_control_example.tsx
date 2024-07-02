@@ -7,7 +7,6 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 
 import {
@@ -142,15 +141,15 @@ export const ReactControlExample = ({
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const [dataViewNotFound, setDataViewNotFound] = useState(false);
 
-  const dashboardApi = useMount(() => {
-    const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
-    const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
+  const dashboardApi = useMemo(() => {
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
 
     return {
       dataLoading: dataLoading$,
       unifiedSearchFilters$,
+      viewMode: viewMode$,
+      filters$,
       query$,
       timeRange$,
       timeslice$,
@@ -158,8 +157,6 @@ export const ReactControlExample = ({
       publishFilters: (newFilters: Filter[] | undefined) => filters$.next(newFilters),
       setChild: (child: HasUniqueId) =>
         children$.next({ ...children$.getValue(), [child.uuid]: child }),
-      setViewMode: (newViewMode) => viewMode.next(newViewMode),
-      setChild: (child) => children$.next({ ...children$.getValue(), [child.uuid]: child }),
       removePanel: () => {},
       replacePanel: () => {
         return Promise.resolve('');
