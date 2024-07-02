@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { useValues } from 'kea';
 
 import {
+  EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -67,7 +68,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
   };
 
   const iconPath = nativeConnector.iconPath;
-
   const hasApiKey = !!(connector.api_key_id ?? apiKeyData);
 
   // TODO service_type === "" is considered unknown/custom connector multipleplaces replace all of them with a better solution
@@ -99,6 +99,19 @@ export const NativeConnectorConfiguration: React.FC = () => {
               <EuiTitle size="s">
                 <h2>{nativeConnector?.name ?? connector.name}</h2>
               </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {connector.is_native
+                  ? i18n.translate(
+                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.nativeConnector',
+                      { defaultMessage: 'Native connector' }
+                    )
+                  : i18n.translate(
+                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.connectorClient',
+                      { defaultMessage: 'Connector client' }
+                    )}
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
           {config.host && config.canDeployEntSearch && errorConnectingMessage && (

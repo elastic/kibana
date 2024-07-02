@@ -10,6 +10,7 @@ import React, { useMemo } from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -76,7 +77,7 @@ export const ConnectorConfiguration: React.FC = () => {
     externalDocsUrl: '',
     iconPath: 'custom.svg',
     isBeta: true,
-    isNative: true,
+    isNative: false,
     keywords: [],
     name: connector.name,
     serviceType: connector.service_type ?? '',
@@ -102,6 +103,19 @@ export const ConnectorConfiguration: React.FC = () => {
               <EuiTitle size="s">
                 <h2>{nativeConnector?.name ?? connector.name}</h2>
               </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">
+                {connector.is_native
+                  ? i18n.translate(
+                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.nativeConnector',
+                      { defaultMessage: 'Native connector' }
+                    )
+                  : i18n.translate(
+                      'xpack.enterpriseSearch.content.connector_detail.configurationConnector.badgeType.connectorClient',
+                      { defaultMessage: 'Connector client' }
+                    )}
+              </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
