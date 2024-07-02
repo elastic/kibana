@@ -277,7 +277,7 @@ function DiscoverDocumentsComponent({
       <>
         <SelectedVSAvailableCallout
           esqlQueryColumns={documents?.esqlQueryColumns}
-          selectedColumns={currentColumns}
+          selectedColumns={currentColumns.filter((col) => col !== '_source')}
         />
         <SearchResponseWarningsCallout warnings={documentState.interceptedWarnings ?? []} />
       </>
