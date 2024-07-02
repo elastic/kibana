@@ -9,10 +9,10 @@
 import React, { FC, PropsWithChildren } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { AbstractDataView } from '@kbn/data-views-plugin/common';
 
 interface IndexHeaderProps {
-  indexPattern: DataView;
+  indexPattern: AbstractDataView;
   defaultIndex?: string;
   setDefault?: () => void;
   editIndexPatternClick?: () => void;
