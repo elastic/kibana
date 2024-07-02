@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil, filter } from 'rxjs';
 import { parse } from 'url';
+import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
@@ -188,6 +189,26 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
+
+    // Ensure developers are notified if working in a context that lacks the EUI Provider.
+    const isDev = this.params.coreContext.env.mode.name === 'development';
+    if (isDev) {
+      setEuiDevProviderWarning((providerError) => {
+        // eslint-disable-next-line no-console
+        console.error(providerError);
+        notifications.toasts.addDanger({
+          title: '`EuiProvider` is missing which can result in negative effects.',
+          // FIXME: more details should open a modal
+          text: mountReactNode(
+            <p>
+              Components that use EUI must be wrapped in EuiProvider. See{' '}
+              <a href="https://ela.st/euiprovider">https://ela.st/euiprovider</a>.
+            </p>
+          ),
+          toastLifeTimeMs: 1000 * 60 * 60,
+        });
+      });
+    }
 
     const globalHelpExtensionMenuLinks$ = new BehaviorSubject<ChromeGlobalHelpExtensionMenuLink[]>(
       []
