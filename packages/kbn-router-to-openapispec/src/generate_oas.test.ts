@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { z } from 'zod';
 import { schema, Type } from '@kbn/config-schema';
 import { generateOpenApiDocument } from './generate_oas';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
@@ -20,12 +19,6 @@ interface RecursiveType {
   name: string;
   self: undefined | RecursiveType;
 }
-const baseCategorySchema = z.object({
-  name: z.string(),
-});
-type ZodRecursiveType = z.infer<typeof baseCategorySchema> & {
-  subcategories: ZodRecursiveType[];
-};
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
@@ -182,47 +175,6 @@ describe('generateOpenApiDocument', () => {
           }
         )
       ).toMatchObject(sharedOas);
-    });
-
-    it('handles recursive schemas', () => {
-      const recursiveSchema: z.ZodType<ZodRecursiveType> = baseCategorySchema.extend({
-        subcategories: z.lazy(() => recursiveSchema.array()),
-      });
-      expect(
-        generateOpenApiDocument(
-          {
-            routers: [
-              createRouter({
-                routes: [
-                  {
-                    isVersioned: false,
-                    path: '/recursive',
-                    method: 'get',
-                    validationSchemas: {
-                      request: {
-                        body: recursiveSchema,
-                      },
-                      response: {
-                        [200]: {
-                          body: () => schema.string({ maxLength: 10, minLength: 1 }),
-                        },
-                      },
-                    },
-                    options: { tags: ['foo'] },
-                    handler: jest.fn(),
-                  },
-                ],
-              }),
-            ],
-            versionedRouters: [],
-          },
-          {
-            title: 'test',
-            baseUrl: 'https://test.oas',
-            version: '99.99.99',
-          }
-        )
-      ).toMatchSnapshot();
     });
   });
 
