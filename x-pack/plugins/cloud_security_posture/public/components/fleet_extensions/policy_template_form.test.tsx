@@ -114,13 +114,13 @@ describe('<CspPolicyTemplateForm />', () => {
   const WrappedComponent = ({
     newPolicy,
     edit = false,
-    agentPolicy,
+    agentPolicies,
     packageInfo = {} as PackageInfo,
     agentlessPolicy,
   }: {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
-    agentPolicy?: AgentPolicy;
+    agentPolicies?: AgentPolicy[];
     packageInfo?: PackageInfo;
     onChange?: jest.Mock<void, [NewPackagePolicy]>;
     agentlessPolicy?: AgentPolicy;
@@ -136,7 +136,7 @@ describe('<CspPolicyTemplateForm />', () => {
               onChange={onChange}
               packageInfo={packageInfo}
               isEditPage={true}
-              agentPolicy={agentPolicy}
+              agentPolicies={agentPolicies}
               agentlessPolicy={agentlessPolicy}
             />
           )}
@@ -146,7 +146,7 @@ describe('<CspPolicyTemplateForm />', () => {
               onChange={onChange}
               packageInfo={packageInfo}
               isEditPage={false}
-              agentPolicy={agentPolicy}
+              agentPolicies={agentPolicies}
               agentlessPolicy={agentlessPolicy}
             />
           )}

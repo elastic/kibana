@@ -74,10 +74,10 @@ describe('useSetupTechnology', () => {
 
     it('sets to AGENT_BASED when agentPolicyId differs from agentlessPolicyId', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
-      const agentPolicy = { id: 'agentPolicyId' } as AgentPolicy;
+      const agentPolicies = [{ id: 'agentPolicyId' } as AgentPolicy];
       const agentlessPolicy = { id: 'agentlessPolicyId' } as AgentPolicy;
       const { result } = renderHook(() =>
-        useSetupTechnology({ input, agentPolicy, agentlessPolicy, isEditPage })
+        useSetupTechnology({ input, agentPolicies, agentlessPolicy, isEditPage })
       );
       expect(result.current.setupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
@@ -115,11 +115,11 @@ describe('useSetupTechnology', () => {
 
     it('initializes with AGENTLESS technology if the agent policy id is "agentless"', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
-      const agentPolicy = { id: 'agentless' } as AgentPolicy;
+      const agentPolicies = [{ id: 'agentless' } as AgentPolicy];
       const { result } = renderHook(() =>
         useSetupTechnology({
           input,
-          agentPolicy,
+          agentPolicies,
           isEditPage,
         })
       );

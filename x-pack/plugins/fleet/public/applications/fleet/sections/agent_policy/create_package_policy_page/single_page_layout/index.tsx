@@ -358,7 +358,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       ) : (
         <ExtensionWrapper>
           <replaceDefineStepView.Component
-            agentPolicy={agentPolicies[0]}
+            agentPolicies={agentPolicies}
             packageInfo={packageInfo}
             newPolicy={packagePolicy}
             onChange={handleExtensionViewOnChange}
