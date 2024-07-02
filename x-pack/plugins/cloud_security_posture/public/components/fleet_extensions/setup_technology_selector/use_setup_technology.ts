@@ -28,10 +28,10 @@ export const useSetupTechnology = ({
   const isCspmAzure = input.type === CLOUDBEAT_AZURE;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
   const isAgentlessAvailable = Boolean(isAgentlessSupportedForCloudProvider && agentlessPolicy);
-  const agentPolicyIds = agentPolicies?.map((policy: AgentPolicy) => policy.id);
+  const agentPolicyIds = (agentPolicies || []).map((policy: AgentPolicy) => policy.id);
   const agentlessPolicyId = agentlessPolicy?.id;
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(() => {
-    if (isEditPage && agentPolicyIds?.includes(SetupTechnology.AGENTLESS)) {
+    if (isEditPage && agentPolicyIds.includes(SetupTechnology.AGENTLESS)) {
       return SetupTechnology.AGENTLESS;
     }
 
@@ -50,7 +50,10 @@ export const useSetupTechnology = ({
       return;
     }
 
-    if (agentPolicyIds && (!agentlessPolicyId || !agentPolicyIds.includes(agentlessPolicyId))) {
+    if (
+      agentPolicyIds.length > 0 &&
+      (!agentlessPolicyId || !agentPolicyIds.includes(agentlessPolicyId))
+    ) {
       /*
         handle case when agent policy is coming from outside,
         e.g. from the get param or when coming to integration from a specific agent policy
