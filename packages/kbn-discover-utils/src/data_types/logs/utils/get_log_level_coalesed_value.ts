@@ -10,9 +10,12 @@ export enum LogLevelCoalescedValue {
   trace = 'trace',
   debug = 'debug',
   info = 'info',
+  notice = 'notice',
   warning = 'warning',
   error = 'error',
   critical = 'critical',
+  alert = 'alert',
+  emergency = 'emergency',
   fatal = 'fatal',
 }
 
@@ -39,10 +42,11 @@ export const getLogLevelCoalescedValue = (
     return LogLevelCoalescedValue.info;
   }
 
-  if (
-    logLevelLowerCase.startsWith('warn') || // warning
-    logLevelLowerCase.startsWith('not') // notice
-  ) {
+  if (logLevelLowerCase.startsWith('not')) {
+    return LogLevelCoalescedValue.notice;
+  }
+
+  if (logLevelLowerCase.startsWith('warn')) {
     return LogLevelCoalescedValue.warning;
   }
 
@@ -52,11 +56,17 @@ export const getLogLevelCoalescedValue = (
 
   if (
     logLevelLowerCase.startsWith('cri') || // critical
-    logLevelLowerCase.startsWith('sev') || // severe
-    logLevelLowerCase.startsWith('ale') || // alert
-    logLevelLowerCase.startsWith('emer') // emergency
+    logLevelLowerCase.startsWith('sev') // severe
   ) {
     return LogLevelCoalescedValue.critical;
+  }
+
+  if (logLevelLowerCase.startsWith('ale')) {
+    return LogLevelCoalescedValue.alert;
+  }
+
+  if (logLevelLowerCase.startsWith('emer')) {
+    return LogLevelCoalescedValue.emergency;
   }
 
   if (logLevelLowerCase.startsWith('fatal')) {

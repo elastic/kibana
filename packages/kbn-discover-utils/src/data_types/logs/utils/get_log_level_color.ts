@@ -6,27 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { EuiThemeComputed, euiPaletteColorBlind } from '@elastic/eui';
 import { LogLevelCoalescedValue } from './get_log_level_coalesed_value';
 
 export const getLogLevelColor = (
-  logLevelCoalescedValue: LogLevelCoalescedValue,
-  euiTheme: EuiThemeComputed
+  logLevelCoalescedValue: LogLevelCoalescedValue
+  // euiTheme: EuiThemeComputed
 ): string | undefined => {
   switch (logLevelCoalescedValue) {
-    case LogLevelCoalescedValue.trace:
     case LogLevelCoalescedValue.debug:
-      return euiTheme.colors.disabled;
+      return '#6092C0';
     case LogLevelCoalescedValue.info:
-      return euiPaletteColorBlind()[1];
+      return '#90B0D1';
+    case LogLevelCoalescedValue.notice:
+      return '#BECFE3';
     case LogLevelCoalescedValue.warning:
-      return '#F2BC5C';
+      return '#D6BF57';
     case LogLevelCoalescedValue.error:
-      return euiPaletteColorBlind()[9];
+      return '#DF9352';
     case LogLevelCoalescedValue.critical:
+      return '#E7664C';
+    case LogLevelCoalescedValue.alert:
+      return '#DA5E47';
+    case LogLevelCoalescedValue.emergency:
     case LogLevelCoalescedValue.fatal:
-      return euiPaletteColorBlind()[2];
+      return '#CC5642';
     default:
-      return euiTheme.colors.lightShade;
+      return '#D3DAE6';
   }
 };
