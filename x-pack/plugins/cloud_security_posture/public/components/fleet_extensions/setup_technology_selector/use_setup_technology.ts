@@ -50,7 +50,7 @@ export const useSetupTechnology = ({
       return;
     }
 
-    if (agentPolicyIds && agentlessPolicyId && !agentPolicyIds.includes(agentlessPolicyId)) {
+    if (agentPolicyIds && (!agentlessPolicyId || !agentPolicyIds.includes(agentlessPolicyId))) {
       /*
         handle case when agent policy is coming from outside,
         e.g. from the get param or when coming to integration from a specific agent policy
