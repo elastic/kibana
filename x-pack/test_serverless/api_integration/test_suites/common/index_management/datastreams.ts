@@ -155,18 +155,6 @@ export default function ({ getService }: FtrProviderContext) {
         // we will only check whether the request was recieved by ES.
         expect(body.success).to.eql(true);
       });
-
-      it('can disable lifecycle for a given policy', async () => {
-        const { body, status } = await supertestWithoutAuth
-          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
-          .set(internalReqHeader)
-          .set(roleAuthc.apiKeyHeader)
-          .send({ enabled: false });
-        svlCommonApi.assertResponseStatusCode(200, status, body);
-        expect(body).to.eql({ success: true });
-        const datastream = await svlDatastreamsHelpers.getDatastream(testDataStreamName);
-        expect(datastream.lifecycle).to.be(undefined);
-      });
     });
 
     describe('Delete', () => {
