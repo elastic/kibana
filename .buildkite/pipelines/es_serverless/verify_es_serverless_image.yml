@@ -71,6 +71,7 @@ steps:
           JEST_INTEGRATION_SCRIPT: "TEST_ES_SERVERLESS_IMAGE=$ES_SERVERLESS_IMAGE .buildkite/scripts/steps/test/jest_integration.sh"
           FTR_CONFIG_PATTERNS: "**/test/security_solution_api_integration/**/serverless.config.ts"
           FTR_EXTRA_ARGS: "$FTR_EXTRA_ARGS"
+          LIMIT_CONFIG_TYPE: "functional,integration"
         retry:
           automatic:
             - exit_status: "*"
