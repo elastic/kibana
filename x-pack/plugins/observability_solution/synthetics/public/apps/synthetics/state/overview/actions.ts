@@ -33,3 +33,13 @@ export const quietFetchOverviewAction = createAsyncAction<
   MonitorOverviewPageState,
   MonitorOverviewResult
 >('quietFetchOverviewAction');
+
+export const refreshOverviewTrends = createAsyncAction<void, Record<string, any>, any>(
+  'refreshOverviewTrendStats'
+);
+
+export const trendStatsBatch = createAsyncAction<
+  Array<{ configId: string; locationId: string }>,
+  Record<string, any>,
+  any
+>('batchTrendStats');

@@ -32,6 +32,10 @@ export interface MonitorOverviewState {
   isErrorPopoverOpen?: string | null;
   error: IHttpSerializedFetchError | null;
   groupBy: GroupByState;
+  trendStats: Record<
+    string,
+    null | { data: any[]; median: number; avg: number; min: number; max: number }
+  >;
 }
 
 export interface GroupByState {

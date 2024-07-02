@@ -8,12 +8,16 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { Chart, Settings, Metric, MetricTrendShape } from '@elastic/charts';
-import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiPanel, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DARK_THEME } from '@elastic/charts';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
-import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  selectErrorPopoverState,
+  selectOverviewTrends,
+  toggleErrorPopoverOpen,
+} from '../../../../state';
 import { useLocationName, useStatusByLocationOverview } from '../../../../hooks';
 import { formatDuration } from '../../../../utils/formatting';
 import { MonitorOverviewItem } from '../../../../../../../common/runtime_types';
@@ -47,21 +51,14 @@ export const getColor = (
 
 export const MetricItem = ({
   monitor,
-  medianDuration,
-  maxDuration,
-  minDuration,
-  avgDuration,
-  data,
   onClick,
+  style,
 }: {
   monitor: MonitorOverviewItem;
-  data: Array<{ x: number; y: number }>;
-  medianDuration: number;
-  avgDuration: number;
-  minDuration: number;
-  maxDuration: number;
+  style?: React.CSSProperties;
   onClick: (params: { id: string; configId: string; location: string; locationId: string }) => void;
 }) => {
+  const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.location.id];
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isErrorPopoverOpen = useSelector(selectErrorPopoverState);
   const locationName = useLocationName(monitor);
@@ -75,8 +72,10 @@ export const MetricItem = ({
 
   const dispatch = useDispatch();
 
+  if (!trendData) return null;
+
   return (
-    <div data-test-subj={`${monitor.name}-metric-item`} style={{ height: '160px' }}>
+    <div data-test-subj={`${monitor.name}-metric-item`} style={style ?? { height: '160px' }}>
       <EuiPanel
         data-test-subj={`${monitor.name}-metric-item-${locationName}-${status}`}
         paddingSize="none"
@@ -135,9 +134,9 @@ export const MetricItem = ({
                 {
                   title: monitor.name,
                   subtitle: locationName,
-                  value: medianDuration,
+                  value: trendData.median,
                   trendShape: MetricTrendShape.Area,
-                  trend: data,
+                  trend: trendData.data,
                   extra: (
                     <EuiFlexGroup
                       alignItems="center"
@@ -162,9 +161,9 @@ export const MetricItem = ({
                             {
                               defaultMessage: 'Avg: {avg}, Min: {min}, Max: {max}',
                               values: {
-                                avg: formatDuration(avgDuration, { noSpace: true }),
-                                min: formatDuration(minDuration, { noSpace: true }),
-                                max: formatDuration(maxDuration, { noSpace: true }),
+                                avg: formatDuration(trendData.avg, { noSpace: true }),
+                                min: formatDuration(trendData.min, { noSpace: true }),
+                                max: formatDuration(trendData.max, { noSpace: true }),
                               },
                             }
                           )}
@@ -173,8 +172,8 @@ export const MetricItem = ({
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   ),
-                  valueFormatter: (d: number) => formatDuration(d),
-                  color: getColor(theme, monitor.isEnabled, status),
+                  valueFormatter: (x: number) => formatDuration(x),
+                  color: getColor(theme, monitor.isEnabled, monitor.status),
                 },
               ],
             ]}
@@ -199,6 +198,7 @@ export const MetricItem = ({
           />
         )}
       </EuiPanel>
+      <EuiSpacer size="s" />
     </div>
   );
 };

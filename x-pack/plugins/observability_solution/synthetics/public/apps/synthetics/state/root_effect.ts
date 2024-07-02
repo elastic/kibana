@@ -33,7 +33,11 @@ import {
   upsertMonitorEffect,
   fetchMonitorFiltersEffect,
 } from './monitor_list';
-import { fetchMonitorOverviewEffect } from './overview';
+import {
+  fetchMonitorOverviewEffect,
+  fetchOverviewTrendStats,
+  refreshOverviewTrendStats,
+} from './overview';
 import { fetchServiceLocationsEffect } from './service_locations';
 import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journey';
 import { fetchPingStatusesEffect } from './ping_status';
@@ -71,5 +75,7 @@ export const rootEffect = function* root(): Generator {
     fork(getCertsListEffect),
     fork(getDefaultAlertingEffect),
     fork(enableDefaultAlertingSilentlyEffect),
+    fork(fetchOverviewTrendStats),
+    fork(refreshOverviewTrendStats),
   ]);
 };

@@ -33,6 +33,7 @@ import { SearchField } from '../common/search_field';
 import { NoMonitorsFound } from '../common/no_monitors_found';
 import { OverviewErrors } from './overview/overview_errors/overview_errors';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { useMonitorsSortedByStatus } from '../../../hooks/use_monitors_sorted_by_status';
 
 export const OverviewPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'overview' });
@@ -84,6 +85,8 @@ export const OverviewPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, lastRefresh]);
 
+  const { monitorsSortedByStatus } = useMonitorsSortedByStatus();
+
   const hasNoMonitors = !search && !enablementLoading && monitorsLoaded && absoluteTotal === 0;
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
@@ -126,7 +129,7 @@ export const OverviewPage: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-          <OverviewGrid />
+          <OverviewGrid monitorsSortedByStatus={monitorsSortedByStatus} />
         </>
       ) : (
         <NoMonitorsFound />
