@@ -10,6 +10,6 @@ import { getInitialESQLQuery } from './get_initial_esql_query';
 
 describe('getInitialESQLQuery', () => {
   it('should work correctly', () => {
-    expect(getInitialESQLQuery('logs*')).toBe('from logs* | limit 10');
+    expect(getInitialESQLQuery('logs*')).toBe('FROM logs* | LIMIT 10');
   });
 });

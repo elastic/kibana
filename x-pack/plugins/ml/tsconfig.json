@@ -128,5 +128,6 @@
     "@kbn/esql-utils",
     "@kbn/core-lifecycle-browser",
     "@kbn/observability-ai-assistant-plugin",
-  ],
+    "@kbn/json-schemas"
+  ]
 }

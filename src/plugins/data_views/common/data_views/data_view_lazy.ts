@@ -503,7 +503,6 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   getRuntimeMappings(): estypes.MappingRuntimeFields {
-    // @ts-expect-error composite type is not yet supported by es client but it can be forced
     return this.runtimeFieldMap;
   }
 
