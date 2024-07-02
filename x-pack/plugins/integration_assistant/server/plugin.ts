@@ -36,10 +36,12 @@ export class IntegrationAssistantPlugin
 {
   private readonly logger: Logger;
   private isAvailable: boolean;
+  private hasLicense: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.isAvailable = true;
+    this.hasLicense = false;
   }
 
   public setup(
@@ -52,7 +54,7 @@ export class IntegrationAssistantPlugin
       'integrationAssistant'
     >('integrationAssistant', () => ({
       getStartServices: core.getStartServices,
-      isAvailable: () => this.isAvailable,
+      isAvailable: () => this.isAvailable && this.hasLicense,
       logger: this.logger,
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
@@ -77,9 +79,7 @@ export class IntegrationAssistantPlugin
     const { licensing } = dependencies;
 
     licensing.license$.subscribe((license) => {
-      if (!license.hasAtLeast('enterprise')) {
-        this.isAvailable = false;
-      }
+      this.hasLicense = license.hasAtLeast('enterprise');
     });
 
     return {};
