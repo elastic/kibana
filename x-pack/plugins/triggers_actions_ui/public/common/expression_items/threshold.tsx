@@ -154,7 +154,7 @@ export const ThresholdExpression = ({
                     error={errors[`threshold${i}`]}
                   >
                     <EuiFieldNumber
-                      data-test-subj="alertThresholdInput"
+                      data-test-subj={`alertThresholdInput${i}`}
                       min={0}
                       value={!threshold || threshold[i] === undefined ? '' : threshold[i]}
                       isInvalid={errors[`threshold${i}`]?.length > 0 || isNil(threshold[i])}

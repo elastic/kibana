@@ -30,6 +30,16 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     await find.clickByButtonText('metric-threshold');
   };
 
+  const clickOnObservabilityCategory = async () => {
+    const categories = await testSubjects.find('ruleTypeModal');
+    const category = await categories.findByCssSelector(`.euiFacetButton[title="Observability"]`);
+    await category.click();
+  };
+
+  const clickOnCustomThresholdRule = async () => {
+    await testSubjects.click('observability.rules.custom_threshold-SelectOption');
+  };
+
   return {
     getManageRulesPageHref,
     clickCreateRuleButton,
@@ -37,5 +47,7 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     clickDisableFromDropDownMenu,
     clickLogsTab,
     clickOnRuleInEventLogs,
+    clickOnObservabilityCategory,
+    clickOnCustomThresholdRule,
   };
 }

@@ -135,7 +135,7 @@ export function MetricRowWithAgg({
               }
             >
               <EuiExpression
-                data-test-subj="aggregationName"
+                data-test-subj={`aggregationName${name}`}
                 description={aggregationTypes[aggType].text}
                 value={aggType === Aggregators.COUNT ? filter || DEFAULT_COUNT_FILTER_TITLE : field}
                 isActive={aggTypePopoverOpen}
@@ -221,6 +221,7 @@ export function MetricRowWithAgg({
                       options={fieldOptions}
                       selectedOptions={field ? [{ label: field }] : []}
                       onChange={handleFieldChange}
+                      data-test-subj="aggregationField"
                     />
                   </EuiFormRow>
                 )}
