@@ -37,8 +37,10 @@ import {
   SentinelOneDownloadAgentFileResponseSchema,
   SentinelOneGetActivitiesParamsSchema,
   SentinelOneGetActivitiesResponseSchema,
-  SentinelOneGetRemoteScriptResultsParamsSchema,
   SentinelOneGetRemoteScriptResultsResponseSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
+  SentinelOneDownloadRemoteScriptResultsParamsSchema,
+  SentinelOneDownloadRemoteScriptResultsResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import {
@@ -46,6 +48,8 @@ import {
   SentinelOneDownloadAgentFileParams,
   SentinelOneGetActivitiesParams,
   SentinelOneGetRemoteScriptResultsParams,
+  SentinelOneDownloadRemoteScriptResultsParams,
+  SentinelOneGetRemoteScriptResultsApiResponse,
 } from '../../../common/sentinelone/types';
 
 export const API_MAX_RESULTS = 1000;
@@ -123,7 +127,7 @@ export class SentinelOneConnector extends SubActionConnector<
     this.registerSubAction({
       name: SUB_ACTION.DOWNLAOD_REMOTE_SCRIPT_RESULTS,
       method: 'downloadRemoteScriptResults',
-      schema: SentinelOneGetRemoteScriptResultsParamsSchema, // FIXME:PT create schema
+      schema: SentinelOneDownloadRemoteScriptResultsParamsSchema,
     });
 
     this.registerSubAction({
@@ -296,30 +300,42 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async getRemoteScriptResults(payload: SentinelOneGetRemoteScriptResultsParams) {
+  public async getRemoteScriptResults({ taskIds }: SentinelOneGetRemoteScriptResultsParams) {
     return this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsResults,
       method: 'post',
-      data: {
-        data: {
-          taskIds: [payload.taskId],
-        },
-      },
+      data: { data: { taskIds } },
       responseSchema: SentinelOneGetRemoteScriptResultsResponseSchema,
-    });
+    }) as unknown as SentinelOneGetRemoteScriptResultsApiResponse;
   }
 
-  // FIXME:PT property code this and add types
-  public async downloadRemoteScriptResults({ taskId }: { taskId: string }) {
-    const scriptResultsInfo = await this.getRemoteScriptResults({ taskId });
+  public async downloadRemoteScriptResults({
+    taskId,
+  }: SentinelOneDownloadRemoteScriptResultsParams) {
+    const scriptResultsInfo = await this.getRemoteScriptResults({ taskIds: [taskId] });
 
-    this.logger.debug(`Results info for taskId [${taskId}]: ${JSON.stringify(scriptResultsInfo)}`);
+    this.logger.debug(
+      `script results for taskId [${taskId}]:\n${JSON.stringify(scriptResultsInfo)}`
+    );
+
+    let fileUrl: string = '';
+
+    for (const downloadLinkInfo of scriptResultsInfo.data.download_links) {
+      if (downloadLinkInfo.taskId === taskId) {
+        fileUrl = downloadLinkInfo.downloadUrl;
+        break;
+      }
+    }
+
+    if (!fileUrl) {
+      throw new Error(`Download URL for script results of task id [${taskId}] not found`);
+    }
 
     const downloadConnection = await this.request({
-      url: scriptResultsInfo.data.download_links.at(0).downloadUrl,
+      url: fileUrl,
       method: 'get',
       responseType: 'stream',
-      responseSchema: SentinelOneDownloadAgentFileResponseSchema, // FIXME:PT create schema for this
+      responseSchema: SentinelOneDownloadRemoteScriptResultsResponseSchema,
     });
 
     return downloadConnection.data;

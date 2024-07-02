@@ -16,14 +16,14 @@ export const SentinelOneSecretsSchema = schema.object({
   token: schema.string(),
 });
 
-const SentinelOneApiListPagination = Object.freeze({
+export const SentinelOneApiListPagination = Object.freeze({
   pagination: schema.object({
     totalItems: schema.number(),
     nextCursor: schema.nullable(schema.string()),
   }),
 });
 
-const SentinelOneApiErrors = Object.freeze({
+export const SentinelOneApiErrors = Object.freeze({
   errors: schema.nullable(schema.arrayOf(schema.string())),
 });
 
@@ -377,14 +377,23 @@ export const SentinelOneExecuteScriptResponseSchema = schema.object({
   ),
 });
 
+export const SentinelOneGetRemoteScriptResultsParamsSchema = schema.object({
+  taskIds: schema.arrayOf(schema.string()),
+});
+
 export const SentinelOneGetRemoteScriptResultsResponseSchema = schema.object(
   {
     errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
-    // FIXME:PT add types for data (maybe)
     data: schema.any(),
   },
   { unknowns: 'allow' }
 );
+
+export const SentinelOneDownloadRemoteScriptResultsParamsSchema = schema.object({
+  taskId: schema.string({ minLength: 1 }),
+});
+
+export const SentinelOneDownloadRemoteScriptResultsResponseSchema = schema.stream();
 
 export const SentinelOneGetRemoteScriptStatusParamsSchema = schema.object(
   {
