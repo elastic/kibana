@@ -11,6 +11,7 @@ import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-strea
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
+import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 import type { APMTracer } from '../../tracers/apm_tracer';
@@ -91,27 +92,35 @@ export const streamGraph = async ({
       if (done) return;
 
       const event = value;
-      if (event.event === 'on_llm_stream') {
-        const chunk = event.data?.chunk;
-        // TODO: For Bedrock streaming support, override `handleLLMNewToken` in callbacks,
-        // TODO: or maybe we can update ActionsClientSimpleChatModel to handle this `on_llm_stream` event
-        if (event.name === 'ActionsClientChatOpenAI') {
-          const msg = chunk.message;
+      // only process events that are part of the agent run
+      if ((event.tags || []).includes(AGENT_NODE_TAG)) {
+        if (event.event === 'on_llm_stream') {
+          const chunk = event.data?.chunk;
+          // TODO: For Bedrock streaming support, override `handleLLMNewToken` in callbacks,
+          // TODO: or maybe we can update ActionsClientSimpleChatModel to handle this `on_llm_stream` event
+          if (event.name === 'ActionsClientChatOpenAI') {
+            const msg = chunk.message;
 
-          if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
-            /* empty */
-          } else if (!didEnd) {
-            if (msg.response_metadata.finish_reason === 'stop') {
-              handleStreamEnd(finalMessage);
-            } else {
-              push({ payload: msg.content, type: 'content' });
-              finalMessage += msg.content;
+            if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
+              /* empty */
+            } else if (!didEnd) {
+              if (msg.response_metadata.finish_reason === 'stop') {
+                handleStreamEnd(finalMessage);
+              } else {
+                push({ payload: msg.content, type: 'content' });
+                finalMessage += msg.content;
+              }
             }
+          }
+        } else if (event.event === 'on_llm_end') {
+          const generations = event.data.output?.generations[0];
+          if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
+            handleStreamEnd(finalMessage);
           }
         }
       }
 
-      await processEvent();
+      void processEvent();
     } catch (err) {
       // if I throw an error here, it crashes the server. Not sure how to get around that.
       // If I put await on this function the error works properly, but when there is not an error
@@ -129,7 +138,7 @@ export const streamGraph = async ({
   };
 
   // Start processing events, do not await! Return `responseWithHeaders` immediately
-  await processEvent();
+  void processEvent();
 
   return responseWithHeaders;
 };

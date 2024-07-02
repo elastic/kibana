@@ -622,7 +622,7 @@ describe('reducer', () => {
       const action = previousPreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual({ ...initialState, needsSync: true });
+      expect(newState).toEqual({ ...initialState, needsSync: false });
     });
 
     it(`should return unmodified state when previous preview panel when no preview panel exist`, () => {
@@ -638,7 +638,7 @@ describe('reducer', () => {
       const action = previousPreviewPanelAction({ id: id1 });
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual({ ...state, needsSync: true });
+      expect(newState).toEqual({ ...state, needsSync: false });
     });
 
     it('should remove only last preview panel', () => {
@@ -662,7 +662,7 @@ describe('reducer', () => {
             preview: [previewPanel1],
           },
         },
-        needsSync: true,
+        needsSync: false,
       });
     });
 
@@ -687,7 +687,7 @@ describe('reducer', () => {
             preview: [previewPanel1],
           },
         },
-        needsSync: true,
+        needsSync: false,
       });
     });
   });

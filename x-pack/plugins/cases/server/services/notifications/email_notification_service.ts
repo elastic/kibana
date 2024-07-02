@@ -100,7 +100,7 @@ export class EmailNotificationService implements NotificationService {
       );
 
       const uids = new Set(assignees.map((assignee) => assignee.uid));
-      const userProfiles = await this.security.userProfiles.bulkGet({ uids });
+      const userProfiles = await this.security.userProfiles.bulkGet({ uids }); // todo: access userProfiles from core security service start contract
       const users = userProfiles.map((profile) => profile.user);
 
       const to = users

@@ -51,3 +51,18 @@ export type LegacyUptimeRuleTypeFactory<TActionGroupIds extends string> = (
   RecoveredActionGroupId,
   DefaultAlert
 >;
+
+export interface MonitorSummary {
+  checkedAt: string;
+  monitorUrl?: string;
+  monitorId: string;
+  configId?: string;
+  monitorName: string;
+  monitorType: string;
+  latestErrorMessage?: string;
+  observerLocation: string;
+  observerName?: string;
+  observerHostname?: string;
+  tags?: string[];
+  reason: string;
+}

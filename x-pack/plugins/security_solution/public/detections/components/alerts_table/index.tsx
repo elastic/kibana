@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import type { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
-import type { Alert } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { Alert, Alerts } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ALERT_BUILDING_BLOCK_TYPE } from '@kbn/rule-data-utils';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -22,6 +22,7 @@ import {
   tableDefaults,
   TableId,
 } from '@kbn/securitysolution-data-table';
+import { fetchNotesByDocumentIds } from '../../../notes/store/notes.slice';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useLicense } from '../../../common/hooks/use_license';
 import { VIEW_SELECTION } from '../../../../common/constants';
@@ -265,11 +266,19 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
     };
   }, []);
 
+  const onLoaded = useCallback(
+    (alerts: Alerts) => {
+      const alertIds = alerts.map((alert: Alert) => alert._id);
+      dispatch(fetchNotesByDocumentIds({ documentIds: alertIds }));
+    },
+    [dispatch]
+  );
+
   const alertStateProps: AlertsTableStateProps = useMemo(
     () => ({
       alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
       configurationId: configId,
-      // stores saperate configuration based on the view of the table
+      // stores separate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
       featureIds: ['siem'],
       query: finalBoolQuery,
@@ -280,6 +289,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       browserFields: finalBrowserFields,
       onUpdate: onAlertTableUpdate,
       cellContext,
+      onLoaded,
       runtimeMappings,
       toolbarVisibility: {
         showColumnSelector: !isEventRenderedView,
@@ -300,6 +310,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       runtimeMappings,
       isEventRenderedView,
       cellContext,
+      onLoaded,
     ]
   );
 

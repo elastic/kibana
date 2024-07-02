@@ -41,7 +41,7 @@ jest.mock('react-redux', () => {
 const renderNotesList = () =>
   render(
     <TestProviders>
-      <NotesList eventId={'event-id'} />
+      <NotesList eventId={'document-id-1'} />
     </TestProviders>
   );
 
@@ -62,14 +62,14 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          fetchNotesByDocumentId: ReqStatus.Loading,
+          fetchNotesByDocumentIds: ReqStatus.Loading,
         },
       },
     });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'document-id-1'} />
       </TestProviders>
     );
 
@@ -83,7 +83,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          fetchNotesByDocumentId: ReqStatus.Succeeded,
+          fetchNotesByDocumentIds: ReqStatus.Succeeded,
         },
       },
     });
@@ -104,18 +104,18 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          fetchNotesByDocumentId: ReqStatus.Failed,
+          fetchNotesByDocumentIds: ReqStatus.Failed,
         },
         error: {
           ...mockGlobalState.notes.error,
-          fetchNotesByDocumentId: { type: 'http', status: 500 },
+          fetchNotesByDocumentIds: { type: 'http', status: 500 },
         },
       },
     });
 
     render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'document-id-1'} />
       </TestProviders>
     );
 
@@ -131,7 +131,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         entities: {
           '1': {
-            eventId: 'event-id',
+            eventId: 'document-id-1',
             noteId: '1',
             note: 'note-1',
             timelineId: '',
@@ -147,7 +147,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'document-id-1'} />
       </TestProviders>
     );
     const { getByText } = within(getByTestId(`${NOTE_AVATAR_TEST_ID}-0`));
@@ -169,7 +169,7 @@ describe('NotesList', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'document-id-1'} />
       </TestProviders>
     );
 
@@ -196,14 +196,14 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          deleteNote: ReqStatus.Loading,
+          deleteNotes: ReqStatus.Loading,
         },
       },
     });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'document-id-1'} />
       </TestProviders>
     );
 
@@ -217,18 +217,18 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         status: {
           ...mockGlobalState.notes.status,
-          deleteNote: ReqStatus.Failed,
+          deleteNotes: ReqStatus.Failed,
         },
         error: {
           ...mockGlobalState.notes.error,
-          deleteNote: { type: 'http', status: 500 },
+          deleteNotes: { type: 'http', status: 500 },
         },
       },
     });
 
     render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'document-id-1'} />
       </TestProviders>
     );
 
@@ -261,7 +261,7 @@ describe('NotesList', () => {
         ...mockGlobalState.notes,
         entities: {
           '1': {
-            eventId: 'event-id',
+            eventId: 'document-id-1',
             noteId: '1',
             note: 'note-1',
             timelineId: '',
@@ -277,7 +277,7 @@ describe('NotesList', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <NotesList eventId={'event-id'} />
+        <NotesList eventId={'document-id-1'} />
       </TestProviders>
     );
 
