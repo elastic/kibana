@@ -10,18 +10,23 @@ import * as React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CopyInput } from '../../../../components/copy_input';
-import { useConnectionDetailsService } from '../../../../context';
-import { useBehaviorSubject } from '../../../../hooks/use_behavior_subject';
 import { Label } from './label';
 
 export interface CloudIdRowProps {
   value: string;
+  showCloudId: boolean;
+  learnMoreUrl?: string;
+  onShowCloudIdToggle: () => void;
+  onCopyClick?: () => void;
 }
 
-export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
-  const service = useConnectionDetailsService();
-  const showCloudId = useBehaviorSubject(service.showCloudId$);
-
+export const CloudIdRow: React.FC<CloudIdRowProps> = ({
+  value,
+  showCloudId,
+  learnMoreUrl,
+  onShowCloudIdToggle,
+  onCopyClick,
+}) => {
   return (
     <>
       <EuiSpacer size="l" />
@@ -31,7 +36,7 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
           defaultMessage: 'Show Cloud ID',
         })}
         checked={showCloudId}
-        onChange={service.toggleShowCloudId}
+        onChange={() => onShowCloudIdToggle()}
         data-test-subj="connectionDetailsCloudIdSwitch"
       />
 
@@ -39,7 +44,14 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
 
       {showCloudId && (
         <EuiFormRow
-          label={<Label learnMoreUrl={service.opts.endpoints?.cloudIdLearMoreLink} />}
+          label={
+            <Label
+              learnMoreUrl={learnMoreUrl}
+              aria-label={i18n.translate('cloud.connectionDetails.cloudId.learnMore', {
+                defaultMessage: 'Learn more about Cloud ID',
+              })}
+            />
+          }
           helpText={i18n.translate('cloud.connectionDetails.tab.endpoints.cloudIdField.helpText', {
             defaultMessage:
               'Specific client libraries and connectors can use this unique identifier specific to Elastic Cloud.',
@@ -47,7 +59,13 @@ export const CloudIdRow: React.FC<CloudIdRowProps> = ({ value }) => {
           fullWidth
           data-test-subj="connectionDetailsCloudId"
         >
-          <CopyInput value={value} />
+          <CopyInput
+            value={value}
+            onCopyClick={() => onCopyClick?.()}
+            aria-label={i18n.translate('cloud.connectionDetails.tab.cloudId.label', {
+              defaultMessage: 'Copy Cloud ID to clipboard',
+            })}
+          />
         </EuiFormRow>
       )}
     </>

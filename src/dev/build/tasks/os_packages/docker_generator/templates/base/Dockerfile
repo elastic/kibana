@@ -17,9 +17,9 @@ RUN microdnf install -y findutils tar gzip
 {{#ubuntu}}
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
 {{/ubuntu}}
-{{#chainguard}}
+{{#wolfi}}
 RUN apk --no-cache add curl
-{{/chainguard}}
+{{/wolfi}}
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
@@ -106,16 +106,16 @@ RUN for iter in {1..10}; do \
       apt-get update  && \
       apt-get upgrade -y  && \
       apt-get install -y --no-install-recommends \
-       fontconfig libnss3 ca-certificates && \
+       fontconfig libnss3 curl ca-certificates && \
       apt-get clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "apt-get error: retry $iter in 10s" && \
       sleep 10; \
     done; \
     (exit $exit_code)
 {{/ubuntu}}
-{{#chainguard}}
+{{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig libstdc++ nss findutils shadow
-{{/chainguard}}
+{{/wolfi}}
 
 # Bring in Kibana from the initial stage.
 COPY --from=builder --chown=1000:0 /usr/share/kibana /usr/share/kibana
@@ -172,10 +172,6 @@ ENV PATH=/usr/share/kibana/bin:$PATH
 # Set some Kibana configuration defaults.
 COPY --chown=1000:0 config/kibana.yml /usr/share/kibana/config/kibana.yml
 {{#serverless}}
-COPY --chown=1000:0 config/serverless.yml /usr/share/kibana/config/serverless.yml
-COPY --chown=1000:0 config/serverless.es.yml /usr/share/kibana/config/serverless.es.yml
-COPY --chown=1000:0 config/serverless.oblt.yml /usr/share/kibana/config/serverless.oblt.yml
-COPY --chown=1000:0 config/serverless.security.yml /usr/share/kibana/config/serverless.security.yml
 ENV PROFILER_SIGNAL=SIGUSR1
 {{/serverless}}
 {{^opensslLegacyProvider}}

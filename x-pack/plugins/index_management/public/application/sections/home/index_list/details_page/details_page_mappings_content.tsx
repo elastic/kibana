@@ -27,6 +27,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { Index } from '../../../../../../common';
 import { useDetailsPageMappingsModelManagement } from '../../../../../hooks/use_details_page_mappings_model_management';
 import { useAppContext } from '../../../../app_context';
@@ -62,27 +63,36 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-  isSemanticTextEnabled?: boolean;
-}> = ({
-  index,
-  data,
-  jsonData,
-  refetchMapping,
-  showAboutMappings,
-  isSemanticTextEnabled = false,
-}) => {
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     services: { extensionsService },
-    core: { getUrlForApp },
-    plugins: { ml },
+    core: {
+      getUrlForApp,
+      application: { capabilities },
+    },
+    plugins: { ml, licensing },
     url,
+    config,
   } = useAppContext();
 
+  const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
+  useEffect(() => {
+    const subscription = licensing?.license$.subscribe((license: ILicense) => {
+      setIsPlatinumLicense(license.isActive && license.hasAtLeast('platinum'));
+    });
+
+    return () => subscription?.unsubscribe();
+  }, [licensing]);
+
+  const { enableSemanticText: isSemanticTextEnabled } = config;
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
     []
   );
+
+  const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
+
   const semanticTextInfo = {
-    isSemanticTextEnabled,
+    isSemanticTextEnabled: isSemanticTextEnabled && hasMLPermissions && isPlatinumLicense,
     indexName: index.name,
     ml,
     setErrorsInTrainedModelDeployment,
@@ -171,7 +181,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
-    if (!isSemanticTextEnabled) {
+    if (!isSemanticTextEnabled || !hasMLPermissions) {
       return;
     }
 
@@ -189,17 +199,19 @@ export const DetailsPageMappingsContent: FunctionComponent<{
         return;
       }
 
-      await fetchInferenceToModelIdMap();
+      if (!hasMLPermissions) {
+        return;
+      }
 
-      setIsModalVisible(pendingDeployments.length > 0);
+      await fetchInferenceToModelIdMap();
     } catch (exception) {
       setSaveMappingError(exception.message);
     }
-  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled, pendingDeployments]);
+  }, [fetchInferenceToModelIdMap, isSemanticTextEnabled, hasMLPermissions]);
 
   const updateMappings = useCallback(async () => {
     try {
-      if (isSemanticTextEnabled) {
+      if (isSemanticTextEnabled && hasMLPermissions) {
         await fetchInferenceToModelIdMap();
 
         if (pendingDeployments.length > 0) {
@@ -496,7 +508,12 @@ export const DetailsPageMappingsContent: FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={true}>
-            <SemanticTextBanner isSemanticTextEnabled={isSemanticTextEnabled} />
+            {hasMLPermissions && (
+              <SemanticTextBanner
+                isSemanticTextEnabled={isSemanticTextEnabled}
+                isPlatinumLicense={isPlatinumLicense}
+              />
+            )}
           </EuiFlexItem>
           {errorSavingMappings}
           {isAddingFields && (
@@ -564,11 +581,10 @@ export const DetailsPageMappingsContent: FunctionComponent<{
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
-      {isModalVisible && (
+      {isModalVisible && isSemanticTextEnabled && (
         <TrainedModelsDeploymentModal
           pendingDeployments={pendingDeployments}
           errorsInTrainedModelDeployment={errorsInTrainedModelDeployment}
-          isSemanticTextEnabled={isSemanticTextEnabled}
           setIsModalVisible={setIsModalVisible}
           refreshModal={refreshModal}
           url={url}

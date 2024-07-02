@@ -28,7 +28,7 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  isTextBased,
+  isEsqlMode,
   adHocDataViews,
   topNavCustomization,
 }: {
@@ -36,7 +36,7 @@ export const getTopNavLinks = ({
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  isTextBased: boolean;
+  isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
@@ -54,7 +54,7 @@ export const getTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
-        isPlainRecord: isTextBased,
+        isEsqlMode,
       });
     },
     testId: 'discoverAlertsButton',
@@ -127,7 +127,7 @@ export const getTopNavLinks = ({
         savedSearch.searchSource,
         state.appState.getState(),
         services,
-        isTextBased
+        isEsqlMode
       );
 
       const { locator, notifications } = services;
@@ -189,7 +189,7 @@ export const getTopNavLinks = ({
           }),
         },
         sharingData: {
-          isTextBased,
+          isTextBased: isEsqlMode,
           locatorParams: [{ id: locator.id, params }],
           ...searchSourceSharingData,
           // CSV reports can be generated without a saved search so we provide a fallback title

@@ -66,6 +66,7 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
         onChange={handleChange}
         disabled={isDisabled}
         resize="none"
+        data-test-subj="questionInput"
       />
 
       <div

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useTestFlyoutOpen } from './hooks/use_test_flyout_open';
@@ -50,27 +50,30 @@ export function TestNowModeFlyoutContainer() {
     [dispatch]
   );
 
-  const flyout = flyoutOpenTestRun ? (
-    <TestNowModeFlyout
-      testRun={
-        flyoutOpenTestRun?.testRunId && flyoutOpenTestRun?.monitor
-          ? {
-              id: flyoutOpenTestRun.testRunId,
-              monitor: flyoutOpenTestRun.monitor,
-              name: flyoutOpenTestRun.name,
-            }
-          : undefined
-      }
-      name={flyoutOpenTestRun.name}
-      inProgress={
-        flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
-      }
-      onClose={() => handleFlyoutClose(flyoutOpenTestRun.testRunId)}
-      onDone={onDone}
-      isPushing={flyoutOpenTestRun.status === 'loading'}
-      errors={flyoutOpenTestRun.errors ?? []}
-    />
-  ) : null;
+  const testRun = useMemo(() => {
+    return flyoutOpenTestRun?.testRunId && flyoutOpenTestRun?.monitor
+      ? {
+          id: flyoutOpenTestRun.testRunId,
+          monitor: flyoutOpenTestRun.monitor,
+          name: flyoutOpenTestRun.name,
+        }
+      : undefined;
+  }, [flyoutOpenTestRun]);
+
+  const flyout =
+    flyoutOpenTestRun && testRun ? (
+      <TestNowModeFlyout
+        testRun={testRun}
+        name={flyoutOpenTestRun.name}
+        inProgress={
+          flyoutOpenTestRun.status === 'in-progress' || flyoutOpenTestRun.status === 'loading'
+        }
+        onClose={() => handleFlyoutClose(flyoutOpenTestRun.testRunId)}
+        onDone={onDone}
+        isPushing={flyoutOpenTestRun.status === 'loading'}
+        errors={flyoutOpenTestRun.errors ?? []}
+      />
+    ) : null;
 
   return (
     <>

@@ -20,9 +20,6 @@ const eventId = 'TUWyf3wBFCFU0qRJTauW';
 const hostIpData: EventFieldsData = {
   aggregatable: true,
   ariaRowindex: 35,
-  category: 'host',
-  description: 'Host ip addresses.',
-  example: '127.0.0.1',
   field: 'host.ip',
   fields: {},
   format: '',
@@ -89,10 +86,6 @@ describe('FieldValueCell', () => {
     const messageData: EventFieldsData = {
       aggregatable: false,
       ariaRowindex: 50,
-      category: 'base',
-      description:
-        'For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.',
-      example: 'Hello World',
       field: 'message',
       fields: {},
       format: '',
@@ -109,10 +102,6 @@ describe('FieldValueCell', () => {
 
     const messageFieldFromBrowserField: BrowserField = {
       aggregatable: false,
-      category: 'base',
-      description:
-        'For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.',
-      example: 'Hello World',
       fields: {},
       format: '',
       indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
@@ -150,9 +139,6 @@ describe('FieldValueCell', () => {
   describe('when `BrowserField` metadata IS available', () => {
     const hostIpFieldFromBrowserField: BrowserField = {
       aggregatable: true,
-      category: 'host',
-      description: 'Host ip addresses.',
-      example: '127.0.0.1',
       fields: {},
       format: '',
       indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],

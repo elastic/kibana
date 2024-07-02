@@ -85,6 +85,18 @@ const baseNavItems = [
     name: 'Build',
   },
   {
+    id: 'relevance',
+    items: [
+      {
+        href: '/app/enterprise_search/relevance/inference_endpoints',
+        id: 'inference_endpoints',
+        items: undefined,
+        name: 'Inference Endpoints',
+      },
+    ],
+    name: 'Relevance',
+  },
+  {
     id: 'es_getting_started',
     items: [
       {
@@ -244,6 +256,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
       'Content',
       'Build',
+      'Relevance',
       'Getting started',
       'Enterprise Search',
     ]);
@@ -273,6 +286,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+            "iconToString": undefined,
             "id": "enterpriseSearchApplicationsContent",
             "items": undefined,
             "name": <EuiFlexGroup
@@ -281,6 +295,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             >
               Content
             </EuiFlexGroup>,
+            "nameToString": "Content",
           },
           Object {
             "href": "/app/enterprise_search/applications/search_applications/my-test-engine/connect",
@@ -301,6 +316,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(navItems?.slice(1).map((ni) => ni.name)).toEqual([
       'Content',
       'Build',
+      'Relevance',
       'Getting started',
       'Enterprise Search',
     ]);
@@ -339,6 +355,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
     expect(engineItem).toMatchInlineSnapshot(`
       Object {
         "href": "/app/enterprise_search/applications/search_applications/my-test-engine/content",
+        "iconToString": "warning",
         "id": "enterpriseSearchApplicationsContent",
         "items": undefined,
         "name": <EuiFlexGroup
@@ -351,6 +368,7 @@ describe('useEnterpriseSearchApplicationNav', () => {
             type="warning"
           />
         </EuiFlexGroup>,
+        "nameToString": "Content",
       }
     `);
   });

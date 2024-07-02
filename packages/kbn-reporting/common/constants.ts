@@ -55,6 +55,7 @@ export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/re
  * ILM
  */
 
+// The ILM policy manages stored reports only in stateful deployments.
 export const ILM_POLICY_NAME = 'kibana-reporting';
 
 /*

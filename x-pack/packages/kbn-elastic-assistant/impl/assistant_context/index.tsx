@@ -13,7 +13,8 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { NavigateToAppOptions } from '@kbn/core/public';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -37,10 +38,10 @@ import {
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
-import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
 import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
+import { SettingsTabs } from '../assistant/settings/types';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -83,6 +84,7 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   title?: string;
   toasts?: IToasts;
 }
@@ -97,6 +99,7 @@ export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern: string | undefined;
   assistantAvailability: AssistantAvailability;
+  assistantFeatures: AssistantFeatures;
   assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (
@@ -127,16 +130,16 @@ export interface UseAssistantContext {
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
-  modelEvaluatorEnabled: boolean;
+  navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
-  selectedSettingsTab: SettingsTabs;
+  selectedSettingsTab: SettingsTabs | null;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
-  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   setTraceOptions: (traceOptions: {
@@ -167,6 +170,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   getComments,
   http,
   baseConversations,
+  navigateToApp,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
   title = DEFAULT_ASSISTANT_TITLE,
   toasts,
@@ -264,7 +268,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Settings State
    */
-  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
 
   const getLastConversationId = useCallback(
     // if a conversationId has been provided, use that
@@ -276,15 +280,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   );
 
   // Fetch assistant capabilities
-  const { data: capabilities } = useCapabilities({ http, toasts });
-  const { assistantModelEvaluation: modelEvaluatorEnabled } =
-    capabilities ?? defaultAssistantFeatures;
+  const { data: assistantFeatures } = useCapabilities({ http, toasts });
 
   const value = useMemo(
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
       assistantAvailability,
+      assistantFeatures: assistantFeatures ?? defaultAssistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -297,8 +300,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
-      modelEvaluatorEnabled,
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,
@@ -324,6 +327,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       actionTypeRegistry,
       alertsIndexPattern,
       assistantAvailability,
+      assistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       localStorageQuickPrompts,
@@ -336,8 +340,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       localStorageKnowledgeBase,
-      modelEvaluatorEnabled,
       promptContexts,
+      navigateToApp,
       nameSpace,
       registerPromptContext,
       selectedSettingsTab,

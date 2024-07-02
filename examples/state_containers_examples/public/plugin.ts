@@ -42,6 +42,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         const { renderApp, History } = await import('./todo/app');
         const [coreStart] = await core.getStartServices();
         return renderApp(
+          coreStart,
           params,
           {
             appTitle: examples.stateContainersExampleBrowserHistory.title,
@@ -59,6 +60,7 @@ export class StateContainersExamplesPlugin implements Plugin {
         const { renderApp, History } = await import('./todo/app');
         const [coreStart] = await core.getStartServices();
         return renderApp(
+          coreStart,
           params,
           {
             appTitle: examples.stateContainersExampleHashHistory.title,

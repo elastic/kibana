@@ -14,7 +14,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
 import type { SloPublicSetup, SloPublicStart } from './types';
@@ -28,11 +28,12 @@ import { ExperimentalFeatures, SloConfig } from '../common/config';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
 import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
+import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
+
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
-  private readonly appMountParameters$ = new Subject<AppMountParameters<unknown>>();
   private experimentalFeatures: ExperimentalFeatures = { ruleFormV2: { enabled: false } };
 
   constructor(private readonly initContext: PluginInitializerContext<SloConfig>) {
@@ -57,7 +58,6 @@ export class SloPlugin
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
       const { observabilityRuleTypeRegistry } = pluginsStart.observability;
-      this.appMountParameters$.next(params);
 
       return renderApp({
         appMountParameters: params,
@@ -108,24 +108,23 @@ export class SloPlugin
         pluginsSetup.embeddable.registerReactEmbeddableFactory(
           SLO_OVERVIEW_EMBEDDABLE_ID,
           async () => {
-            const deps = { ...coreStart, ...pluginsStart };
             const { getOverviewEmbeddableFactory } = await import(
               './embeddable/slo/overview/slo_embeddable_factory'
             );
-            return getOverviewEmbeddableFactory(deps);
+            return getOverviewEmbeddableFactory(coreSetup.getStartServices);
           }
         );
-        const registerSloAlertsEmbeddableFactory = async () => {
-          const { SloAlertsEmbeddableFactoryDefinition } = await import(
-            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
-          );
-          const factory = new SloAlertsEmbeddableFactoryDefinition(
-            coreSetup.getStartServices,
-            kibanaVersion
-          );
-          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-        };
-        registerSloAlertsEmbeddableFactory();
+
+        pluginsSetup.embeddable.registerReactEmbeddableFactory(
+          SLO_ALERTS_EMBEDDABLE_ID,
+          async () => {
+            const { getAlertsEmbeddableFactory } = await import(
+              './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+            );
+
+            return getAlertsEmbeddableFactory(coreSetup.getStartServices, kibanaVersion);
+          }
+        );
 
         pluginsSetup.embeddable.registerReactEmbeddableFactory(SLO_ERROR_BUDGET_ID, async () => {
           const deps = { ...coreStart, ...pluginsStart };
@@ -139,7 +138,8 @@ export class SloPlugin
         const registerAsyncSloUiActions = async () => {
           if (pluginsSetup.uiActions) {
             const { registerSloUiActions } = await import('./ui_actions');
-            registerSloUiActions(pluginsSetup.uiActions, coreSetup);
+
+            registerSloUiActions(coreSetup, pluginsSetup, pluginsStart);
           }
         };
         registerAsyncSloUiActions();
@@ -166,7 +166,6 @@ export class SloPlugin
         observabilityRuleTypeRegistry: pluginsStart.observability.observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
-        getAppMountParameters: () => firstValueFrom(this.appMountParameters$),
         isServerless: !!pluginsStart.serverless,
         experimentalFeatures: this.experimentalFeatures,
       }),

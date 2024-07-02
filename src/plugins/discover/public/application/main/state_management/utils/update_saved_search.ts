@@ -5,13 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { cloneDeep } from 'lodash';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverGlobalStateContainer } from '../discover_global_state_container';
+import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
 
 /**
  * Updates the saved search with a given data view & Appstate
@@ -73,14 +74,19 @@ export function updateSavedSearch({
       savedSearch.viewMode = state.viewMode;
     }
 
-    savedSearch.breakdownField = state.breakdownField || undefined; // `undefined` instead of an empty string
+    if (typeof state.breakdownField !== 'undefined') {
+      savedSearch.breakdownField = state.breakdownField;
+    } else if (savedSearch.breakdownField) {
+      savedSearch.breakdownField = '';
+    }
+
     savedSearch.hideAggregatedPreview = state.hideAggregatedPreview;
 
-    // add a flag here to identify text based language queries
+    // add a flag here to identify ES|QL queries
     // these should be filtered out from the visualize editor
-    const isTextBasedQueryResult = isTextBasedQuery(state.query);
-    if (savedSearch.isTextBasedQuery || isTextBasedQueryResult) {
-      savedSearch.isTextBasedQuery = isTextBasedQueryResult;
+    const isEsqlMode = isDataSourceType(state.dataSource, DataSourceType.Esql);
+    if (savedSearch.isTextBasedQuery || isEsqlMode) {
+      savedSearch.isTextBasedQuery = isEsqlMode;
     }
   }
 

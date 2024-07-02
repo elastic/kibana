@@ -10,8 +10,13 @@ import { v4 } from 'uuid';
 import { omit } from 'lodash';
 import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
+import { Reference } from '@kbn/content-management-utils';
 import { DashboardPanelMap, DashboardPanelState } from '..';
 import { SavedDashboardPanel } from '../content_management';
+import {
+  getReferencesForPanelId,
+  prefixReferencesFromPanel,
+} from '../dashboard_container/persistable_state/dashboard_container_references';
 
 export function convertSavedDashboardPanelToPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
@@ -80,15 +85,19 @@ export const convertPanelMapToSavedPanels = (
  * When saving a dashboard as a copy, we should generate new IDs for all panels so that they are
  * properly refreshed when navigating between Dashboards
  */
-export const generateNewPanelIds = (panels: DashboardPanelMap) => {
+export const generateNewPanelIds = (panels: DashboardPanelMap, references?: Reference[]) => {
   const newPanelsMap: DashboardPanelMap = {};
-  for (const panel of Object.values(panels)) {
+  const newReferences: Reference[] = [];
+  for (const [oldId, panel] of Object.entries(panels)) {
     const newId = v4();
     newPanelsMap[newId] = {
       ...panel,
       gridData: { ...panel.gridData, i: newId },
       explicitInput: { ...panel.explicitInput, id: newId },
     };
+    newReferences.push(
+      ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))
+    );
   }
-  return newPanelsMap;
+  return { panels: newPanelsMap, references: newReferences };
 };

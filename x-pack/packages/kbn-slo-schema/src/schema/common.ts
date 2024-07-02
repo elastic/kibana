@@ -48,6 +48,9 @@ const summarySchema = t.intersection([
     status: statusSchema,
     sliValue: t.number,
     errorBudget: errorBudgetSchema,
+    fiveMinuteBurnRate: t.number,
+    oneHourBurnRate: t.number,
+    oneDayBurnRate: t.number,
   }),
   t.partial({
     summaryUpdatedAt: t.union([t.string, t.null]),
@@ -78,6 +81,7 @@ const groupSummarySchema = t.type({
       id: t.string,
       instanceId: t.string,
       name: t.string,
+      groupings: t.record(t.string, t.unknown),
     }),
   }),
   violated: t.number,
@@ -87,8 +91,8 @@ const groupSummarySchema = t.type({
 });
 
 const dateRangeSchema = t.type({
-  from: t.union([dateType, t.string]),
-  to: t.union([dateType, t.string]),
+  from: dateType,
+  to: dateType,
 });
 
 export {

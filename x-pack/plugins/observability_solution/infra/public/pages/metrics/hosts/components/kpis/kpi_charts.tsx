@@ -7,18 +7,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { HostKpiCharts } from '../../../../../components/asset_details';
-import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
-import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
+import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 
 export const KpiCharts = () => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
   const { isRequestRunning: hostCountLoading, data: hostCountData } = useHostCountContext();
-  const { dataView } = useMetricsDataViewContext();
+  const { metricsView } = useMetricsDataViewContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
@@ -26,10 +26,10 @@ export const KpiCharts = () => {
   const filters = shouldUseSearchCriteria
     ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
     : [
-        buildCombinedHostsFilter({
+        buildCombinedAssetFilter({
           field: 'host.name',
           values: hostNodes.map((p) => p.name),
-          dataView,
+          dataView: metricsView?.dataViewReference,
         }),
       ];
 
@@ -71,12 +71,12 @@ export const KpiCharts = () => {
 
   return (
     <HostKpiCharts
-      dataView={dataView}
+      dataView={metricsView?.dataViewReference}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      options={{ getSubtitle: afterLoadedState.getSubtitle }}
+      getSubtitle={afterLoadedState.getSubtitle}
       loading={loading}
     />
   );

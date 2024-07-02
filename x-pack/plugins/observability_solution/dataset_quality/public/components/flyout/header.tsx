@@ -16,8 +16,12 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { flyoutOpenInLogsExplorerText } from '../../../common/translations';
-import { useLinkToLogsExplorer } from '../../hooks';
+import {
+  flyoutOpenInDiscoverText,
+  flyoutOpenInLogsExplorerText,
+} from '../../../common/translations';
+import { NavigationSource } from '../../services/telemetry';
+import { useRedirectLink } from '../../hooks';
 import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 import { IntegrationIcon } from '../common';
 
@@ -25,7 +29,13 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
   const { integration, title } = dataStreamStat;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
-  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
+  const redirectLinkProps = useRedirectLink({
+    dataStreamStat,
+    telemetry: {
+      page: 'details',
+      navigationSource: NavigationSource.Header,
+    },
+  });
 
   return (
     <EuiFlyoutHeader hasBorder>
@@ -58,10 +68,14 @@ export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
             <EuiButton
               data-test-subj="datasetQualityHeaderButton"
               size="s"
-              {...logsExplorerLinkProps}
-              iconType="logoObservability"
+              {...redirectLinkProps.linkProps}
+              iconType={
+                redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
+              }
             >
-              {flyoutOpenInLogsExplorerText}
+              {redirectLinkProps.isLogsExplorerAvailable
+                ? flyoutOpenInLogsExplorerText
+                : flyoutOpenInDiscoverText}
             </EuiButton>
           </EuiFlexGroup>
         </EuiFlexItem>

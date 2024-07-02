@@ -53,6 +53,7 @@ function hasAuthFactory(fleetAuthz: FleetAuthz, productFeatureService?: ProductF
  * @param licenseService
  * @param fleetAuthz
  * @param userRoles
+ * @param productFeaturesService
  */
 export const calculateEndpointAuthz = (
   licenseService: LicenseService,
@@ -90,6 +91,7 @@ export const calculateEndpointAuthz = (
   const canWriteFileOperations = hasAuth('writeFileOperations');
 
   const canWriteExecuteOperations = hasAuth('writeExecuteOperations');
+  const canWriteScanOperations = hasAuth('writeScanOperations');
 
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
@@ -122,6 +124,7 @@ export const calculateEndpointAuthz = (
     canAccessResponseConsole: false, // set further below
     canWriteExecuteOperations: canWriteExecuteOperations && isEnterpriseLicense,
     canWriteFileOperations: canWriteFileOperations && isEnterpriseLicense,
+    canWriteScanOperations: canWriteScanOperations && isEnterpriseLicense,
 
     // ---------------------------------------------------------
     // artifacts
@@ -180,6 +183,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canAccessResponseConsole: false,
     canWriteFileOperations: false,
     canWriteExecuteOperations: false,
+    canWriteScanOperations: false,
     canWriteTrustedApplications: false,
     canReadTrustedApplications: false,
     canWriteHostIsolationExceptions: false,

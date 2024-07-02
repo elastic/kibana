@@ -8,6 +8,7 @@
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as conn from '..';
 
@@ -16,6 +17,9 @@ export interface OpenConnectionDetailsParams {
   start: {
     core: {
       overlays: CoreStart['overlays'];
+      i18n: CoreStart['i18n'];
+      analytics?: CoreStart['analytics'];
+      theme: CoreStart['theme'];
     };
   };
 }
@@ -23,14 +27,16 @@ export interface OpenConnectionDetailsParams {
 export const openConnectionDetails = async ({ props, start }: OpenConnectionDetailsParams) => {
   const mount = (element: HTMLElement) => {
     const reactElement = (
-      <conn.KibanaConnectionDetailsProvider
-        {...props}
-        onNavigation={() => {
-          flyoutRef?.close();
-        }}
-      >
-        <conn.ConnectionDetailsFlyoutContent />
-      </conn.KibanaConnectionDetailsProvider>
+      <KibanaRenderContextProvider {...start.core}>
+        <conn.KibanaConnectionDetailsProvider
+          {...props}
+          onNavigation={() => {
+            flyoutRef?.close();
+          }}
+        >
+          <conn.ConnectionDetailsFlyoutContent />
+        </conn.KibanaConnectionDetailsProvider>
+      </KibanaRenderContextProvider>
     );
     ReactDOM.render(reactElement, element);
 

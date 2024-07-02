@@ -98,34 +98,57 @@ describe('getStateDefaults', () => {
     });
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
-    const actualForTextBasedWithInvalidViewMode = getStateDefaults({
+    const actualForEsqlWithAggregatedViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForTextBasedWithInvalidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForEsqlWithAggregatedViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
 
-    const actualForTextBasedWithValidViewMode = getStateDefaults({
+    const actualForEsqlWithInvalidPatternLevelViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMockWithESQL,
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      },
+    });
+    expect(actualForEsqlWithInvalidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+
+    const actualForEsqlWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
       },
     });
-    expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-    expect(actualForTextBasedWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
+    expect(actualForEsqlWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForEsqlWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
 
-    const actualForWithValidViewMode = getStateDefaults({
+    const actualForWithValidAggLevelViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMock,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
-    expect(actualForWithValidViewMode.dataSource).toEqual(
+    expect(actualForWithValidAggLevelViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+    expect(actualForWithValidAggLevelViewMode.dataSource).toEqual(
+      createDataViewDataSource({
+        dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
+      })
+    );
+
+    const actualForWithValidPatternLevelViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMock,
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      },
+    });
+    expect(actualForWithValidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.PATTERN_LEVEL);
+    expect(actualForWithValidPatternLevelViewMode.dataSource).toEqual(
       createDataViewDataSource({
         dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
       })
@@ -133,11 +156,11 @@ describe('getStateDefaults', () => {
   });
 
   test('should return expected dataSource', () => {
-    const actualForTextBased = getStateDefaults({
+    const actualForEsql = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: savedSearchMockWithESQL,
     });
-    expect(actualForTextBased.dataSource).toMatchInlineSnapshot(`
+    expect(actualForEsql.dataSource).toMatchInlineSnapshot(`
       Object {
         "type": "esql",
       }

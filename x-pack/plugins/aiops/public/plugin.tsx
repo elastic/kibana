@@ -8,6 +8,8 @@
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import { type CoreSetup } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
+import { dynamic } from '@kbn/shared-ux-utility';
+
 import { getChangePointDetectionComponent } from './shared_components';
 import type {
   AiopsPluginSetup,
@@ -59,6 +61,18 @@ export class AiopsPlugin
   public start(core: CoreStart, plugins: AiopsPluginStartDeps): AiopsPluginStart {
     return {
       ChangePointDetectionComponent: getChangePointDetectionComponent(core, plugins),
+      getPatternAnalysisAvailable: async () => {
+        const { getPatternAnalysisAvailable } = await import(
+          './components/log_categorization/log_categorization_enabled'
+        );
+        return getPatternAnalysisAvailable(plugins.licensing);
+      },
+      PatternAnalysisComponent: dynamic(
+        async () =>
+          import(
+            './components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper'
+          )
+      ),
     };
   }
 

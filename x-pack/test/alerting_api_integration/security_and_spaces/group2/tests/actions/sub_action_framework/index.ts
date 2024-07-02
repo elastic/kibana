@@ -22,7 +22,7 @@ const createSubActionConnector = async ({
   connectorTypeId = 'test.sub-action-connector',
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   config?: Record<string, unknown>;
   secrets?: Record<string, unknown>;
   connectorTypeId?: string;
@@ -56,7 +56,7 @@ const executeSubAction = async ({
   subActionParams,
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   connectorId: string;
   subAction: string;
   subActionParams: Record<string, unknown>;
@@ -170,7 +170,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           retry: true,
           connector_id: res.body.id,
-          errorSource: TaskErrorSource.FRAMEWORK,
+          errorSource: TaskErrorSource.USER,
           service_message:
             'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])',
         });

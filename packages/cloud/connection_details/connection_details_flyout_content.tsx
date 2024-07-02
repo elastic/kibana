@@ -17,11 +17,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConnectionDetails } from './connection_details';
-import { useConnectionDetailsOpts } from './context';
+import { useConnectionDetailsOpts, useConnectionDetailsService } from './context';
 import { Tabs } from './tabs';
 
 export const ConnectionDetailsFlyoutContent: React.FC = () => {
   const ctx = useConnectionDetailsOpts();
+  const service = useConnectionDetailsService();
 
   const header = (
     <EuiFlyoutHeader hasBorder>
@@ -39,7 +40,15 @@ export const ConnectionDetailsFlyoutContent: React.FC = () => {
             defaultMessage: 'Connect to the Elasticsearch API by using the following details.',
           })}{' '}
           {!!ctx.links?.learnMore && (
-            <EuiLink external href={ctx.links.learnMore} target="_blank">
+            // Below onClick is used only for telemetry, but `href` is the real
+            // semantic action.
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiLink
+              external
+              href={ctx.links.learnMore}
+              target="_blank"
+              onClick={() => service.emitTelemetryEvent(['learn_more_clicked'])}
+            >
               {i18n.translate('cloud.connectionDetails.learnMoreButtonLabel', {
                 defaultMessage: 'Learn more',
               })}

@@ -28,6 +28,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
@@ -57,6 +58,7 @@ import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
@@ -90,6 +92,7 @@ import type { BrowserField } from '../../../../common/containers/source';
 import { useFetchIndex } from '../../../../common/containers/source';
 import { NewTermsFields } from '../new_terms_fields';
 import { ScheduleItem } from '../../../rule_creation/components/schedule_item_form';
+import { RequiredFields } from '../../../rule_creation/components/required_fields';
 import { DocLink } from '../../../../common/components/links_to_docs/doc_link';
 import { defaultCustomQuery } from '../../../../detections/pages/detection_engine/rules/utils';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
@@ -98,7 +101,9 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
@@ -106,7 +111,7 @@ const CommonUseField = getUseField({ component: Field });
 const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
-interface StepDefineRuleProps extends RuleStepProps {
+export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
@@ -190,6 +195,8 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   thresholdFields,
   enableThresholdSuppression,
 }) => {
+  const queryClient = useQueryClient();
+
   const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -204,6 +211,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
 
+  const isAIAssistantEnabled = useIsExperimentalFeatureEnabled(
+    'AIAssistantOnRuleCreationFormEnabled'
+  );
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
@@ -452,6 +462,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   );
 
   const [{ queryBar }] = useFormData<DefineStepRule>({ form, watch: ['queryBar'] });
+
+  const { fields: esqlSuppressionFields, isLoading: isEsqlSuppressionLoading } =
+    useAllEsqlRuleFields({
+      esqlQuery: isEsqlRule(ruleType) ? (queryBar?.query?.query as string) : undefined,
+      indexPatternsFields: indexPattern.fields,
+    });
+
   const areSuppressionFieldsDisabledBySequence =
     isEqlRule(ruleType) &&
     isEqlSequenceQuery(queryBar?.query?.query as string) &&
@@ -744,6 +761,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         path="queryBar"
         config={esqlQueryBarConfig}
         component={QueryBarDefineRule}
+        validationData={{ queryClient }}
         componentProps={{
           ...queryBarProps,
           dataTestSubj: 'detectionEngineStepDefineRuleEsqlQueryBar',
@@ -751,7 +769,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         }}
       />
     ),
-    [queryBarProps, esqlQueryBarConfig]
+    [queryBarProps, esqlQueryBarConfig, queryClient]
   );
 
   const QueryBarMemo = useMemo(
@@ -916,6 +934,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
+          {isAIAssistantEnabled && !isMlRule(ruleType) && !isQueryBarValid && (
+            <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
+          )}
+
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />
@@ -940,7 +962,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </RuleTypeEuiFormRow>
             </>
           )}
-
           <RuleTypeEuiFormRow $isVisible={isMlRule(ruleType)} fullWidth>
             <>
               <UseField
@@ -1026,7 +1047,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               />
             </>
           </RuleTypeEuiFormRow>
-
           <EuiSpacer size="m" />
 
           <>
@@ -1062,9 +1082,13 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                 path="groupByFields"
                 component={MultiSelectFieldsAutocomplete}
                 componentProps={{
-                  browserFields: termsAggregationFields,
+                  browserFields: isEsqlRule(ruleType)
+                    ? esqlSuppressionFields
+                    : termsAggregationFields,
                   isDisabled:
-                    !isAlertSuppressionLicenseValid || areSuppressionFieldsDisabledBySequence,
+                    !isAlertSuppressionLicenseValid ||
+                    areSuppressionFieldsDisabledBySequence ||
+                    isEsqlSuppressionLoading,
                   disabledText: areSuppressionFieldsDisabledBySequence
                     ? i18n.EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP
                     : alertSuppressionUpsellingMessage,
@@ -1115,6 +1139,19 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               </UseMultiFields>
             </IntendedRuleTypeEuiFormRow>
           </>
+
+          <EuiSpacer size="l" />
+
+          {!isMlRule(ruleType) && (
+            <>
+              <RequiredFields
+                path="requiredFields"
+                indexPatternFields={indexPattern.fields}
+                isIndexPatternLoading={isIndexPatternLoading}
+              />
+              <EuiSpacer size="l" />
+            </>
+          )}
 
           <RelatedIntegrations path="relatedIntegrations" dataTestSubj="relatedIntegrations" />
 

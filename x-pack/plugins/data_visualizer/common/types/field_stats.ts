@@ -96,6 +96,11 @@ export interface StringFieldStats {
   sampledValues?: Bucket[];
   topValuesSampleSize?: number;
   topValuesSamplerShardSize?: number;
+  /**
+   * Approximate: true for when the terms are from a random subset of the source data
+   * such that result/count for each term is not deterministic every time
+   */
+  approximate?: boolean;
 }
 
 export interface DateFieldStats {
@@ -206,8 +211,8 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 export interface FieldStatsCommonRequestParams {
   index: string;
   timeFieldName?: string;
-  earliestMs?: number | undefined;
-  latestMs?: number | undefined;
+  earliestMs?: number | string | undefined;
+  latestMs?: number | string | undefined;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;
@@ -222,8 +227,8 @@ export type SupportedAggs = Set<string>;
 
 export interface OverallStatsSearchStrategyParams {
   sessionId?: string;
-  earliest?: number;
-  latest?: number;
+  earliest?: number | string;
+  latest?: number | string;
   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
   searchQuery: Query['query'];

@@ -8,16 +8,22 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import expect from '@kbn/expect';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('main', () => {
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
 
@@ -25,17 +31,18 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('can update an existing field', async () => {
           const title = `basic_index`;
-          const response1 = await supertest
+          const response1 = await supertestWithoutAuth
             .post(config.path)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               override: true,
               [config.serviceKey]: {
@@ -57,11 +64,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               runtimeField: {
                 type: 'keyword',
@@ -73,11 +80,11 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(response2.status).to.be(200);
 
-          const response3 = await supertest
+          const response3 = await supertestWithoutAuth
             .get(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           const field =
             config.serviceKey === 'index_pattern' ? response3.body.field : response3.body.fields[0];
@@ -89,11 +96,11 @@ export default function ({ getService }: FtrProviderContext) {
           expect(field.runtimeField.script.source).to.be("doc['something_new'].value");
 
           // Partial update
-          const response4 = await supertest
+          const response4 = await supertestWithoutAuth
             .post(`${config.path}/${response1.body[config.serviceKey].id}/runtime_field/runtimeFoo`)
             .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               runtimeField: {
                 script: {

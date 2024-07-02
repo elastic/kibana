@@ -118,7 +118,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
           {isEdit ? (
             <FormattedMessage
               id="xpack.savedObjectsTagging.management.editModal.title"
-              defaultMessage="Edit '{name}' tag"
+              defaultMessage="Edit ''{name}'' tag"
               values={{
                 name: initialTag.name,
               }}

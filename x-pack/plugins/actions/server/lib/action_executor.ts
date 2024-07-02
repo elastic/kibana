@@ -6,7 +6,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { KibanaRequest, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  AnalyticsServiceStart,
+  KibanaRequest,
+  Logger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
@@ -15,6 +20,8 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -57,6 +64,7 @@ export interface ActionExecutorContext {
   getUnsecuredServices: GetUnsecuredServicesFunction;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
+  analyticsService: AnalyticsServiceStart;
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
@@ -316,7 +324,7 @@ export class ActionExecutor {
         new Error(
           `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         ),
-        TaskErrorSource.USER
+        TaskErrorSource.FRAMEWORK
       );
     }
 
@@ -379,7 +387,7 @@ export class ActionExecutor {
         },
       },
       async (span) => {
-        const { actionTypeRegistry, eventLogger } = this.actionExecutorContext!;
+        const { actionTypeRegistry, analyticsService, eventLogger } = this.actionExecutorContext!;
 
         const actionInfo = await this.getActionInfoInternal(actionId, namespace.namespace);
 
@@ -507,6 +515,7 @@ export class ActionExecutor {
             rawResult.errorSource = TaskErrorSource.USER;
           }
         } catch (err) {
+          const errorSource = getErrorSource(err) || TaskErrorSource.FRAMEWORK;
           if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
           } else {
@@ -517,7 +526,7 @@ export class ActionExecutor {
               serviceMessage: err.message,
               error: err,
               retry: true,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource,
             };
           }
         }
@@ -584,6 +593,15 @@ export class ActionExecutor {
                   total_tokens: tokenTracking.total_tokens,
                   prompt_tokens: tokenTracking.prompt_tokens,
                   completion_tokens: tokenTracking.completion_tokens,
+                });
+                analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
+                  actionTypeId,
+                  total_tokens: tokenTracking.total_tokens,
+                  prompt_tokens: tokenTracking.prompt_tokens,
+                  completion_tokens: tokenTracking.completion_tokens,
+                  ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
+                    ? { provider: config?.apiProvider }
+                    : {}),
                 });
               }
             })

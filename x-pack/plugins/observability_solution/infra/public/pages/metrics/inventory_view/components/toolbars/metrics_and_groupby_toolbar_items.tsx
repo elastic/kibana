@@ -36,7 +36,6 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
     <>
       <EuiFlexItem grow={false}>
         <WaffleMetricControls
-          fields={props.createDerivedIndexPattern().fields}
           options={metricOptions}
           metric={props.metric}
           onChange={props.changeMetric}
@@ -50,7 +49,6 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
           groupBy={props.groupBy}
           nodeType={props.nodeType}
           onChange={props.changeGroupBy}
-          fields={props.createDerivedIndexPattern().fields}
           onChangeCustomOptions={props.changeCustomOptions}
           customOptions={props.customOptions}
         />

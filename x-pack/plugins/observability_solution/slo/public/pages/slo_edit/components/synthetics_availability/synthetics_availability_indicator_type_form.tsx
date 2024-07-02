@@ -4,28 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   ALL_VALUE,
-  SyntheticsAvailabilityIndicator,
-  QuerySchema,
   FiltersSchema,
+  QuerySchema,
+  SyntheticsAvailabilityIndicator,
 } from '@kbn/slo-schema';
-import { FilterStateStore } from '@kbn/es-query';
+import moment from 'moment';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FieldSelector } from '../synthetics_common/field_selector';
+import { DATA_VIEW_FIELD } from '../custom_common/index_selection';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { formatAllFilters } from '../../helpers/format_filters';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { QueryBuilder } from '../common/query_builder';
 import { GroupByCardinality } from '../common/group_by_cardinality';
-import { formatAllFilters } from '../../helpers/format_filters';
-
-const ONE_DAY_IN_MILLISECONDS = 1 * 60 * 60 * 1000 * 24;
+import { QueryBuilder } from '../common/query_builder';
+import { FieldSelector } from '../synthetics_common/field_selector';
 
 export function SyntheticsAvailabilityIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm<SyntheticsAvailabilityIndicator>>();
+  const dataViewId = watch(DATA_VIEW_FIELD);
 
   const [monitorIds = [], projects = [], tags = [], index, globalFilters] = watch([
     'indicator.params.monitorIds',
@@ -35,9 +37,14 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
     'indicator.params.filter',
   ]);
 
+  const { dataView } = useCreateDataView({
+    indexPatternString: index,
+    dataViewId,
+  });
+
   const [range, _] = useState({
-    start: new Date().getTime() - ONE_DAY_IN_MILLISECONDS,
-    end: new Date().getTime(),
+    from: moment().subtract(1, 'day').toDate(),
+    to: new Date(),
   });
 
   const filters = {
@@ -113,7 +120,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         <EuiFlexItem>
           <QueryBuilder
             dataTestSubj="syntheticsAvailabilityFilterInput"
-            indexPatternString={index}
+            dataView={dataView}
             label={i18n.translate('xpack.slo.sloEdit.syntheticsAvailability.filter', {
               defaultMessage: 'Query filter',
             })}

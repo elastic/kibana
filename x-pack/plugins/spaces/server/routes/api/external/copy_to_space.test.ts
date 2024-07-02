@@ -57,7 +57,7 @@ describe('copy to space', () => {
       createResolveSavedObjectsImportErrorsMock()
     );
 
-    const clientService = new SpacesClientService(jest.fn());
+    const clientService = new SpacesClientService(jest.fn(), 'traditional');
     clientService
       .setup({ config$: Rx.of(spacesConfig) })
       .setClientRepositoryFactory(() => savedObjectsRepositoryMock);
@@ -85,6 +85,7 @@ describe('copy to space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
+      isServerless: false,
     });
 
     const [[ctsRouteDefinition, ctsRouteHandler], [resolveRouteDefinition, resolveRouteHandler]] =

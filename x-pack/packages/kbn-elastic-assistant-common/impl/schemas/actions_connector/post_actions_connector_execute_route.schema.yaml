@@ -31,7 +31,7 @@ paths:
                 - subAction
               properties:
                 conversationId:
-                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
+                  $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
                 message:
                   type: string
                 model:

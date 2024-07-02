@@ -24,44 +24,60 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
 };
 
 describe('TokenEstimateTooltip component tests', () => {
-  beforeEach(() => {
-    render(
-      <IntlProvider locale="en">
-        <MockFormProvider>
-          <TokenEstimateTooltip context={50} total={150} />
-        </MockFormProvider>
-      </IntlProvider>
-    );
+  describe('when context and total tokens are provided', () => {
+    beforeEach(() => {
+      render(
+        <IntlProvider locale="en">
+          <MockFormProvider>
+            <TokenEstimateTooltip context={50} total={150} />
+          </MockFormProvider>
+        </IntlProvider>
+      );
+    });
+
+    it('toggles tooltip visibility when button is clicked', () => {
+      const button = screen.getByTestId('token-tooltip-button');
+      expect(screen.queryByTestId('token-tooltip-title')).not.toBeInTheDocument();
+      fireEvent.click(button);
+      expect(screen.queryByTestId('token-tooltip-title')).toBeInTheDocument();
+    });
+
+    it('displays context and instruction tokens in breakdown', () => {
+      const button = screen.getByTestId('token-tooltip-button');
+      fireEvent.click(button);
+      const panel = screen.getByTestId('token-tooltip-breakdown-1');
+      expect(panel).toBeInTheDocument();
+      expect(panel).toHaveTextContent('50'); // context tokens
+      expect(panel).toHaveTextContent('100'); // instruction tokens
+      expect(screen.queryByTestId('clipped-tokens-description')).not.toBeInTheDocument();
+    });
+
+    it('displays learn more link', () => {
+      const button = screen.getByTestId('token-tooltip-button');
+      fireEvent.click(button);
+      const link = screen.getByTestId('context-optimization-documentation-link');
+      expect(link).toBeInTheDocument();
+    });
   });
 
-  it('toggles tooltip visibility when button is clicked', () => {
-    const button = screen.getByTestId('token-tooltip-button');
-    expect(screen.queryByTestId('token-tooltip-title')).not.toBeInTheDocument();
-    fireEvent.click(button);
-    expect(screen.queryByTestId('token-tooltip-title')).toBeInTheDocument();
-  });
+  describe('when context is clipped', () => {
+    beforeEach(() => {
+      render(
+        <IntlProvider locale="en">
+          <MockFormProvider>
+            <TokenEstimateTooltip context={100} total={150} clipped={1000} />
+          </MockFormProvider>
+        </IntlProvider>
+      );
+    });
 
-  it('displays context and instruction tokens in breakdown', () => {
-    const button = screen.getByTestId('token-tooltip-button');
-    fireEvent.click(button);
-    const panel = screen.getByTestId('token-tooltip-breakdown-1');
-    expect(panel).toBeInTheDocument();
-    expect(panel).toHaveTextContent('50'); // context tokens
-    expect(panel).toHaveTextContent('100'); // instruction tokens
-  });
-
-  it('displays total tokens and model limit if available', () => {
-    const button = screen.getByTestId('token-tooltip-button');
-    fireEvent.click(button);
-    const panel = screen.getByTestId('token-tooltip-breakdown-2');
-    expect(panel).toBeInTheDocument();
-    expect(panel).toHaveTextContent('150');
-  });
-
-  it('displays learn more link', () => {
-    const button = screen.getByTestId('token-tooltip-button');
-    fireEvent.click(button);
-    const link = screen.getByTestId('context-optimization-documentation-link');
-    expect(link).toBeInTheDocument();
+    it('displays clipped context tokens in breakdown', () => {
+      const button = screen.getByTestId('token-tooltip-button');
+      fireEvent.click(button);
+      const panel = screen.getByTestId('clipped-tokens-callout');
+      expect(panel).toBeInTheDocument();
+      expect(panel).toHaveTextContent('1,000');
+      expect(screen.getByTestId('clipped-tokens-callout')).toBeInTheDocument();
+    });
   });
 });

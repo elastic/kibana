@@ -30,6 +30,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsOverviewTab');
     },
 
+    async getOverviewTab() {
+      return testSubjects.find('infraAssetDetailsOverviewTab');
+    },
+
     async getAssetDetailsKPITileValue(type: string) {
       const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
@@ -67,12 +71,12 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return servicesWithIconsAndNames;
     },
 
-    async clickOverviewLinkToAlerts() {
-      return testSubjects.click('infraAssetDetailsAlertsShowAllButton');
+    async overviewLinkToAlertsExist() {
+      return testSubjects.existOrFail('infraAssetDetailsAlertsTabAlertsShowAllButton');
     },
 
-    async clickOverviewOpenAlertsFlyout() {
-      return testSubjects.click('infraAssetDetailsCreateAlertsRuleButton');
+    async overviewOpenAlertsFlyoutExist() {
+      return testSubjects.existOrFail('infraAssetDetailsAlertsTabCreateAlertsRuleButton');
     },
 
     async clickShowAllMetadataOverviewTab() {
@@ -100,6 +104,15 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getOverviewTabDockerMetricCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsDockerChartsSection${metric}`
+      );
+
       return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 
@@ -211,6 +224,14 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async getMetricsTabKubernetesCharts() {
       const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
       const section = await container.findByTestSubject(`infraAssetDetailsKubernetesChartsSection`);
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getMetricsTabDockerCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsDockerChartsSection${metric}`
+      );
       return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 

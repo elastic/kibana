@@ -19,11 +19,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
-
 import { getAuthzFromRequest } from '../security';
-
+import { appContextService } from '../app_context';
 import { FleetUnauthorizedError } from '../../errors';
 
 import { getAgentsByKuery, getAgentById } from './crud';
@@ -88,6 +89,7 @@ export interface AgentClient {
     total: number;
     page: number;
     perPage: number;
+    statusSummary?: Record<AgentStatus, number>;
     aggregations?: Record<string, estypes.AggregationsAggregate>;
   }>;
 
@@ -104,7 +106,8 @@ class AgentClientImpl implements AgentClient {
   constructor(
     private readonly internalEsClient: ElasticsearchClient,
     private readonly soClient: SavedObjectsClientContract,
-    private readonly preflightCheck?: () => void | Promise<void>
+    private readonly preflightCheck?: () => void | Promise<void>,
+    private readonly spaceId?: string
   ) {}
 
   public async listAgents(
@@ -114,7 +117,10 @@ class AgentClientImpl implements AgentClient {
     }
   ) {
     await this.#runPreflight();
-    return getAgentsByKuery(this.internalEsClient, this.soClient, options);
+    return getAgentsByKuery(this.internalEsClient, this.soClient, {
+      ...options,
+      spaceId: this.spaceId,
+    });
   }
 
   public async getAgent(agentId: string) {
@@ -133,7 +139,8 @@ class AgentClientImpl implements AgentClient {
       this.internalEsClient,
       this.soClient,
       agentPolicyId,
-      filterKuery
+      filterKuery,
+      this.spaceId
     );
   }
 
@@ -161,14 +168,23 @@ export class AgentServiceImpl implements AgentService {
   public asScoped(req: KibanaRequest) {
     const preflightCheck = async () => {
       const authz = await getAuthzFromRequest(req);
-      if (!authz.fleet.all) {
+      if (!authz.fleet.all && !authz.fleet.readAgents) {
         throw new FleetUnauthorizedError(
           `User does not have adequate permissions to access Fleet agents.`
         );
       }
     };
 
-    return new AgentClientImpl(this.internalEsClient, this.soClient, preflightCheck);
+    const soClient = appContextService.getInternalUserSOClientForSpaceId(
+      appContextService.getSavedObjects().getScopedClient(req).getCurrentNamespace()
+    );
+
+    return new AgentClientImpl(
+      this.internalEsClient,
+      soClient,
+      preflightCheck,
+      soClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING
+    );
   }
 
   public get asInternalUser() {

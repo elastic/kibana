@@ -7,7 +7,7 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AIAssistantConversationsDataClient } from '.';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 import { getUpdateConversationSchemaMock } from '../../__mocks__/conversations_schema.mock';
 import { AIAssistantDataClientParams } from '..';
 
@@ -33,7 +33,7 @@ describe('AIAssistantConversationsDataClient', () => {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
       spaceId: 'default',
-      indexPatternsResorceName: '',
+      indexPatternsResourceName: '',
       currentUser: mockUser1,
       kibanaVersion: '8.8.0',
     };

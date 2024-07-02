@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useCurrentEuiBreakpoint } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -63,11 +63,20 @@ export const NodesOverview = ({
   isAutoReloading,
 }: Props) => {
   const currentBreakpoint = useCurrentEuiBreakpoint();
-  const [{ detailsItemId }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
+  const [{ detailsItemId, assetType }, setFlyoutUrlState] = useAssetDetailsFlyoutState();
   const { onPageReady } = usePerformanceContext();
 
+  const nodeName = useMemo(
+    () => nodes.find((node) => node.path[0].value === detailsItemId)?.name,
+    [detailsItemId, nodes]
+  );
+
   const closeFlyout = useCallback(
-    () => setFlyoutUrlState({ detailsItemId: null }),
+    () =>
+      setFlyoutUrlState({
+        detailsItemId: null,
+        assetType: null,
+      }),
     [setFlyoutUrlState]
   );
 
@@ -149,9 +158,10 @@ export const NodesOverview = ({
         bottomMargin={bottomMargin}
         staticHeight={isStatic}
       />
-      {nodeType === 'host' && detailsItemId && (
+      {nodeType === assetType && detailsItemId && (
         <AssetDetailsFlyout
-          assetName={detailsItemId}
+          assetId={detailsItemId}
+          assetName={nodeName}
           assetType={nodeType}
           closeFlyout={closeFlyout}
           currentTime={currentTime}
