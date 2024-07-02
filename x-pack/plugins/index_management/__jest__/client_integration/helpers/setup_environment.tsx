@@ -88,6 +88,9 @@ const appDependencies = {
     enableTogglingDataRetention: true,
     enableSemanticText: false,
   },
+  overlays: {
+    openConfirm: jest.fn(),
+  },
 } as any;
 
 export const kibanaVersion = new SemVer(MAJOR_VERSION);
