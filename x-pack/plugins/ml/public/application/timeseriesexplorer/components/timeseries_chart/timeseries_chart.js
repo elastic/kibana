@@ -609,7 +609,7 @@ class TimeseriesChartIntl extends Component {
       .append('g')
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + fcsHeight + ')');
-    axes.append('g').attr('class', 'y axis'); // HERE?
+    axes.append('g').attr('class', 'y axis');
 
     // Create the elements for the metric value line and model bounds area.
     fcsGroup.append('path').attr('class', 'area bounds');
