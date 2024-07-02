@@ -100,7 +100,7 @@ export const TypeField = ({ onChange }: TypeFieldProps) => {
                   {
                     value: INDEX_PATTERN_TYPE.ROLLUP,
                     inputDisplay: i18n.translate('indexPatternEditor.typeSelect.rollup', {
-                      defaultMessage: 'Rollup',
+                      defaultMessage: 'Rollup (deprecated)',
                     }),
                     dropdownDisplay: rollupSelectItem,
                   },
