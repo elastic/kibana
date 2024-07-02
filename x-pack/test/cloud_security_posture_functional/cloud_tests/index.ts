@@ -12,5 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Cloud Security Posture', function () {
     loadTestFile(require.resolve('./dashboard_sanity'));
     loadTestFile(require.resolve('./benchmark_sanity'));
+    loadTestFile(require.resolve('./findings_sanity'));
   });
 }

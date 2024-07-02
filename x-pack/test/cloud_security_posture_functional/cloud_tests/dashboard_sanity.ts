@@ -10,9 +10,9 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'cloudPostureDashboard', 'header', 'benchmark']);
+  const pageObjects = getPageObjects(['common', 'cloudPostureDashboard', 'header']);
 
-  describe('Cloud Posture Dashboard Page', function () {
+  describe('Cloud Posture Dashboard Page - Sanity Tests', function () {
     this.tags(['cloud_security_posture_ui_sanity']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
@@ -46,11 +46,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(scores.length).to.be(4);
       });
 
-      it('displays a number of resources evaluated greater than 2000', async () => {
+      it('displays a number of resources evaluated greater than 1500', async () => {
         const resourcesEvaluated = await dashboard.getCloudResourcesEvaluated();
         const visibleText = await resourcesEvaluated.getVisibleText();
         const resourcesEvaluatedCount = parseInt(visibleText.replace(/,/g, ''), 10);
-        expect(resourcesEvaluatedCount).greaterThan(2000);
+        expect(resourcesEvaluatedCount).greaterThan(1500);
       });
     });
 

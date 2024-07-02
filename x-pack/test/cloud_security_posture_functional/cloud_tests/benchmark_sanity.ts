@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'benchmark']);
 
-  describe('Benchmark Page', function () {
+  describe('Benchmark Page - Sanity Tests', function () {
     this.tags(['cloud_security_posture_ui_sanity']);
     let benchmark: typeof pageObjects.benchmark;
 
