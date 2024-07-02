@@ -3,12 +3,20 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*", "jest.config.js"],
+  "include": ["common/**/*", "server/**/*",  "public/**/*", "jest.config.js"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/core-http-server",
+    "@kbn/management-settings-ids",
+    "@kbn/config-schema",
+    "@kbn/core-ui-settings-common",
+    "@kbn/i18n",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/core-ui-settings-browser",
   ]
 }
