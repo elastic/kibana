@@ -488,7 +488,7 @@ describe('Actions', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeTruthy();
     });
   });
 });

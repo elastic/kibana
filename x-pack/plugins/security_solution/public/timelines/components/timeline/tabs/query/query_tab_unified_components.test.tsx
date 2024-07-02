@@ -808,7 +808,7 @@ describe('query tab with unified timeline', () => {
             await waitFor(() => {
               expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
               expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to add more.'
+                '1 Note available. Click to view it & add more.'
               );
             });
           },
@@ -869,7 +869,7 @@ describe('query tab with unified timeline', () => {
             await waitFor(() => {
               expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
               expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to add more.'
+                '1 Note available. Click to view it & add more.'
               );
             });
           },
@@ -958,7 +958,7 @@ describe('query tab with unified timeline', () => {
             await waitFor(() => {
               expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
               expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to add more.'
+                '1 Note available. Click to view it & add more.'
               );
             });
           },
@@ -1048,7 +1048,7 @@ describe('query tab with unified timeline', () => {
             await waitFor(() => {
               expect(screen.getByTestId('timeline-notes-tool-tip')).toBeVisible();
               expect(screen.getByTestId('timeline-notes-tool-tip')).toHaveTextContent(
-                '1 Note available. Click to add more.'
+                '1 Note available. Click to view it & add more.'
               );
             });
           },

@@ -34,7 +34,7 @@ export const NOTES_COUNT_TOOLTIP = ({ notesCount }: { notesCount: number }) =>
     {
       values: { notesCount },
       defaultMessage:
-        '{notesCount} {notesCount, plural, one {Note} other {Notes}  } available. Click to view them & add more.',
+        '{notesCount} {notesCount, plural, one {Note} other {Notes}  } available. Click to view {notesCount, plural, one {it} other {them}} & add more.',
     }
   );
 
