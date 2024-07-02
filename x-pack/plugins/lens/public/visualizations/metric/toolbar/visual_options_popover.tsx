@@ -130,6 +130,8 @@ function ValueFontOption({
             append={i18n.translate('xpack.lens.shared.pixel', {
               defaultMessage: 'px',
             })}
+            min={8}
+            step={1}
             data-test-subj="lens-value-font-size"
             value={dbFontValue.inputValue}
             disabled={mode !== 'custom'}
