@@ -53,6 +53,15 @@ describe('getQueryText', () => {
     });
   });
 
+  it('uses unknown fields as part of queryText', () => {
+    const query = Query.parse('tag:tag-1 unknown:worlds some search');
+
+    expect(parseQuery(query, [])).toEqual({
+      queryText: 'some search unknown:worlds',
+      selectedTags: ['tag-1'],
+    });
+  });
+
   it('parses the types when provided types are empty', () => {
     const query = Query.parse('type:(index-pattern or dashboard) kibana');
 

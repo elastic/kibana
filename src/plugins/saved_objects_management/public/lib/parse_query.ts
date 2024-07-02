@@ -15,31 +15,55 @@ interface ParsedQuery {
   selectedTags?: string[];
 }
 
-export function parseQuery(query: Query, types: SavedObjectManagementTypeInfo[]): ParsedQuery {
+enum FieldClause {
+  TYPE = 'type',
+  TAG = 'tag',
+}
+const fieldClauseValues: string[] = Object.values(FieldClause);
+
+export function parseQuery(query: Query, typeInfos: SavedObjectManagementTypeInfo[]): ParsedQuery {
   let queryText: string | undefined;
   let visibleTypes: string[] | undefined;
   let selectedTags: string[] | undefined;
 
   if (query) {
-    if (query.ast.getTermClauses().length) {
-      queryText = query.ast
-        .getTermClauses()
-        .map((clause: any) => clause.value)
-        .join(' ');
+    const termClauses = query.ast.getTermClauses();
+    if (termClauses.length > 0) {
+      queryText = termClauses.map(({ value }) => value).join(' ');
     }
-    if (query.ast.getFieldClauses('type')) {
-      const displayedTypes = query.ast.getFieldClauses('type')[0].value as string[];
-      const displayNameToNameMap = types.reduce((map, type) => {
-        map.set(type.displayName, type.name);
+
+    const typeFieldClauses = query.ast.getFieldClauses(FieldClause.TYPE);
+    if (typeFieldClauses && typeFieldClauses.length > 0) {
+      const displayNameToNameMap = typeInfos.reduce((map, typeInfo) => {
+        map.set(typeInfo.displayName, typeInfo.name);
         return map;
       }, new Map<string, string>());
-      visibleTypes = displayedTypes.map((type) => {
-        return displayNameToNameMap.get(type) ?? type;
+      const values = typeFieldClauses[0].value;
+      const typeFieldClausesValues = Array.isArray(values) ? values : [values];
+      visibleTypes = typeFieldClausesValues.map((typeInfo) => {
+        typeInfo = typeInfo.toString();
+        return displayNameToNameMap.get(typeInfo) ?? typeInfo;
       });
     }
-    if (query.ast.getFieldClauses('tag')) {
-      selectedTags = query.ast.getFieldClauses('tag')[0].value as string[];
+
+    const tagFieldClauses = query.ast.getFieldClauses(FieldClause.TAG);
+    if (tagFieldClauses && tagFieldClauses.length > 0) {
+      const values = tagFieldClauses[0].value;
+      const tagFieldClausesValues = Array.isArray(values) ? values : [values];
+      selectedTags = tagFieldClausesValues.map((t) => {
+        return t.toString();
+      });
     }
+
+    // check for unknown filters
+    query.ast.getFieldClauses().forEach((clause) => {
+      const { type: clauseType, field, value } = clause;
+      if (clauseType === 'field' && !Array.isArray(value) && !fieldClauseValues.includes(field)) {
+        // Unknown filters must be used as part of the search term.
+        // Example: "remote:logs" is not a filter, it is a valid search term.
+        queryText = `${queryText ?? ''} ${field}:${value}`;
+      }
+    });
   }
 
   return {
