@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { omit } from 'lodash';
+import { AirdropPopover } from '@kbn/airdrops';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -253,6 +255,22 @@ export const getTopNavLinks = ({
   if (services.capabilities.discover.save && !defaultMenu?.saveItem?.disabled) {
     entries.push({ data: saveSearch, order: defaultMenu?.saveItem?.order ?? 600 });
   }
+
+  entries.push({
+    data: {
+      id: 'setFilters',
+      label: 'Set filters',
+      run: () => {},
+      renderItem: ({ key }) => (
+        <AirdropPopover
+          key={key}
+          description="Share the state of the app with another Kibana instance."
+          group="searchBar"
+        />
+      ),
+    },
+    order: 0,
+  });
 
   return entries.sort((a, b) => a.order - b.order).map((entry) => entry.data);
 };

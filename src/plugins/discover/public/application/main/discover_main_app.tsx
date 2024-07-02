@@ -8,6 +8,8 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { useAirdrop, useOnDrop } from '@kbn/airdrops/src';
+import type { Filter } from '@kbn/es-query';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './state_management/discover_state';
 import { DiscoverLayout } from './components/layout';
@@ -33,7 +35,9 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const { chrome, docLinks, data, spaces, history } = services;
+  const { chrome, docLinks, data, spaces, history, filterManager } = services;
+  const { registerAirdropContent } = useAirdrop();
+  const filtersAirdrop = useOnDrop<Filter[]>({ id: 'searchBar.filters' });
 
   useUrlTracking(stateContainer.savedSearchState);
 
@@ -87,6 +91,22 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       data.search.session.clear();
     };
   }, [data.search.session]);
+
+  useEffect(() => {
+    const unregister = registerAirdropContent({
+      id: 'searchBar.filters',
+      label: 'Filters',
+      get: () => filterManager.getFilters(),
+    });
+
+    return unregister;
+  }, [registerAirdropContent, filterManager]);
+
+  useEffect(() => {
+    if (filtersAirdrop) {
+      filterManager.setAppFilters(filtersAirdrop.content);
+    }
+  }, [filtersAirdrop, filterManager]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 

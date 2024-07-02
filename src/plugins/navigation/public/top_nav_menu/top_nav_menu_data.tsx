@@ -29,7 +29,7 @@ export interface TopNavMenuData {
   target?: string;
   href?: string;
   intl?: InjectedIntl;
-  renderItem?: () => React.ReactNode;
+  renderItem?: (arg: { key: string }) => React.ReactNode;
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
