@@ -19,7 +19,7 @@ import { useEnabledFeatures } from '../contexts/ml';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
-  const { showNodeInfo } = useEnabledFeatures();
+  const { showContextualInsights, showNodeInfo } = useEnabledFeatures();
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
@@ -35,6 +35,7 @@ export const LogRateAnalysisPage: FC = () => {
         <LogRateAnalysis
           dataView={dataView}
           savedSearch={savedSearch}
+          showContextualInsights={showContextualInsights}
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
             'analytics',

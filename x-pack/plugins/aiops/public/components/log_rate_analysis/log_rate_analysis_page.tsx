@@ -57,7 +57,13 @@ interface SignificantFieldValue {
   pValue: number | null;
 }
 
-export const LogRateAnalysisPage: FC = () => {
+interface LogRateAnalysisPageProps {
+  showContextualInsights?: boolean;
+}
+
+export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
+  showContextualInsights = false,
+}) => {
   const aiopsAppContext = useAiopsAppContext();
   const { data: dataService, observabilityAIAssistant } = aiopsAppContext;
   const { dataView, savedSearch } = useDataSource();
@@ -311,7 +317,9 @@ export const LogRateAnalysisPage: FC = () => {
               onAnalysisCompleted={onAnalysisCompleted}
             />
           </EuiFlexItem>
-          {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight && messages ? (
+          {showContextualInsights &&
+          observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight &&
+          messages ? (
             <EuiFlexItem grow={false}>
               <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
                 title={logRateAnalysisTitle}
