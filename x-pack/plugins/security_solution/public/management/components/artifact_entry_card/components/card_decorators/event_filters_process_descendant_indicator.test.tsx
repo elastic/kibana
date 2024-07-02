@@ -7,7 +7,6 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { EventFiltersProcessDescendantIndicatorProps } from './event_filters_process_descendant_indicator';
 import { EventFiltersProcessDescendantIndicator } from './event_filters_process_descendant_indicator';
 import type { AnyArtifact } from '../../types';
 import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
@@ -16,12 +15,13 @@ import {
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
+import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 
 describe('EventFiltersProcessDescendantIndicator', () => {
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let render: (
-    props: EventFiltersProcessDescendantIndicatorProps
+    props: ArtifactEntryCardDecoratorProps
   ) => ReturnType<AppContextTestRender['render']>;
 
   const STANDARD_EVENT_FILTER: AnyArtifact = {
