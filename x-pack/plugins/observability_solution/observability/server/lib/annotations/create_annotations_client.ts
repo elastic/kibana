@@ -83,7 +83,7 @@ export function createAnnotationsClient(params: {
         if (!indexExists) {
           await initIndex();
         } else {
-          updateMappings();
+          await updateMappings();
         }
 
         const annotation = {
