@@ -238,9 +238,8 @@ export function correctCommonEsqlMistakes(query: string): {
     switch (name) {
       case 'FROM':
         formattedCommand = formattedCommand
-          .replaceAll(/FROM "(.*)"/g, 'FROM $1')
-          .replaceAll(/FROM '(.*)'/g, 'FROM $1')
-          .replaceAll(/FROM `(.*)`/g, 'FROM $1');
+          .replaceAll(/FROM '(.*)'/g, 'FROM "$1"')
+          .replaceAll(/FROM `(.*)`/g, 'FROM "$1"');
         break;
 
       case 'WHERE':
