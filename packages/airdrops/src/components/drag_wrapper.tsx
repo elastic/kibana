@@ -12,7 +12,7 @@ import { TRANSFER_DATA_TYPE } from '../constants';
 import { useAirdrop } from '../services';
 import type { Airdrop, AirdropContent } from '../types';
 
-export interface Props<T = Record<string, unknown>> {
+export interface Props<T = unknown> {
   content: AirdropContent<T>;
   children: React.ReactNode;
 }

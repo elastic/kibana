@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -20,28 +20,32 @@ import {
 import { of } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 
+import { Interpolation, Theme } from '@emotion/react';
 import { useAirdrop } from '../services';
 import type { AirdropContent } from '../types';
 import { type Props as AirdropDragButtonProps } from './airdrop_drag_button';
 import { DragWrapper } from './drag_wrapper';
 import { GroupContentSelector } from './group_content_selector';
 
-interface Props extends Omit<AirdropDragButtonProps, 'content'> {
+interface Props<T = unknown> extends Omit<AirdropDragButtonProps<T>, 'content'> {
   description: string;
-  content?: AirdropDragButtonProps['content'];
+  content?: AirdropDragButtonProps<T>['content'];
   group?: string;
+  cssPopover?: Interpolation<Theme>;
 }
 
-export const AirdropPopover: FC<Props> = ({
+export function AirdropPopover<T>({
   description,
   group,
   iconSize,
   size,
+  cssPopover,
   content: _content,
-}) => {
+}: Props<T>) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState<AirdropContent[]>([]);
   const { getContents$ForGroup } = useAirdrop();
+
   const contents$ = useMemo(() => {
     if (!group) return of([]);
     return getContents$ForGroup(group);
@@ -59,6 +63,7 @@ export const AirdropPopover: FC<Props> = ({
 
   return (
     <EuiPopover
+      css={cssPopover}
       button={
         <EuiButtonIcon
           display="empty"
@@ -81,17 +86,20 @@ export const AirdropPopover: FC<Props> = ({
           <p>{description}</p>
         </EuiText>
 
-        <EuiSpacer />
-
-        <GroupContentSelector contents={contents} onSelectionChange={setSelectedContent} />
+        {contents.length > 0 && (
+          <>
+            <EuiSpacer />
+            <GroupContentSelector contents={contents} onSelectionChange={setSelectedContent} />
+          </>
+        )}
       </div>
       <EuiPopoverFooter>
         <DragWrapper content={content}>
-          <EuiButton fullWidth size="s">
+          <EuiButton iconType="grab" fullWidth size="s">
             Drag on other Kibana window
           </EuiButton>
         </DragWrapper>
       </EuiPopoverFooter>
     </EuiPopover>
   );
-};
+}

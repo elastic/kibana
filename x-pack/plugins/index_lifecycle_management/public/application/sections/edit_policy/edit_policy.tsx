@@ -26,7 +26,7 @@ import {
   EuiPageHeader,
   EuiTimeline,
 } from '@elastic/eui';
-import { AirdropDragButton, useOnDrop } from '@kbn/airdrops';
+import { AirdropPopover, useOnDrop } from '@kbn/airdrops';
 
 import type { SerializedPolicy } from '../../../../common/types';
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
@@ -183,7 +183,8 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          <AirdropDragButton<SerializedPolicy>
+          <AirdropPopover<SerializedPolicy>
+            description="Share this form values with another Kibana instance."
             content={{
               id: DROP_ID,
               get: () => {
@@ -193,6 +194,7 @@ export const EditPolicy: React.FunctionComponent = () => {
                 };
               },
             }}
+            cssPopover={{ marginTop: '8px' }}
           />,
           <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
             <FormattedMessage
