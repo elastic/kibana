@@ -25,7 +25,7 @@ export const OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID =
  * NOTE: This is not to be used in production as-is, and must be used with an OpenAI ConnectorId
  */
 export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
-  actions,
+  actionsClient,
   connectorId,
   esClient,
   esStore,
@@ -36,9 +36,8 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
   traceOptions,
 }) => {
   const llm = new ActionsClientLlm({
-    actions,
+    actionsClient,
     connectorId,
-    request,
     llmType,
     logger,
     model: request.body.model,
