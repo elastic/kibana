@@ -18,10 +18,24 @@ import {
 export function getShardCapacityDeprecationInfo({
   symptom,
   details,
+  status,
 }: {
   details: any;
   symptom: any;
+  status: estypes.HealthReportIndicatorHealthStatus;
 }) {
+  // When we dont have a details field for our indicator, we can only report
+  // the symptom to the user given that's the only information about the deprecation
+  // we have.
+  if (status === 'unknown' && !details) {
+    return {
+      details: symptom,
+      message: symptom,
+      url: null,
+      resolveDuringUpgrade: false,
+    };
+  }
+
   const causes = [];
   if (details.indices_with_readonly_block > 0) {
     causes.push(
@@ -109,7 +123,7 @@ export async function getHealthIndicators(
         return {
           type: 'health_indicator',
           isCritical: status === 'red',
-          ...getShardCapacityDeprecationInfo({ symptom, details }),
+          ...getShardCapacityDeprecationInfo({ symptom, details, status }),
         };
       }),
   ];
