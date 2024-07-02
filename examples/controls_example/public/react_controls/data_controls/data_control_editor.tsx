@@ -139,15 +139,13 @@ export const DataControlEditor = ({
     );
   }, [selectedFieldName, setControlEditorValid, selectedDataView, selectedControlType]);
 
-  const dataControlFactories = useMemo(() => {
-    return getAllControlTypes()
+  const CompatibleControlTypesComponent = useMemo(() => {
+    const dataControlFactories = getAllControlTypes()
       .map((type) => getControlFactory(type))
       .filter((factory) => {
         return isDataControlFactory(factory);
       });
-  }, []);
 
-  const CompatibleControlTypesComponent = useMemo(() => {
     return (
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
         {dataControlFactories.map((factory) => {
@@ -172,11 +170,11 @@ export const DataControlEditor = ({
 
           return disabled ? (
             <EuiToolTip
-              key={`disabled__${controlType}`}
+              key={`disabled__${factory.type}`}
               content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
                 {
                   fieldSelected: Boolean(selectedFieldName),
-                  controlType,
+                  controlType: factory.getDisplayName(),
                 }
               )}
             >
@@ -188,7 +186,7 @@ export const DataControlEditor = ({
         })}
       </EuiKeyPadMenu>
     );
-  }, [selectedFieldName, fieldRegistry, selectedControlType, controlType, dataControlFactories]);
+  }, [selectedFieldName, fieldRegistry, selectedControlType]);
 
   const CustomSettingsComponent = useMemo(() => {
     if (!selectedControlType || !selectedFieldName || !fieldRegistry) return;
@@ -254,6 +252,7 @@ export const DataControlEditor = ({
                   selectedDataViewId={selectedDataViewId}
                   onChangeDataViewId={(newDataViewId) => {
                     stateManager.dataViewId.next(newDataViewId);
+                    setSelectedControlType(undefined);
                   }}
                   trigger={{
                     label:
