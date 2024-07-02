@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IStorage } from '@kbn/kibana-utils-plugin/public';
+import type { IStorage, IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export const localStorageMock = (): IStorage => {
@@ -27,10 +27,20 @@ export const localStorageMock = (): IStorage => {
   };
 };
 
+const createStorageMock = (storeMock: IStorage): jest.Mocked<IStorageWrapper> => {
+  const storage = new Storage(storeMock);
+  return {
+    get: jest.fn((...args) => storage.get(...args)),
+    clear: jest.fn((...args) => storage.clear(...args)),
+    set: jest.fn((...args) => storage.set(...args)),
+    remove: jest.fn((...args) => storage.remove(...args)),
+  } as jest.Mocked<IStorageWrapper>;
+};
+
 export const createSecuritySolutionStorageMock = () => {
   const localStorage = localStorageMock();
   return {
     localStorage,
-    storage: new Storage(localStorage),
+    storage: createStorageMock(localStorage),
   };
 };
