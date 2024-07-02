@@ -31,15 +31,37 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
-    const cspBenchmarkRules = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
-      type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-    });
-    const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
-      (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
-    );
-    expect(requestedBenchmarkRules.length).greaterThan(0);
+    let retryCount = 0;
+    let arraySize = [];
 
-    return requestedBenchmarkRules.map((item) => item.attributes);
+    while (retryCount < 10) {
+      try {
+        const kibanaServer2 = getService('kibanaServer');
+        const cspBenchmarkRules = await kibanaServer2.savedObjects.find<CspBenchmarkRule>({
+          type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+        });
+
+        const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
+          (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+        );
+        arraySize.push(requestedBenchmarkRules);
+        if (requestedBenchmarkRules.length > 1) {
+          return requestedBenchmarkRules.map((item) => item.attributes);
+        } else {
+          throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
+        }
+      } catch (error) {
+        retryCount++;
+
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay
+      }
+    }
+
+    throw new Error(
+      `Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${JSON.stringify(
+        arraySize[0]
+      )}`
+    );
   };
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
@@ -143,8 +165,7 @@ export default function (providerContext: FtrProviderContext) {
     },
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/179815
-  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {
+  describe('GET /internal/cloud_security_posture/benchmarks', () => {
     describe('Get Benchmark API', async () => {
       beforeEach(async () => {
         await index.removeFindings();
