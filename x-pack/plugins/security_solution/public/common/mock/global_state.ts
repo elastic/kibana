@@ -71,7 +71,19 @@ export const mockSourcererState: SourcererState = {
 
 export const mockGlobalState: State = {
   app: {
-    notesById: {},
+    notesById: {
+      '1': {
+        created: new Date('2024-07-02T08:32:29.233Z'),
+        id: '1',
+        lastEdit: new Date('2024-07-02T08:32:29.233Z'),
+        note: 'New Note',
+        user: 'elastic',
+        saveObjectId: 'c1a44f63-eb20-4c65-a050-eb9e842d8492',
+        version: 'WzIyNDUsMV0=',
+        eventId: '1',
+        timelineId: 'some-timeline-id',
+      },
+    },
     errors: [
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
@@ -342,7 +354,7 @@ export const mockGlobalState: State = {
           tiebreakerField: '',
           timestampField: '@timestamp',
         },
-        eventIdToNoteIds: {},
+        eventIdToNoteIds: { '1': ['1'] },
         excludedRowRendererIds: [],
         expandedDetail: {},
         highlightedDropAndProviderId: '',
@@ -508,7 +520,7 @@ export const mockGlobalState: State = {
     ids: ['1'],
     entities: {
       '1': {
-        eventId: 'event-id',
+        eventId: '1', // ids based on mock Timeline Data
         noteId: '1',
         note: 'note-1',
         timelineId: 'timeline-1',
