@@ -21,6 +21,7 @@ import {
   EDIT_AS_QUERY_DSL,
   KIBANA_CODE_EDITOR,
 } from '../screens/search_bar';
+import { LOADING_INDICATOR } from '../screens/security_header';
 
 export const openAddFilterPopover = () => {
   cy.get(GLOBAL_SEARCH_BAR_SUBMIT_BUTTON).should('be.enabled');
@@ -85,4 +86,8 @@ export const fillAddFilterFormAsQueryDSL = (query: string) => {
   cy.get(KIBANA_CODE_EDITOR).type(query, { parseSpecialCharSequences: false });
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).click();
   cy.get(ADD_FILTER_FORM_SAVE_BUTTON).should('not.exist');
+};
+
+export const waitForSavedQueryLoaded = () => {
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };

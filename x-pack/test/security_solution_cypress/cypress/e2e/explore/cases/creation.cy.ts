@@ -65,7 +65,7 @@ const getUsername = () => {
 };
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
-describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
+describe('Cases', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
   beforeEach(() => {
     deleteTimelines();
     deleteCases();

@@ -36,7 +36,7 @@ export const StatItemsComponent = React.memo<StatItemsProps>(({ statItems, from,
   const { isToggleExpanded, onToggle } = useToggleStatus({ id });
 
   return (
-    <FlexItem grow={1} data-test-subj={key}>
+    <FlexItem grow={1} data-test-subj={`stat-${key}`}>
       <EuiPanel hasBorder>
         <StatItemHeader
           onToggle={onToggle}

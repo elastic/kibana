@@ -39,21 +39,20 @@ export const openLensVisualizationsInspectModal = (
   { panelSelector, embeddableId, tab }: InspectLensVisualizationsMetadata,
   onOpen: () => void
 ) => {
-  cy.get(panelSelector)
-    .get(`[data-test-embeddable-id="${embeddableId}"]`)
-    .each(($el) => {
-      // wait for visualization to load
-      if ($el.find(LOADER_ARIA).length > 0) {
-        cy.get(LOADER_ARIA).should('not.exist');
-      }
+  cy.get(`${panelSelector} [data-test-embeddable-id="${embeddableId}"]`).within(($el) => {
+    // wait for visualization to load
+    if ($el.find(LOADER_ARIA).length > 0) {
+      cy.get(LOADER_ARIA).should('not.exist');
+    }
 
-      cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
-      cy.get(EMBEDDABLE_PANEL_INSPECT).click();
+    cy.wrap($el).get(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
+  });
 
-      onOpen();
+  cy.get(EMBEDDABLE_PANEL_INSPECT).click();
 
-      closesModal();
-    });
+  onOpen();
+
+  closesModal();
 };
 
 export const openTab = (tab: string) => {

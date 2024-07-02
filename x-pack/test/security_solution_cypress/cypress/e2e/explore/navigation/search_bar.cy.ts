@@ -12,6 +12,7 @@ import {
   fillAddFilterForm,
   openKqlQueryBar,
   fillKqlQueryBar,
+  waitForSavedQueryLoaded,
 } from '../../../tasks/search_bar';
 import {
   AUTO_SUGGEST_AGENT_NAME,
@@ -22,13 +23,15 @@ import { getHostIpFilter } from '../../../objects/filter';
 
 import { hostsUrl } from '../../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
+import { waitForPageToBeLoaded } from '../../../tasks/common';
 
-// Failing: See https://github.com/elastic/kibana/issues/182932
-describe.skip('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
+describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
+    waitForPageToBeLoaded();
+    waitForSavedQueryLoaded();
   });
 
   it('adds correctly a filter to the global search bar', () => {
