@@ -33,18 +33,15 @@ const agentExplorerRoute = createApmServerRoute({
     ]),
   }),
   async handler(resources): Promise<AgentExplorerAgentsResponse> {
-    const {
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { context, params } = resources;
 
     const { environment, kuery, start, end, probability, serviceName, agentLanguage } =
       params.query;
 
+    const { security } = await context.core;
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ security, probability }),
     ]);
 
     return getAgents({

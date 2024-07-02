@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { CoreRequestHandlerContext, KibanaRequest, Logger } from '@kbn/core/server';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
   ActionType as ConnectorType,
@@ -90,7 +90,10 @@ export type ObsAIAssistantConnectorTypeExecutorOptions = ConnectorTypeExecutorOp
 >;
 
 export function getObsAIAssistantConnectorType(
-  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
+  initResources: (
+    request: KibanaRequest,
+    context: CoreRequestHandlerContext
+  ) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
   alertDetailsContextService: AlertDetailsContextualInsightsService
 ): ObsAIAssistantConnectorType {
   return {
@@ -136,13 +139,16 @@ function renderParameterTemplates(
 
 async function executor(
   execOptions: ObsAIAssistantConnectorTypeExecutorOptions,
-  initResources: (request: KibanaRequest) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
+  initResources: (
+    request: KibanaRequest,
+    context: CoreRequestHandlerContext
+  ) => Promise<ObservabilityAIAssistantRouteHandlerResources>,
   alertDetailsContextService: AlertDetailsContextualInsightsService
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const request = execOptions.request;
+  const { context, request } = execOptions;
   const alerts = execOptions.params.alerts;
 
-  if (!request) {
+  if (!context || !request) {
     throw new Error('AI Assistant connector requires a kibana request');
   }
 
@@ -152,7 +158,7 @@ async function executor(
     return { actionId: execOptions.actionId, status: 'ok' };
   }
 
-  const resources = await initResources(request);
+  const resources = await initResources(request, context);
   const client = await resources.service.getClient({ request });
   const functionClient = await resources.service.getFunctionClient({
     signal: new AbortController().signal,

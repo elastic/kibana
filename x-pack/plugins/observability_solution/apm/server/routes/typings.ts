@@ -18,6 +18,7 @@ import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/serv
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;
@@ -44,6 +45,7 @@ export type MinimalApmPluginRequestHandlerContext = Omit<
     savedObjects: {
       client: SavedObjectsClientContract;
     };
+    security: SecurityRequestHandlerContext;
   }>;
 };
 

@@ -14,6 +14,7 @@ import {
 } from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { flatten } from 'lodash';
+import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 
 export const alertDetailsContextRt = t.intersection([
   t.type({
@@ -54,6 +55,7 @@ export interface AlertDetailsContextualInsightsRequestContext {
     savedObjects: {
       client: SavedObjectsClientContract;
     };
+    security: SecurityRequestHandlerContext;
   }>;
   licensing: Promise<LicensingApiRequestHandlerContext>;
 }

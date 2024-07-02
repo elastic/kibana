@@ -35,9 +35,9 @@ export const getAlertDetailsContextHandler = (
     requestContext: AlertDetailsContextualInsightsRequestContext,
     query: AlertDetailsContextualInsightsHandlerQuery
   ) => {
+    const coreContext = await requestContext.core;
     const resources = {
       getApmIndices: async () => {
-        const coreContext = await requestContext.core;
         return resourcePlugins.apmDataAccess.setup.getApmIndices(coreContext.savedObjects.client);
       },
       request: requestContext.request,
@@ -63,28 +63,20 @@ export const getAlertDetailsContextHandler = (
       },
     };
 
-    const [
-      apmEventClient,
-      annotationsClient,
-      apmAlertsClient,
-      coreContext,
-      mlClient,
-      randomSampler,
-    ] = await Promise.all([
-      getApmEventClient(resources),
-      resourcePlugins.observability.setup.getScopedAnnotationsClient(
-        resources.context,
-        requestContext.request
-      ),
-      getApmAlertsClient(resources),
-      requestContext.core,
-      getMlClient(resources),
-      getRandomSampler({
-        security: resourcePlugins.security,
-        probability: 1,
-        request: requestContext.request,
-      }),
-    ]);
+    const [apmEventClient, annotationsClient, apmAlertsClient, mlClient, randomSampler] =
+      await Promise.all([
+        getApmEventClient(resources),
+        resourcePlugins.observability.setup.getScopedAnnotationsClient(
+          resources.context,
+          requestContext.request
+        ),
+        getApmAlertsClient(resources),
+        getMlClient(resources),
+        getRandomSampler({
+          security: coreContext.security,
+          probability: 1,
+        }),
+      ]);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const alertStartedAt = query.alert_started_at;

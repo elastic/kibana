@@ -5,30 +5,24 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
+import { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import seedrandom from 'seedrandom';
-import { APMRouteHandlerResources } from '../../../routes/apm_routes/register_apm_server_routes';
 
 export type RandomSampler = Awaited<ReturnType<typeof getRandomSampler>>;
 
 export async function getRandomSampler({
   security,
-  request,
   probability,
 }: {
-  security: APMRouteHandlerResources['plugins']['security'];
-  request: KibanaRequest;
+  security: SecurityRequestHandlerContext;
   probability: number;
 }) {
   let seed = 1;
 
-  if (security) {
-    const securityPluginStart = await security.start();
-    const username = securityPluginStart.authc.getCurrentUser(request)?.username;
+  const username = security.authc.getCurrentUser()?.username;
 
-    if (username) {
-      seed = Math.abs(seedrandom(username).int32());
-    }
+  if (username) {
+    seed = Math.abs(seedrandom(username).int32());
   }
 
   return {

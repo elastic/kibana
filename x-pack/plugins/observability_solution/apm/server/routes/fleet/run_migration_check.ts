@@ -33,13 +33,11 @@ export async function runMigrationCheck({
 }): Promise<RunMigrationCheckResponse> {
   const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 
-  const savedObjectsClient = (await context.core).savedObjects.client;
-  const [fleetPluginStart, securityPluginStart] = await Promise.all([
-    plugins.fleet.start(),
-    plugins.security.start(),
-  ]);
+  const [coreContext, fleetPluginStart] = await Promise.all([context.core, plugins.fleet.start()]);
+  const savedObjectsClient = coreContext.savedObjects.client;
+  const securityService = coreContext.security;
 
-  const hasRequiredRole = isSuperuser({ securityPluginStart, request });
+  const hasRequiredRole = isSuperuser({ securityService });
   if (!hasRequiredRole) {
     return {
       has_cloud_agent_policy: false,

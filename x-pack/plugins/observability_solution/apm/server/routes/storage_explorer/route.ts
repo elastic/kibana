@@ -43,21 +43,16 @@ const storageExplorerRoute = createApmServerRoute({
   ): Promise<{
     serviceStatistics: StorageExplorerServiceStatisticsResponse;
   }> => {
-    const {
-      config,
-      params,
-      context,
-      request,
-      plugins: { security },
-    } = resources;
+    const { config, params, context } = resources;
 
     const {
       query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
+    const { security } = await context.core;
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ security, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -94,21 +89,17 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
     query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
   handler: async (resources): Promise<StorageDetailsResponse> => {
-    const {
-      params,
-      context,
-      request,
-      plugins: { security },
-    } = resources;
+    const { params, context } = resources;
 
     const {
       path: { serviceName },
       query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
+    const { security } = await context.core;
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ security, probability }),
     ]);
 
     return getStorageDetails({
@@ -136,21 +127,16 @@ const storageChartRoute = createApmServerRoute({
   ): Promise<{
     storageTimeSeries: SizeTimeseriesResponse;
   }> => {
-    const {
-      config,
-      params,
-      context,
-      request,
-      plugins: { security },
-    } = resources;
+    const { config, params, context } = resources;
 
     const {
       query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
+    const { security } = await context.core;
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ security, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -206,21 +192,16 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
     query: t.intersection([indexLifecyclePhaseRt, probabilityRt, environmentRt, kueryRt, rangeRt]),
   }),
   handler: async (resources): Promise<StorageExplorerSummaryStatisticsResponse> => {
-    const {
-      config,
-      params,
-      context,
-      request,
-      plugins: { security },
-    } = resources;
+    const { config, params, context } = resources;
 
     const {
       query: { indexLifecyclePhase, probability, environment, kuery, start, end },
     } = params;
 
+    const { security } = await context.core;
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ security, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({

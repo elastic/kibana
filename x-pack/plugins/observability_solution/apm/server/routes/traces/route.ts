@@ -34,18 +34,14 @@ const tracesRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (resources): Promise<TopTracesPrimaryStatsResponse> => {
-    const {
-      config,
-      params,
-      request,
-      plugins: { security },
-    } = resources;
+    const { context, config, params } = resources;
 
     const { environment, kuery, start, end, probability } = params.query;
 
+    const { security } = await context.core;
     const [apmEventClient, randomSampler] = await Promise.all([
       getApmEventClient(resources),
-      getRandomSampler({ security, request, probability }),
+      getRandomSampler({ security, probability }),
     ]);
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
