@@ -14,19 +14,28 @@ import {
   ViewDashboardSteps,
 } from './types';
 import { ProductLine, ProductTier } from './configs';
-import { useCurrentUser } from '../../../lib/kibana';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
+import { useKibana as mockUseKibana } from '../../../lib/kibana/__mocks__';
 import type { AppContextTestRender } from '../../../mock/endpoint';
 import { createAppRootMockRenderer } from '../../../mock/endpoint';
+import { createSecuritySolutionStorageMock } from '../../../mock/mock_local_storage';
+// import type { MockStorage } from '../../../lib/local_storage/__mocks__';
+// import { storage } from '../../../lib/local_storage';
 
 jest.mock('./toggle_panel');
 jest.mock('../../../lib/kibana');
+// jest.mock('../../../lib/local_storage');
 
 (useCurrentUser as jest.Mock).mockReturnValue({ fullName: 'UserFullName' });
+
+const mockedUseKibana = mockUseKibana();
+// const { storage: storageMock } = createSecuritySolutionStorageMock();
 
 describe('OnboardingComponent', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
+  let { storage: mockedStorage } = createSecuritySolutionStorageMock();
   const props = {
     indicesExist: true,
     productTypes: [{ product_line: ProductLine.security, product_tier: ProductTier.complete }],
@@ -41,11 +50,21 @@ describe('OnboardingComponent', () => {
   };
 
   beforeEach(() => {
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        // storage: storageMock,
+        storage: mockedStorage,
+      },
+    });
     mockedContext = createAppRootMockRenderer();
     render = () => (renderResult = mockedContext.render(<OnboardingComponent {...props} />));
   });
 
   afterEach(() => {
+    // storageMock.clear();
+    mockedStorage.clear();
     jest.clearAllMocks();
   });
 
@@ -87,9 +106,11 @@ describe('OnboardingComponent', () => {
     });
 
     it('should stay stay dismissed', () => {
+      // storage.get.mockReturnValue(false);
       render();
       renderResult.getByTestId('euiDismissCalloutButton').click();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
+      expect(mockedStorage.set).toHaveBeenCalledWith('securitySolution.showAvcBanner', 'false');
       // need to test local storage key presence or refresh and banner is not present
     });
   });
