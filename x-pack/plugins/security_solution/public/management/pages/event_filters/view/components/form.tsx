@@ -39,7 +39,10 @@ import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/unified-search-plugin/public/autocomplete/providers/value_suggestion_provider';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useGetUpdatedTags } from '../../../../hooks/artifacts';
-import { FILTER_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts/constants';
+import {
+  FILTER_PROCESS_DESCENDANTS_TAG,
+  PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
 import {
   isFilterProcessDescendantsEnabled,
   isFilterProcessDescendantsTag,
@@ -521,12 +524,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Additional condition added:"
                 />
               </EuiText>
-              <code>
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.additionalCondition"
-                  defaultMessage="event.category is process"
-                />
-              </code>
+              <code>{PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT}</code>
               <EuiSpacer size="m" />
             </>
           )}
