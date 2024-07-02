@@ -151,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
           [SPACE_IDS]: ['default'],
           [ALERT_SEVERITY]: 'critical',
           [ALERT_RISK_SCORE]: 50,
-          [ALERT_RULE_PARAMETERS]: {
+          [ALERT_RULE_PARAMETERS]: expect.objectContaining({
             anomaly_threshold: 30,
             author: [],
             description: 'Test ML rule description',
@@ -174,7 +174,7 @@ export default ({ getService }: FtrProviderContext) => {
             to: 'now',
             type: 'machine_learning',
             version: 1,
-          },
+          }),
           [ALERT_DEPTH]: 1,
           [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
           [ALERT_ORIGINAL_TIME]: expect.any(String),

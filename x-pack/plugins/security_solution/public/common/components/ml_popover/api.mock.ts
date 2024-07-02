@@ -100,6 +100,16 @@ export const mockJobsSummaryResponse: MlSummaryJob[] = [
   },
 ];
 
+export const getJobsSummaryResponseMock = (additionalJobs: MlSummaryJob[]): MlSummaryJob[] => [
+  ...mockJobsSummaryResponse,
+  ...additionalJobs,
+];
+
+export const buildMockJobsSummary = (overrides: Partial<MlSummaryJob>): MlSummaryJob => ({
+  ...mockJobsSummaryResponse[0],
+  ...overrides,
+});
+
 export const mockGetModuleResponse: Module[] = [
   {
     id: 'security_linux_v3',

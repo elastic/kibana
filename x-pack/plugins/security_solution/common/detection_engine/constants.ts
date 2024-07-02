@@ -47,6 +47,7 @@ export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
   'new_terms',
   'threat_match',
   'eql',
+  'machine_learning',
 ];
 
 export const SUPPRESSIBLE_ALERT_RULES_GA: Type[] = ['saved_query', 'query'];
