@@ -53,6 +53,22 @@ describe('Create ', () => {
     );
   });
 
+  it('does not render default value when setDefaultValue is false', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create
+          isLoading={false}
+          customFieldConfiguration={customFieldConfiguration}
+          setDefaultValue={false}
+        />
+      </FormTestComponent>
+    );
+
+    expect(
+      await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
+    ).toHaveValue('');
+  });
+
   it('renders loading state correctly', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
