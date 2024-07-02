@@ -28,6 +28,7 @@ import { createDashboardSavedObjectType } from './dashboard_saved_object';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './dashboard_container/dashboard_container_embeddable_factory';
+import { registerCreate } from './routes/create';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -59,6 +60,8 @@ export class DashboardPlugin
         },
       })
     );
+
+    registerCreate(core.http.createRouter().versioned, plugins.contentManagement);
 
     plugins.contentManagement.register({
       id: CONTENT_ID,
