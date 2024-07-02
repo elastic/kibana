@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { convertSecurityApi } from './convert_security_api';
-export { getDefaultSecurityImplementation } from './default_implementation';
-
-export interface SecurityServiceConfigType {
-  experimental?: {
-    fipsMode?: {
-      enabled: boolean;
-    };
-  };
+/**
+ * Core's FIPS service
+ *
+ * @public
+ */
+export interface CoreFipsService {
+  /**
+   * Check if Kibana is configured to run in FIPS mode
+   */
+  isEnabled(): boolean;
 }
