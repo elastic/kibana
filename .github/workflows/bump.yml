@@ -7,7 +7,7 @@ on:
     paths:
       - 'oas_docs/kibana.serverless.yaml'
 
-  pull_request:
+  pull_request_target:
     branches:
       - main
     paths:
@@ -33,21 +33,12 @@ jobs:
           file: oas_docs/kibana.serverless.yaml
 
   api-diff:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: ${{ github.event_name == 'pull_request_target' }}
     name: Check API diff on Bump.sh
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Create Preview
-        uses: bump-sh/github-action@v1
-        with:
-          doc: serverless
-          token: ${{secrets.BUMP_TOKEN}}
-          file: oas_docs/kibana.serverless.yaml
-          command: preview
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Comment pull request with API diff
         uses: bump-sh/github-action@v1
         with:
