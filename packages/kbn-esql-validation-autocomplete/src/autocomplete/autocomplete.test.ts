@@ -110,7 +110,7 @@ describe('autocomplete', () => {
     },
   });
 
-  const sourceCommands = ['row', 'from', 'show'];
+  const sourceCommands = ['row', 'from', 'show', 'metrics'];
 
   describe('New command', () => {
     testSuggestions(
