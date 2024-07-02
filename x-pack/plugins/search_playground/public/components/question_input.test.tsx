@@ -5,45 +5,106 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import React from 'react';
-import { render } from '@testing-library/react';
+import { EuiButton, EuiForm } from '@elastic/eui';
+import React, { FormEventHandler } from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QuestionInput } from './question_input';
 
 const mockButton = (
   <EuiButton data-test="btn" className="btn" onClick={() => {}}>
-    Some text
+    Send
   </EuiButton>
+);
+
+const handleOnSubmitMock = jest.fn();
+
+const MockChatForm = ({
+  children,
+  handleSubmit,
+}: {
+  children: React.ReactElement;
+  handleSubmit: FormEventHandler;
+}) => (
+  <EuiForm
+    component="form"
+    css={{ display: 'flex', flexGrow: 1 }}
+    onSubmit={handleSubmit}
+    data-test-subj="chatPage"
+  >
+    {children}
+  </EuiForm>
 );
 describe('Question Input', () => {
   describe('renders', () => {
     it('correctly', () => {
-      const { queryByTestId } = render(
-        <QuestionInput value="value" onChange={() => {}} button={mockButton} isDisabled={false} />
+      render(
+        <IntlProvider locale="en">
+          <MockChatForm handleSubmit={handleOnSubmitMock}>
+            <QuestionInput value="" onChange={() => {}} button={mockButton} isDisabled={false} />
+          </MockChatForm>
+        </IntlProvider>
       );
 
-      expect(queryByTestId('questionInput')).toBeInTheDocument();
+      expect(screen.getByTestId('questionInput')).toBeInTheDocument();
     });
 
     it('disabled', () => {
-      const { queryByTestId } = render(
-        <QuestionInput value="value" onChange={() => {}} button={mockButton} isDisabled={true} />
+      render(
+        <IntlProvider locale="en">
+          <MockChatForm handleSubmit={handleOnSubmitMock}>
+            <QuestionInput
+              value="my question"
+              onChange={() => {}}
+              button={mockButton}
+              isDisabled={true}
+            />
+          </MockChatForm>
+        </IntlProvider>
       );
 
-      expect(queryByTestId('questionInput')).toBeDisabled();
+      expect(screen.getByTestId('questionInput')).toBeDisabled();
     });
 
     it('with value', () => {
-      const { queryByTestId } = render(
-        <QuestionInput
-          value="my question"
-          onChange={() => {}}
-          button={mockButton}
-          isDisabled={true}
-        />
+      render(
+        <IntlProvider locale="en">
+          <MockChatForm handleSubmit={handleOnSubmitMock}>
+            <QuestionInput
+              value="my question"
+              onChange={() => {}}
+              button={mockButton}
+              isDisabled={false}
+            />
+          </MockChatForm>
+        </IntlProvider>
       );
 
-      expect(queryByTestId('questionInput')).toHaveDisplayValue('my question');
+      expect(screen.getByTestId('questionInput')).toHaveDisplayValue('my question');
     });
+  });
+  it('submits form', () => {
+    render(
+      <IntlProvider locale="en">
+        <MockChatForm handleSubmit={handleOnSubmitMock}>
+          <QuestionInput value="" onChange={() => {}} button={mockButton} isDisabled={false} />
+        </MockChatForm>
+      </IntlProvider>
+    );
+
+    const textArea = screen.getByTestId('questionInput');
+    fireEvent.compositionStart(textArea);
+    fireEvent.keyDown(textArea, {
+      key: 'Enter',
+      shiftKey: false,
+    });
+    expect(handleOnSubmitMock).not.toHaveBeenCalled();
+
+    fireEvent.compositionEnd(textArea);
+    fireEvent.keyDown(textArea, {
+      key: 'Enter',
+      shiftKey: false,
+    });
+    expect(handleOnSubmitMock).toHaveBeenCalled();
   });
 });
