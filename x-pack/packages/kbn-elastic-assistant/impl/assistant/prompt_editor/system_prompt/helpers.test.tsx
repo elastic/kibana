@@ -16,13 +16,13 @@ import { getOptions, getOptionFromPrompt } from './helpers';
 describe('helpers', () => {
   describe('getOptionFromPrompt', () => {
     it('returns an EuiSuperSelectOption with the correct value', () => {
-      const option = getOptionFromPrompt(mockSystemPrompt);
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isFlyoutMode: true });
 
       expect(option.value).toBe(mockSystemPrompt.id);
     });
 
     it('returns an EuiSuperSelectOption with the correct inputDisplay', () => {
-      const option = getOptionFromPrompt(mockSystemPrompt);
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isFlyoutMode: false });
 
       render(<>{option.inputDisplay}</>);
 
@@ -30,7 +30,7 @@ describe('helpers', () => {
     });
 
     it('shows the expected name in the dropdownDisplay', () => {
-      const option = getOptionFromPrompt(mockSystemPrompt);
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isFlyoutMode: true });
 
       render(<TestProviders>{option.dropdownDisplay}</TestProviders>);
 
@@ -38,7 +38,7 @@ describe('helpers', () => {
     });
 
     it('shows the expected prompt content in the dropdownDisplay', () => {
-      const option = getOptionFromPrompt(mockSystemPrompt);
+      const option = getOptionFromPrompt({ ...mockSystemPrompt, isFlyoutMode: true });
 
       render(<TestProviders>{option.dropdownDisplay}</TestProviders>);
 

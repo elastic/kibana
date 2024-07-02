@@ -40,6 +40,7 @@ const defaultProps: Props = {
   setIsSettingsModalVisible: jest.fn(),
   setSelectedPromptContexts: jest.fn(),
   isFlyoutMode: false,
+  allSystemPrompts: [],
 };
 
 describe('PromptEditorComponent', () => {

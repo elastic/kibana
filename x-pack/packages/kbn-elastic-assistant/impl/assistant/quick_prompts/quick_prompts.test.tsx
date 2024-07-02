@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { QuickPrompts } from './quick_prompts';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { QUICK_PROMPTS_TAB } from '../settings/const';
+import { QuickPrompts } from './quick_prompts';
 
 const setInput = jest.fn();
 const setIsSettingsModalVisible = jest.fn();
@@ -20,6 +20,7 @@ const testProps = {
   setIsSettingsModalVisible,
   trackPrompt,
   isFlyoutMode: false,
+  allPrompts: MOCK_QUICK_PROMPTS,
 };
 const setSelectedSettingsTab = jest.fn();
 const mockUseAssistantContext = {

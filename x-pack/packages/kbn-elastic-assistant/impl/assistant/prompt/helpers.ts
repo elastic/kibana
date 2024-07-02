@@ -6,10 +6,10 @@
  */
 
 import { Replacements, transformRawData } from '@kbn/elastic-assistant-common';
+import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import type { ClientMessage } from '../../assistant_context/types';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
 import type { SelectedPromptContext } from '../prompt_context/types';
-import type { Prompt } from '../types';
 import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
 
 export const getSystemMessages = ({
@@ -17,7 +17,7 @@ export const getSystemMessages = ({
   selectedSystemPrompt,
 }: {
   isNewChat: boolean;
-  selectedSystemPrompt: Prompt | undefined;
+  selectedSystemPrompt: PromptResponse | undefined;
 }): ClientMessage[] => {
   if (!isNewChat || selectedSystemPrompt == null) {
     return [];
@@ -53,7 +53,7 @@ export function getCombinedMessage({
   isNewChat: boolean;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
-  selectedSystemPrompt: Prompt | undefined;
+  selectedSystemPrompt: PromptResponse | undefined;
 }): ClientMessageWithReplacements {
   let replacements: Replacements = currentReplacements ?? {};
   const onNewReplacements = (newReplacements: Replacements) => {

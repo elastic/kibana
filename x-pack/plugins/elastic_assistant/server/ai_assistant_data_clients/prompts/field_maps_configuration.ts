@@ -23,9 +23,19 @@ export const assistantPromptsFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  is_shared: {
-    type: 'boolean',
+  consumer: {
+    type: 'text',
     array: false,
+    required: false,
+  },
+  color: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  categories: {
+    type: 'keyword',
+    array: true,
     required: false,
   },
   is_new_conversation_default: {

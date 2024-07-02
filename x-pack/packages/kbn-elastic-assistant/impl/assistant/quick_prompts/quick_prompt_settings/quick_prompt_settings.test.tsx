@@ -13,6 +13,7 @@ import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
 import { mockPromptContexts } from '../../../mock/prompt_context';
 
 const onSelectedQuickPromptChange = jest.fn();
+const setPromptsBulkActions = jest.fn();
 const setUpdatedQuickPromptSettings = jest.fn().mockImplementation((fn) => {
   return fn(MOCK_QUICK_PROMPTS);
 });
@@ -22,6 +23,8 @@ const testProps = {
   quickPromptSettings: MOCK_QUICK_PROMPTS,
   selectedQuickPrompt: MOCK_QUICK_PROMPTS[0],
   setUpdatedQuickPromptSettings,
+  promptsBulkActions: {},
+  setPromptsBulkActions,
 };
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -91,8 +94,11 @@ describe('QuickPromptSettings', () => {
     const customOption = {
       categories: [],
       color: '#D36086',
-      prompt: '',
-      title: 'sooper custom prompt',
+      consumer: undefined,
+      content: '',
+      id: 'sooper custom prompt',
+      name: 'sooper custom prompt',
+      promptType: 'quick',
     };
     expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([...MOCK_QUICK_PROMPTS, customOption]);
     expect(onSelectedQuickPromptChange).toHaveBeenCalledWith(customOption);
@@ -130,7 +136,7 @@ describe('QuickPromptSettings', () => {
     const previousFirstElementOfTheArray = mutatableQuickPrompts.shift();
 
     expect(setUpdatedQuickPromptSettings).toHaveReturnedWith([
-      { ...previousFirstElementOfTheArray, prompt: 'what does this do' },
+      { ...previousFirstElementOfTheArray, content: 'what does this do' },
       ...mutatableQuickPrompts,
     ]);
   });

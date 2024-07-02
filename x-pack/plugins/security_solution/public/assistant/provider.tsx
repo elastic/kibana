@@ -15,21 +15,24 @@ import {
   AssistantProvider as ElasticAssistantProvider,
   bulkUpdateConversations,
   getUserConversations,
+  getPrompts,
+  bulkUpdatePrompts,
 } from '@kbn/elastic-assistant';
 
 import { once } from 'lodash/fp';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { useObservable } from 'react-use';
 import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
-import { useBaseConversations } from './use_conversation_store';
-import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
 import { BASE_SECURITY_SYSTEM_PROMPTS } from './content/prompts/system';
+import { useBaseConversations } from './use_conversation_store';
+import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
@@ -112,12 +115,28 @@ export const createConversations = async (
   }
 };
 
+export const createBasePrompts = async (notifications: NotificationsStart, http: HttpSetup) => {
+  const promptsToCreate = [...BASE_SECURITY_QUICK_PROMPTS, ...BASE_SECURITY_SYSTEM_PROMPTS];
+
+  // post bulk create
+  const bulkResult = await bulkUpdatePrompts(
+    http,
+    {
+      create: promptsToCreate,
+    },
+    notifications.toasts
+  );
+  if (bulkResult && bulkResult.success) {
+    return true;
+  }
+};
+
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
 export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const {
-    application: { navigateToApp },
+    application: { navigateToApp, currentAppId$ },
     http,
     notifications,
     storage,
@@ -129,6 +148,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const baseConversations = useBaseConversations();
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
+  const currentAppId = useObservable(currentAppId$, '');
 
   useEffect(() => {
     const migrateConversationsFromLocalStorage = once(async () => {
@@ -152,6 +172,27 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     storage,
   ]);
 
+  useEffect(() => {
+    const createSecurityPrompts = once(async () => {
+      const res = await getPrompts({
+        http,
+      });
+      if (
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege &&
+        res.total === 0
+      ) {
+        await createBasePrompts(notifications, http);
+      }
+    });
+    createSecurityPrompts();
+  }, [
+    assistantAvailability.hasAssistantPrivilege,
+    assistantAvailability.isAssistantEnabled,
+    http,
+    notifications,
+  ]);
+
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
@@ -166,14 +207,13 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       docLinks={{ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }}
       basePath={basePath}
       basePromptContexts={Object.values(PROMPT_CONTEXTS)}
-      baseQuickPrompts={BASE_SECURITY_QUICK_PROMPTS} // to server and plugin start
-      baseSystemPrompts={BASE_SECURITY_SYSTEM_PROMPTS} // to server and plugin start
       baseConversations={baseConversations}
       getComments={getComments}
       http={http}
       navigateToApp={navigateToApp}
       title={ASSISTANT_TITLE}
       toasts={toasts}
+      currentAppId={currentAppId ?? 'securitySolutionUI'}
     >
       {children}
     </ElasticAssistantProvider>
