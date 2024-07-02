@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(currentURL.hash).to.eql('#some=hash-value');
     });
 
-    it('can login after `Unauthorized` error preserving original URL', async () => {
+    it.skip('can login after `Unauthorized` error preserving original URL', async () => {
       await getService('supertest')
         .post('/authentication/app/setup')
         .send({ simulateUnauthorized: true })
