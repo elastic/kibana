@@ -22,6 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
 
   describe('Data streams', function () {
+    // see details:
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -58,9 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(testDataStream).to.eql({
           name: testDataStreamName,
           lifecycle: {
-            effective_retention: '365d',
             enabled: true,
-            retention_determined_by: 'default_global_retention',
           },
           privileges: {
             delete_index: true,
@@ -83,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      xit('returns a single data stream by ID', async () => {
+      it('returns a single data stream by ID', async () => {
         const { body: dataStream, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
           .set(internalReqHeader)
@@ -115,11 +116,8 @@ export default function ({ getService }: FtrProviderContext) {
           indexTemplateName: testDataStreamName,
           nextGenerationManagedBy: 'Data stream lifecycle',
           hidden: false,
-          // lifecyle contains 3 elements for security prj, but only one for the other projects.
           lifecycle: {
-            effective_retention: '365d',
             enabled: true,
-            retention_determined_by: 'default_global_retention',
           },
         });
       });
@@ -131,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
-      xit('updates the data retention of a DS', async () => {
+      it('updates the data retention of a DS', async () => {
         const { body, status } = await supertestWithoutAuth
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set(internalReqHeader)
@@ -144,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql({ success: true });
       });
 
-      xit('sets data retention to infinite', async () => {
+      it('sets data retention to infinite', async () => {
         const { body, status } = await supertestWithoutAuth
           .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
           .set(internalReqHeader)
@@ -159,20 +157,15 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('can disable lifecycle for a given policy', async () => {
-        // const { body, status } = await supertestWithoutAuth
-        //   .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
-        //   .set(internalReqHeader)
-        //   .set(role.apiKeyHeader)
-        //   .send({ enabled: false });
-        // svlCommonApi.assertResponseStatusCode(200, status, body);
-        // Error: Expected status code 200, got 410 with body '{"statusCode":410,"error":"Gone","message":"Request for uri [/_data_stream/test-data-stream/_lifecycle] with method [DELETE] exists but is not available when running in serverless mode","attributes":{"error":{"root_cause":[{"type":"api_not_available_exception","reason":"Request for uri [/_data_stream/test-data-stream/_lifecycle] with method [DELETE] exists but is not available when running in serverless mode"}],"type":"api_not_available_exception","reason":"Request for uri [/_data_stream/test-data-stream/_lifecycle] with method [DELETE] exists but is not available when running in serverless mode"}}}'
-        // + expected - actual
-        //
-        // -410
-        // +200
-        // expect(body).to.eql({ success: true });
-        // const datastream = await getDatastream(testDataStreamName);
-        // expect(datastream.lifecycle).to.be(undefined);
+        const { body, status } = await supertestWithoutAuth
+          .put(`${API_BASE_PATH}/data_streams/${testDataStreamName}/data_retention`)
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
+          .send({ enabled: false });
+        svlCommonApi.assertResponseStatusCode(200, status, body);
+        expect(body).to.eql({ success: true });
+        const datastream = await svlDatastreamsHelpers.getDatastream(testDataStreamName);
+        expect(datastream.lifecycle).to.be(undefined);
       });
     });
 

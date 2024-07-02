@@ -19,6 +19,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./index_component_templates'));
     loadTestFile(require.resolve('./datastreams'));
     loadTestFile(require.resolve('./mappings'));
-    // loadTestFile(require.resolve('./settings'));
+    loadTestFile(require.resolve('./settings'));
   });
 }
