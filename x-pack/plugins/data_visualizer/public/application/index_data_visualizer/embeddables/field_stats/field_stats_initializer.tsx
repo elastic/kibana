@@ -100,9 +100,10 @@ export const FieldStatisticsInitializer: FC<FieldStatsInitializerProps> = ({
         getIndexPatternFromESQLQuery(query.esql),
         dataViews
       );
-      if (adhocDataView && adhocDataView.id){
+      if (adhocDataView && adhocDataView.id) {
         setDataViewId(adhocDataView.id);
       }
+
       await onPreview({
         viewType,
         dataViewId: adhocDataView?.id,
