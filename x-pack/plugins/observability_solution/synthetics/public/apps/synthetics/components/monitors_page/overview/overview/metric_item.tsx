@@ -173,7 +173,7 @@ export const MetricItem = ({
                     </EuiFlexGroup>
                   ),
                   valueFormatter: (x: number) => formatDuration(x),
-                  color: getColor(theme, monitor.isEnabled, monitor.status),
+                  color: getColor(theme, monitor.isEnabled, status),
                 },
               ],
             ]}
