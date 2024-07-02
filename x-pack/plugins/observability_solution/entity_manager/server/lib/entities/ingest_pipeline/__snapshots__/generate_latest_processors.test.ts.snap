@@ -8,7 +8,7 @@ Array [
       "value": "{{{_ingest.timestamp}}}",
     },
   },
-    Object {
+  Object {
     "set": Object {
       "field": "entity.type",
       "value": "service",
