@@ -36,11 +36,7 @@ RUN mkdir /usr/share/kibana
 WORKDIR /usr/share/kibana
 RUN tar \
   --strip-components=1 \
-  -zxf /tmp/kibana.tar.gz {{#serverless}}&& \
-# Exclude serverless.yml disabled assets
-  rm -rf node_modules/@kbn/screenshotting-plugin/chromium && \
-  rm -rf node_modules/@kbn/screenshotting-plugin/server/assets
-{{/serverless}}
+  -zxf /tmp/kibana.tar.gz
 # Ensure that group permissions are the same as user permissions.
 # This will help when relying on GID-0 to run Kibana, rather than UID-1000.
 # OpenShift does this, for example.
