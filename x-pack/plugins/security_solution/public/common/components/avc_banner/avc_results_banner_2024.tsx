@@ -39,7 +39,7 @@ export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDi
     >
       <FormattedMessage
         id="xpack.securitySolution.common.avcResultsBanner.body"
-        defaultMessage="Elastic security shines in Malware Protection Test by AV-Comparatives"
+        defaultMessage="Elastic Security shines in Malware Protection Test by AV-Comparatives"
       />
       <EuiSpacer size="s" />
       <EuiButton
