@@ -46,6 +46,7 @@ interface UseSettingsUpdater {
 
 export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
+  conversationsLoaded: boolean,
   anonymizationFields: FindAnonymizationFieldsResponse
 ): UseSettingsUpdater => {
   // Initial state from assistant context
@@ -151,7 +152,6 @@ export const useSettingsUpdater = (
     const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
       ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
       : undefined;
-
     return (bulkResult?.success ?? true) && (bulkAnonymizationFieldsResult?.success ?? true);
   }, [
     setAllQuickPrompts,
@@ -163,9 +163,9 @@ export const useSettingsUpdater = (
     toasts,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
-    updatedAssistantStreamingEnabled,
     updatedKnowledgeBaseSettings,
     assistantStreamingEnabled,
+    updatedAssistantStreamingEnabled,
     setAssistantStreamingEnabled,
     setKnowledgeBase,
     anonymizationFieldsBulkActions,
@@ -187,6 +187,13 @@ export const useSettingsUpdater = (
     anonymizationFieldsBulkActions.delete?.ids?.length,
     anonymizationFieldsBulkActions.update?.length,
   ]);
+
+  useEffect(() => {
+    // Update conversation settings when conversations are loaded
+    if (conversationsLoaded) {
+      setConversationSettings(conversations);
+    }
+  }, [conversations, conversationsLoaded]);
 
   return {
     conversationSettings,
