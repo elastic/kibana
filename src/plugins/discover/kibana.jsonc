@@ -40,7 +40,8 @@
       "noDataPage",
       "globalSearch",
       "observabilityAIAssistant",
-      "aiops"
+      "aiops",
+      "fieldsMetadata"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]
