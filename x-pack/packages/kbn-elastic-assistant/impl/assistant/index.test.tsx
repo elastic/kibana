@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { Assistant } from '.';
 import type { IHttpFetchError } from '@kbn/core/public';
 
@@ -63,15 +63,25 @@ const mockData = {
 };
 const mockDeleteConvo = jest.fn();
 const mockGetDefaultConversation = jest.fn().mockReturnValue(mockData.welcome_id);
+const clearConversation = jest.fn();
 const mockUseConversation = {
+  clearConversation: clearConversation.mockResolvedValue(mockData.welcome_id),
   getConversation: jest.fn(),
   getDefaultConversation: mockGetDefaultConversation,
   deleteConversation: mockDeleteConvo,
   setApiConfig: jest.fn().mockResolvedValue({}),
 };
 
+const refetchResults = jest.fn();
+
 describe('Assistant', () => {
-  beforeAll(() => {
+  let persistToLocalStorage: jest.Mock;
+  let persistToSessionStorage: jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    persistToLocalStorage = jest.fn();
+    persistToSessionStorage = jest.fn();
     (useConversation as jest.Mock).mockReturnValue(mockUseConversation);
 
     jest.mocked(PromptEditor).mockReturnValue(null);
@@ -85,13 +95,14 @@ describe('Assistant', () => {
     ];
     jest.mocked(useLoadConnectors).mockReturnValue({
       isFetched: true,
+      isFetchedAfterMount: true,
       data: connectors,
     } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
 
     jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
       data: mockData,
       isLoading: false,
-      refetch: jest.fn().mockResolvedValue({
+      refetch: refetchResults.mockResolvedValue({
         isLoading: false,
         data: {
           ...mockData,
@@ -103,16 +114,6 @@ describe('Assistant', () => {
       }),
       isFetched: true,
     } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
-  });
-
-  let persistToLocalStorage: jest.Mock;
-  let persistToSessionStorage: jest.Mock;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    persistToLocalStorage = jest.fn();
-    persistToSessionStorage = jest.fn();
-
     jest
       .mocked(useLocalStorage)
       .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
@@ -227,6 +228,16 @@ describe('Assistant', () => {
 
       await waitFor(() => {
         expect(mockDeleteConvo).toHaveBeenCalledWith(mockData.electric_sheep_id.id);
+      });
+    });
+    it('should refetchConversationsState after clear chat history button click', async () => {
+      renderAssistant({ isFlyoutMode: true });
+      fireEvent.click(screen.getByTestId('chat-context-menu'));
+      fireEvent.click(screen.getByTestId('clear-chat'));
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+      await waitFor(() => {
+        expect(clearConversation).toHaveBeenCalled();
+        expect(refetchResults).toHaveBeenCalled();
       });
     });
   });

@@ -122,6 +122,7 @@ export const AssistantHeader: React.FC<Props> = ({
             `,
             onClick: showDestroyModal,
             icon: 'refresh',
+            'data-test-subj': 'clear-chat',
           },
         ],
       },
@@ -236,6 +237,7 @@ export const AssistantHeader: React.FC<Props> = ({
                       aria-label="test"
                       iconType="boxesVertical"
                       onClick={onButtonClick}
+                      data-test-subj="chat-context-menu"
                     />
                   }
                   isOpen={isPopoverOpen}
@@ -259,6 +261,7 @@ export const AssistantHeader: React.FC<Props> = ({
           confirmButtonText={i18n.RESET_BUTTON_TEXT}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="reset-conversation-modal"
         >
           <p>{i18n.CLEAR_CHAT_CONFIRMATION}</p>
         </EuiConfirmModal>
