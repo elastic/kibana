@@ -70,6 +70,15 @@ exports[`EnabledFeatures renders as expected 1`] = `
             },
           ]
         }
+        headerText={
+          <EuiText
+            size="xs"
+          >
+            <b>
+              Feature visibility
+            </b>
+          </EuiText>
+        }
         onChange={[MockFunction]}
         space={
           Object {

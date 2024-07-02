@@ -38,6 +38,8 @@
     "@kbn/security-plugin-types-public",
     "@kbn/cloud-plugin",
     "@kbn/cloud-experiments-plugin",
+    "@kbn/security-plugin-types-common",
+    "@kbn/core-application-browser",
   ],
   "exclude": [
     "target/**/*",

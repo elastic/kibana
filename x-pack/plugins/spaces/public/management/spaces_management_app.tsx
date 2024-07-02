@@ -44,14 +44,23 @@ export const spacesManagementApp = Object.freeze({
       title,
 
       async mount({ element, setBreadcrumbs, history }) {
-        const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
-          await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
+        const [
+          [coreStart, { features }],
+          { SpacesGridPage },
+          { ManageSpacePage },
+          { ViewSpacePage },
+        ] = await Promise.all([
+          getStartServices(),
+          import('./spaces_grid'),
+          import('./edit_space'),
+          import('./view_space'),
+        ]);
 
         const spacesFirstBreadcrumb = {
           text: title,
           href: `/`,
         };
-        const { notifications, application, chrome } = coreStart;
+        const { notifications, application, chrome, http } = coreStart;
 
         chrome.docTitle.change(title);
 
@@ -63,6 +72,7 @@ export const spacesManagementApp = Object.freeze({
               getFeatures={features.getFeatures}
               notifications={notifications}
               spacesManager={spacesManager}
+              serverBasePath={http.basePath.serverBasePath}
               history={history}
               getUrlForApp={application.getUrlForApp}
               maxSpaces={config.maxSpaces}
@@ -94,29 +104,62 @@ export const spacesManagementApp = Object.freeze({
           );
         };
 
-        const EditSpacePageWithBreadcrumbs = () => {
-          const { spaceId } = useParams<{ spaceId: string }>();
+        const SpacePageWithBreadcrumbs = ({ context }: { context: 'edit' | 'view' }) => {
+          const { spaceId, selectedTabId } = useParams<{
+            spaceId: string;
+            selectedTabId?: string;
+          }>();
+
+          const breadcrumbText = (space: Space) =>
+            context === 'edit'
+              ? i18n.translate('xpack.spaces.management.editSpaceBreadcrumb', {
+                  defaultMessage: 'Edit {space}',
+                  values: { space: space.name },
+                })
+              : i18n.translate('xpack.spaces.management.viewSpaceBreadcrumb', {
+                  defaultMessage: 'View {space}',
+                  values: { space: space.name },
+                });
 
           const onLoadSpace = (space: Space) => {
             setBreadcrumbs([
               spacesFirstBreadcrumb,
               {
-                text: space.name,
+                text: breadcrumbText(space),
               },
             ]);
           };
 
+          if (context === 'edit') {
+            return (
+              <ManageSpacePage
+                capabilities={application.capabilities}
+                getFeatures={features.getFeatures}
+                notifications={notifications}
+                spacesManager={spacesManager}
+                spaceId={spaceId}
+                onLoadSpace={onLoadSpace}
+                history={history}
+                allowFeatureVisibility={config.allowFeatureVisibility}
+                solutionNavExperiment={solutionNavExperiment}
+              />
+            );
+          }
+
           return (
-            <ManageSpacePage
+            <ViewSpacePage
               capabilities={application.capabilities}
               getFeatures={features.getFeatures}
-              notifications={notifications}
+              getUrlForApp={application.getUrlForApp}
+              navigateToUrl={application.navigateToUrl}
+              serverBasePath={http.basePath.serverBasePath}
               spacesManager={spacesManager}
-              spaceId={spaceId}
-              onLoadSpace={onLoadSpace}
               history={history}
               allowFeatureVisibility={config.allowFeatureVisibility}
               solutionNavExperiment={solutionNavExperiment}
+              onLoadSpace={onLoadSpace}
+              spaceId={spaceId}
+              selectedTabId={selectedTabId}
             />
           );
         };
@@ -134,7 +177,10 @@ export const spacesManagementApp = Object.freeze({
                       <CreateSpacePageWithBreadcrumbs />
                     </Route>
                     <Route path="/edit/:spaceId">
-                      <EditSpacePageWithBreadcrumbs />
+                      <SpacePageWithBreadcrumbs context="edit" />
+                    </Route>
+                    <Route path={['/view/:spaceId', '/view/:spaceId/:selectedTabId']} exact>
+                      <SpacePageWithBreadcrumbs context="view" />
                     </Route>
                   </Routes>
                 </Router>

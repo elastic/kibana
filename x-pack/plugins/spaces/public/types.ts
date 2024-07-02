@@ -61,3 +61,10 @@ export interface SpacesApi {
    */
   ui: SpacesApiUi;
 }
+
+export interface SpaceContentTypeSummaryItem {
+  displayName: string;
+  icon?: string;
+  count: number;
+  type: string;
+}

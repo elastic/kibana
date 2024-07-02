@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
+  type EuiBasicTableColumn,
   EuiButton,
-  EuiButtonIcon,
   EuiCallOut,
   EuiInMemoryTable,
   EuiLink,
@@ -31,9 +30,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import type { Space } from '../../../common';
+import { addSpaceIdToPath, type Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
+import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 import { SpaceSolutionBadge } from '../../space_solution_badge';
@@ -49,6 +48,7 @@ const LazySpaceAvatar = lazy(() =>
 interface Props {
   spacesManager: SpacesManager;
   notifications: NotificationsStart;
+  serverBasePath: string;
   getFeatures: FeaturesPluginStart['getFeatures'];
   capabilities: Capabilities;
   history: ScopedHistory;
@@ -59,6 +59,7 @@ interface Props {
 
 interface State {
   spaces: Space[];
+  activeSpace: Space | null;
   features: KibanaFeature[];
   loading: boolean;
   showConfirmDeleteModal: boolean;
@@ -71,6 +72,7 @@ export class SpacesGridPage extends Component<Props, State> {
     super(props);
     this.state = {
       spaces: [],
+      activeSpace: null,
       features: [],
       loading: true,
       showConfirmDeleteModal: false,
@@ -133,12 +135,16 @@ export class SpacesGridPage extends Component<Props, State> {
         ) : undefined}
         <EuiInMemoryTable
           itemId={'id'}
+          data-test-subj={'spacesListTable'}
           items={this.state.spaces}
           tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
             defaultMessage: 'Kibana spaces',
           })}
           rowHeader="name"
-          columns={this.getColumnConfig()}
+          rowProps={(item) => ({
+            'data-test-subj': `spacesListTableRow-${item.id}`,
+          })}
+          columns={this.getColumnConfig({ serverBasePath: this.props.serverBasePath })}
           pagination={true}
           sorting={true}
           search={{
@@ -221,12 +227,18 @@ export class SpacesGridPage extends Component<Props, State> {
     });
 
     const getSpaces = spacesManager.getSpaces();
+    const getActiveSpace = spacesManager.getActiveSpace();
 
     try {
-      const [spaces, features] = await Promise.all([getSpaces, getFeatures()]);
+      const [spaces, activeSpace, features] = await Promise.all([
+        getSpaces,
+        getActiveSpace,
+        getFeatures(),
+      ]);
       this.setState({
         loading: false,
         spaces,
+        activeSpace,
         features,
       });
     } catch (error) {
@@ -241,17 +253,19 @@ export class SpacesGridPage extends Component<Props, State> {
     }
   };
 
-  public getColumnConfig() {
+  public getColumnConfig({ serverBasePath }: { serverBasePath: string }) {
     const config: Array<EuiBasicTableColumn<Space>> = [
       {
         field: 'initials',
         name: '',
         width: '50px',
-        render: (value: string, record: Space) => {
+        render: (_value: string, rowRecord) => {
           return (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
-                <LazySpaceAvatar space={record} size="s" />
+              <EuiLink
+                {...reactRouterNavigate(this.props.history, this.getViewSpacePath(rowRecord))}
+              >
+                <LazySpaceAvatar space={rowRecord} size="s" />
               </EuiLink>
             </Suspense>
           );
@@ -263,8 +277,11 @@ export class SpacesGridPage extends Component<Props, State> {
           defaultMessage: 'Space',
         }),
         sortable: true,
-        render: (value: string, record: Space) => (
-          <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
+        render: (value: string, rowRecord) => (
+          <EuiLink
+            {...reactRouterNavigate(this.props.history, this.getViewSpacePath(rowRecord))}
+            data-test-subj={`${rowRecord.id}-hyperlink`}
+          >
             {value}
           </EuiLink>
         ),
@@ -275,6 +292,8 @@ export class SpacesGridPage extends Component<Props, State> {
           defaultMessage: 'Description',
         }),
         sortable: true,
+        truncateText: true,
+        width: '30%',
       },
       {
         field: 'disabledFeatures',
@@ -284,8 +303,8 @@ export class SpacesGridPage extends Component<Props, State> {
         sortable: (space: Space) => {
           return getEnabledFeatures(this.state.features, space).length;
         },
-        render: (disabledFeatures: string[], record: Space) => {
-          const enabledFeatureCount = getEnabledFeatures(this.state.features, record).length;
+        render: (_disabledFeatures: string[], rowRecord) => {
+          const enabledFeatureCount = getEnabledFeatures(this.state.features, rowRecord).length;
           if (enabledFeatureCount === this.state.features.length) {
             return (
               <FormattedMessage
@@ -350,45 +369,68 @@ export class SpacesGridPage extends Component<Props, State> {
       }),
       actions: [
         {
-          render: (record: Space) => (
-            <EuiButtonIcon
-              data-test-subj={`${record.name}-editSpace`}
-              aria-label={i18n.translate(
-                'xpack.spaces.management.spacesGridPage.editSpaceActionName',
-                {
-                  defaultMessage: `Edit {spaceName}.`,
-                  values: { spaceName: record.name },
-                }
-              )}
-              color={'primary'}
-              iconType={'pencil'}
-              {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}
-            />
-          ),
+          isPrimary: true,
+          name: i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionName', {
+            defaultMessage: `Edit`,
+          }),
+          description: (rowRecord) =>
+            i18n.translate('xpack.spaces.management.spacesGridPage.editSpaceActionDescription', {
+              defaultMessage: `Edit {spaceName}.`,
+              values: { spaceName: rowRecord.name },
+            }),
+          type: 'icon',
+          icon: 'pencil',
+          color: 'primary',
+          href: (rowRecord) =>
+            reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).href,
+          onClick: (rowRecord) =>
+            reactRouterNavigate(this.props.history, this.getEditSpacePath(rowRecord)).onClick,
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-editSpace`,
         },
         {
-          available: (record: Space) => !isReservedSpace(record),
-          render: (record: Space) => (
-            <EuiButtonIcon
-              data-test-subj={`${record.name}-deleteSpace`}
-              aria-label={i18n.translate(
-                'xpack.spaces.management.spacesGridPage.deleteActionName',
-                {
-                  defaultMessage: `Delete {spaceName}.`,
-                  values: { spaceName: record.name },
-                }
-              )}
-              color={'danger'}
-              iconType={'trash'}
-              onClick={() => this.onDeleteSpaceClick(record)}
-            />
-          ),
+          name: i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionName', {
+            defaultMessage: 'Switch',
+          }),
+          description: (rowRecord) =>
+            i18n.translate('xpack.spaces.management.spacesGridPage.switchSpaceActionDescription', {
+              defaultMessage: 'Switch to {spaceName} space',
+              values: { spaceName: rowRecord.name },
+            }),
+          type: 'icon',
+          icon: 'merge',
+          color: 'primary',
+          href: (rowRecord) =>
+            addSpaceIdToPath(
+              serverBasePath,
+              rowRecord.id,
+              `${ENTER_SPACE_PATH}?next=/app/management/kibana/spaces/`
+            ),
+          available: (rowRecord) => this.state.activeSpace?.name !== rowRecord.name,
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-switchSpace`,
+        },
+        {
+          name: i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionName', {
+            defaultMessage: `Delete`,
+          }),
+          description: (rowRecord) =>
+            i18n.translate('xpack.spaces.management.spacesGridPage.deleteActionDescription', {
+              defaultMessage: `Delete {spaceName}.`,
+              values: { spaceName: rowRecord.name },
+            }),
+          type: 'icon',
+          icon: 'trash',
+          color: 'danger',
+          onClick: (rowRecord) => this.onDeleteSpaceClick(rowRecord),
+          available: (rowRecord: Space) => !isReservedSpace(rowRecord),
+          'data-test-subj': (rowRecord) => `${rowRecord.name}-deleteSpace`,
         },
       ],
     });
 
     return config;
   }
+
+  private getViewSpacePath = (space: Space) => `view/${encodeURIComponent(space.id)}`;
 
   private getEditSpacePath = (space: Space) => `edit/${encodeURIComponent(space.id)}`;
 

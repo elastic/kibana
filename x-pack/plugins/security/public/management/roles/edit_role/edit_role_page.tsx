@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -555,30 +556,27 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getElasticsearchPrivileges = () => {
     return (
-      <div>
-        <EuiSpacer />
-        <ElasticsearchPrivileges
-          role={role}
-          editable={!isRoleReadOnly}
-          indicesAPIClient={indicesAPIClient}
-          onChange={onRoleChange}
-          runAsUsers={runAsUsers}
-          validator={validator}
-          indexPatterns={indexPatternsTitles}
-          remoteClusters={remoteClustersState.value}
-          builtinESPrivileges={builtInESPrivileges}
-          license={license}
-          docLinks={docLinks}
-          canUseRemoteIndices={
-            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
-          }
-          canUseRemoteClusters={
-            buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteClusters
-          }
-          isDarkMode={isDarkMode}
-          buildFlavor={buildFlavor}
-        />
-      </div>
+      <ElasticsearchPrivileges
+        role={role}
+        editable={!isRoleReadOnly}
+        indicesAPIClient={indicesAPIClient}
+        onChange={onRoleChange}
+        runAsUsers={runAsUsers}
+        validator={validator}
+        indexPatterns={indexPatternsTitles}
+        remoteClusters={remoteClustersState.value}
+        builtinESPrivileges={builtInESPrivileges}
+        license={license}
+        docLinks={docLinks}
+        canUseRemoteIndices={
+          buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteIndices
+        }
+        canUseRemoteClusters={
+          buildFlavor === 'traditional' && featureCheckState.value?.canUseRemoteClusters
+        }
+        isDarkMode={isDarkMode}
+        buildFlavor={buildFlavor}
+      />
     );
   };
 
@@ -586,21 +584,18 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getKibanaPrivileges = () => {
     return (
-      <div>
-        <EuiSpacer />
-        <KibanaPrivilegesRegion
-          kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
-          spaces={spaces.list}
-          spacesEnabled={spaces.enabled}
-          uiCapabilities={uiCapabilities}
-          canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
-          editable={!isRoleReadOnly}
-          role={role}
-          onChange={onRoleChange}
-          validator={validator}
-          spacesApiUi={spacesApiUi}
-        />
-      </div>
+      <KibanaPrivilegesRegion
+        kibanaPrivileges={new KibanaPrivileges(kibanaPrivileges, features)}
+        spaces={spaces.list}
+        spacesEnabled={spaces.enabled}
+        uiCapabilities={uiCapabilities}
+        canCustomizeSubFeaturePrivileges={license.getFeatures().allowSubFeaturePrivileges}
+        editable={!isRoleReadOnly}
+        role={role}
+        onChange={onRoleChange}
+        validator={validator}
+        spacesApiUi={spacesApiUi}
+      />
     );
   };
 
@@ -797,44 +792,89 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   return (
     <div className="editRolePage">
-      <EuiForm {...formError}>
-        {getFormTitle()}
-        <EuiSpacer />
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
-            defaultMessage="Set privileges on your Elasticsearch data and control access to your Project spaces."
-          />
-        </EuiText>
-        {isRoleReserved && (
-          <Fragment>
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <p id="reservedRoleDescription" tabIndex={0}>
-                <FormattedMessage
-                  id="xpack.security.management.editRole.modifyingReversedRolesDescription"
-                  defaultMessage="Reserved roles are built-in and cannot be removed or modified."
-                />
-              </p>
+      <EuiForm {...formError} fullWidth>
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            {getFormTitle()}
+            <EuiSpacer />
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.security.management.editRole.setPrivilegesToKibanaSpacesDescription"
+                defaultMessage="Set privileges on your Elasticsearch data and control access to your Project spaces."
+              />
             </EuiText>
-          </Fragment>
-        )}
-        {isDeprecatedRole && (
-          <Fragment>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              title={getExtendedRoleDeprecationNotice(role)}
-              color="warning"
-              iconType="warning"
-            />
-          </Fragment>
-        )}
-        <EuiSpacer />
-        {getRoleNameAndDescription()}
-        {getElasticsearchPrivileges()}
-        {getKibanaPrivileges()}
-        <EuiSpacer />
-        {getFormButtons()}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isRoleReserved && (
+              <Fragment>
+                <EuiText size="s" color="subdued">
+                  <p id="reservedRoleDescription" tabIndex={0}>
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.modifyingReversedRolesDescription"
+                      defaultMessage="Reserved roles are built-in and cannot be removed or modified."
+                    />
+                  </p>
+                </EuiText>
+              </Fragment>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {isDeprecatedRole && (
+              <Fragment>
+                <EuiSpacer size="s" />
+                <EuiCallOut
+                  title={getExtendedRoleDeprecationNotice(role)}
+                  color="warning"
+                  iconType="warning"
+                />
+              </Fragment>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>{getRoleNameAndDescription()}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="xpack.security.management.editRole.dataLayerLabel"
+                  defaultMessage="Data Layer"
+                />
+              }
+            >
+              {getElasticsearchPrivileges()}
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              label={
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.security.management.editRole.appLayerLabel"
+                      defaultMessage="Application layer"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      type="iInCircle"
+                      color="subdued"
+                      content={
+                        <FormattedMessage
+                          id="xpack.security.management.editRole.appLayerTooltipText"
+                          defaultMessage="Feature access is granted on a per space basis for all features. Feature visibility is set on the space. Both must be enabled for this role to use a feature"
+                        />
+                      }
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+            >
+              {getKibanaPrivileges()}
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow fullWidth={false}>{getFormButtons()}</EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiForm>
     </div>
   );
