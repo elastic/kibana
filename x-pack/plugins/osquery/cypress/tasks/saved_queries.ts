@@ -21,8 +21,7 @@ import {
 import { navigateTo } from './navigation';
 
 export const getSavedQueriesComplexTest = () =>
-  // FLAKY: https://github.com/elastic/kibana/issues/169786
-  describe.skip('Saved queries Complex Test', () => {
+  describe('Saved queries Complex Test', () => {
     const timeout = '601';
     const suffix = generateRandomStringName(1)[0];
     const savedQueryId = `Saved-Query-Id-${suffix}`;
@@ -65,7 +64,9 @@ export const getSavedQueriesComplexTest = () =>
         cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
 
         // change pagination
-        cy.getBySel('pagination-button-next').click().wait(500).click();
+        cy.getBySel('pagination-button-next').click();
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel('pagination-button-next').click();
         cy.getBySel(RESULTS_TABLE_COLUMNS_BUTTON).should('have.text', 'Columns32/35');
 
         // enter fullscreen
