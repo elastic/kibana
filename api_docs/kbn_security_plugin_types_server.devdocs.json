@@ -3242,22 +3242,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_settings_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/maintenance_window_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/invalidate_pending_api_keys/task.ts"
               },
               {
@@ -3267,10 +3251,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/plugin.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -3293,16 +3273,8 @@
                 "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
               },
               {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/setup_routes.ts"
-              },
-              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/request_context_factory.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -3315,30 +3287,6 @@
               {
                 "plugin": "lists",
                 "path": "x-pack/plugins/lists/server/get_user.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/live_query/create_live_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/create_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/saved_query/update_saved_query_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/create_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/pack/update_pack_route.ts"
-              },
-              {
-                "plugin": "osquery",
-                "path": "x-pack/plugins/osquery/server/routes/asset/update_assets_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -3363,10 +3311,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/plugins/reporting/server/routes/common/get_user.ts"
               },
               {
                 "plugin": "serverlessSearch",
