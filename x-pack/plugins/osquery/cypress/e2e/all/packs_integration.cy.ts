@@ -40,8 +40,7 @@ import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-// Failing: See https://github.com/elastic/kibana/issues/176543
-describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';
 
   describe(
@@ -162,6 +161,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('should be able to run live prebuilt pack', () => {
         navigateTo('/app/osquery/live_queries');
         cy.contains('New live query').click();
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
         cy.contains('Run a set of queries in a pack.').click();
         cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
         cy.getBySel('globalLoadingIndicator').should('not.exist');
@@ -189,8 +189,7 @@ describe.skip('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       navigateTo('/app/osquery/packs');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/171279
-    describe.skip('add proper shard to policies packs config', () => {
+    describe('add proper shard to policies packs config', () => {
       const globalPack = 'globalPack' + generateRandomStringName(1)[0];
       const agentPolicy = 'testGlobal' + generateRandomStringName(1)[0];
       let globalPackId: string;
