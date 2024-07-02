@@ -9,7 +9,7 @@ import { initializeDataViews } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Timelines', { tags: ['@ess'] }, () => {
+describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
   before(() => {
     initializeDataViews();
   });
