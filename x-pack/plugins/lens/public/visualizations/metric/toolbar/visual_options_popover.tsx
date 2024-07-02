@@ -71,15 +71,21 @@ type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number> | 'custom';
 const valueFontModes: Array<{ value: ValueFontMode } & Pick<EuiSelectOption, 'text'>> = [
   {
     value: 'default',
-    text: 'Default',
+    text: i18n.translate('xpack.lens.metric.toolbarVisOptions.default', {
+      defaultMessage: 'Default',
+    }),
   },
   {
     value: 'fit',
-    text: 'Fit',
+    text: i18n.translate('xpack.lens.metric.toolbarVisOptions.fit', {
+      defaultMessage: 'Fit',
+    }),
   },
   {
     value: 'custom',
-    text: 'Custom',
+    text: i18n.translate('xpack.lens.metric.toolbarVisOptions.custom', {
+      defaultMessage: 'Custom',
+    }),
   },
 ];
 
@@ -99,7 +105,7 @@ function ValueFontOption({
     value: fontSize,
   });
 
-  const label = i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+  const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.valueFontSize', {
     defaultMessage: 'Value fontSize',
   });
 
@@ -111,7 +117,6 @@ function ValueFontOption({
             fullWidth
             compressed
             data-test-subj="lens-value-font-mode-select"
-            aria-label="Metric value font mode"
             options={valueFontModes}
             value={mode}
             onChange={({ target }) => {
@@ -122,9 +127,10 @@ function ValueFontOption({
         <EuiFlexItem>
           <EuiFieldNumber
             compressed
-            append="px"
+            append={i18n.translate('xpack.lens.shared.pixel', {
+              defaultMessage: 'px',
+            })}
             data-test-subj="lens-value-font-size"
-            aria-label="Metric value font size"
             value={dbFontValue.inputValue}
             disabled={mode !== 'custom'}
             onChange={({ target }) => dbFontValue.handleInputChange(+target.value)}
@@ -141,15 +147,21 @@ const alignmentOptions: Array<{
 }> = [
   {
     id: 'left',
-    label: 'Left',
+    label: i18n.translate('xpack.lens.shared.left', {
+      defaultMessage: 'Left',
+    }),
   },
   {
     id: 'center',
-    label: 'Center',
+    label: i18n.translate('xpack.lens.shared.center', {
+      defaultMessage: 'Center',
+    }),
   },
   {
     id: 'right',
-    label: 'Right',
+    label: i18n.translate('xpack.lens.shared.right', {
+      defaultMessage: 'Right',
+    }),
   },
 ];
 
@@ -160,7 +172,7 @@ function TitlesAlignmentOption({
   value: MetricStyle['titlesTextAlign'];
   onChange: (alignment: MetricStyle['titlesTextAlign']) => void;
 }) {
-  const label = i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+  const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.titlesAlignment', {
     defaultMessage: 'Titles Alignment',
   });
 
@@ -171,7 +183,7 @@ function TitlesAlignmentOption({
         <span>
           {label}{' '}
           <EuiIconTip
-            content={i18n.translate('xpack.lens.shared.xxx', {
+            content={i18n.translate('xpack.lens.metric.toolbarVisOptions.titlesAlignmentTip', {
               defaultMessage: 'Alignment of the title and subtitle',
             })}
             iconProps={{
@@ -207,7 +219,7 @@ function ValuesAlignmentOption({
   value: MetricStyle['valuesTextAlign'];
   onChange: (alignment: MetricStyle['valuesTextAlign']) => void;
 }) {
-  const label = i18n.translate('xpack.lens.shared.xxx', {
+  const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.valueAlignment', {
     defaultMessage: 'Value Alignment',
   });
 
@@ -219,7 +231,7 @@ function ValuesAlignmentOption({
           {label}{' '}
           <EuiIconTip
             color="subdued"
-            content={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityTooltip', {
+            content={i18n.translate('xpack.lens.metric.toolbarVisOptions.valueAlignmentTip', {
               defaultMessage: 'Alignment of the value',
             })}
             iconProps={{

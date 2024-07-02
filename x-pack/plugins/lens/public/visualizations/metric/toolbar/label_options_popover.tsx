@@ -39,7 +39,7 @@ export const LabelOptionsPopover: FC<LabelOptionsPopoverProps> = ({ state, setSt
 
   return (
     <TooltipWrapper
-      tooltipContent={i18n.translate('xpack.lens.metric.labelOptionsPopoverDisabled', {
+      tooltipContent={i18n.translate('xpack.lens.metric.toolbarLabelOptions.disabled', {
         defaultMessage: 'Not supported with Break down by',
       })}
       condition={hasBreakdownBy}
