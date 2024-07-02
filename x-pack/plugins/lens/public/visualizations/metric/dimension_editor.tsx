@@ -424,7 +424,11 @@ export function DimensionEditorAdditionalSection({
   const { euiTheme } = useEuiTheme();
 
   const currentData = frame.activeData?.[state.layerId];
-  if (accessor !== state.metricAccessor || !isNumericFieldForDatatable(currentData, accessor)) {
+  if (
+    accessor !== state.metricAccessor ||
+    !isNumericFieldForDatatable(currentData, accessor) ||
+    datasource?.hasArrayValues(accessor)
+  ) {
     return null;
   }
 

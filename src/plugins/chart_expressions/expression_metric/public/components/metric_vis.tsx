@@ -21,6 +21,9 @@ import {
   MetricWNumber,
   SettingsProps,
   MetricWText,
+  MetricWNumberArrayValues,
+  MetricDatum,
+  MetricWStringArrayValues,
 } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
@@ -47,6 +50,16 @@ import { getPaletteService, getThemeService, getFormatService } from '../service
 import { getDataBoundsForPalette } from '../utils';
 
 export const defaultColor = euiThemeVars.euiColorEmptyShade;
+
+// simple type guards do not discern between number[] and string[]
+function isArrayOfStrings(v: unknown): v is string[] {
+  return Array.isArray(v) && typeof v[0] === 'string';
+}
+
+// simple type guards do not discern between number[] and string[]
+function isArrayOfNumbers(v: unknown): v is number[] {
+  return Array.isArray(v) && typeof v[0] === 'number';
+}
 
 function enhanceFieldFormat(serializedFieldFormat: SerializedFieldFormat | undefined) {
   const formatId = serializedFieldFormat?.id || 'number';
@@ -200,14 +213,14 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : data.rows.slice(0, 1)
   ).map((row, rowIdx) => {
-    const value: number | string =
+    const value: MetricDatum['value'] =
       row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    if (typeof value !== 'number') {
+    if (typeof value === 'string') {
       const nonNumericMetric: MetricWText = {
         value: formatPrimaryMetric(value),
         title: String(title),
@@ -219,7 +232,33 @@ export const MetricVis = ({
       return nonNumericMetric;
     }
 
-    const baseMetric: MetricWNumber = {
+    if (isArrayOfStrings(value)) {
+      const formattedValues = value.map((v) => formatPrimaryMetric(v));
+      const nonNumericArrayMetric: MetricWStringArrayValues = {
+        value: formattedValues,
+        title: String(title),
+        subtitle,
+        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+        extra: renderSecondaryMetric(data.columns, row, config),
+        color: config.metric.color ?? defaultColor,
+      };
+      return nonNumericArrayMetric;
+    }
+
+    if (isArrayOfNumbers(value)) {
+      const numericArrayMetric: MetricWNumberArrayValues = {
+        value,
+        valueFormatter: formatPrimaryMetric,
+        title: String(title),
+        subtitle,
+        icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
+        extra: renderSecondaryMetric(data.columns, row, config),
+        color: config.metric.color ?? defaultColor,
+      };
+      return numericArrayMetric;
+    }
+
+    const baseMetric: MetricWNumber | MetricWNumberArrayValues = {
       value,
       valueFormatter: formatPrimaryMetric,
       title: String(title),
