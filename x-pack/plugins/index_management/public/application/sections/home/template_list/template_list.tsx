@@ -281,7 +281,6 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   useEffect(() => {
     if (templatesAirdrop) {
-      console.log('templatesAirdrop', templatesAirdrop);
       const templates = templatesAirdrop.content;
 
       Promise.all(
@@ -290,9 +289,11 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
             body: JSON.stringify(template),
           })
         )
-      );
+      ).then(() => {
+        reload();
+      });
     }
-  }, [templatesAirdrop, http]);
+  }, [templatesAirdrop, http, reload]);
 
   let content;
 
