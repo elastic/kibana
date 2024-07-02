@@ -121,11 +121,11 @@ export const JourneyScreenshotDialog = ({
         <ModalBodyStyled css={{ display: 'flex' }}>
           <ScreenshotImage
             label={i18n.translate('xpack.synthetics.monitor.screenshotImageLabel', {
-              defaultMessage: '"{stepName}", {stepNumber} of {maxSteps}',
+              defaultMessage: '"{stepName}", {stepNumber} of {totalSteps}',
               values: {
                 stepName,
                 stepNumber,
-                maxSteps,
+                totalSteps: maxSteps ?? stepNumber,
               },
             })}
             imgSrc={imgSrc}
@@ -179,10 +179,10 @@ export const JourneyScreenshotDialog = ({
             <EuiFlexItem grow={false} css={{ flexBasis: 'fit-content' }}>
               <EuiText color={euiTheme.colors.text}>
                 {i18n.translate('xpack.synthetics.monitor.stepOfSteps', {
-                  defaultMessage: 'Step: {stepNumber} of {maxSteps}',
+                  defaultMessage: 'Step: {stepNumber} of {totalSteps}',
                   values: {
                     stepNumber,
-                    maxSteps,
+                    totalSteps: maxSteps ?? stepNumber,
                   },
                 })}
               </EuiText>

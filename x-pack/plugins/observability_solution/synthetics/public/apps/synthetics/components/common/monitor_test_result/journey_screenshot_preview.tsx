@@ -79,11 +79,11 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
   const renderScreenshotImage = (screenshotSize: ScreenshotImageSize) => (
     <ScreenshotImage
       label={i18n.translate('xpack.synthetics.monitorTestResult.screenshotImageLabel', {
-        defaultMessage: '"{stepName}", {stepNumber} of {maxSteps}',
+        defaultMessage: '"{stepName}", {stepNumber} of {totalSteps}',
         values: {
           stepName,
           stepNumber,
-          maxSteps,
+          totalSteps: maxSteps ?? stepNumber,
         },
       })}
       imgSrc={imgSrc}
