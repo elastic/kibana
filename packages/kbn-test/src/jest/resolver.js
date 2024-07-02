@@ -35,6 +35,12 @@ const STATIC_FILE_EXT =
  * @returns
  */
 module.exports = (request, options) => {
+  // @testing-library/react requires react-dom/client that is not available on version <18
+  // remove after the migration to React@18 is done
+  if (request === `react-dom/client`) {
+    return module.exports(`react-dom`, options);
+  }
+
   if (request === `@elastic/eui`) {
     return module.exports(`@elastic/eui/test-env`, options);
   }
