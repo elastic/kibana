@@ -642,7 +642,6 @@ const AssistantComponent: React.FC<Props> = ({
                 setSelectedPromptContexts={setSelectedPromptContexts}
                 isFlyoutMode={isFlyoutMode}
                 allSystemPrompts={allPrompts.data}
-                refetchPrompts={refetchPrompts}
               />
             </ModalPromptEditorWrapper>
           )}
@@ -650,7 +649,6 @@ const AssistantComponent: React.FC<Props> = ({
     ),
     [
       getComments,
-      refetchPrompts,
       abortStream,
       currentConversation,
       showAnonymizedValues,

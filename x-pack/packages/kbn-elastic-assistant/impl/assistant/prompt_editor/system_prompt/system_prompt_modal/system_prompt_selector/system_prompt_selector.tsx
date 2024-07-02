@@ -135,7 +135,7 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
     // Callback for when user deletes a quick prompt
     const onDelete = useCallback(
       (label: string) => {
-        const deleteId = options.find((o) => o.label !== label)?.id;
+        const deleteId = options.find((o) => o.label === label)?.id;
         setOptions(options.filter((o) => o.label !== label));
         if (selectedOptions?.[0]?.label === label) {
           handleSelectionChange([]);
