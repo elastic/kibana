@@ -49,6 +49,7 @@ import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { useUnifiedTableExpandableFlyout } from '../hooks/use_unified_timeline_expandable_flyout';
+import type { UnifiedTimelineDataGridCellContext } from '../../types';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -73,8 +74,6 @@ type CommonDataTableProps = {
   updatedAt: number;
   isTextBasedQuery?: boolean;
   leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
-  cellContext?: EuiDataGridProps['cellContext'];
-  eventIdToNoteIds?: Record<string, string[]>;
 } & Pick<
   UnifiedDataTableProps,
   | 'onSort'
@@ -117,8 +116,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSort,
     onFilter,
     leadingControlColumns,
-    cellContext,
-    eventIdToNoteIds,
   }) {
     const dispatch = useDispatch();
 
@@ -389,27 +386,27 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
-          eventIdToNoteIds={eventIdToNoteIds}
-          rowHeight={rowHeight}
           setCustomGridBodyProps={setCustomGridBodyProps}
-          events={events}
           enabledRowRenderers={enabledRowRenderers}
-          eventIdsAddingNotes={cellContext?.eventIdsAddingNotes}
-          onToggleShowNotes={cellContext?.onToggleShowNotes}
           refetch={refetch}
         />
       ),
-      [
-        tableRows,
-        enabledRowRenderers,
-        events,
-        eventIdToNoteIds,
-        cellContext?.eventIdsAddingNotes,
-        cellContext?.onToggleShowNotes,
-        rowHeight,
-        refetch,
-      ]
+      [tableRows, enabledRowRenderers, refetch]
     );
+
+    const cellContext: UnifiedTimelineDataGridCellContext = useMemo(() => {
+      return {
+        expandedEventId: expandedDoc?.id,
+      };
+    }, [expandedDoc]);
+
+    const finalRenderCustomBodyCallback = useMemo(() => {
+      return enabledRowRenderers.length > 0 ? renderCustomBodyCallback : undefined;
+    }, [enabledRowRenderers.length, renderCustomBodyCallback]);
+
+    const finalTrailControlColumns = useMemo(() => {
+      return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
+    }, [enabledRowRenderers.length, trailingControlColumns]);
 
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
@@ -460,8 +457,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={renderCustomBodyCallback}
-            trailingControlColumns={trailingControlColumns}
+            renderCustomGridBody={finalRenderCustomBodyCallback}
+            trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
           />
