@@ -935,7 +935,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       index: dataView.getIndexPattern(),
       hasLabels,
       buffer,
-      requestBody: _.pick(searchSource.getSearchRequestBody(), [
+      requestBody: _.pick(await searchSource.getSearchRequestBody(), [
         'fields',
         'query',
         'runtime_mappings',

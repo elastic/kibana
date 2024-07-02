@@ -140,8 +140,9 @@ export const ChangePointDetectionContextProvider: FC<PropsWithChildren<unknown>>
     },
   } = useAiopsAppContext();
 
-  const savedSearchQuery = useMemo(() => {
-    return getEsQueryFromSavedSearch({
+  // todo this might be broken due to making async
+  const savedSearchQuery = useMemo(async () => {
+    return await getEsQueryFromSavedSearch({
       dataView,
       uiSettings,
       savedSearch,

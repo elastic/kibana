@@ -32,6 +32,7 @@ export const useSearch = (
     },
   } = useAiopsAppContext();
 
+  // todo this needs to be fixed, getEsQueryFromSavedSearch now returns async
   const searchData = useMemo(
     () =>
       getEsQueryFromSavedSearch({

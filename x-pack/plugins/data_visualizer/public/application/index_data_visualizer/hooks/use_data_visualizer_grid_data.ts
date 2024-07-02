@@ -136,53 +136,55 @@ export const useDataVisualizerGridData = (
   }, [input.id, input.fieldsToFetch, input.visibleFieldNames, currentDataView]);
 
   /** Prepare required params to pass to search strategy **/
-  const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } = useMemo(() => {
-    const filterManager = data.query.filterManager;
-    const searchData = getEsQueryFromSavedSearch({
-      dataView: currentDataView,
-      uiSettings,
-      savedSearch: currentSavedSearch,
-      query: currentQuery,
-      filters: currentFilters,
-      filterManager: data.query.filterManager,
-    });
+  // todo this is broken
+  const { searchQueryLanguage, searchString, searchQuery, queryOrAggregateQuery } =
+    useMemo(async () => {
+      const filterManager = data.query.filterManager;
+      const searchData = await getEsQueryFromSavedSearch({
+        dataView: currentDataView,
+        uiSettings,
+        savedSearch: currentSavedSearch,
+        query: currentQuery,
+        filters: currentFilters,
+        filterManager: data.query.filterManager,
+      });
 
-    if (searchData === undefined || dataVisualizerListState.searchString !== '') {
-      if (filterManager) {
-        const globalFilters = filterManager?.getGlobalFilters();
+      if (searchData === undefined || dataVisualizerListState.searchString !== '') {
+        if (filterManager) {
+          const globalFilters = filterManager?.getGlobalFilters();
 
-        if (dataVisualizerListState.filters)
-          filterManager.setFilters(dataVisualizerListState.filters);
-        if (globalFilters) filterManager?.addFilters(globalFilters);
+          if (dataVisualizerListState.filters)
+            filterManager.setFilters(dataVisualizerListState.filters);
+          if (globalFilters) filterManager?.addFilters(globalFilters);
+        }
+        return {
+          searchQuery: dataVisualizerListState.searchQuery,
+          searchString: dataVisualizerListState.searchString,
+          searchQueryLanguage: dataVisualizerListState.searchQueryLanguage,
+        };
+      } else {
+        return {
+          queryOrAggregateQuery: searchData.queryOrAggregateQuery,
+          searchQuery: searchData.searchQuery,
+          searchString: searchData.searchString,
+          searchQueryLanguage: searchData.queryLanguage,
+        };
       }
-      return {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+      currentSavedSearch?.id,
+      currentDataView.id,
+      dataVisualizerListState.searchString,
+      dataVisualizerListState.searchQueryLanguage,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify({
         searchQuery: dataVisualizerListState.searchQuery,
-        searchString: dataVisualizerListState.searchString,
-        searchQueryLanguage: dataVisualizerListState.searchQueryLanguage,
-      };
-    } else {
-      return {
-        queryOrAggregateQuery: searchData.queryOrAggregateQuery,
-        searchQuery: searchData.searchQuery,
-        searchString: searchData.searchString,
-        searchQueryLanguage: searchData.queryLanguage,
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    currentSavedSearch?.id,
-    currentDataView.id,
-    dataVisualizerListState.searchString,
-    dataVisualizerListState.searchQueryLanguage,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify({
-      searchQuery: dataVisualizerListState.searchQuery,
-      currentQuery,
-      currentFilters,
-    }),
-    lastRefresh,
-    data.query.filterManager,
-  ]);
+        currentQuery,
+        currentFilters,
+      }),
+      lastRefresh,
+      data.query.filterManager,
+    ]);
 
   const _timeBuckets = useTimeBuckets(uiSettings);
 

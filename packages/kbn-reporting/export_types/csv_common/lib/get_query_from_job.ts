@@ -32,11 +32,11 @@ interface CsvConfigType {
  * A utility to get the query from a CSV reporting job to inspect or analyze
  * @public
  */
-export const getQueryFromCsvJob = (
+export const getQueryFromCsvJob = async (
   searchSource: ISearchSource,
   { scroll: config }: CsvConfigType,
   pitId?: string
-): QueryInspection => {
+): Promise<QueryInspection> => {
   // Max number of documents in each returned page
   searchSource.setField('size', durationToNumber(config.size));
 
@@ -55,6 +55,6 @@ export const getQueryFromCsvJob = (
   }
 
   return {
-    requestBody: searchSource.getSearchRequestBody(),
+    requestBody: await searchSource.getSearchRequestBody(),
   };
 };

@@ -122,7 +122,7 @@ export class SearchCursorPit extends SearchCursor {
         (searchAfter ? ` search_after: [${searchAfter}]` : '')
     );
 
-    const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
+    const searchBody: estypes.SearchRequest = await searchSource.getSearchRequestBody();
     if (searchBody == null) {
       throw new Error('Could not retrieve the search body!');
     }

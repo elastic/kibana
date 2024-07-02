@@ -144,7 +144,7 @@ describe('context app', function () {
       });
     });
 
-    it('should update search source correctly when useNewFieldsApi set to false', function () {
+    it('should update search source correctly when useNewFieldsApi set to false', async () => {
       const searchSource = updateSearchSource(
         savedSearchMock.searchSource,
         'id',
@@ -152,12 +152,12 @@ describe('context app', function () {
         false,
         dataViewMock
       );
-      const searchRequestBody = searchSource.getSearchRequestBody();
+      const searchRequestBody = await searchSource.getSearchRequestBody();
       expect(searchRequestBody._source).toBeInstanceOf(Object);
       expect(searchRequestBody.track_total_hits).toBe(false);
     });
 
-    it('should update search source correctly when useNewFieldsApi set to true', function () {
+    it('should update search source correctly when useNewFieldsApi set to true', async () => {
       const searchSource = updateSearchSource(
         savedSearchMock.searchSource,
         'id',
@@ -165,7 +165,7 @@ describe('context app', function () {
         true,
         dataViewMock
       );
-      const searchRequestBody = searchSource.getSearchRequestBody();
+      const searchRequestBody = await searchSource.getSearchRequestBody();
       expect(searchRequestBody._source).toBe(false);
       expect(searchRequestBody.track_total_hits).toBe(false);
     });

@@ -71,7 +71,7 @@ function isNonAggregateQuery(query?: Query | AggregateQuery): query is Query {
  * Extract query data from the saved search object
  * with overrides from the provided query data and/or filters
  */
-export function getEsQueryFromSavedSearch({
+export async function getEsQueryFromSavedSearch({
   dataView,
   uiSettings,
   savedSearch,
@@ -104,7 +104,7 @@ export function getEsQueryFromSavedSearch({
     // Flattened query from search source may contain a clause that narrows the time range
     // which might interfere with global time pickers so we need to remove
     const savedQuery =
-      cloneDeep(savedSearchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
+      cloneDeep((await savedSearchSource.getSearchRequestBody())?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearchSource.getField('index')?.timeFieldName;
 
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {
