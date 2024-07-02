@@ -7,7 +7,7 @@
 
 import { createServer } from '@mswjs/http-middleware';
 
-import { http, HttpResponse, JsonBodyType, StrictResponse } from 'msw';
+import { http, HttpResponse, StrictResponse } from 'msw';
 
 export const setupMockServer = () => {
   const server = createServer(usageAPIHandler);
@@ -50,8 +50,6 @@ let interceptedRequestPayload: UsageRecord[] = [];
 const usageAPIHandler = http.post(
   'api/v1/usage',
   async ({ request }): Promise<StrictResponse<UsageResponse>> => {
-    console.log('Intercepted request to /api/v1/usage');
-    // const payload = await request.clone();
     const payload = (await request.clone().json()) as UsageRecord[];
     interceptedRequestPayload = payload;
 
