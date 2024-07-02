@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { partition } from 'lodash';
+import { isEmpty, partition } from 'lodash';
 
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
@@ -538,11 +538,13 @@ export const convertPatchAPIToInternalSchema = (
   const [ruleUpdateSystemActions, ruleUpdateActions] = partition(nextParams.actions, (action) =>
     actionsClient.isSystemAction(action.id)
   );
-  const systemActions =
-    ruleUpdateSystemActions?.map((action) => transformRuleToAlertAction(action)) ??
-    existingRuleSystemActions;
-  const alertActions =
-    ruleUpdateActions?.map((action) => transformRuleToAlertAction(action)) ?? existingRuleActions;
+  const systemActions = !isEmpty(ruleUpdateSystemActions)
+    ? ruleUpdateSystemActions.map((action) => transformRuleToAlertAction(action))
+    : existingRuleSystemActions;
+  const alertActions = !isEmpty(ruleUpdateActions)
+    ? ruleUpdateActions.map((action) => transformRuleToAlertAction(action))
+    : existingRuleActions;
+
   const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
   const actions = transformToActionFrequency(alertActions as RuleActionCamel[], throttle);
 
@@ -588,7 +590,7 @@ export const convertPatchAPIToInternalSchema = (
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
     actions,
-    systemActions: systemActions ?? existingRuleSystemActions,
+    systemActions,
   };
 };
 
