@@ -57,6 +57,7 @@ export interface RuleScheduleProps {
 export const RuleSchedule = (props: RuleScheduleProps) => {
   const { interval, minimumScheduleInterval, errors = {}, onChange } = props;
 
+  // @ts-expect-error upgrade typescript v5.1.6
   const hasIntervalError = errors.interval?.length > 0;
 
   const intervalNumber = getDurationNumberInItsUnit(interval);
@@ -99,6 +100,7 @@ export const RuleSchedule = (props: RuleScheduleProps) => {
       data-test-subj="ruleSchedule"
       display="rowCompressed"
       helpText={helpText}
+      // @ts-expect-error upgrade typescript v5.1.6
       isInvalid={errors.interval?.length > 0}
       error={errors.interval}
     >
@@ -107,6 +109,7 @@ export const RuleSchedule = (props: RuleScheduleProps) => {
           <EuiFieldNumber
             fullWidth
             prepend={[SCHEDULE_TITLE_PREFIX]}
+            // @ts-expect-error upgrade typescript v5.1.6
             isInvalid={errors.interval?.length > 0}
             value={intervalNumber}
             name="interval"

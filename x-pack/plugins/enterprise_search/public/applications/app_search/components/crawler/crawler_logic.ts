@@ -83,18 +83,21 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     domains: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onReceiveCrawlerData: (_, { data: { domains } }) => domains,
       },
     ],
     events: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onReceiveCrawlerData: (_, { data: { events } }) => events,
       },
     ],
     mostRecentCrawlRequest: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onReceiveCrawlerData: (_, { data: { mostRecentCrawlRequest } }) => mostRecentCrawlRequest,
       },
     ],
@@ -102,6 +105,7 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
       null,
       {
         clearTimeoutId: () => null,
+        // @ts-expect-error upgrade typescript v5.1.6
         onCreateNewTimeout: (_, { timeoutId }) => timeoutId,
       },
     ],

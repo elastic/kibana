@@ -109,18 +109,21 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     hasPrefix: [
       false,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setHasPrefix: (_, { hasPrefix }) => hasPrefix,
       },
     ],
     languageSelectValue: [
       UNIVERSAL_LANGUAGE_VALUE,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLanguageSelectValue: (_, { language }) => language ?? null,
       },
     ],
     rawName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRawName: (_, { rawName }) => rawName,
       },
     ],

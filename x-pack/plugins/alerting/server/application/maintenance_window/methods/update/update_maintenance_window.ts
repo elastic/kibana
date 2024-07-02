@@ -98,6 +98,7 @@ async function updateWithOCC(
     const modificationMetadata = await getModificationMetadata();
 
     let events = generateMaintenanceWindowEvents({
+      // @ts-expect-error upgrade typescript v5.1.6
       rRule: rRule || maintenanceWindow.rRule,
       duration: typeof duration === 'number' ? duration : maintenanceWindow.duration,
       expirationDate,

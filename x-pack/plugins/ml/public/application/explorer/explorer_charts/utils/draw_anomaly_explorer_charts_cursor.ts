@@ -38,7 +38,9 @@ export function drawCursor(
     cursor &&
     cursor.type === 'Over' &&
     cursor.x !== null &&
+    // @ts-expect-error upgrade typescript v5.1.6
     cursor.x >= config.plotEarliest &&
+    // @ts-expect-error upgrade typescript v5.1.6
     cursor.x <= config.plotLatest
       ? [cursor.x]
       : [];

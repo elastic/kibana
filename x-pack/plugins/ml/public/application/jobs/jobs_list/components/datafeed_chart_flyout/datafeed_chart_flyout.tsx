@@ -272,6 +272,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
       <EuiFlyout
         size="m"
         ownFocus
+        // @ts-expect-error upgrade typescript v5.1.6
         onClose={onClose.bind(null, false)}
         aria-label={i18n.translate('xpack.ml.jobsList.datafeedChart.datafeedChartFlyoutAriaLabel', {
           defaultMessage: 'Datafeed chart flyout',

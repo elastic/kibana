@@ -60,11 +60,15 @@ export const CrawlerSingleDomainLogic = kea<
     domain: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         onReceiveDomainData: (_, { domain }) => domain,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateCrawlRules: (currentDomain, { crawlRules }) =>
           ({ ...currentDomain, crawlRules } as CrawlerDomain),
+        // @ts-expect-error upgrade typescript v5.1.6
         updateEntryPoints: (currentDomain, { entryPoints }) =>
           ({ ...currentDomain, entryPoints } as CrawlerDomain),
+        // @ts-expect-error upgrade typescript v5.1.6
         updateSitemaps: (currentDomain, { sitemaps }) =>
           ({ ...currentDomain, sitemaps } as CrawlerDomain),
       },

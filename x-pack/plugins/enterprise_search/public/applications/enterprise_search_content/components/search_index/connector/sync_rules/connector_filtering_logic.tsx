@@ -198,6 +198,7 @@ export const ConnectorFilteringLogic = kea<
     filteringConfig: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (filteringConfig, filteringRules) =>
           filteringConfig
             ? {
@@ -205,6 +206,7 @@ export const ConnectorFilteringLogic = kea<
                 active: filteringRules,
               }
             : null,
+        // @ts-expect-error upgrade typescript v5.1.6
         draftApiSuccess: (filteringConfig, filteringRules) =>
           filteringConfig
             ? {
@@ -212,6 +214,7 @@ export const ConnectorFilteringLogic = kea<
                 draft: filteringRules,
               }
             : null,
+        // @ts-expect-error upgrade typescript v5.1.6
         setFilteringConfig: (_, filteringConfig) => filteringConfig,
       },
     ],
@@ -220,18 +223,21 @@ export const ConnectorFilteringLogic = kea<
       {
         draftApiError: () => false,
         draftApiSuccess: () => false,
+        // @ts-expect-error upgrade typescript v5.1.6
         setIsEditing: (_, { isEditing }) => isEditing,
       },
     ],
     localAdvancedSnippet: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setLocalAdvancedSnippet: (_, { advancedSnippet }) => advancedSnippet,
       },
     ],
     localFilteringRules: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         addFilteringRule: (filteringRules, filteringRule) => {
           const newFilteringRules: FilteringRule[] = filteringRules.length
             ? [
@@ -242,16 +248,22 @@ export const ConnectorFilteringLogic = kea<
             : [filteringRule, createDefaultRule(1)];
           return newFilteringRules.map((rule, index) => ({ ...rule, order: index }));
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         deleteFilteringRule: (filteringRules, filteringRule) =>
+          // @ts-expect-error upgrade typescript v5.1.6
           filteringRules.filter((rule) => rule.id !== filteringRule.id),
+        // @ts-expect-error upgrade typescript v5.1.6
         reorderFilteringRules: (filteringRules, newFilteringRules) => {
           const lastItem = filteringRules.length
             ? filteringRules[filteringRules.length - 1]
             : createDefaultRule(0);
           return [...newFilteringRules, lastItem].map((rule, index) => ({ ...rule, order: index }));
         },
+        // @ts-expect-error upgrade typescript v5.1.6
         setLocalFilteringRules: (_, filteringRules) => filteringRules,
+        // @ts-expect-error upgrade typescript v5.1.6
         updateFilteringRule: (filteringRules, filteringRule) =>
+          // @ts-expect-error upgrade typescript v5.1.6
           filteringRules.map((rule) => (rule.id === filteringRule.id ? filteringRule : rule)),
       },
     ],

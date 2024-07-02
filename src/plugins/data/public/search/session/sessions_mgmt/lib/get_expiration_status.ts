@@ -43,6 +43,7 @@ export const getExpirationStatus = (config: SearchSessionsConfigSchema, expires:
     });
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   if (durationToExpire.valueOf() > 0 && expiresInDays <= sufficientDays) {
     return { toolTipContent, statusContent };
   }

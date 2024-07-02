@@ -114,18 +114,20 @@ export const getDataFromFieldsHits = (
     // format nested fields
     let nestedFields;
     if (isRuleParametersFieldOrSubfield(field, prependField)) {
-      nestedFields = Array.isArray(item)
+      nestedFields = Array.isArray(item) // @ts-expect-error upgrade typescript v5.1.6
         ? item
             .reduce((acc, i) => {
+              // @ts-expect-error upgrade typescript v5.1.6
               acc.push(getDataFromFieldsHits(i, dotField, fieldCategory));
               return acc;
             }, [])
             .flat()
         : getDataFromFieldsHits(item, dotField, fieldCategory);
     } else {
-      nestedFields = Array.isArray(item)
+      nestedFields = Array.isArray(item) // @ts-expect-error upgrade typescript v5.1.6
         ? item
             .reduce((acc, i) => {
+              // @ts-expect-error upgrade typescript v5.1.6
               acc.push(getDataFromFieldsHits(i, dotField, fieldCategory));
               return acc;
             }, [])

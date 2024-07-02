@@ -55,11 +55,15 @@ export const EmailParamsFields = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultMessage]);
+  // @ts-expect-error upgrade typescript v5.1.6
   const isToInvalid: boolean = to !== undefined && errors.to !== undefined && errors.to.length > 0;
   const isSubjectInvalid: boolean =
+    // @ts-expect-error upgrade typescript v5.1.6
     subject !== undefined && errors.subject !== undefined && errors.subject.length > 0;
+  // @ts-expect-error upgrade typescript v5.1.6
   const isCCInvalid: boolean = errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
+    // @ts-expect-error upgrade typescript v5.1.6
     errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined;
 
   return (

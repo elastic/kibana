@@ -24,6 +24,7 @@ export async function waitForDocumentInIndex<T>({
   return pRetry(
     async () => {
       const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
+      // @ts-expect-error upgrade typescript v5.1.6
       if (!response.hits.total || response.hits.total < docCountTarget) {
         throw new Error('No hits found');
       }
@@ -43,6 +44,7 @@ export async function waitForIndexToBeEmpty<T>({
   return pRetry(
     async () => {
       const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
+      // @ts-expect-error upgrade typescript v5.1.6
       if (response.hits.total != null && response.hits.total > 0) {
         throw new Error(`Found ${response.hits.total} docs.`);
       }

@@ -33,6 +33,7 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
     account: [
       props.appSearch,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setOnboardingComplete: (account) => ({
           ...account,
           onboardingComplete: true,

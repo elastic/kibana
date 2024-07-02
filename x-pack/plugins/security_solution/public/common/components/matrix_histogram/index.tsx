@@ -57,6 +57,7 @@ const visualizationResponseHasData = (response: VisualizationResponse[]): boolea
   }
   return Object.values<AggregationsTermsAggregateBase<unknown[]>>(
     response[0].aggregations ?? {}
+    // @ts-expect-error upgrade typescript v5.1.6
   ).some(({ buckets }) => buckets.length > 0);
 };
 

@@ -197,13 +197,22 @@ export const GroupByExpression = ({
           {groupByTypes[groupBy].sizeRequired ? (
             <>
               <EuiFlexItem grow={1}>
-                <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
+                <EuiFormRow
+                  isInvalid={
+                    // @ts-expect-error upgrade typescript v5.1.6
+                    errors.termSize.length > 0
+                  }
+                  error={errors.termSize}
+                >
                   <EuiFieldNumber
                     data-test-subj="fieldsNumberSelect"
                     css={css`
                       min-width: 50px;
                     `}
-                    isInvalid={errors.termSize.length > 0}
+                    isInvalid={
+                      // @ts-expect-error upgrade typescript v5.1.6
+                      errors.termSize.length > 0
+                    }
                     value={termSize || ''}
                     onChange={(e) => {
                       const { value } = e.target;
@@ -216,7 +225,13 @@ export const GroupByExpression = ({
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
-                <EuiFormRow isInvalid={errors.termField.length > 0} error={errors.termField}>
+                <EuiFormRow
+                  isInvalid={
+                    // @ts-expect-error upgrade typescript v5.1.6
+                    errors.termField.length > 0
+                  }
+                  error={errors.termField}
+                >
                   <EuiComboBox
                     singleSelection={canSelectMultiTerms ? false : { asPlainText: true }}
                     placeholder={i18n.translate(
@@ -226,7 +241,10 @@ export const GroupByExpression = ({
                       }
                     )}
                     data-test-subj="fieldsExpressionSelect"
-                    isInvalid={errors.termField.length > 0}
+                    isInvalid={
+                      // @ts-expect-error upgrade typescript v5.1.6
+                      errors.termField.length > 0
+                    }
                     selectedOptions={selectedTermsFieldsOptions}
                     onChange={(
                       selectedOptions: Array<EuiComboBoxOptionOption<GroupByOverFieldOption>>

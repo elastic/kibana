@@ -82,12 +82,14 @@ export const CreateSearchApplicationLogic = kea<
     searchApplicationName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setName: (_, { name }) => name,
       },
     ],
     selectedIndices: [
       [],
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSelectedIndices: (_, { indices }) => indices,
       },
     ],

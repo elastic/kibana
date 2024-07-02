@@ -59,7 +59,10 @@ export const ValueExpression = ({
           onClick={() => {
             setValuePopoverOpen(true);
           }}
-          isInvalid={errors.length > 0}
+          isInvalid={
+            // @ts-expect-error upgrade typescript v5.1.6
+            errors.length > 0
+          }
         />
       }
       isOpen={valuePopoverOpen}
@@ -82,14 +85,20 @@ export const ValueExpression = ({
           <EuiFlexItem grow={false}>
             <EuiFormRow
               data-test-subj="valueFieldNumberForm"
-              isInvalid={errors.length > 0 && value !== undefined}
+              isInvalid={
+                // @ts-expect-error upgrade typescript v5.1.6
+                errors.length > 0 && value !== undefined
+              }
               error={errors}
             >
               <EuiFieldNumber
                 data-test-subj="valueFieldNumber"
                 min={0}
                 value={value}
-                isInvalid={errors.length > 0 && value !== undefined}
+                isInvalid={
+                  // @ts-expect-error upgrade typescript v5.1.6
+                  errors.length > 0 && value !== undefined
+                }
                 onChange={(e: any) => {
                   onChangeSelectedValue(e.target.value as number);
                 }}

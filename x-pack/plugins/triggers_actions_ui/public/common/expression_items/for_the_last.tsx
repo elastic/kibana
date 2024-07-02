@@ -97,9 +97,16 @@ export const ForLastExpression = ({
         </ClosablePopoverTitle>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiFormRow isInvalid={errors.timeWindowSize.length > 0} error={errors.timeWindowSize}>
+            <EuiFormRow
+              isInvalid={
+                /* @ts-expect-error upgrade typescript v5.1.6 */
+                errors.timeWindowSize.length > 0
+              }
+              error={errors.timeWindowSize}
+            >
               <EuiFieldNumber
                 data-test-subj="timeWindowSizeNumber"
+                /* @ts-expect-error upgrade typescript v5.1.6 */
                 isInvalid={errors.timeWindowSize.length > 0}
                 min={0}
                 value={timeWindowSize || ''}

@@ -82,12 +82,14 @@ export const DocumentCreationLogic = kea<
     creationMode: [
       'api',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         openDocumentCreation: (_, { creationMode }) => creationMode,
       },
     ],
     activeJsonTab: [
       'uploadTab',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setActiveJsonTab: (_, { activeJsonTab }) => activeJsonTab,
       },
     ],
@@ -96,12 +98,14 @@ export const DocumentCreationLogic = kea<
       {
         showCreationModes: () => DocumentCreationStep.ShowCreationModes,
         openDocumentCreation: () => DocumentCreationStep.AddDocuments,
+        // @ts-expect-error upgrade typescript v5.1.6
         setCreationStep: (_, { creationStep }) => creationStep,
       },
     ],
     textInput: [
       dedent(DOCUMENTS_API_JSON_EXAMPLE),
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setTextInput: (_, { textInput }) => textInput,
         closeDocumentCreation: () => dedent(DOCUMENTS_API_JSON_EXAMPLE),
         setActiveJsonTab: () => dedent(DOCUMENTS_API_JSON_EXAMPLE),
@@ -110,6 +114,7 @@ export const DocumentCreationLogic = kea<
     fileInput: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFileInput: (_, { fileInput }) => fileInput,
         closeDocumentCreation: () => null,
         setActiveJsonTab: () => null,
@@ -129,6 +134,7 @@ export const DocumentCreationLogic = kea<
       [],
       {
         onSubmitJson: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         setWarnings: (_, { warnings }) => warnings,
         closeDocumentCreation: () => [],
         setActiveJsonTab: () => [],
@@ -138,6 +144,7 @@ export const DocumentCreationLogic = kea<
       [],
       {
         onSubmitJson: () => [],
+        // @ts-expect-error upgrade typescript v5.1.6
         setErrors: (_, { errors }) => (Array.isArray(errors) ? errors : [errors]),
         closeDocumentCreation: () => [],
         setActiveJsonTab: () => [],
@@ -146,6 +153,7 @@ export const DocumentCreationLogic = kea<
     summary: [
       {} as DocumentCreationSummary,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setSummary: (_, { summary }) => summary,
       },
     ],

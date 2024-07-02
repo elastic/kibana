@@ -143,9 +143,13 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     resultFields: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         initializeResultFields: (_, { resultFields }) => resultFields,
+        // @ts-expect-error upgrade typescript v5.1.6
         clearAllFields: (resultFields) => clearAllFields(resultFields),
+        // @ts-expect-error upgrade typescript v5.1.6
         resetAllFields: (resultFields) => resetAllFields(resultFields),
+        // @ts-expect-error upgrade typescript v5.1.6
         updateField: (resultFields, { fieldName, settings }) =>
           resultFields.hasOwnProperty(fieldName)
             ? { ...resultFields, [fieldName]: settings }
@@ -155,18 +159,21 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     lastSavedResultFields: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         initializeResultFields: (_, { resultFields }) => resultFields,
       },
     ],
     schema: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         initializeResultFields: (_, { schema }) => schema,
       },
     ],
     schemaConflicts: [
       {},
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         initializeResultFields: (_, { schemaConflicts }) => schemaConflicts || {},
       },
     ],

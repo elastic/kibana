@@ -17,6 +17,7 @@ export const transformMaintenanceWindowResponse = (
     duration: response.duration,
     expirationDate: response.expiration_date,
     events: response.events,
+    // @ts-expect-error upgrade typescript v5.1.6
     rRule: response.r_rule,
     ...(response.category_ids !== undefined ? { categoryIds: response.category_ids } : {}),
     ...(response.scoped_query !== undefined ? { scopedQuery: response.scoped_query } : {}),

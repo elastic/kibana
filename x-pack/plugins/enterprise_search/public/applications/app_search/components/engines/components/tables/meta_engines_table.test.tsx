@@ -84,6 +84,7 @@ describe('MetaEnginesTable', () => {
     it('is hidden by default', () => {
       const wrapper = shallow(<MetaEnginesTable {...props} />);
       const table = wrapper.find(EuiBasicTable).dive();
+      // @ts-expect-error upgrade typescript v5.1.6
       const tableBody = table.find('RenderWithEuiTheme').renderProp('children')();
 
       expect(tableBody.find(MetaEnginesTableNameColumnContent)).toHaveLength(1);
@@ -97,6 +98,7 @@ describe('MetaEnginesTable', () => {
       });
       const wrapper = shallow(<MetaEnginesTable {...props} />);
       const table = wrapper.find(EuiBasicTable).dive();
+      // @ts-expect-error upgrade typescript v5.1.6
       const tableBody = table.find('RenderWithEuiTheme').renderProp('children')();
 
       expect(tableBody.find(MetaEnginesTableExpandedRow)).toHaveLength(1);
