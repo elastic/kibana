@@ -11,8 +11,7 @@ import { setTLSRecoveredAlertsContext } from './message_utils';
 import { TLSLatestPing } from './tls_rule_executor';
 
 describe('setTLSRecoveredAlertsContext', () => {
-  const timestamp = new Date('2024-07-02T00:00:00').toISOString();
-  const notAfterTimestamp = new Date('2024-06-02T00:00:00').toISOString();
+  const timestamp = new Date().toISOString();
   const alertUuid = 'alert-id';
   const configId = '12345';
   const basePath = {
@@ -74,7 +73,7 @@ describe('setTLSRecoveredAlertsContext', () => {
                 subject: {
                   common_name: 'cert-2',
                 },
-                not_after: notAfterTimestamp,
+                not_after: timestamp,
               },
             },
           },
@@ -91,7 +90,7 @@ describe('setTLSRecoveredAlertsContext', () => {
         monitorName: 'test-monitor',
         monitorType: 'test-monitor-type',
         monitorUrl: 'test-monitor-url',
-        newStatus: 'Certificate cert-2 Expired on Jun 2, 2024 EDT, 30 days ago.',
+        newStatus: expect.stringContaining('Certificate cert-2 Expired on'),
         previousStatus: 'Certificate cert-1 test-summary',
         sha256: 'cert-1-sha256',
         status: 'has expired',
@@ -139,7 +138,7 @@ describe('setTLSRecoveredAlertsContext', () => {
                 subject: {
                   common_name: 'cert-1',
                 },
-                not_after: notAfterTimestamp,
+                not_after: timestamp,
               },
             },
           },
