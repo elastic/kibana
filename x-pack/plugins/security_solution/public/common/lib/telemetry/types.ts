@@ -6,6 +6,12 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type {
+  AddNoteFromExpandableFlyoutClickedParams,
+  NotesTelemetryEvents,
+  NotesTelemetryEventParams,
+  OpenNoteInExpandableFlyoutClickedParams,
+} from '../../../notes/telemetry/types';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
@@ -130,6 +136,8 @@ export type TelemetryEventParams =
   | OnboardingHubStepLinkClickedParams
   | ReportManualRuleRunTelemetryEventParams
   | ReportEventLogTelemetryEventParams;
+  | OnboardingHubStepLinkClickedParams
+  | NotesTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -183,6 +191,10 @@ export interface TelemetryClientStart {
   reportEventLogShowSourceEventDateRange(
     params: ReportEventLogShowSourceEventDateRangeParams
   ): void;
+
+  // new notes
+  reportOpenNoteInExpandableFlyoutClicked(params: OpenNoteInExpandableFlyoutClickedParams): void;
+  reportAddNoteFromExpandableFlyoutClicked(params: AddNoteFromExpandableFlyoutClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -209,4 +221,5 @@ export type TelemetryEvent =
     }
   | OnboardingHubTelemetryEvent
   | ManualRuleRunTelemetryEvent
-  | EventLogTelemetryEvent;
+  | EventLogTelemetryEvent
+  | NotesTelemetryEvents;

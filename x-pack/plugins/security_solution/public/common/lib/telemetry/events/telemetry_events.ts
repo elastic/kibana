@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  addNoteFromExpandableFlyoutClickedEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+} from '../../../../notes/telemetry';
 import type { TelemetryEvent } from '../types';
 import { TelemetryEventTypes } from '../constants';
 import {
@@ -186,4 +190,6 @@ export const telemetryEvents = [
   manualRuleRunOpenModalEvent,
   eventLogFilterByRunTypeEvent,
   eventLogShowSourceEventDateRangeEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+  addNoteFromExpandableFlyoutClickedEvent,
 ];

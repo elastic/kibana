@@ -107,6 +107,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   trailingControlColumns,
   onToggleShowNotes,
 }) => {
+  const { telemetry } = useKibana().services;
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
@@ -224,6 +225,10 @@ const StatefulEventComponent: React.FC<Props> = ({
           },
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: timelineId,
+        panel: 'right',
+      });
     } else {
       // opens the panel when clicking on the table row action
       dispatch(
@@ -241,6 +246,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     expandableFlyoutDisabled,
     openFlyout,
     timelineId,
+    telemetry,
     dispatch,
     tabType,
   ]);

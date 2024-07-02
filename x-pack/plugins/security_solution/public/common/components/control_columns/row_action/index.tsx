@@ -169,31 +169,36 @@ const RowActionComponent = ({
     tabType,
   ]);
 
-  const toggleShowNotes = useCallback(
-    () =>
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
+  const toggleShowNotes = useCallback(() => {
+    openFlyout({
+      right: {
+        id: DocumentDetailsRightPanelKey,
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: tableId,
         },
-        left: {
-          id: DocumentDetailsLeftPanelKey,
-          path: {
-            tab: LeftPanelNotesTab,
-          },
-          params: {
-            id: eventId,
-            indexName,
-            scopeId: tableId,
-          },
+      },
+      left: {
+        id: DocumentDetailsLeftPanelKey,
+        path: {
+          tab: LeftPanelNotesTab,
         },
-      }),
-    [eventId, indexName, openFlyout, tableId]
-  );
+        params: {
+          id: eventId,
+          indexName,
+          scopeId: tableId,
+        },
+      },
+    });
+    telemetry.reportOpenNoteInExpandableFlyoutClicked({
+      location: timelineId,
+    });
+    telemetry.reportDetailsFlyoutOpened({
+      location: timelineId,
+      panel: 'left',
+    });
+  }, [eventId, indexName, openFlyout, tableId, telemetry]);
 
   const Action = controlColumn.rowCellRender;
 
