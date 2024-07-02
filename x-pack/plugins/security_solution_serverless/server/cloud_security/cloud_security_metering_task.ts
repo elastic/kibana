@@ -36,7 +36,7 @@ export const getUsageRecords = (
   logger: Logger
 ): UsageRecord => {
   let assetCount;
-  let resourceSubtypeCounter;
+  let resourceSubtypeCounterMap;
 
   if (cloudSecuritySolution === CSPM || cloudSecuritySolution === KSPM) {
     const resourceSubtypeBuckets: ResourceSubtypeAggregationBucket[] =
@@ -47,11 +47,10 @@ export const getUsageRecords = (
       .filter((bucket) => billableAssets.includes(bucket.key))
       .reduce((acc, bucket) => acc + bucket.unique_assets.value, 0);
 
-    resourceSubtypeCounter = assetCountAggregation.resource_sub_type.buckets.reduce(
+    resourceSubtypeCounterMap = assetCountAggregation.resource_sub_type.buckets.reduce(
       (resourceMap, item) => {
         resourceMap[item.key] = {
-          doc_count: item.doc_count as number,
-          unique_assets: item.unique_assets.value as number,
+          unique_assets: item.unique_assets.value,
         };
         return resourceMap;
       },
@@ -78,9 +77,7 @@ export const getUsageRecords = (
   }
   const roundedCreationTimestamp = creationTimestamp.toISOString();
 
-  const metadata = resourceSubtypeCounter
-    ? { tier, resource_sub_type_count: resourceSubtypeCounter }
-    : { tier };
+  const metadata = resourceSubtypeCounterMap ? { tier, ...resourceSubtypeCounterMap } : { tier };
 
   const usageRecord: UsageRecord = {
     id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
@@ -95,7 +92,6 @@ export const getUsageRecords = (
     source: {
       id: taskId,
       instance_group_id: projectId,
-      // metadata: { tier },
       metadata,
     },
   };

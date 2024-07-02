@@ -81,7 +81,7 @@ export class SecurityUsageReportingTask {
       this.logger.error(`missing required task manager service during start of ${this.taskType}`);
       return;
     }
-    taskManager.bulkUpdateSchedules([this.taskId], { interval: '30s' });
+
     this.wasStarted = true;
 
     try {
@@ -162,7 +162,7 @@ export class SecurityUsageReportingTask {
     if (usageRecords.length !== 0) {
       try {
         this.logger.debug(`Sending ${usageRecords.length} usage records to the API`);
-        // console.log(JSON.stringify(usageRecords));
+
         usageReportResponse = await usageReportingService.reportUsage(
           usageRecords,
           this.config.usageReportingApiUrl
@@ -182,7 +182,11 @@ export class SecurityUsageReportingTask {
           }, ${usageReportResponse.statusText}`
         );
       } catch (err) {
-        this.logger.error(`Failed to send usage records ${JSON.stringify(usageRecords)}: ${err} `);
+        this.logger.error(
+          `Failed to send (${
+            usageRecords.length
+          }) usage records starting from ${lastSuccessfulReport.toISOString()}: ${err} `
+        );
         shouldRunAgain = true;
       }
     }

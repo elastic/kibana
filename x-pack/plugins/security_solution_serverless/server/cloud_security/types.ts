@@ -41,7 +41,6 @@ export interface MinTimestamp {
 
 export interface ResourceSubtypeCounter {
   [key: string]: {
-    doc_count: number;
     unique_assets: number;
   };
 }
