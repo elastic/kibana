@@ -9,7 +9,7 @@
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { useAirdrop, useOnDrop } from '@kbn/airdrops/src';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { useUrlTracking } from './hooks/use_url_tracking';
 import { DiscoverStateContainer } from './state_management/discover_state';
 import { DiscoverLayout } from './components/layout';
@@ -37,7 +37,15 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history, filterManager } = services;
   const { registerAirdropContent } = useAirdrop();
+
   const filtersAirdrop = useOnDrop<Filter[]>({ id: 'searchBar.filters' });
+  const queryAirdrop = useOnDrop<Query | AggregateQuery>({ id: 'searchBar.query' });
+  const selectedFieldsAirdrop = useOnDrop<string[] | undefined>({ id: 'searchBar.columns' });
+
+  const { query } = data;
+  const {
+    appState: { get: getAppState, update: updateAppState },
+  } = stateContainer;
 
   useUrlTracking(stateContainer.savedSearchState);
 
@@ -103,10 +111,42 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   }, [registerAirdropContent, filterManager]);
 
   useEffect(() => {
+    const unregister = registerAirdropContent({
+      id: 'searchBar.query',
+      label: 'Query',
+      get: () => query.queryString.getQuery(),
+    });
+
+    return unregister;
+  }, [registerAirdropContent, query]);
+
+  useEffect(() => {
+    const unregister = registerAirdropContent({
+      id: 'searchBar.columns',
+      label: 'Selected fields',
+      get: () => getAppState().columns,
+    });
+
+    return unregister;
+  }, [registerAirdropContent, getAppState]);
+
+  useEffect(() => {
     if (filtersAirdrop) {
       filterManager.setAppFilters(filtersAirdrop.content);
     }
   }, [filtersAirdrop, filterManager]);
+
+  useEffect(() => {
+    if (queryAirdrop) {
+      query.queryString.setQuery(queryAirdrop.content);
+    }
+  }, [queryAirdrop, query]);
+
+  useEffect(() => {
+    if (selectedFieldsAirdrop) {
+      updateAppState({ columns: selectedFieldsAirdrop.content });
+    }
+  }, [selectedFieldsAirdrop, updateAppState]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
