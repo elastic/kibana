@@ -432,7 +432,7 @@ export const EditPackagePolicyForm = memo<{
   const replaceConfigurePackage = replaceDefineStepView && originalPackagePolicy && packageInfo && (
     <ExtensionWrapper>
       <replaceDefineStepView.Component
-        agentPolicy={agentPolicies[0]}
+        agentPolicies={agentPolicies}
         packageInfo={packageInfo}
         policy={originalPackagePolicy}
         newPolicy={packagePolicy}
