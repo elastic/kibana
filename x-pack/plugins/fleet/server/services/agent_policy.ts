@@ -1008,7 +1008,8 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
-      const packagePoliciesToDelete = this.packagePoliciesWithoutMultiplePolicies(packagePolicies);
+      const { policiesWithSingleAP: packagePoliciesToDelete, policiesWithMultipleAP } =
+        this.packagePoliciesWithoutMultiplePolicies(packagePolicies);
 
       await packagePolicyService.delete(
         soClient,
@@ -1021,6 +1022,21 @@ class AgentPolicyService {
       );
       logger.debug(
         `Deleted package policies with ids ${packagePoliciesToDelete
+          .map((policy) => policy.id)
+          .join(', ')}`
+      );
+
+      await packagePolicyService.bulkUpdate(
+        soClient,
+        esClient,
+        policiesWithMultipleAP.map((policy) => ({
+          ...policy,
+          policy_id: '',
+          policy_ids: policy.policy_ids.filter((policyId) => policyId !== id),
+        }))
+      );
+      logger.debug(
+        `Updated package policies with ids ${policiesWithMultipleAP
           .map((policy) => policy.id)
           .join(', ')}`
       );
@@ -1557,14 +1573,21 @@ class AgentPolicyService {
     }
   }
 
-  private packagePoliciesWithoutMultiplePolicies(packagePolicies: PackagePolicy[]) {
+  private packagePoliciesWithoutMultiplePolicies(packagePolicies: PackagePolicy[]): {
+    policiesWithSingleAP: PackagePolicy[];
+    policiesWithMultipleAP: PackagePolicy[];
+  } {
     // Find package policies that don't have multiple agent policies and mark them for deletion
     if (appContextService.getExperimentalFeatures().enableReusableIntegrationPolicies) {
-      return packagePolicies.filter(
+      const policiesWithSingleAP = packagePolicies.filter(
         (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
       );
+      const policiesWithMultipleAP = packagePolicies.filter(
+        (policy) => policy?.policy_ids && policy?.policy_ids.length > 1
+      );
+      return { policiesWithSingleAP, policiesWithMultipleAP };
     }
-    return packagePolicies;
+    return { policiesWithSingleAP: packagePolicies, policiesWithMultipleAP: [] };
   }
 }
 

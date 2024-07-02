@@ -667,12 +667,23 @@ describe('Agent policy', () => {
             id: 'package-3',
           },
         ] as any);
-        await agentPolicyService.delete(soClient, esClient, 'mocked');
+        await agentPolicyService.delete(soClient, esClient, 'policy_1');
         expect(mockedPackagePolicyService.delete).toBeCalledWith(
           expect.anything(),
           expect.anything(),
           ['package-2', 'package-3'],
           expect.anything()
+        );
+        expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          [
+            {
+              id: 'package-1',
+              policy_id: '',
+              policy_ids: ['int_policy_2'],
+            },
+          ]
         );
       });
     });
