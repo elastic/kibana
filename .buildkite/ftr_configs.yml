@@ -409,9 +409,7 @@ enabled:
   - x-pack/test/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/integrations.config.ts
-  - x-pack/test/security_solution_endpoint/configs/integrations_feature_flag.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
-  - x-pack/test/security_solution_endpoint/configs/serverless.integrations_feature_flag.config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
