@@ -33,6 +33,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/fleet/cypress/packages/*.zip',
   '**/apm-diagnostics-*.json',
   '**/.*',
+  '**/*.zip',
   '**/__mocks__/**/*',
   'x-pack/docs/**/*',
   'packages/core/apps/core-apps-server-internal/assets/fonts/**/*',

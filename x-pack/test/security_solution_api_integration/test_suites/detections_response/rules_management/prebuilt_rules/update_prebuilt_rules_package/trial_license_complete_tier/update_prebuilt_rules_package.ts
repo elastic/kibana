@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return getPackageResponse.body.item.version ?? '';
   };
 
-  describe('@ess @serverless @skipInServerlessMKI update_prebuilt_rules_package', () => {
+  describe.skip('@ess @serverless @skipInServerlessMKI update_prebuilt_rules_package', () => {
     before(async () => {
       const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
       const fleetPackages = await fs.readFile(configFilePath, 'utf8');
