@@ -4,13 +4,17 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_export:
-    summary: Exports rules to an `.ndjson` file
     post:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ExportRules
-      summary: Export rules
-      description: Exports rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file - Actions, Exception lists. Prebuilt rules cannot be exported.
+      summary: Export detection rules
+      description: |
+        Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
+        - Actions
+        - Exception lists
+        > info
+        > You cannot export prebuilt rules.
       tags:
         - Import/Export API
       parameters:

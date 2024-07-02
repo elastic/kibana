@@ -8,9 +8,9 @@ paths:
       x-labels: [ess]
       operationId: FinalizeAlertsMigration
       x-codegen-enabled: true
-      summary: Finalizes alerts migration(s)
+      summary: Finalize detection alert migrations
       description: |
-        The finalization endpoint replaces the original index's alias with the successfully migrated index's alias.
+        Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
         The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
         finalize it.
       tags:
