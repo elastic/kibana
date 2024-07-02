@@ -12,7 +12,6 @@ import {
   EuiFieldSearch,
   EuiFormRow,
   EuiIconTip,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -35,7 +34,6 @@ import {
   useSourceContext,
   withSourceProvider,
 } from '../../../containers/metrics_source';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { MetricsExplorerGroupBy } from '../../../pages/metrics/metrics_explorer/components/group_by';
 import { MetricsExplorerKueryBar } from '../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
@@ -66,7 +64,6 @@ export { defaultExpression };
 
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata } = props;
-  const { docLinks } = useKibanaContextForPlugin().services;
   const { source } = useSourceContext();
   const { metricsView } = useMetricsDataViewContext();
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
@@ -267,30 +264,6 @@ export const Expressions: React.FC<Props> = (props) => {
     [ruleParams.criteria]
   );
 
-  // Test to see if any of the group fields in groupBy are already filtered down to a single
-  // group by the filterQuery. If this is the case, then a groupBy is unnecessary, as it would only
-  // ever produce one group instance
-  const groupByFilterTestPatterns = useMemo(() => {
-    if (!ruleParams.groupBy) return null;
-    const groups = !Array.isArray(ruleParams.groupBy) ? [ruleParams.groupBy] : ruleParams.groupBy;
-    return groups.map((group: string) => ({
-      groupName: group,
-      pattern: new RegExp(`{"match(_phrase)?":{"${group}":"(.*?)"}}`),
-    }));
-  }, [ruleParams.groupBy]);
-
-  const redundantFilterGroupBy = useMemo(() => {
-    const { filterQuery } = ruleParams;
-    if (typeof filterQuery !== 'string' || !groupByFilterTestPatterns) return [];
-    return groupByFilterTestPatterns
-      .map(({ groupName, pattern }) => {
-        if (pattern.test(filterQuery)) {
-          return groupName;
-        }
-      })
-      .filter((g) => typeof g === 'string') as string[];
-  }, [ruleParams, groupByFilterTestPatterns]);
-
   return (
     <>
       <EuiSpacer size="m" />
@@ -465,35 +438,8 @@ export const Expressions: React.FC<Props> = (props) => {
             ...options,
             groupBy: ruleParams.groupBy || undefined,
           }}
-          errorOptions={redundantFilterGroupBy}
         />
       </EuiFormRow>
-      {redundantFilterGroupBy.length > 0 && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="danger">
-            <FormattedMessage
-              id="xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError"
-              defaultMessage="This rule may alert on {matchedGroups} less than expected, because the filter query contains a match for {groupCount, plural, one {this field} other {these fields}}. For more information, refer to {filteringAndGroupingLink}."
-              values={{
-                matchedGroups: <strong>{redundantFilterGroupBy.join(', ')}</strong>,
-                groupCount: redundantFilterGroupBy.length,
-                filteringAndGroupingLink: (
-                  <EuiLink
-                    data-test-subj="infraExpressionsTheDocsLink"
-                    href={`${docLinks.links.observability.metricsThreshold}#filtering-and-grouping`}
-                  >
-                    {i18n.translate(
-                      'xpack.infra.metrics.alertFlyout.alertPerRedundantFilterError.docsLink',
-                      { defaultMessage: 'the docs' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-        </>
-      )}
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"
