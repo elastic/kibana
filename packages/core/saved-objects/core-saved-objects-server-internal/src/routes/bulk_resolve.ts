@@ -34,8 +34,9 @@ export const registerBulkResolveRoute = (
     {
       path: '/_bulk_resolve',
       options: {
+        summary: `Resolve saved objects`,
+        tags: ['oas-tag:saved objects'],
         access,
-        description: `Resolve saved objects`,
       },
       validate: {
         body: schema.arrayOf(
