@@ -7,7 +7,7 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiToolTip, EuiSwitch, EuiFormRow, useGeneratedHtmlId } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { RowRendererId } from '../../../../common/api/timeline';
@@ -39,12 +39,10 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
     selectExcludedRowRendererIds(state, timelineId)
   );
 
-  const areAllRowRenderersExcluded = useMemo(
-    () => Object.values(RowRendererId).every((id) => excludedRowRendererIds.includes(id)),
+  const isAnyRowRendererEnabled = useMemo(
+    () => Object.values(RowRendererId).some((id) => !excludedRowRendererIds.includes(id)),
     [excludedRowRendererIds]
   );
-
-  const [checked, setChecked] = useState(!areAllRowRenderersExcluded);
 
   const handleDisableAll = useCallback(() => {
     dispatch(
@@ -59,23 +57,21 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
     dispatch(setExcludedRowRendererIds({ id: timelineId, excludedRowRendererIds: [] }));
   }, [dispatch, timelineId]);
 
-  const onChange = (e: EuiSwitchEvent) => {
-    setChecked(e.target.checked);
-    if (e.target.checked) {
-      handleEnableAll();
-    } else {
-      handleDisableAll();
-    }
-  };
+  const onChange = useCallback(
+    (e: EuiSwitchEvent) => {
+      if (e.target.checked) {
+        handleEnableAll();
+      } else {
+        handleDisableAll();
+      }
+    },
+    [handleDisableAll, handleEnableAll]
+  );
 
   const rowRendererLabel = useMemo(
     () => <span id={toggleTextSwitchId}>{i18n.EVENT_RENDERERS_SWITCH}</span>,
     [toggleTextSwitchId]
   );
-
-  useEffect(() => {
-    setChecked(!areAllRowRenderersExcluded);
-  }, [areAllRowRenderersExcluded]);
 
   return (
     <EuiToolTip position="top" content={i18n.EVENT_RENDERERS_SWITCH_WARNING}>
@@ -83,7 +79,7 @@ export const RowRendererSwitch = React.memo(function RowRendererSwitch(
         <EuiSwitch
           data-test-subj="row-renderer-switch"
           label=""
-          checked={checked}
+          checked={isAnyRowRendererEnabled}
           onChange={onChange}
           compressed
         />
