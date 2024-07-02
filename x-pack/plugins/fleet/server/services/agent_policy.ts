@@ -68,6 +68,7 @@ import {
 } from '../../common/constants';
 import type {
   DeleteAgentPolicyResponse,
+  EnrollmentAPIKey,
   FetchAllAgentPoliciesOptions,
   FetchAllAgentPolicyIdsOptions,
   FleetServerPolicy,
@@ -1078,6 +1079,27 @@ class AgentPolicyService {
       id,
       name: agentPolicy.name,
     };
+  }
+
+  public async createAgentlessAgent(agentPolicy: AgentPolicy, enrollmentToken: EnrollmentAPIKey) {
+    if (agentPolicy.supports_agentless) {
+      const agentlessApiUrl = appContextService.getConfig()?.agentless?.api.url;
+      console.log('agentlessApiUrl', agentlessApiUrl);
+
+      const deploymentName = agentPolicy.name;
+      console.log('deploymentName', deploymentName);
+
+      const stackVersion = appContextService.getKibanaVersion();
+      console.log('stackVersion', stackVersion);
+
+      const policyId = agentPolicy.id;
+      console.log('policyId', policyId);
+
+      // const fleetToken = appContextService.().authc.apiKeys.;
+      // console.log('fleetToken', fleetToken);
+
+      console.log('enrollemntToken', enrollmentToken);
+    }
   }
 
   public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
