@@ -19,6 +19,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { INVOKE_ASSISTANT_ERROR_EVENT } from '../../lib/telemetry/event_based_telemetry';
 import { ElasticAssistantPluginRouter, GetElser } from '../../types';
 import { buildResponse } from '../../lib/build_response';
 import {
@@ -61,10 +62,12 @@ export const chatCompleteRoute = (
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const assistantResponse = buildResponse(response);
+        let telemetry;
+        let actionTypeId;
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           const logger: Logger = ctx.elasticAssistant.logger;
-          const telemetry = ctx.elasticAssistant.telemetry;
+          telemetry = ctx.elasticAssistant.telemetry;
 
           // Perform license and authenticated user checks
           const checkResponse = performChecks({
@@ -97,7 +100,7 @@ export const chatCompleteRoute = (
           const actions = ctx.elasticAssistant.actions;
           const actionsClient = await actions.getActionsClientWithRequest(request);
           const connectors = await actionsClient.getBulk({ ids: [connectorId] });
-          const actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
+          actionTypeId = connectors.length > 0 ? connectors[0].actionTypeId : '.gen-ai';
 
           // replacements
           const anonymizationFieldsRes =
@@ -226,6 +229,16 @@ export const chatCompleteRoute = (
           });
         } catch (err) {
           const error = transformError(err as Error);
+          telemetry?.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
+            actionTypeId: actionTypeId ?? '',
+            isEnabledKnowledgeBase: true,
+            isEnabledRAGAlerts: true,
+            model: request.body.model,
+            errorMessage: error.message,
+            // TODO rm actionTypeId check when llmClass for bedrock streaming is implemented
+            // tracked here: https://github.com/elastic/security-team/issues/7363
+            assistantStreamingEnabled: request.body.isStream ?? false,
+          });
           return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,

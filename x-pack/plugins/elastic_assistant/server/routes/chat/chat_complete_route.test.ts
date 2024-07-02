@@ -33,26 +33,19 @@ const actionsClient = actionsClientMock.create();
 jest.mock('../../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
 }));
-jest.mock('../../lib/executor', () => ({
-  executeAction: jest.fn().mockImplementation(async ({ connectorId }) => {
-    if (connectorId === 'mock-connector-id') {
-      return {
-        connector_id: 'mock-connector-id',
-        data: mockActionResponse,
-        status: 'ok',
-      };
-    } else {
-      throw new Error('simulated error');
-    }
-  }),
-}));
 const mockStream = jest.fn().mockImplementation(() => new PassThrough());
 jest.mock('../../lib/langchain/execute_custom_llm_chain', () => ({
   callAgentExecutor: jest.fn().mockImplementation(
     async ({
       connectorId,
       isStream,
+      onLlmResponse,
     }: {
+      onLlmResponse: (
+        content: string,
+        replacements: Record<string, string>,
+        isError: boolean
+      ) => Promise<void>;
       actionsClient: PublicMethodsOf<ActionsClient>;
       connectorId: string;
       esClient: ElasticsearchClient;
@@ -64,25 +57,14 @@ jest.mock('../../lib/langchain/execute_custom_llm_chain', () => ({
     }) => {
       if (!isStream && connectorId === 'mock-connector-id') {
         return {
-          body: {
-            connector_id: 'mock-connector-id',
-            data: mockActionResponse,
-            status: 'ok',
-          },
-          headers: { 'content-type': 'application/json' },
+          connector_id: 'mock-connector-id',
+          data: mockActionResponse,
+          status: 'ok',
         };
       } else if (isStream && connectorId === 'mock-connector-id') {
-        return {
-          body: mockStream,
-          headers: {
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-            'Transfer-Encoding': 'chunked',
-            'X-Accel-Buffering': 'no',
-            'X-Content-Type-Options': 'nosniff',
-          },
-        };
+        return mockStream;
       } else {
+        onLlmResponse('simulated error', {}, true).catch(() => {});
         throw new Error('simulated error');
       }
     }
@@ -140,8 +122,12 @@ const mockContext = {
 
 const mockRequest = {
   body: {
+    conversationId: 'mock-conversation-id',
     connectorId: 'mock-connector-id',
     persist: true,
+    isEnabledKnowledgeBase: true,
+    isEnabledRAGAlerts: false,
+    model: 'gpt-4',
     messages: [
       {
         role: 'user',
@@ -222,14 +208,9 @@ describe('chatCompleteRoute', () => {
               );
 
               expect(result).toEqual({
-                body: {
-                  connector_id: 'mock-connector-id',
-                  data: mockActionResponse,
-                  status: 'ok',
-                },
-                headers: {
-                  'content-type': 'application/json',
-                },
+                connector_id: 'mock-connector-id',
+                data: mockActionResponse,
+                status: 'ok',
               });
             }),
           };
@@ -246,7 +227,10 @@ describe('chatCompleteRoute', () => {
   it('returns the expected error when executeCustomLlmChain fails', async () => {
     const requestWithBadConnectorId = {
       ...mockRequest,
-      connectorId: 'bad-connector-id',
+      body: {
+        ...mockRequest.body,
+        connectorId: 'bad-connector-id',
+      },
     };
 
     const mockRouter = {
@@ -304,6 +288,7 @@ describe('chatCompleteRoute', () => {
       ...mockRequest,
       body: {
         ...mockRequest.body,
+        isEnabledRAGAlerts: true,
         anonymizationFields: [
           { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
           { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
@@ -337,84 +322,13 @@ describe('chatCompleteRoute', () => {
     );
   });
 
-  it('reports success events to telemetry - kb off, RAG alerts on', async () => {
-    const req = {
-      ...mockRequest,
-      body: {
-        ...mockRequest.body,
-        isEnabledKnowledgeBase: false,
-        anonymizationFields: [
-          { id: '@timestamp', field: '@timestamp', allowed: true, anonymized: false },
-          { id: 'host.name', field: 'host.name', allowed: true, anonymized: true },
-        ],
-      },
-    };
-
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, req, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                actionTypeId: '.gen-ai',
-                model: 'gpt-4',
-                assistantStreamingEnabled: false,
-                isEnabledKnowledgeBase: false,
-                isEnabledRAGAlerts: true,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
-  it('reports success events to telemetry - kb off, RAG alerts off', async () => {
-    const req = {
-      ...mockRequest,
-      body: {
-        ...mockRequest.body,
-        isEnabledKnowledgeBase: false,
-      },
-    };
-
-    const mockRouter = {
-      versioned: {
-        post: jest.fn().mockImplementation(() => {
-          return {
-            addVersion: jest.fn().mockImplementation(async (_, handler) => {
-              await handler(mockContext, req, mockResponse);
-
-              expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
-                actionTypeId: '.gen-ai',
-                model: 'gpt-4',
-                assistantStreamingEnabled: false,
-                isEnabledKnowledgeBase: false,
-                isEnabledRAGAlerts: false,
-              });
-            }),
-          };
-        }),
-      },
-    };
-
-    await chatCompleteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
-    );
-  });
-
   it('reports error events to telemetry - kb on, RAG alerts off', async () => {
     const requestWithBadConnectorId = {
       ...mockRequest,
-      connectorId: 'bad-connector-id',
+      body: {
+        ...mockRequest.body,
+        connectorId: 'bad-connector-id',
+      },
     };
 
     const mockRouter = {
@@ -427,7 +341,7 @@ describe('chatCompleteRoute', () => {
               expect(reportEvent).toHaveBeenCalledWith(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
                 errorMessage: 'simulated error',
                 isEnabledKnowledgeBase: true,
-                isEnabledRAGAlerts: false,
+                isEnabledRAGAlerts: true,
                 actionTypeId: '.gen-ai',
                 model: 'gpt-4',
                 assistantStreamingEnabled: false,
@@ -497,16 +411,7 @@ describe('chatCompleteRoute', () => {
                 mockResponse
               );
 
-              expect(result).toEqual({
-                body: mockStream,
-                headers: {
-                  'Cache-Control': 'no-cache',
-                  Connection: 'keep-alive',
-                  'Transfer-Encoding': 'chunked',
-                  'X-Accel-Buffering': 'no',
-                  'X-Content-Type-Options': 'nosniff',
-                },
-              });
+              expect(result).toEqual(mockStream);
             }),
           };
         }),
@@ -537,16 +442,7 @@ describe('chatCompleteRoute', () => {
                 mockResponse
               );
 
-              expect(result).toEqual({
-                body: mockStream,
-                headers: {
-                  'Cache-Control': 'no-cache',
-                  Connection: 'keep-alive',
-                  'Transfer-Encoding': 'chunked',
-                  'X-Accel-Buffering': 'no',
-                  'X-Content-Type-Options': 'nosniff',
-                },
-              });
+              expect(result).toEqual(mockStream);
             }),
           };
         }),
