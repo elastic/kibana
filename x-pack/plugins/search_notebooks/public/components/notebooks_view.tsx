@@ -11,15 +11,21 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { SearchNotebooks } from './search_notebooks';
+import { NotebookListValue } from '../types';
 
 export interface SearchNotebooksViewProps {
   core: CoreStart;
   queryClient: QueryClient;
+  getNotebookList: () => NotebookListValue;
 }
 
-export const SearchNotebooksView = ({ core, queryClient }: SearchNotebooksViewProps) => (
+export const SearchNotebooksView = ({
+  core,
+  queryClient,
+  getNotebookList,
+}: SearchNotebooksViewProps) => (
   <KibanaThemeProvider theme={core.theme}>
-    <KibanaContextProvider services={{ ...core }}>
+    <KibanaContextProvider services={{ ...core, notebooks: { getNotebookList } }}>
       <QueryClientProvider client={queryClient}>
         <SearchNotebooks />
       </QueryClientProvider>
