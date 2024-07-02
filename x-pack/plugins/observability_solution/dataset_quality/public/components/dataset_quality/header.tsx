@@ -45,7 +45,7 @@ export default function Header() {
               >
                 <FormattedMessage
                   id="xpack.datasetQuality.appDescription.dsNamingSchemeLinkText"
-                  defaultMessage="Data Stream naming scheme"
+                  defaultMessage="Data stream naming scheme"
                 />
               </EuiLink>
             ),
