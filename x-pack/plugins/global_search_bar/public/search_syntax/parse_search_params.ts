@@ -31,12 +31,16 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
     };
   }
 
-  const searchTerm = getSearchTerm(query);
+  let searchTerm = getSearchTerm(query);
   const filterValues = applyAliases(getFieldValueMap(query), aliasMap);
 
   const unknownFilters = [...filterValues.entries()]
     .filter(([key]) => !knownFilters.includes(key))
     .reduce((unknowns, [key, value]) => {
+      // Unknown filters must be used as part of the search term.
+      // Example: "remote:logs" is not a filter, it is a valid search term.
+      searchTerm = `${searchTerm} ${key}:${value}`;
+
       return {
         ...unknowns,
         [key]: value,
