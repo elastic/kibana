@@ -2718,7 +2718,7 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
               .debug(
                 () =>
                   `Rejecting package policy update due to dataset change, old val '${
-                    oldStream?.vars[DATASET_VAR_NAME]?.value
+                    oldStream.vars![DATASET_VAR_NAME].value
                   }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
