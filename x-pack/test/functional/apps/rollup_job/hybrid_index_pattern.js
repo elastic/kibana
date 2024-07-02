@@ -8,6 +8,7 @@
 import datemath from '@elastic/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
+import { MOCK_ROLLUP_INDEX_NAME, createMockRollupIndex } from './test_helpers';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
@@ -17,9 +18,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings']);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  // Failing: See https://github.com/elastic/kibana/issues/184278
-  // Failing: See https://github.com/elastic/kibana/issues/184277
-  describe.skip('hybrid index pattern', function () {
+  describe('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `hybrid-index-pattern-test-rollup-job-${Date.now()}`;
@@ -46,6 +45,11 @@ export default function ({ getService, getPageObjects }) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'rollup',
       });
+
+      // The step below is done for the 7.17 ES 8.15 forward compatibility tests
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex(es);
     });
 
     it('create hybrid index pattern', async () => {
@@ -121,6 +125,7 @@ export default function ({ getService, getPageObjects }) {
         rollupTargetIndexName,
         `${regularIndexPrefix}*`,
         `${rollupSourceIndexPrefix}*`,
+        MOCK_ROLLUP_INDEX_NAME,
       ]);
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup_hybrid'
