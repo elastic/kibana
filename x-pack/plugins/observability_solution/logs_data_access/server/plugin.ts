@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { registerServices } from './services/register_services';
 import { LogsDataAccessPluginStartDeps, LogsDataAccessPluginSetupDeps } from './types';
 
@@ -27,11 +21,8 @@ export class LogsDataAccessPlugin
       LogsDataAccessPluginStartDeps
     >
 {
-  private readonly logger: Logger;
+  constructor() {}
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
   public setup(core: CoreSetup, plugins: LogsDataAccessPluginSetupDeps) {}
 
   public start(core: CoreStart, plugins: LogsDataAccessPluginStartDeps) {
