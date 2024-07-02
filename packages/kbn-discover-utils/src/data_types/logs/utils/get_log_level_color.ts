@@ -15,11 +15,11 @@ export const getLogLevelColor = (
 ): string | undefined => {
   switch (logLevelCoalescedValue) {
     case LogLevelCoalescedValue.debug:
-      return '#6092C0';
+      return '#BECFE3';
     case LogLevelCoalescedValue.info:
       return '#90B0D1';
     case LogLevelCoalescedValue.notice:
-      return '#BECFE3';
+      return '#6092C0';
     case LogLevelCoalescedValue.warning:
       return '#D6BF57';
     case LogLevelCoalescedValue.error:
