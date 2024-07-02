@@ -9,9 +9,13 @@ import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchNotebooksPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SearchNotebooksPluginStart {}
+
+export interface SearchNotebooksPluginStart {
+  setNotebookList: (value: NotebookListValue) => void;
+}
 
 export interface SearchNotebooksPluginStartDependencies {
   console: ConsolePluginStart;
 }
+
+export type NotebookListValue = string | null;

@@ -147,7 +147,7 @@ export interface ESQLParamLiteral<ParamType extends string = string> extends ESQ
   type: 'literal';
   literalType: 'param';
   paramType: ParamType;
-  value?: string | number;
+  value: string | number;
 }
 
 /**

@@ -16,7 +16,11 @@ import type {
   NormalizedRuleError,
   RuleDetailsInError,
 } from '../../../../../../../common/api/detection_engine';
-import type { BulkEditActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
+import type {
+  BulkActionType,
+  BulkEditActionResponse,
+} from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { RuleAlertType } from '../../../../rule_schema';
@@ -33,6 +37,7 @@ export type BulkActionError =
 export const buildBulkResponse = (
   response: KibanaResponseFactory,
   {
+    bulkAction,
     isDryRun = false,
     errors = [],
     updated = [],
@@ -40,6 +45,7 @@ export const buildBulkResponse = (
     deleted = [],
     skipped = [],
   }: {
+    bulkAction?: BulkActionType;
     isDryRun?: boolean;
     errors?: BulkActionError[];
     updated?: RuleAlertType[];
@@ -76,10 +82,17 @@ export const buildBulkResponse = (
       };
 
   if (numFailed > 0) {
+    let message = summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed';
+    if (bulkAction === BulkActionTypeEnum.run) {
+      message =
+        summary.succeeded > 0
+          ? 'Bulk manual rule run partially failed'
+          : 'Bulk manual rule run failed';
+    }
     return response.custom<BulkEditActionResponse>({
       headers: { 'content-type': 'application/json' },
       body: {
-        message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+        message,
         status_code: 500,
         attributes: {
           errors: normalizeErrorResponse(errors),

@@ -5,13 +5,35 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+
+import {
+  type ActionExecutionContext,
+  type Action,
+  addPanelMenuTrigger,
+} from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
-import { addPanelMenuTrigger } from '../../triggers';
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
+import type { IconType, CommonProps } from '@elastic/eui';
+import React, { type MouseEventHandler } from 'react';
+
+export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-subj'> {
+  id: string;
+  name: string;
+  icon: IconType;
+  onClick: MouseEventHandler;
+  description?: string;
+  isDisabled?: boolean;
+  isDeprecated?: boolean;
+  order: number;
+}
+
+export type GroupedAddPanelActions = Pick<
+  PanelSelectionMenuItem,
+  'id' | 'isDisabled' | 'data-test-subj' | 'order'
+> & {
+  title: string;
+  items: PanelSelectionMenuItem[];
+};
 
 const onAddPanelActionClick =
   (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
@@ -30,16 +52,11 @@ const onAddPanelActionClick =
     } else action.execute(context);
   };
 
-export type GroupedAddPanelActions = EuiContextMenuPanelDescriptor & {
-  icon?: string;
-};
-
-export const getAddPanelActionMenuItems = (
+export const getAddPanelActionMenuItemsGroup = (
   api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
-): [EuiContextMenuPanelItemDescriptor[], Record<string, GroupedAddPanelActions>] => {
-  const ungrouped: EuiContextMenuPanelItemDescriptor[] = [];
+) => {
   const grouped: Record<string, GroupedAddPanelActions> = {};
 
   const context = {
@@ -47,29 +64,31 @@ export const getAddPanelActionMenuItems = (
     trigger: addPanelMenuTrigger,
   };
 
-  const getMenuItem = (item: Action<object>) => {
+  const getMenuItem = (item: Action<object>): PanelSelectionMenuItem => {
     const actionName = item.getDisplayName(context);
 
     return {
+      id: item.id,
       name: actionName,
       icon:
         (typeof item.getIconType === 'function' ? item.getIconType(context) : undefined) ?? 'empty',
       onClick: onAddPanelActionClick(item, context, closePopover),
       'data-test-subj': `create-action-${actionName}`,
-      toolTipContent: item?.getDisplayNameTooltip?.(context),
+      description: item?.getDisplayNameTooltip?.(context),
+      order: item.order ?? 0,
     };
   };
 
   actions?.forEach((item) => {
     if (Array.isArray(item.grouping)) {
       item.grouping.forEach((group) => {
-        if (!grouped[group.id]) {
-          grouped[group.id] = {
-            id: group.id,
-            icon:
-              (typeof group.getIconType === 'function' ? group.getIconType(context) : undefined) ??
-              'empty',
-            title: group.getDisplayName ? group.getDisplayName(context) : undefined,
+        const groupId = group.id;
+        if (!grouped[groupId]) {
+          grouped[groupId] = {
+            id: groupId,
+            title: group.getDisplayName ? group.getDisplayName(context) : '',
+            'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
+            order: group.order ?? 0,
             items: [],
           };
         }
@@ -77,9 +96,22 @@ export const getAddPanelActionMenuItems = (
         grouped[group.id]!.items!.push(getMenuItem(item));
       });
     } else {
-      ungrouped.push(getMenuItem(item));
+      // use other group as the default for definitions that don't have a group
+      const fallbackGroup = COMMON_EMBEDDABLE_GROUPING.other;
+
+      if (!grouped[fallbackGroup.id]) {
+        grouped[fallbackGroup.id] = {
+          id: fallbackGroup.id,
+          title: fallbackGroup.getDisplayName?.({ embeddable: api }) || '',
+          'data-test-subj': `dashboardEditorMenu-${fallbackGroup.id}Group`,
+          order: fallbackGroup.order || 0,
+          items: [],
+        };
+      }
+
+      grouped[fallbackGroup.id].items.push(getMenuItem(item));
     }
   });
 
-  return [ungrouped, grouped];
+  return grouped;
 };
