@@ -193,6 +193,11 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeDataInAnalyzerEnabled: true,
 
   /**
+   * Enables executing given text input in endpoint response console
+   */
+  responseConsoleExecuteEnabled: false,
+
+  /*
    * Enables experimental JAMF integration data to be available in Analyzer
    */
   jamfDataInAnalyzerEnabled: false,
