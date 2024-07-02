@@ -19,6 +19,8 @@ export interface RunAgentParams extends NodeParamsBase {
 
 export const AGENT_NODE = 'agent';
 
+export const AGENT_NODE_TAG = 'agent_run';
+
 const NO_HISTORY = '[No existing knowledge history]';
 /**
  * Node to run the agent
@@ -44,11 +46,11 @@ export const runAgent = async ({
     query: '',
   });
 
-  const agentOutcome = await agentRunnable.invoke(
+  const agentOutcome = await agentRunnable.withConfig({ tags: [AGENT_NODE_TAG] }).invoke(
     {
       ...state,
       chat_history: state.messages, // TODO: Message de-dupe with ...state spread
-      knowledge_history: knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY,
+      knowledge_history: JSON.stringify(knowledgeHistory?.length ? knowledgeHistory : NO_HISTORY),
     },
     config
   );
