@@ -45,7 +45,7 @@ export const useNotesInFlyout = (args: UseNotesInFlyoutArgs) => {
   const dispatch = useDispatch();
 
   const noteIds: string[] = useMemo(
-    () => (eventIdToNoteIds && eventId && eventIdToNoteIds[eventId]) || EMPTY_STRING_ARRAY,
+    () => (eventId && eventIdToNoteIds?.[eventId]) || EMPTY_STRING_ARRAY,
     [eventIdToNoteIds, eventId]
   );
 

@@ -400,6 +400,14 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       };
     }, [expandedDoc]);
 
+    const finalRenderCustomBodyCallback = useMemo(() => {
+      return enabledRowRenderers.length > 0 ? renderCustomBodyCallback : undefined;
+    }, [enabledRowRenderers.length, renderCustomBodyCallback]);
+
+    const finalTrailControlColumns = useMemo(() => {
+      return enabledRowRenderers.length > 0 ? trailingControlColumns : undefined;
+    }, [enabledRowRenderers.length, trailingControlColumns]);
+
     return (
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <StyledTimelineUnifiedDataTable>
@@ -449,12 +457,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             showMultiFields={true}
             cellActionsMetadata={cellActionsMetadata}
             externalAdditionalControls={additionalControls}
-            renderCustomGridBody={
-              enabledRowRenderers.length > 0 ? renderCustomBodyCallback : undefined
-            }
-            trailingControlColumns={
-              enabledRowRenderers.length > 0 ? trailingControlColumns : undefined
-            }
+            renderCustomGridBody={finalRenderCustomBodyCallback}
+            trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
           />

@@ -213,7 +213,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
   const noteIds = useMemo(
-    () => (eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes),
+    () => eventIdToNoteIds?.[eventId] ?? emptyNotes,
     [eventIdToNoteIds, eventId]
   );
 
