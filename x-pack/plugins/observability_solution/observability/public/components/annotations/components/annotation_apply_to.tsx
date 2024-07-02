@@ -8,7 +8,6 @@
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ServiceApplyTo } from './service_apply_to';
 import { SLOApplyTo } from './slo_apply_to';
 import { Annotation } from '../../../../common/annotations';
 
@@ -24,8 +23,6 @@ export function AnnotationApplyTo({ editAnnotation }: { editAnnotation?: Annotat
       </EuiTitle>
       <EuiSpacer size="s" />
       <SLOApplyTo editAnnotation={editAnnotation} />
-      <EuiSpacer size="s" />
-      <ServiceApplyTo editAnnotation={editAnnotation} />
     </>
   );
 }

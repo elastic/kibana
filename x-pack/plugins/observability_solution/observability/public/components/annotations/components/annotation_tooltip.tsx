@@ -45,13 +45,25 @@ export function AnnotationTooltip({
       }),
       description: annotation.message ?? '--',
     },
-    {
-      title: i18n.translate('xpack.observability.annotationTooltip.slos', {
-        defaultMessage: 'SLOs',
+  ];
+
+  if (annotation.slo?.id) {
+    listItems.push({
+      title: i18n.translate('xpack.observability.annotationTooltip.slo', {
+        defaultMessage: 'SLO',
       }),
       description: annotation.slo?.id ?? '--',
-    },
-  ];
+    });
+  }
+
+  if (annotation.service) {
+    listItems.push({
+      title: i18n.translate('xpack.observability.annotationTooltip.service', {
+        defaultMessage: 'Service',
+      }),
+      description: annotation.service.name ?? '--',
+    });
+  }
 
   return (
     <EuiPanel color="plain" hasShadow={false} hasBorder={false} paddingSize="m" borderRadius="none">

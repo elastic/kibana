@@ -6,7 +6,12 @@
  */
 
 import moment, { Moment } from 'moment';
-import { defaultAnnotationColor, defaultAnnotationLabel } from '@kbn/event-annotation-common';
+import {
+  defaultAnnotationColor,
+  defaultAnnotationLabel,
+  defaultRangeAnnotationLabel,
+  defaultAnnotationRangeColor,
+} from '@kbn/event-annotation-common';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { CreateAnnotationForm } from './components/create_annotation';
 
@@ -23,13 +28,13 @@ export function getDefaultAnnotation({
   const sloInstanceId = slo?.instanceId;
 
   return {
-    message: defaultAnnotationLabel,
+    message: timestampEnd ? defaultRangeAnnotationLabel : defaultAnnotationLabel,
     '@timestamp': timestamp ?? moment(),
     '@timestampEnd': timestampEnd,
     annotation: {
       style: {
         icon: 'triangle',
-        color: defaultAnnotationColor,
+        color: timestampEnd ? defaultAnnotationRangeColor : defaultAnnotationColor,
         line: {
           width: 2,
           style: 'solid',

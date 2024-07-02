@@ -52,13 +52,14 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
-  const { ObservabilityAnnotations, annotations, onAnnotationClick } = useAnnotations({
-    slo,
-    domain: {
-      min: 'now-30d',
-      max: 'now',
-    },
-  });
+  const { ObservabilityAnnotations, annotations, onAnnotationClick, wrapOnBrushEnd } =
+    useAnnotations({
+      slo,
+      domain: {
+        min: 'now-30d',
+        max: 'now',
+      },
+    });
 
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
@@ -95,9 +96,9 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
         pointerUpdateDebounce={0}
         pointerUpdateTrigger={'x'}
         locale={i18n.getLocale()}
-        onBrushEnd={(brushArea) => {
+        onBrushEnd={wrapOnBrushEnd((brushArea) => {
           onBrushed?.(getBrushTimeBounds(brushArea));
-        }}
+        })}
         onAnnotationClick={onAnnotationClick}
       />
       <Axis

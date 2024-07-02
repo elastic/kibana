@@ -56,7 +56,7 @@ export function EventsAreaChart({
       threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
   };
 
-  const { ObservabilityAnnotations, annotations } = useAnnotations({
+  const { ObservabilityAnnotations, annotations, wrapOnBrushEnd } = useAnnotations({
     domain,
     slo,
   });
@@ -85,9 +85,9 @@ export function EventsAreaChart({
         pointerUpdateDebounce={0}
         pointerUpdateTrigger={'x'}
         locale={i18n.getLocale()}
-        onBrushEnd={(brushArea) => {
+        onBrushEnd={wrapOnBrushEnd((brushArea) => {
           onBrushed?.(getBrushTimeBounds(brushArea));
-        }}
+        })}
       />
       {annotation}
 

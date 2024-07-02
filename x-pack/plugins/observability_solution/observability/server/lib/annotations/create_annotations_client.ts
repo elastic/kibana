@@ -8,7 +8,6 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { isEqual } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import {
@@ -57,7 +56,7 @@ export function createAnnotationsClient(params: {
     });
     const mappings = currentMappings?.[index].mappings;
 
-    if (isEqual(mappings, ANNOTATION_MAPPINGS)) {
+    if (mappings.dynamic) {
       return;
     }
 
