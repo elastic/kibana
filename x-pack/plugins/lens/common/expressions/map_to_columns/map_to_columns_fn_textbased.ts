@@ -28,18 +28,11 @@ export const mapToOriginalColumnsTextBased: MapToColumnsExpressionFunction['fn']
 
       return mappedRow;
     }),
-    columns: data.columns
-      .filter((column) => idMap[column.id])
-      .map((column) => {
-        const originalColumns = idMap[column.id];
-        return (
-          originalColumns &&
-          originalColumns.map((originalColumn) => ({
-            ...column,
-            id: originalColumn.id,
-          }))
-        );
-      })
-      .flat(),
+    columns: data.columns.flatMap((column) => {
+      if (!(column.id in idMap)) {
+        return [];
+      }
+      return idMap[column.id].map((originalColumn) => ({ ...column, id: originalColumn.id }));
+    }),
   };
 };
