@@ -39,7 +39,7 @@ export const getPinTooltip = ({
 }) => {
   if (timelineType === TimelineType.template) {
     return i18n.DISABLE_PIN(isAlert);
-  } else if (isPinned && eventHasNotes) {
+  } else if (eventHasNotes) {
     return i18n.PINNED_WITH_NOTES(isAlert);
   } else if (isPinned) {
     return i18n.PINNED(isAlert);

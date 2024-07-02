@@ -147,7 +147,7 @@ export const usePollApi = ({
       if (connectorId == null || connectorId === '') {
         throw new Error('Invalid connector id');
       }
-      // edge case - clearTimeout does not always work in time,
+      // edge case - clearTimeout does not always work in time
       // so we need to check if the connectorId has changed
       if (connectorId !== connectorIdRef.current) {
         return;

@@ -17,6 +17,7 @@ import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
 import type { APMTracer } from '../../tracers/apm_tracer';
 import { withAssistantSpan } from '../../tracers/with_assistant_span';
+import { AGENT_NODE_TAG } from './nodes/run_agent';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
@@ -98,70 +99,74 @@ export const streamGraph = async ({
       if (done) return;
 
       const event = value;
-      if (event.event === 'on_llm_stream') {
-        const chunk = event.data?.chunk;
 
-        if (event.name === 'ActionsClientChatOpenAI') {
-          const msg = chunk.message;
+      // only process events that are part of the agent run
+      if ((event.tags || []).includes(AGENT_NODE_TAG)) {
+        if (event.event === 'on_llm_stream') {
+          const chunk = event.data?.chunk;
 
-          if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
-            /* empty */
-          } else if (!didEnd) {
-            if (msg.response_metadata.finish_reason === 'stop') {
-              handleStreamEnd(finalMessage);
-            } else {
-              push({ payload: msg.content, type: 'content' });
-              finalMessage += msg.content;
-            }
-          }
-        }
+          if (event.name === 'ActionsClientChatOpenAI') {
+            const msg = chunk.message;
 
-        if (event.name === 'ActionsClientBedrockChatModel') {
-          const msg = chunk;
-
-          if (msg) {
             if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
               /* empty */
             } else if (!didEnd) {
               if (msg.response_metadata.finish_reason === 'stop') {
                 handleStreamEnd(finalMessage);
               } else {
-                const finalOutputEndIndex = msg.content.search(finalOutputStopRegex);
-                const currentOutput = message.replace(/\s/g, '');
-
-                if (currentOutput.includes(finalOutputStartToken)) {
-                  finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
-                }
-
-                if (finalOutputIndex > -1 && finalOutputEndIndex > -1) {
-                  didEnd = true;
-                  handleStreamEnd(finalMessage);
-                  return;
-                }
-
-                if (finalOutputIndex > -1) {
-                  finalMessage += msg.content;
-                  push({ payload: msg.content, type: 'content' });
-                }
-
-                message += msg.content;
+                push({ payload: msg.content, type: 'content' });
+                finalMessage += msg.content;
               }
             }
           }
-        }
-      } else if (event.event === 'on_llm_end') {
-        if (event.name === 'ActionsClientChatOpenAI') {
-          const generations = event.data.output?.generations[0];
-          if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
-            handleStreamEnd(finalMessage);
+
+          if (event.name === 'ActionsClientBedrockChatModel') {
+            const msg = chunk;
+
+            if (msg) {
+              if (msg.tool_call_chunks && msg.tool_call_chunks.length > 0) {
+                /* empty */
+              } else if (!didEnd) {
+                if (msg.response_metadata.finish_reason === 'stop') {
+                  handleStreamEnd(finalMessage);
+                } else {
+                  const finalOutputEndIndex = msg.content.search(finalOutputStopRegex);
+                  const currentOutput = message.replace(/\s/g, '');
+
+                  if (currentOutput.includes(finalOutputStartToken)) {
+                    finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+                  }
+
+                  if (finalOutputIndex > -1 && finalOutputEndIndex > -1) {
+                    didEnd = true;
+                    handleStreamEnd(finalMessage);
+                    return;
+                  }
+
+                  if (finalOutputIndex > -1) {
+                    finalMessage += msg.content;
+                    push({ payload: msg.content, type: 'content' });
+                  }
+
+                  message += msg.content;
+                }
+              }
+            }
           }
-        }
+        } else if (event.event === 'on_llm_end') {
+          if (event.name === 'ActionsClientChatOpenAI') {
+            const generations = event.data.output?.generations[0];
+            if (generations && generations[0]?.generationInfo.finish_reason === 'stop') {
+              handleStreamEnd(finalMessage);
+            }
+          }
 
-        if (event.name === 'ActionsClientBedrockChatModel') {
-          const generations = event.data.output?.generations[0];
+          if (event.name === 'ActionsClientBedrockChatModel') {
+            const generations = event.data.output?.generations[0];
 
-          if (generations && generations[0]?.generationInfo.stop_reason === 'end_turn') {
-            handleStreamEnd(finalMessage);
+            if (generations && generations[0]?.generationInfo.stop_reason === 'end_turn') {
+              handleStreamEnd(finalMessage);
+            }
           }
         }
       }

@@ -67,6 +67,8 @@ import {
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import { NotesFlyout } from '../../properties/notes_flyout';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -214,6 +216,21 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+  });
+
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
@@ -239,6 +256,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
       }
     },
     [
@@ -247,6 +269,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       securitySolutionNotesEnabled,
       selectedPatterns,
       timelineId,
+      showNotesFlyout,
+      setNotesEventId,
     ]
   );
 
@@ -256,6 +280,9 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timelineId,
     activeTab: TimelineTabs.query,
     refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
     onToggleShowNotes,
   });
 
@@ -311,6 +338,20 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [timelineDataService, combinedQueries, kqlQueryLanguage]);
   // </Synchronisation of the timeline data service>
 
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
+
   if (unifiedComponentsInTimelineEnabled) {
     return (
       <>
@@ -322,6 +363,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           refetch={refetch}
           skip={!canQueryTimeline}
         />
+        {NotesFlyoutMemo}
 
         <UnifiedTimelineBody
           header={
@@ -350,8 +392,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
           expandedDetail={expandedDetail}
           showExpandedDetails={showExpandedDetails}
           leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-          eventIdToNoteIds={eventIdToNoteIds}
-          pinnedEventIds={pinnedEventIds}
           onChangePage={loadPage}
           activeTab={activeTab}
           updatedAt={refreshedAt}
@@ -372,6 +412,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
+      {NotesFlyoutMemo}
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
           <QueryTabHeader
@@ -405,6 +446,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 })}
                 leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={timelineEmptyTrailingControlColumns}
+                onToggleShowNotes={onToggleShowNotes}
               />
             </StyledEuiFlyoutBody>
 

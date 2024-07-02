@@ -6,28 +6,26 @@
  */
 
 import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/bedrock/web';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core/server';
 import { Readable } from 'stream';
 import { filter, isArray, map } from 'lodash';
+import { PublicMethodsOf } from '@kbn/utility-types';
 
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-5-sonnet-20240620-v1:0';
 export const DEFAULT_BEDROCK_REGION = 'us-east-1';
 
 export class ActionsClientBedrockChatModel extends _BedrockChat {
   constructor({
-    actions,
-    request,
+    actionsClient,
     connectorId,
     logger,
     ...params
   }: {
-    actions: ActionsPluginStart;
+    actionsClient: PublicMethodsOf<ActionsClient>;
     connectorId: string;
     logger: Logger;
-    request: KibanaRequest;
   } & BaseChatModelParams) {
     super({
       ...params,
@@ -36,9 +34,6 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
       model: DEFAULT_BEDROCK_MODEL,
       region: DEFAULT_BEDROCK_REGION,
       fetchFn: async (url, options) => {
-        // create an actions client from the authenticated request context:
-        const actionsClient = await actions.getActionsClientWithRequest(request);
-
         const inputBody = JSON.parse(options?.body as string);
         const messages = map(inputBody.messages, sanitizeMessage);
 
