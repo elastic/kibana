@@ -85,7 +85,7 @@ export const getTabs = ({
       content: (
         <ViewSpaceAssignedRoles
           space={space}
-          roles={rest.roles}
+          spaceRoles={rest.roles}
           features={features}
           isReadOnly={!canUserModifyRoles}
         />
