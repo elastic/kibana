@@ -42,8 +42,6 @@ import {
 } from '../../../../../components';
 import { SideBarColumn } from '../../../components/side_bar_column';
 
-import { useMultipleAgentPolicies } from '../../../../../hooks';
-
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 import { Persona } from './persona';
