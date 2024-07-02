@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { DropDownLabel, DropDownOption, DropDownProps } from './agg_select';
+export type { DropDownProps } from './agg_select';
 export { AggSelect, createLabel } from './agg_select';

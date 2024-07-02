@@ -21,14 +21,15 @@ export const FieldStatsInfoButton = ({
   disabled,
   isEmpty = false,
   hideTrigger = false,
+  isGroupLabel = false,
 }: {
   field: FieldForStats;
   label: string;
-  searchValue?: string;
   disabled?: boolean;
   isEmpty?: boolean;
   onButtonClick?: (field: FieldForStats) => void;
   hideTrigger?: boolean;
+  isGroupLabel?: boolean;
 }) => {
   const themeVars = useCurrentThemeVars();
   const emptyFieldMessage = isEmpty
@@ -99,7 +100,9 @@ export const FieldStatsInfoButton = ({
         aria-label={label}
         title={label}
         className="euiComboBoxOption__content"
-        css={{ paddingBottom: themeVars.euiTheme.euiSizeXS }}
+        css={{
+          paddingBottom: themeVars.euiTheme.euiSizeXS,
+        }}
       >
         {label}
       </EuiText>

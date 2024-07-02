@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiBadge, EuiFormRow, EuiPanel, EuiRange, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
@@ -29,12 +28,12 @@ import {
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
+import type { OptionWithFieldStats } from '../../../../../components/field_stats_flyout/eui_combo_box_with_field_stats';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
   FieldStatsFlyoutProvider,
 } from '../../../../../components/field_stats_flyout';
-import type { FieldForStats } from '../../../../../components/field_stats_flyout/field_stats_info_button';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useDataSource } from '../../../../../contexts/ml';
 
@@ -91,18 +90,18 @@ type RuntimeMappingFieldType =
   | ES_FIELD_TYPES.KEYWORD
   | ES_FIELD_TYPES.LONG;
 
-interface RuntimeOption extends EuiComboBoxOptionOption {
-  field: FieldForStats;
-}
-function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: RuntimeMappingsType) {
-  const runtimeOptions: RuntimeOption[] = [];
+function getRuntimeDepVarOptions<T>(
+  jobType: AnalyticsJobType,
+  runtimeMappings: RuntimeMappingsType
+): T[] {
+  const runtimeOptions: T[] = [];
   Object.keys(runtimeMappings).forEach((id) => {
     const field = runtimeMappings[id];
     if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
       runtimeOptions.push({
         label: id,
         field: { id, type: field.type as RuntimeMappingFieldType },
-      });
+      } as T);
     }
   });
   return runtimeOptions;
@@ -121,9 +120,9 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
   const [loadingDepVarOptions, setLoadingDepVarOptions] = useState<boolean>(false);
   const [dependentVariableFetchFail, setDependentVariableFetchFail] = useState<boolean>(false);
-  const [dependentVariableOptions, setDependentVariableOptions] = useState<
-    EuiComboBoxOptionOption[]
-  >([]);
+  const [dependentVariableOptions, setDependentVariableOptions] = useState<OptionWithFieldStats[]>(
+    []
+  );
   const [includesTableItems, setIncludesTableItems] = useState<FieldSelectionItem[]>([]);
   const [fetchingExplainData, setFetchingExplainData] = useState<boolean>(false);
   const [maxDistinctValuesError, setMaxDistinctValuesError] = useState<string | undefined>();
@@ -204,14 +203,14 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   const loadDepVarOptions = async (
     formState: State['form'],
-    runtimeOptions: EuiComboBoxOptionOption[] = []
+    runtimeOptions: OptionWithFieldStats[] = []
   ) => {
     setLoadingDepVarOptions(true);
     setMaxDistinctValuesError(undefined);
 
     try {
       if (selectedDataView !== undefined) {
-        const depVarOptions = [];
+        const depVarOptions: OptionWithFieldStats[] = [];
         let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
         const { fields } = newJobCapsServiceAnalytics;
@@ -221,6 +220,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           if (shouldAddAsDepVarOption(field.id, field.type, jobType)) {
             depVarOptions.push({
               label: field.id,
+              key: field.id,
               field,
             });
 
@@ -373,10 +373,13 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   useEffect(() => {
     if (isJobTypeWithDepVar) {
       const dataViewRuntimeFields = getCombinedRuntimeMappings(selectedDataView);
-      let runtimeOptions;
+      let runtimeOptions: OptionWithFieldStats[] = [];
 
       if (dataViewRuntimeFields) {
-        runtimeOptions = getRuntimeDepVarOptions(jobType, dataViewRuntimeFields);
+        runtimeOptions = getRuntimeDepVarOptions<OptionWithFieldStats>(
+          jobType,
+          dataViewRuntimeFields
+        );
       }
 
       loadDepVarOptions(form, runtimeOptions);
@@ -400,7 +403,10 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           setDependentVariableOptions(filteredOptions);
         } else if (runtimeMappings) {
           // add to filteredOptions if it's the type supported
-          const runtimeOptions = getRuntimeDepVarOptions(jobType, runtimeMappings);
+          const runtimeOptions = getRuntimeDepVarOptions<OptionWithFieldStats>(
+            jobType,
+            runtimeMappings
+          );
           setDependentVariableOptions([...filteredOptions, ...runtimeOptions]);
         }
       }
