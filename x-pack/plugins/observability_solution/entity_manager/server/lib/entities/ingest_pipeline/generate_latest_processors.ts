@@ -47,6 +47,12 @@ export function generateLatestProcessors(definition: EntityDefinition, spaceId: 
     },
     {
       set: {
+        field: 'entity.type',
+        value: definition.type,
+      },
+    },
+    {
+      set: {
         field: 'entity.spaceId',
         value: spaceId,
       },

@@ -10,6 +10,12 @@ Array [
   },
   Object {
     "set": Object {
+      "field": "entity.type",
+      "value": "service",
+    },
+  },
+  Object {
+    "set": Object {
       "field": "entity.spaceId",
       "value": "default",
     },
