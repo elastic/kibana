@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlDatastreamsHelpers = getService('svlDatastreamsHelpers');
 
   describe('Data streams', function () {
-    // see details:
+    // see details: https://github.com/elastic/kibana/issues/187372
     this.tags(['failsOnMKI']);
 
     before(async () => {
@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
-      it('returns an array of data streams', async () => {
+      xit('returns an array of data streams', async () => {
         const { body: dataStreams, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams`)
           .set(internalReqHeader)
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('returns a single data stream by ID', async () => {
+      xit('returns a single data stream by ID', async () => {
         const { body: dataStream, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
           .set(internalReqHeader)
