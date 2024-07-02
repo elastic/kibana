@@ -35,13 +35,14 @@ export const AVCResultsBanner2024: React.FC<{ onDismiss: () => void }> = ({ onDi
       iconType="cheer"
       onDismiss={onDismiss}
       className={calloutStyles}
+      data-test-subj="avcResultsBanner"
     >
       <FormattedMessage
         id="xpack.securitySolution.common.avcResultsBanner.body"
         defaultMessage="Elastic security shines in Malware Protection Test by AV-Comparatives"
       />
       <EuiSpacer size="s" />
-      <EuiButton size="s" color="success" href={docLinks.links.securitySolution.avcResults}>
+      <EuiButton size="s" color="success" href={docLinks.links.securitySolution.avcResults} data-test-subj="avcReadTheBlog">
         <FormattedMessage
           id="xpack.securitySolution.common.avcResults.readTheBlog.link"
           defaultMessage="Read the blog"
