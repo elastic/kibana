@@ -18,7 +18,7 @@ value:
       frequency: 
         summary: false
         notify_when: onActionGroupChange
-  consumer: alerts
+  consumer: stackAlerts
   name: my Elasticsearch query rule
   params:    
     esQuery: '"""{"query":{"match_all" : {}}}"""'

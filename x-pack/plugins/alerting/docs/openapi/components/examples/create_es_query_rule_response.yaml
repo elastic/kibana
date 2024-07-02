@@ -5,7 +5,7 @@ value:
   name: my Elasticsearch query rule
   tags: []
   rule_type_id: .es-query
-  consumer: alerts
+  consumer: stackAlerts
   schedule:
     interval: 1d
   actions:

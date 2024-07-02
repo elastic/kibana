@@ -1,6 +1,6 @@
 summary: Create an Elasticsearch query rule that uses Kibana query language (KQL).
 value:
-  consumer: alerts
+  consumer: stackAlerts
   name: my Elasticsearch query KQL rule
   params:
     aggType: count
