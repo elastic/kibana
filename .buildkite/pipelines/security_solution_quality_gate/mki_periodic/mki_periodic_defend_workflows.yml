@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
-    label: "Serverless MKI QA Defend Workflows Cypress Tests on Serverless"
+    label: "Cypress MKI - Defend Workflows "
     key: test_defend_workflows
     agents:
       image: family/kibana-ubuntu-2004

@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:ai_assistant
-    label: "Serverless MKI QA AI Assistant - Security Solution Cypress Tests"
+    label: "Cypress MKI - GenAI"
     key: test_ai_assistant
     env:
       BK_TEST_SUITE_KEY: "serverless-cypress-gen-ai"
@@ -18,7 +18,7 @@ steps:
         - exit_status: "-1"
           limit: 1
 
-  - group: "Serverless MKI QA AI Assistant - API Integration"
+  - group: "API MKI - GenAI"
     key: api_test_ai_assistant
     steps:
       - label: Running genai:qa:serverless:release
