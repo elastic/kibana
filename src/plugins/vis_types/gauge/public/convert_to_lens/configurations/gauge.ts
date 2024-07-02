@@ -11,7 +11,7 @@ import { GaugeVisConfiguration } from '@kbn/visualizations-plugin/common';
 import { getDefaultGaugeArgsFromParams } from '../../to_ast';
 import { GaugeVisParams } from '../../types';
 
-export const getConfiguration = (
+export const getGaugeConfiguration = (
   layerId: string,
   params: GaugeVisParams,
   palette: PaletteOutput<CustomPaletteParams> | undefined,
@@ -21,7 +21,7 @@ export const getConfiguration = (
     maxAccessor,
   }: {
     metricAccessor: string;
-    minAccessor: string;
+    minAccessor?: string;
     maxAccessor: string;
   }
 ): GaugeVisConfiguration => {

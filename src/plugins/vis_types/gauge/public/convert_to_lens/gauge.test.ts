@@ -13,7 +13,7 @@ import { GaugeVisParams } from '../types';
 
 const mockGetColumnsFromVis = jest.fn();
 const mockGetPercentageColumnFormulaColumn = jest.fn();
-const mockGetConfiguration = jest.fn().mockReturnValue({});
+const mockGetGaugeConfiguration = jest.fn().mockReturnValue({});
 const mockGetPercentageModeConfig = jest.fn();
 const mockGetPalette = jest.fn();
 const mockCreateStaticValueColumn = jest.fn();
@@ -34,7 +34,7 @@ jest.mock('@kbn/visualizations-plugin/public', () => ({
 }));
 
 jest.mock('./configurations/gauge', () => ({
-  getConfiguration: jest.fn(() => mockGetConfiguration()),
+  getGaugeConfiguration: jest.fn(() => mockGetGaugeConfiguration()),
 }));
 
 const params: GaugeVisParams = {
@@ -144,11 +144,11 @@ describe('convertToLens', () => {
         ],
       },
     ]);
-    mockGetConfiguration.mockReturnValue(config);
+    mockGetGaugeConfiguration.mockReturnValue(config);
 
     const result = await convertToLens(vis, timefilter);
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
-    expect(mockGetConfiguration).toBeCalledTimes(1);
+    expect(mockGetGaugeConfiguration).toBeCalledTimes(1);
     expect(mockGetPalette).toBeCalledTimes(1);
     expect(mockCreateStaticValueColumn).toBeCalledTimes(2);
     expect(result?.type).toEqual('lnsGauge');

@@ -46,7 +46,7 @@ export const getDefaultGaugeArgsFromParams = ({
 
   return {
     shape: gaugeTypeToShape(gaugeType),
-    ticksPosition: scale.show ? 'auto' : 'hidden',
+    ticksPosition: scale.show ? 'auto' : 'bands',
     colorMode: 'palette',
     labelMajorMode,
     ...(labelMajorMode === 'custom' ? { labelMinor: style.subText } : {}),

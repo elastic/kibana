@@ -231,7 +231,7 @@ function PrimaryMetricEditor(props: SubProps) {
       state?.palette?.params?.rangeType === 'percent'
   );
 
-  const activePalette = state?.palette || {
+  const activePalette = state?.palette ?? {
     type: 'palette',
     name: (supportsPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams)
       .name,

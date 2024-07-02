@@ -10,7 +10,7 @@ import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import { GaugeVisParams } from '../../types';
-import { getConfiguration } from './goal';
+import { getMetricConfiguration } from './metric';
 
 const params: GaugeVisParams = {
   addTooltip: false,
@@ -65,7 +65,7 @@ describe('getConfiguration', () => {
     const maxAccessor = 'max-accessor-id';
     const collapseFn = 'sum';
     expect(
-      getConfiguration(layerId, params, palette, {
+      getMetricConfiguration(layerId, params, palette, {
         metrics,
         buckets,
         maxAccessor,

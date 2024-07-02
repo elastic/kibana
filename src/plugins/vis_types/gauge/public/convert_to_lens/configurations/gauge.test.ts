@@ -8,8 +8,9 @@
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { getConfiguration } from './gauge';
+import { getGaugeConfiguration } from './gauge';
 import { GaugeType, GaugeVisParams } from '../../types';
+import { merge } from 'lodash';
 
 const params: GaugeVisParams = {
   addTooltip: false,
@@ -48,7 +49,12 @@ const params: GaugeVisParams = {
   type: 'gauge',
 };
 
-describe('getConfiguration', () => {
+describe.each(['gauge', 'goal'])('getConfiguration - %s', (type) => {
+  const layerId = 'layer-id';
+  const metricAccessor = 'metric-id';
+  const minAccessor = 'min-accessor';
+  const maxAccessor = 'max-accessor';
+
   const getPalette = (gaugeType: GaugeType) =>
     ({
       name: 'custom',
@@ -56,13 +62,9 @@ describe('getConfiguration', () => {
       type: 'palette',
     } as PaletteOutput<CustomPaletteParams>);
 
-  test('shourd return correct configuration - Arc', () => {
-    const layerId = 'layer-id';
-    const metricAccessor = 'metric-id';
-    const minAccessor = 'min-accessor';
-    const maxAccessor = 'max-accessor';
+  test('should return correct configuration - Arc', () => {
     expect(
-      getConfiguration(layerId, params, getPalette('Arc'), {
+      getGaugeConfiguration(layerId, merge({}, params, { type }), getPalette('Arc'), {
         metricAccessor,
         minAccessor,
         maxAccessor,
@@ -82,17 +84,13 @@ describe('getConfiguration', () => {
       },
       percentageMode: false,
       shape: 'arc',
-      ticksPosition: 'hidden',
+      ticksPosition: 'bands',
     });
   });
 
-  test('shourd return correct configuration - Circle', () => {
-    const layerId = 'layer-id';
-    const metricAccessor = 'metric-id';
-    const minAccessor = 'min-accessor';
-    const maxAccessor = 'max-accessor';
+  test('should return correct configuration - Circle', () => {
     expect(
-      getConfiguration(layerId, params, getPalette('Circle'), {
+      getGaugeConfiguration(layerId, merge({}, params, { type }), getPalette('Circle'), {
         metricAccessor,
         minAccessor,
         maxAccessor,
@@ -112,7 +110,83 @@ describe('getConfiguration', () => {
       },
       percentageMode: false,
       shape: 'arc',
-      ticksPosition: 'hidden',
+      ticksPosition: 'bands',
+    });
+  });
+
+  test('should return correct ticksPosition with scale shown', () => {
+    expect(
+      getGaugeConfiguration(
+        layerId,
+        merge({}, params, {
+          type,
+          gauge: {
+            scale: {
+              show: true,
+            },
+          },
+        }),
+        getPalette('Circle'),
+        {
+          metricAccessor,
+          minAccessor,
+          maxAccessor,
+        }
+      )
+    ).toMatchObject({
+      ticksPosition: 'auto',
+    });
+  });
+
+  test('should return correct custom labels', () => {
+    expect(
+      getGaugeConfiguration(
+        layerId,
+        merge({}, params, {
+          type,
+          gauge: {
+            labels: {
+              show: true,
+            },
+            style: {
+              subText: 'label minor',
+            },
+          },
+        }),
+        getPalette('Circle'),
+        {
+          metricAccessor,
+          minAccessor,
+          maxAccessor,
+        }
+      )
+    ).toMatchObject({
+      labelMajorMode: 'custom',
+      labelMinor: 'label minor',
+    });
+  });
+
+  test('should return correct auto labels', () => {
+    expect(
+      getGaugeConfiguration(
+        layerId,
+        merge({}, params, {
+          type,
+          gauge: {
+            labels: {
+              show: true,
+            },
+          },
+        }),
+        getPalette('Circle'),
+        {
+          metricAccessor,
+          minAccessor,
+          maxAccessor,
+        }
+      )
+    ).toMatchObject({
+      labelMajorMode: 'auto',
     });
   });
 });

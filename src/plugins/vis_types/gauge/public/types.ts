@@ -56,7 +56,7 @@ export interface Gauge extends ColorSchemaParams {
 }
 
 export interface GaugeVisParams {
-  type: 'gauge';
+  type: 'gauge' | 'goal';
   addTooltip: boolean;
   addLegend: boolean;
   isDisplayWarning: boolean;
