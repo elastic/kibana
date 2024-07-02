@@ -65,9 +65,8 @@ export function registerCategorizationRoutes(
             const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
             const model = new llmClass({
-              actions: actionsPlugin,
+              actionsClient,
               connectorId: connector.id,
-              request: req,
               logger,
               llmType: isOpenAI ? 'openai' : 'bedrock',
               model: connector.config?.defaultModel,
