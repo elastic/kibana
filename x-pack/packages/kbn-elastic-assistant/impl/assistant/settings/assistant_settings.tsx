@@ -23,7 +23,7 @@ import {
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation, useLoadConnectors } from '../../..';
 import * as i18n from './translations';

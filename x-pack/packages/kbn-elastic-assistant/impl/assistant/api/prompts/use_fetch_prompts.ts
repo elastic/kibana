@@ -81,7 +81,7 @@ export const getPrompts = async ({
   toasts,
 }: {
   http: HttpSetup;
-  toasts?: IToasts;
+  toasts: IToasts;
   signal?: AbortSignal | undefined;
 }) => {
   try {
@@ -91,7 +91,7 @@ export const getPrompts = async ({
       signal,
     });
   } catch (error) {
-    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+    toasts.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
       title: i18n.translate('xpack.elasticAssistant.prompts.getPromptsError', {
         defaultMessage: 'Error fetching prompts',
       }),

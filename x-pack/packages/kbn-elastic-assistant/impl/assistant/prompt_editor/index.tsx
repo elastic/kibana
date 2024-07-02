@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../..';
 import type { PromptContext, SelectedPromptContext } from '../prompt_context/types';
 import { SystemPrompt } from './system_prompt';

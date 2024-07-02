@@ -6,7 +6,7 @@
  */
 import { EuiBasicTableColumn, EuiIcon, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../../assistant_context/types';
 import { AIConnector } from '../../../../connectorland/connector_selector';
 import { BadgesColumn } from '../../../common/components/assistant_settings_management/badges';

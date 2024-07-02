@@ -9,7 +9,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useQuickPromptEditor, DEFAULT_COLOR } from './use_quick_prompt_editor';
 import { mockAlertPromptContext } from '../../../mock/prompt_context';
 import { MOCK_QUICK_PROMPTS } from '../../../mock/quick_prompt';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../assistant_context';
 
 jest.mock('../../../assistant_context');

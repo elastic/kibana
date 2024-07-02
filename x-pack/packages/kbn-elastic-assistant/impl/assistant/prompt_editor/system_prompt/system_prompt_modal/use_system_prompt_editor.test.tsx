@@ -11,7 +11,7 @@ import {
   mockSuperheroSystemPrompt,
   mockSystemPrompts,
 } from '../../../../mock/system_prompt';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../../assistant_context';
 
 jest.mock('../../../../assistant_context');

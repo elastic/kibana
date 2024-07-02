@@ -14,7 +14,7 @@ import {
 } from './helpers';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const tilde = '`';
 const codeDelimiter = '```';

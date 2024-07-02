@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 export const getPromptById = ({
   prompts,

@@ -13,7 +13,7 @@ import styled from 'styled-components';
 
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { EMPTY_PROMPT } from './translations';
 
 const Strong = styled.strong`

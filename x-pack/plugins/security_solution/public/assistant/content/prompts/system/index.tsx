@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import {
+  PromptTypeEnum,
+  type PromptResponse,
+} from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { APP_UI_ID } from '../../../../../common';
 import {
   DEFAULT_SYSTEM_PROMPT_NAME,
   DEFAULT_SYSTEM_PROMPT_NON_I18N,
@@ -21,17 +25,17 @@ export const BASE_SECURITY_SYSTEM_PROMPTS: PromptResponse[] = [
     id: 'default-system-prompt',
     content: DEFAULT_SYSTEM_PROMPT_NON_I18N,
     name: DEFAULT_SYSTEM_PROMPT_NAME,
-    promptType: 'system',
+    promptType: PromptTypeEnum.system,
     isDefault: true,
     isNewConversationDefault: true,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
   {
     id: 'CB9FA555-B59F-4F71-AFF9-8A891AC5BC28',
     content: SUPERHERO_SYSTEM_PROMPT_NON_I18N,
     name: SUPERHERO_SYSTEM_PROMPT_NAME,
-    promptType: 'system',
-    consumer: 'securitySolutionUI',
+    promptType: PromptTypeEnum.system,
+    consumer: APP_UI_ID,
     isDefault: true,
   },
 ];

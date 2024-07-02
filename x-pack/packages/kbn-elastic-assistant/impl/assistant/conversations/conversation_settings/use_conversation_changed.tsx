@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../..';
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 import { ConversationsBulkActions } from '../../api';

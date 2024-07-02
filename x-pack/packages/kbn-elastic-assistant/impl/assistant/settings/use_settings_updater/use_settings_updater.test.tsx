@@ -11,7 +11,7 @@ import { alertConvo, welcomeConvo } from '../../../mock/conversation';
 import { useSettingsUpdater } from './use_settings_updater';
 import { defaultQuickPrompt, mockSystemPrompt } from '../../../mock/system_prompt';
 import { HttpSetup } from '@kbn/core/public';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const mockConversations = {
   [alertConvo.title]: alertConvo,

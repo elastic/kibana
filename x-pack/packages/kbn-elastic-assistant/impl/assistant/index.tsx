@@ -39,6 +39,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { find, isEmpty, uniqBy } from 'lodash';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -182,7 +183,18 @@ const AssistantComponent: React.FC<Props> = ({
     isFetched: isFetchedAnonymizationFields,
   } = useFetchAnonymizationFields();
 
-  const { data: allPrompts, refetch: refetchPrompts } = useFetchPrompts();
+  const {
+    data: { data: allPrompts },
+    refetch: refetchPrompts,
+    isLoading: isLoadingPrompts,
+  } = useFetchPrompts();
+
+  const allSystemPrompts = useMemo(() => {
+    if (!isLoadingPrompts) {
+      return allPrompts.filter((p) => p.promptType === PromptTypeEnum.system);
+    }
+    return [];
+  }, [allPrompts, isLoadingPrompts]);
 
   // Connector details
   const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({
@@ -401,10 +413,10 @@ const AssistantComponent: React.FC<Props> = ({
   const selectedSystemPrompt = useMemo(
     () =>
       getDefaultSystemPrompt({
-        allSystemPrompts: allPrompts.data,
+        allSystemPrompts,
         conversation: currentConversation,
       }),
-    [allPrompts, currentConversation]
+    [allSystemPrompts, currentConversation]
   );
 
   const [editingSystemPromptId, setEditingSystemPromptId] = useState<string | undefined>(
@@ -426,12 +438,12 @@ const AssistantComponent: React.FC<Props> = ({
       }
       setEditingSystemPromptId(
         getDefaultSystemPrompt({
-          allSystemPrompts: allPrompts.data,
+          allSystemPrompts,
           conversation: selectedConversation,
         })?.id
       );
     },
-    [allPrompts, refetchCurrentConversation, refetchResults]
+    [allSystemPrompts, refetchCurrentConversation, refetchResults]
   );
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
@@ -562,7 +574,7 @@ const AssistantComponent: React.FC<Props> = ({
     handleRegenerateResponse,
     isLoading: isLoadingChatSend,
   } = useChatSend({
-    allSystemPrompts: allPrompts.data,
+    allSystemPrompts,
     currentConversation,
     setPromptTextPreview,
     setUserPrompt,
@@ -641,7 +653,7 @@ const AssistantComponent: React.FC<Props> = ({
                 setIsSettingsModalVisible={setIsSettingsModalVisible}
                 setSelectedPromptContexts={setSelectedPromptContexts}
                 isFlyoutMode={isFlyoutMode}
-                allSystemPrompts={allPrompts.data}
+                allSystemPrompts={allSystemPrompts}
               />
             </ModalPromptEditorWrapper>
           )}
@@ -667,7 +679,7 @@ const AssistantComponent: React.FC<Props> = ({
       promptTextPreview,
       handleOnSystemPromptSelectionChange,
       selectedPromptContexts,
-      allPrompts.data,
+      allSystemPrompts,
     ]
   );
 
@@ -871,7 +883,7 @@ const AssistantComponent: React.FC<Props> = ({
                     isSettingsModalVisible={isSettingsModalVisible}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     isFlyoutMode
-                    allSystemPrompts={allPrompts.data}
+                    allSystemPrompts={allSystemPrompts}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -895,7 +907,7 @@ const AssistantComponent: React.FC<Props> = ({
       </EuiPanel>
     );
   }, [
-    allPrompts.data,
+    allSystemPrompts,
     comments,
     connectorPrompt,
     currentConversation,
@@ -1095,7 +1107,7 @@ const AssistantComponent: React.FC<Props> = ({
                         setIsSettingsModalVisible={setIsSettingsModalVisible}
                         trackPrompt={trackPrompt}
                         isFlyoutMode={isFlyoutMode}
-                        allPrompts={allPrompts.data}
+                        allPrompts={allPrompts}
                       />
                     </EuiPanel>
                   )}
@@ -1132,7 +1144,7 @@ const AssistantComponent: React.FC<Props> = ({
             conversationsLoaded={conversationsLoaded}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
-            allPrompts={allPrompts.data}
+            allPrompts={allPrompts}
             refetchPrompts={refetchPrompts}
           />
         )}
@@ -1212,7 +1224,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             trackPrompt={trackPrompt}
             isFlyoutMode={isFlyoutMode}
-            allPrompts={allPrompts.data}
+            allPrompts={allPrompts}
           />
         )}
       </EuiModalFooter>

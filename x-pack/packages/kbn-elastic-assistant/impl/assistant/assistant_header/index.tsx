@@ -18,7 +18,7 @@ import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanst
 import { css } from '@emotion/react';
 import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { isEmpty } from 'lodash';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';

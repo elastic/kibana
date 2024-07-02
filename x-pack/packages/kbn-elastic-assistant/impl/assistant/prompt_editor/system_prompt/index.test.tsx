@@ -17,7 +17,7 @@ import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { TEST_IDS } from '../../constants';
 import { useAssistantContext } from '../../../assistant_context';
 import { WELCOME_CONVERSATION } from '../../use_conversation/sample_conversations';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 const BASE_CONVERSATION: Conversation = {
   ...WELCOME_CONVERSATION,

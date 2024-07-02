@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 
 interface Props {

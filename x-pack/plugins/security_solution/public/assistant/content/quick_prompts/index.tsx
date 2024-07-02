@@ -9,6 +9,7 @@ import {
   PromptTypeEnum,
   type PromptResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { APP_UI_ID } from '../../../../common';
 import * as i18n from './translations';
 import {
   KNOWLEDGE_BASE_CATEGORY,
@@ -31,7 +32,7 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     isDefault: true,
     id: i18n.ALERT_SUMMARIZATION_TITLE,
     promptType: PromptTypeEnum.quick,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
   {
     name: i18n.ESQL_QUERY_GENERATION_TITLE,
@@ -41,7 +42,7 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     isDefault: true,
     id: i18n.ESQL_QUERY_GENERATION_TITLE,
     promptType: PromptTypeEnum.quick,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
   {
     name: i18n.RULE_CREATION_TITLE,
@@ -51,7 +52,7 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     isDefault: true,
     id: i18n.RULE_CREATION_TITLE,
     promptType: PromptTypeEnum.quick,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
   {
     name: i18n.WORKFLOW_ANALYSIS_TITLE,
@@ -60,7 +61,7 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     isDefault: true,
     id: i18n.WORKFLOW_ANALYSIS_TITLE,
     promptType: PromptTypeEnum.quick,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
   {
     name: i18n.THREAT_INVESTIGATION_GUIDES_TITLE,
@@ -70,7 +71,7 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     isDefault: true,
     id: i18n.THREAT_INVESTIGATION_GUIDES_TITLE,
     promptType: PromptTypeEnum.quick,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
   {
     name: i18n.SPL_QUERY_CONVERSION_TITLE,
@@ -79,7 +80,7 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     isDefault: true,
     id: i18n.SPL_QUERY_CONVERSION_TITLE,
     promptType: PromptTypeEnum.quick,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
   {
     name: i18n.AUTOMATION_TITLE,
@@ -88,6 +89,6 @@ export const BASE_SECURITY_QUICK_PROMPTS: PromptResponse[] = [
     isDefault: true,
     id: i18n.AUTOMATION_TITLE,
     promptType: PromptTypeEnum.quick,
-    consumer: 'securitySolutionUI',
+    consumer: APP_UI_ID,
   },
 ];

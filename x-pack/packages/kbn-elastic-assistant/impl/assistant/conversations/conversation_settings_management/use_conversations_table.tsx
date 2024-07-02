@@ -11,7 +11,7 @@ import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/publ
 import { EuiBadge, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';

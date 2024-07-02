@@ -7,7 +7,7 @@
 
 import { getPromptById } from './helpers';
 import { mockSystemPrompt, mockSuperheroSystemPrompt } from '../../mock/system_prompt';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 
 describe('helpers', () => {
   describe('getPromptById', () => {

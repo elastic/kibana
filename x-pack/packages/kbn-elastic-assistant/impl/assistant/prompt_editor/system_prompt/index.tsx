@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash/fp';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 import { SelectSystemPrompt } from './select_system_prompt';

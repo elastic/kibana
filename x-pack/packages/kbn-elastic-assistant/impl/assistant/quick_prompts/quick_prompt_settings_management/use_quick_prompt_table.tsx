@@ -7,7 +7,7 @@
 
 import { EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { BadgesColumn } from '../../common/components/assistant_settings_management/badges';
 import { RowActions } from '../../common/components/assistant_settings_management/row_actions';
 import { PromptContextTemplate } from '../../prompt_context/types';

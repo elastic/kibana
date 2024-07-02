@@ -18,7 +18,7 @@ import React, { useMemo } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../..';
 import * as i18n from './translations';
 
