@@ -85,7 +85,7 @@ export const Template: FunctionComponent<Props> = ({
               })}
               data-error-message-text={i18n('core.ui.welcomeErrorMessageText', {
                 defaultMessage:
-                  'Please reload this page. If the issue persists, check the server logs.',
+                  'Please reload this page. If the issue persists, check the browser console and server logs.',
               })}
               data-error-message-reload={i18n('core.ui.welcomeErrorReloadButton', {
                 defaultMessage: 'Reload',
