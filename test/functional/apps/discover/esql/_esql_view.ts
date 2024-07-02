@@ -575,7 +575,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const newValue = await monacoEditor.getCodeEditorValue();
         expect(newValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| where \`geo.dest\`!="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`!="BT"`
         );
       });
 
@@ -597,7 +597,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nand \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\`=="BT"`
         );
       });
     });
