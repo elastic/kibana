@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiTitle,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import { apmLight } from '@kbn/shared-svg';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,6 +24,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 export function AddAPMCallOut() {
   const { core } = useApmPluginContext();
+  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiPanel color="subdued" hasShadow={false}>
@@ -30,7 +32,7 @@ export function AddAPMCallOut() {
         <EuiFlexItem grow={0}>
           <EuiImage
             css={{
-              background: '#FFFFFF',
+              background: euiTheme.colors.emptyShade,
             }}
             width="160"
             height="100"
@@ -66,7 +68,10 @@ export function AddAPMCallOut() {
       <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <div>
-            <EuiButton data-test-subj="" href={core.http.basePath.prepend('/app/apm/tutorial')}>
+            <EuiButton
+              data-test-subj="apmAddApmCallOutButton"
+              href={core.http.basePath.prepend('/app/apm/tutorial')}
+            >
               {i18n.translate('xpack.apm.logsServiceOverview.callout.addApm', {
                 defaultMessage: 'Add APM',
               })}
@@ -75,10 +80,9 @@ export function AddAPMCallOut() {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="apmAddAPMCallOutLearnMoreButton"
+            data-test-subj="apmAddApmCallOutLearnMoreButton"
             iconType="popout"
             iconSide="right"
-            idata-test-subj="apmAddAPMCallOutLearnMore"
             href="https://www.elastic.co/observability/application-performance-monitoring"
           >
             {i18n.translate('xpack.apm.addAPMCallOut.linkToElasticcoButtonEmptyLabel', {
