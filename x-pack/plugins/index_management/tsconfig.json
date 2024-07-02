@@ -53,6 +53,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/rollup",
     "@kbn/ml-error-utils",
+    "@kbn/unsaved-changes-prompt",
   ],
   "exclude": ["target/**/*"]
 }
