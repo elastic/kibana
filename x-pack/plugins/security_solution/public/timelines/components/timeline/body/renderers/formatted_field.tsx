@@ -71,7 +71,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray?: boolean;
   isUnifiedDataTable?: boolean;
   fieldFormat?: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<BrowserField>;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;
