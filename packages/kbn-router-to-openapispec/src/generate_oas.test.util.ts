@@ -8,32 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
-
-/** Intended to cover a wide set of schema configurations */
-export const testSchema = schema.object({
-  string: schema.string({ maxLength: 10, minLength: 1 }),
-  maybeNumber: schema.maybe(schema.number({ max: 1000, min: 1 })),
-  booleanDefault: schema.boolean({
-    defaultValue: true,
-    meta: {
-      description: 'defaults to to true',
-    },
-  }),
-  ipType: schema.ip({ versions: ['ipv4'] }),
-  literalType: schema.literal('literallythis'),
-  neverType: schema.never(),
-  map: schema.mapOf(schema.string(), schema.string()),
-  record: schema.recordOf(schema.string(), schema.string()),
-  union: schema.oneOf([
-    schema.string({ maxLength: 1, meta: { description: 'Union string' } }),
-    schema.number({ min: 0, meta: { description: 'Union number' } }),
-  ]),
-  uri: schema.uri({
-    scheme: ['prototest'],
-    defaultValue: () => 'prototest://something',
-  }),
-  any: schema.any({ meta: { description: 'any type' } }),
-});
+import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';
 
 type RoutesMeta = ReturnType<Router['getRoutes']>[number];
 type VersionedRoutesMeta = ReturnType<CoreVersionedRouter['getRoutes']>[number];
@@ -55,7 +30,8 @@ export const getRouterDefaults = () => ({
   method: 'get',
   options: {
     tags: ['foo', 'oas-tag:bar'],
-    description: 'route',
+    summary: 'route summary',
+    description: 'route description',
   },
   validationSchemas: {
     request: {
@@ -66,7 +42,7 @@ export const getRouterDefaults = () => ({
       query: schema.object({
         page: schema.number({ max: 999, min: 1, defaultValue: 1, meta: { description: 'page' } }),
       }),
-      body: testSchema,
+      body: createLargeSchema(),
     },
     response: {
       200: {
@@ -82,8 +58,9 @@ export const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
-    description: 'versioned route',
+    summary: 'versioned route',
     access: 'public',
+    deprecated: true,
     options: {
       tags: ['ignore-me', 'oas-tag:versioned'],
     },

@@ -13,12 +13,17 @@ import { EcsAllowedValues } from './ecs_allowed_values';
 import { IndexInvalidValues } from './index_invalid_values';
 import { CodeSuccess } from '../styles';
 import * as i18n from './translations';
-import type { AllowedValue, EnrichedFieldMetadata, UnallowedValueCount } from '../types';
+import type {
+  AllowedValue,
+  CustomFieldMetadata,
+  EcsBasedFieldMetadata,
+  UnallowedValueCount,
+} from '../types';
 
 export const EMPTY_PLACEHOLDER = '--';
 
 export const getCustomTableColumns = (): Array<
-  EuiTableFieldDataColumnType<EnrichedFieldMetadata>
+  EuiTableFieldDataColumnType<CustomFieldMetadata>
 > => [
   {
     field: 'indexFieldName',
@@ -40,7 +45,7 @@ export const getCustomTableColumns = (): Array<
 ];
 
 export const getEcsCompliantTableColumns = (): Array<
-  EuiTableFieldDataColumnType<EnrichedFieldMetadata>
+  EuiTableFieldDataColumnType<EcsBasedFieldMetadata>
 > => [
   {
     field: 'indexFieldName',
@@ -52,12 +57,7 @@ export const getEcsCompliantTableColumns = (): Array<
   {
     field: 'type',
     name: i18n.ECS_MAPPING_TYPE,
-    render: (type: string | undefined) =>
-      type != null ? (
-        <CodeSuccess data-test-subj="type">{type}</CodeSuccess>
-      ) : (
-        <EuiCode data-test-subj="typePlaceholder">{EMPTY_PLACEHOLDER}</EuiCode>
-      ),
+    render: (type: string) => <CodeSuccess data-test-subj="type">{type}</CodeSuccess>,
     sortable: true,
     truncateText: false,
     width: '25%',
@@ -75,12 +75,7 @@ export const getEcsCompliantTableColumns = (): Array<
   {
     field: 'description',
     name: i18n.ECS_DESCRIPTION,
-    render: (description: string | undefined) =>
-      description != null ? (
-        <span data-test-subj="description">{description}</span>
-      ) : (
-        <EuiCode data-test-subj="emptyPlaceholder">{EMPTY_PLACEHOLDER}</EuiCode>
-      ),
+    render: (description: string) => <span data-test-subj="description">{description}</span>,
     sortable: false,
     truncateText: false,
     width: '25%',
@@ -88,7 +83,7 @@ export const getEcsCompliantTableColumns = (): Array<
 ];
 
 export const getIncompatibleValuesTableColumns = (): Array<
-  EuiTableFieldDataColumnType<EnrichedFieldMetadata>
+  EuiTableFieldDataColumnType<EcsBasedFieldMetadata>
 > => [
   {
     field: 'indexFieldName',

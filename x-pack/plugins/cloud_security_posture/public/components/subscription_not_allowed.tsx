@@ -8,12 +8,11 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiPageSection } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
-export const SubscriptionNotAllowed = ({
-  licenseManagementLocator,
-}: {
-  licenseManagementLocator?: string;
-}) => {
+export const SubscriptionNotAllowed = () => {
+  const handleNavigateToLicenseManagement = useLicenseManagementLocatorApi();
+
   return (
     <EuiPageSection color="danger" alignment="center">
       <EuiEmptyPrompt
@@ -27,14 +26,14 @@ export const SubscriptionNotAllowed = ({
           </h2>
         }
         body={
-          licenseManagementLocator ? (
+          handleNavigateToLicenseManagement ? (
             <p data-test-subj={'has_locator'}>
               <FormattedMessage
                 id="xpack.csp.subscriptionNotAllowed.promptDescription"
                 defaultMessage="To use these cloud security features, you must {link}."
                 values={{
                   link: (
-                    <EuiLink href={licenseManagementLocator}>
+                    <EuiLink onClick={handleNavigateToLicenseManagement}>
                       <FormattedMessage
                         id="xpack.csp.subscriptionNotAllowed.promptLinkText"
                         defaultMessage="start a trial or upgrade your subscription"

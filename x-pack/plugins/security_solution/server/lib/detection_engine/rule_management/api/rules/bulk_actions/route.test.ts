@@ -30,10 +30,10 @@ import {
   getBulkDisableRuleActionSchemaMock,
 } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { readRules } from '../../../logic/rule_management/read_rules';
+import { readRules } from '../../../logic/detection_rules_client/read_rules';
 
 jest.mock('../../../../../machine_learning/authz');
-jest.mock('../../../logic/rule_management/read_rules', () => ({ readRules: jest.fn() }));
+jest.mock('../../../logic/detection_rules_client/read_rules', () => ({ readRules: jest.fn() }));
 
 describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
@@ -518,7 +518,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
       );
     });
 
@@ -530,7 +530,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 2 more'
+        'action: Invalid literal value, expected "delete", action: Invalid literal value, expected "disable", action: Invalid literal value, expected "enable", action: Invalid literal value, expected "export", action: Invalid literal value, expected "duplicate", and 4 more'
       );
     });
 
@@ -564,7 +564,7 @@ describe('Perform bulk action route', () => {
       });
       const result = server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 7 more'
+        'ids: Expected array, received string, action: Invalid literal value, expected "delete", ids: Expected array, received string, ids: Expected array, received string, action: Invalid literal value, expected "enable", and 10 more'
       );
     });
 

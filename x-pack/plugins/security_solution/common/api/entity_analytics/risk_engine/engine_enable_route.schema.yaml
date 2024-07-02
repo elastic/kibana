@@ -16,6 +16,8 @@ servers:
 paths:
   /internal/risk_score/engine/enable:
     post:
+      x-labels: [ess, serverless]
+      x-internal: true
       summary: Enable the Risk Engine
       requestBody:
         content:

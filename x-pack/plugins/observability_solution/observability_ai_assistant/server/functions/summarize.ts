@@ -8,13 +8,15 @@
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
 
+export const SUMMARIZE_FUNCTION_NAME = 'summarize';
+
 export function registerSummarizationFunction({
   client,
   functions,
 }: FunctionRegistrationParameters) {
   functions.registerFunction(
     {
-      name: 'summarize',
+      name: SUMMARIZE_FUNCTION_NAME,
       description: `Use this function to store facts in the knowledge database if the user requests it.
         You can score the learnings with a confidence metric, whether it is a correction on a previous learning.
         An embedding will be created that you can recall later with a semantic search.

@@ -83,7 +83,6 @@ export const PageSimpleStringStream: FC = () => {
         label="Toggle compression setting for response stream."
         checked={compressResponse}
         onChange={(e) => setCompressResponse(!compressResponse)}
-        compressed
       />
       <EuiSpacer />
       <EuiText>

@@ -30,11 +30,6 @@ export const generateConfig = async ({
     junit: {
       reportName: junitReportName,
     },
-    suiteTags: {
-      ...baseConfig.get('suiteTags'),
-      include: [...baseConfig.get('suiteTags.include'), ...SUITE_TAGS[target].include],
-      exclude: [...baseConfig.get('suiteTags.exclude'), ...SUITE_TAGS[target].exclude],
-    },
     kbnTestServer: {
       ...baseConfig.get('kbnTestServer'),
       serverArgs: [
@@ -51,6 +46,13 @@ export const generateConfig = async ({
 
         ...kbnServerArgs,
       ],
+    },
+    mochaOpts: {
+      ...baseConfig.get('mochaOpts'),
+      grep:
+        target === 'serverless'
+          ? '/^(?!.*@(skipInServerless|brokenInServerless)).*@serverless/'
+          : '/^(?!.*@skipInEss).*@ess.*/',
     },
   };
 };

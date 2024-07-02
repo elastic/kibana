@@ -10,7 +10,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
-import { useLeftPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useOsqueryTab } from '../../../../common/components/event_details/osquery_tab';
 import { useResponseActionsView } from '../../../../common/components/event_details/response_actions_view';
@@ -24,7 +24,7 @@ const ExtendedFlyoutWrapper = styled.div`
  * Automated response actions results, displayed in the document details expandable flyout left section under the Insights tab, Response tab
  */
 export const ResponseDetails: React.FC = () => {
-  const { searchHit, dataAsNestedObject, isPreview } = useLeftPanelContext();
+  const { searchHit, dataAsNestedObject, isPreview } = useDocumentDetailsContext();
   const endpointResponseActionsEnabled = useIsExperimentalFeatureEnabled(
     'endpointResponseActionsEnabled'
   );

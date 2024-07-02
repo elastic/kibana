@@ -34,7 +34,7 @@ interface LibraryTransformGuards {
  * APIs that inherit this interface can be linked to and unlinked from the library in place without
  * re-initialization.
  */
-export interface HasInPlaceLibraryTransforms
+export interface HasInPlaceLibraryTransforms<RuntimeState extends object = object>
   extends Partial<LibraryTransformGuards>,
     DuplicateTitleCheck {
   /**
@@ -48,6 +48,11 @@ export interface HasInPlaceLibraryTransforms
    * @returns {Promise<string>} id of persisted library item
    */
   saveToLibrary: (title: string) => Promise<string>;
+
+  /**
+   * gets a snapshot of this embeddable's runtime state without any state that links it to a library item.
+   */
+  getByValueRuntimeSnapshot: () => RuntimeState;
 
   /**
    * Un-links this embeddable from the library. This method is optional, and only needed if the Embeddable
@@ -69,6 +74,7 @@ export const apiHasInPlaceLibraryTransforms = (
 };
 
 /**
+ * @deprecated use HasInPlaceLibraryTransforms instead
  * APIs that inherit this interface can be linked to and unlinked from the library. After the save or unlink
  * operation, the embeddable will be reinitialized.
  */

@@ -20,6 +20,7 @@ interface SetupDeps {
   spacesManager: SpacesManager;
   config: ConfigType;
   getRolesAPIClient: () => Promise<RolesAPIClient>;
+  solutionNavExperiment: Promise<boolean>;
 }
 
 export class ManagementService {
@@ -31,9 +32,16 @@ export class ManagementService {
     spacesManager,
     config,
     getRolesAPIClient,
+    solutionNavExperiment,
   }: SetupDeps) {
     this.registeredSpacesManagementApp = management.sections.section.kibana.registerApp(
-      spacesManagementApp.create({ getStartServices, spacesManager, config, getRolesAPIClient })
+      spacesManagementApp.create({
+        getStartServices,
+        spacesManager,
+        config,
+        getRolesAPIClient,
+        solutionNavExperiment,
+      })
     );
   }
 

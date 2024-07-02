@@ -22,10 +22,12 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/emit_with_concatenated_message';
 import { createFunctionResponseMessage } from '@kbn/observability-ai-assistant-plugin/common/utils/create_function_response_message';
-import { ESQLSearchReponse } from '@kbn/es-types';
 import type { FunctionRegistrationParameters } from '..';
 import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
-import { validateEsqlQuery } from './validate_esql_query';
+import { runAndValidateEsqlQuery } from './validate_esql_query';
+import { INLINE_ESQL_QUERY_REGEX } from './constants';
+
+export const QUERY_FUNCTION_NAME = 'query';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -70,8 +72,8 @@ const loadEsqlDocs = once(async () => {
 
 export function registerQueryFunction({ functions, resources }: FunctionRegistrationParameters) {
   functions.registerInstruction(({ availableFunctionNames }) =>
-    availableFunctionNames.includes('query')
-      ? `You MUST use the "query" function when the user wants to:
+    availableFunctionNames.includes(QUERY_FUNCTION_NAME)
+      ? `You MUST use the "${QUERY_FUNCTION_NAME}" function when the user wants to:
   - visualize data
   - run any arbitrary query
   - breakdown or filter ES|QL queries that are displayed on the current page
@@ -79,11 +81,11 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
   - asks general questions about ES|QL
 
   DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "query" function for this.
+  DO NOT UNDER ANY CIRCUMSTANCES try to correct an ES|QL query yourself - always use the "${QUERY_FUNCTION_NAME}" function for this.
 
   If the user asks for a query, and one of the dataset info functions was called and returned no results, you should still call the query function to generate an example query.
 
-  Even if the "context" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
+  Even if the "${QUERY_FUNCTION_NAME}" function was used before that, follow it up with the "${QUERY_FUNCTION_NAME}" function. If a query fails, do not attempt to correct it yourself. Again you should call the "${QUERY_FUNCTION_NAME}" function,
   even if it has been called before.
 
   When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
@@ -108,7 +110,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
     },
     async ({ arguments: { query } }) => {
       const client = (await resources.context.core).elasticsearch.client.asCurrentUser;
-      const { error, errorMessages } = await validateEsqlQuery({
+      const { error, errorMessages, rows, columns } = await runAndValidateEsqlQuery({
         query,
         client,
       });
@@ -122,22 +124,18 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
           },
         };
       }
-      const response = (await client.transport.request({
-        method: 'POST',
-        path: '_query',
-        body: {
-          query,
-        },
-      })) as ESQLSearchReponse;
 
       return {
-        content: response,
+        content: {
+          columns,
+          rows,
+        },
       };
     }
   );
   functions.registerFunction(
     {
-      name: 'query',
+      name: QUERY_FUNCTION_NAME,
       description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
@@ -164,7 +162,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
         await chat('classify_esql', {
           messages: withEsqlSystemMessage().concat(
             createFunctionResponseMessage({
-              name: 'query',
+              name: QUERY_FUNCTION_NAME,
               content: {},
             }).message,
             {
@@ -243,14 +241,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
               parameters: {
                 type: 'object',
                 properties: {
-                  guides: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      enum: ['API', 'KIBANA', 'CROSS_CLUSTER'],
-                    },
-                    description: 'A list of guides',
-                  },
                   commands: {
                     type: 'array',
                     items: {
@@ -295,7 +285,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
-        guides?: string[];
         commands?: string[];
         functions?: string[];
         intention: VisualizeESQLUserIntention;
@@ -304,9 +293,9 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       const keywords = [
         ...(args.commands ?? []),
         ...(args.functions ?? []),
-        ...(args.guides ?? []),
         'SYNTAX',
         'OVERVIEW',
+        'OPERATORS',
       ].map((keyword) => keyword.toUpperCase());
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
@@ -328,7 +317,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       }
 
       const queryFunctionResponseMessage = createFunctionResponseMessage({
-        name: 'query',
+        name: QUERY_FUNCTION_NAME,
         content: {},
         data: {
           // add the included docs for debugging
@@ -429,12 +418,26 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage(async (msg) => {
+          msg.message.content = msg.message.content.replaceAll(
+            INLINE_ESQL_QUERY_REGEX,
+            (_match, query) => {
+              const correction = correctCommonEsqlMistakes(query);
+              if (correction.isCorrection) {
+                resources.logger.debug(
+                  `Corrected query, from: \n${correction.input}\nto:\n${correction.output}`
+                );
+              }
+              return '```esql\n' + correction.output + '\n```';
+            }
+          );
+
           if (msg.message.function_call.name) {
             return msg;
           }
-          const esqlQuery = correctCommonEsqlMistakes(msg.message.content, resources.logger)
-            .match(/```esql([\s\S]*?)```/)?.[1]
-            ?.trim();
+
+          const esqlQuery = msg.message.content.match(
+            new RegExp(INLINE_ESQL_QUERY_REGEX, 'ms')
+          )?.[1];
 
           let functionCall: ConcatenatedMessage['message']['function_call'] | undefined;
 
@@ -462,7 +465,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             ...msg,
             message: {
               ...msg.message,
-              content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
               ...(functionCall
                 ? {
                     function_call: functionCall,

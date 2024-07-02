@@ -26,12 +26,13 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 import { api } from './api';
-import { validate } from './validators';
+import { validateCasesWebhookConfig, validateConnector } from './validators';
 import * as i18n from './translations';
 
 const supportedSubActions: string[] = ['pushToService'];
 export type ActionParamsType = CasesWebhookActionParamsType;
 export const ConnectorTypeId = '.cases-webhook';
+
 // connector type definition
 export function getConnectorType(): ConnectorType<
   CasesWebhookPublicConfigurationType,
@@ -46,16 +47,15 @@ export function getConnectorType(): ConnectorType<
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationSchema,
-        customValidator: validate.config,
+        customValidator: validateCasesWebhookConfig,
       },
       secrets: {
         schema: ExternalIncidentServiceSecretConfigurationSchema,
-        customValidator: validate.secrets,
       },
       params: {
         schema: ExecutorParamsSchema,
       },
-      connector: validate.connector,
+      connector: validateConnector,
     },
     executor,
     supportedFeatureIds: [CasesConnectorFeatureId],

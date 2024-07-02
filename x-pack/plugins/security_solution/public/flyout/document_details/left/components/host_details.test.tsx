@@ -8,22 +8,39 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { Anomalies } from '../../../../common/components/ml/types';
-import { LeftPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { TestProviders } from '../../../../common/mock';
 import { HostDetails } from './host_details';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useHostRelatedUsers } from '../../../../common/containers/related_entities/related_users';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import {
   HOST_DETAILS_TEST_ID,
   HOST_DETAILS_INFO_TEST_ID,
   HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
+  HOST_DETAILS_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
 } from './test_ids';
 import { EXPANDABLE_PANEL_CONTENT_TEST_ID } from '../../../shared/components/test_ids';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { HostPreviewPanelKey } from '../../../entity_details/host_right';
+import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
+
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -124,27 +141,46 @@ const mockRelatedUsersResponse = {
   loading: false,
 };
 
-const renderHostDetails = (contextValue: LeftPanelContext) =>
+const renderHostDetails = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <LeftPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <HostDetails {...defaultProps} />
-      </LeftPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
 describe('<HostDetails />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     mockUseMlUserPermissions.mockReturnValue({ isPlatinumOrTrialLicense: false, capabilities: {} });
     mockUseHostDetails.mockReturnValue(mockHostDetailsResponse);
     mockUseRiskScore.mockReturnValue(mockRiskScoreResponse);
     mockUseHostsRelatedUsers.mockReturnValue(mockRelatedUsersResponse);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   it('should render host details correctly', () => {
-    const { getByTestId } = renderHostDetails(mockContextValue);
+    const { getByTestId, queryByTestId } = renderHostDetails(mockContextValue);
     expect(getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(HOST_DETAILS_TEST_ID))).toBeInTheDocument();
+    expect(queryByTestId(HOST_DETAILS_LINK_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('should render host name as clicable link when feature flag is true', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    const { getByTestId } = renderHostDetails(mockContextValue);
+    expect(getByTestId(HOST_DETAILS_LINK_TEST_ID)).toBeInTheDocument();
+
+    getByTestId(HOST_DETAILS_LINK_TEST_ID).click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: HostPreviewPanelKey,
+      params: {
+        hostName: defaultProps.hostName,
+        scopeId: defaultProps.scopeId,
+        banner: HOST_PREVIEW_BANNER,
+      },
+    });
   });
 
   describe('Host overview', () => {
@@ -181,7 +217,7 @@ describe('<HostDetails />', () => {
 
   describe('Related users', () => {
     it('should render the related user table with correct dates and indices', () => {
-      const { getByTestId } = renderHostDetails(mockContextValue);
+      const { getByTestId, queryByTestId } = renderHostDetails(mockContextValue);
       expect(mockUseHostsRelatedUsers).toBeCalledWith({
         from: timestamp,
         hostName: 'test host',
@@ -189,6 +225,7 @@ describe('<HostDetails />', () => {
         skip: false,
       });
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID)).toBeInTheDocument();
+      expect(queryByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('should render user risk score column when license and capabilities are valid', () => {
@@ -232,6 +269,22 @@ describe('<HostDetails />', () => {
       expect(getByTestId(HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID).textContent).toContain(
         'No users identified'
       );
+    });
+
+    it('should render user name as clicable link when feature flag is true', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      const { getAllByTestId } = renderHostDetails(mockContextValue);
+      expect(getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID).length).toBe(1);
+
+      getAllByTestId(HOST_DETAILS_RELATED_USERS_LINK_TEST_ID)[0].click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: UserPreviewPanelKey,
+        params: {
+          userName: 'test user',
+          scopeId: defaultProps.scopeId,
+          banner: USER_PREVIEW_BANNER,
+        },
+      });
     });
   });
 });

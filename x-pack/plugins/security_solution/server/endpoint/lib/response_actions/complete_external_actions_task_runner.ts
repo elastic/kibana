@@ -6,6 +6,7 @@
  */
 
 import type { CancellableTask, RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
+import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { BulkRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ResponseActionsConnectorNotConfiguredError } from '../../services/actions/clients/errors';
@@ -17,6 +18,10 @@ import { QueueProcessor } from '../../utils/queue_processor';
 import type { LogsEndpointActionResponse } from '../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../common/endpoint/constants';
+import {
+  COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE,
+  COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION,
+} from './complete_external_actions_task';
 
 /**
  * A task manager runner responsible for checking the status of and completing pending actions
@@ -34,7 +39,7 @@ export class CompleteExternalActionsTaskRunner
     private readonly endpointContextServices: EndpointAppContextService,
     private readonly esClient: ElasticsearchClient,
     private readonly nextRunInterval: string = '60s',
-    private readonly taskId?: string,
+    private readonly taskInstanceId?: string,
     private readonly taskType?: string
   ) {
     this.log = this.endpointContextServices.createLogger(
@@ -47,6 +52,10 @@ export class CompleteExternalActionsTaskRunner
       batchSize: 50,
       logger: this.log,
     });
+  }
+
+  private get taskId(): string {
+    return `${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_TYPE}-${COMPLETE_EXTERNAL_RESPONSE_ACTIONS_TASK_VERSION}`;
   }
 
   private async queueBatchProcessor({
@@ -94,6 +103,13 @@ export class CompleteExternalActionsTaskRunner
   }
 
   public async run(): Promise<RunResult | void> {
+    if (this.taskInstanceId !== this.taskId) {
+      this.log.info(
+        `Outdated task version. Got [${this.taskInstanceId}] from task instance. Current version is [${this.taskId}]`
+      );
+      return getDeleteTaskRunResult();
+    }
+
     this.log.debug(`Started: Checking status of external response actions`);
     this.abortController = new AbortController();
 
@@ -118,7 +134,7 @@ export class CompleteExternalActionsTaskRunner
             this.endpointContextServices.getInternalResponseActionsClient({
               agentType,
               taskType: this.taskType,
-              taskId: this.taskId,
+              taskId: this.taskInstanceId,
             });
 
           return agentTypeActionsClient

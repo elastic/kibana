@@ -202,3 +202,48 @@ export const crossClusterApiKeySchema = restApiKeySchema.extends({
     { unknowns: 'allow' }
   ),
 });
+
+/**
+ * Response of Kibana Update API key endpoint.
+ */
+export type UpdateAPIKeyResult = estypes.SecurityUpdateApiKeyResponse;
+
+/**
+ * Request body of Kibana Update API key endpoint.
+ */
+export type UpdateAPIKeyParams =
+  | UpdateRestAPIKeyParams
+  | UpdateCrossClusterAPIKeyParams
+  | UpdateRestAPIKeyWithKibanaPrivilegesParams;
+
+export const updateRestApiKeySchema = restApiKeySchema.extends({
+  name: null,
+  id: schema.string(),
+});
+
+export const updateCrossClusterApiKeySchema = crossClusterApiKeySchema.extends({
+  name: null,
+  id: schema.string(),
+});
+
+export type UpdateRestAPIKeyParams = TypeOf<typeof updateRestApiKeySchema>;
+export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof updateCrossClusterApiKeySchema>;
+export type UpdateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
+  ReturnType<typeof getUpdateRestApiKeyWithKibanaPrivilegesSchema>
+>;
+
+export const getUpdateRestApiKeyWithKibanaPrivilegesSchema = (
+  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
+) =>
+  restApiKeySchema.extends({
+    role_descriptors: null,
+    name: null,
+    id: schema.string(),
+    kibana_role_descriptors: schema.recordOf(
+      schema.string(),
+      schema.object({
+        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
+        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
+      })
+    ),
+  });
