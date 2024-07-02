@@ -115,7 +115,6 @@ export function useCustomCardsForCategory(
         toFeaturedCard('kubernetes'),
         toFeaturedCard('docker'),
         isServerless ? toFeaturedCard('prometheus') : otelCard,
-        otelCard,
         {
           id: 'azure-virtual',
           type: 'virtual',
@@ -196,7 +195,6 @@ export function useCustomCardsForCategory(
           integration: '',
         },
         isServerless ? toFeaturedCard('nginx') : otelCard,
-        otelCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',

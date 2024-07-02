@@ -110,8 +110,8 @@ export const OtelLogsPanel: React.FC = () => {
             </p>
           </EuiText>
           <CopyableCodeBlock
-            content={`kubectl create secret generic elastic-secret \
---from-literal=es_endpoint='${setup?.elasticsearchUrl}' \                 
+            content={`kubectl create secret generic elastic-secret-otel \\
+--from-literal=es_endpoint='${setup?.elasticsearchUrl}' \\                 
 --from-literal=es_api_key='${apiKeyData?.apiKeyEncoded}'
 
 kubectl apply -f otel-collector-k8s.yml`}
@@ -477,12 +477,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: es_endpoint
-                  name: elastic-secret
+                  name: elastic-secret-otel
             - name: ES_API_KEY
               valueFrom:
                 secretKeyRef:
                   key: es_api_key
-                  name: elastic-secret
+                  name: elastic-secret-otel
           volumeMounts:
             - mountPath: /etc/elastic-agent/otel.yaml
               name: opentelemetry-collector-configmap
