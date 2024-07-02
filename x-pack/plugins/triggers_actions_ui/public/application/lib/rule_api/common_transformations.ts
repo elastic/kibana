@@ -25,6 +25,9 @@ const transformAction: RewriteRequestCase<RuleUiAction> = (action) => {
             summary: action.frequency.summary,
             notifyWhen: action.frequency.notify_when,
             throttle: action.frequency.throttle,
+            ...(action.frequency.tzid ? { tzid: action.frequency.tzid } : {}),
+            ...(action.frequency.dtstart ? { dtstart: action.frequency.dtstart } : {}),
+            ...(action.frequency.byweekday ? { byweekday: action.frequency.byweekday } : {}),
           },
         }
       : {}),

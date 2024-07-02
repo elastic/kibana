@@ -28,6 +28,9 @@ export const transformUpdateRuleBody: RewriteResponseCase<UpdateRuleBody> = ({
                   notify_when: action.frequency!.notifyWhen,
                   throttle: action.frequency!.throttle,
                   summary: action.frequency!.summary,
+                  ...(action.frequency.dtstart ? { dtstart: action.frequency.dtstart } : {}),
+                  ...(action.frequency.tzid ? { tzid: action.frequency.tzid } : {}),
+                  ...(action.frequency.byweekday ? { byweekday: action.frequency.byweekday } : {}),
                 }
               : undefined,
           }

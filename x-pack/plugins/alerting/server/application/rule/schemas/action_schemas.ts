@@ -35,10 +35,25 @@ export const actionAlertsFilterSchema = schema.object({
   timeframe: schema.maybe(actionAlertsFilterTimeFrameSchema),
 });
 
+export const byweekdaySchema = schema.arrayOf(
+  schema.oneOf([
+    schema.literal('MO'),
+    schema.literal('TU'),
+    schema.literal('WE'),
+    schema.literal('TH'),
+    schema.literal('FR'),
+    schema.literal('SA'),
+    schema.literal('SU'),
+  ])
+);
+
 export const actionFrequencySchema = schema.object({
   summary: schema.boolean(),
   notifyWhen: notifyWhenSchema,
   throttle: schema.nullable(schema.string()),
+  dtstart: schema.maybe(schema.string()),
+  tzid: schema.maybe(schema.string()),
+  byweekday: schema.maybe(byweekdaySchema),
 });
 
 /**

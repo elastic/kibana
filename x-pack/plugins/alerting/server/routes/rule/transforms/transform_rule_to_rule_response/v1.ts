@@ -66,6 +66,9 @@ export const transformRuleActions = (
                 summary: frequency.summary,
                 notify_when: frequency.notifyWhen,
                 throttle: frequency.throttle,
+                ...(frequency.tzid ? { tzid: frequency.tzid } : {}),
+                ...(frequency.dtstart ? { dtstart: frequency.dtstart } : {}),
+                ...(frequency.byweekday ? { byweekday: frequency.byweekday } : {}),
               },
             }
           : {}),

@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { WeekdayStr } from 'rrule';
+import { ActionNotifyWhenAdvancedOptions } from './action_notify_when_advanced_options';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { RuleNotifyWhenType, NotifyWhenSelectOptions } from '../../../types';
 import { DEFAULT_FREQUENCY } from '../../../common/constants';
@@ -142,6 +144,9 @@ interface ActionNotifyWhenProps {
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultNotifyWhenValue?: RuleNotifyWhenType;
+  onDtStartChange: (dtstart?: string) => void;
+  onTzidChange: (tzid?: string) => void;
+  onByWeekdayChange: (byweekday?: WeekdayStr[]) => void;
 }
 
 export const ActionNotifyWhen = ({
@@ -156,6 +161,9 @@ export const ActionNotifyWhen = ({
   showMinimumThrottleUnitWarning,
   notifyWhenSelectOptions = NOTIFY_WHEN_OPTIONS,
   defaultNotifyWhenValue = DEFAULT_FREQUENCY.notifyWhen,
+  onTzidChange,
+  onDtStartChange,
+  onByWeekdayChange,
 }: ActionNotifyWhenProps) => {
   const [showCustomThrottleOpts, setShowCustomThrottleOpts] = useState<boolean>(false);
   const [notifyWhenValue, setNotifyWhenValue] =
@@ -383,6 +391,15 @@ export const ActionNotifyWhen = ({
                   </EuiText>
                 </>
               )}
+              <ActionNotifyWhenAdvancedOptions
+                frequency={frequency}
+                throttle={throttle}
+                throttleUnit={throttleUnit}
+                onByWeekdayChange={onByWeekdayChange}
+                onDtStartChange={onDtStartChange}
+                onTzidChange={onTzidChange}
+                isOpen={!!(frequency?.tzid || frequency?.byweekday || frequency?.dtstart)}
+              />
             </>
           )}
         </EuiFlexItem>

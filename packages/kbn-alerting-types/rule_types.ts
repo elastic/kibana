@@ -12,6 +12,7 @@ import type {
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
 import type { Filter } from '@kbn/es-query';
+import { WeekdayStr } from 'rrule';
 import type { RuleNotifyWhenType, RRuleParams } from '.';
 
 export type RuleTypeParams = Record<string, unknown>;
@@ -29,6 +30,9 @@ export interface RuleActionFrequency extends SavedObjectAttributes {
   summary: boolean;
   notifyWhen: RuleNotifyWhenType;
   throttle: string | null;
+  dtstart?: string;
+  tzid?: string;
+  byweekday?: WeekdayStr[];
 }
 
 export interface AlertsFilterTimeframe extends SavedObjectAttributes {
