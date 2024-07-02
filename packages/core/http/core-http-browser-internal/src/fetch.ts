@@ -166,6 +166,9 @@ export class Fetch {
 
     try {
       response = await window.fetch(request);
+      // if (request.method === 'POST') {
+      //   console.log('POST request', request);
+      // }
     } catch (err) {
       throw new HttpFetchError(err.message, err.name ?? 'Error', request);
     }
