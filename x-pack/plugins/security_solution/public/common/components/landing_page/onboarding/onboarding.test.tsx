@@ -86,7 +86,7 @@ describe('OnboardingComponent', () => {
       );
     });
 
-    it('should stay stay dismissed', () => {
+    it('on closing the callout should store dismissal state in local storage', () => {
       render();
       renderResult.getByTestId('euiDismissCalloutButton').click();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
@@ -94,7 +94,13 @@ describe('OnboardingComponent', () => {
         'securitySolution.showAvcBanner',
         false
       );
-      // need to test local storage key presence or refresh and banner is not present
+    });
+    it('should stay dismissed if it has been closed once', ()=> {
+      (useKibana().services.storage.get as jest.Mock).mockReturnValue(
+        false
+      );
+      render();
+      expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
     });
   });
 });
