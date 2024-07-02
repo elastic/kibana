@@ -17,3 +17,7 @@ export const apiPublishesBlockingError = (
 ): unknownApi is PublishesBlockingError => {
   return Boolean(unknownApi && (unknownApi as PublishesBlockingError)?.blockingError !== undefined);
 };
+
+export function hasBlockingError(api: unknown) {
+  return apiPublishesBlockingError(api) && api.blockingError?.value !== undefined;
+}

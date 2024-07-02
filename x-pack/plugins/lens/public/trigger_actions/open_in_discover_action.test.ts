@@ -23,6 +23,7 @@ describe('open in discover action', () => {
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
     getSavedVis: jest.fn(() => undefined),
     canViewUnderlyingData: () => Promise.resolve(true),
+    getFullAttributes: jest.fn(() => undefined),
     getViewUnderlyingDataArgs: jest.fn(() => ({
       dataViewSpec: { id: 'index-pattern-id' },
       timeRange: { from: 'now-7d', to: 'now' },
