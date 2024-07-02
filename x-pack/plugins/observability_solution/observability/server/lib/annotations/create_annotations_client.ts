@@ -6,22 +6,21 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
+import { isEqual } from 'lodash';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import {
-  createAnnotationRt,
-  deleteAnnotationRt,
   Annotation,
-  getAnnotationByIdRt,
+  CreateAnnotationParams,
+  DeleteAnnotationParams,
+  GetByIdAnnotationParams,
+  FindAnnotationParams,
+  DEFAULT_ANNOTATION_INDEX,
 } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
-import { mappings } from './mappings';
 import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
-
-type CreateParams = t.TypeOf<typeof createAnnotationRt>;
-type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;
-type GetByIdParams = t.TypeOf<typeof getAnnotationByIdRt>;
 
 export function createAnnotationsClient(params: {
   index: string;
@@ -31,12 +30,15 @@ export function createAnnotationsClient(params: {
 }) {
   const { index, esClient, logger, license } = params;
 
+  const readIndex =
+    index === DEFAULT_ANNOTATION_INDEX ? index : `${index}*,${DEFAULT_ANNOTATION_INDEX}`;
+
   const initIndex = () =>
     createOrUpdateIndex({
       index,
-      mappings,
       client: esClient,
       logger,
+      mappings: ANNOTATION_MAPPINGS,
     });
 
   function ensureGoldLicense<T extends (...args: any[]) => any>(fn: T): T {
@@ -48,13 +50,26 @@ export function createAnnotationsClient(params: {
     }) as T;
   }
 
+  const updateMappings = async () => {
+    // get index mapping
+    const currentMappings = await esClient.indices.getMapping({
+      index,
+    });
+    const mappings = currentMappings?.[index].mappings;
+
+    if (isEqual(mappings, ANNOTATION_MAPPINGS)) {
+      return;
+    }
+
+    // update index mapping
+    await initIndex();
+  };
+
   return {
-    get index() {
-      return index;
-    },
+    index,
     create: ensureGoldLicense(
       async (
-        createParams: CreateParams
+        createParams: CreateAnnotationParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
         const indexExists = await unwrapEsResponse(
           esClient.indices.exists(
@@ -67,6 +82,8 @@ export function createAnnotationsClient(params: {
 
         if (!indexExists) {
           await initIndex();
+        } else {
+          await updateMappings();
         }
 
         const annotation = {
@@ -98,32 +115,130 @@ export function createAnnotationsClient(params: {
         ).body as { _id: string; _index: string; _source: Annotation };
       }
     ),
-    getById: ensureGoldLicense(async (getByIdParams: GetByIdParams) => {
+    update: ensureGoldLicense(
+      async (
+        updateParams: Annotation
+      ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
+        const { id, ...rest } = updateParams;
+
+        const annotation = {
+          ...rest,
+          event: {
+            created: new Date().toISOString(),
+          },
+        };
+
+        const body = await unwrapEsResponse(
+          esClient.index(
+            {
+              index,
+              id,
+              body: annotation,
+              refresh: 'wait_for',
+            },
+            { meta: true }
+          )
+        );
+
+        return (
+          await esClient.get<Annotation>(
+            {
+              index,
+              id: body._id,
+            },
+            { meta: true }
+          )
+        ).body as { _id: string; _index: string; _source: Annotation };
+      }
+    ),
+    getById: ensureGoldLicense(async (getByIdParams: GetByIdAnnotationParams) => {
       const { id } = getByIdParams;
 
-      return unwrapEsResponse(
-        esClient.get(
-          {
-            id,
-            index,
+      const response = await esClient.search({
+        index: readIndex,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  _id: id,
+                },
+              },
+            ],
           },
-          { meta: true }
-        )
-      );
+        },
+      });
+      return response.hits.hits?.[0];
     }),
-    delete: ensureGoldLicense(async (deleteParams: DeleteParams) => {
+    find: ensureGoldLicense(async (findParams: FindAnnotationParams) => {
+      const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
+
+      const shouldClauses: QueryDslQueryContainer[] = [];
+      if (sloId) {
+        shouldClauses.push({
+          term: {
+            'slo.id': sloId,
+          },
+        });
+      }
+      if (sloInstanceId && sloInstanceId !== '*') {
+        shouldClauses.push({
+          term: {
+            'slo.instanceId': sloInstanceId,
+          },
+        });
+      }
+      if (serviceName) {
+        shouldClauses.push({
+          term: {
+            'service.name': serviceName,
+          },
+        });
+      }
+
+      const result = await esClient.search({
+        index: readIndex,
+        size: 10000,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                    lte: end,
+                  },
+                },
+              },
+              {
+                bool: {
+                  should: shouldClauses,
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+          },
+        },
+      });
+      return result.hits.hits.map((hit) => ({ ...(hit._source as Annotation), id: hit._id }));
+    }),
+    delete: ensureGoldLicense(async (deleteParams: DeleteAnnotationParams) => {
       const { id } = deleteParams;
 
-      return unwrapEsResponse(
-        esClient.delete(
-          {
-            index,
-            id,
-            refresh: 'wait_for',
+      return await esClient.deleteByQuery({
+        index: readIndex,
+        ignore_unavailable: true,
+        body: {
+          query: {
+            term: {
+              _id: id,
+            },
           },
-          { meta: true }
-        )
-      );
+        },
+        refresh: true,
+      });
     }),
   };
 }

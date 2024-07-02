@@ -18,7 +18,7 @@ export async function createOrUpdateIndex({
   logger,
 }: {
   index: string;
-  mappings: Mappings;
+  mappings?: Mappings;
   client: ElasticsearchClient;
   logger: Logger;
 }) {

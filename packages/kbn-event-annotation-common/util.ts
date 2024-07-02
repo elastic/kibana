@@ -57,6 +57,13 @@ export const defaultAnnotationLabel = i18n.translate(
   }
 );
 
+export const defaultRangeAnnotationLabel = i18n.translate(
+  'eventAnnotationCommon.manualAnnotation.defaultRangeAnnotationLabel',
+  {
+    defaultMessage: 'Event range',
+  }
+);
+
 export const getDefaultManualAnnotation = (
   id: string,
   timestamp: string
