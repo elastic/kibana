@@ -22,6 +22,6 @@ export function importerFactory(format: string, options: ImportFactoryOptions) {
     case FILE_FORMATS.NDJSON:
       return new NdjsonImporter();
     default:
-      return;
+      throw new Error('Importer not found for format');
   }
 }

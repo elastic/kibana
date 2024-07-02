@@ -19,8 +19,9 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(
     id: string | undefined,
     index: string,
+    reuseIndex: boolean,
     settings: IndicesIndexSettings,
-    mappings: MappingTypeMapping,
+    mappings: MappingTypeMapping | undefined,
     ingestPipeline: IngestPipelineWrapper,
     data: InputData
   ): Promise<ImportResponse> {
@@ -35,11 +36,20 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
         // first chunk of data, create the index and id to return
         id = generateId();
 
-        await createIndex(index, settings, mappings);
+        if (reuseIndex) {
+          // await createIndex(index, settings, mappings);
+          if (mappings !== undefined) {
+            await updateMappings(index, mappings);
+          }
+        } else {
+          if (mappings !== undefined) {
+            await createIndex(index, settings, mappings);
+          }
+        }
         createdIndex = index;
 
         // create the pipeline if one has been supplied
-        if (pipelineId !== undefined) {
+        if (pipelineId !== undefined && pipeline !== undefined) {
           const resp = await createPipeline(pipelineId, pipeline);
           if (resp.acknowledged !== true) {
             throw resp;
@@ -107,6 +117,14 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
     }
 
     await asCurrentUser.indices.create({ index, body }, { maxRetries: 0 });
+  }
+
+  async function updateMappings(index: string, mappings: MappingTypeMapping) {
+    const body: MappingTypeMapping = {
+      properties: mappings.properties,
+    };
+
+    await asCurrentUser.indices.putMapping({ index, body }, { maxRetries: 0 });
   }
 
   async function indexData(index: string, pipelineId: string, data: InputData) {

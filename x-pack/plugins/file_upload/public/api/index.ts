@@ -36,7 +36,7 @@ export const IndexNameFormComponent = IndexNameFormAsyncWrapper;
 export async function importerFactory(
   format: string,
   options: ImportFactoryOptions
-): Promise<IImporter | undefined> {
+): Promise<IImporter> {
   const fileUploadModules = await lazyLoadModules();
   return fileUploadModules.importerFactory(format, options);
 }

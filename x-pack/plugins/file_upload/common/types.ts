@@ -127,10 +127,12 @@ export type ImportDoc = ImportDocMessage | string | object;
 
 export interface IngestPipelineWrapper {
   id: string;
-  pipeline: IngestPipeline;
+  pipeline?: IngestPipeline;
 }
 
 export interface IngestPipeline {
   description: string;
   processors: any[];
+  isManaged?: boolean;
+  name?: string;
 }
