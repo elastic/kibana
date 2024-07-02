@@ -12,6 +12,7 @@ import {
   AttackDiscovery,
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryResponse,
+  AttackDiscoveryStat,
   AttackDiscoveryStatus,
   ExecuteConnectorRequestBody,
   GenerationInterval,
@@ -23,9 +24,10 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 
 import { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '../evaluate/utils';
 import { getLlmType } from '../utils';
 import type { GetRegisteredTools } from '../../services/app_context';
@@ -52,7 +54,7 @@ export const REQUIRED_FOR_ATTACK_DISCOVERY: AnonymizationFieldResponse[] = [
 ];
 
 export const getAssistantToolParams = ({
-  actions,
+  actionsClient,
   alertsIndexPattern,
   anonymizationFields,
   apiConfig,
@@ -67,7 +69,7 @@ export const getAssistantToolParams = ({
   request,
   size,
 }: {
-  actions: ActionsPluginStart;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
   apiConfig: ApiConfig;
@@ -98,11 +100,10 @@ export const getAssistantToolParams = ({
   };
 
   const llm = new ActionsClientLlm({
-    actions,
+    actionsClient,
     connectorId: apiConfig.connectorId,
     llmType: getLlmType(apiConfig.actionTypeId),
     logger,
-    request,
     temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
@@ -413,4 +414,59 @@ export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginN
   // get the attack discovery tool:
   const assistantTools = getRegisteredTools(pluginName);
   return assistantTools.find((tool) => tool.id === 'attack-discovery');
+};
+
+export const updateAttackDiscoveryLastViewedAt = async ({
+  connectorId,
+  authenticatedUser,
+  dataClient,
+}: {
+  connectorId: string;
+  authenticatedUser: AuthenticatedUser;
+  dataClient: AttackDiscoveryDataClient;
+}): Promise<AttackDiscoveryResponse | null> => {
+  const attackDiscovery = await dataClient.findAttackDiscoveryByConnectorId({
+    connectorId,
+    authenticatedUser,
+  });
+
+  if (attackDiscovery == null) {
+    return null;
+  }
+
+  // update lastViewedAt time as this is the function used for polling by connectorId
+  return dataClient.updateAttackDiscovery({
+    attackDiscoveryUpdateProps: {
+      id: attackDiscovery.id,
+      lastViewedAt: new Date().toISOString(),
+      backingIndex: attackDiscovery.backingIndex,
+    },
+    authenticatedUser,
+  });
+};
+
+export const getAttackDiscoveryStats = async ({
+  authenticatedUser,
+  dataClient,
+}: {
+  authenticatedUser: AuthenticatedUser;
+  dataClient: AttackDiscoveryDataClient;
+}): Promise<AttackDiscoveryStat[]> => {
+  const attackDiscoveries = await dataClient.findAllAttackDiscoveries({
+    authenticatedUser,
+  });
+
+  return attackDiscoveries.map((ad) => {
+    const updatedAt = moment(ad.updatedAt);
+    const lastViewedAt = moment(ad.lastViewedAt);
+    const timeSinceLastViewed = updatedAt.diff(lastViewedAt);
+    const hasViewed = timeSinceLastViewed <= 0;
+    const discoveryCount = ad.attackDiscoveries.length;
+    return {
+      hasViewed,
+      status: ad.status,
+      count: discoveryCount,
+      connectorId: ad.apiConfig.connectorId,
+    };
+  });
 };
