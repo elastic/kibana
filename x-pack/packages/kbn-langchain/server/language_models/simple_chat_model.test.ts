@@ -6,10 +6,10 @@
  */
 
 import { PassThrough } from 'stream';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
-import { ActionsClientSimpleChatModel, CustomChatModelInput } from './simple_chat_model';
+import { ActionsClientSimpleChatModel } from './simple_chat_model';
 import { mockActionResponse } from './mocks';
 import { BaseMessage } from '@langchain/core/messages';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
@@ -19,26 +19,15 @@ import { parseGeminiStream } from '../utils/gemini';
 const connectorId = 'mock-connector-id';
 
 const mockExecute = jest.fn();
+const actionsClient = actionsClientMock.create();
 
 const mockLogger = loggerMock.create();
-
-const mockActions = {
-  getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-    execute: mockExecute,
-  })),
-} as unknown as ActionsPluginStart;
 
 const mockStreamExecute = jest.fn().mockImplementation(() => ({
   data: new PassThrough(),
   status: 'ok',
 }));
-const mockStreamActions = {
-  getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-    execute: mockStreamExecute,
-  })),
-} as unknown as ActionsPluginStart;
 
-const prompt = 'Do you know my name?';
 const callMessages = [
   {
     lc_serializable: true,
@@ -78,20 +67,10 @@ const callRunManager = {
   handleLLMNewToken,
 } as unknown as CallbackManagerForLLMRun;
 
-const mockRequest: CustomChatModelInput['request'] = {
-  params: { connectorId },
-  body: {
-    message: prompt,
-    subAction: 'invokeAI',
-    isEnabledKnowledgeBase: true,
-  },
-} as CustomChatModelInput['request'];
-
 const defaultArgs = {
-  actions: mockActions,
+  actionsClient,
   connectorId,
   logger: mockLogger,
-  request: mockRequest,
   streaming: false,
 };
 jest.mock('../utils/bedrock');
@@ -100,6 +79,12 @@ jest.mock('../utils/gemini');
 describe('ActionsClientSimpleChatModel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    actionsClient.execute.mockImplementation(
+      jest.fn().mockImplementation(() => ({
+        data: mockActionResponse,
+        status: 'ok',
+      }))
+    );
     mockExecute.mockImplementation(() => ({
       data: mockActionResponse,
       status: 'ok',
@@ -146,28 +131,24 @@ describe('ActionsClientSimpleChatModel', () => {
         callOptions,
         callRunManager
       );
-      const subAction = mockExecute.mock.calls[0][0].params.subAction;
+      const subAction = actionsClient.execute.mock.calls[0][0].params.subAction;
       expect(subAction).toEqual('invokeAI');
 
       expect(result).toEqual(mockActionResponse.message);
     });
 
     it('rejects with the expected error when the action result status is error', async () => {
-      const hasErrorStatus = jest.fn().mockImplementation(() => ({
-        message: 'action-result-message',
-        serviceMessage: 'action-result-service-message',
-        status: 'error', // <-- error status
-      }));
+      const hasErrorStatus = jest.fn().mockImplementation(() => {
+        throw Error(
+          'ActionsClientSimpleChatModel: action result status is error: action-result-message - action-result-service-message'
+        );
+      });
 
-      const badActions = {
-        getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-          execute: hasErrorStatus,
-        })),
-      } as unknown as ActionsPluginStart;
+      actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
 
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
         ...defaultArgs,
-        actions: badActions,
+        actionsClient,
       });
 
       await expect(
@@ -180,10 +161,12 @@ describe('ActionsClientSimpleChatModel', () => {
     it('rejects with the expected error the message has invalid content', async () => {
       const invalidContent = { message: 1234 };
 
-      mockExecute.mockImplementation(() => ({
-        data: invalidContent,
-        status: 'ok',
-      }));
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          data: invalidContent,
+          status: 'ok',
+        })
+      );
 
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel(defaultArgs);
 
@@ -221,9 +204,10 @@ describe('ActionsClientSimpleChatModel', () => {
       (parseGeminiStream as jest.Mock).mockResolvedValue(mockActionResponse.message);
     });
     it('returns the expected content when _call is invoked with streaming and llmType is Bedrock', async () => {
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
         ...defaultArgs,
-        actions: mockStreamActions,
+        actionsClient,
         llmType: 'bedrock',
         streaming: true,
         maxTokens: 333,
@@ -248,9 +232,10 @@ describe('ActionsClientSimpleChatModel', () => {
       expect(result).toEqual(mockActionResponse.message);
     });
     it('returns the expected content when _call is invoked with streaming and llmType is Gemini', async () => {
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
         ...defaultArgs,
-        actions: mockStreamActions,
+        actionsClient,
         llmType: 'gemini',
         streaming: true,
         maxTokens: 333,
@@ -283,9 +268,11 @@ describe('ActionsClientSimpleChatModel', () => {
         handleToken(`, "action_input": "`);
         handleToken('token6');
       });
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
+
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
         ...defaultArgs,
-        actions: mockStreamActions,
+        actionsClient,
         llmType: 'bedrock',
         streaming: true,
       });
@@ -303,9 +290,10 @@ describe('ActionsClientSimpleChatModel', () => {
         handleToken('"');
         handleToken('token7');
       });
+      actionsClient.execute.mockImplementationOnce(mockStreamExecute);
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel({
         ...defaultArgs,
-        actions: mockStreamActions,
+        actionsClient,
         llmType: 'bedrock',
         streaming: true,
       });
