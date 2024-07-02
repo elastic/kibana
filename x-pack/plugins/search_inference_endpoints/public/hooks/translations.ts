@@ -15,13 +15,6 @@ export const ENDPOINT_DELETION_FAILED = i18n.translate(
   }
 );
 
-export const ERROR_DELETING = i18n.translate(
-  'xpack.searchInferenceEndpoints.deleteEndpoint.errorDeleting',
-  {
-    defaultMessage: 'The inference endpoint cannot be deleted. Please try again.',
-  }
-);
-
 export const DELETE_SUCCESS = i18n.translate(
   'xpack.searchInferenceEndpoints.deleteEndpoint.deleteSuccess',
   {
