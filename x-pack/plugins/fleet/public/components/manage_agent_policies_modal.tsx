@@ -150,7 +150,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
           <EuiText>
             <FormattedMessage
               id="xpack.fleet.manageAgentPolicies.confirmModalDescription"
-              defaultMessage="Agent policies which share this integration"
+              defaultMessage="Agent policies sharing this integration"
             />
           </EuiText>
         </EuiFlexItem>
