@@ -8,6 +8,8 @@ paths:
       summary: Permanently redirects to a new location
       operationId: EndpointUnisolateRedirect
       x-codegen-enabled: true
+      x-labels:
+        - ess
       requestBody:
         required: true
         content:
