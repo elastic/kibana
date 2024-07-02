@@ -69,6 +69,7 @@
   .euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id='colorIndicator'] .euiDataGridRowCell__content {
     height: 100%;
     padding: 0;
+    border-bottom: 0;
   }
 
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
