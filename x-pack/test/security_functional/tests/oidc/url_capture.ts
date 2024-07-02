@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.waitUntilUrlIncludes('logged_out');
     });
 
-    it.skip('can login preserving original URL', async () => {
+    it('can login preserving original URL', async () => {
       await browser.get(
         deployment.getHostPort() + '/app/management/security/users#some=hash-value'
       );
