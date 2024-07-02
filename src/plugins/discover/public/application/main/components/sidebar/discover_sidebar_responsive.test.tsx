@@ -20,10 +20,7 @@ import {
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
-import {
-  AvailableFields$,
-  DataDocuments$,
-} from '../../state_management/discover_data_state_container';
+import { DataDocuments$ } from '../../state_management/discover_data_state_container';
 import { stubLogstashDataView } from '@kbn/data-plugin/common/stubs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -154,10 +151,6 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
       fetchStatus: FetchStatus.COMPLETE,
       result: hits,
     }) as DataDocuments$,
-    availableFields$: new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-      fields: [] as string[],
-    }) as AvailableFields$,
     onChangeDataView: jest.fn(),
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
@@ -311,11 +304,6 @@ describe('discover responsive sidebar', function () {
     expect(unmappedFieldsCount.exists()).toBe(false);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
 
-    expect(props.availableFields$.getValue()).toEqual({
-      fetchStatus: 'complete',
-      fields: ['extension'],
-    });
-
     expect(findTestSubject(comp, 'fieldListGrouped__ariaDescription').text()).toBe(
       '1 selected field. 4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
     );
@@ -373,11 +361,6 @@ describe('discover responsive sidebar', function () {
     expect(emptyFieldsCount.text()).toBe('20');
     expect(metaFieldsCount.text()).toBe('2');
     expect(unmappedFieldsCount.exists()).toBe(false);
-
-    expect(propsWithoutColumns.availableFields$.getValue()).toEqual({
-      fetchStatus: 'complete',
-      fields: ['bytes', 'extension', '_id', 'phpmemory'],
-    });
 
     expect(findTestSubject(compWithoutSelected, 'fieldListGrouped__ariaDescription').text()).toBe(
       '4 popular fields. 3 available fields. 20 empty fields. 2 meta fields.'
