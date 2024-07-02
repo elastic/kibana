@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import type { ThreatMapEntries } from '../../../../common/components/threat_match/types';
 import { ThreatMatchComponent } from '../../../../common/components/threat_match';
-import type { BrowserFields } from '../../../../common/containers/source';
 import type { FieldHook } from '../../../../shared_imports';
 import {
   Field,
@@ -28,7 +27,6 @@ const CommonUseField = getUseField({ component: Field });
 
 interface ThreatMatchInputProps {
   threatMapping: FieldHook;
-  threatBrowserFields: Readonly<BrowserFields>;
   threatIndexPatterns: DataViewBase;
   indexPatterns: DataViewBase;
   threatIndexPatternsLoading: boolean;
@@ -44,7 +42,6 @@ const ThreatMatchInputComponent: React.FC<ThreatMatchInputProps> = ({
   indexPatterns,
   threatIndexPatterns,
   threatIndexPatternsLoading,
-  threatBrowserFields,
   onValidityChange,
 }: ThreatMatchInputProps) => {
   const { setValue, value: threatItems } = threatMapping;
