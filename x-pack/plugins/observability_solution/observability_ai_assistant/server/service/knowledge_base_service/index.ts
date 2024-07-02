@@ -105,7 +105,7 @@ export class KnowledgeBaseService {
       });
 
       this.dependencies.logger.debug(
-        'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
+        () => 'Model definition status:\n' + JSON.stringify(getResponse.trained_model_configs[0])
       );
 
       return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
@@ -158,7 +158,7 @@ export class KnowledgeBaseService {
       }
 
       this.dependencies.logger.debug('Model is not allocated yet');
-      this.dependencies.logger.debug(JSON.stringify(response));
+      this.dependencies.logger.debug(() => JSON.stringify(response));
 
       throw gatewayTimeout();
     }, retryOptions);
@@ -366,7 +366,7 @@ export class KnowledgeBaseService {
     entries: RecalledEntry[];
   }> => {
     this.dependencies.logger.debug(
-      `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
+      () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
     const modelId = await this.dependencies.getModelId();
 

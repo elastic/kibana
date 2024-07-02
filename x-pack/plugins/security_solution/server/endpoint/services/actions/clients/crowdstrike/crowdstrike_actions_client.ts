@@ -98,7 +98,8 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `calling connector actions 'execute()' for Crowdstrike with:\n${stringify(executeOptions)}`
+      () =>
+        `calling connector actions 'execute()' for Crowdstrike with:\n${stringify(executeOptions)}`
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
@@ -114,7 +115,7 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
         actionSendResponse
       );
     } else {
-      this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
+      this.log.debug(() => `Response:\n${stringify(actionSendResponse)}`);
     }
 
     return actionSendResponse;

@@ -146,9 +146,10 @@ export const bulkCreateArtifacts = async (
 
   for (let batchN = 0; batchN < batches.length; batchN++) {
     logger.debug(
-      `Creating artifacts for batch ${batchN + 1} with ${batches[batchN].length / 2} artifacts`
+      () =>
+        `Creating artifacts for batch ${batchN + 1} with ${batches[batchN].length / 2} artifacts`
     );
-    logger.debug(`Artifacts in current batch: ${JSON.stringify(batches[batchN])}`);
+    logger.debug(() => `Artifacts in current batch: ${JSON.stringify(batches[batchN])}`);
     // Generate a bulk create for the current batch of artifacts
     const res = await withPackageSpan(`Bulk create fleet artifacts batch [${batchN}]`, () =>
       esClient.bulk({

@@ -85,7 +85,9 @@ const handler: (
     const end = new Date();
 
     const tookMs = end.getTime() - start.getTime();
-    logger.debug(`Asset criticality CSV upload completed in ${tookMs}ms ${JSON.stringify(stats)}`);
+    logger.debug(
+      () => `Asset criticality CSV upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
+    );
 
     // type assignment here to ensure that the response body stays in sync with the API schema
     const resBody: AssetCriticalityBulkUploadResponse = { errors, stats };

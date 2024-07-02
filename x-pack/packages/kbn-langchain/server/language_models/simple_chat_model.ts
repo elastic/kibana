@@ -102,9 +102,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       formattedMessages.push(getMessageContentAndRole(message.content, message._getType()));
     });
     this.#logger.debug(
-      `ActionsClientSimpleChatModel#_call\ntraceId: ${
-        this.#traceId
-      }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
+      () =>
+        `ActionsClientSimpleChatModel#_call\ntraceId: ${
+          this.#traceId
+        }\nassistantMessage:\n${JSON.stringify(formattedMessages)} `
     );
     // create a new connector request body with the assistant message:
     const requestBody = {

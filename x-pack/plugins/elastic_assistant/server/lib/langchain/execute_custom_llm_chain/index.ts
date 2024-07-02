@@ -119,7 +119,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     (tool) => tool.getTool(assistantToolParams) ?? []
   );
 
-  logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
+  logger.debug(
+    () => `applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`
+  );
 
   const executorArgs = {
     memory,

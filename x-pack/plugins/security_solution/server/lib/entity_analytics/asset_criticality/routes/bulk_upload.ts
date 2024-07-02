@@ -87,7 +87,7 @@ export const assetCriticalityPublicBulkUploadRoute = (
 
           const tookMs = end.getTime() - start.getTime();
           logger.debug(
-            `Asset criticality Bulk upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
+            () => `Asset criticality Bulk upload completed in ${tookMs}ms ${JSON.stringify(stats)}`
           );
 
           const resBody: AssetCriticalityBulkUploadResponse = { errors, stats };

@@ -47,14 +47,16 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
           ),
       }),
       func: async (input, _, cbManager) => {
-        logger.debug(`KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`);
+        logger.debug(
+          () => `KnowledgeBaseWriteToolParams:input\n ${JSON.stringify(input, null, 2)}`
+        );
 
         const knowledgeBaseEntry: KnowledgeBaseEntryCreateProps = {
           metadata: { kbResource: 'user', source: 'conversation', required: input.required },
           text: input.query,
         };
 
-        logger.debug(`knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
+        logger.debug(() => `knowledgeBaseEntry\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`);
 
         const resp = await kbDataClient.createKnowledgeBaseEntry({ knowledgeBaseEntry });
 

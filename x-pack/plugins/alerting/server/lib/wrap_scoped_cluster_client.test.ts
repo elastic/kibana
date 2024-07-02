@@ -25,7 +25,7 @@ const esqlQueryRequest = {
   },
 };
 
-const logger = loggingSystemMock.create().get();
+let logger = loggingSystemMock.create().get();
 
 const rule = {
   name: 'test-rule',
@@ -41,6 +41,10 @@ describe('wrapScopedClusterClient', () => {
 
   afterAll(() => {
     jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    logger = loggingSystemMock.create().get();
   });
 
   afterEach(() => {
@@ -68,7 +72,7 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
       );
     });
@@ -93,7 +97,7 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
       );
     });
@@ -193,7 +197,7 @@ describe('wrapScopedClusterClient', () => {
       expect(stats.numSearches).toEqual(3);
       expect(stats.esSearchDurationMs).toEqual(999);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {}`
       );
     });
@@ -241,7 +245,7 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000ms requestTimeout'
       );
     });
@@ -266,7 +270,7 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000ms requestTimeout'
       );
     });
@@ -340,7 +344,7 @@ describe('wrapScopedClusterClient', () => {
       expect(stats.numSearches).toEqual(3);
       expect(stats.esSearchDurationMs).toEqual(999);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
         `executing eql query for rule .test-rule-type:abcdefg in space my-space - {\"index\":\"foo\",\"query\":\"process where process.name == \\\"regsvr32.exe\\\"\"} - with options {}`
       );
     });
@@ -391,7 +395,7 @@ describe('wrapScopedClusterClient', () => {
         });
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-        expect(logger.debug).toHaveBeenCalledWith(
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
           'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
       });
@@ -416,7 +420,7 @@ describe('wrapScopedClusterClient', () => {
         });
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
-        expect(logger.debug).toHaveBeenCalledWith(
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
           'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
       });
@@ -490,7 +494,7 @@ describe('wrapScopedClusterClient', () => {
         expect(stats.numSearches).toEqual(3);
         expect(stats.totalSearchDurationMs).toBeGreaterThan(-1);
 
-        expect(logger.debug).toHaveBeenCalledWith(
+        expect(loggingSystemMock.collect(logger).debug[0][0]).toEqual(
           `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\",\"body\":{\"query\":\"from .kibana_task_manager\"}} - with options {}`
         );
       });

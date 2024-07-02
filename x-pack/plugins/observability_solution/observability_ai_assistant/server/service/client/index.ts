@@ -439,18 +439,20 @@ export class ObservabilityAIAssistantClient {
             if (this.dependencies.logger.isLevelEnabled('debug')) {
               switch (event.type) {
                 case StreamingChatResponseEventType.MessageAdd:
-                  this.dependencies.logger.debug(`Added message: ${JSON.stringify(event.message)}`);
+                  this.dependencies.logger.debug(
+                    () => `Added message: ${JSON.stringify(event.message)}`
+                  );
                   break;
 
                 case StreamingChatResponseEventType.ConversationCreate:
                   this.dependencies.logger.debug(
-                    `Created conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Created conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
 
                 case StreamingChatResponseEventType.ConversationUpdate:
                   this.dependencies.logger.debug(
-                    `Updated conversation: ${JSON.stringify(event.conversation)}`
+                    () => `Updated conversation: ${JSON.stringify(event.conversation)}`
                   );
                   break;
               }

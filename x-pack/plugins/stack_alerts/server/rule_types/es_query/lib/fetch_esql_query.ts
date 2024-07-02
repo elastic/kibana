@@ -42,7 +42,7 @@ export async function fetchEsqlQuery({
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
-  logger.debug(`ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
+  logger.debug(() => `ES|QL query rule (${ruleId}) query: ${JSON.stringify(query)}`);
 
   const response = await esClient.transport.request<EsqlTable>({
     method: 'POST',

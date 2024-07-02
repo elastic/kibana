@@ -34,7 +34,7 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
   logger.info(
     `Entity manager index template is up to date (use debug logging to see what was installed)`
   );
-  logger.debug(`Entity manager index template: ${JSON.stringify(template)}`);
+  logger.debug(() => `Entity manager index template: ${JSON.stringify(template)}`);
 }
 
 export async function upsertComponent({ esClient, component, logger }: ComponentManagementOptions) {
@@ -48,5 +48,5 @@ export async function upsertComponent({ esClient, component, logger }: Component
   logger.info(
     `Entity manager component template is up to date (use debug logging to see what was installed)`
   );
-  logger.debug(`Entity manager component template: ${JSON.stringify(component)}`);
+  logger.debug(() => `Entity manager component template: ${JSON.stringify(component)}`);
 }

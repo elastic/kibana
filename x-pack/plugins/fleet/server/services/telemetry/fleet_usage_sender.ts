@@ -93,27 +93,27 @@ export class FleetUsageSender {
       } = usageData;
       appContextService
         .getLogger()
-        .debug('Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
+        .debug(() => 'Fleet usage telemetry: ' + JSON.stringify(fleetUsageData));
 
       core.analytics.reportEvent(FLEET_USAGES_EVENT_TYPE, fleetUsageData);
 
       appContextService
         .getLogger()
-        .debug('Agents per privileges telemetry: ' + JSON.stringify(agentsPerPrivileges));
+        .debug(() => 'Agents per privileges telemetry: ' + JSON.stringify(agentsPerPrivileges));
       core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
         agents_per_privileges: agentsPerPrivileges,
       });
 
       appContextService
         .getLogger()
-        .debug('Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
+        .debug(() => 'Agents per version telemetry: ' + JSON.stringify(agentsPerVersion));
       agentsPerVersion.forEach((byVersion) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { agents_per_version: byVersion });
       });
 
       appContextService
         .getLogger()
-        .debug('Agents per output type telemetry: ' + JSON.stringify(agentsPerOutputType));
+        .debug(() => 'Agents per output type telemetry: ' + JSON.stringify(agentsPerOutputType));
       agentsPerOutputType.forEach((byOutputType) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, {
           agents_per_output_type: byOutputType,
@@ -122,7 +122,7 @@ export class FleetUsageSender {
 
       appContextService
         .getLogger()
-        .debug('Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
+        .debug(() => 'Agents upgrade details telemetry: ' + JSON.stringify(upgradeDetails));
       upgradeDetails.forEach((upgradeDetailsObj) => {
         core.analytics.reportEvent(FLEET_AGENTS_EVENT_TYPE, { upgrade_details: upgradeDetailsObj });
       });

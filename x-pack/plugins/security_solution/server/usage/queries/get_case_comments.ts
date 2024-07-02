@@ -34,7 +34,7 @@ export const getCaseComments = async ({
     namespaces: ['*'],
     filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,
   };
-  logger.debug(`Getting cases with point in time (PIT) query:', ${JSON.stringify(query)}`);
+  logger.debug(() => `Getting cases with point in time (PIT) query:', ${JSON.stringify(query)}`);
   const finder = savedObjectsClient.createPointInTimeFinder<AttachmentAttributes>(query);
   let responses: Array<SavedObjectsFindResult<AttachmentAttributes>> = [];
   for await (const response of finder.find()) {

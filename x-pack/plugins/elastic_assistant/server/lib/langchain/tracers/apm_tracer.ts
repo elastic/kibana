@@ -77,12 +77,12 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   }
 
   async onRetrieverStart(run: Run): Promise<void> {
-    this.logger.debug(`onRetrieverStart: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onRetrieverStart: run:\n${JSON.stringify(run, null, 2)}`);
     this.createAndAddSpanFromRun(run, this.retrieverSpans);
   }
 
   async onRetrieverEnd(run: Run): Promise<void> {
-    this.logger.debug(`onRetrieverEnd: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onRetrieverEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.retrieverSpans.pop();
     if (span != null) {
       span.addLabels(this._getLabelsFromRun(run));
@@ -91,16 +91,16 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   }
 
   async onRetrieverError(run: Run): Promise<void> {
-    this.logger.debug(`onRetrieverError: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onRetrieverError: run:\n${JSON.stringify(run, null, 2)}`);
   }
 
   async onLLMStart(run: Run): Promise<void> {
-    this.logger.debug(`onLLMStart: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onLLMStart: run:\n${JSON.stringify(run, null, 2)}`);
     this.createAndAddSpanFromRun(run, this.llmSpans);
   }
 
   async onLLMEnd(run: Run): Promise<void> {
-    this.logger.debug(`onLLMEnd: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onLLMEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.llmSpans.pop();
     if (span != null) {
       span.addLabels(this._getLabelsFromRun(run));
@@ -109,16 +109,16 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   }
 
   async onLLMError(run: Run): Promise<void> {
-    this.logger.debug(`onLLMError: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onLLMError: run:\n${JSON.stringify(run, null, 2)}`);
   }
 
   async onChainStart(run: Run): Promise<void> {
-    this.logger.debug(`onChainStart: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onChainStart: run:\n${JSON.stringify(run, null, 2)}`);
     this.createAndAddSpanFromRun(run, this.chainSpans);
   }
 
   async onChainEnd(run: Run): Promise<void> {
-    this.logger.debug(`onChainEnd: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onChainEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.chainSpans.pop();
     if (span != null) {
       span.addLabels(this._getLabelsFromRun(run));
@@ -127,16 +127,16 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   }
 
   async onChainError(run: Run): Promise<void> {
-    this.logger.debug(`onChainError: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onChainError: run:\n${JSON.stringify(run, null, 2)}`);
   }
 
   async onToolStart(run: Run): Promise<void> {
-    this.logger.debug(`onToolStart: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onToolStart: run:\n${JSON.stringify(run, null, 2)}`);
     this.createAndAddSpanFromRun(run, this.toolSpans);
   }
 
   async onToolEnd(run: Run): Promise<void> {
-    this.logger.debug(`onToolEnd: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onToolEnd: run:\n${JSON.stringify(run, null, 2)}`);
     const span = this.toolSpans.pop();
     if (span != null) {
       span.addLabels(this._getLabelsFromRun(run));
@@ -145,6 +145,6 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
   }
 
   async onToolError(run: Run): Promise<void> {
-    this.logger.debug(`onToolError: run:\n${JSON.stringify(run, null, 2)}`);
+    this.logger.debug(() => `onToolError: run:\n${JSON.stringify(run, null, 2)}`);
   }
 }

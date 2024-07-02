@@ -107,7 +107,7 @@ export abstract class SubActionConnector<Config, Secrets> {
       responseSchema.validate(data);
     } catch (resValidationError) {
       const err = new Error(`Response validation failed (${resValidationError})`);
-      this.logger.debug(`${err.message}:\n${inspect(data, { depth: 10 })}`);
+      this.logger.debug(() => `${err.message}:\n${inspect(data, { depth: 10 })}`);
       throw err;
     }
   }

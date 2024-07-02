@@ -57,7 +57,7 @@ export const getDetectionRules = async ({
     filter,
   };
   logger.debug(
-    `Getting detection rules with point in time (PIT) query:', ${JSON.stringify(query)}`
+    () => `Getting detection rules with point in time (PIT) query:', ${JSON.stringify(query)}`
   );
   const finder = savedObjectsClient.createPointInTimeFinder<RuleSearchResult>(query);
   let responses: Array<SavedObjectsFindResult<RuleSearchResult>> = [];

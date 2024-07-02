@@ -181,7 +181,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     };
 
     this.log.debug(
-      `calling connector actions 'execute()' for SentinelOne with:\n${stringify(executeOptions)}`
+      () =>
+        `calling connector actions 'execute()' for SentinelOne with:\n${stringify(executeOptions)}`
     );
 
     const actionSendResponse = await this.connectorActionsClient.execute(executeOptions);
@@ -198,7 +199,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       );
     }
 
-    this.log.debug(`Response:\n${stringify(actionSendResponse)}`);
+    this.log.debug(() => `Response:\n${stringify(actionSendResponse)}`);
 
     return actionSendResponse as ActionTypeExecutorResult<T>;
   }
@@ -227,7 +228,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       )) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
 
       this.log.debug(
-        `Response for SentinelOne agent id [${agentUUID}] returned:\n${stringify(response)}`
+        () => `Response for SentinelOne agent id [${agentUUID}] returned:\n${stringify(response)}`
       );
 
       s1ApiResponse = response.data;
@@ -439,9 +440,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         >(SUB_ACTION.GET_ACTIVITIES, activitySearchCriteria);
 
         this.log.debug(
-          `Search of activity log with:\n${stringify(
-            activitySearchCriteria
-          )}\n returned:\n${stringify(activityLogSearchResponse.data)}`
+          () =>
+            `Search of activity log with:\n${stringify(
+              activitySearchCriteria
+            )}\n returned:\n${stringify(activityLogSearchResponse.data)}`
         );
 
         if (activityLogSearchResponse.data?.data.length) {
@@ -771,10 +773,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       };
 
       this.log.debug(
-        `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
-          searchRequestOptions,
-          15
-        )}`
+        () =>
+          `searching for ${command} responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
+            searchRequestOptions,
+            15
+          )}`
       );
 
       const searchResults = await this.options.esClient
@@ -782,7 +785,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         .catch(catchAndWrapError);
 
       this.log.debug(
-        `Search results for SentinelOne ${command} activity documents:\n${stringify(searchResults)}`
+        () =>
+          `Search results for SentinelOne ${command} activity documents:\n${stringify(
+            searchResults
+          )}`
       );
 
       for (const searchResultHit of searchResults.hits.hits) {
@@ -831,9 +837,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     this.log.debug(
-      `${completedResponses.length} ${command} action responses generated:\n${stringify(
-        completedResponses
-      )}`
+      () =>
+        `${completedResponses.length} ${command} action responses generated:\n${stringify(
+          completedResponses
+        )}`
     );
 
     if (warnings.length > 0) {
@@ -928,10 +935,11 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (Object.keys(actionsByAgentAndBatchId).length) {
       this.log.debug(
-        `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
-          searchRequestOptions,
-          15
-        )}`
+        () =>
+          `searching for get-file responses from [${SENTINEL_ONE_ACTIVITY_INDEX_PATTERN}] index with:\n${stringify(
+            searchRequestOptions,
+            15
+          )}`
       );
 
       const searchResults = await this.options.esClient
@@ -939,7 +947,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         .catch(catchAndWrapError);
 
       this.log.debug(
-        `Search results for SentinelOne get-file activity documents:\n${stringify(searchResults)}`
+        () =>
+          `Search results for SentinelOne get-file activity documents:\n${stringify(searchResults)}`
       );
 
       for (const s1Hit of searchResults.hits.hits) {
@@ -1008,9 +1017,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     }
 
     this.log.debug(
-      `${completedResponses.length} get-file action responses generated:\n${stringify(
-        completedResponses
-      )}`
+      () =>
+        `${completedResponses.length} get-file action responses generated:\n${stringify(
+          completedResponses
+        )}`
     );
 
     if (warnings.length > 0) {

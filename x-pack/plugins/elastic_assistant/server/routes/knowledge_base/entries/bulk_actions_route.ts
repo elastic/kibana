@@ -144,7 +144,8 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           }
 
           logger.debug(
-            `Performing bulk action on Knowledge Base Entries:\n${JSON.stringify(request.body)}`
+            () =>
+              `Performing bulk action on Knowledge Base Entries:\n${JSON.stringify(request.body)}`
           );
 
           const { body } = request;

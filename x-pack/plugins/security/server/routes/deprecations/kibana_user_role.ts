@@ -53,9 +53,10 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
         logger.debug(`No users with "${KIBANA_USER_ROLE_NAME}" role found.`);
       } else {
         logger.debug(
-          `The following users with "${KIBANA_USER_ROLE_NAME}" role found and will be migrated to "${KIBANA_ADMIN_ROLE_NAME}" role: ${usersWithKibanaUserRole
-            .map((user) => user.username)
-            .join(', ')}.`
+          () =>
+            `The following users with "${KIBANA_USER_ROLE_NAME}" role found and will be migrated to "${KIBANA_ADMIN_ROLE_NAME}" role: ${usersWithKibanaUserRole
+              .map((user) => user.username)
+              .join(', ')}.`
         );
       }
 
@@ -107,9 +108,10 @@ export function defineKibanaUserRoleDeprecationRoutes({ router, logger }: RouteD
         logger.debug(`No role mappings with "${KIBANA_USER_ROLE_NAME}" role found.`);
       } else {
         logger.debug(
-          `The following role mappings with "${KIBANA_USER_ROLE_NAME}" role found and will be migrated to "${KIBANA_ADMIN_ROLE_NAME}" role: ${roleMappingsWithKibanaUserRole
-            .map(([mappingName]) => mappingName)
-            .join(', ')}.`
+          () =>
+            `The following role mappings with "${KIBANA_USER_ROLE_NAME}" role found and will be migrated to "${KIBANA_ADMIN_ROLE_NAME}" role: ${roleMappingsWithKibanaUserRole
+              .map(([mappingName]) => mappingName)
+              .join(', ')}.`
         );
       }
 

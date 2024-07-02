@@ -366,6 +366,7 @@ describe('Ad Hoc Task Runner', () => {
       triggeredActionsStatus: 'complete',
     });
     (RuleRunMetricsStore as jest.Mock).mockImplementation(() => ruleRunMetricsStore);
+    logger.isLevelEnabled.mockReturnValue(true);
     logger.get.mockImplementation(() => logger);
     taskRunnerFactoryInitializerParams.executionContext.withContext.mockImplementation((ctx, fn) =>
       fn()

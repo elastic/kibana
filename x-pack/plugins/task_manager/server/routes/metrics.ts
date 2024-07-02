@@ -45,7 +45,7 @@ export function metricsRoute(params: MetricsRouteParams) {
 
   metrics$.subscribe((metrics) => {
     lastMetrics = { process_uuid: taskManagerId, timestamp: new Date().toISOString(), ...metrics };
-    additionalDebugLogger.debug(`subscribed metrics ${JSON.stringify(metrics)}`);
+    additionalDebugLogger.debug(() => `subscribed metrics ${JSON.stringify(metrics)}`);
   });
 
   router.get(
@@ -69,9 +69,10 @@ export function metricsRoute(params: MetricsRouteParams) {
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse> {
       debugLogger.debug(
-        `/api/task_manager/metrics route accessed with reset=${req.query.reset} - metrics ${
-          lastMetrics ? JSON.stringify(lastMetrics) : 'not available'
-        }`
+        () =>
+          `/api/task_manager/metrics route accessed with reset=${req.query.reset} - metrics ${
+            lastMetrics ? JSON.stringify(lastMetrics) : 'not available'
+          }`
       );
       if (req.query.reset) {
         resetMetrics$.next(true);

@@ -154,7 +154,7 @@ export class TelemetryEventsSender {
         deployment_id: appContextService.getCloud()?.deploymentId,
       }));
 
-      this.logger.debug(JSON.stringify(toSend));
+      this.logger.debug(() => JSON.stringify(toSend));
 
       await this.send(
         toSend,
@@ -199,10 +199,12 @@ export class TelemetryEventsSender {
         },
         timeout: 5000,
       });
-      this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
+      this.logger.debug(
+        () => `Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`
+      );
     } catch (err) {
       this.logger.debug(
-        `Error sending events: ${err?.response?.status} ${JSON.stringify(err.response.data)}`
+        () => `Error sending events: ${err?.response?.status} ${JSON.stringify(err.response.data)}`
       );
     }
   }
