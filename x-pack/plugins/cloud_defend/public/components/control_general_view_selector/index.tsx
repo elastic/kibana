@@ -274,28 +274,39 @@ export const ControlGeneralViewSelector = ({
     [errorMap, index, conditionsAdded, onChange, selector, selectors]
   );
 
+  const onAddStringArrayCondition = useCallback(
+    (condition: SelectorCondition) => {
+      const updatedSelector = { ...selector, [condition]: [] };
+      onChange(updatedSelector, index);
+    },
+    [selector, onChange, index]
+  );
+
   const onChangeStringArrayCondition = useCallback(
-    (prop: SelectorCondition, values: string[]) => {
-      const updatedSelector = { ...selector, [prop]: values };
+    (condition: SelectorCondition, values: Extract<string[], Selector[SelectorCondition]>) => {
+      const updatedSelector = { ...selector, [condition]: values };
       const errors = [];
 
       if (values.length === 0) {
         errors.push(i18n.errorValueRequired);
       }
 
-      const stringValueErrors = validateStringValuesForCondition(prop, values);
+      const stringValueErrors = validateStringValuesForCondition(condition, values);
 
       if (stringValueErrors.length > 0) {
         errors.push(...stringValueErrors);
       }
 
       if (errors.length) {
-        errorMap[prop] = errors;
+        errorMap[condition] = errors;
       } else {
-        delete errorMap[prop];
+        delete errorMap[condition];
       }
 
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded.length === 0;
+      if (Object.keys(errorMap).length > 0 || conditionsAdded.length === 0) {
+        updatedSelector.hasErrors = true;
+      }
+
       setErrorMap({ ...errorMap });
 
       onChange(updatedSelector, index);
@@ -313,17 +324,17 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onAddCondition = useCallback(
-    (prop: SelectorCondition) => {
-      const valueType = SelectorConditionsMap[prop].type;
+    (condition: SelectorCondition) => {
+      const valueType = SelectorConditionsMap[condition].type;
 
       if (valueType === 'flag' || valueType === 'boolean') {
-        onChangeBooleanCondition(prop, true);
+        onChangeBooleanCondition(condition, true);
       } else {
-        onChangeStringArrayCondition(prop, []);
+        onAddStringArrayCondition(condition);
       }
       closeAddCondition();
     },
-    [closeAddCondition, onChangeBooleanCondition, onChangeStringArrayCondition]
+    [closeAddCondition, onChangeBooleanCondition, onAddStringArrayCondition]
   );
 
   const onRemoveCondition = useCallback(
@@ -400,7 +411,7 @@ export const ControlGeneralViewSelector = ({
                   <b>{i18n.conditions}</b>
                 </EuiText>
                 <EuiBadge
-                  title={conditionsAdded.join(',')}
+                  title={conditionsAdded.join(', ')}
                   color="hollow"
                   data-test-subj="cloud-defend-conditions-count"
                 >
@@ -474,26 +485,26 @@ export const ControlGeneralViewSelector = ({
             maxLength={MAX_SELECTOR_NAME_LENGTH}
           />
         </EuiFormRow>
-        {conditionsAdded.map((prop) => {
-          const label = camelToSentenceCase(prop);
-          const valueType = SelectorConditionsMap[prop].type;
+        {conditionsAdded.map((condition) => {
+          const label = camelToSentenceCase(condition);
+          const valueType = SelectorConditionsMap[condition].type;
 
           if (valueType === 'flag') {
             return (
               <FlagCondition
-                key={prop}
+                key={condition}
                 label={label}
-                prop={prop}
+                prop={condition}
                 onRemoveCondition={onRemoveCondition}
               />
             );
           } else if (valueType === 'boolean') {
             return (
               <BooleanCondition
-                key={prop}
+                key={condition}
                 label={label}
                 selector={selector}
-                prop={prop}
+                prop={condition}
                 onChangeBooleanCondition={onChangeBooleanCondition}
                 onRemoveCondition={onRemoveCondition}
               />
@@ -501,9 +512,9 @@ export const ControlGeneralViewSelector = ({
           } else {
             return (
               <StringArrayCondition
-                key={prop}
+                key={condition}
                 label={label}
-                prop={prop}
+                prop={condition}
                 selector={selector}
                 errorMap={errorMap}
                 onAddValueToCondition={onAddValueToCondition}

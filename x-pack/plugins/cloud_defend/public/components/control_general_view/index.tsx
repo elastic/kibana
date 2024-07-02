@@ -254,27 +254,22 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onSelectorChange = useCallback(
-    (updatedSelector: Selector, index: number) => {
-      const old = selectors[index];
+    (updatedSelector: Selector, updatedSelectorIndex: number) => {
+      const oldSelector = selectors[updatedSelectorIndex];
 
-      if (updatedSelector.hasErrors === false) {
-        delete updatedSelector.hasErrors;
-      }
+      let updatedResponses = structuredClone(responses);
 
-      const updatedSelectors: Selector[] = JSON.parse(JSON.stringify(selectors));
-      let updatedResponses: Response[] = JSON.parse(JSON.stringify(responses));
-
-      if (old.name !== updatedSelector.name) {
+      if (oldSelector.name !== updatedSelector.name) {
         // update all references to this selector in responses
         updatedResponses = responses.map((response) => {
-          let oldNameIndex = response.match.indexOf(old.name);
+          let oldNameIndex = response.match.indexOf(oldSelector.name);
 
           if (oldNameIndex !== -1) {
             response.match[oldNameIndex] = updatedSelector.name;
           }
 
           if (response.exclude) {
-            oldNameIndex = response.exclude.indexOf(old.name);
+            oldNameIndex = response.exclude.indexOf(oldSelector.name);
 
             if (oldNameIndex !== -1) {
               response.exclude[oldNameIndex] = updatedSelector.name;
@@ -285,7 +280,9 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         });
       }
 
-      updatedSelectors[index] = JSON.parse(JSON.stringify(updatedSelector));
+      const updatedSelectors = structuredClone(selectors);
+      updatedSelectors[updatedSelectorIndex] = structuredClone(updatedSelector);
+
       onUpdateYaml(updatedSelectors, updatedResponses);
     },
     [onUpdateYaml, responses, selectors]

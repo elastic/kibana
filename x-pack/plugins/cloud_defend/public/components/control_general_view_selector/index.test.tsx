@@ -215,8 +215,8 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(onChange.mock.calls[0][0]).toHaveProperty('hasErrors');
   });
 
-  it('shows an error if no values provided for condition', async () => {
-    const { getByText, getByTestId } = render(<WrappedComponent />);
+  it('shoud not show any errors after adding a new combobox condition', async () => {
+    const { getByText, getByTestId, queryByText } = render(<WrappedComponent />);
     const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
 
     getByTestId('cloud-defend-btnremovecondition-operation').click();
@@ -226,8 +226,8 @@ describe('<ControlGeneralViewSelector />', () => {
 
     expect(onChange.mock.calls).toHaveLength(2);
     expect(onChange.mock.calls[1][0]).toHaveProperty('containerImageName');
-    expect(onChange.mock.calls[1][0]).toHaveProperty('hasErrors');
-    expect(getByText(i18n.errorValueRequired)).toBeTruthy();
+    expect(onChange.mock.calls[1][0]).not.toHaveProperty('hasErrors');
+    expect(queryByText(/Please address the highlighted errors/)).toBeNull();
   });
 
   it('prevents conditions from having values that exceed MAX_CONDITION_VALUE_LENGTH_BYTES', async () => {
