@@ -19,6 +19,7 @@ export interface DataViewEditorPropsWithServices extends DataViewEditorProps {
 
 export const DataViewEditor = ({
   onSave,
+  onSaveLazy,
   onCancel = () => {},
   services,
   defaultTypeIsRollup = false,
@@ -34,6 +35,7 @@ export const DataViewEditor = ({
       <EuiFlyout onClose={() => {}} hideCloseButton={true} size="l">
         <DataViewEditorLazy
           onSave={onSave}
+          onSaveLazy={onSaveLazy}
           onCancel={onCancel}
           defaultTypeIsRollup={defaultTypeIsRollup}
           requireTimestampField={requireTimestampField}
