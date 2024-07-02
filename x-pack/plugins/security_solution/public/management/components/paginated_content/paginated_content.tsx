@@ -54,7 +54,7 @@ export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> exten
   /** Classname applied to the area that holds the content items */
   contentClassName?: string;
   // Artifact specific decorations to display in the cards
-  CardDecorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
+  CardDecorator: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps> | undefined;
   /**
    * Children can be used to define custom content if the default creation of items is not sufficient
    * to accommodate a use case.

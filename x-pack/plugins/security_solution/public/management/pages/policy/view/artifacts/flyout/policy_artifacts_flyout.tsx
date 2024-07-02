@@ -39,7 +39,7 @@ interface PolicyArtifactsFlyoutProps {
   searchableFields: string[];
   onClose: () => void;
   labels: typeof POLICY_ARTIFACT_FLYOUT_LABELS;
-  CardDecorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
+  CardDecorator: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps> | undefined;
 }
 
 export const MAX_ALLOWED_RESULTS = 100;
