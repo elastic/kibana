@@ -38,7 +38,7 @@ export interface CommonArtifactEntryCardProps extends CommonProps {
   policies?: MenuItemPropsByPolicyId;
   loadingPoliciesList?: boolean;
   // Artifact specific decoration to be displayed in the card section
-  Decorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
+  Decorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 
 export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {

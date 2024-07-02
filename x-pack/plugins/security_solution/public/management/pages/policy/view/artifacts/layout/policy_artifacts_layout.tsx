@@ -46,7 +46,7 @@ export interface PolicyArtifactsLayoutProps {
   /** A boolean to check if has write artifact privilege or not */
   canWriteArtifact?: boolean;
   // Artifact specific decorations to display in the cards
-  CardDecorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
+  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
   ({

@@ -39,7 +39,7 @@ interface PolicyArtifactsListProps {
   labels: typeof POLICY_ARTIFACT_LIST_LABELS;
   onDeleteActionCallback: (item: ExceptionListItemSchema) => void;
   canWriteArtifact?: boolean;
-  CardDecorator: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps> | undefined;
+  CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(

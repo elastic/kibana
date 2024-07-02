@@ -28,7 +28,7 @@ export interface PolicyArtifactsAssignableListProps {
   selectedArtifactIds: string[];
   selectedArtifactsUpdated: (id: string, selected: boolean) => void;
   isListLoading: boolean;
-  CardDecorator: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps> | undefined;
+  CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
 }
 
 export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignableListProps>(

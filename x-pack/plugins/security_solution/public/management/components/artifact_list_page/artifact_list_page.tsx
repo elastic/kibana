@@ -76,7 +76,7 @@ export interface ArtifactListPageProps {
   allowCardDeleteAction?: boolean;
   allowCardCreateAction?: boolean;
   secondaryPageInfo?: React.ReactNode;
-  CardDecorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
+  CardDecorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 
 export const ArtifactListPage = memo<ArtifactListPageProps>(

@@ -41,7 +41,7 @@ export interface ArtifactEntryCardMinifiedProps extends CommonProps {
   item: AnyArtifact;
   isSelected: boolean;
   onToggleSelectedArtifact: (selected: boolean) => void;
-  Decorator?: React.NamedExoticComponent<ArtifactEntryCardDecoratorProps>;
+  Decorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 
 /**
