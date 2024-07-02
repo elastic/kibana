@@ -44,6 +44,7 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
+import { getDataTierFilter } from '../utils/get_data_tier_filter';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -93,13 +94,17 @@ export const eqlExecutor = async ({
   return withSecuritySpan('eqlExecutor', async () => {
     const result = createSearchAfterReturnType();
 
+    const dataTiersFilters = await getDataTierFilter({
+      uiSettingsClient: services.uiSettingsClient,
+    });
+
     const request = buildEqlSearchRequest({
       query: ruleParams.query,
       index: inputIndex,
       from: tuple.from.toISOString(),
       to: tuple.to.toISOString(),
       size: ruleParams.maxSignals,
-      filters: ruleParams.filters,
+      filters: [...(ruleParams.filters || []), ...dataTiersFilters],
       primaryTimestamp,
       secondaryTimestamp,
       runtimeMappings,

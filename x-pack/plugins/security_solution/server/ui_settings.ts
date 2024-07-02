@@ -37,6 +37,7 @@ import {
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
+  EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
@@ -321,6 +322,30 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
+    },
+    [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionLabel',
+        {
+          defaultMessage: 'Exclude cold or frozen data tier from rule execution',
+        }
+      ),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.excludedDataTiersForRuleExecutionDescription',
+        {
+          defaultMessage: `
+          Use this option for faster rules performance or to reduce rule execution time if it is too long or times out. 
+          <br/>Note that events from the selected data tiers will not be searched to generate alerts.
+          <br/>Comma delimit to exclude multiple tiers - data_frozen,data_cold.`,
+        }
+      ),
+      type: 'array',
+      schema: schema.arrayOf(
+        schema.oneOf([schema.literal('data_cold'), schema.literal('data_frozen')])
+      ),
+      value: [],
+      category: [APP_ID],
+      requiresPageReload: false,
     },
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
