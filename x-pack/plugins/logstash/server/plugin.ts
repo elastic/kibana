@@ -8,12 +8,10 @@
 import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { registerRoutes } from './routes';
 
 interface SetupDeps {
   licensing: LicensingPluginSetup;
-  security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
 }
 
@@ -27,7 +25,7 @@ export class LogstashPlugin implements Plugin {
   setup(core: CoreSetup, deps: SetupDeps) {
     this.logger.debug('Setting up Logstash plugin');
 
-    registerRoutes(core.http.createRouter(), deps.security);
+    registerRoutes(core.http.createRouter());
 
     deps.features.registerElasticsearchFeature({
       id: 'pipelines',

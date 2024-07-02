@@ -9,15 +9,11 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
 import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { Pipeline } from '../../models/pipeline';
 import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
 
-export function registerPipelineSaveRoute(
-  router: LogstashPluginRouter,
-  security?: SecurityPluginSetup
-) {
+export function registerPipelineSaveRoute(router: LogstashPluginRouter) {
   router.put(
     {
       path: '/api/logstash/pipeline/{id}',
@@ -39,14 +35,12 @@ export function registerPipelineSaveRoute(
     wrapRouteWithLicenseCheck(
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
+        const coreContext = await context.core;
         try {
-          let username: string | undefined;
-          if (security) {
-            const user = await security.authc.getCurrentUser(request);
-            username = user?.username;
-          }
+          const user = coreContext.security.authc.getCurrentUser();
+          const username = user?.username;
 
-          const { client } = (await context.core).elasticsearch;
+          const { client } = coreContext.elasticsearch;
           const pipeline = Pipeline.fromDownstreamJSON(request.body, request.params.id, username);
 
           await client.asCurrentUser.logstash.putPipeline({
