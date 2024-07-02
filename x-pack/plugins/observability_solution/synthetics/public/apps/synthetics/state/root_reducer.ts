@@ -31,6 +31,7 @@ import { serviceLocationsReducer, ServiceLocationsState } from './service_locati
 import { monitorOverviewReducer, MonitorOverviewState } from './overview';
 import { BrowserJourneyState } from './browser_journey/models';
 import { pingStatusReducer, PingStatusState } from './ping_status';
+import { monitorStatusHeatmapReducer, MonitorStatusHeatmap } from './status_heatmap';
 
 export interface SyntheticsAppState {
   ui: UiState;
@@ -52,6 +53,7 @@ export interface SyntheticsAppState {
   serviceLocations: ServiceLocationsState;
   overviewStatus: OverviewStatusStateReducer;
   syntheticsEnablement: SyntheticsEnablementState;
+  monitorStatusHeatmap: MonitorStatusHeatmap;
 }
 
 export const rootReducer = combineReducers<SyntheticsAppState>({
@@ -74,4 +76,5 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   syntheticsEnablement: syntheticsEnablementReducer,
   certificates: certificatesReducer,
   certsList: certsListReducer,
+  monitorStatusHeatmap: monitorStatusHeatmapReducer,
 });

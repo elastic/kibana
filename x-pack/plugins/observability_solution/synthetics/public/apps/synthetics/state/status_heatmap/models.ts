@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { syntheticsGetPingsRoute } from './get_pings';
-export { syntheticsGetPingStatusesRoute } from './get_ping_statuses';
-export { syntheticsGetPingHeatmapRoute } from './ping_heatmap';
+export interface MonitorStatusHeatmapActionArgs {
+  from: string | number;
+  to: string | number;
+  interval: number;
+  monitorId: string;
+  location: string;
+}
