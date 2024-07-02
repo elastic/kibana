@@ -8,6 +8,9 @@ paths:
       summary: Get Action State schema
       operationId: EndpointGetActionsState
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       responses:
         '200':
           description: OK
@@ -21,6 +24,9 @@ paths:
       summary: Get Running Processes Action
       operationId: EndpointGetRunningProcessesAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -40,6 +46,9 @@ paths:
       summary: Isolate host Action
       operationId: EndpointIsolateHostAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -59,6 +68,9 @@ paths:
       summary: Unisolate host Action
       operationId: EndpointUnisolateHostAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -78,6 +90,9 @@ paths:
       summary: Kill process Action
       operationId: EndpointKillProcessAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:
@@ -98,6 +113,9 @@ paths:
       summary: Suspend process Action
       operationId: EndpointSuspendProcessAction
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       requestBody:
         required: true
         content:

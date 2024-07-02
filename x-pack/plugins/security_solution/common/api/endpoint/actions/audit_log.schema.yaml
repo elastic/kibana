@@ -8,6 +8,9 @@ paths:
       summary: Get action audit log schema
       operationId: EndpointGetActionAuditLog
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - name: query
           in: query

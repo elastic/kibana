@@ -8,6 +8,9 @@ paths:
       summary: File Info schema
       operationId: EndpointFileInfo
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - name: query
           in: path

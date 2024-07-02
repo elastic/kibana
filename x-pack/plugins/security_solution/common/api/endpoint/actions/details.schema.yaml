@@ -8,6 +8,9 @@ paths:
       summary: Get Action details schema
       operationId: EndpointGetActionsDetails
       x-codegen-enabled: false
+      x-labels:
+        - ess
+        - serverless
       parameters:
         - name: query
           in: path

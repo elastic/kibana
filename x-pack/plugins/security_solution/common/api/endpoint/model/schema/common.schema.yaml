@@ -171,6 +171,13 @@ components:
                     entity_id:
                       type: string
                       minLength: 1
+
+    ProtectionUpdatesNoteResponse:
+      type: object
+      properties:
+        note:
+          type: string
+
     SuccessResponse:
       type: object
       properties: {}
