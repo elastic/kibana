@@ -149,6 +149,7 @@ export interface ResolverNode {
   parent?: string | number;
   name?: string;
   stats: EventStats;
+  agentId?: string;
 }
 
 /**
@@ -864,6 +865,11 @@ export interface ResolverSchema {
    * parent represents the field that is the edge between two nodes.
    */
   parent: string;
+
+  /**
+   * agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }
 
 /**
@@ -883,6 +889,11 @@ export type ResolverEntityIndex = Array<{
    * Unique ID value for the requested document using the `_id` field passed to the /entity route
    */
   id: string;
+
+  /**
+   * Agent id is required for endpoint because entity_id might not include agent.id soon
+   */
+  agentId?: string;
 }>;
 
 /**
