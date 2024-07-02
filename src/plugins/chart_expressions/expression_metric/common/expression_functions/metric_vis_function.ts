@@ -77,6 +77,24 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           'The direction the progress bar should grow. Must be provided to render a progress bar.',
       }),
     },
+    titlesTextAlign: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.titlesTextAlign.help', {
+        defaultMessage: 'The alignment of the title and subtitle.',
+      }),
+    },
+    valuesTextAlign: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.valuesTextAlign.help', {
+        defaultMessage: 'The alignment of the value.',
+      }),
+    },
+    valueFontSize: {
+      types: ['string', 'number'],
+      help: i18n.translate('expressionMetricVis.function.valueFontSize.help', {
+        defaultMessage: 'The value font size.',
+      }),
+    },
     color: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.color.help', {
@@ -189,6 +207,9 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
             icon: args.icon,
             palette: args.palette?.params,
             progressDirection: args.progressDirection,
+            titlesTextAlign: args.titlesTextAlign,
+            valuesTextAlign: args.valuesTextAlign,
+            valueFontSize: args.valueFontSize,
             maxCols: args.maxCols,
             minTiles: args.minTiles,
             trends: args.trendline?.trends,
