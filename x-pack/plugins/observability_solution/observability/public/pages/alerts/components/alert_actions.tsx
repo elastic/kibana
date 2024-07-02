@@ -197,7 +197,7 @@ export function AlertActions({
 
   return (
     <>
-      {viewInAppUrl && !isInApp ? (
+      {viewInAppUrl !== '' && !isInApp ? (
         <EuiFlexItem>
           <EuiToolTip
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
@@ -211,7 +211,7 @@ export function AlertActions({
               })}
               color="text"
               onMouseOver={handleViewInAppUrl}
-              href={viewInAppUrl}
+              onClick={() => window.open(viewInAppUrl)}
               iconType="eye"
               size="s"
             />
