@@ -7,6 +7,8 @@
 
 import type { TransportResult } from '@elastic/elasticsearch';
 
+import { apiKeysMock } from '@kbn/core-security-server-mocks';
+
 import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
@@ -19,7 +21,10 @@ function createSetupMock() {
   const mockAuthz = authorizationMock.create();
   return {
     audit: auditServiceMock.create(),
-    authc: { getCurrentUser: jest.fn() },
+    authc: {
+      getCurrentUser: jest.fn(),
+      apiKeys: apiKeysMock.create(),
+    },
     authz: {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
