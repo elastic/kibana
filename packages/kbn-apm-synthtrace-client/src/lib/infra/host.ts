@@ -17,6 +17,10 @@ interface HostDocument extends Fields {
   'metricset.name'?: string;
   'event.module'?: string;
   'service.name'?: string;
+  'host.ip'?: string;
+  'host.os.name'?: string;
+  'host.os.version'?: string;
+  'cloud.provider'?: string;
 }
 
 class Host extends Entity<HostDocument> {
@@ -126,5 +130,9 @@ export function host(name: string): Host {
     'agent.id': 'synthtrace',
     'host.hostname': name,
     'host.name': name,
+    'host.ip': '10.128.0.2',
+    'host.os.name': 'Linux',
+    'host.os.version': '4.19.76-linuxkit',
+    'cloud.provider': 'gcp',
   });
 }
