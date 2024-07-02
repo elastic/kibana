@@ -5,35 +5,34 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { calculateAuto } from '@kbn/calculate-auto';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,
   APMTransactionErrorRateIndicator,
-  SyntheticsAvailabilityIndicator,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
+  SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
-import { getElasticsearchQueryOrThrow } from './transform_generators';
-
-import { buildParamValues } from './transform_generators/synthetics_availability';
-import { typedSearch } from '../utils/queries';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import { APMTransactionDurationIndicator } from '../domain/models';
 import { computeSLIForPreview } from '../domain/services';
+import { typedSearch } from '../utils/queries';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
-import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { buildParamValues } from './transform_generators/synthetics_availability';
 
 interface Options {
   range: {
@@ -44,8 +43,9 @@ interface Options {
   instanceId?: string;
   remoteName?: string;
   groupBy?: string;
-  groupings?: Record<string, unknown>;
+  groupings?: Record<string, string>;
 }
+
 export class GetPreviewData {
   constructor(
     private esClient: ElasticsearchClient,
@@ -70,7 +70,11 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    this.getGroupingsFilter(options, filter);
+
+    const groupingFilters = getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -171,7 +175,10 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -271,7 +278,10 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -339,7 +349,10 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -409,9 +422,10 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-
-    this.getGroupingsFilter(options, filter);
-
+    const groupingFilters = getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
@@ -463,8 +477,10 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = getGroupingsFilter(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -512,21 +528,6 @@ export class GetPreviewData {
         total: bucket.total?.doc_count ?? 0,
       },
     }));
-  }
-
-  private getGroupingsFilter(options: Options, filter: estypes.QueryDslQueryContainer[]) {
-    const groupingsKeys = Object.keys(options.groupings || []);
-    if (groupingsKeys.length) {
-      groupingsKeys.forEach((key) => {
-        filter.push({
-          term: { [key]: options.groupings?.[key] },
-        });
-      });
-    } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
-      filter.push({
-        term: { [options.groupBy]: options.instanceId },
-      });
-    }
   }
 
   private async getSyntheticsAvailabilityPreviewData(
@@ -671,5 +672,20 @@ export class GetPreviewData {
     } catch (err) {
       return [];
     }
+  }
+}
+
+function getGroupingsFilter(options: Options): estypes.QueryDslQueryContainer[] | undefined {
+  const groupingsKeys = Object.keys(options.groupings ?? {});
+  if (groupingsKeys.length) {
+    return groupingsKeys.map((key) => ({
+      term: { [key]: options.groupings![key] },
+    }));
+  } else if (options.instanceId !== ALL_VALUE && options.groupBy) {
+    return [
+      {
+        term: { [options.groupBy]: options.instanceId },
+      },
+    ];
   }
 }

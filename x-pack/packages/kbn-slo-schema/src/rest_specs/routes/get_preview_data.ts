@@ -22,7 +22,7 @@ const getPreviewDataParamsSchema = t.type({
       instanceId: t.string,
       groupBy: t.string,
       remoteName: t.string,
-      groupings: t.record(t.string, t.unknown),
+      groupings: t.record(t.string, t.string),
     }),
   ]),
 });

@@ -22,3 +22,5 @@ export * from './summary_client';
 export * from './get_slo_instances';
 export * from './find_slo_groups';
 export * from './get_slo_health';
+export * from './get_preview_data';
+export * from './get_preview_sli';
