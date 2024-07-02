@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { Logger } from '@kbn/core/server';
 import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_TIMEOUT, getDefaultArguments } from './constants';
 
 import { getMessageContentAndRole } from './helpers';
@@ -18,11 +19,10 @@ import { TraceOptions } from './types';
 const LLM_TYPE = 'ActionsClientLlm';
 
 interface ActionsClientLlmParams {
-  actions: ActionsPluginStart;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   llmType?: string;
   logger: Logger;
-  request: KibanaRequest;
   model?: string;
   temperature?: number;
   timeout?: number;
@@ -31,10 +31,9 @@ interface ActionsClientLlmParams {
 }
 
 export class ActionsClientLlm extends LLM {
-  #actions: ActionsPluginStart;
+  #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest;
   #traceId: string;
   #timeout?: number;
 
@@ -46,13 +45,12 @@ export class ActionsClientLlm extends LLM {
   temperature?: number;
 
   constructor({
-    actions,
+    actionsClient,
     connectorId,
     traceId = uuidv4(),
     llmType,
     logger,
     model,
-    request,
     temperature,
     timeout,
     traceOptions,
@@ -61,12 +59,11 @@ export class ActionsClientLlm extends LLM {
       callbacks: [...(traceOptions?.tracers ?? [])],
     });
 
-    this.#actions = actions;
+    this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
     this.#traceId = traceId;
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
-    this.#request = request;
     this.#timeout = timeout;
     this.model = model;
     this.temperature = temperature;
@@ -107,10 +104,7 @@ export class ActionsClientLlm extends LLM {
       },
     };
 
-    // create an actions client from the authenticated request context:
-    const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-
-    const actionResult = await actionsClient.execute(requestBody);
+    const actionResult = await this.#actionsClient.execute(requestBody);
 
     if (actionResult.status === 'error') {
       throw new Error(

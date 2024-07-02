@@ -34,6 +34,7 @@ import type {
 interface Props {
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   globalDataTags: GlobalDataTag[];
+  isDisabled?: boolean;
 }
 
 function parseValue(value: string | number): string | number {
@@ -50,6 +51,7 @@ function parseValue(value: string | number): string | number {
 export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
   updateAgentPolicy,
   globalDataTags,
+  isDisabled,
 }) => {
   const { overlays } = useStartServices();
   const [editTags, setEditTags] = useState<{ [k: number]: GlobalDataTag }>({});
@@ -358,6 +360,8 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
                   aria-label="Edit"
                   iconType="pencil"
                   color="text"
+                  data-test-subj={`globalDataTagEditField${index}Btn`}
+                  isDisabled={isDisabled}
                   onClick={() => handleStartEdit(index)}
                 />
               );
@@ -387,6 +391,8 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
                   aria-label="Delete"
                   iconType="trash"
                   color="text"
+                  data-test-subj={`globalDataTagDeleteField${index}Btn`}
+                  isDisabled={isDisabled}
                   onClick={() => deleteTag(index)}
                 />
               );
@@ -408,6 +414,7 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
       newTagErrors,
       deleteTag,
       handleStartEdit,
+      isDisabled,
     ]
   );
 
@@ -431,6 +438,8 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
                 iconType="plusInCircle"
                 onClick={handleAddField}
                 style={{ marginTop: '16px' }}
+                disabled={isDisabled}
+                data-test-subj="globalDataTagAddFieldBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.globalDataTagsTable.addFieldBtn"
@@ -449,7 +458,8 @@ export const GlobalDataTagsTable: React.FunctionComponent<Props> = ({
                 iconType="plusInCircle"
                 onClick={handleAddField}
                 style={{ marginTop: '16px' }}
-                isDisabled={isAdding}
+                isDisabled={isDisabled || isAdding}
+                data-test-subj="globalDataTagAddAnotherFieldBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.globalDataTagsTable.addAnotherFieldBtn"
