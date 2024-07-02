@@ -9,8 +9,8 @@ import React from 'react';
 
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../../../../common/utils/get_synthetics_monitor_url';
 import { STATE_ID } from '../../../../../common/field_names';
 import { SyntheticsMonitorStatusTranslations } from '../../../../../common/rules/synthetics/translations';
