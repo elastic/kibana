@@ -43,6 +43,7 @@ interface OwnProps {
   setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
@@ -69,6 +70,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   onCloseFlyout,
   onConversationSelected,
   conversations,
+  conversationsLoaded,
   refetchConversationsState,
   onConversationCreate,
   isAssistantEnabled,
@@ -158,6 +160,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
               setIsSettingsModalVisible={setIsSettingsModalVisible}
               onConversationSelected={onConversationSelected}
               conversations={conversations}
+              conversationsLoaded={conversationsLoaded}
               refetchConversationsState={refetchConversationsState}
               isFlyoutMode={true}
             />
