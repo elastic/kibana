@@ -37,19 +37,12 @@ import {
   SentinelOneDownloadAgentFileResponseSchema,
   SentinelOneGetActivitiesParamsSchema,
   SentinelOneGetActivitiesResponseSchema,
-  SentinelOneGetRemoteScriptResultsResponseSchema,
-  SentinelOneGetRemoteScriptResultsParamsSchema,
-  SentinelOneDownloadRemoteScriptResultsParamsSchema,
-  SentinelOneDownloadRemoteScriptResultsResponseSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 import {
   SentinelOneFetchAgentFilesParams,
   SentinelOneDownloadAgentFileParams,
   SentinelOneGetActivitiesParams,
-  SentinelOneGetRemoteScriptResultsParams,
-  SentinelOneDownloadRemoteScriptResultsParams,
-  SentinelOneGetRemoteScriptResultsApiResponse,
 } from '../../../common/sentinelone/types';
 
 export const API_MAX_RESULTS = 1000;
@@ -66,7 +59,6 @@ export class SentinelOneConnector extends SubActionConnector<
     remoteScripts: string;
     remoteScriptStatus: string;
     remoteScriptsExecute: string;
-    remoteScriptsResults: string;
     activities: string;
   };
 
@@ -79,7 +71,6 @@ export class SentinelOneConnector extends SubActionConnector<
       remoteScripts: `${this.config.url}${API_PATH}/remote-scripts`,
       remoteScriptStatus: `${this.config.url}${API_PATH}/remote-scripts/status`,
       remoteScriptsExecute: `${this.config.url}${API_PATH}/remote-scripts/execute`,
-      remoteScriptsResults: `${this.config.url}${API_PATH}/remote-scripts/fetch-files`,
       agents: `${this.config.url}${API_PATH}/agents`,
       activities: `${this.config.url}${API_PATH}/activities`,
     };
@@ -116,18 +107,6 @@ export class SentinelOneConnector extends SubActionConnector<
       name: SUB_ACTION.GET_REMOTE_SCRIPT_STATUS,
       method: 'getRemoteScriptStatus',
       schema: SentinelOneGetRemoteScriptStatusParamsSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.GET_REMOTE_SCRIPT_RESULTS,
-      method: 'getRemoteScriptResults',
-      schema: SentinelOneGetRemoteScriptResultsParamsSchema,
-    });
-
-    this.registerSubAction({
-      name: SUB_ACTION.DOWNLOAD_REMOTE_SCRIPT_RESULTS,
-      method: 'downloadRemoteScriptResults',
-      schema: SentinelOneDownloadRemoteScriptResultsParamsSchema,
     });
 
     this.registerSubAction({
@@ -298,47 +277,6 @@ export class SentinelOneConnector extends SubActionConnector<
       },
       responseSchema: SentinelOneGetRemoteScriptStatusResponseSchema,
     });
-  }
-
-  public async getRemoteScriptResults({ taskIds }: SentinelOneGetRemoteScriptResultsParams) {
-    return this.sentinelOneApiRequest({
-      url: this.urls.remoteScriptsResults,
-      method: 'post',
-      data: { data: { taskIds } },
-      responseSchema: SentinelOneGetRemoteScriptResultsResponseSchema,
-    }) as unknown as SentinelOneGetRemoteScriptResultsApiResponse;
-  }
-
-  public async downloadRemoteScriptResults({
-    taskId,
-  }: SentinelOneDownloadRemoteScriptResultsParams) {
-    const scriptResultsInfo = await this.getRemoteScriptResults({ taskIds: [taskId] });
-
-    this.logger.debug(
-      `script results for taskId [${taskId}]:\n${JSON.stringify(scriptResultsInfo)}`
-    );
-
-    let fileUrl: string = '';
-
-    for (const downloadLinkInfo of scriptResultsInfo.data.download_links) {
-      if (downloadLinkInfo.taskId === taskId) {
-        fileUrl = downloadLinkInfo.downloadUrl;
-        break;
-      }
-    }
-
-    if (!fileUrl) {
-      throw new Error(`Download URL for script results of task id [${taskId}] not found`);
-    }
-
-    const downloadConnection = await this.request({
-      url: fileUrl,
-      method: 'get',
-      responseType: 'stream',
-      responseSchema: SentinelOneDownloadRemoteScriptResultsResponseSchema,
-    });
-
-    return downloadConnection.data;
   }
 
   private async sentinelOneApiRequest<R extends SentinelOneBaseApiResponse>(
