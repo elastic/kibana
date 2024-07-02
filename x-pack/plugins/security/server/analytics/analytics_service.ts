@@ -231,10 +231,10 @@ const permissionsPolicyViolation: EventTypeOpts<PermissionsPolicyViolationEvent>
         optional: true,
       },
     },
-    featureId: {
+    policyId: {
       type: 'text',
       _meta: {
-        description: '"featureId" field of Reporting API permissions policy violation report.',
+        description: '"policyId" field of Reporting API permissions policy violation report.',
         optional: false,
       },
     },

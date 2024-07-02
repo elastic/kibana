@@ -40,6 +40,7 @@ kibana_vars=(
     csp.report_uri
     csp.report_to
     csp.report_only.form_action
+    permissionsPolicy.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
     data.search.asyncSearch.waitForCompletion
