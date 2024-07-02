@@ -7,10 +7,10 @@
 
 import type OpenAI from 'openai';
 import { Stream } from 'openai/streaming';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
-import { ActionsClientChatOpenAI, ActionsClientChatOpenAIParams } from './chat_openai';
+import { ActionsClientChatOpenAI } from './chat_openai';
 import { mockActionResponse, mockChatCompletion } from './mocks';
 
 const connectorId = 'mock-connector-id';
@@ -19,11 +19,8 @@ const mockExecute = jest.fn();
 
 const mockLogger = loggerMock.create();
 
-const mockActions = {
-  getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-    execute: mockExecute,
-  })),
-} as unknown as ActionsPluginStart;
+const actionsClient = actionsClientMock.create();
+
 const chunk = {
   object: 'chat.completion.chunk',
   choices: [
@@ -40,30 +37,15 @@ export async function* asyncGenerator() {
   yield chunk;
 }
 const mockStreamExecute = jest.fn();
-const mockStreamActions = {
-  getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-    execute: mockStreamExecute,
-  })),
-} as unknown as ActionsPluginStart;
 
 const prompt = 'Do you know my name?';
 
 const { signal } = new AbortController();
 
-const mockRequest = {
-  params: { connectorId },
-  body: {
-    message: prompt,
-    subAction: 'invokeAI',
-    isEnabledKnowledgeBase: true,
-  },
-} as ActionsClientChatOpenAIParams['request'];
-
 const defaultArgs = {
-  actions: mockActions,
+  actionsClient,
   connectorId,
   logger: mockLogger,
-  request: mockRequest,
   streaming: false,
   signal,
   timeout: 999999,
@@ -77,6 +59,7 @@ describe('ActionsClientChatOpenAI', () => {
       data: mockChatCompletion,
       status: 'ok',
     }));
+    actionsClient.execute.mockImplementation(mockExecute);
   });
 
   describe('_llmType', () => {
@@ -116,10 +99,11 @@ describe('ActionsClientChatOpenAI', () => {
       functions: [jest.fn()],
     };
     it('returns the expected data', async () => {
+      actionsClient.execute.mockImplementation(mockStreamExecute);
       const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
         ...defaultArgs,
         streaming: true,
-        actions: mockStreamActions,
+        actionsClient,
       });
 
       const result: AsyncIterable<OpenAI.ChatCompletionChunk> =
@@ -178,16 +162,11 @@ describe('ActionsClientChatOpenAI', () => {
         serviceMessage: 'action-result-service-message',
         status: 'error', // <-- error status
       }));
-
-      const badActions = {
-        getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-          execute: hasErrorStatus,
-        })),
-      } as unknown as ActionsPluginStart;
+      actionsClient.execute.mockRejectedValueOnce(hasErrorStatus);
 
       const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
         ...defaultArgs,
-        actions: badActions,
+        actionsClient,
       });
 
       expect(actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs))
