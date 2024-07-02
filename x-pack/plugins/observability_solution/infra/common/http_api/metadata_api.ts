@@ -48,7 +48,6 @@ export const InfraMetadataContainerRT = rt.partial({
   name: rt.string,
   id: rt.string,
   runtime: rt.string,
-  imageName: rt.string,
   image: rt.partial({ name: rt.string }),
 });
 
