@@ -60,7 +60,7 @@ added like this to a test suite:
 
 ```
 describe('my test suite', function () {
-  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
+  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']); // SKIPS ON ALL ENVIRONMENTS, INCLUDING MKI
   // or for a single tag: this.tags('skipSvlSec');
   [...]
 });
