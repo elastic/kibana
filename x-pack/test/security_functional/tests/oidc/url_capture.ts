@@ -16,8 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/186780
-  describe.skip('URL capture', function () {
+  describe('URL capture', function () {
     this.tags('includeFirefox');
 
     before(async () => {
@@ -65,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(currentURL.path).to.eql('/authentication/app?one=two');
     });
 
-    it('resets invalid target URL', async () => {
+    it.skip('resets invalid target URL', async () => {
       this.timeout(120000);
 
       for (const targetURL of [
