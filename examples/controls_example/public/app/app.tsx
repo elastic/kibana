@@ -16,6 +16,7 @@ import {
   EuiTab,
   EuiTabs,
 } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 
@@ -47,35 +48,37 @@ const App = ({
   }
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageSection>
-          <EuiPageHeader pageTitle="Controls" />
-        </EuiPageSection>
-        <EuiPageTemplate.Section>
+    <I18nProvider>
+      <EuiPage>
+        <EuiPageBody>
           <EuiPageSection>
-            <EuiTabs>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(CONTROLS_REFACTOR_TEST)}
-                isSelected={CONTROLS_REFACTOR_TEST === selectedTabId}
-              >
-                Register a new React control
-              </EuiTab>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(CONTROLS_AS_A_BUILDING_BLOCK)}
-                isSelected={CONTROLS_AS_A_BUILDING_BLOCK === selectedTabId}
-              >
-                Controls as a building block
-              </EuiTab>
-            </EuiTabs>
-
-            <EuiSpacer />
-
-            {renderTabContent()}
+            <EuiPageHeader pageTitle="Controls" />
           </EuiPageSection>
-        </EuiPageTemplate.Section>
-      </EuiPageBody>
-    </EuiPage>
+          <EuiPageTemplate.Section>
+            <EuiPageSection>
+              <EuiTabs>
+                <EuiTab
+                  onClick={() => onSelectedTabChanged(CONTROLS_REFACTOR_TEST)}
+                  isSelected={CONTROLS_REFACTOR_TEST === selectedTabId}
+                >
+                  Register a new React control
+                </EuiTab>
+                <EuiTab
+                  onClick={() => onSelectedTabChanged(CONTROLS_AS_A_BUILDING_BLOCK)}
+                  isSelected={CONTROLS_AS_A_BUILDING_BLOCK === selectedTabId}
+                >
+                  Controls as a building block
+                </EuiTab>
+              </EuiTabs>
+
+              <EuiSpacer />
+
+              {renderTabContent()}
+            </EuiPageSection>
+          </EuiPageTemplate.Section>
+        </EuiPageBody>
+      </EuiPage>
+    </I18nProvider>
   );
 };
 

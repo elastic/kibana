@@ -1,25 +1,16 @@
 .rangeSliderAnchor__button {
   .euiFormControlLayout {
-    align-items: center;
     box-shadow: none;
-    background-color: transparent;
-
-    .euiFormControlLayout__childrenWrapper {
-      background-color: transparent;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      border-top-right-radius: $euiBorderRadius;
-      border-bottom-right-radius: $euiBorderRadius;
-
-      .euiFormControlLayoutDelimited__delimiter, .euiFormControlLayoutIcons--static {
-        height: auto !important;
-      }
-    }
+    background-color: transparent !important;
   }
 
   .rangeSlider__invalidToken {
-    height: $euiSizeS * 2;
     padding: 0 $euiSizeS;
+    display: flex;
+
+    .euiToolTipAnchor {
+      align-self: center;
+    }
 
     .euiIcon {
       background-color: transparent;
@@ -32,9 +23,7 @@
 
 .rangeSliderAnchor__fieldNumber {
   font-weight: $euiFontWeightMedium;
-  box-shadow: none;
-  text-align: center;
-  background-color: transparent;
+  height: calc($euiButtonHeight - 3px) !important;
 
   &.rangeSliderAnchor__fieldNumber--valid:invalid:not(:focus) {
     background-image: none; // override the red underline for values between steps

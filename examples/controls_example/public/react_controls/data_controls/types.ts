@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CanClearSelections } from '@kbn/controls-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import {
@@ -25,7 +24,6 @@ import {
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesPanelTitle, 'hidePanelTitle'> & // control titles cannot be hidden
   HasEditCapabilities &
-  CanClearSelections &
   PublishesDataViews &
   PublishesFilters & {
     setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter

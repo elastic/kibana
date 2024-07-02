@@ -185,10 +185,10 @@ export const getSearchControlFactory = ({
       return {
         api,
         /**
-         * The `conrolStyleProps` prop is necessary because it contains the props from the generic
+         * The `controlPanelClassNamess` prop is necessary because it contains the class names from the generic
          * ControlPanel that are necessary for styling
          */
-        Component: (conrolStyleProps) => {
+        Component: (controlPanelClassNames) => {
           const currentSearch = useStateFromPublishingSubject(searchString);
 
           useEffect(() => {
@@ -202,7 +202,7 @@ export const getSearchControlFactory = ({
 
           return (
             <EuiFieldSearch
-              {...conrolStyleProps}
+              {...controlPanelClassNames}
               incremental={true}
               isClearable={false} // this will be handled by the clear floating action instead
               value={currentSearch ?? ''}
