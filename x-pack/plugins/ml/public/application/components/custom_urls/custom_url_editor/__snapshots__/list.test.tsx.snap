@@ -6,6 +6,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
 >
   <EuiFlexGroup
     data-test-subj="mlJobEditCustomUrlItem_0"
+    direction="column"
     key="url_0"
   >
     <EuiFlexItem
@@ -59,102 +60,110 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         />
       </EuiFormRow>
     </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+    <EuiFlexGroup
+      data-test-subj="mlJobEditCustomUrlItem_0"
+      direction="row"
+      key="url_0_button_group"
+      responsive={false}
     >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        isInvalid={false}
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Time range"
-            id="xpack.ml.customUrlEditorList.timeRangeLabel"
-          />
-        }
-        labelType="label"
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiFieldText
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          error={Array []}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
           isInvalid={false}
-          onChange={[Function]}
-          placeholder="auto"
-          value="auto"
-        />
-      </EuiFormRow>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={true}
-        labelType="label"
-      >
-        <EuiToolTip
-          content={
+          label={
             <Memo(MemoizedFormattedMessage)
-              defaultMessage="Test custom URL"
-              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlEditorList.timeRangeLabel"
             />
           }
-          delay="regular"
-          display="inlineBlock"
-          position="top"
+          labelType="label"
         >
-          <EuiButtonIcon
-            aria-label="Test custom URL"
-            color="primary"
-            data-test-subj="mlJobEditTestCustomUrlButton"
-            iconType="popout"
-            onClick={[Function]}
-            size="s"
+          <EuiFieldText
+            isInvalid={false}
+            onChange={[Function]}
+            placeholder="auto"
+            value="auto"
           />
-        </EuiToolTip>
-      </EuiFormRow>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={true}
-        labelType="label"
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiToolTip
-          content={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Delete custom URL"
-              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
-            />
-          }
-          delay="regular"
-          display="inlineBlock"
-          position="top"
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          hasChildLabel={true}
+          hasEmptyLabelSpace={true}
+          labelType="label"
         >
-          <EuiButtonIcon
-            aria-label="Delete custom URL"
-            color="danger"
-            data-test-subj="mlJobEditDeleteCustomUrlButton_0"
-            iconType="trash"
-            onClick={[Function]}
-            size="s"
-          />
-        </EuiToolTip>
-      </EuiFormRow>
-    </EuiFlexItem>
+          <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Test custom URL"
+                id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Test custom URL"
+              color="primary"
+              data-test-subj="mlJobEditTestCustomUrlButton"
+              iconType="popout"
+              onClick={[Function]}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          hasChildLabel={true}
+          hasEmptyLabelSpace={true}
+          labelType="label"
+        >
+          <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Delete custom URL"
+                id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Delete custom URL"
+              color="danger"
+              data-test-subj="mlJobEditDeleteCustomUrlButton_0"
+              iconType="trash"
+              onClick={[Function]}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiFlexGroup>
   <EuiSpacer
     size="m"
   />
   <EuiFlexGroup
     data-test-subj="mlJobEditCustomUrlItem_1"
+    direction="column"
     key="url_1"
   >
     <EuiFlexItem
@@ -208,102 +217,110 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         />
       </EuiFormRow>
     </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+    <EuiFlexGroup
+      data-test-subj="mlJobEditCustomUrlItem_1"
+      direction="row"
+      key="url_1_button_group"
+      responsive={false}
     >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        isInvalid={false}
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Time range"
-            id="xpack.ml.customUrlEditorList.timeRangeLabel"
-          />
-        }
-        labelType="label"
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiFieldText
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          error={Array []}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
           isInvalid={false}
-          onChange={[Function]}
-          placeholder="auto"
-          value="1h"
-        />
-      </EuiFormRow>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={true}
-        labelType="label"
-      >
-        <EuiToolTip
-          content={
+          label={
             <Memo(MemoizedFormattedMessage)
-              defaultMessage="Test custom URL"
-              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlEditorList.timeRangeLabel"
             />
           }
-          delay="regular"
-          display="inlineBlock"
-          position="top"
+          labelType="label"
         >
-          <EuiButtonIcon
-            aria-label="Test custom URL"
-            color="primary"
-            data-test-subj="mlJobEditTestCustomUrlButton"
-            iconType="popout"
-            onClick={[Function]}
-            size="s"
+          <EuiFieldText
+            isInvalid={false}
+            onChange={[Function]}
+            placeholder="auto"
+            value="1h"
           />
-        </EuiToolTip>
-      </EuiFormRow>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={true}
-        labelType="label"
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiToolTip
-          content={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Delete custom URL"
-              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
-            />
-          }
-          delay="regular"
-          display="inlineBlock"
-          position="top"
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          hasChildLabel={true}
+          hasEmptyLabelSpace={true}
+          labelType="label"
         >
-          <EuiButtonIcon
-            aria-label="Delete custom URL"
-            color="danger"
-            data-test-subj="mlJobEditDeleteCustomUrlButton_1"
-            iconType="trash"
-            onClick={[Function]}
-            size="s"
-          />
-        </EuiToolTip>
-      </EuiFormRow>
-    </EuiFlexItem>
+          <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Test custom URL"
+                id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Test custom URL"
+              color="primary"
+              data-test-subj="mlJobEditTestCustomUrlButton"
+              iconType="popout"
+              onClick={[Function]}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          hasChildLabel={true}
+          hasEmptyLabelSpace={true}
+          labelType="label"
+        >
+          <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Delete custom URL"
+                id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Delete custom URL"
+              color="danger"
+              data-test-subj="mlJobEditDeleteCustomUrlButton_1"
+              iconType="trash"
+              onClick={[Function]}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiFlexGroup>
   <EuiSpacer
     size="m"
   />
   <EuiFlexGroup
     data-test-subj="mlJobEditCustomUrlItem_2"
+    direction="column"
     key="url_2"
   >
     <EuiFlexItem
@@ -357,96 +374,103 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
         />
       </EuiFormRow>
     </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
+    <EuiFlexGroup
+      data-test-subj="mlJobEditCustomUrlItem_2"
+      direction="row"
+      key="url_2_button_group"
+      responsive={false}
     >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        error={Array []}
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        isInvalid={false}
-        label={
-          <Memo(MemoizedFormattedMessage)
-            defaultMessage="Time range"
-            id="xpack.ml.customUrlEditorList.timeRangeLabel"
-          />
-        }
-        labelType="label"
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiFieldText
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          error={Array []}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
           isInvalid={false}
-          onChange={[Function]}
-          placeholder="auto"
-          value="auto"
-        />
-      </EuiFormRow>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={true}
-        labelType="label"
-      >
-        <EuiToolTip
-          content={
+          label={
             <Memo(MemoizedFormattedMessage)
-              defaultMessage="Test custom URL"
-              id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              defaultMessage="Time range"
+              id="xpack.ml.customUrlEditorList.timeRangeLabel"
             />
           }
-          delay="regular"
-          display="inlineBlock"
-          position="top"
+          labelType="label"
         >
-          <EuiButtonIcon
-            aria-label="Test custom URL"
-            color="primary"
-            data-test-subj="mlJobEditTestCustomUrlButton"
-            iconType="popout"
-            onClick={[Function]}
-            size="s"
+          <EuiFieldText
+            isInvalid={false}
+            onChange={[Function]}
+            placeholder="auto"
+            value="auto"
           />
-        </EuiToolTip>
-      </EuiFormRow>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={true}
-        labelType="label"
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
       >
-        <EuiToolTip
-          content={
-            <Memo(MemoizedFormattedMessage)
-              defaultMessage="Delete custom URL"
-              id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
-            />
-          }
-          delay="regular"
-          display="inlineBlock"
-          position="top"
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          hasChildLabel={true}
+          hasEmptyLabelSpace={true}
+          labelType="label"
         >
-          <EuiButtonIcon
-            aria-label="Delete custom URL"
-            color="danger"
-            data-test-subj="mlJobEditDeleteCustomUrlButton_2"
-            iconType="trash"
-            onClick={[Function]}
-            size="s"
-          />
-        </EuiToolTip>
-      </EuiFormRow>
-    </EuiFlexItem>
+          <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Test custom URL"
+                id="xpack.ml.customUrlEditorList.testCustomUrlTooltip"
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Test custom URL"
+              color="primary"
+              data-test-subj="mlJobEditTestCustomUrlButton"
+              iconType="popout"
+              onClick={[Function]}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiFormRow
+          describedByIds={Array []}
+          display="row"
+          hasChildLabel={true}
+          hasEmptyLabelSpace={true}
+          labelType="label"
+        >
+          <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Delete custom URL"
+                id="xpack.ml.customUrlEditorList.deleteCustomUrlTooltip"
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <EuiButtonIcon
+              aria-label="Delete custom URL"
+              color="danger"
+              data-test-subj="mlJobEditDeleteCustomUrlButton_2"
+              iconType="trash"
+              onClick={[Function]}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   </EuiFlexGroup>
   <EuiSpacer
     size="m"
