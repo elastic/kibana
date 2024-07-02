@@ -11,6 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import SemVer from 'semver/classes/semver';
 
 import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
+import { AirdropKibanaProvider } from '@kbn/airdrops';
 
 import { API_BASE_PATH } from '../../common';
 import {
@@ -49,7 +50,14 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
     theme,
   } = core;
   const startServices = { analytics, i18n, overlays, theme };
-  const { services, setBreadcrumbs, uiSettings, settings, kibanaVersion } = dependencies;
+  const {
+    services,
+    setBreadcrumbs,
+    uiSettings,
+    settings,
+    kibanaVersion,
+    plugins: { airdrop },
+  } = dependencies;
 
   // theme is required by the CodeEditor component used to edit runtime field Painless scripts.
   const { Provider: KibanaReactContextProvider } =
@@ -81,11 +89,13 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
       <KibanaReactContextProvider>
         <Provider store={indexManagementStore(services)}>
           <AppContextProvider value={dependencies}>
-            <MappingsEditorProvider>
-              <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
-              </ComponentTemplatesProvider>
-            </MappingsEditorProvider>
+            <AirdropKibanaProvider airdrop={airdrop}>
+              <MappingsEditorProvider>
+                <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+                  <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
+                </ComponentTemplatesProvider>
+              </MappingsEditorProvider>
+            </AirdropKibanaProvider>
           </AppContextProvider>
         </Provider>
       </KibanaReactContextProvider>

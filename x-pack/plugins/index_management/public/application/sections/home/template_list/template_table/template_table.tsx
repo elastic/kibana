@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useState, Fragment, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -26,6 +26,7 @@ interface Props {
   reload: UseRequestResponse['resendRequest'];
   editTemplate: (name: string) => void;
   cloneTemplate: (name: string) => void;
+  onSelectionChange: (selectedItems: TemplateListItem[]) => void;
   history: ScopedHistory;
 }
 
@@ -35,6 +36,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   editTemplate,
   cloneTemplate,
   history,
+  onSelectionChange,
 }) => {
   const { uiMetricService } = useServices();
   const [selection, setSelection] = useState<TemplateListItem[]>([]);
@@ -260,6 +262,10 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
   const goToList = () => {
     return history.push('templates');
   };
+
+  useEffect(() => {
+    onSelectionChange(selection);
+  }, [selection, onSelectionChange]);
 
   return (
     <Fragment>

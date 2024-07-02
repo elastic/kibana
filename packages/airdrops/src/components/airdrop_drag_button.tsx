@@ -14,18 +14,29 @@ import { DragWrapper, Props as DragWrapperProps } from './drag_wrapper';
 export interface Props<T = unknown> extends Omit<DragWrapperProps<T>, 'children'> {
   size?: EuiButtonIconProps['size'];
   iconSize?: EuiButtonIconProps['iconSize'];
+  display?: EuiButtonIconProps['display'];
 }
 
-export function AirdropDragButton<T>({ size = 's', iconSize = 'm', ...rest }: Props<T>) {
+export function AirdropDragButton<T>({
+  size = 's',
+  iconSize = 'm',
+  display = 'base',
+  ...rest
+}: Props<T>) {
   return (
     <DragWrapper {...rest}>
-      <EuiButtonIcon
-        display="base"
-        iconSize={iconSize}
-        size={size}
-        iconType="watchesApp"
-        aria-label="Next"
-      />
+      {({ isLoadingContent }) => {
+        return (
+          <EuiButtonIcon
+            iconType="grab"
+            size={size}
+            iconSize={iconSize}
+            display={display}
+            isDisabled={isLoadingContent}
+            aria-label="Drag"
+          />
+        );
+      }}
     </DragWrapper>
   );
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { type DragEvent } from 'react';
+import React, { type DragEvent, useState, useEffect, useRef } from 'react';
 import { TRANSFER_DATA_TYPE } from '../constants';
 
 import { useAirdrop } from '../services';
@@ -14,18 +14,22 @@ import type { Airdrop, AirdropContent } from '../types';
 
 export interface Props<T = unknown> {
   content: AirdropContent<T>;
-  children: React.ReactNode;
+  children: ({ isLoadingContent }: { isLoadingContent: boolean }) => React.ReactNode;
 }
 
 export function DragWrapper<T>({ content, children }: Props<T>) {
   const { setIsDragging } = useAirdrop();
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
+  const [asyncContent, setAsyncContent] = useState<T | undefined>();
+  const idx = useRef(0);
 
   const onDragStart = (e: DragEvent) => {
     setIsDragging(true);
+
     const airdrop: Airdrop<T> = {
       id: content.id,
       app: content.app,
-      content: content.get(),
+      content: content.get ? content.get() : asyncContent!,
     };
     const serializedData = JSON.stringify(airdrop);
     e.dataTransfer.setData(TRANSFER_DATA_TYPE, serializedData);
@@ -34,6 +38,23 @@ export function DragWrapper<T>({ content, children }: Props<T>) {
   const onDragEnd = () => {
     setIsDragging(false);
   };
+
+  useEffect(() => {
+    if (!content.get && !content.getAsync) {
+      throw new Error('AirdropContent must have either a get or getAsync method');
+    }
+
+    if (content.getAsync) {
+      const currentIdx = idx.current;
+      setIsLoadingContent(true);
+
+      content.getAsync().then((value) => {
+        if (currentIdx !== idx.current) return;
+        setIsLoadingContent(false);
+        setAsyncContent(value);
+      });
+    }
+  }, [content]);
 
   return (
     <div
@@ -46,7 +67,7 @@ export function DragWrapper<T>({ content, children }: Props<T>) {
         transform: 'translate(0, 0)', // avoids parent bkg rendering
       }}
     >
-      {children}
+      {children({ isLoadingContent })}
     </div>
   );
 }

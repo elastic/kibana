@@ -44,5 +44,6 @@ export interface Airdrop<T = unknown> {
 }
 
 export interface AirdropContent<T = unknown> extends Omit<Airdrop<T>, 'content'> {
-  get: () => T;
+  get?: () => T;
+  getAsync?: () => Promise<T>;
 }

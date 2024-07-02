@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
 import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 import { AirdropKibanaProvider } from '@kbn/airdrops';
-import type { AirdropPluginStart } from '@kbn/airdrop-plugin';
+import type { AirdropPluginStart } from '@kbn/airdrop-plugin/public';
 
 import {
   CloudSetup,

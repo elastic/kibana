@@ -12,7 +12,7 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
 import { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
-import type { AirdropPluginStart } from '@kbn/airdrop-plugin';
+import type { AirdropPluginStart } from '@kbn/airdrop-plugin/public';
 
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';

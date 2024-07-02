@@ -37,6 +37,7 @@ interface Props<T = unknown> extends Omit<AirdropDragButtonProps<T>, 'content'> 
 export function AirdropPopover<T>({
   description,
   group,
+  display = 'empty',
   iconSize,
   size,
   cssPopover,
@@ -55,9 +56,35 @@ export function AirdropPopover<T>({
   const content = useMemo<AirdropDragButtonProps['content']>(() => {
     if (_content) return _content;
 
+    const hasAsyncGetters = selectedContent.some((c) => Boolean(c.getAsync));
+    if (hasAsyncGetters) {
+      return {
+        id: '__group__',
+        getAsync: async () => {
+          const asyncContent: { [id: string]: unknown } = {};
+          await Promise.all(
+            selectedContent.map((c) => {
+              if (!c.get && !c.getAsync) {
+                throw new Error('AirdropContent must have either a get or getAsync method');
+              }
+              const promise = c.getAsync ? c.getAsync() : Promise.resolve(c.get!());
+              return promise.then((v) => (asyncContent[c.id] = v));
+            })
+          );
+          return asyncContent;
+        },
+      };
+    }
+
     return {
       id: '__group__',
-      get: () => selectedContent.reduce((acc, c) => ({ ...acc, [c.id]: c.get() }), {}),
+      get: () =>
+        selectedContent.reduce((acc, c) => {
+          if (!c.get) {
+            throw new Error('AirdropContent must have a get method');
+          }
+          return { ...acc, [c.id]: c.get() };
+        }, {}),
     };
   }, [_content, selectedContent]);
 
@@ -66,7 +93,7 @@ export function AirdropPopover<T>({
       css={cssPopover}
       button={
         <EuiButtonIcon
-          display="empty"
+          display={display}
           iconSize={iconSize}
           size={size}
           iconType="share"
@@ -95,9 +122,11 @@ export function AirdropPopover<T>({
       </div>
       <EuiPopoverFooter>
         <DragWrapper content={content}>
-          <EuiButton iconType="grab" fullWidth size="s">
-            Drag on other Kibana window
-          </EuiButton>
+          {({ isLoadingContent }) => (
+            <EuiButton iconType="grab" fullWidth size="s" disabled={isLoadingContent}>
+              Drag on other Kibana window
+            </EuiButton>
+          )}
         </DragWrapper>
       </EuiPopoverFooter>
     </EuiPopover>
