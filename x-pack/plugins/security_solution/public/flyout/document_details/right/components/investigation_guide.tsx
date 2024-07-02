@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,7 +25,7 @@ import {
  */
 export const InvestigationGuide: React.FC = () => {
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview } =
+  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview, isPreviewMode } =
     useDocumentDetailsContext();
 
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
@@ -45,6 +45,11 @@ export const InvestigationGuide: React.FC = () => {
       },
     });
   }, [eventId, indexName, openLeftPanel, scopeId]);
+
+  const hasInvesigationGuide = useMemo(
+    () => !error && basicAlertData && basicAlertData.ruleId && ruleNote,
+    [error, basicAlertData, ruleNote]
+  );
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={INVESTIGATION_GUIDE_TEST_ID}>
@@ -71,7 +76,12 @@ export const InvestigationGuide: React.FC = () => {
             { defaultMessage: 'investigation guide' }
           )}
         />
-      ) : !error && basicAlertData.ruleId && ruleNote ? (
+      ) : hasInvesigationGuide && isPreviewMode ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.openFlyoutMessage"
+          defaultMessage="Open alert details to access investigation guides."
+        />
+      ) : hasInvesigationGuide ? (
         <EuiFlexItem>
           <EuiButton
             onClick={goToInvestigationsTab}
@@ -93,7 +103,7 @@ export const InvestigationGuide: React.FC = () => {
       ) : (
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.investigation.investigationGuide.noDataDescription"
-          defaultMessage="There’s no investigation guide for this rule."
+          defaultMessage="There's no investigation guide for this rule."
         />
       )}
     </EuiFlexGroup>
