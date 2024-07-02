@@ -6,29 +6,28 @@
  */
 
 import React from 'react';
+import { EuiCard } from '@elastic/eui';
 
-import { EuiButton, EuiCard } from '@elastic/eui';
-
-import * as i18n from '../../../common/translations';
-
-interface MultilingualE5PromptProps {
+interface EndpointPromptProps {
   setIsInferenceFlyoutVisible: (value: boolean) => void;
+  title: string;
+  description: string;
+  footer: React.ReactElement;
 }
 
-export const MultilingualE5Prompt: React.FC<MultilingualE5PromptProps> = ({
+export const EndpointPrompt: React.FC<EndpointPromptProps> = ({
   setIsInferenceFlyoutVisible,
+  title,
+  description,
+  footer,
 }) => (
   <EuiCard
     display="plain"
-    hasBorder
     textAlign="left"
     data-test-subj="multilingualE5PromptForEmptyState"
-    title={i18n.E5_TITLE}
-    description={i18n.E5_DESCRIPTION}
-    footer={
-      <EuiButton iconType="plusInCircle" onClick={() => setIsInferenceFlyoutVisible(true)}>
-        {i18n.ADD_ENDPOINT_LABEL}
-      </EuiButton>
-    }
+    title={title}
+    titleSize="xs"
+    description={description}
+    footer={footer}
   />
 );

@@ -21,6 +21,7 @@ import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SearchConnectorsPluginSetup } from '@kbn/search-connectors-plugin/server';
@@ -95,6 +96,7 @@ interface PluginsSetup {
   guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
+  licensing: LicensingPluginStart;
   searchConnectors?: SearchConnectorsPluginSetup;
   security: SecurityPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -148,6 +150,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       logsShared,
       customIntegrations,
       ml,
+      licensing,
       guidedOnboarding,
       cloud,
       searchConnectors,
@@ -262,6 +265,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       log,
       enterpriseSearchRequestHandler,
       ml,
+      licensing,
     };
 
     registerConfigDataRoute(dependencies);
