@@ -7,6 +7,7 @@
  */
 
 import { Serializable, SerializableRecord } from '@kbn/utility-types';
+import { ReactNode } from 'react';
 import { FieldFormat } from './field_format';
 import { FieldFormatsRegistry } from './field_formats_registry';
 
@@ -26,7 +27,7 @@ export interface HtmlContextTypeOptions {
  * To html converter function
  * @public
  */
-export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
+export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => ReactNode;
 
 /**
  * Plain text converter options
