@@ -149,6 +149,7 @@ export const EventColumnView = React.memo<Props>(
                   toggleShowNotes={toggleShowNotes}
                   setEventsLoading={setEventsLoading}
                   setEventsDeleted={setEventsDeleted}
+                  disablePinAction={false}
                 />
               )}
             </EventsTdGroupActions>

@@ -52,6 +52,7 @@ export const TimelineControlColumnCellRender = memo(function TimelineControlColu
       loadingEventIds={props.loadingEventIds}
       toggleShowNotes={props.toggleShowNotes}
       disableExpandAction
+      disablePinAction={false}
     />
   );
 });

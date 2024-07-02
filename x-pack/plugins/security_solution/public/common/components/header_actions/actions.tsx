@@ -66,6 +66,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   timelineId,
   refetch,
   toggleShowNotes,
+  disablePinAction = true,
 }) => {
   const dispatch = useDispatch();
 
@@ -238,6 +239,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled, expandableFlyoutDisabled]
   );
 
+  const noteIds = useMemo(() => {
+    return securitySolutionNotesEnabled && !expandableFlyoutDisabled
+      ? documentBasedNotes.map((note) => note.noteId)
+      : timelineNoteIds;
+  }, [documentBasedNotes, timelineNoteIds, securitySolutionNotesEnabled, expandableFlyoutDisabled]);
+
   return (
     <ActionsContainer>
       <>
@@ -273,26 +280,26 @@ const ActionsComponent: React.FC<ActionProps> = ({
           )}
         </>
         {!isEventViewer && showNotes && (
-          <>
-            <AddEventNoteAction
-              ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
-              key="add-event-note"
-              timelineType={timelineType}
-              notesCount={notesCount}
-              eventId={eventId}
-              toggleShowNotes={toggleShowNotes}
-            />
+          <AddEventNoteAction
+            ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
+            key="add-event-note"
+            timelineType={timelineType}
+            notesCount={notesCount}
+            eventId={eventId}
+            toggleShowNotes={toggleShowNotes}
+          />
+        )}
 
-            <PinEventAction
-              ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
-              isAlert={isAlert(eventType)}
-              key="pin-event"
-              onPinClicked={handlePinClicked}
-              noteIds={timelineNoteIds}
-              eventIsPinned={isEventPinned}
-              timelineType={timelineType}
-            />
-          </>
+        {!isEventViewer && !disablePinAction && (
+          <PinEventAction
+            ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+            isAlert={isAlert(eventType)}
+            key="pin-event"
+            onPinClicked={handlePinClicked}
+            noteIds={noteIds}
+            eventIsPinned={isEventPinned}
+            timelineType={timelineType}
+          />
         )}
         <AlertContextMenu
           ariaLabel={i18n.MORE_ACTIONS_FOR_ROW({ ariaRowindex, columnValues })}

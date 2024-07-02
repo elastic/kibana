@@ -112,6 +112,7 @@ export interface ActionProps {
   timelineId: string;
   toggleShowNotes?: () => void;
   width?: number;
+  disablePinAction?: boolean;
 }
 
 interface AdditionalControlColumnProps {

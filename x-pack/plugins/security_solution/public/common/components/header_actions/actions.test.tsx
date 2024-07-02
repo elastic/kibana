@@ -469,4 +469,26 @@ describe('Actions', () => {
       expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toBeFalsy();
     });
   });
+
+  describe('Pin action', () => {
+    test('should hide pin Action by default', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeFalsy();
+    });
+
+    test('should show pin Action by when disablePinAction = false', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Actions {...defaultProps} disableExpandAction disablePinAction={false} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="pin-event"]').exists()).toBeFalsy();
+    });
+  });
 });

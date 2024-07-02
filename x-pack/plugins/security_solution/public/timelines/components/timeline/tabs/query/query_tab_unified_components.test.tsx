@@ -1104,4 +1104,97 @@ describe('query tab with unified timeline', () => {
       });
     });
   });
+
+  describe('Leading actions - pin', () => {
+    describe('securitySolutionNotesEnabled = true', () => {
+      beforeEach(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+          jest.fn((feature: keyof ExperimentalFeatures) => {
+            if (feature === 'unifiedComponentsInTimelineEnabled') {
+              return true;
+            }
+            if (feature === 'securitySolutionNotesEnabled') {
+              return true;
+            }
+            return allowedExperimentalValues[feature];
+          })
+        );
+      });
+      it(
+        'should have the pin button with correct tooltip',
+        async () => {
+          renderTestComponents();
+
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          expect(screen.getAllByTestId('pin')).toHaveLength(1);
+          // disabled because it is already pinned
+          expect(screen.getByTestId('pin')).toBeDisabled();
+
+          fireEvent.mouseOver(screen.getByTestId('pin'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
+              'This event cannot be unpinned because it has notes'
+            );
+            /*
+             * Above event is alert and not an event but `getEventType` in
+             *x-pack/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
+             * returns it has event and not an alert even though, it has event.kind as signal.
+             * Need to see if it is okay
+             *
+             * */
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+    });
+
+    describe('securitySolutionNotesEnabled = false', () => {
+      beforeEach(() => {
+        (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+          jest.fn((feature: keyof ExperimentalFeatures) => {
+            if (feature === 'unifiedComponentsInTimelineEnabled') {
+              return true;
+            }
+            if (feature === 'securitySolutionNotesEnabled') {
+              return false;
+            }
+            return allowedExperimentalValues[feature];
+          })
+        );
+      });
+
+      it(
+        'should have the pin button with correct tooltip',
+        async () => {
+          renderTestComponents();
+
+          expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+          expect(screen.getAllByTestId('pin')).toHaveLength(1);
+          // disabled because it is already pinned
+          expect(screen.getByTestId('pin')).toBeDisabled();
+
+          fireEvent.mouseOver(screen.getByTestId('pin'));
+
+          await waitFor(() => {
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toBeVisible();
+            expect(screen.getByTestId('timeline-action-pin-tool-tip')).toHaveTextContent(
+              'This event cannot be unpinned because it has notes'
+            );
+            /*
+             * Above event is alert and not an event but `getEventType` in
+             * x-pack/plugins/security_solution/public/timelines/components/timeline/body/helpers.tsx
+             * returns it has event and not an alert even though, it has event.kind as signal.
+             * Need to see if it is okay
+             *
+             * */
+          });
+        },
+        SPECIAL_TEST_TIMEOUT
+      );
+    });
+  });
 });
