@@ -84,8 +84,10 @@ export default ({ getService }: FtrProviderContext) => {
     'user.name': ['root'],
   };
 
-  // The tests described in this file rely on the 'alertSuppressionForMachineLearningRuleEnabled' feature flag
-  describe('@ess @serverless @serverlessQA Machine Learning Detection Rule - Alert Suppression', () => {
+  // The tests described in this file rely on the
+  // 'alertSuppressionForMachineLearningRuleEnabled' feature flag, and are thus
+  // skipped in MKI
+  describe('@ess @serverless @skipInServerlessMKI Machine Learning Detection Rule - Alert Suppression', () => {
     describe('with an active ML Job', () => {
       before(async () => {
         // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
