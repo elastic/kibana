@@ -487,8 +487,10 @@ export class DataViewsService {
    */
   clearInstanceCache = (id?: string) => {
     if (id) {
+      this.dataViewLazyCache.delete(id);
       this.dataViewCache.delete(id);
     } else {
+      this.dataViewLazyCache.clear();
       this.dataViewCache.clear();
     }
   };
