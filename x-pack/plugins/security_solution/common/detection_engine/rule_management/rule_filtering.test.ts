@@ -62,7 +62,7 @@ describe('convertRulesFilterToKQL', () => {
   it('handles presence of "tags" properly', () => {
     const kql = convertRulesFilterToKQL({ ...filterOptions, tags: ['tag1', 'tag2'] });
 
-    expect(kql).toBe('alert.attributes.tags:("tag1" AND "tag2")');
+    expect(kql).toBe('alert.attributes.tags:("tag1" OR "tag2")');
   });
 
   it('handles combination of different properties properly', () => {
@@ -74,7 +74,7 @@ describe('convertRulesFilterToKQL', () => {
     });
 
     expect(kql).toBe(
-      `(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND alert.attributes.tags:(\"tag1\" AND \"tag2\")`
+      `(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND alert.attributes.tags:(\"tag1\" OR \"tag2\")`
     );
   });
 
