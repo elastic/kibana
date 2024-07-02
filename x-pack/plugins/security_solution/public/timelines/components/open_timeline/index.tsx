@@ -69,7 +69,7 @@ interface OwnProps<TCache = object> {
 export type OpenTimelineOwnProps = OwnProps &
   Pick<
     OpenTimelineProps,
-    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle'
+    'defaultPageSize' | 'title' | 'importDataModalToggle' | 'setImportDataModalToggle' | 'tabName'
   >;
 
 /** Returns a collection of selected timeline ids */
@@ -130,6 +130,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     importDataModalToggle,
     onOpenTimeline,
     setImportDataModalToggle,
+    tabName,
     title,
   }) => {
     const dispatch = useDispatch();
@@ -305,12 +306,16 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
 
     /** Invoked by the EUI table implementation when the user interacts with the table (i.e. to update sorting) */
     const onTableChange: OnTableChange = useCallback(({ page, sort }: OnTableChangeParams) => {
-      const { index, size } = page;
-      const { field, direction } = sort;
-      setPageIndex(index);
-      setPageSize(size);
-      setSortDirection(direction);
-      setSortField(field);
+      if (page != null) {
+        const { index, size } = page;
+        setPageIndex(index);
+        setPageSize(size);
+      }
+      if (sort != null) {
+        const { field, direction } = sort;
+        setSortDirection(direction);
+        setSortField(field);
+      }
     }, []);
 
     /** Invoked when the user toggles the option to only view favorite timelines */
@@ -414,6 +419,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         selectedItems={selectedItems}
         sortDirection={sortDirection}
         sortField={sortField}
+        tabName={tabName}
         templateTimelineFilter={templateTimelineFilter}
         timelineType={timelineType}
         timelineStatus={timelineStatus}

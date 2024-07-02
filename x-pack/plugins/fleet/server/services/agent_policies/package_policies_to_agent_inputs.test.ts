@@ -41,6 +41,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
     updated_at: '',
     updated_by: '',
     policy_id: '',
+    policy_ids: [''],
     enabled: true,
     namespace: 'default',
     inputs: [],
@@ -873,6 +874,53 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         revision: 1,
         type: 'test-metrics',
         use_output: 'default',
+      },
+    ]);
+  });
+
+  it('does not include processor add_fields when global tags array is empty', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        []
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
       },
     ]);
   });

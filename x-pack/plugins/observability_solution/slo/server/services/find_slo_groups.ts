@@ -87,7 +87,14 @@ export class FindSLOGroups {
                     },
                   },
                   _source: {
-                    includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
+                    includes: [
+                      'sliValue',
+                      'status',
+                      'slo.id',
+                      'slo.instanceId',
+                      'slo.name',
+                      'slo.groupings',
+                    ],
                   },
                   size: 1,
                 },
@@ -165,6 +172,7 @@ export class FindSLOGroups {
                 id: sourceSummaryDoc.slo.id,
                 instanceId: sourceSummaryDoc.slo.instanceId,
                 name: sourceSummaryDoc.slo.name,
+                groupings: sourceSummaryDoc.slo.groupings,
               },
             },
             violated: bucket.violated?.doc_count,

@@ -27,7 +27,6 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { PluginsSetup, PluginsStart, RouteInitialization } from './types';
 import type { MlCapabilities } from '../common/types/capabilities';
-import { jsonSchemaRoutes } from './routes/json_schema';
 import { notificationsRoutes } from './routes/notifications';
 import {
   type MlFeatures,
@@ -277,7 +276,6 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     notificationsRoutes(routeInit);
-    jsonSchemaRoutes(routeInit);
     alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });

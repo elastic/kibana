@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
@@ -41,19 +42,22 @@ export const createDatasetQuality = ({
     );
 
     return (
-      <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
-        <SummaryPanelProvider>
-          <KibanaContextProviderForPlugin>
-            <DatasetQuality />
-          </KibanaContextProviderForPlugin>
-        </SummaryPanelProvider>
-      </DatasetQualityContext.Provider>
+      <PerformanceContextProvider>
+        <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
+          <SummaryPanelProvider>
+            <KibanaContextProviderForPlugin>
+              <DatasetQuality />
+            </KibanaContextProviderForPlugin>
+          </SummaryPanelProvider>
+        </DatasetQualityContext.Provider>
+      </PerformanceContextProvider>
     );
   };
 };
 
 const Header = dynamic(() => import('./header'));
 const Warnings = dynamic(() => import('./warnings/warnings'));
+const EmptyStateWrapper = dynamic(() => import('./empty_state/empty_state'));
 const Table = dynamic(() => import('./table/table'));
 const Filters = dynamic(() => import('./filters/filters'));
 const SummaryPanel = dynamic(() => import('./summary_panel/summary_panel'));
@@ -67,15 +71,18 @@ function DatasetQuality() {
       <EuiFlexItem grow={false}>
         <Warnings />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Filters />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SummaryPanel />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <Table />
-      </EuiFlexItem>
+
+      <EmptyStateWrapper>
+        <EuiFlexItem grow={false}>
+          <Filters />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <SummaryPanel />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <Table />
+        </EuiFlexItem>
+      </EmptyStateWrapper>
     </EuiFlexGroup>
   );
 }

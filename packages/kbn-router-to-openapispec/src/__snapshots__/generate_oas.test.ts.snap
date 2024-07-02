@@ -85,7 +85,6 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
@@ -133,6 +132,7 @@ Object {
   "paths": Object {
     "/bar": Object {
       "get": Object {
+        "deprecated": true,
         "operationId": "/bar#0",
         "parameters": Array [
           Object {
@@ -221,6 +221,7 @@ Object {
     },
     "/foo/{id}/{path*}": Object {
       "get": Object {
+        "description": "route description",
         "operationId": "/foo/{id}/{path*}#0",
         "parameters": Array [
           Object {
@@ -357,15 +358,15 @@ Object {
                 },
               },
             },
-            "description": "route",
           },
         },
-        "summary": "route",
+        "summary": "route summary",
         "tags": Array [
           "bar",
         ],
       },
       "post": Object {
+        "description": "route description",
         "operationId": "/foo/{id}/{path*}#1",
         "parameters": Array [
           Object {
@@ -502,10 +503,9 @@ Object {
                 },
               },
             },
-            "description": "route",
           },
         },
-        "summary": "route",
+        "summary": "route summary",
         "tags": Array [
           "bar",
         ],
@@ -611,7 +611,6 @@ Object {
                 },
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",
@@ -688,7 +687,6 @@ Object {
                 "schema": Object {},
               },
             },
-            "description": "No description",
           },
         },
         "summary": "",

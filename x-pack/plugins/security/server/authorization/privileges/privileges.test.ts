@@ -185,6 +185,293 @@ describe('features', () => {
     });
   });
 
+  test('actions should respect `composedOf` specified at the privilege', () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        id: 'foo',
+        name: 'Foo KibanaFeature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-savedObject-all-1'],
+              read: ['all-savedObject-read-1'],
+            },
+            ui: ['all-ui-1'],
+          },
+          read: {
+            savedObject: {
+              all: ['read-savedObject-all-1'],
+              read: ['read-savedObject-read-1'],
+            },
+            ui: ['read-ui-1'],
+          },
+        },
+      }),
+      new KibanaFeature({
+        id: 'bar',
+        name: 'Bar KibanaFeature',
+        app: [],
+        category: { id: 'bar', label: 'bar' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-savedObject-all-2'],
+              read: ['all-savedObject-read-2'],
+            },
+            ui: ['all-ui-2'],
+            composedOf: [{ feature: 'foo', privileges: ['all'] }],
+          },
+          read: {
+            savedObject: {
+              all: ['read-savedObject-all-2'],
+              read: ['read-savedObject-read-2'],
+            },
+            ui: ['read-ui-2'],
+            composedOf: [{ feature: 'foo', privileges: ['read'] }],
+          },
+        },
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+    const expectedAllPrivileges = [
+      actions.login,
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-2', 'get'),
+      actions.savedObject.get('all-savedObject-all-2', 'find'),
+      actions.savedObject.get('all-savedObject-all-2', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-2', 'close_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-2', 'create'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-2', 'update'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-2', 'delete'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_delete'),
+      actions.savedObject.get('all-savedObject-all-2', 'share_to_space'),
+      actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-2', 'get'),
+      actions.savedObject.get('all-savedObject-read-2', 'find'),
+      actions.savedObject.get('all-savedObject-read-2', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-read-2', 'close_point_in_time'),
+      actions.ui.get('bar', 'all-ui-2'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-1', 'get'),
+      actions.savedObject.get('all-savedObject-all-1', 'find'),
+      actions.savedObject.get('all-savedObject-all-1', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-1', 'close_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-1', 'create'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-1', 'update'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-1', 'delete'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_delete'),
+      actions.savedObject.get('all-savedObject-all-1', 'share_to_space'),
+      actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-1', 'get'),
+      actions.savedObject.get('all-savedObject-read-1', 'find'),
+      actions.savedObject.get('all-savedObject-read-1', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-read-1', 'close_point_in_time'),
+      actions.ui.get('foo', 'all-ui-1'),
+    ];
+
+    const expectedReadPrivileges = [
+      actions.login,
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-2', 'get'),
+      actions.savedObject.get('read-savedObject-all-2', 'find'),
+      actions.savedObject.get('read-savedObject-all-2', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-2', 'close_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-2', 'create'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-2', 'update'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-2', 'delete'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_delete'),
+      actions.savedObject.get('read-savedObject-all-2', 'share_to_space'),
+      actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-2', 'get'),
+      actions.savedObject.get('read-savedObject-read-2', 'find'),
+      actions.savedObject.get('read-savedObject-read-2', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-read-2', 'close_point_in_time'),
+      actions.ui.get('bar', 'read-ui-2'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-1', 'get'),
+      actions.savedObject.get('read-savedObject-all-1', 'find'),
+      actions.savedObject.get('read-savedObject-all-1', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-1', 'close_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-1', 'create'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-1', 'update'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-1', 'delete'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_delete'),
+      actions.savedObject.get('read-savedObject-all-1', 'share_to_space'),
+      actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-1', 'get'),
+      actions.savedObject.get('read-savedObject-read-1', 'find'),
+      actions.savedObject.get('read-savedObject-read-1', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-read-1', 'close_point_in_time'),
+      actions.ui.get('foo', 'read-ui-1'),
+    ];
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('features.bar', {
+      all: [...expectedAllPrivileges],
+      read: [...expectedReadPrivileges],
+      minimal_all: [...expectedAllPrivileges],
+      minimal_read: [...expectedReadPrivileges],
+    });
+  });
+
+  test('actions should respect `composedOf` specified at the privilege even if the referenced feature is hidden', () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        hidden: true,
+        id: 'foo',
+        name: 'Foo KibanaFeature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-savedObject-all-1'],
+              read: ['all-savedObject-read-1'],
+            },
+            ui: ['all-ui-1'],
+          },
+          read: {
+            savedObject: {
+              all: ['read-savedObject-all-1'],
+              read: ['read-savedObject-read-1'],
+            },
+            ui: ['read-ui-1'],
+          },
+        },
+      }),
+      new KibanaFeature({
+        id: 'bar',
+        name: 'Bar KibanaFeature',
+        app: [],
+        category: { id: 'bar', label: 'bar' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['all-savedObject-all-2'],
+              read: ['all-savedObject-read-2'],
+            },
+            ui: ['all-ui-2'],
+            composedOf: [{ feature: 'foo', privileges: ['all'] }],
+          },
+          read: {
+            savedObject: {
+              all: ['read-savedObject-all-2'],
+              read: ['read-savedObject-read-2'],
+            },
+            ui: ['read-ui-2'],
+            composedOf: [{ feature: 'foo', privileges: ['read'] }],
+          },
+        },
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+    const expectedAllPrivileges = [
+      actions.login,
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-2', 'get'),
+      actions.savedObject.get('all-savedObject-all-2', 'find'),
+      actions.savedObject.get('all-savedObject-all-2', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-2', 'close_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-2', 'create'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-2', 'update'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-2', 'delete'),
+      actions.savedObject.get('all-savedObject-all-2', 'bulk_delete'),
+      actions.savedObject.get('all-savedObject-all-2', 'share_to_space'),
+      actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-2', 'get'),
+      actions.savedObject.get('all-savedObject-read-2', 'find'),
+      actions.savedObject.get('all-savedObject-read-2', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-read-2', 'close_point_in_time'),
+      actions.ui.get('bar', 'all-ui-2'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-all-1', 'get'),
+      actions.savedObject.get('all-savedObject-all-1', 'find'),
+      actions.savedObject.get('all-savedObject-all-1', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-1', 'close_point_in_time'),
+      actions.savedObject.get('all-savedObject-all-1', 'create'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('all-savedObject-all-1', 'update'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('all-savedObject-all-1', 'delete'),
+      actions.savedObject.get('all-savedObject-all-1', 'bulk_delete'),
+      actions.savedObject.get('all-savedObject-all-1', 'share_to_space'),
+      actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('all-savedObject-read-1', 'get'),
+      actions.savedObject.get('all-savedObject-read-1', 'find'),
+      actions.savedObject.get('all-savedObject-read-1', 'open_point_in_time'),
+      actions.savedObject.get('all-savedObject-read-1', 'close_point_in_time'),
+      actions.ui.get('foo', 'all-ui-1'),
+    ];
+
+    const expectedReadPrivileges = [
+      actions.login,
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-2', 'get'),
+      actions.savedObject.get('read-savedObject-all-2', 'find'),
+      actions.savedObject.get('read-savedObject-all-2', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-2', 'close_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-2', 'create'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-2', 'update'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-2', 'delete'),
+      actions.savedObject.get('read-savedObject-all-2', 'bulk_delete'),
+      actions.savedObject.get('read-savedObject-all-2', 'share_to_space'),
+      actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-2', 'get'),
+      actions.savedObject.get('read-savedObject-read-2', 'find'),
+      actions.savedObject.get('read-savedObject-read-2', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-read-2', 'close_point_in_time'),
+      actions.ui.get('bar', 'read-ui-2'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-all-1', 'get'),
+      actions.savedObject.get('read-savedObject-all-1', 'find'),
+      actions.savedObject.get('read-savedObject-all-1', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-1', 'close_point_in_time'),
+      actions.savedObject.get('read-savedObject-all-1', 'create'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
+      actions.savedObject.get('read-savedObject-all-1', 'update'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
+      actions.savedObject.get('read-savedObject-all-1', 'delete'),
+      actions.savedObject.get('read-savedObject-all-1', 'bulk_delete'),
+      actions.savedObject.get('read-savedObject-all-1', 'share_to_space'),
+      actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
+      actions.savedObject.get('read-savedObject-read-1', 'get'),
+      actions.savedObject.get('read-savedObject-read-1', 'find'),
+      actions.savedObject.get('read-savedObject-read-1', 'open_point_in_time'),
+      actions.savedObject.get('read-savedObject-read-1', 'close_point_in_time'),
+      actions.ui.get('foo', 'read-ui-1'),
+    ];
+
+    const actual = privileges.get();
+    expect(actual).toHaveProperty('features.bar', {
+      all: [...expectedAllPrivileges],
+      read: [...expectedReadPrivileges],
+      minimal_all: [...expectedAllPrivileges],
+      minimal_read: [...expectedReadPrivileges],
+    });
+  });
+
   test(`features with no privileges aren't listed`, () => {
     const features: KibanaFeature[] = [
       new KibanaFeature({
@@ -202,6 +489,55 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).not.toHaveProperty('features.foo');
+  });
+
+  test(`hidden features aren't listed`, () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        hidden: true,
+        id: 'foo',
+        name: 'Foo KibanaFeature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            management: {
+              'all-management': ['all-management-1'],
+            },
+            catalogue: ['all-catalogue-1'],
+            savedObject: {
+              all: ['all-savedObject-all-1'],
+              read: ['all-savedObject-read-1'],
+            },
+            ui: ['all-ui-1'],
+          },
+          read: {
+            management: {
+              'read-management': ['read-management-1'],
+            },
+            catalogue: ['read-catalogue-1'],
+            savedObject: {
+              all: ['read-savedObject-all-1'],
+              read: ['read-savedObject-read-1'],
+            },
+            ui: ['read-ui-1'],
+          },
+        },
+      }),
+    ];
+
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+    const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+    const actual = privileges.get();
+    expect(actual).not.toHaveProperty('features.foo');
+
+    const checkPredicate = (action: string) => action.includes('all-') || action.includes('read-');
+    expect(actual.global.all.some(checkPredicate)).toBe(false);
+    expect(actual.global.read.some(checkPredicate)).toBe(false);
+    expect(actual.space.all.some(checkPredicate)).toBe(false);
+    expect(actual.space.read.some(checkPredicate)).toBe(false);
   });
 });
 
@@ -377,6 +713,194 @@ describe('features', () => {
         ]);
       });
 
+      test('actions defined in any feature privilege of a hidden but referenced feature are included in `all`, ignoring the excludeFromBasePrivileges property', () => {
+        const getFeatures = ({
+          excludeFromBasePrivileges,
+        }: {
+          excludeFromBasePrivileges: boolean;
+        }) => [
+          new KibanaFeature({
+            hidden: true,
+            excludeFromBasePrivileges,
+            id: 'foo',
+            name: 'Foo KibanaFeature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: {
+                management: {
+                  'all-management': ['all-management-1'],
+                },
+                catalogue: ['all-catalogue-1'],
+                savedObject: {
+                  all: ['all-savedObject-all-1'],
+                  read: ['all-savedObject-read-1'],
+                },
+                ui: ['all-ui-1'],
+              },
+              read: {
+                management: {
+                  'read-management': ['read-management-1'],
+                },
+                catalogue: ['read-catalogue-1'],
+                savedObject: {
+                  all: ['read-savedObject-all-1'],
+                  read: ['read-savedObject-read-1'],
+                },
+                ui: ['read-ui-1'],
+              },
+            },
+          }),
+          new KibanaFeature({
+            id: 'bar',
+            name: 'Bar KibanaFeature',
+            app: [],
+            category: { id: 'bar', label: 'bar' },
+            privileges: {
+              all: {
+                management: {
+                  'all-management': ['all-management-2'],
+                },
+                catalogue: ['all-catalogue-2'],
+                savedObject: {
+                  all: ['all-savedObject-all-2'],
+                  read: ['all-savedObject-read-2'],
+                },
+                ui: ['all-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['all'] }],
+              },
+              read: {
+                management: {
+                  'read-management': ['read-management-2'],
+                },
+                catalogue: ['read-catalogue-2'],
+                savedObject: {
+                  all: ['read-savedObject-all-2'],
+                  read: ['read-savedObject-read-2'],
+                },
+                ui: ['read-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['read'] }],
+              },
+            },
+          }),
+        ];
+
+        const expectedActions = [
+          actions.login,
+          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGetFeatures ? [actions.api.get('features')] : []),
+          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.space.manage,
+                actions.ui.get('spaces', 'manage'),
+                actions.ui.get('management', 'kibana', 'spaces'),
+                actions.ui.get('catalogue', 'spaces'),
+              ]
+            : []),
+          ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
+          actions.ui.get('catalogue', 'all-catalogue-2'),
+          actions.ui.get('management', 'all-management', 'all-management-2'),
+          actions.savedObject.get('all-savedObject-all-2', 'bulk_get'),
+          actions.savedObject.get('all-savedObject-all-2', 'get'),
+          actions.savedObject.get('all-savedObject-all-2', 'find'),
+          actions.savedObject.get('all-savedObject-all-2', 'open_point_in_time'),
+          actions.savedObject.get('all-savedObject-all-2', 'close_point_in_time'),
+          actions.savedObject.get('all-savedObject-all-2', 'create'),
+          actions.savedObject.get('all-savedObject-all-2', 'bulk_create'),
+          actions.savedObject.get('all-savedObject-all-2', 'update'),
+          actions.savedObject.get('all-savedObject-all-2', 'bulk_update'),
+          actions.savedObject.get('all-savedObject-all-2', 'delete'),
+          actions.savedObject.get('all-savedObject-all-2', 'bulk_delete'),
+          actions.savedObject.get('all-savedObject-all-2', 'share_to_space'),
+          actions.savedObject.get('all-savedObject-read-2', 'bulk_get'),
+          actions.savedObject.get('all-savedObject-read-2', 'get'),
+          actions.savedObject.get('all-savedObject-read-2', 'find'),
+          actions.savedObject.get('all-savedObject-read-2', 'open_point_in_time'),
+          actions.savedObject.get('all-savedObject-read-2', 'close_point_in_time'),
+          actions.ui.get('bar', 'all-ui-2'),
+          actions.ui.get('catalogue', 'read-catalogue-2'),
+          actions.ui.get('management', 'read-management', 'read-management-2'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-all-2', 'get'),
+          actions.savedObject.get('read-savedObject-all-2', 'find'),
+          actions.savedObject.get('read-savedObject-all-2', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-2', 'close_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-2', 'create'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
+          actions.savedObject.get('read-savedObject-all-2', 'update'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
+          actions.savedObject.get('read-savedObject-all-2', 'delete'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_delete'),
+          actions.savedObject.get('read-savedObject-all-2', 'share_to_space'),
+          actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-read-2', 'get'),
+          actions.savedObject.get('read-savedObject-read-2', 'find'),
+          actions.savedObject.get('read-savedObject-read-2', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-read-2', 'close_point_in_time'),
+          actions.ui.get('bar', 'read-ui-2'),
+          actions.ui.get('catalogue', 'all-catalogue-1'),
+          actions.ui.get('management', 'all-management', 'all-management-1'),
+          actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
+          actions.savedObject.get('all-savedObject-all-1', 'get'),
+          actions.savedObject.get('all-savedObject-all-1', 'find'),
+          actions.savedObject.get('all-savedObject-all-1', 'open_point_in_time'),
+          actions.savedObject.get('all-savedObject-all-1', 'close_point_in_time'),
+          actions.savedObject.get('all-savedObject-all-1', 'create'),
+          actions.savedObject.get('all-savedObject-all-1', 'bulk_create'),
+          actions.savedObject.get('all-savedObject-all-1', 'update'),
+          actions.savedObject.get('all-savedObject-all-1', 'bulk_update'),
+          actions.savedObject.get('all-savedObject-all-1', 'delete'),
+          actions.savedObject.get('all-savedObject-all-1', 'bulk_delete'),
+          actions.savedObject.get('all-savedObject-all-1', 'share_to_space'),
+          actions.savedObject.get('all-savedObject-read-1', 'bulk_get'),
+          actions.savedObject.get('all-savedObject-read-1', 'get'),
+          actions.savedObject.get('all-savedObject-read-1', 'find'),
+          actions.savedObject.get('all-savedObject-read-1', 'open_point_in_time'),
+          actions.savedObject.get('all-savedObject-read-1', 'close_point_in_time'),
+          actions.ui.get('foo', 'all-ui-1'),
+          actions.ui.get('catalogue', 'read-catalogue-1'),
+          actions.ui.get('management', 'read-management', 'read-management-1'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-all-1', 'get'),
+          actions.savedObject.get('read-savedObject-all-1', 'find'),
+          actions.savedObject.get('read-savedObject-all-1', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-1', 'close_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-1', 'create'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
+          actions.savedObject.get('read-savedObject-all-1', 'update'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
+          actions.savedObject.get('read-savedObject-all-1', 'delete'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_delete'),
+          actions.savedObject.get('read-savedObject-all-1', 'share_to_space'),
+          actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-read-1', 'get'),
+          actions.savedObject.get('read-savedObject-read-1', 'find'),
+          actions.savedObject.get('read-savedObject-read-1', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-read-1', 'close_point_in_time'),
+          actions.ui.get('foo', 'read-ui-1'),
+        ];
+
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(
+          getFeatures({ excludeFromBasePrivileges: false })
+        );
+        expect(
+          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+        ).toHaveProperty(`${group}.all`, expectedActions);
+
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(
+          getFeatures({ excludeFromBasePrivileges: true })
+        );
+        expect(
+          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+        ).toHaveProperty(`${group}.all`, expectedActions);
+      });
+
       test('actions defined in a feature privilege with name `read` are included in `read`', () => {
         const features: KibanaFeature[] = [
           new KibanaFeature({
@@ -465,6 +989,141 @@ describe('features', () => {
           actions.ui.get('foo', 'read-ui-1'),
           actions.ui.get('foo', 'read-ui-2'),
         ]);
+      });
+
+      test('actions defined in a feature privilege with name `read` of a hidden but referenced feature are included in `read`, ignoring the excludeFromBasePrivileges property', () => {
+        const getFeatures = ({
+          excludeFromBasePrivileges,
+        }: {
+          excludeFromBasePrivileges: boolean;
+        }) => [
+          new KibanaFeature({
+            hidden: true,
+            excludeFromBasePrivileges,
+            id: 'foo',
+            name: 'Foo KibanaFeature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: {
+                management: {
+                  'all-management': ['all-management-1'],
+                },
+                catalogue: ['all-catalogue-1'],
+                savedObject: {
+                  all: ['all-savedObject-all-1'],
+                  read: ['all-savedObject-read-1'],
+                },
+                ui: ['all-ui-1'],
+              },
+              read: {
+                management: {
+                  'read-management': ['read-management-1'],
+                },
+                catalogue: ['read-catalogue-1'],
+                savedObject: {
+                  all: ['read-savedObject-all-1'],
+                  read: ['read-savedObject-read-1'],
+                },
+                ui: ['read-ui-1'],
+              },
+            },
+          }),
+          new KibanaFeature({
+            id: 'bar',
+            name: 'Bar KibanaFeature',
+            app: [],
+            category: { id: 'bar', label: 'bar' },
+            privileges: {
+              all: {
+                management: {
+                  'all-management': ['all-management-2'],
+                },
+                catalogue: ['all-catalogue-2'],
+                savedObject: {
+                  all: ['all-savedObject-all-2'],
+                  read: ['all-savedObject-read-2'],
+                },
+                ui: ['all-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['all'] }],
+              },
+              read: {
+                management: {
+                  'read-management': ['read-management-2'],
+                },
+                catalogue: ['read-catalogue-2'],
+                savedObject: {
+                  all: ['read-savedObject-all-2'],
+                  read: ['read-savedObject-read-2'],
+                },
+                ui: ['read-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['read'] }],
+              },
+            },
+          }),
+        ];
+
+        const expectedActions = [
+          actions.login,
+          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
+          actions.ui.get('catalogue', 'read-catalogue-2'),
+          actions.ui.get('management', 'read-management', 'read-management-2'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-all-2', 'get'),
+          actions.savedObject.get('read-savedObject-all-2', 'find'),
+          actions.savedObject.get('read-savedObject-all-2', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-2', 'close_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-2', 'create'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_create'),
+          actions.savedObject.get('read-savedObject-all-2', 'update'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_update'),
+          actions.savedObject.get('read-savedObject-all-2', 'delete'),
+          actions.savedObject.get('read-savedObject-all-2', 'bulk_delete'),
+          actions.savedObject.get('read-savedObject-all-2', 'share_to_space'),
+          actions.savedObject.get('read-savedObject-read-2', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-read-2', 'get'),
+          actions.savedObject.get('read-savedObject-read-2', 'find'),
+          actions.savedObject.get('read-savedObject-read-2', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-read-2', 'close_point_in_time'),
+          actions.ui.get('bar', 'read-ui-2'),
+          actions.ui.get('catalogue', 'read-catalogue-1'),
+          actions.ui.get('management', 'read-management', 'read-management-1'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-all-1', 'get'),
+          actions.savedObject.get('read-savedObject-all-1', 'find'),
+          actions.savedObject.get('read-savedObject-all-1', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-1', 'close_point_in_time'),
+          actions.savedObject.get('read-savedObject-all-1', 'create'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_create'),
+          actions.savedObject.get('read-savedObject-all-1', 'update'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_update'),
+          actions.savedObject.get('read-savedObject-all-1', 'delete'),
+          actions.savedObject.get('read-savedObject-all-1', 'bulk_delete'),
+          actions.savedObject.get('read-savedObject-all-1', 'share_to_space'),
+          actions.savedObject.get('read-savedObject-read-1', 'bulk_get'),
+          actions.savedObject.get('read-savedObject-read-1', 'get'),
+          actions.savedObject.get('read-savedObject-read-1', 'find'),
+          actions.savedObject.get('read-savedObject-read-1', 'open_point_in_time'),
+          actions.savedObject.get('read-savedObject-read-1', 'close_point_in_time'),
+          actions.ui.get('foo', 'read-ui-1'),
+        ];
+
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(
+          getFeatures({ excludeFromBasePrivileges: false })
+        );
+        expect(
+          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+        ).toHaveProperty(`${group}.read`, expectedActions);
+
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(
+          getFeatures({ excludeFromBasePrivileges: true })
+        );
+        expect(
+          privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic).get()
+        ).toHaveProperty(`${group}.read`, expectedActions);
       });
 
       test('actions defined in a reserved privilege are not included in `all` or `read`', () => {
@@ -596,6 +1255,104 @@ describe('features', () => {
         ]);
       });
 
+      test('actions defined via `composedOf` in a feature with excludeFromBasePrivileges are not included in `all` or `read', () => {
+        const features: KibanaFeature[] = [
+          new KibanaFeature({
+            hidden: true,
+            id: 'foo',
+            name: 'Foo KibanaFeature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: {
+                management: {
+                  'all-management': ['all-management-1'],
+                },
+                catalogue: ['all-catalogue-1'],
+                savedObject: {
+                  all: ['all-savedObject-all-1'],
+                  read: ['all-savedObject-read-1'],
+                },
+                ui: ['all-ui-1'],
+              },
+              read: {
+                management: {
+                  'read-management': ['read-management-1'],
+                },
+                catalogue: ['read-catalogue-1'],
+                savedObject: {
+                  all: ['read-savedObject-all-1'],
+                  read: ['read-savedObject-read-1'],
+                },
+                ui: ['read-ui-1'],
+              },
+            },
+          }),
+          new KibanaFeature({
+            excludeFromBasePrivileges: true,
+            id: 'bar',
+            name: 'Bar KibanaFeature',
+            app: [],
+            category: { id: 'bar', label: 'bar' },
+            privileges: {
+              all: {
+                management: {
+                  'all-management': ['all-management-2'],
+                },
+                catalogue: ['all-catalogue-2'],
+                savedObject: {
+                  all: ['all-savedObject-all-2'],
+                  read: ['all-savedObject-read-2'],
+                },
+                ui: ['all-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['all'] }],
+              },
+              read: {
+                management: {
+                  'read-management': ['read-management-2'],
+                },
+                catalogue: ['read-catalogue-2'],
+                savedObject: {
+                  all: ['read-savedObject-all-2'],
+                  read: ['read-savedObject-read-2'],
+                },
+                ui: ['read-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['read'] }],
+              },
+            },
+          }),
+        ];
+
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+        const actual = privileges.get();
+        expect(actual).toHaveProperty(`${group}.all`, [
+          actions.login,
+          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGetFeatures ? [actions.api.get('features')] : []),
+          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.space.manage,
+                actions.ui.get('spaces', 'manage'),
+                actions.ui.get('management', 'kibana', 'spaces'),
+                actions.ui.get('catalogue', 'spaces'),
+              ]
+            : []),
+          ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
+        ]);
+        expect(actual).toHaveProperty(`${group}.read`, [
+          actions.login,
+          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
+        ]);
+      });
+
       test('actions defined in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
         const features: KibanaFeature[] = [
           new KibanaFeature({
@@ -631,6 +1388,105 @@ describe('features', () => {
                   read: ['read-savedObject-read-1'],
                 },
                 ui: ['read-ui-1'],
+              },
+            },
+          }),
+        ];
+
+        const mockFeaturesPlugin = featuresPluginMock.createSetup();
+        mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+        const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
+
+        const actual = privileges.get();
+        expect(actual).toHaveProperty(`${group}.all`, [
+          actions.login,
+          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGetFeatures ? [actions.api.get('features')] : []),
+          ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
+          ...(expectGetFeatures ? [actions.api.get('manageSpaces')] : []),
+          ...(expectManageSpaces
+            ? [
+                actions.space.manage,
+                actions.ui.get('spaces', 'manage'),
+                actions.ui.get('management', 'kibana', 'spaces'),
+                actions.ui.get('catalogue', 'spaces'),
+              ]
+            : []),
+          ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
+        ]);
+        expect(actual).toHaveProperty(`${group}.read`, [
+          actions.login,
+          ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
+        ]);
+      });
+
+      test('actions defined via `composedOf` in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
+        const features: KibanaFeature[] = [
+          new KibanaFeature({
+            hidden: true,
+            id: 'foo',
+            name: 'Foo KibanaFeature',
+            app: [],
+            category: { id: 'foo', label: 'foo' },
+            privileges: {
+              all: {
+                management: {
+                  'all-management': ['all-management-1'],
+                },
+                catalogue: ['all-catalogue-1'],
+                savedObject: {
+                  all: ['all-savedObject-all-1'],
+                  read: ['all-savedObject-read-1'],
+                },
+                ui: ['all-ui-1'],
+              },
+              read: {
+                management: {
+                  'read-management': ['read-management-1'],
+                },
+                catalogue: ['read-catalogue-1'],
+                savedObject: {
+                  all: ['read-savedObject-all-1'],
+                  read: ['read-savedObject-read-1'],
+                },
+                ui: ['read-ui-1'],
+              },
+            },
+          }),
+          new KibanaFeature({
+            id: 'bar',
+            name: 'Bar KibanaFeature',
+            app: [],
+            category: { id: 'bar', label: 'bar' },
+            privileges: {
+              all: {
+                excludeFromBasePrivileges: true,
+                management: {
+                  'all-management': ['all-management-2'],
+                },
+                catalogue: ['all-catalogue-2'],
+                savedObject: {
+                  all: ['all-savedObject-all-2'],
+                  read: ['all-savedObject-read-2'],
+                },
+                ui: ['all-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['all'] }],
+              },
+              read: {
+                excludeFromBasePrivileges: true,
+                management: {
+                  'read-management': ['read-management-2'],
+                },
+                catalogue: ['read-catalogue-2'],
+                savedObject: {
+                  all: ['read-savedObject-all-2'],
+                  read: ['read-savedObject-read-2'],
+                },
+                ui: ['read-ui-2'],
+                composedOf: [{ feature: 'foo', privileges: ['read'] }],
               },
             },
           }),

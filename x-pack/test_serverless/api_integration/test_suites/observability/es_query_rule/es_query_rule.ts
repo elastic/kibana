@@ -38,14 +38,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
-      await supertest
-        .delete(`/api/actions/connector/${actionId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
+      await supertest.delete(`/api/actions/connector/${actionId}`).set(internalReqHeader);
+
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'rule.id': ruleId } },

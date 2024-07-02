@@ -12,7 +12,7 @@ export const useIntegrationCheck = ({ dependsOn }: { dependsOn: string }) => {
   const { metadata } = useMetadataStateContext();
 
   const hasIntegration = useMemo(
-    () => (metadata?.features ?? []).some((f) => f.name === dependsOn),
+    () => (metadata?.features ?? []).some((f) => f.name.startsWith(dependsOn)),
     [metadata?.features, dependsOn]
   );
 

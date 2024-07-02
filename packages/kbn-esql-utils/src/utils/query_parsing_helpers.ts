@@ -12,17 +12,30 @@ const DEFAULT_ESQL_LIMIT = 500;
 // retrieves the index pattern from the aggregate query for ES|QL using ast parsing
 export function getIndexPatternFromESQLQuery(esql?: string) {
   const { ast } = getAstAndSyntaxErrors(esql);
-  const fromCommand = ast.find(({ name }) => name === 'from');
-  const args = (fromCommand?.args ?? []) as ESQLSource[];
+  const sourceCommand = ast.find(({ name }) => ['from', 'metrics'].includes(name));
+  const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
   return indices?.map((index) => index.text).join(',');
 }
 
-// For ES|QL we consider the following commands as transformational commands
+// For ES|QL we consider stats and keep transformational command
+// The metrics command too but only if it aggregates
 export function hasTransformationalCommand(esql?: string) {
-  const transformationalCommands = ['stats', 'keep', 'metrics'];
+  const transformationalCommands = ['stats', 'keep'];
   const { ast } = getAstAndSyntaxErrors(esql);
-  return transformationalCommands.some((command) => ast.find(({ name }) => name === command));
+  const hasAtLeastOneTransformationalCommand = transformationalCommands.some((command) =>
+    ast.find(({ name }) => name === command)
+  );
+  if (hasAtLeastOneTransformationalCommand) {
+    return true;
+  }
+  const metricsCommand = ast.find(({ name }) => name === 'metrics');
+
+  if (metricsCommand && 'aggregates' in metricsCommand) {
+    return true;
+  }
+
+  return false;
 }
 
 export function getLimitFromESQLQuery(esql: string): number {

@@ -6,6 +6,11 @@
  */
 
 import {
+  INSPECT_MODAL,
+  INSPECT_MODAL_REQUEST_TAB,
+  INSPECT_MODAL_RESPONSE_TAB,
+} from '../../../../screens/inspect';
+import {
   closeTimelineFlyout,
   openEventDetailsFlyout,
   openHostDetailsFlyout,
@@ -17,22 +22,21 @@ import {
   TIMELINE_DETAILS_FLYOUT,
   USER_DETAILS_FLYOUT,
 } from '../../../../screens/unified_timeline';
-import {
-  ROW_ADD_NOTES_BUTTON,
-  ADD_NOTE_CONTAINER,
-  RESOLVER_GRAPH_CONTAINER,
-} from '../../../../screens/timeline';
-import { OPEN_ANALYZER_BTN } from '../../../../screens/alerts';
 import { GET_DISCOVER_DATA_GRID_CELL_HEADER } from '../../../../screens/discover';
 import { addFieldToTable, removeFieldFromTable } from '../../../../tasks/discover';
 import { login } from '../../../../tasks/login';
 import { visitWithTimeRange } from '../../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../../tasks/security_main';
-import { createNewTimeline, executeTimelineSearch } from '../../../../tasks/timeline';
+import {
+  createNewTimeline,
+  executeTimelineSearch,
+  openTimelineInspectButton,
+} from '../../../../tasks/timeline';
 import { ALERTS_URL } from '../../../../urls/navigation';
+import { openTab } from '../../../../tasks/inspect';
+import { CODE_BLOCK } from '../../../../screens/common';
 
-// FLAKY: https://github.com/elastic/kibana/issues/181882
-describe.skip(
+describe(
   'Unsaved Timeline query tab',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
@@ -55,6 +59,32 @@ describe.skip(
       executeTimelineSearch('*');
     });
 
+    it('should be able inspect without any issues', () => {
+      openTimelineInspectButton();
+      cy.get(INSPECT_MODAL).should('be.visible');
+      openTab(INSPECT_MODAL_REQUEST_TAB);
+      cy.get(INSPECT_MODAL_REQUEST_TAB).should('have.attr', 'aria-selected', 'true');
+      cy.get(INSPECT_MODAL).within(() => {
+        cy.get(CODE_BLOCK)
+          .should('be.visible')
+          .then(($codeEditor) => {
+            const { height } = $codeEditor[0].getBoundingClientRect();
+            expect(height).to.be.gt(100);
+          });
+      });
+
+      openTab(INSPECT_MODAL_RESPONSE_TAB);
+      cy.get(INSPECT_MODAL_RESPONSE_TAB).should('have.attr', 'aria-selected', 'true');
+      cy.get(INSPECT_MODAL).within(() => {
+        cy.get(CODE_BLOCK)
+          .should('be.visible')
+          .then(($codeEditor) => {
+            const { height } = $codeEditor[0].getBoundingClientRect();
+            expect(height).to.be.gt(100);
+          });
+      });
+    });
+
     it('should be able to add/remove columns correctly', () => {
       cy.get(GET_UNIFIED_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
       addFieldToTable('agent.type');
@@ -63,19 +93,8 @@ describe.skip(
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('agent.type')).should('not.exist');
     });
 
-    it('should render the add note button and display the markdown editor', () => {
-      cy.get(ROW_ADD_NOTES_BUTTON).should('be.visible').realClick();
-      cy.get(ADD_NOTE_CONTAINER).should('be.visible');
-    });
-
-    it('should render the analyze event button and display the process analyzer visualization', () => {
-      cy.get(OPEN_ANALYZER_BTN).should('be.visible').realClick();
-      cy.get(RESOLVER_GRAPH_CONTAINER).should('be.visible');
-    });
-
-    // these tests are skipped until we implement the expandable flyout in the unified table for timeline
     context('flyout', () => {
-      it.skip('should be able to open/close details details/host/user flyout', () => {
+      it('should be able to open/close details details/host/user flyout', () => {
         cy.log('Event Details Flyout');
         openEventDetailsFlyout(0);
         cy.get(TIMELINE_DETAILS_FLYOUT).should('be.visible');

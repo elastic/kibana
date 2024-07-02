@@ -1,12 +1,29 @@
-ATAN
+## ATAN
 
-Syntax
-Parameters
-number
-Numeric expression. If null, the function returns null.
-DescriptionReturns the arctangent of the input numeric expression as an angle, expressed in radians.Supported types
-Example
+The `ATAN` function in ES|QL is used to calculate the arctangent of a given numeric expression. The result is expressed in radians. If the input is null, the function will return null.
+
+### Syntax
+
+`ATAN(number)`
+
+#### Parameters
+
+- `number`: A numeric expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `ATAN` function in ES|QL:
+
 ```esql
 ROW a=12.9
-| EVAL atan=ATAN(a)
+| EVAL atan = ATAN(a)
 ```
+
+In this example, the `ATAN` function is used to calculate the arctangent of the number 12.9.
+
+```esql
+ROW b=7.5
+| EVAL atan_value = ATAN(b)
+```
+
+In this second example, the `ATAN` function is used to calculate the arctangent of the number 7.5. The result is stored in the `atan_value` variable.

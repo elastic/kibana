@@ -6,9 +6,13 @@
  */
 
 export class GetDataStreamsDetailsError extends Error {
-  constructor(message: string) {
+  readonly statusCode?: number;
+
+  constructor(message: string, statusCode?: number) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
     this.name = 'GetDataStreamsDetailsError';
+
+    this.statusCode = statusCode;
   }
 }

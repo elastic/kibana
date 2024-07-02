@@ -7,6 +7,7 @@
 
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { DataViewSpec, FieldSpec } from '@kbn/data-views-plugin/public';
+import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
 import { InputsModelId } from '../store/inputs/constants';
 import {
@@ -46,6 +47,7 @@ import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
+import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -500,4 +502,46 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
+  dataViewPicker: dataViewPickerInitialState,
+  notes: {
+    entities: {
+      '1': {
+        eventId: 'document-id-1',
+        noteId: '1',
+        note: 'note-1',
+        timelineId: 'timeline-1',
+        created: 1663882629000,
+        createdBy: 'elastic',
+        updated: 1663882629000,
+        updatedBy: 'elastic',
+        version: 'version',
+      },
+    },
+    ids: ['1'],
+    status: {
+      fetchNotesByDocumentIds: ReqStatus.Idle,
+      createNote: ReqStatus.Idle,
+      deleteNotes: ReqStatus.Idle,
+      fetchNotes: ReqStatus.Idle,
+    },
+    error: {
+      fetchNotesByDocumentIds: null,
+      createNote: null,
+      deleteNotes: null,
+      fetchNotes: null,
+    },
+    pagination: {
+      page: 1,
+      perPage: 10,
+      total: 0,
+    },
+    sort: {
+      field: 'created' as const,
+      direction: 'desc' as const,
+    },
+    filter: '',
+    search: '',
+    selectedIds: [],
+    pendingDeleteIds: [],
+  },
 };
