@@ -6,11 +6,9 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiModal, EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutResizable, useEuiTheme } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
 import { css } from '@emotion/react';
 import {
   ShowAssistantOverlayProps,
@@ -22,22 +20,15 @@ import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-const StyledEuiModal = styled(EuiModal)`
-  ${({ theme }) => `margin-top: ${theme.eui.euiSizeXXL};`}
-  min-width: 95vw;
-  min-height: 25vh;
-`;
-
 /**
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
 export interface Props {
-  isFlyoutMode: boolean;
   currentUserAvatar?: UserAvatar;
 }
 
-export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAvatar }) => {
+export const AssistantOverlay = React.memo<Props>(({ currentUserAvatar }) => {
   const { euiTheme } = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationTitle, setConversationTitle] = useState<string | undefined>(
@@ -130,51 +121,32 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
 
   if (!isModalVisible) return null;
 
-  if (isFlyoutMode) {
-    return (
-      <EuiFlyoutResizable
-        ref={flyoutRef}
-        css={css`
-          max-inline-size: calc(100% - 20px);
-          min-inline-size: 400px;
-          > div {
-            height: 100%;
-          }
-        `}
-        onClose={handleCloseModal}
-        data-test-subj="ai-assistant-flyout"
-        paddingSize="none"
-        hideCloseButton
-        // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
-        maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
-      >
-        <Assistant
-          conversationTitle={conversationTitle}
-          promptContextId={promptContextId}
-          onCloseFlyout={handleCloseModal}
-          isFlyoutMode={isFlyoutMode}
-          chatHistoryVisible={chatHistoryVisible}
-          setChatHistoryVisible={toggleChatHistory}
-          currentUserAvatar={currentUserAvatar}
-        />
-      </EuiFlyoutResizable>
-    );
-  }
-
   return (
-    <>
-      {isModalVisible && (
-        <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
-          <Assistant
-            conversationTitle={conversationTitle}
-            promptContextId={promptContextId}
-            chatHistoryVisible={chatHistoryVisible}
-            setChatHistoryVisible={toggleChatHistory}
-            currentUserAvatar={currentUserAvatar}
-          />
-        </StyledEuiModal>
-      )}
-    </>
+    <EuiFlyoutResizable
+      ref={flyoutRef}
+      css={css`
+        max-inline-size: calc(100% - 20px);
+        min-inline-size: 400px;
+        > div {
+          height: 100%;
+        }
+      `}
+      onClose={handleCloseModal}
+      data-test-subj="ai-assistant-flyout"
+      paddingSize="none"
+      hideCloseButton
+      // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
+      maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
+    >
+      <Assistant
+        conversationTitle={conversationTitle}
+        promptContextId={promptContextId}
+        onCloseFlyout={handleCloseModal}
+        chatHistoryVisible={chatHistoryVisible}
+        setChatHistoryVisible={toggleChatHistory}
+        currentUserAvatar={currentUserAvatar}
+      />
+    </EuiFlyoutResizable>
   );
 });
 

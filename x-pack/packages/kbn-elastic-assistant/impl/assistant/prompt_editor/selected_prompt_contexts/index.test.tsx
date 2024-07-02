@@ -15,7 +15,6 @@ import type { SelectedPromptContext } from '../../prompt_context/types';
 import { Props, SelectedPromptContexts } from '.';
 
 const defaultProps: Props = {
-  isNewConversation: false,
   promptContexts: {
     [mockAlertPromptContext.id]: mockAlertPromptContext,
     [mockEventPromptContext.id]: mockEventPromptContext,
@@ -23,7 +22,6 @@ const defaultProps: Props = {
   selectedPromptContexts: {},
   setSelectedPromptContexts: jest.fn(),
   currentReplacements: {},
-  isFlyoutMode: false,
 };
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
@@ -50,61 +48,6 @@ describe('SelectedPromptContexts', () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('selectedPromptContexts')).not.toBeInTheDocument();
-    });
-  });
-
-  it('it does NOT render a spacer when isNewConversation is false and selectedPromptContextIds.length is 1', async () => {
-    render(
-      <TestProviders>
-        <SelectedPromptContexts
-          {...defaultProps}
-          isNewConversation={false} // <--
-          selectedPromptContexts={{
-            [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
-          }} // <-- length 1
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('spacer')).not.toBeInTheDocument();
-    });
-  });
-
-  it('it renders a spacer when isNewConversation is true and selectedPromptContextIds.length is 1', async () => {
-    render(
-      <TestProviders>
-        <SelectedPromptContexts
-          {...defaultProps}
-          isNewConversation={true} // <--
-          selectedPromptContexts={{
-            [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
-          }} // <-- length 1
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('spacer')).toBeInTheDocument();
-    });
-  });
-
-  it('it renders a spacer for each selected prompt context when isNewConversation is false and selectedPromptContextIds.length is 2', async () => {
-    render(
-      <TestProviders>
-        <SelectedPromptContexts
-          {...defaultProps}
-          isNewConversation={false} // <--
-          selectedPromptContexts={{
-            [mockAlertPromptContext.id]: mockSelectedAlertPromptContext,
-            [mockEventPromptContext.id]: mockSelectedEventPromptContext,
-          }} // <-- length 2
-        />
-      </TestProviders>
-    );
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId('spacer')).toHaveLength(2);
     });
   });
 

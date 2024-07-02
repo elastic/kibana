@@ -333,8 +333,7 @@ interface SolutionSideNavPanelItemsProps {
  */
 const SolutionSideNavPanelItems: React.FC<SolutionSideNavPanelItemsProps> = React.memo(
   function SolutionSideNavPanelItems({ items, onClose }) {
-    const { euiTheme } = useEuiTheme();
-    const panelLinksGroupClassNames = classNames(SolutionSideNavPanelLinksGroupStyles(euiTheme));
+    const panelLinksGroupClassNames = classNames(SolutionSideNavPanelLinksGroupStyles());
     return (
       <EuiListGroup className={panelLinksGroupClassNames}>
         {items.map((item) => (

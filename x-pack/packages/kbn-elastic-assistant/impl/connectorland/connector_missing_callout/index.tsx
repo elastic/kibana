@@ -20,7 +20,6 @@ interface Props {
   isConnectorConfigured: boolean;
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  isFlyoutMode: boolean;
 }
 
 /**
@@ -31,7 +30,7 @@ interface Props {
  * TODO: Add setting for 'default connector' so we can auto-resolve and not even show this
  */
 export const ConnectorMissingCallout: React.FC<Props> = React.memo(
-  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible, isFlyoutMode }) => {
+  ({ isConnectorConfigured, isSettingsModalVisible, setIsSettingsModalVisible }) => {
     const { assistantAvailability, setSelectedSettingsTab } = useAssistantContext();
 
     const onConversationSettingsClicked = useCallback(() => {
@@ -55,13 +54,10 @@ export const ConnectorMissingCallout: React.FC<Props> = React.memo(
             iconType="controlsVertical"
             size="m"
             title={i18n.MISSING_CONNECTOR_CALLOUT_TITLE}
-            css={
-              isFlyoutMode &&
-              css`
-                padding-left: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
-                padding-right: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
-              `
-            }
+            css={css`
+              padding-left: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+              padding-right: ${euiLightVars.euiPanelPaddingModifiers.paddingMedium} !important;
+            `}
           >
             <p>
               <FormattedMessage

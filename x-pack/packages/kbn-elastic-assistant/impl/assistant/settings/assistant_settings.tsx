@@ -57,7 +57,6 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  isFlyoutMode: boolean;
   onSave: (success: boolean) => Promise<void>;
   selectedConversationId?: string;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
@@ -78,7 +77,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     onConversationSelected,
     conversations,
     conversationsLoaded,
-    isFlyoutMode,
   }) => {
     const {
       actionTypeRegistry,
@@ -333,7 +331,6 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                       setAssistantStreamingEnabled={setUpdatedAssistantStreamingEnabled}
                       onSelectedConversationChange={onHandleSelectedConversationChange}
                       http={http}
-                      isFlyoutMode={isFlyoutMode}
                     />
                   ))}
                 {selectedSettingsTab === QUICK_PROMPTS_TAB && (

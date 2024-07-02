@@ -90,7 +90,6 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
-          isFlyoutMode={false}
         />
       );
     });
@@ -99,47 +98,12 @@ describe('SystemPrompt', () => {
       expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
     });
 
-    it('does NOT render the system prompt text', () => {
-      expect(screen.queryByTestId('systemPromptText')).not.toBeInTheDocument();
-    });
-
     it('does NOT render the edit button', () => {
       expect(screen.queryByTestId('edit')).not.toBeInTheDocument();
     });
 
     it('does NOT render the clear button', () => {
       expect(screen.queryByTestId('clear')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('when conversation is NOT null', () => {
-    beforeEach(() => {
-      render(
-        <SystemPrompt
-          conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
-          isSettingsModalVisible={isSettingsModalVisible}
-          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
-          setIsSettingsModalVisible={setIsSettingsModalVisible}
-          isFlyoutMode={false}
-        />
-      );
-    });
-
-    it('does NOT render the system prompt select', () => {
-      expect(screen.queryByTestId('selectSystemPrompt')).not.toBeInTheDocument();
-    });
-
-    it('renders the system prompt text', () => {
-      expect(screen.getByTestId('systemPromptText')).toHaveTextContent(mockSystemPrompt.content);
-    });
-
-    it('renders the edit button', () => {
-      expect(screen.getByTestId('edit')).toBeInTheDocument();
-    });
-
-    it('renders the clear button', () => {
-      expect(screen.getByTestId('clear')).toBeInTheDocument();
     });
   });
 
@@ -156,7 +120,6 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -203,7 +166,6 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -264,7 +226,6 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -332,7 +293,6 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -415,7 +375,6 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -476,25 +435,6 @@ describe('SystemPrompt', () => {
     });
   });
 
-  it('shows the system prompt select when the edit button is clicked', () => {
-    render(
-      <TestProviders>
-        <SystemPrompt
-          conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
-          isSettingsModalVisible={isSettingsModalVisible}
-          onSystemPromptSelectionChange={onSystemPromptSelectionChange}
-          setIsSettingsModalVisible={setIsSettingsModalVisible}
-          isFlyoutMode={false}
-        />
-      </TestProviders>
-    );
-
-    userEvent.click(screen.getByTestId('edit'));
-
-    expect(screen.getByTestId('selectSystemPrompt')).toBeInTheDocument();
-  });
-
   it('shows the system prompt select when system prompt text is clicked', () => {
     render(
       <TestProviders>
@@ -504,7 +444,6 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
-          isFlyoutMode={false}
         />
       </TestProviders>
     );

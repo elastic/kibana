@@ -30,7 +30,6 @@ export interface ConversationSettingsEditorProps {
   conversationsSettingsBulkActions: ConversationsBulkActions;
   http: HttpSetup;
   isDisabled?: boolean;
-  isFlyoutMode: boolean;
   selectedConversation?: Conversation;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
@@ -48,7 +47,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     conversationSettings,
     http,
     isDisabled = false,
-    isFlyoutMode,
     setConversationSettings,
     conversationsSettingsBulkActions,
     setConversationsSettingsBulkActions,
@@ -271,14 +269,12 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             allSystemPrompts={allSystemPrompts}
             compressed
             conversation={selectedConversation}
-            isEditing={true}
             isDisabled={isDisabled}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
             showTitles={true}
             isSettingsModalVisible={true}
             setIsSettingsModalVisible={noop} // noop, already in settings
-            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 
@@ -303,7 +299,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
-            isFlyoutMode={isFlyoutMode}
           />
         </EuiFormRow>
 

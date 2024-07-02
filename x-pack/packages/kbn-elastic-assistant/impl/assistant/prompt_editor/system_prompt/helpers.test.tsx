@@ -26,7 +26,7 @@ describe('helpers', () => {
 
       render(<>{option.inputDisplay}</>);
 
-      expect(screen.getByTestId('systemPromptText')).toHaveTextContent(mockSystemPrompt.content);
+      expect(screen.getByTestId('systemPromptText')).toHaveTextContent(mockSystemPrompt.name);
     });
 
     it('shows the expected name in the dropdownDisplay', () => {
@@ -51,7 +51,7 @@ describe('helpers', () => {
       const prompts = [mockSystemPrompt, mockSuperheroSystemPrompt];
       const promptIds = prompts.map(({ id }) => id);
 
-      const options = getOptions({ prompts, isFlyoutMode: false });
+      const options = getOptions({ prompts });
       const optionValues = options.map(({ value }) => value);
 
       expect(optionValues).toEqual(promptIds);
