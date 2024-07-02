@@ -29,7 +29,7 @@ export const useDebouncedValue = <T>(
     value: T;
     defaultValue?: T;
   },
-  { allowFalsyValue, wait }: { allowFalsyValue?: boolean; wait?: number } = {
+  { allowFalsyValue, wait = DEFAULT_TIMEOUT }: { allowFalsyValue?: boolean; wait?: number } = {
     wait: DEFAULT_TIMEOUT,
   }
 ) => {
