@@ -14,8 +14,10 @@ Status: `in progress`.
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
 
-  - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa) -[**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
-  - [Rule field doesn't have an update but has a custom value - `ABA`](#rule-field-doesnt-have-an-update-but-has-a-custom-value---aba) -[**Scenario: `ABA` - Rule field is any type**](#scenario-aba---rule-field-is-any-type)
+  - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
+    - [**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
+  - [Rule field doesn't have an update but has a custom value - `ABA`](#rule-field-doesnt-have-an-update-but-has-a-custom-value---aba)
+    - [**Scenario: `ABA` - Rule field is any type**](#scenario-aba---rule-field-is-any-type)
   - [Rule field has an update and doesn't have a custom value - `AAB`](#rule-field-has-an-update-and-doesnt-have-a-custom-value---aab)
     - [**Scenario: `AAB` - Rule field is any type**](#scenario-aab---rule-field-is-any-type)
   - [Rule field has an update and a custom value that are the same - `ABB`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same---abb)
@@ -40,9 +42,9 @@ Status: `in progress`.
 
 ### Terminology
 
-- **Base version**: Also labeled as `base_version`. This is the version of a rule authored by Elastic and unchanged by a user. The algorithms use it as a point of reference to see if the rule is being updated at all in addition to seeing if the user has customized anything themselves
+- **Base version**: Also labeled as `base_version`. This is the version of a rule authored by Elastic as it is installed from the `security_detection_engine` package, with no customizations to any fields by the user.
 
-- **Current version**: Also labeled as `current_version`. This is the version of the rule that the user currently has installed. If any modifications were made to the "out of the box" `base_version` of the rule they would be represented by the `current_version` of the rule.
+- **Current version**: Also labeled as `current_version`. This is the version of the rule that the user currently has installed. Consists of the `base_version` of the rules plus all customization applies to its fields by the user.
 
 - **Target version**: Also labeled as `target_version`. This is the version of the rule that contains the update from Elastic.
 
