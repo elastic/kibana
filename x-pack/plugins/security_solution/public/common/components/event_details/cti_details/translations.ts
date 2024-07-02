@@ -92,6 +92,14 @@ export const ENRICHED_DATA = i18n.translate(
   }
 );
 
+export const NESTED_OBJECT_VALUES_NOT_RENDERED = i18n.translate(
+  'xpack.securitySolution.eventDetails.ctiSummary.investigationEnrichmentObjectValuesNotRendered',
+  {
+    defaultMessage:
+      'This field contains nested object values, which are not rendered here. See the full document for all fields/values',
+  }
+);
+
 export const CURRENT_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.alertDetails.overview.hostRiskLevel', {
     defaultMessage: 'Current {riskEntity} risk level',
