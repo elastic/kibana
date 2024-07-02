@@ -70,8 +70,6 @@ export default ({ getService }: FtrProviderContext): void => {
   };
 
   describe('@ess @serverless Risk Scoring Preview API', function () {
-    this.tags(['esGate']);
-
     before(async () => {
       enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });

@@ -85,6 +85,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   };
 
   describe('@ess @serverless endpoint list', function () {
+    this.tags(['esGate']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     describe('when initially navigating to page', () => {
       before(async () => {

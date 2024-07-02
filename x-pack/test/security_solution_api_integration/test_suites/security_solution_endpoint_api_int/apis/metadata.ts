@@ -47,6 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('@ess @serverless test metadata apis', function () {
+    this.tags(['esGate']);
+
     describe('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
       let agent1Timestamp: number;
