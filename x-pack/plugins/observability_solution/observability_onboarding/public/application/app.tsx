@@ -22,6 +22,7 @@ import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
+  ObservabilityOnboardingContextValue,
 } from '../plugin';
 import { ObservabilityOnboardingFlow } from './observability_onboarding_flow';
 
@@ -40,14 +41,13 @@ export const breadcrumbsApp = {
 export function ObservabilityOnboardingAppRoot({
   appMountParameters,
   core,
-  deps,
-  corePlugins: { observability, data },
+  corePlugins,
   config,
 }: {
   appMountParameters: AppMountParameters;
 } & RenderAppProps) {
   const { history, setHeaderActionMenu, theme$ } = appMountParameters;
-  const plugins = { ...deps };
+  const services: ObservabilityOnboardingContextValue = { ...core, ...corePlugins, config };
 
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
@@ -63,15 +63,7 @@ export function ObservabilityOnboardingAppRoot({
             application: core.application,
           }}
         >
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              observability,
-              data,
-              config,
-            }}
-          >
+          <KibanaContextProvider services={services}>
             <KibanaThemeProvider
               theme={{ theme$ }}
               modify={{

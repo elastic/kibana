@@ -12,7 +12,6 @@ export * from './detail_panel';
 export * from './header_actions';
 export * from './session_view';
 export * from './bulk_actions';
-export * from './third_party_agent';
 
 export const FILTER_OPEN: Status = 'open';
 export const FILTER_CLOSED: Status = 'closed';

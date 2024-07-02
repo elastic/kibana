@@ -24,6 +24,7 @@ export function createAddErrorBudgetPanelAction(
   return {
     id: ADD_SLO_ERROR_BUDGET_ACTION_ID,
     grouping: COMMON_SLO_GROUPING,
+    order: 10,
     getIconType: () => 'visLine',
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
