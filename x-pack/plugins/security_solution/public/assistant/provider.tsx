@@ -176,6 +176,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     const createSecurityPrompts = once(async () => {
       const res = await getPrompts({
         http,
+        toasts: notifications.toasts,
       });
       if (
         assistantAvailability.isAssistantEnabled &&

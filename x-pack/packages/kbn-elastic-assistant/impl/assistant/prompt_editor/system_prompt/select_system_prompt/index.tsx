@@ -77,20 +77,18 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
   );
 
   const [isOpenLocal, setIsOpenLocal] = useState<boolean>(isOpen);
-  const [valueOfSelected, setValueOfSelected] = useState<string | undefined>(
-    selectedPrompt?.id ?? allSystemPrompts?.[0]?.id
-  );
   const handleOnBlur = useCallback(() => setIsOpenLocal(false), []);
+  const valueOfSelected = useMemo(() => selectedPrompt?.id, [selectedPrompt?.id]);
 
   // Write the selected system prompt to the conversation config
   const setSelectedSystemPrompt = useCallback(
-    (prompt: PromptResponse | undefined) => {
+    (promptId?: string) => {
       if (conversation && conversation.apiConfig) {
         setApiConfig({
           conversation,
           apiConfig: {
             ...conversation.apiConfig,
-            defaultSystemPromptId: prompt?.id,
+            defaultSystemPromptId: promptId,
           },
         });
       }
@@ -134,14 +132,11 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
       // Note: if callback is provided, this component does not persist. Extract to separate component
       if (onSystemPromptSelectionChange != null) {
         onSystemPromptSelectionChange(selectedSystemPromptId);
-      } else {
-        setSelectedSystemPrompt(allSystemPrompts.find((sp) => sp.id === selectedSystemPromptId));
       }
-      setValueOfSelected(selectedSystemPromptId);
+      setSelectedSystemPrompt(selectedSystemPromptId);
       setIsEditing?.(false);
     },
     [
-      allSystemPrompts,
       onSystemPromptSelectionChange,
       setIsEditing,
       setIsSettingsModalVisible,
@@ -154,7 +149,6 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
     setSelectedSystemPrompt(undefined);
     setIsEditing?.(false);
     clearSelectedSystemPrompt?.();
-    setValueOfSelected(undefined);
   }, [clearSelectedSystemPrompt, setIsEditing, setSelectedSystemPrompt]);
 
   const onShowSelectSystemPrompt = useCallback(() => {

@@ -96,7 +96,7 @@ export const getDefaultSystemPrompt = ({
   );
   const defaultNewSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
 
-  return conversationSystemPrompt ?? defaultNewSystemPrompt;
+  return conversationSystemPrompt?.id ? conversationSystemPrompt : defaultNewSystemPrompt;
 };
 
 /**

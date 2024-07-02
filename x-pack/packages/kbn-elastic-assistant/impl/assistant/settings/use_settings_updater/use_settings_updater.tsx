@@ -140,6 +140,30 @@ export const useSettingsUpdater = (
    * Save all pending settings
    */
   const saveSettings = useCallback(async (): Promise<boolean> => {
+    const bulkPromptsResult = hasBulkPrompts
+      ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
+      : undefined;
+
+    // replace conversation references for created
+    if (bulkPromptsResult) {
+      bulkPromptsResult.attributes.results.created.forEach((p) => {
+        if (conversationsSettingsBulkActions.create) {
+          Object.values(conversationsSettingsBulkActions.create).forEach((c) => {
+            if (c.apiConfig?.defaultSystemPromptId === p.name) {
+              c.apiConfig.defaultSystemPromptId = p.id;
+            }
+          });
+        }
+        if (conversationsSettingsBulkActions.update) {
+          Object.values(conversationsSettingsBulkActions.update).forEach((c) => {
+            if (c.apiConfig?.defaultSystemPromptId === p.name) {
+              c.apiConfig.defaultSystemPromptId = p.id;
+            }
+          });
+        }
+      });
+    }
+
     const bulkResult = hasBulkConversations
       ? await bulkUpdateConversations(http, conversationsSettingsBulkActions, toasts)
       : undefined;
@@ -168,10 +192,6 @@ export const useSettingsUpdater = (
 
     const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
       ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
-      : undefined;
-
-    const bulkPromptsResult = hasBulkPrompts
-      ? await bulkUpdatePrompts(http, promptsBulkActions, toasts)
       : undefined;
 
     return (
