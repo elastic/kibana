@@ -1261,6 +1261,7 @@ describe('rules schema', () => {
       { ruleType: 'saved_query', ruleMock: getCreateSavedQueryRulesSchemaMock() },
       { ruleType: 'eql', ruleMock: getCreateEqlRuleSchemaMock() },
       { ruleType: 'new_terms', ruleMock: getCreateNewTermsRulesSchemaMock() },
+      { ruleType: 'machine_learning', ruleMock: getCreateMachineLearningRulesSchemaMock() },
     ];
 
     cases.forEach(({ ruleType, ruleMock }) => {
