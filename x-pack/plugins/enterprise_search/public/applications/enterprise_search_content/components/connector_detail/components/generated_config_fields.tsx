@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiCallOut,
   EuiCode,
   EuiConfirmModal,
@@ -20,7 +20,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -84,8 +83,6 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
   generateApiKey,
   isGenerateLoading,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const refreshButtonClick = () => {
@@ -104,8 +101,8 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
     <>
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
       <>
-        <EuiFlexGrid columns={3} alignItems="center" gutterSize="m">
-          <EuiFlexItem css={{ minHeight: euiTheme.size.l }}>
+        <EuiFlexGrid columns={3} alignItems="center" gutterSize="s">
+          <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="check" />
@@ -150,7 +147,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={connector.id}>
                   {(copy) => (
-                    <EuiButtonEmpty
+                    <EuiButtonIcon
                       size="xs"
                       data-test-subj="enterpriseSearchConnectorDeploymentButton"
                       iconType="copyClipboard"
@@ -161,7 +158,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem css={{ minHeight: euiTheme.size.l }}>
+          <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="check" />
@@ -186,7 +183,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
             )}
           </EuiFlexItem>
           <EuiFlexItem />
-          <EuiFlexItem css={{ minHeight: euiTheme.size.l }}>
+          <EuiFlexItem>
             <EuiFlexGroup responsive={false} gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <EuiIcon type="check" />
@@ -194,8 +191,9 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
               <EuiFlexItem>
                 {i18n.translate(
                   'xpack.enterpriseSearch.connectorDeployment.apiKeyCreatedFlexItemLabel',
-                  { defaultMessage: 'API key created *' }
+                  { defaultMessage: 'API key created' }
                 )}
+                {apiKey?.encoded && ` *`}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -225,9 +223,9 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                           <EuiCode>{apiKey?.encoded}</EuiCode>
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
+                          <EuiButtonIcon
                             data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                            size="s"
+                            size="xs"
                             iconType="refresh"
                             isLoading={isGenerateLoading}
                             onClick={refreshButtonClick}
@@ -235,7 +233,7 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButtonEmpty
+                          <EuiButtonIcon
                             size="xs"
                             data-test-subj="enterpriseSearchConnectorDeploymentButton"
                             iconType="copyClipboard"
@@ -248,9 +246,9 @@ export const GeneratedConfigFields: React.FC<GeneratedConfigFieldsProps> = ({
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
+                  <EuiButtonIcon
                     data-test-subj="enterpriseSearchGeneratedConfigFieldsButton"
-                    size="s"
+                    size="xs"
                     iconType="refresh"
                     isLoading={isGenerateLoading}
                     onClick={refreshButtonClick}
