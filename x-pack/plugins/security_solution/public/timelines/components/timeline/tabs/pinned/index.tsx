@@ -14,6 +14,11 @@ import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
@@ -46,6 +51,7 @@ import {
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
@@ -171,12 +177,54 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const { openFlyout } = useExpandableFlyoutApi();
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+  const onToggleShowNotes = useCallback(
+    (eventId?: string) => {
+      const indexName = selectedPatterns.join(',');
+      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          left: {
+            id: DocumentDetailsLeftPanelKey,
+            path: {
+              tab: LeftPanelNotesTab,
+            },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+        });
+      }
+    },
+    [
+      expandableFlyoutDisabled,
+      openFlyout,
+      securitySolutionNotesEnabled,
+      selectedPatterns,
+      timelineId,
+    ]
+  );
+
   const leadingControlColumns = useTimelineControlColumn({
     columns,
     sort,
     timelineId,
     activeTab: TimelineTabs.pinned,
     refetch,
+    onToggleShowNotes,
   });
 
   const isQueryLoading = useMemo(

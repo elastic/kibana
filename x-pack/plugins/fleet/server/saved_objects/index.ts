@@ -86,7 +86,10 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
-import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
+import {
+  packagePolicyV13AdvancedFields,
+  packagePolicyV10OnWriteScanFix,
+} from './model_versions/security_solution';
 import {
   migratePackagePolicyIdsToV8150,
   migratePackagePolicySetRequiresRootToV8150,
@@ -608,6 +611,14 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: migratePackagePolicyIdsToV8150,
+            },
+          ],
+        },
+        '13': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV13AdvancedFields,
             },
           ],
         },
