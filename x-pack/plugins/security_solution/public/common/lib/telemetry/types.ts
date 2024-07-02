@@ -6,6 +6,12 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
+import type {
+  AddNoteFromExpandableFlyoutClickedParams,
+  NotesTelemetryEvents,
+  NotesTelemetryEventParams,
+  OpenNoteInExpandableFlyoutClickedParams,
+} from '../../../notes/telemetry/types';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
@@ -112,7 +118,8 @@ export type TelemetryEventParams =
   | ReportDocumentDetailsTelemetryEventParams
   | OnboardingHubStepOpenParams
   | OnboardingHubStepFinishedParams
-  | OnboardingHubStepLinkClickedParams;
+  | OnboardingHubStepLinkClickedParams
+  | NotesTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -155,6 +162,10 @@ export interface TelemetryClientStart {
   reportOnboardingHubStepOpen(params: OnboardingHubStepOpenParams): void;
   reportOnboardingHubStepFinished(params: OnboardingHubStepFinishedParams): void;
   reportOnboardingHubStepLinkClicked(params: OnboardingHubStepLinkClickedParams): void;
+
+  // new notes
+  reportOpenNoteInExpandableFlyoutClicked(params: OpenNoteInExpandableFlyoutClickedParams): void;
+  reportAddNoteFromExpandableFlyoutClicked(params: AddNoteFromExpandableFlyoutClickedParams): void;
 }
 
 export type TelemetryEvent =
@@ -179,4 +190,5 @@ export type TelemetryEvent =
       eventType: TelemetryEventTypes.BreadcrumbClicked;
       schema: RootSchema<ReportBreadcrumbClickedParams>;
     }
-  | OnboardingHubTelemetryEvent;
+  | OnboardingHubTelemetryEvent
+  | NotesTelemetryEvents;

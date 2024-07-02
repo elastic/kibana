@@ -7,6 +7,10 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
+  AddNoteFromExpandableFlyoutClickedParams,
+  OpenNoteInExpandableFlyoutClickedParams,
+} from '../../../notes/telemetry/types';
+import type {
   TelemetryClientStart,
   ReportAlertsGroupingChangedParams,
   ReportAlertsGroupingToggledParams,
@@ -167,5 +171,17 @@ export class TelemetryClient implements TelemetryClientStart {
 
   public reportOnboardingHubStepLinkClicked = (params: OnboardingHubStepLinkClickedParams) => {
     this.analytics.reportEvent(TelemetryEventTypes.OnboardingHubStepLinkClicked, params);
+  };
+
+  public reportOpenNoteInExpandableFlyoutClicked = (
+    params: OpenNoteInExpandableFlyoutClickedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked, params);
+  };
+
+  public reportAddNoteFromExpandableFlyoutClicked = (
+    params: AddNoteFromExpandableFlyoutClickedParams
+  ) => {
+    this.analytics.reportEvent(TelemetryEventTypes.AddNoteFromExpandableFlyoutClicked, params);
   };
 }
