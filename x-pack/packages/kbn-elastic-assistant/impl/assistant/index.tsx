@@ -220,7 +220,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (conversationsLoaded && Object.keys(conversations).length > 0) {
+    if (areConnectorsFetched && conversationsLoaded && Object.keys(conversations).length > 0) {
       setCurrentConversation((prev) => {
         const nextConversation =
           (currentConversationId && conversations[currentConversationId]) ||
@@ -256,13 +256,13 @@ const AssistantComponent: React.FC<Props> = ({
       });
     }
   }, [
+    areConnectorsFetched,
     conversationTitle,
     conversations,
+    conversationsLoaded,
+    currentConversationId,
     getDefaultConversation,
     getLastConversationId,
-    conversationsLoaded,
-    currentConversation?.id,
-    currentConversationId,
     isAssistantEnabled,
     isFlyoutMode,
   ]);
@@ -549,7 +549,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleOnChatCleared,
+    handleOnChatCleared: onChatCleared,
     handlePromptChange,
     handleSendMessage,
     handleRegenerateResponse,
@@ -566,6 +566,11 @@ const AssistantComponent: React.FC<Props> = ({
     setSelectedPromptContexts,
     setCurrentConversation,
   });
+
+  const handleOnChatCleared = useCallback(async () => {
+    await onChatCleared();
+    await refetchResults();
+  }, [onChatCleared, refetchResults]);
 
   const handleChatSend = useCallback(
     async (promptText: string) => {
@@ -733,15 +738,7 @@ const AssistantComponent: React.FC<Props> = ({
         }
       }
     })();
-  }, [
-    currentConversation,
-    defaultConnector,
-    refetchConversationsState,
-    setApiConfig,
-    showMissingConnectorCallout,
-    areConnectorsFetched,
-    mutateAsync,
-  ]);
+  }, [areConnectorsFetched, currentConversation, mutateAsync]);
 
   const handleCreateConversation = useCallback(async () => {
     const newChatExists = find(conversations, ['title', NEW_CHAT]);
