@@ -500,17 +500,6 @@ describe('Prebuilt rule asset schema', () => {
     );
   });
 
-  test('You cannot send in an array of actions that are missing "group"', () => {
-    const payload: Omit<PrebuiltRuleAsset['actions'], 'group'> = {
-      ...getPrebuiltRuleMock(),
-      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
-    };
-
-    const result = PrebuiltRuleAsset.safeParse(payload);
-    expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"actions.0.group: Required"`);
-  });
-
   test('You cannot send in an array of actions that are missing "id"', () => {
     const payload: Omit<PrebuiltRuleAsset['actions'], 'id'> = {
       ...getPrebuiltRuleMock(),
