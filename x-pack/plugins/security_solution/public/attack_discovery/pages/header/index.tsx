@@ -12,6 +12,8 @@ import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
+import { StatusBell } from './status_bell';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import * as i18n from './translations';
 
@@ -23,6 +25,7 @@ interface Props {
   onGenerate: () => void;
   onCancel: () => void;
   onConnectorIdSelected: (connectorId: string) => void;
+  stats: AttackDiscoveryStats | null;
 }
 
 const HeaderComponent: React.FC<Props> = ({
@@ -33,6 +36,7 @@ const HeaderComponent: React.FC<Props> = ({
   onGenerate,
   onConnectorIdSelected,
   onCancel,
+  stats,
 }) => {
   const isFlyoutMode = false; // always false for attack discovery
   const { hasAssistantPrivilege } = useAssistantAvailability();
@@ -67,7 +71,6 @@ const HeaderComponent: React.FC<Props> = ({
           },
     [isLoading, handleCancel, onGenerate]
   );
-
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -78,6 +81,7 @@ const HeaderComponent: React.FC<Props> = ({
       data-test-subj="header"
       gutterSize="none"
     >
+      <StatusBell stats={stats} />
       {connectorsAreConfigured && (
         <EuiFlexItem grow={false}>
           <ConnectorSelectorInline
@@ -85,6 +89,7 @@ const HeaderComponent: React.FC<Props> = ({
             onConnectorSelected={noop}
             onConnectorIdSelected={onConnectorIdSelected}
             selectedConnectorId={connectorId}
+            stats={stats}
           />
         </EuiFlexItem>
       )}

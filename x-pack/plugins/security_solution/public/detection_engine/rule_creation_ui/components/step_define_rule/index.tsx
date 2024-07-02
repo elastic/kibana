@@ -58,6 +58,7 @@ import { MlJobSelect } from '../../../rule_creation/components/ml_job_select';
 import { PickTimeline } from '../../../rule_creation/components/pick_timeline';
 import { StepContentWrapper } from '../../../rule_creation/components/step_content_wrapper';
 import { ThresholdInput } from '../threshold_input';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SuppressionInfoIcon } from '../suppression_info_icon';
 import { EsqlInfoIcon } from '../../../rule_creation/components/esql_info_icon';
 import {
@@ -102,6 +103,7 @@ import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { useAlertSuppression } from '../../../rule_management/logic/use_alert_suppression';
+import { AiAssistant } from '../ai_assistant';
 import { RelatedIntegrations } from '../../../rule_creation/components/related_integrations';
 
 const CommonUseField = getUseField({ component: Field });
@@ -109,7 +111,7 @@ const CommonUseField = getUseField({ component: Field });
 const StyledVisibleContainer = styled.div<{ isVisible: boolean }>`
   display: ${(props) => (props.isVisible ? 'block' : 'none')};
 `;
-interface StepDefineRuleProps extends RuleStepProps {
+export interface StepDefineRuleProps extends RuleStepProps {
   indicesConfig: string[];
   threatIndicesConfig: string[];
   defaultSavedQuery?: SavedQuery;
@@ -209,6 +211,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const isThresholdRule = getIsThresholdRule(ruleType);
   const alertSuppressionUpsellingMessage = useUpsellingMessage('alert_suppression_rule_form');
 
+  const isAIAssistantEnabled = useIsExperimentalFeatureEnabled(
+    'AIAssistantOnRuleCreationFormEnabled'
+  );
   const { getFields, reset, setFieldValue } = form;
 
   const setRuleTypeCallback = useSetFieldValueWithCallback({
@@ -928,6 +933,11 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               )}
             </>
           </RuleTypeEuiFormRow>
+
+          {isAIAssistantEnabled && !isMlRule(ruleType) && !isQueryBarValid && (
+            <AiAssistant getFields={form.getFields} language={queryBar?.query?.language} />
+          )}
+
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />

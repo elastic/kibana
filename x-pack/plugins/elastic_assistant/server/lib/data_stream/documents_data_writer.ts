@@ -11,9 +11,8 @@ import type {
   BulkResponseItem,
   Script,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import { UUID } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export interface BulkOperationError {
   message: string;
