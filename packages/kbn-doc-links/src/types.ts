@@ -537,6 +537,7 @@ export interface DocLinks {
     datastreamsDownsampling: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
+    grantESAccessToStandaloneAgents: string;
     packageSignatures: string;
     upgradeElasticAgent: string;
     learnMoreBlog: string;
@@ -554,6 +555,7 @@ export interface DocLinks {
     scalingKubernetesResourcesAndLimits: string;
     roleAndPrivileges: string;
     proxiesSettings: string;
+    unprivilegedMode: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
