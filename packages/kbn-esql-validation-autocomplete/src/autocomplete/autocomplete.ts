@@ -81,6 +81,7 @@ import {
 } from '../shared/resources_helpers';
 import { ESQLCallbacks } from '../shared/types';
 import {
+  findMissingBrackets,
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
   getQueryForFields,
@@ -137,28 +138,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
   return finalSuggestions;
 }
 
-/**
- * This function count the number of unclosed brackets in order to
- * locally fix the queryString to generate a valid AST
- * A known limitation of this is that is not aware of commas "," or pipes "|"
- * so it is not yet helpful on a multiple commands errors (a workaround it to pass each command here...)
- * @param bracketType
- * @param text
- * @returns
- */
-function countBracketsUnclosed(bracketType: '(' | '[', text: string) {
-  const stack = [];
-  const closingBrackets = { '(': ')', '[': ']' };
-  for (const char of text) {
-    if (char === bracketType) {
-      stack.push(bracketType);
-    } else if (char === closingBrackets[bracketType]) {
-      stack.pop();
-    }
-  }
-  return stack.length;
-}
-
 export async function suggest(
   fullText: string,
   offset: number,
@@ -170,16 +149,14 @@ export async function suggest(
 
   let finalText = innerText;
 
-  // check if all brackets are closed, otherwise close them
-  const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
-  const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
+  const missingBrackets = findMissingBrackets(finalText);
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
   const charThatNeedMarkers = [',', ':'];
   if (
     (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
     (context.triggerKind === 0 &&
-      unclosedRoundBrackets === 0 &&
+      missingBrackets.roundCount === 0 &&
       getLastCharFromTrimmed(innerText) !== '_') ||
     (context.triggerCharacter === ' ' &&
       (isMathFunction(innerText, offset) ||
@@ -187,10 +164,7 @@ export async function suggest(
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
-
-  // if there are unclosed brackets, close them
-  if (unclosedRoundBrackets) finalText += ')'.repeat(unclosedRoundBrackets);
-  if (unclosedSquaredBrackets) finalText += ']'.repeat(unclosedSquaredBrackets);
+  if (missingBrackets.stack) finalText += missingBrackets.stack.join('');
 
   const { ast } = await astProvider(finalText);
 

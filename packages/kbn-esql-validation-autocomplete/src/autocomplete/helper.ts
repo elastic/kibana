@@ -71,3 +71,38 @@ export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'ind
 
   return sources.length === 1 ? sources[0] : undefined;
 }
+
+export const findMissingBrackets = (text: string) => {
+  const stack: Array<']' | ')'> = [];
+  const length = text.length;
+  let roundCount = 0;
+
+  for (let i = 0; i < length; i++) {
+    const char = text[i];
+    switch (char) {
+      case '(': {
+        roundCount++;
+        stack.push(')');
+        break;
+      }
+      case '[': {
+        stack.push(']');
+        break;
+      }
+      case ')': {
+        if (roundCount > 0) roundCount--;
+        stack.pop();
+        break;
+      }
+      case ']': {
+        stack.pop();
+        break;
+      }
+    }
+  }
+
+  return {
+    stack,
+    roundCount,
+  };
+};
