@@ -22,6 +22,7 @@ const defaultProps: ComponentProps<typeof NotesButton> = {
   eventId: 'event-id',
   notesCount: 1,
   timelineType: TimelineType.default,
+  toolTip: 'Sample Tooltip',
 };
 
 const TestWrapper: React.FC = ({ children }) => {

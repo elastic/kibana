@@ -17,6 +17,9 @@ interface AddEventNoteActionProps {
   timelineType: TimelineType;
   toggleShowNotes?: () => void | ((eventId: string) => void);
   eventId?: string;
+  /*
+   * Number of notes associated with the event
+   */
   notesCount: number;
 }
 

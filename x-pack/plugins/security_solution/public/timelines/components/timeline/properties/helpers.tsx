@@ -84,7 +84,7 @@ interface NotesButtonProps {
   ariaLabel?: string;
   isDisabled?: boolean;
   toggleShowNotes?: () => void | ((eventId: string) => void);
-  toolTip?: string;
+  toolTip: string;
   timelineType: TimelineTypeLiteral;
   eventId?: string;
   /**
@@ -95,7 +95,7 @@ interface NotesButtonProps {
 
 export const NotesButton = React.memo<NotesButtonProps>(
   ({ ariaLabel, isDisabled, timelineType, toggleShowNotes, toolTip, eventId, notesCount }) => (
-    <EuiToolTip content={toolTip || ''} data-test-subj="timeline-notes-tool-tip">
+    <EuiToolTip content={toolTip} data-test-subj="timeline-notes-tool-tip">
       <SmallNotesButton
         ariaLabel={ariaLabel}
         isDisabled={isDisabled}
