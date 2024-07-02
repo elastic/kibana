@@ -25,7 +25,11 @@ export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDeco
     ) {
       return (
         <>
-          <EuiText data-test-subj={testIdPrefix && `${testIdPrefix}-processDescendantIndication`}>
+          <EuiText
+            data-test-subj={
+              testIdPrefix !== undefined ? `${testIdPrefix}-processDescendantIndication` : undefined
+            }
+          >
             <code>
               <strong>
                 <FormattedMessage
@@ -34,7 +38,11 @@ export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDeco
                 />{' '}
                 <ProcessDescendantsTooltip
                   indicateExtraEntry
-                  testIdPrefix={testIdPrefix && `${testIdPrefix}-processDescendantIndication`}
+                  testIdPrefix={
+                    testIdPrefix !== undefined
+                      ? `${testIdPrefix}-processDescendantIndication`
+                      : undefined
+                  }
                 />
               </strong>
             </code>

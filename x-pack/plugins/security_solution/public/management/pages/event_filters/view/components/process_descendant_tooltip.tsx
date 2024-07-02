@@ -50,9 +50,12 @@ export const ProcessDescendantsTooltip = ({
           </p>
         </EuiText>
       }
-      data-test-subj={testIdPrefix && `${testIdPrefix}-tooltipText`}
+      data-test-subj={testIdPrefix !== undefined ? `${testIdPrefix}-tooltipText` : undefined}
     >
-      <EuiIcon type="iInCircle" data-test-subj={testIdPrefix && `${testIdPrefix}-tooltipIcon`} />
+      <EuiIcon
+        type="iInCircle"
+        data-test-subj={testIdPrefix !== undefined ? `${testIdPrefix}-tooltipIcon` : undefined}
+      />
     </EuiToolTip>
   );
 };
