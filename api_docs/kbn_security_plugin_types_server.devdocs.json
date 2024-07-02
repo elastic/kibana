@@ -3242,22 +3242,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_settings_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/maintenance_window_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/invalidate_pending_api_keys/task.ts"
               },
               {
@@ -3267,10 +3251,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/plugin.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -3291,10 +3271,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
-              },
-              {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/setup_routes.ts"
               },
               {
                 "plugin": "cloudSecurityPosture",

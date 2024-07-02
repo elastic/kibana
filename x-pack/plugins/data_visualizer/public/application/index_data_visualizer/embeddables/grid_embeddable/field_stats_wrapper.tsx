@@ -30,21 +30,62 @@ const EmbeddableFieldStatsTableWrapper = dynamic(() => import('./embeddable_fiel
 function isESQLFieldStatisticTableEmbeddableState(
   input: FieldStatisticTableEmbeddableProps
 ): input is ESQLDataVisualizerGridEmbeddableState {
-  return isPopulatedObject(input, ['esql']) && input.esql === true;
+  return isPopulatedObject(input, ['isEsqlMode']) && input.isEsqlMode === true;
 }
 
 function isFieldStatisticTableEmbeddableState(
   input: FieldStatisticTableEmbeddableProps
 ): input is Required<FieldStatisticTableEmbeddableProps, 'dataView'> {
-  return isPopulatedObject(input, ['dataView']) && Boolean(input.esql) === false;
+  return isPopulatedObject(input, ['dataView']) && Boolean(input.isEsqlMode) === false;
 }
 
 const FieldStatisticsWrapperContent = (props: FieldStatisticTableEmbeddableProps) => {
   if (isESQLFieldStatisticTableEmbeddableState(props)) {
-    return <EmbeddableESQLFieldStatsTableWrapper {...props} />;
+    return (
+      <EmbeddableESQLFieldStatsTableWrapper
+        dataView={props.dataView}
+        esqlQuery={props.esqlQuery}
+        isEsqlMode={props.isEsqlMode ?? props.esql}
+        filters={props.filters}
+        lastReloadRequestTime={props.lastReloadRequestTime}
+        onAddFilter={props.onAddFilter}
+        onTableUpdate={props.onTableUpdate}
+        query={props.query}
+        samplingOption={props.samplingOption}
+        savedSearch={props.savedSearch}
+        sessionId={props.sessionId}
+        shouldGetSubfields={props.shouldGetSubfields}
+        showPreviewByDefault={props.showPreviewByDefault}
+        totalDocuments={props.totalDocuments}
+        timeRange={props.timeRange}
+        visibleFieldNames={props.visibleFieldNames}
+        resetData$={props.resetData$}
+        onRenderComplete={props.onRenderComplete}
+      />
+    );
   }
   if (isFieldStatisticTableEmbeddableState(props)) {
-    return <EmbeddableFieldStatsTableWrapper {...props} />;
+    return (
+      <EmbeddableFieldStatsTableWrapper
+        dataView={props.dataView}
+        isEsqlMode={false}
+        filters={props.filters}
+        lastReloadRequestTime={props.lastReloadRequestTime}
+        onAddFilter={props.onAddFilter}
+        onTableUpdate={props.onTableUpdate}
+        query={props.query}
+        samplingOption={props.samplingOption}
+        savedSearch={props.savedSearch}
+        sessionId={props.sessionId}
+        shouldGetSubfields={props.shouldGetSubfields}
+        showPreviewByDefault={props.showPreviewByDefault}
+        totalDocuments={props.totalDocuments}
+        timeRange={props.timeRange}
+        visibleFieldNames={props.visibleFieldNames}
+        resetData$={props.resetData$}
+        onRenderComplete={props.onRenderComplete}
+      />
+    );
   } else {
     return (
       <EuiEmptyPrompt
@@ -133,7 +174,8 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
         <DatePickerContextProvider {...datePickerDeps}>
           <FieldStatisticsWrapperContent
             dataView={props.dataView}
-            esql={props.esql}
+            isEsqlMode={props.isEsqlMode ?? props.esql}
+            esqlQuery={props.esqlQuery}
             filters={props.filters}
             lastReloadRequestTime={props.lastReloadRequestTime}
             onAddFilter={props.onAddFilter}
@@ -146,6 +188,9 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
             showPreviewByDefault={props.showPreviewByDefault}
             totalDocuments={props.totalDocuments}
             visibleFieldNames={props.visibleFieldNames}
+            resetData$={props.resetData$}
+            timeRange={props.timeRange}
+            onRenderComplete={props.onRenderComplete}
           />
         </DatePickerContextProvider>
       </KibanaContextProvider>
