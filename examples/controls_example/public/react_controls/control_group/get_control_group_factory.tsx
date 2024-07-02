@@ -47,6 +47,7 @@ import {
   ControlGroupSerializedState,
   ControlGroupUnsavedChanges,
 } from './types';
+import { dataControlFetch$ } from './data_control_fetch';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -67,7 +68,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         labelPosition,
         chainingSystem,
         autoApplySelections,
-        ignoreParentSettings: initialParentSettings,
+        ignoreParentSettings,
       } = initialState;
 
       const autoApplySelections$ = new BehaviorSubject<boolean>(autoApplySelections);
@@ -76,8 +77,8 @@ export const getControlGroupEmbeddableFactory = (services: {
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
-      const ignoreParentSettings = new BehaviorSubject<ParentIgnoreSettings | undefined>(
-        initialParentSettings
+      const ignoreParentSettings$ = new BehaviorSubject<ParentIgnoreSettings | undefined>(
+        ignoreParentSettings
       );
       const grow = new BehaviorSubject<boolean | undefined>(
         defaultControlGrow === undefined ? DEFAULT_CONTROL_GROW : defaultControlGrow
@@ -114,6 +115,8 @@ export const getControlGroupEmbeddableFactory = (services: {
           .sort((a, b) => (a.order > b.order ? 1 : -1))
       );
       const api = setApi({
+        dataControlFetch$: dataControlFetch$(ignoreParentSettings$, parentApi ? parentApi : {}),
+        ignoreParentSettings$,
         autoApplySelections$,
         unsavedChanges,
         resetUnsavedChanges: () => {
@@ -134,7 +137,7 @@ export const getControlGroupEmbeddableFactory = (services: {
               chainingSystem: chainingSystem$,
               labelPosition: labelPosition$,
               autoApplySelections: autoApplySelections$,
-              ignoreParentSettings,
+              ignoreParentSettings: ignoreParentSettings$,
             },
             { core: services.core }
           );
@@ -155,7 +158,7 @@ export const getControlGroupEmbeddableFactory = (services: {
               labelPosition: labelPosition$.getValue(),
               chainingSystem: chainingSystem$.getValue(),
               autoApplySelections: autoApplySelections$.getValue(),
-              ignoreParentSettings: ignoreParentSettings.getValue(),
+              ignoreParentSettings: ignoreParentSettings$.getValue(),
             }
           );
         },
