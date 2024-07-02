@@ -116,6 +116,7 @@ test('generates metric chart config', async () => {
                 "query": Object {
                   "esql": "from test | count=count() by @timestamp, category",
                 },
+                "timeField": undefined,
               },
             },
           },
