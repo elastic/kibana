@@ -14,7 +14,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import type { ImmutableArray } from '../../../../../../common/endpoint/types';
 import type { TransformStats } from '../../types';
 import { WARNING_TRANSFORM_STATES } from '../../../../../../common/constants';
-import { metadataTransformPrefix } from '../../../../../../common/endpoint/constants';
 import { LinkToApp } from '../../../../../common/components/endpoint/link_to_app';
 import { CallOut } from '../../../../../common/components/callouts';
 import type { EndpointAction } from '../../store/action';
@@ -74,7 +73,7 @@ export const TransformFailedCallout = memo<TransformFailedCalloutProps>(
             id="xpack.securitySolution.endpoint.list.transformFailed.message"
             defaultMessage="A required transform, {transformId}, is currently failing. Most of the time this can be fixed by {transformsPage}. For additional help, please visit the {docsPage}"
             values={{
-              transformId: failingTransformIds || metadataTransformPrefix,
+              transformId: failingTransformIds,
               transformsPage: (
                 <LinkToApp
                   data-test-subj="failed-transform-restart-link"

@@ -41,11 +41,7 @@ import {
   TRANSFORM_STATES,
 } from '../../../../../common/constants';
 import type { TransformStats } from '../types';
-import {
-  HOST_METADATA_LIST_ROUTE,
-  METADATA_UNITED_TRANSFORM,
-  metadataTransformPrefix,
-} from '../../../../../common/endpoint/constants';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   initialUserPrivilegesState,
@@ -1168,7 +1164,7 @@ describe('when on the endpoint list page', () => {
     it('is not displayed when transform state is not failed', () => {
       const transforms: TransformStats[] = [
         {
-          id: `${metadataTransformPrefix}-0.20.0`,
+          id: `endpoint.metadata_current-default-0.20.0`,
           state: TRANSFORM_STATES.STARTED,
         } as TransformStats,
       ];
@@ -1213,7 +1209,7 @@ describe('when on the endpoint list page', () => {
     it('is displayed when relevant transform state is failed state', async () => {
       const transforms: TransformStats[] = [
         {
-          id: `${metadataTransformPrefix}-0.20.0`,
+          id: `endpoint.metadata_current-default-0.20.0`,
           state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
@@ -1230,11 +1226,11 @@ describe('when on the endpoint list page', () => {
     it('displays correct transform id when in failed state', async () => {
       const transforms: TransformStats[] = [
         {
-          id: `${metadataTransformPrefix}-0.20.0`,
+          id: `endpoint.metadata_current-default-0.20.0`,
           state: TRANSFORM_STATES.STARTED,
         } as TransformStats,
         {
-          id: `${METADATA_UNITED_TRANSFORM}-1.2.1`,
+          id: `endpoint.metadata_united-default-1.2.1`,
           state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];

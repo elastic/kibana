@@ -10,6 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import pRetry from 'p-retry';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getEndpointPackageInfo } from '../../../../../common/endpoint/utils/package';
 import { dump } from '../../../../../scripts/endpoint/common/utils';
 import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
 import {
@@ -19,11 +20,7 @@ import {
 import {
   METADATA_DATASTREAM,
   METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
   metadataCurrentIndexPattern,
-  metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
-  METADATA_UNITED_TRANSFORM_V2,
   POLICY_RESPONSE_INDEX,
 } from '../../../../../common/endpoint/constants';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
@@ -81,15 +78,23 @@ export const cyLoadEndpointDataHandler = async (
     CustomMetadataGenerator: EndpointMetadataGenerator.custom({ version, os, isolation }),
   });
 
+  const endpointPackage = await getEndpointPackageInfo(kbnClient);
+  const transforms = endpointPackage?.installationInfo?.installed_es
+    .filter((asset) => asset.type === ElasticsearchAssetType.transform)
+    .map((asset) => asset.id);
+  if (!transforms) {
+    throw new Error('transforms not installed');
+  }
+  const currentTransformName = transforms.find((t) => t.includes('current'));
+  const unitedTransformName = transforms.find((t) => t.includes('united'));
+
   if (waitUntilTransformed) {
     log.info(`Stopping transforms...`);
 
     // need this before indexing docs so that the united transform doesn't
     // create a checkpoint with a timestamp after the doc timestamps
-    await stopTransform(esClient, log, metadataTransformPrefix);
-    await stopTransform(esClient, log, METADATA_CURRENT_TRANSFORM_V2);
-    await stopTransform(esClient, log, METADATA_UNITED_TRANSFORM);
-    await stopTransform(esClient, log, METADATA_UNITED_TRANSFORM_V2);
+    await stopTransform(esClient, log, currentTransformName);
+    await stopTransform(esClient, log, unitedTransformName);
   }
 
   log.info(`Calling indexHostAndAlerts() to index [${numHosts}] endpoint hosts...`);
@@ -122,14 +127,12 @@ export const cyLoadEndpointDataHandler = async (
     log.info(`starting transforms...`);
 
     // missing transforms are ignored, start either name
-    await startTransform(esClient, log, metadataTransformPrefix);
-    await startTransform(esClient, log, METADATA_CURRENT_TRANSFORM_V2);
+    await startTransform(esClient, log, currentTransformName);
 
     const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
     await waitForEndpoints(esClient, log, 'endpoint_index', metadataIds);
 
-    await startTransform(esClient, log, METADATA_UNITED_TRANSFORM);
-    await startTransform(esClient, log, METADATA_UNITED_TRANSFORM_V2);
+    await startTransform(esClient, log, unitedTransformName);
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));

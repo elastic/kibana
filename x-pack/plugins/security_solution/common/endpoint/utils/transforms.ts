@@ -8,30 +8,20 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { isEndpointPackageV2 } from './package_v2';
 import { usageTracker } from '../data_loaders/usage_tracker';
-import {
-  metadataCurrentIndexPattern,
-  metadataTransformPrefix,
-  METADATA_CURRENT_TRANSFORM_V2,
-  METADATA_TRANSFORMS_PATTERN,
-  METADATA_TRANSFORMS_PATTERN_V2,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_UNITED_TRANSFORM_V2,
-} from '../constants';
+import { metadataCurrentIndexPattern } from '../constants';
 
 export const waitForMetadataTransformsReady = usageTracker.track(
   'waitForMetadataTransformsReady',
-  async (esClient: Client, version: string): Promise<void> => {
-    await waitFor(() => areMetadataTransformsReady(esClient, version));
+  async (esClient: Client): Promise<void> => {
+    await waitFor(() => areMetadataTransformsReady(esClient));
   }
 );
 
 export const stopMetadataTransforms = usageTracker.track(
   'stopMetadataTransforms',
-  async (esClient: Client, version: string): Promise<void> => {
-    const transformIds = await getMetadataTransformIds(esClient, version);
-
+  async (esClient: Client): Promise<void> => {
+    const transformIds = await getMetadataTransformIds(esClient);
     await Promise.all(
       transformIds.map((transformId) =>
         esClient.transform.stopTransform({
@@ -50,19 +40,11 @@ export const startMetadataTransforms = usageTracker.track(
   async (
     esClient: Client,
     // agentIds to wait for
-    agentIds: string[],
-    version: string
+    agentIds: string[]
   ): Promise<void> => {
-    const transformIds = await getMetadataTransformIds(esClient, version);
-    const isV2 = isEndpointPackageV2(version);
-    const currentTransformPrefix = isV2 ? METADATA_CURRENT_TRANSFORM_V2 : metadataTransformPrefix;
-    const currentTransformId = transformIds.find((transformId) =>
-      transformId.startsWith(currentTransformPrefix)
-    );
-    const unitedTransformPrefix = isV2 ? METADATA_UNITED_TRANSFORM_V2 : METADATA_UNITED_TRANSFORM;
-    const unitedTransformId = transformIds.find((transformId) =>
-      transformId.startsWith(unitedTransformPrefix)
-    );
+    const transformIds = await getMetadataTransformIds(esClient);
+    const currentTransformId = transformIds.find((transformId) => transformId.includes('current'));
+    const unitedTransformId = transformIds.find((transformId) => transformId.includes('united'));
     if (!currentTransformId || !unitedTransformId) {
       // eslint-disable-next-line no-console
       console.warn('metadata transforms not found, skipping transform start');
@@ -96,26 +78,22 @@ export const startMetadataTransforms = usageTracker.track(
 );
 
 async function getMetadataTransformStats(
-  esClient: Client,
-  version: string
+  esClient: Client
 ): Promise<TransformGetTransformStatsTransformStats[]> {
-  const transformId = isEndpointPackageV2(version)
-    ? METADATA_TRANSFORMS_PATTERN_V2
-    : METADATA_TRANSFORMS_PATTERN;
   return (
     await esClient.transform.getTransformStats({
-      transform_id: transformId,
+      transform_id: '*endpoint.metadata_*',
       allow_no_match: true,
     })
   ).transforms;
 }
 
-async function getMetadataTransformIds(esClient: Client, version: string): Promise<string[]> {
-  return (await getMetadataTransformStats(esClient, version)).map((transform) => transform.id);
+async function getMetadataTransformIds(esClient: Client): Promise<string[]> {
+  return (await getMetadataTransformStats(esClient)).map((transform) => transform.id);
 }
 
-async function areMetadataTransformsReady(esClient: Client, version: string): Promise<boolean> {
-  const transforms = await getMetadataTransformStats(esClient, version);
+async function areMetadataTransformsReady(esClient: Client): Promise<boolean> {
+  const transforms = await getMetadataTransformStats(esClient);
   return !transforms.some(
     // TODO TransformGetTransformStatsTransformStats type needs to be updated to include health
     (transform: TransformGetTransformStatsTransformStats & { health?: { status: string } }) =>
