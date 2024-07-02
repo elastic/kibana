@@ -334,6 +334,7 @@ export interface DocLinks {
   };
   readonly securitySolution: {
     readonly artifactControl: string;
+    readonly avcResults: string;
     readonly trustedApps: string;
     readonly eventFilters: string;
     readonly blocklist: string;

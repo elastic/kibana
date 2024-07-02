@@ -20,6 +20,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
@@ -35,6 +37,10 @@ import {
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 import { SideBarColumn } from '../../../components/side_bar_column';
+
+import type { FleetStartServices } from '../../../../../../../plugin';
+
+import { AVCResultsBanner2024 } from './avc_banner/avc_results_banner_2024';
 
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
@@ -159,9 +165,11 @@ export const OverviewPage: React.FC<Props> = memo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
     );
+    const { storage } = useKibana<FleetStartServices>().services;
     const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
+    const isElasticDefend = packageInfo.name === 'endpoint';
     const [markdown, setMarkdown] = useState<string | undefined>(undefined);
     const [selectedItemId, setSelectedItem] = useState<string | undefined>(undefined);
     const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
@@ -283,6 +291,14 @@ export const OverviewPage: React.FC<Props> = memo(
 
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
 
+    const [showAVCBanner, setShowAVCBanner] = useState(
+      storage.get('securitySolution.showAvcBanner') ?? true
+    );
+    const onBannerDismiss = useCallback(() => {
+      setShowAVCBanner(false);
+      storage.set('securitySolution.showAvcBanner', false);
+    }, [storage]);
+
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
         <SideBar grow={2}>
@@ -297,6 +313,12 @@ export const OverviewPage: React.FC<Props> = memo(
         </SideBar>
         <EuiFlexItem grow={9} className="eui-textBreakWord">
           {isUnverified && <UnverifiedCallout />}
+          {isElasticDefend && showAVCBanner && (
+            <>
+              <AVCResultsBanner2024 onDismiss={onBannerDismiss} />
+              <EuiSpacer size="s" />
+            </>
+          )}
           {isPrerelease && (
             <PrereleaseCallout
               packageName={packageInfo.name}
