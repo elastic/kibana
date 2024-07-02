@@ -10157,6 +10157,104 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row nullVar = null | eval repeat(nullVar, nullVar)', []);
       });
 
+      describe('top', () => {
+        describe('no errors on correct usage', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 3, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top(stringField, 1, "desc")', []);
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 5, "asc")', []);
+          testErrorsAndWarnings('from a_index | stats top(stringField, 5, "asc")', []);
+        });
+
+        describe('errors on invalid argument count', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 3)', [
+            'Error: [top] function expects exactly 3 arguments, got 2.',
+          ]);
+          testErrorsAndWarnings('from a_index | stats var = top(stringField)', [
+            'Error: [top] function expects exactly 3 arguments, got 1.',
+          ]);
+        });
+
+        describe('limit must be a literal', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, numberField, "asc")', [
+            'Argument of [=] must be a constant, received [top(stringField,numberField,"asc")]',
+          ]);
+          testErrorsAndWarnings(
+            'from a_index | stats var = top(stringField, 100 + numberField, "asc")',
+            [
+              'Argument of [=] must be a constant, received [top(stringField,100+numberField,"asc")]',
+            ]
+          );
+        });
+
+        describe('order must be "asc" or "desc"', () => {
+          testErrorsAndWarnings('from a_index | stats var = top(stringField, 1, stringField)', [
+            'Argument of [=] must be a constant, received [top(stringField,1,stringField)]',
+          ]);
+          testErrorsAndWarnings(
+            'from a_index | stats var = top(stringField, 1, "asdf")',
+            [],
+            ['Invalid option ["asdf"] for top. Supported options: ["asc", "desc"].']
+          );
+        });
+
+        testErrorsAndWarnings('from a_index | sort top(stringField, numberField, "asc")', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc")', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, numberField, "asc") > 0', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, numberField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = top(stringField, numberField, "asc") > 0',
+          ['EVAL does not support function top']
+        );
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, numberField, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort top(stringField, 5, "asc")', [
+          'SORT does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, 5, "asc")', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | where top(stringField, 5, "asc") > 0', [
+          'WHERE does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, 5, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval var = top(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, 5, "asc")', [
+          'EVAL does not support function top',
+        ]);
+
+        testErrorsAndWarnings('from a_index | eval top(stringField, 5, "asc") > 0', [
+          'EVAL does not support function top',
+        ]);
+      });
+
       describe('st_distance', () => {
         testErrorsAndWarnings(
           'row var = st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
