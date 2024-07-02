@@ -14,23 +14,14 @@ export const builtInServicesFromLogsEntityDefinition: EntityDefinition =
     name: 'Services from logs',
     type: 'service',
     managed: true,
-    filter: '@timestamp >= now-15m',
-    indexPatterns: [
-      'logs-*',
-      'filebeat*',
-      'apm*',
-      'metrics-*',
-      'remote_cluster:logs*',
-      'remote_cluster:filebeat*',
-      'remote_cluster:apm*',
-      'remote_cluster:metrics-*',
-    ],
+    filter: '@timestamp >= now-10m',
+    indexPatterns: ['logs-*', 'filebeat*', 'apm*', 'metrics-*'],
     history: {
       timestampField: '@timestamp',
       interval: '1m',
       settings: {
-        frequency: '5m',
-        syncDelay: '5m',
+        frequency: '2m',
+        syncDelay: '2m',
       },
     },
     latest: {
