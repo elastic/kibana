@@ -22,7 +22,6 @@ import {
   getSpaces,
   getTheme,
 } from '../services';
-import { VisSavedObject } from '../types';
 import {
   deserializeReferences,
   serializeReferences,
@@ -36,7 +35,6 @@ import {
   VisualizeSerializedState,
   VisualizeRuntimeState,
   VisualizeSavedVisInputState,
-  VisualizeOutputState,
   ExtraSavedObjectProperties,
 } from './types';
 

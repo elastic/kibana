@@ -22,7 +22,6 @@ import {
   VisParams,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
-import { decode } from '@kbn/rison';
 import { Reference } from '@kbn/content-management-utils';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SerializedTitles } from '@kbn/presentation-publishing';
@@ -93,7 +92,7 @@ function DefaultEditor({
     parentApi.dataView$.next(dataView);
   }, [parentApi, dataView]);
 
-  const editorInitialWidth = 30; //getInitialWidth(vis.type.editorConfig.defaultSize);
+  const editorInitialWidth = 30; // getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
     <EuiErrorBoundary>
