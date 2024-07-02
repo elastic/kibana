@@ -30,11 +30,11 @@ import {
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
 import {
-  deleteNote,
+  deleteNotes,
   ReqStatus,
   selectCreateNoteStatus,
-  selectDeleteNoteError,
-  selectDeleteNoteStatus,
+  selectDeleteNotesError,
+  selectDeleteNotesStatus,
   selectFetchNotesByDocumentIdsError,
   selectFetchNotesByDocumentIdsStatus,
   selectNotesByDocumentId,
@@ -91,14 +91,14 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
-  const deleteStatus = useSelector((state: State) => selectDeleteNoteStatus(state));
-  const deleteError = useSelector((state: State) => selectDeleteNoteError(state));
+  const deleteStatus = useSelector((state: State) => selectDeleteNotesStatus(state));
+  const deleteError = useSelector((state: State) => selectDeleteNotesError(state));
   const [deletingNoteId, setDeletingNoteId] = useState('');
 
   const deleteNoteFc = useCallback(
     (noteId: string) => {
       setDeletingNoteId(noteId);
-      dispatch(deleteNote({ id: noteId }));
+      dispatch(deleteNotes({ ids: [noteId] }));
     },
     [dispatch]
   );
