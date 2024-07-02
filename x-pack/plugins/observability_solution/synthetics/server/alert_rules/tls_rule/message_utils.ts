@@ -104,7 +104,7 @@ export const setTLSRecoveredAlertsContext = async ({
 }) => {
   const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
 
-  for await (const recoveredAlert of recoveredAlerts) {
+  for (const recoveredAlert of recoveredAlerts) {
     const recoveredAlertId = recoveredAlert.alert.getId();
     const alertUuid = recoveredAlert.alert.getUuid();
     const indexedStartedAt = recoveredAlert.alert.getStart() ?? defaultStartedAt;

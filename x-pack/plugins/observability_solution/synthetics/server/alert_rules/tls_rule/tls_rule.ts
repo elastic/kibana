@@ -124,6 +124,7 @@ export const registerSyntheticsTLSCheckRule = (
         const { uuid, start } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,
+          state: { ...updateState(ruleState, foundCerts), ...summary },
         });
         const indexedStartedAt = start ?? startedAt.toISOString();
 
@@ -145,8 +146,6 @@ export const registerSyntheticsTLSCheckRule = (
             alertsLocator,
             basePath.publicBaseUrl
           ),
-          ...updateState(ruleState, foundCerts),
-          ...summary,
         };
 
         alertsClient.setAlertData({
