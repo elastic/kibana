@@ -28,6 +28,8 @@ export default function ({ getService }: FtrProviderContext) {
   const getRandomString: () => string = () => randomness.string({ casing: 'lower', alpha: true });
 
   describe('Index templates', function () {
+    // see details: https://github.com/elastic/kibana/issues/187368
+    this.tags(['failsOnMKI']);
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -128,37 +130,18 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('create', () => {
-      it('should create an index template', async () => {
+      xit('should create an index template', async () => {
         const payload = svlTemplatesHelpers.getTemplatePayload(
           `template-${getRandomString()}`,
           [getRandomString()],
           undefined,
           false
         );
-        const { status /* , body */ } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
-        // console.log(`\nλjs body: \n${JSON.stringify(body, null, 2)}`);
-        // {
-        //   "statusCode": 400,
-        //   "error": "Bad Request",
-        //   "message": "Settings [index.number_of_shards] are not available when running in serverless mode",
-        //   "attributes": {
-        //   "error": {
-        //     "root_cause": [
-        //       {
-        //         "type": "illegal_argument_exception",
-        //         "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //       }
-        //     ],
-        //       "type": "illegal_argument_exception",
-        //       "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //   }
-        // }
-        // }
-
-        expect(status).to.eql(400);
+        const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
+        expect(status).to.eql(200);
       });
 
-      it('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
+      xit('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
         const templateName = `template-${getRandomString()}`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -169,28 +152,9 @@ export default function ({ getService }: FtrProviderContext) {
 
         await svlTemplatesApi.createTemplate(payload, roleAuthc);
 
-        const { status /* , body */ } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
-        // console.log(`\nλjs body: \n${JSON.stringify(body, null, 2)}`);
-        // λjs body:
-        // {
-        //   "statusCode": 400,
-        //   "error": "Bad Request",
-        //   "message": "Settings [index.number_of_shards] are not available when running in serverless mode",
-        //   "attributes": {
-        //   "error": {
-        //     "root_cause": [
-        //       {
-        //         "type": "illegal_argument_exception",
-        //         "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //       }
-        //     ],
-        //       "type": "illegal_argument_exception",
-        //       "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //   }
-        // }
-        // }
+        const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
 
-        expect(status).to.eql(400);
+        expect(status).to.eql(409);
       });
 
       it('should validate the request payload', async () => {
@@ -211,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it('should parse the ES error and return the cause', async () => {
+      xit('should parse the ES error and return the cause', async () => {
         const templateName = `template-create-parse-es-error`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -228,40 +192,18 @@ export default function ({ getService }: FtrProviderContext) {
           },
         };
         payload.template!.mappings = { ...payload.template!.mappings, runtime };
-        const { status, body } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
-        // console.log(`\nλjs body: \n${JSON.stringify(body, null, 2)}`);
-        // λjs body:
-        // {
-        //   "statusCode": 400,
-        //   "error": "Bad Request",
-        //   "message": "Settings [index.number_of_shards] are not available when running in serverless mode",
-        //   "attributes": {
-        //   "error": {
-        //     "root_cause": [
-        //       {
-        //         "type": "illegal_argument_exception",
-        //         "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //       }
-        //     ],
-        //       "type": "illegal_argument_exception",
-        //       "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //   }
-        // }
-        // }
-
+        const { body, status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
         expect(status).to.eql(400);
 
         expect(body.attributes).an('object');
-        expect(body.attributes.error.reason).contain(
-          'Settings [index.number_of_shards] are not available when running in serverless mode'
-        );
+        expect(body.attributes.error.reason).contain('template after composition is invalid');
         // one of the item of the cause array should point to our script
-        // expect(body.attributes.causes.join(',')).contain('"hello with error');
+        expect(body.attributes.causes.join(',')).contain('"hello with error');
       });
     });
 
     describe('update', () => {
-      it('should update an index template', async () => {
+      xit('should update an index template', async () => {
         const templateName = `template-${getRandomString()}`;
         const indexTemplate = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -270,40 +212,15 @@ export default function ({ getService }: FtrProviderContext) {
           false
         );
 
-        const { status /* , body */ } = await svlTemplatesApi.createTemplate(
-          indexTemplate,
-          roleAuthc
-        );
-        // console.log(`\nλjs body: \n${JSON.stringify(body, null, 2)}`);
-        // λjs body:
-        // {
-        //   "statusCode": 400,
-        //   "error": "Bad Request",
-        //   "message": "Settings [index.number_of_shards] are not available when running in serverless mode",
-        //   "attributes": {
-        //   "error": {
-        //     "root_cause": [
-        //       {
-        //         "type": "illegal_argument_exception",
-        //         "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //       }
-        //     ],
-        //       "type": "illegal_argument_exception",
-        //       "reason": "Settings [index.number_of_shards] are not available when running in serverless mode"
-        //   }
-        // }
-        // }
+        const { status } = await svlTemplatesApi.createTemplate(indexTemplate, roleAuthc);
+        expect(status).to.eql(200);
 
-        expect(status).to.eql(400);
+        let { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
 
-        // let { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
-
-        // const { name, version } = indexTemplate;
-
-        // Error: expected undefined to equal '1'
-        // expect(
-        //   catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        // ).to.equal(version?.toString());
+        const { name, version } = indexTemplate;
+        expect(
+          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
+        ).to.equal(version?.toString());
 
         // Update template with new version
         const updatedVersion = 2;
@@ -312,17 +229,16 @@ export default function ({ getService }: FtrProviderContext) {
           templateName,
           roleAuthc
         );
-        expect(updateStatus).to.eql(404);
+        expect(updateStatus).to.eql(200);
 
-        // ({ body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName));
+        ({ body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName));
 
-        // Error: expected undefined to equal '2'
-        // expect(
-        //   catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
-        // ).to.equal(updatedVersion.toString());
+        expect(
+          catTemplateResponse.find(({ name: catTemplateName }) => catTemplateName === name)?.version
+        ).to.equal(updatedVersion.toString());
       });
 
-      it('should parse the ES error and return the cause', async () => {
+      xit('should parse the ES error and return the cause', async () => {
         const templateName = `template-update-parse-es-error`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -343,26 +259,25 @@ export default function ({ getService }: FtrProviderContext) {
         payload.template!.mappings = { ...payload.template!.mappings, runtime };
 
         const { status: createStatus } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
-        expect(createStatus).to.eql(400);
+        expect(createStatus).to.eql(200);
 
         // Update template with an error in the runtime field script
         payload.template!.mappings.runtime.myRuntimeField.script = 'emit("hello with error';
-        const { status: updateStatus /* , body */ } = await svlTemplatesApi.updateTemplate(
+        const { status: updateStatus, body } = await svlTemplatesApi.updateTemplate(
           payload,
           templateName,
           roleAuthc
         );
         expect(updateStatus).to.eql(404);
 
-        // Error: expected undefined to be an object
-        // expect(body.attributes).an('object');
+        expect(body.attributes).an('object');
         // one of the item of the cause array should point to our script
-        // expect(body.attributes.causes.join(',')).contain('"hello with error');
+        expect(body.attributes.causes.join(',')).contain('"hello with error');
       });
     });
 
     describe('delete', () => {
-      it('should delete an index template', async () => {
+      xit('should delete an index template', async () => {
         const templateName = `template-${getRandomString()}`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -371,36 +286,32 @@ export default function ({ getService }: FtrProviderContext) {
           false
         );
 
-        // const { status: createStatus, body: createBody } = await svlTemplatesApi.createTemplate(
-        // const { status, body } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
-        // if (createStatus !== 200) {
-        //   throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
-        //   Error: Error creating template: 400 Settings [index.number_of_shards] are not available when running in serverless mode
-        // }
+        const { status: createStatus, body: createBody } = await svlTemplatesApi.createTemplate(
+          payload,
+          roleAuthc
+        );
+        if (createStatus !== 200)
+          throw new Error(`Error creating template: ${createStatus} ${createBody.message}`);
 
-        let { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
+        const { body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName);
 
-        // Error: expected undefined to equal 'template-zhpbfuskvuudqo'
-        // expect(
-        //   catTemplateResponse.find((template) => template.name === payload.name)?.name
-        // ).to.equal(templateName);
+        expect(
+          catTemplateResponse.find((template) => template.name === payload.name)?.name
+        ).to.equal(templateName);
 
         const { status: deleteStatus, body: deleteBody } = await svlTemplatesApi.deleteTemplates(
           [{ name: templateName }],
           roleAuthc
         );
-        if (deleteStatus !== 200) {
-          throw new Error(`Error deleting template: ${deleteBody.message}`);
-        }
 
-        // Error: expected [ { name: 'template-pcfqgpobipa',
-        //      error: { status: 404, payload: [Object], options: [Object] } } ] to be empty
-        // expect(deleteBody.errors).to.be.empty();
-        // expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
+        if (deleteStatus !== 200) throw new Error(`Error deleting template: ${deleteBody.message}`);
 
-        ({ body: catTemplateResponse } = await svlTemplatesHelpers.catTemplate(templateName));
+        expect(deleteBody.errors).to.be.empty();
+        expect(deleteBody.templatesDeleted[0]).to.equal(templateName);
 
-        expect(catTemplateResponse.find((template) => template.name === payload.name)).to.equal(
+        const { body: catTemplateResponse2 } = await svlTemplatesHelpers.catTemplate(templateName);
+
+        expect(catTemplateResponse2.find((template) => template.name === payload.name)).to.equal(
           undefined
         );
       });
