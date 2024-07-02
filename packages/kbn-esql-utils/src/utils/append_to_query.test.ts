@@ -31,7 +31,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '+', 'string')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`=="tada!"`
+| WHERE \`dest\`=="tada!"`
       );
     });
     it('appends a filter out where clause in an existing query', () => {
@@ -39,7 +39,7 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'string')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`!="tada!"`
+| WHERE \`dest\`!="tada!"`
       );
     });
 
@@ -48,14 +48,14 @@ describe('appendToQuery', () => {
         appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-', 'ip')
       ).toBe(
         `from logstash-* // meow
-| where \`dest\`::string!="tada!"`
+| WHERE \`dest\`::string!="tada!"`
       );
     });
 
     it('appends a where clause in an existing query with casting to string when the type is not given', () => {
       expect(appendWhereClauseToESQLQuery('from logstash-* // meow', 'dest', 'tada!', '-')).toBe(
         `from logstash-* // meow
-| where \`dest\`::string!="tada!"`
+| WHERE \`dest\`::string!="tada!"`
       );
     });
 
@@ -70,7 +70,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* // meow
-| where \`dest\` is not null`
+| WHERE \`dest\` is not null`
       );
     });
 
@@ -85,7 +85,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* // meow
-| where \`dest\` is null`
+| WHERE \`dest\` is null`
       );
     });
 
@@ -100,7 +100,7 @@ describe('appendToQuery', () => {
         )
       ).toBe(
         `from logstash-* | where country == "GR"
-and \`dest\`=="Crete"`
+AND \`dest\`=="Crete"`
       );
     });
 

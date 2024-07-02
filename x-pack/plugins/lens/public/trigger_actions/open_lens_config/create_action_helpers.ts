@@ -63,7 +63,7 @@ export async function executeCreateAction({
   const defaultIndex = dataView.getIndexPattern();
 
   const defaultEsqlQuery = {
-    esql: `from ${defaultIndex} | limit 10`,
+    esql: `FROM ${defaultIndex} | LIMIT 10`,
   };
 
   // For the suggestions api we need only the columns

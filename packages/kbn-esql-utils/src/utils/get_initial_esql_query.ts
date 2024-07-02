@@ -11,5 +11,5 @@
  * @param indexOrIndexPattern
  */
 export function getInitialESQLQuery(indexOrIndexPattern: string): string {
-  return `from ${indexOrIndexPattern} | limit 10`;
+  return `FROM ${indexOrIndexPattern} | LIMIT 10`;
 }

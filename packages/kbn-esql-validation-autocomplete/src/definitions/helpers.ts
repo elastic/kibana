@@ -56,12 +56,16 @@ export function getCommandSignature(
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
-    declaration: `${name} ${printCommandArguments(signature, withTypes)} ${options.map(
+    declaration: `${name.toUpperCase()} ${printCommandArguments(
+      signature,
+      withTypes
+    )} ${options.map(
       (option) =>
-        `${option.wrapped ? option.wrapped[0] : ''}${option.name} ${printCommandArguments(
-          option.signature,
-          withTypes
-        )}${option.wrapped ? option.wrapped[1] : ''}`
+        `${
+          option.wrapped ? option.wrapped[0] : ''
+        }${option.name.toUpperCase()} ${printCommandArguments(option.signature, withTypes)}${
+          option.wrapped ? option.wrapped[1] : ''
+        }`
     )}`,
     examples,
   };
