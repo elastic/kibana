@@ -109,7 +109,7 @@ export const eqlExecutor = async ({
       exceptionFilter,
     });
 
-    ruleExecutionLogger.debug(() => `EQL query request: ${JSON.stringify(request)}`);
+    ruleExecutionLogger.debug(`EQL query request: ${JSON.stringify(request)}`);
     const exceptionsWarning = getUnprocessedExceptionsWarnings(unprocessedExceptions);
     if (exceptionsWarning) {
       result.warningMessages.push(exceptionsWarning);

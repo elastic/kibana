@@ -518,14 +518,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             if (result.success) {
               ruleExecutionLogger.debug('Security Rule execution completed');
               ruleExecutionLogger.debug(
-                () =>
-                  `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
-                    spaceId
-                  )} ${
-                    !isEmpty(tuples)
-                      ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
-                      : ''
-                  }`
+                `Finished indexing ${createdSignalsCount} alerts into ${ruleDataClient.indexNameWithNamespace(
+                  spaceId
+                )} ${
+                  !isEmpty(tuples)
+                    ? `searched between date ranges ${JSON.stringify(tuples, null, 2)}`
+                    : ''
+                }`
               );
 
               if (!hasError && !wroteWarningStatus && !result.warning) {
