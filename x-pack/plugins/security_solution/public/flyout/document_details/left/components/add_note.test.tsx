@@ -18,6 +18,7 @@ import {
 import { ReqStatus } from '../../../../notes/store/notes.slice';
 import { useIsTimelineFlyoutOpen } from '../../shared/hooks/use_is_timeline_flyout_open';
 import { TimelineId } from '../../../../../common/types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../shared/hooks/use_is_timeline_flyout_open');
 
@@ -56,9 +57,22 @@ describe('AddNote', () => {
   it('should create note', () => {
     const { getByTestId } = renderAddNote();
 
+    userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
     getByTestId(ADD_NOTE_BUTTON_TEST_ID).click();
 
     expect(mockDispatch).toHaveBeenCalled();
+  });
+
+  it('should disable add button markdown editor if invalid', () => {
+    const { getByTestId } = renderAddNote();
+
+    const addButton = getByTestId(ADD_NOTE_BUTTON_TEST_ID);
+
+    expect(addButton).toHaveAttribute('disabled');
+
+    userEvent.type(getByTestId('euiMarkdownEditorTextArea'), 'new note');
+
+    expect(addButton).not.toHaveAttribute('disabled');
   });
 
   it('should render the add note button in loading state while creating a new note', () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCheckbox,
@@ -83,6 +83,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
   const [editorValue, setEditorValue] = useState('');
+  const [isMarkdownInvalid, setIsMarkdownInvalid] = useState(false);
 
   const activeTimeline = useSelector((state: State) =>
     timelineSelectors.selectTimelineById(state, TimelineId.active)
@@ -121,8 +122,15 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
     }
   }, [addErrorToast, createError, createStatus]);
 
-  const checkBoxDisabled =
-    !isTimelineFlyout || (isTimelineFlyout && activeTimeline.savedObjectId == null);
+  const buttonDisabled = useMemo(
+    () => editorValue.trim().length === 0 || isMarkdownInvalid,
+    [editorValue, isMarkdownInvalid]
+  );
+
+  const checkBoxDisabled = useMemo(
+    () => !isTimelineFlyout || (isTimelineFlyout && activeTimeline?.savedObjectId == null),
+    [activeTimeline?.savedObjectId, isTimelineFlyout]
+  );
 
   return (
     <>
@@ -133,7 +141,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
             value={editorValue}
             onChange={setEditorValue}
             ariaLabel={MARKDOWN_ARIA_LABEL}
-            setIsMarkdownInvalid={() => {}}
+            setIsMarkdownInvalid={setIsMarkdownInvalid}
           />
         </EuiComment>
       </EuiCommentList>
@@ -167,6 +175,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
           <EuiButton
             onClick={addNote}
             isLoading={createStatus === ReqStatus.Loading}
+            disabled={buttonDisabled}
             data-test-subj={ADD_NOTE_BUTTON_TEST_ID}
           >
             {ADD_NOTE_BUTTON}
