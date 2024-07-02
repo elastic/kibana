@@ -13,7 +13,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/cloud-plugin",
-    "@kbn/security-plugin",
     "@kbn/storybook",
     "@kbn/core-http-browser",
     "@kbn/i18n",

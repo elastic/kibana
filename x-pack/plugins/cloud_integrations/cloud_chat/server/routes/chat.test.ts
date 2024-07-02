@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-
 jest.mock('jsonwebtoken', () => ({
   sign: () => {
     return 'json-web-token';
@@ -68,7 +66,7 @@ describe('chat route', () => {
 
   test('error if no user is missing any details', async () => {
     security.authc.getCurrentUser.mockReturnValueOnce(
-      securityMock.createMockAuthenticatedUser({
+      securityServiceMock.createMockAuthenticatedUser({
         username: undefined,
       })
     );
@@ -108,7 +106,7 @@ describe('chat route', () => {
     const email = 'user@elastic.co';
 
     security.authc.getCurrentUser.mockReturnValueOnce(
-      securityMock.createMockAuthenticatedUser({
+      securityServiceMock.createMockAuthenticatedUser({
         username,
         metadata: {
           saml_email: [email],
@@ -150,7 +148,7 @@ describe('chat route', () => {
     const email = 'user@elastic.co';
 
     security.authc.getCurrentUser.mockReturnValueOnce(
-      securityMock.createMockAuthenticatedUser({
+      securityServiceMock.createMockAuthenticatedUser({
         username,
         metadata: {
           saml_email: [email],
@@ -195,7 +193,7 @@ describe('chat route', () => {
     const email = 'user@elastic.co';
 
     security.authc.getCurrentUser.mockReturnValueOnce(
-      securityMock.createMockAuthenticatedUser({
+      securityServiceMock.createMockAuthenticatedUser({
         username,
         metadata: {
           saml_email: [email],
@@ -236,7 +234,7 @@ describe('chat route', () => {
     const email = 'user@elastic.co';
 
     security.authc.getCurrentUser.mockReturnValueOnce(
-      securityMock.createMockAuthenticatedUser({
+      securityServiceMock.createMockAuthenticatedUser({
         username,
         metadata: {
           saml_email: [email],
@@ -287,7 +285,7 @@ describe('chat route', () => {
     const email = 'test+first.last@elasticsearch.com';
 
     security.authc.getCurrentUser.mockReturnValueOnce(
-      securityMock.createMockAuthenticatedUser({
+      securityServiceMock.createMockAuthenticatedUser({
         username: undefined,
       })
     );
@@ -335,7 +333,7 @@ describe('chat route', () => {
     const email = 'user@elastic.co';
 
     security.authc.getCurrentUser.mockReturnValueOnce(
-      securityMock.createMockAuthenticatedUser({
+      securityServiceMock.createMockAuthenticatedUser({
         username,
         metadata: {
           saml_email: [email],
