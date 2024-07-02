@@ -14,6 +14,9 @@ export const ANNOTATION_MAPPINGS: Mappings = {
         type: {
           type: 'keyword',
         },
+        style: {
+          type: 'flattened',
+        },
       },
     },
     message: {
