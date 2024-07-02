@@ -12,12 +12,9 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import {
-  getDefaultArguments,
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server';
+import { getDefaultArguments } from '@kbn/langchain/server';
 import { MessagesPlaceholder } from '@langchain/core/prompts';
+import { getLlmClass } from '../../../routes/utils';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -36,6 +33,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
+  bedrockChatEnabled,
   connectorId,
   esClient,
   esStore,
@@ -51,7 +49,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   traceOptions,
 }) => {
   const isOpenAI = llmType === 'openai';
-  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   const llm = new llmClass({
     actions,
@@ -173,6 +171,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
 
     let message = '';
     let tokenParentRunId = '';
+    let finalOutputIndex = -1;
+    const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
+    const finalOutputStopRegex = /(?<!\\)\"/;
 
     executor
       .invoke(
@@ -192,7 +193,24 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
                   tokenParentRunId = parentRunId;
                 }
                 if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
-                  push({ payload, type: 'content' });
+                  if (llmType === 'bedrock' && bedrockChatEnabled) {
+                    const finalOutputEndIndex = payload.search(finalOutputStopRegex);
+                    const currentOutput = message.replace(/\s/g, '');
+
+                    if (currentOutput.includes(finalOutputStartToken)) {
+                      finalOutputIndex = currentOutput.indexOf(finalOutputStartToken);
+                    }
+
+                    if (finalOutputIndex > -1) {
+                      push({ payload, type: 'content' });
+                    }
+
+                    if (finalOutputIndex > -1 && finalOutputEndIndex > -1) {
+                      didEnd = true;
+                    }
+                  } else {
+                    push({ payload, type: 'content' });
+                  }
                   // store message in case of error
                   message += payload;
                 }

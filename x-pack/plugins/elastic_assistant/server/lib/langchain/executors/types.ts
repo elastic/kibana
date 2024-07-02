@@ -38,6 +38,7 @@ export interface AgentExecutorParams<T extends boolean> {
   alertsIndexPattern?: string;
   actions: ActionsPluginStart;
   anonymizationFields?: AnonymizationFieldResponse[];
+  bedrockChatEnabled: boolean;
   isEnabledKnowledgeBase: boolean;
   assistantTools?: AssistantTool[];
   connectorId: string;

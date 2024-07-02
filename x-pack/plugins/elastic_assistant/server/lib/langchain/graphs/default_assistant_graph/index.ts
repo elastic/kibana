@@ -7,12 +7,9 @@
 
 import { StructuredTool } from '@langchain/core/tools';
 import { RetrievalQAChain } from 'langchain/chains';
-import {
-  getDefaultArguments,
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain/server';
+import { getDefaultArguments } from '@kbn/langchain/server';
 import { createOpenAIFunctionsAgent, createStructuredChatAgent } from 'langchain/agents';
+import { getLlmClass } from '../../../../routes/utils';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
 import { openAIFunctionAgentPrompt, structuredChatAgentPrompt } from './prompts';
@@ -30,6 +27,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   anonymizationFields,
   isEnabledKnowledgeBase,
   assistantTools = [],
+  bedrockChatEnabled,
   connectorId,
   conversationId,
   dataClients,
@@ -48,7 +46,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const isOpenAI = llmType === 'openai';
-  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+  const llmClass = getLlmClass(llmType, bedrockChatEnabled);
 
   const llm = new llmClass({
     actions,

@@ -38,7 +38,16 @@ export const executeTools = async ({ config, logger, state, tools }: ExecuteTool
   if (!agentAction || 'returnValues' in agentAction) {
     throw new Error('Agent has not been run yet');
   }
-  const out = await toolExecutor.invoke(agentAction, config);
+
+  let out;
+  try {
+    out = await toolExecutor.invoke(agentAction, config);
+  } catch (err) {
+    return {
+      steps: [{ action: agentAction, observation: JSON.stringify(`Error: ${err}`, null, 2) }],
+    };
+  }
+
   return {
     steps: [{ action: agentAction, observation: JSON.stringify(out, null, 2) }],
   };
