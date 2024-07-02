@@ -50,6 +50,7 @@ export function SearchEmbeddablFieldStatsTableComponent({
       onAddFilter={onAddFilter}
       searchSessionId={fetchContext?.searchSessionId}
       isEsqlMode={isEsql}
+      timeRange={fetchContext?.timeRange}
     />
   );
 }
