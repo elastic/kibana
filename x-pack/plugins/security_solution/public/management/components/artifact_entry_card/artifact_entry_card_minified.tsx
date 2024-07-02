@@ -41,6 +41,11 @@ export interface ArtifactEntryCardMinifiedProps extends CommonProps {
   item: AnyArtifact;
   isSelected: boolean;
   onToggleSelectedArtifact: (selected: boolean) => void;
+  /**
+   * Artifact specific decorator component that receives the current artifact as a prop, and
+   * is displayed inside the card on the top of the card section,
+   * above the selected OS and the condition entries.
+   */
   Decorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
 }
 
