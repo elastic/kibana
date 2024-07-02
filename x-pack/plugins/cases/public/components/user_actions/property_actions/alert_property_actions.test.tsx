@@ -17,84 +17,87 @@ import {
 } from '../../../common/mock';
 import { AlertPropertyActions } from './alert_property_actions';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174667
-describe.skip('AlertPropertyActions', () => {
-  let appMock: AppMockRenderer;
+for (let i = 0; i < 200; i++) {
+  describe('AlertPropertyActions', () => {
+    let appMock: AppMockRenderer;
 
-  const props = {
-    isLoading: false,
-    totalAlerts: 1,
-    onDelete: jest.fn(),
-  };
+    const props = {
+      isLoading: false,
+      totalAlerts: 1,
+      onDelete: jest.fn(),
+    };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMock = createAppMockRenderer();
-  });
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMock = createAppMockRenderer();
+    });
 
-  it('renders the correct number of actions', async () => {
-    appMock.render(<AlertPropertyActions {...props} />);
+    it('renders correctly', async () => {
+      appMock.render(<AlertPropertyActions {...props} />);
 
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+    });
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    it('renders the correct number of actions', async () => {
+      appMock.render(<AlertPropertyActions {...props} />);
 
-    expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
-      1
-    );
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    expect(
-      await screen.findByTestId('property-actions-user-action-minusInCircle')
-    ).toBeInTheDocument();
-  });
+      userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
 
-  it('renders the modal info correctly for multiple alert', async () => {
-    appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
+      expect(
+        (await screen.findByTestId('property-actions-user-action-group')).children.length
+      ).toBe(1);
+    });
 
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+    it('renders the modal info correctly for multiple alert', async () => {
+      appMock.render(<AlertPropertyActions {...props} totalAlerts={2} />);
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+      userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
 
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
-    expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alerts');
-    expect(await screen.findByText('Remove')).toBeInTheDocument();
-  });
+      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-  it('remove alerts correctly', async () => {
-    appMock.render(<AlertPropertyActions {...props} />);
+      expect(await screen.findByTestId('confirmModalTitleText')).toHaveTextContent('Remove alerts');
+      expect(await screen.findByText('Remove')).toBeInTheDocument();
+    });
 
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
+    it('remove alerts correctly', async () => {
+      appMock.render(<AlertPropertyActions {...props} />);
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
+      userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
 
-    expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+      userEvent.click(await screen.findByTestId('property-actions-user-action-minusInCircle'));
 
-    userEvent.click(await screen.findByText('Remove'));
+      expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(props.onDelete).toHaveBeenCalled();
+      userEvent.click(await screen.findByText('Remove'));
+
+      await waitFor(() => {
+        expect(props.onDelete).toHaveBeenCalled();
+      });
+    });
+
+    it('does not show the property actions without delete permissions', () => {
+      appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
+      appMock.render(<AlertPropertyActions {...props} />);
+
+      expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
+    });
+
+    it('does show the property actions with only delete permissions', async () => {
+      appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
+      appMock.render(<AlertPropertyActions {...props} />);
+
+      expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
     });
   });
-
-  it('does not show the property actions without delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: noCasesPermissions() });
-    appMock.render(<AlertPropertyActions {...props} />);
-
-    expect(screen.queryByTestId('property-actions-user-action')).not.toBeInTheDocument();
-  });
-
-  it('does show the property actions with only delete permissions', async () => {
-    appMock = createAppMockRenderer({ permissions: onlyDeleteCasesPermission() });
-    appMock.render(<AlertPropertyActions {...props} />);
-
-    expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
-  });
-});
+}
