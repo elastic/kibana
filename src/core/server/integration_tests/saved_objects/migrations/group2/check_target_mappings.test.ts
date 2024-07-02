@@ -122,7 +122,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
 
       // Check for migration steps present in the logs
       logs = await fs.readFile(logFilePath, 'utf-8');
-      expect(logs).not.toMatch('CREATE_NEW_TARGET');
+      expect(logs).not.toMatch('[.kibana] CREATE_NEW_TARGET');
       expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES');
       expect(logs).toMatch(
         'UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'

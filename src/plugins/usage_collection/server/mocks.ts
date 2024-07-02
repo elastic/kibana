@@ -26,12 +26,12 @@ export const createUsageCollectionSetupMock = () => {
     executionContext: executionContextServiceMock.createSetupContract(),
     maximumWaitTimeForAllCollectorsInS: 1,
   });
-  const { createUsageCounter, getUsageCounterByType } =
+  const { createUsageCounter, getUsageCounterByDomainId } =
     usageCountersServiceMock.createSetupContract();
 
   const usageCollectionSetupMock: jest.Mocked<UsageCollectionSetup> = {
     createUsageCounter,
-    getUsageCounterByType,
+    getUsageCounterByDomainId,
     bulkFetch: jest.fn().mockImplementation(collectorSet.bulkFetch),
     getCollectorByType: jest.fn().mockImplementation(collectorSet.getCollectorByType),
     toApiFieldNames: jest.fn().mockImplementation(collectorSet.toApiFieldNames),

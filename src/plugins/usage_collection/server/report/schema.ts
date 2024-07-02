@@ -36,6 +36,7 @@ export const reportSchema = schema.object({
         type: schema.string(),
         appName: schema.string(),
         eventName: schema.string(),
+        namespace: schema.maybe(schema.string()),
         total: schema.number(),
       })
     )

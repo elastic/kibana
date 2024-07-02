@@ -11,12 +11,11 @@ import moment from 'moment';
 import { chain, sumBy } from 'lodash';
 import { ReportSchemaType } from './schema';
 import { storeApplicationUsage } from './store_application_usage';
-import { UsageCounter } from '../usage_counters';
-import { serializeUiCounterName } from '../../common/ui_counters';
+import { type UsageCountersServiceSetup } from '../usage_counters';
 
-export async function storeReport(
+export async function storeUiReport(
   internalRepository: ISavedObjectsRepository,
-  uiCountersUsageCounter: UsageCounter,
+  counters: UsageCountersServiceSetup,
   report: ReportSchemaType
 ) {
   const uiCounters = report.uiCounter ? Object.entries(report.uiCounter) : [];
@@ -60,11 +59,15 @@ export async function storeReport(
     // UI Counters
     ...uiCounters.map(async ([, metric]) => {
       const { appName, eventName, total, type } = metric;
-      const counterName = serializeUiCounterName({ appName, eventName });
-      uiCountersUsageCounter.incrementCounter({
-        counterName,
+
+      const counter =
+        counters.getUsageCounterByDomainId(appName) ?? counters.createUsageCounter(appName);
+
+      counter.incrementCounter({
+        counterName: eventName,
         counterType: type,
         incrementBy: total,
+        source: 'ui',
       });
     }),
     // Application Usage

@@ -9,10 +9,10 @@
 import moment from 'moment';
 import { isSavedObjectOlderThan, rollUsageCountersIndices } from './rollups';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { SavedObjectsFindResult } from '@kbn/core/server';
+import type { SavedObjectsFindResult } from '@kbn/core/server';
 
 import {
-  UsageCountersSavedObjectAttributes,
+  type UsageCountersSavedObjectAttributes,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
 } from '@kbn/usage-collection-plugin/server';
 
@@ -21,12 +21,13 @@ import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 const createMockSavedObjectDoc = (updatedAt: moment.Moment, id: string) =>
   ({
     id,
-    type: 'usage-counter',
+    type: USAGE_COUNTERS_SAVED_OBJECT_TYPE,
     attributes: {
       count: 3,
       counterName: 'testName',
       counterType: 'count',
       domainId: 'testDomain',
+      source: 'server',
     },
     references: [],
     updated_at: updatedAt.format(),

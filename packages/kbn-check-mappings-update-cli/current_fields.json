@@ -243,6 +243,12 @@
     "tokenType"
   ],
   "core-usage-stats": [],
+  "counter": [
+    "counterName",
+    "counterType",
+    "domainId",
+    "source"
+  ],
   "csp-rule-template": [
     "metadata",
     "metadata.benchmark",
