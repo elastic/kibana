@@ -22,6 +22,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SloConfig } from '..';
 import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { SloRequestHandlerContext } from '../types';
@@ -36,6 +37,8 @@ interface RegisterRoutes {
 }
 
 export interface RegisterRoutesDependencies {
+  licensing: LicensingPluginSetup;
+  logger: Logger;
   pluginsSetup: {
     core: CoreSetup;
     ruleRegistry: RuleRegistryPluginSetupContract;

@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SLOClient } from '@kbn/slo-plugin/server/services/slo_client';
 
 import type { HTTPAuthorizationHeader } from '../../../../common/http_authorization_header';
 import type { PackageInstallContext } from '../../../../common/types';
@@ -69,6 +70,7 @@ export async function _installPackage({
   authorizationHeader,
   ignoreMappingUpdateErrors,
   skipDataStreamRollover,
+  sloClient,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -83,6 +85,7 @@ export async function _installPackage({
   authorizationHeader?: HTTPAuthorizationHeader | null;
   ignoreMappingUpdateErrors?: boolean;
   skipDataStreamRollover?: boolean;
+  sloClient?: SLOClient;
 }): Promise<AssetReference[]> {
   const { packageInfo, paths } = packageInstallContext;
   const { name: pkgName, version: pkgVersion, title: pkgTitle } = packageInfo;
@@ -147,6 +150,7 @@ export async function _installPackage({
     logger.debug(`Package install - Installing Kibana assets`);
     const kibanaAssetPromise = withPackageSpan('Install Kibana assets', () =>
       installKibanaAssetsAndReferences({
+        esClient,
         savedObjectsClient,
         pkgName,
         pkgTitle,
@@ -154,6 +158,7 @@ export async function _installPackage({
         installedPkg,
         logger,
         spaceId,
+        sloClient,
         assetTags: packageInfo?.asset_tags,
       })
     );
