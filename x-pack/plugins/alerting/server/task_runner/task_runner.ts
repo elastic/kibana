@@ -69,6 +69,8 @@ import { filterMaintenanceWindowsIds, getMaintenanceWindows } from './get_mainte
 import { RuleTypeRunner } from './rule_type_runner';
 import { initializeAlertsClient } from '../alerts_client';
 import { withAlertingSpan, processRunResults } from './lib';
+import { NotificationHandler } from './notification_handerl';
+import { getMatchingNotificationsAsActions } from './notification_utils';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -381,6 +383,14 @@ export class TaskRunner<
       throw error;
     }
 
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
+
+    const actions = await getMatchingNotificationsAsActions({
+      actionsClient,
+      rule,
+      ruleType: this.ruleType,
+    });
+
     const executionHandler = new ExecutionHandler({
       rule,
       ruleType: this.ruleType,
@@ -394,8 +404,9 @@ export class TaskRunner<
       ruleLabel,
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
-      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      actionsClient,
       alertsClient,
+      actions,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
