@@ -43,7 +43,7 @@ export function AnnotationTooltip({
       title: i18n.translate('xpack.observability.annotationTooltip.description', {
         defaultMessage: 'Description',
       }),
-      description: annotation.message ?? '--',
+      description: annotation.description ?? '--',
     },
     {
       title: i18n.translate('xpack.observability.annotationTooltip.slos', {
