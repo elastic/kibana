@@ -256,7 +256,7 @@ export const SelectInferenceId: React.FC<Props> = ({
                 >
                   {selectedOptionLabel ||
                     i18n.translate(
-                      'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.defaultLabel',
+                      'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.alreadyExistsLabel',
                       {
                         defaultMessage: 'No inference endpoint selected',
                       }

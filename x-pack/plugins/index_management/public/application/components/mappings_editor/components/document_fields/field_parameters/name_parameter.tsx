@@ -38,7 +38,7 @@ export const NameParameter: React.FC<NameParameterProps> = ({ isSemanticText }) 
     () => ({
       ...rest,
       label: isSemanticText
-        ? i18n.translate('xpack.idxMgmt.mappingsEditor.nameFieldLabel', {
+        ? i18n.translate('xpack.idxMgmt.mappingsEditor.semanticTextNameFieldLabel', {
             defaultMessage: 'New field name',
           })
         : rest.label,

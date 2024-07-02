@@ -1101,7 +1101,7 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
         {
           validator: emptyField(
             i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.validations.referenceFieldIsRequiredErrorMessage',
+              'xpack.idxMgmt.mappingsEditor.parameters.validations.inferenceIdIsRequiredErrorMessage',
               {
                 defaultMessage: 'Inference ID is required.',
               }
