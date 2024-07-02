@@ -244,7 +244,7 @@ export async function createChatService({
     sendAnalyticsEvent: (event) => {
       sendEvent(analytics, event);
     },
-    renderFunction: (name, args, response, onActionClick) => {
+    renderFunction: (name, args, response, onActionClick, scrollElement) => {
       const fn = renderFunctionRegistry.get(name);
 
       if (!fn) {
@@ -262,6 +262,7 @@ export async function createChatService({
         response: parsedResponse,
         arguments: parsedArguments,
         onActionClick,
+        scrollElement,
       });
     },
     getFunctions,

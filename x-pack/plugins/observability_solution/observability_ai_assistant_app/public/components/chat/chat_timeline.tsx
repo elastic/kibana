@@ -52,6 +52,7 @@ export interface ChatTimelineProps {
   hasConnector: boolean;
   chatState: ChatState;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  scrollElement?: React.RefObject<HTMLDivElement>;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (message: Message, feedback: Feedback) => void;
   onRegenerate: (message: Message) => void;
@@ -71,6 +72,7 @@ export function ChatTimeline({
   chatService,
   hasConnector,
   currentUser,
+  scrollElement,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -87,6 +89,7 @@ export function ChatTimeline({
       currentUser,
       chatState,
       onActionClick,
+      scrollElement,
     });
 
     const consolidatedChatItems: Array<ChatTimelineItem | ChatTimelineItem[]> = [];
@@ -109,7 +112,7 @@ export function ChatTimeline({
     }
 
     return consolidatedChatItems;
-  }, [chatService, hasConnector, messages, currentUser, chatState, onActionClick]);
+  }, [chatService, hasConnector, messages, currentUser, chatState, onActionClick, scrollElement]);
 
   return (
     <EuiCommentList

@@ -117,6 +117,12 @@ export const LensWrapper = ({
               query={state.query}
               timeRange={dateRange}
               viewMode={ViewMode.VIEW}
+              executionContext={{
+                id: props.id,
+                type: 'lens',
+                name: `test-kibana-test-${props.id}`,
+                description: 'test-kibana-test',
+              }}
             />
           </>
         )}

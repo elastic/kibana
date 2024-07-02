@@ -30,23 +30,24 @@ import {
 import { WaterfallItem } from './waterfall_item';
 import { WaterfallContextProvider } from './context/waterfall_context';
 import { useWaterfallContext } from './context/use_waterfall';
+import { TraceMap } from './trace_map';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
-  duration: IWaterfall['duration'];
   waterfallItemId?: string;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
+  // when rendering in a container, this should be the element that should be scrolled
+  scrollElement?: React.RefObject<HTMLDivElement>;
+  showRelatedErrors?: boolean;
   showCriticalPath: boolean;
-  maxLevelOpen: number;
+  onClickWaterfallItem?: (item: IWaterfallSpanOrTransaction, flyoutDetailTab: string) => void;
 }
 
 type WaterfallProps = Omit<
   AccordionWaterfallProps,
-  'item' | 'maxLevelOpen' | 'showCriticalPath' | 'waterfall' | 'isOpen'
+  'item' | 'showCriticalPath' | 'waterfall' | 'isOpen'
 >;
-
 interface WaterfallNodeProps extends WaterfallProps {
   node: IWaterfallNodeFlatten;
 }
@@ -84,9 +85,9 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
     height: 100%;
   }
 `;
+const MAX_DEPTH_OPEN_LIMIT = 2;
 
 export function AccordionWaterfall({
-  maxLevelOpen,
   showCriticalPath,
   waterfall,
   isOpen,
@@ -94,17 +95,20 @@ export function AccordionWaterfall({
 }: AccordionWaterfallProps) {
   return (
     <WaterfallContextProvider
-      maxLevelOpen={maxLevelOpen}
+      maxLevelOpen={
+        waterfall.traceDocsTotal > 500 ? MAX_DEPTH_OPEN_LIMIT : waterfall.traceDocsTotal
+      }
       showCriticalPath={showCriticalPath}
       waterfall={waterfall}
       isOpen={isOpen}
     >
       <Waterfall {...props} />
+      <TraceMap />
     </WaterfallContextProvider>
   );
 }
 
-function Waterfall(props: WaterfallProps) {
+function Waterfall({ scrollElement, ...props }: WaterfallProps) {
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
@@ -123,7 +127,7 @@ function Waterfall(props: WaterfallProps) {
   };
 
   return (
-    <WindowScroller onScroll={onScroll}>
+    <WindowScroller onScroll={onScroll} scrollElement={scrollElement?.current ?? window}>
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
@@ -176,9 +180,14 @@ const VirtualRow = React.memo(
 
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const theme = useTheme();
-  const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
-  const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
-    useWaterfallContext();
+  const { waterfallItemId, onClickWaterfallItem, timelineMargins, node, showRelatedErrors } = props;
+  const {
+    totalDuration,
+    criticalPathSegmentsById,
+    getErrorCount,
+    updateTreeNode,
+    showCriticalPath,
+  } = useWaterfallContext();
 
   const displayedColor = showCriticalPath ? transparentize(0.5, node.item.color) : node.item.color;
   const marginLeftLevel = 8 * node.level;
@@ -199,7 +208,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   };
 
   const onWaterfallItemClick = (flyoutDetailTab: string) => {
-    onClickWaterfallItem(node.item, flyoutDetailTab);
+    onClickWaterfallItem?.(node.item, flyoutDetailTab);
   };
 
   return (
@@ -228,12 +237,13 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
               color={displayedColor}
               item={node.item}
               hasToggle={hasToggle}
-              totalDuration={duration}
+              totalDuration={totalDuration}
               isSelected={node.item.id === waterfallItemId}
               errorCount={errorCount}
               marginLeftLevel={marginLeftLevel}
               onClick={onWaterfallItemClick}
               segments={segments}
+              showRelatedErrors={showRelatedErrors}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
