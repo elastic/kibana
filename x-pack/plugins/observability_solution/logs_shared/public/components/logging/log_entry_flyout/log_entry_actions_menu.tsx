@@ -6,28 +6,36 @@
  */
 
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  uptimeOverviewLocatorID,
+  type UptimeOverviewLocatorInfraParams,
+} from '@kbn/deeplinks-observability';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { LinkDescriptor, useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import { ILocatorClient } from '@kbn/share-plugin/common/url_service';
 import React, { useMemo } from 'react';
-import { useLinkProps, LinkDescriptor } from '@kbn/observability-shared-plugin/public';
-import { useVisibilityState } from '../../../utils/use_visibility_state';
 import { LogEntry } from '../../../../common/search_strategies/log_entries/log_entry';
-
-const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useVisibilityState } from '../../../utils/use_visibility_state';
 
 export interface LogEntryActionsMenuProps {
   logEntry: LogEntry;
 }
 
 export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
+  const {
+    services: {
+      share: {
+        url: { locators },
+      },
+    },
+  } = useKibanaContextForPlugin();
   const { hide, isVisible, toggle } = useVisibilityState(false);
 
   const apmLinkDescriptor = useMemo(() => getAPMLink(logEntry), [logEntry]);
-  const uptimeLinkDescriptor = useMemo(() => getUptimeLink(logEntry), [logEntry]);
 
-  const uptimeLinkProps = useLinkProps({
-    app: 'uptime',
-    ...(uptimeLinkDescriptor ? uptimeLinkDescriptor : {}),
-  });
+  const uptimeLinkProps = getUptimeLink({ locators })(logEntry);
 
   const apmLinkProps = useLinkProps({
     app: 'apm',
@@ -38,7 +46,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
     () => [
       <EuiContextMenuItem
         data-test-subj="logEntryActionsMenuItem uptimeLogEntryActionsMenuItem"
-        disabled={!uptimeLinkDescriptor}
+        disabled={!uptimeLinkProps}
         icon="uptimeApp"
         key="uptimeLink"
         {...uptimeLinkProps}
@@ -61,7 +69,7 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
         />
       </EuiContextMenuItem>,
     ],
-    [uptimeLinkDescriptor, apmLinkDescriptor, apmLinkProps, uptimeLinkProps]
+    [apmLinkDescriptor, apmLinkProps, uptimeLinkProps]
   );
 
   const hasMenuItems = useMemo(() => menuItems.length > 0, [menuItems]);
@@ -92,25 +100,40 @@ export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
   );
 };
 
-const getUptimeLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
-  const searchExpressions = logEntry.fields
-    .filter(({ field, value }) => value != null && UPTIME_FIELDS.includes(field))
-    .reduce<string[]>((acc, fieldItem) => {
-      const { field, value } = fieldItem;
-      return acc.concat(value.map((val) => `${field}:${val}`));
-    }, []);
+const getUptimeLink =
+  ({ locators }: { locators: ILocatorClient }) =>
+  (logEntry: LogEntry): ContextRouterLinkProps | undefined => {
+    const uptimeLocator = locators.get<UptimeOverviewLocatorInfraParams>(uptimeOverviewLocatorID);
 
-  if (searchExpressions.length === 0) {
-    return undefined;
-  }
-  return {
-    app: 'uptime',
-    hash: '/',
-    search: {
-      search: `${searchExpressions.join(' or ')}`,
-    },
+    if (!uptimeLocator) {
+      return undefined;
+    }
+
+    const ipValue = logEntry.fields.find(({ field }) => field === 'host.ip')?.value?.[0];
+    const containerValue = logEntry.fields.find(({ field }) => field === 'container.id')
+      ?.value?.[0];
+    const podValue = logEntry.fields.find(({ field }) => field === 'kubernetes.pod.uid')
+      ?.value?.[0];
+    const hostValue = logEntry.fields.find(({ field }) => field === 'host.name')?.value?.[0];
+
+    const uptimeLocatorParams: UptimeOverviewLocatorInfraParams = {
+      ...(typeof ipValue === 'string' && { ip: ipValue }),
+      ...(typeof containerValue === 'string' && { container: containerValue }),
+      ...(typeof podValue === 'string' && { pod: podValue }),
+      ...(typeof hostValue === 'string' && { host: hostValue }),
+    };
+
+    if (Object.keys(uptimeLocatorParams).length === 0) {
+      return undefined;
+    }
+
+    // Coercing the return value to ContextRouterLinkProps because
+    // EuiContextMenuItem defines a too broad type for onClick
+    return getRouterLinkProps({
+      href: uptimeLocator.getRedirectUrl(uptimeLocatorParams),
+      onClick: () => uptimeLocator.navigate(uptimeLocatorParams),
+    }) as ContextRouterLinkProps;
   };
-};
 
 const getAPMLink = (logEntry: LogEntry): LinkDescriptor | undefined => {
   const traceId = logEntry.fields.find(
@@ -152,4 +175,9 @@ function getApmTraceUrl({
   rangeTo: string;
 }) {
   return `/link-to/trace/${traceId}?` + new URLSearchParams({ rangeFrom, rangeTo }).toString();
+}
+
+export interface ContextRouterLinkProps {
+  href: string | undefined;
+  onClick: (event: React.MouseEvent) => void;
 }
