@@ -25,7 +25,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     const header = getPageObject('header');
 
     before(async () => {
-      await svlCommonPage.loginWithRole('admin');
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     beforeEach(async () => {
