@@ -7,22 +7,23 @@
 
 import moment, { Moment } from 'moment';
 import { defaultAnnotationColor, defaultAnnotationLabel } from '@kbn/event-annotation-common';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { CreateAnnotationForm } from './components/create_annotation';
 
 export function getDefaultAnnotation({
+  slo,
   timestamp,
-  sloId,
-  sloInstanceId,
   timestampEnd,
 }: {
   timestamp?: Moment;
   timestampEnd?: Moment;
-  sloId?: string;
-  sloInstanceId?: string;
+  slo?: SLOWithSummaryResponse;
 }): Partial<CreateAnnotationForm> {
+  const sloId = slo?.id;
+  const sloInstanceId = slo?.instanceId;
+
   return {
-    name: defaultAnnotationLabel,
-    message: '',
+    message: defaultAnnotationLabel,
     '@timestamp': timestamp ?? moment(),
     '@timestampEnd': timestampEnd,
     annotation: {

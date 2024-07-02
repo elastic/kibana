@@ -53,8 +53,7 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
   const { ObservabilityAnnotations, annotations, onAnnotationClick } = useAnnotations({
-    sloId: slo?.id,
-    sloInstanceId: slo?.instanceId,
+    slo,
     domain: {
       min: 'now-30d',
       max: 'now',

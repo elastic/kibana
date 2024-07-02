@@ -58,8 +58,7 @@ export function EventsAreaChart({
 
   const { ObservabilityAnnotations, annotations } = useAnnotations({
     domain,
-    sloId: slo.id,
-    sloInstanceId: slo.instanceId,
+    slo,
   });
 
   return (

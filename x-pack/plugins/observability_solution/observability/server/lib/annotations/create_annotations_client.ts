@@ -8,7 +8,9 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
-import { ANNOTATION_RESOURCES_VERSION, ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
+import { isEqual } from 'lodash';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { ANNOTATION_MAPPINGS } from './mappings/annotation_mappings';
 import {
   Annotation,
   CreateAnnotationParams,
@@ -26,12 +28,10 @@ export function createAnnotationsClient(params: {
   logger: Logger;
   license?: ILicense;
 }) {
-  const { index: rawIndex, esClient, logger, license } = params;
+  const { index, esClient, logger, license } = params;
 
-  const index =
-    rawIndex === DEFAULT_ANNOTATION_INDEX
-      ? rawIndex + `-v${ANNOTATION_RESOURCES_VERSION}`
-      : rawIndex;
+  const readIndex =
+    index === DEFAULT_ANNOTATION_INDEX ? index : `${index}*,${DEFAULT_ANNOTATION_INDEX}`;
 
   const initIndex = () =>
     createOrUpdateIndex({
@@ -50,6 +50,21 @@ export function createAnnotationsClient(params: {
     }) as T;
   }
 
+  const updateMappings = async () => {
+    // get index mapping
+    const currentMappings = await esClient.indices.getMapping({
+      index,
+    });
+    const mappings = currentMappings?.[index].mappings;
+
+    if (isEqual(mappings, ANNOTATION_MAPPINGS)) {
+      return;
+    }
+
+    // update index mapping
+    await initIndex();
+  };
+
   return {
     index,
     create: ensureGoldLicense(
@@ -67,6 +82,8 @@ export function createAnnotationsClient(params: {
 
         if (!indexExists) {
           await initIndex();
+        } else {
+          updateMappings();
         }
 
         const annotation = {
@@ -138,7 +155,8 @@ export function createAnnotationsClient(params: {
       const { id } = getByIdParams;
 
       const response = await esClient.search({
-        index: rawIndex + `*`,
+        index: readIndex,
+        ignore_unavailable: true,
         query: {
           bool: {
             filter: [
@@ -156,9 +174,46 @@ export function createAnnotationsClient(params: {
     find: ensureGoldLicense(async (findParams: FindAnnotationParams) => {
       const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
 
+      const shouldClauses: QueryDslQueryContainer[] = [];
+      const mustNotClauses: QueryDslQueryContainer[] = [];
+      if (sloId) {
+        shouldClauses.push({
+          term: {
+            'slo.id': sloId,
+          },
+        });
+      } else {
+        mustNotClauses.push({
+          exists: {
+            field: 'slo.id',
+          },
+        });
+      }
+      if (sloInstanceId && sloInstanceId !== '*') {
+        shouldClauses.push({
+          term: {
+            'slo.instanceId': sloInstanceId,
+          },
+        });
+      }
+      if (serviceName) {
+        shouldClauses.push({
+          term: {
+            'service.name': serviceName,
+          },
+        });
+      } else {
+        mustNotClauses.push({
+          exists: {
+            field: 'service.name',
+          },
+        });
+      }
+
       const result = await esClient.search({
-        index: rawIndex + `*`,
+        index: readIndex,
         size: 10000,
+        ignore_unavailable: true,
         query: {
           bool: {
             filter: [
@@ -171,35 +226,8 @@ export function createAnnotationsClient(params: {
                 },
               },
             ],
-            should: [
-              ...(sloId
-                ? [
-                    {
-                      term: {
-                        'slo.id': sloId,
-                      },
-                    },
-                  ]
-                : []),
-              ...(sloInstanceId && sloInstanceId !== '*'
-                ? [
-                    {
-                      term: {
-                        'slo.instanceId': sloInstanceId,
-                      },
-                    },
-                  ]
-                : []),
-              ...(serviceName
-                ? [
-                    {
-                      term: {
-                        'service.name': serviceName,
-                      },
-                    },
-                  ]
-                : []),
-            ],
+            should: shouldClauses,
+            must_not: mustNotClauses,
           },
         },
       });
@@ -209,7 +237,8 @@ export function createAnnotationsClient(params: {
       const { id } = deleteParams;
 
       return await esClient.deleteByQuery({
-        index: rawIndex + `-*`,
+        index: readIndex,
+        ignore_unavailable: true,
         body: {
           query: {
             term: {

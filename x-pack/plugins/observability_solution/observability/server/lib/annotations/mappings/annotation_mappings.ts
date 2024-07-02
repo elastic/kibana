@@ -6,8 +6,6 @@
  */
 import { Mappings } from '../../../utils/create_or_update_index';
 
-export const ANNOTATION_RESOURCES_VERSION = 1.0;
-
 export const ANNOTATION_MAPPINGS: Mappings = {
   dynamic: true,
   properties: {
@@ -19,7 +17,7 @@ export const ANNOTATION_MAPPINGS: Mappings = {
       },
     },
     message: {
-      type: 'keyword',
+      type: 'text',
     },
     tags: {
       type: 'keyword',
@@ -50,7 +48,31 @@ export const ANNOTATION_MAPPINGS: Mappings = {
         },
       },
     },
+    host: {
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
     slo: {
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        instanceId: {
+          type: 'keyword',
+        },
+      },
+    },
+    monitor: {
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+      },
+    },
+    alert: {
       properties: {
         id: {
           type: 'keyword',

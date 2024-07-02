@@ -54,8 +54,7 @@ export function GoodBadEventsChart({
 
   const { ObservabilityAnnotations, annotations, wrapOnBrushEnd, onAnnotationClick } =
     useAnnotations({
-      sloId: slo?.id,
-      sloInstanceId: slo?.instanceId,
+      slo,
     });
 
   const dateFormat = uiSettings.get('dateFormat');

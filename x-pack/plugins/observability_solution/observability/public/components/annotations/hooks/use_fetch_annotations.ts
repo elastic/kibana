@@ -6,29 +6,36 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Annotation } from '../../../../common/annotations';
 import { useKibana } from '../../../utils/kibana_react';
 
 export function useFetchAnnotations({
   start,
   end,
-  sloId,
-  sloInstanceId,
+  slo,
 }: {
   start: string;
   end: string;
-  sloId?: string;
-  sloInstanceId?: string;
+  slo?: SLOWithSummaryResponse;
 }) {
   const { http } = useKibana().services;
 
+  const sloId = slo?.id;
+  const sloInstanceId = slo?.instanceId;
+  let serviceName: string | undefined;
+  if (slo?.indicator.params && 'service' in slo?.indicator.params) {
+    serviceName = slo?.indicator.params.service;
+  }
+
   const { isLoading, isError, isSuccess, data, refetch } = useQuery({
-    queryKey: ['fetchAnnotationList', start, end, sloId, sloInstanceId],
+    queryKey: ['fetchAnnotationList', start, end, sloId, sloInstanceId, serviceName],
     queryFn: async ({}) => {
       return await http.get<Annotation[]>('/api/observability/annotations/find', {
         query: {
           start,
           end,
+          serviceName,
           sloId,
           sloInstanceId,
         },

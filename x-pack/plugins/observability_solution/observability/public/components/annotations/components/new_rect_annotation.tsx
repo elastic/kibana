@@ -10,17 +10,16 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import moment from 'moment';
 import { useFormContext } from 'react-hook-form';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationTooltip } from './annotation_tooltip';
 import { Annotation, CreateAnnotationParams } from '../../../../common/annotations';
 
 export function NewRectAnnotation({
-  sloId,
-  sloInstanceId,
+  slo,
   isCreateOpen,
 }: {
-  sloId?: string;
-  sloInstanceId?: string;
   isCreateOpen: boolean;
+  slo?: SLOWithSummaryResponse;
 }) {
   const { watch, getValues } = useFormContext<CreateAnnotationParams>();
   const timestamp = watch('@timestamp');
@@ -36,7 +35,7 @@ export function NewRectAnnotation({
       annotation={{
         ...values,
         annotation,
-        ...(sloId ? { slo: { id: sloId, instanceId: sloInstanceId } } : {}),
+        ...(slo ? { slo: { id: slo.id, instanceId: slo.instanceId } } : {}),
       }}
     />
   );

@@ -17,6 +17,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFormContext } from 'react-hook-form';
 import moment from 'moment';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { CreateAnnotationForm } from './create_annotation';
 import { Annotation } from '../../../../common/annotations';
 import { DisplayAnnotation } from '../display_annotations';
@@ -24,8 +25,7 @@ import { NewLineAnnotation } from './new_line_annotation';
 import { NewRectAnnotation } from './new_rect_annotation';
 
 export interface ObservabilityAnnotationsProps {
-  sloId?: string;
-  sloInstanceId?: string;
+  slo?: SLOWithSummaryResponse;
   tooltipSpecs?: Partial<TooltipSpec>;
   annotations?: Annotation[];
   isCreateOpen: boolean;
@@ -33,8 +33,7 @@ export interface ObservabilityAnnotationsProps {
 }
 
 export function ObservabilityAnnotations({
-  sloId,
-  sloInstanceId,
+  slo,
   tooltipSpecs,
   annotations,
   isCreateOpen,
@@ -60,8 +59,8 @@ export function ObservabilityAnnotations({
       <Tooltip {...(tooltipSpecs ?? {})} actions={actions} type={TooltipType.VerticalCursor} />
       <DisplayAnnotation annotations={annotations} />
 
-      <NewLineAnnotation sloId={sloId} sloInstanceId={sloInstanceId} isCreateOpen={isCreateOpen} />
-      <NewRectAnnotation sloId={sloId} sloInstanceId={sloInstanceId} isCreateOpen={isCreateOpen} />
+      <NewLineAnnotation slo={slo} isCreateOpen={isCreateOpen} />
+      <NewRectAnnotation slo={slo} isCreateOpen={isCreateOpen} />
     </EuiErrorBoundary>
   );
 }

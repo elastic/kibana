@@ -14,6 +14,7 @@ import {
   defaultRangeAnnotationLabel,
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-common';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { getDefaultAnnotation } from './default_annotation';
 import { useEditAnnotationHelper } from './hooks/use_edit_annotation_helper';
 import type { CreateAnnotationForm } from './components/create_annotation';
@@ -24,13 +25,11 @@ import { useAnnotationCRUDS } from './hooks/use_annotation_cruds';
 
 export const useAnnotations = ({
   domain,
-  sloId,
-  sloInstanceId,
   editAnnotation,
+  slo,
 }: {
+  slo?: SLOWithSummaryResponse;
   editAnnotation?: Annotation | null;
-  sloId?: string;
-  sloInstanceId?: string;
   domain?: {
     min: number | string;
     max: number | string;
@@ -38,7 +37,7 @@ export const useAnnotations = ({
 } = {}) => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const methods = useForm<CreateAnnotationForm>({
-    defaultValues: getDefaultAnnotation({ sloId, sloInstanceId }),
+    defaultValues: getDefaultAnnotation({ slo }),
     mode: 'all',
   });
   const { setValue, reset } = methods;
@@ -48,8 +47,7 @@ export const useAnnotations = ({
   const { data, refetch } = useFetchAnnotations({
     start: domain?.min ? String(domain?.min) : 'now-30d',
     end: domain?.min ? String(domain?.max) : 'now',
-    sloId,
-    sloInstanceId,
+    slo,
   });
 
   useKey(
@@ -142,8 +140,7 @@ export const useAnnotations = ({
           const { to, from } = getBrushData(event);
           reset(
             getDefaultAnnotation({
-              sloId,
-              sloInstanceId,
+              slo,
               timestamp: moment(from),
               timestampEnd: moment(to),
             })
@@ -158,7 +155,7 @@ export const useAnnotations = ({
     },
     createAnnotation: (start: string | number, end?: string | null) => {
       if (isCreateOpen) return;
-      reset(getDefaultAnnotation({ sloId, sloInstanceId }));
+      reset(getDefaultAnnotation({ slo }));
 
       if (isNaN(Number(start))) {
         setValue('@timestamp', moment(start));
@@ -169,7 +166,7 @@ export const useAnnotations = ({
         setValue('@timestampEnd', moment(new Date(Number(end))));
       }
       if (end) {
-        setValue('name', defaultRangeAnnotationLabel);
+        setValue('message', defaultRangeAnnotationLabel);
         setValue('annotation.style.color', defaultAnnotationRangeColor);
       }
       setIsCreateOpen(true);
@@ -193,8 +190,7 @@ export const useAnnotations = ({
           <ObservabilityAnnotations
             tooltipSpecs={tooltipSpecs}
             annotations={annotations}
-            sloInstanceId={sloInstanceId}
-            sloId={sloId}
+            slo={slo}
             isCreateOpen={isCreateOpen}
             setIsCreateOpen={setIsCreateOpen}
           />
