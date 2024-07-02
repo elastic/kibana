@@ -12,7 +12,7 @@ import { ApmServiceInventory } from './apm_signal_inventory';
 import { MultiSignalInventory } from './multi_signal_inventory';
 import { useApmParams } from '../../../hooks/use_apm_params';
 
-export const ServiceInventory = () => {
+export function ServiceInventory() {
   const { core } = useApmPluginContext();
   const isMultiSignalEnabled = core.uiSettings.get<boolean>(apmEnableMultiSignal, false);
 
@@ -25,4 +25,4 @@ export const ServiceInventory = () => {
   ) : (
     <ApmServiceInventory />
   );
-};
+}

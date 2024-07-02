@@ -74,7 +74,7 @@ function useServicesEntitiesMainStatisticsFetcher() {
   return { mainStatisticsData: data, mainStatisticsStatus: status };
 }
 
-export const MultiSignalInventory = () => {
+export function MultiSignalInventory() {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
 
@@ -122,4 +122,4 @@ export const MultiSignalInventory = () => {
       </EuiFlexGroup>
     </>
   );
-};
+}

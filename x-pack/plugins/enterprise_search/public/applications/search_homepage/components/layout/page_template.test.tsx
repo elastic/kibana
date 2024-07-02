@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { TestHelper } from '../../../test_helpers/test_utils.test_helper';
 
 import { SearchHomepagePageTemplate } from './page_template';
@@ -19,7 +21,9 @@ describe('SearchHomepagePageTemplate', () => {
   it('renders as expected', async () => {
     const { container } = TestHelper.render(
       <SearchHomepagePageTemplate>
-        <div>Test</div>
+        <div>
+          {i18n.translate('xpack.enterpriseSearch..div.testLabel', { defaultMessage: 'Test' })}
+        </div>
       </SearchHomepagePageTemplate>
     );
 

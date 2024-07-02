@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { PopoverBadge } from './popover_badge';
 import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_context';
 
-export const NotAvailableApmMetrics = () => {
+export function NotAvailableApmMetrics() {
   const { core } = useApmPluginContext();
   return (
     <PopoverBadge
@@ -34,4 +34,4 @@ export const NotAvailableApmMetrics = () => {
       }
     />
   );
-};
+}
