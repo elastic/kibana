@@ -65,7 +65,9 @@ interface UseConversation {
 
 export const useConversation = (): UseConversation => {
   const { http, toasts } = useAssistantContext();
-  const { data: allPrompts } = useFetchPrompts();
+  const {
+    data: { data: allPrompts },
+  } = useFetchPrompts();
 
   const getConversation = useCallback(
     async (conversationId: string, silent?: boolean) => {
@@ -103,7 +105,7 @@ export const useConversation = (): UseConversation => {
     async (conversation: Conversation) => {
       if (conversation.apiConfig) {
         const defaultSystemPromptId = getDefaultSystemPrompt({
-          allSystemPrompts: allPrompts.data,
+          allSystemPrompts: allPrompts,
           conversation,
         })?.id;
 
@@ -117,7 +119,7 @@ export const useConversation = (): UseConversation => {
         });
       }
     },
-    [allPrompts.data, http, toasts]
+    [allPrompts, http, toasts]
   );
 
   /**

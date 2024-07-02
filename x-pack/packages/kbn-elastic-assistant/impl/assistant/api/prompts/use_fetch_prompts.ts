@@ -21,7 +21,7 @@ export interface UseFetchPromptsParams {
  * API call for fetching prompts for current spaceId
  *
  * @param {Object} options - The options object.
- * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} options.consumer - prompt consumer
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
  * @returns {useQuery} hook for getting the status of the prompts
