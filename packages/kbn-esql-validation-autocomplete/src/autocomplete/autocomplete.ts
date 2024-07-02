@@ -82,6 +82,7 @@ import {
 import { ESQLCallbacks } from '../shared/types';
 import {
   findMissingBrackets,
+  fixupQuery,
   getFunctionsToIgnoreForStats,
   getParamAtPosition,
   getQueryForFields,
@@ -146,26 +147,7 @@ export async function suggest(
   resourceRetriever?: ESQLCallbacks
 ): Promise<SuggestionRawDefinition[]> {
   const innerText = fullText.substring(0, offset);
-
-  let finalText = innerText;
-
-  const missingBrackets = findMissingBrackets(finalText);
-  // if it's a comma by the user or a forced trigger by a function argument suggestion
-  // add a marker to make the expression still valid
-  const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
-    (context.triggerKind === 0 &&
-      missingBrackets.roundCount === 0 &&
-      getLastCharFromTrimmed(innerText) !== '_') ||
-    (context.triggerCharacter === ' ' &&
-      (isMathFunction(innerText, offset) ||
-        isComma(innerText.trimEnd()[innerText.trimEnd().length - 1])))
-  ) {
-    finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
-  }
-  if (missingBrackets.stack) finalText += missingBrackets.stack.join('');
-
+  const finalText = fixupQuery(fullText, offset, context);
   const { ast } = await astProvider(finalText);
 
   const astContext = getAstContext(innerText, ast, offset);

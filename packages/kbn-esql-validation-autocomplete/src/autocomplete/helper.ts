@@ -8,7 +8,16 @@
 
 import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSource } from '@kbn/esql-ast';
 import { FunctionDefinition } from '../definitions/types';
-import { getFunctionDefinition, isAssignment, isFunctionItem } from '../shared/helpers';
+import { EDITOR_MARKER } from '../shared/constants';
+import {
+  getFunctionDefinition,
+  isAssignment,
+  isFunctionItem,
+  getLastCharFromTrimmed,
+  isComma,
+  isMathFunction,
+} from '../shared/helpers';
+import type { EditorContext } from './types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -105,4 +114,40 @@ export const findMissingBrackets = (text: string) => {
     stack,
     roundCount,
   };
+};
+
+/**
+ * Tries to fix the query by: (1) inserting missing closing brackets and
+ * (2) inserting a marker, if the character before the caret might imply that
+ * the user is about to type a new expression.
+ *
+ * @param query An ES|QL query to fix.
+ * @param caretPosition User's cursor position.
+ * @param context Context of the editor.
+ */
+export const fixupQuery = (query: string, caretPosition: number, context: EditorContext) => {
+  const leftOfCaret = query.substring(0, caretPosition);
+  const missingBrackets = findMissingBrackets(leftOfCaret);
+  let fixedQuery = leftOfCaret;
+
+  // Insert a marker, if it is a comma/colon by the user or a forced trigger by
+  // a function argument suggestion to make the expression still valid.
+  const charThatNeedMarkers = [',', ':'];
+  if (
+    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+    (context.triggerKind === 0 &&
+      missingBrackets.roundCount === 0 &&
+      getLastCharFromTrimmed(leftOfCaret) !== '_') ||
+    (context.triggerCharacter === ' ' &&
+      (isMathFunction(leftOfCaret, caretPosition) ||
+        isComma(leftOfCaret.trimEnd()[leftOfCaret.trimEnd().length - 1])))
+  ) {
+    fixedQuery =
+      leftOfCaret.substring(0, caretPosition) +
+      EDITOR_MARKER +
+      leftOfCaret.substring(caretPosition);
+  }
+  if (missingBrackets.stack) fixedQuery += missingBrackets.stack.join('');
+
+  return fixedQuery;
 };
