@@ -95,6 +95,21 @@ export class DataGridService extends FtrService {
     return await this.find.byCssSelector(this.getCellElementSelector(rowIndex, columnIndex));
   }
 
+  public async getControlColumnsCount() {
+    const controlsHeaderSelector = '.euiDataGridHeaderCell--controlColumn';
+    return (await this.find.allByCssSelector(controlsHeaderSelector)).length;
+  }
+
+  public async getCellElementExcludingControlColumns(
+    rowIndex: number = 0,
+    columnIndexAfterControlColumns: number = 0
+  ) {
+    const controlsCount = await this.getControlColumnsCount();
+    return await this.find.byCssSelector(
+      this.getCellElementSelector(rowIndex, controlsCount + columnIndexAfterControlColumns)
+    );
+  }
+
   private async getCellActionButton(
     rowIndex: number = 0,
     columnIndex: number = 0,
@@ -136,8 +151,39 @@ export class DataGridService extends FtrService {
     await actionButton.click();
   }
 
+  /**
+   * Clicks grid cell 'filter for' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellFilterForButtonExcludingControlColumns(
+    rowIndex: number = 0,
+    columnIndex: number = 0
+  ) {
+    const controlsCount = await this.getControlColumnsCount();
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      controlsCount + columnIndex,
+      'filterForButton'
+    );
+    await actionButton.click();
+  }
+
   public async clickCellFilterOutButton(rowIndex: number = 0, columnIndex: number = 0) {
     const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterOutButton');
+    await actionButton.click();
+  }
+
+  public async clickCellFilterOutButtonExcludingControlColumns(
+    rowIndex: number = 0,
+    columnIndex: number = 0
+  ) {
+    const controlsCount = await this.getControlColumnsCount();
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      controlsCount + columnIndex,
+      'filterOutButton'
+    );
     await actionButton.click();
   }
 
@@ -161,11 +207,13 @@ export class DataGridService extends FtrService {
 
     const rows: string[][] = [];
     let rowIdx = -1;
+    let prevVisibleRowIndex = -1;
     for (const cell of cells) {
-      if (await cell.elementHasClass('euiDataGridRowCell--firstColumn')) {
-        // first column contains expand icon
+      const visibleRowIndex = Number(await cell.getAttribute('data-gridcell-visible-row-index'));
+      if (prevVisibleRowIndex !== visibleRowIndex) {
         rowIdx++;
         rows[rowIdx] = [];
+        prevVisibleRowIndex = visibleRowIndex;
       }
       if (!(await cell.elementHasClass('euiDataGridRowCell--controlColumn'))) {
         rows[rowIdx].push(await cell.getVisibleText());
@@ -254,17 +302,30 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0, columnIndex: 0 }
+    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<void> {
-    const rowColumns = await this.getRow(options);
     const testSubj = options.isAnchorRow
-      ? '~docTableExpandToggleColumnAnchor'
-      : '~docTableExpandToggleColumn';
+      ? 'docTableExpandToggleColumnAnchor'
+      : 'docTableExpandToggleColumn';
 
-    const toggle = await rowColumns[options.columnIndex ?? 0].findByTestSubject(testSubj);
+    let toggle: WebElementWrapper | undefined;
 
-    await toggle.scrollIntoViewIfNecessary();
-    await toggle.click();
+    await this.retry.try(async () => {
+      toggle = await this.find.byCssSelector(
+        `${
+          options.isAnchorRow
+            ? ''
+            : `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex || 0}"] `
+        }[data-test-subj="${testSubj}"]`
+      );
+    });
+
+    if (toggle) {
+      await toggle.scrollIntoViewIfNecessary();
+      await toggle.click();
+    } else {
+      throw new Error('Unable to find row toggle element');
+    }
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
@@ -500,8 +561,10 @@ export class DataGridService extends FtrService {
   }
 
   public async selectRow(rowIndex: number) {
-    const columns = await this.getRow({ rowIndex });
-    const checkbox = await columns[1].findByClassName('euiCheckbox__input');
+    const checkbox = await this.find.byCssSelector(
+      `.euiDataGridRow[data-grid-visible-row-index="${rowIndex}"] [data-gridcell-column-id="select"] .euiCheckbox__input`
+    );
+
     await checkbox.click();
   }
 
