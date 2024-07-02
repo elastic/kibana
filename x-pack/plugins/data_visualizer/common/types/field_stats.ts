@@ -211,8 +211,8 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 export interface FieldStatsCommonRequestParams {
   index: string;
   timeFieldName?: string;
-  earliestMs?: number | undefined;
-  latestMs?: number | undefined;
+  earliestMs?: number | string | undefined;
+  latestMs?: number | string | undefined;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   intervalMs?: number;
   query: estypes.QueryDslQueryContainer;
@@ -227,8 +227,8 @@ export type SupportedAggs = Set<string>;
 
 export interface OverallStatsSearchStrategyParams {
   sessionId?: string;
-  earliest?: number;
-  latest?: number;
+  earliest?: number | string;
+  latest?: number | string;
   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
   searchQuery: Query['query'];

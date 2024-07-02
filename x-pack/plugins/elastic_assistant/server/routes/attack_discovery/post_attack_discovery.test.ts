@@ -10,6 +10,7 @@ import { postAttackDiscoveryRoute } from './post_attack_discovery';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { AttackDiscoveryDataClient } from '../../ai_assistant_data_clients/attack_discovery';
 import { transformESSearchToAttackDiscovery } from '../../ai_assistant_data_clients/attack_discovery/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../__mocks__/attack_discovery_schema.mock';
@@ -68,6 +69,7 @@ describe('postAttackDiscoveryRoute', () => {
     jest.clearAllMocks();
     context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
+    context.elasticAssistant.actions = actionsMock.createStart();
     postAttackDiscoveryRoute(server.router);
     findAttackDiscoveryByConnectorId.mockResolvedValue(mockCurrentAd);
     (getAssistantTool as jest.Mock).mockReturnValue({ getTool: jest.fn() });
