@@ -27,7 +27,7 @@ export class AnnotationDataService {
     const esClient = this.getService('es');
     try {
       await esClient.indices.delete({
-        index: 'observability-annotations-v1',
+        index: 'observability-annotations',
         ignore_unavailable: true,
       });
       await esClient.indices.delete({

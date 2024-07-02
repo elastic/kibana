@@ -10,7 +10,7 @@ import { JsonObject } from '@kbn/utility-types';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-const DEFAULT_INDEX_NAME = 'observability-annotations-v1';
+const DEFAULT_INDEX_NAME = 'observability-annotations';
 
 // eslint-disable-next-line import/no-default-export
 export default function annotationApiTests({ getService }: FtrProviderContext) {
