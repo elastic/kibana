@@ -19,12 +19,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { isEqual } from 'lodash';
+import styled from 'styled-components';
 
 import { AgentPolicyMultiSelect } from '../applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/agent_policy_multi_select';
 import { useAgentPoliciesOptions } from '../applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/agent_policy_options';
 import type { AgentPolicy } from '../types';
 import { usePackagePolicyWithRelatedData } from '../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks';
 import { useStartServices } from '../hooks';
+
+const StyledEuiConfirmModal = styled(EuiConfirmModal)`
+  min-width: 448px;
+`;
 
 interface Props {
   onClose: () => void;
@@ -111,7 +116,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
   const { agentPolicyMultiOptions, isLoading } = useAgentPoliciesOptions(packageInfo);
 
   return (
-    <EuiConfirmModal
+    <StyledEuiConfirmModal
       title={
         <FormattedMessage
           id="xpack.fleet.manageAgentPolicies.confirmModalTitle"
@@ -189,7 +194,7 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
                 />
               }
             >
-              <EuiText>
+              <EuiText size="s">
                 <FormattedMessage
                   id="xpack.fleet.manageAgentPolicies.calloutBody"
                   defaultMessage="{removedPolicies} will no longer use this integration."
@@ -208,6 +213,6 @@ export const ManageAgentPoliciesModal: React.FunctionComponent<Props> = ({
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiConfirmModal>
+    </StyledEuiConfirmModal>
   );
 };
