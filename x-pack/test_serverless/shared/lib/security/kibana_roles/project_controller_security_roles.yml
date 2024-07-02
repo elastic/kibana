@@ -284,6 +284,7 @@ t3_analyst:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
