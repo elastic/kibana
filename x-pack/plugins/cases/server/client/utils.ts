@@ -21,6 +21,7 @@ import type {
   CaseStatuses,
   CustomFieldsConfiguration,
   ExternalReferenceAttachmentPayload,
+  TemplatesConfiguration,
 } from '../../common/types/domain';
 import {
   ActionsAttachmentPayloadRt,
@@ -603,4 +604,38 @@ export const constructSearch = (
   }
 
   return { search };
+};
+
+/**
+ * remove deleted custom field from template
+ */
+export const removeCustomFieldFromTemplates = ({
+  templates,
+  customFields,
+}: {
+  templates?: TemplatesConfiguration;
+  customFields?: CustomFieldsConfiguration;
+}): TemplatesConfiguration => {
+  if (!templates || !templates.length) {
+    return [];
+  }
+
+  return templates.map((template) => {
+    if (!template.caseFields?.customFields || !template.caseFields?.customFields.length) {
+      return template;
+    }
+
+    if (!customFields || !customFields?.length) {
+      return { ...template, caseFields: { ...template.caseFields, customFields: [] } };
+    }
+
+    const templateCustomFields = template.caseFields.customFields.filter((templateCustomField) =>
+      customFields?.find((customField) => customField.key === templateCustomField.key)
+    );
+
+    return {
+      ...template,
+      caseFields: { ...template.caseFields, customFields: templateCustomFields },
+    };
+  });
 };
