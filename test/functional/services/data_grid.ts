@@ -308,20 +308,24 @@ export class DataGridService extends FtrService {
       ? 'docTableExpandToggleColumnAnchor'
       : 'docTableExpandToggleColumn';
 
-    const toggle = await this.find.byCssSelector(
-      `${
-        options.isAnchorRow
-          ? ''
-          : `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex || 0}"]`
-      } ${
-        typeof options.columnIndex === 'number'
-          ? `.euiDataGridRowCell[data-gridcell-column-index="${options.columnIndex}"]`
-          : '.euiDataGridRowCell[data-gridcell-column-id="openDetails"]'
-      } [data-test-subj="${testSubj}"]`
-    );
+    let toggle: WebElementWrapper | undefined;
 
-    await toggle.scrollIntoViewIfNecessary();
-    await toggle.click();
+    await this.retry.try(async () => {
+      toggle = await this.find.byCssSelector(
+        `${
+          options.isAnchorRow
+            ? ''
+            : `.euiDataGridRow[data-grid-visible-row-index="${options.rowIndex || 0}"] `
+        }[data-test-subj="${testSubj}"]`
+      );
+    });
+
+    if (toggle) {
+      await toggle.scrollIntoViewIfNecessary();
+      await toggle.click();
+    } else {
+      throw new Error('Unable to find row toggle element');
+    }
   }
 
   public async getDetailsRows(): Promise<WebElementWrapper[]> {
