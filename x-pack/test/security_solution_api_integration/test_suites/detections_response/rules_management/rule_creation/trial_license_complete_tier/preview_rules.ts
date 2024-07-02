@@ -90,7 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
                 .send(getSimplePreviewRule())
             )
           );
-          
+
           expect(responses.filter((r) => r.body.statusCode === 429).length).to.eql(5);
         });
       });
