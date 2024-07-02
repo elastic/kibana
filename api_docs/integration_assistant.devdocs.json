@@ -34,13 +34,17 @@
       "children": [
         {
           "parentPluginId": "integrationAssistant",
-          "id": "def-public.IntegrationAssistantPluginStart.CreateIntegration",
-          "type": "CompoundType",
+          "id": "def-public.IntegrationAssistantPluginStart.components",
+          "type": "Object",
           "tags": [],
-          "label": "CreateIntegration",
+          "label": "components",
           "description": [],
           "signature": [
-            "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+            "{ CreateIntegration: ",
+            "CreateIntegrationComponent",
+            "; CreateIntegrationCardButton: ",
+            "CreateIntegrationCardButtonComponent",
+            "; }"
           ],
           "path": "x-pack/plugins/integration_assistant/public/types.ts",
           "deprecated": false,
@@ -48,21 +52,37 @@
         },
         {
           "parentPluginId": "integrationAssistant",
-          "id": "def-public.IntegrationAssistantPluginStart.CreateIntegrationCardButton",
-          "type": "CompoundType",
+          "id": "def-public.IntegrationAssistantPluginStart.renderUpselling",
+          "type": "Function",
           "tags": [],
-          "label": "CreateIntegrationCardButton",
-          "description": [],
+          "label": "renderUpselling",
+          "description": [
+            "\nSets the upselling to be rendered in the UI.\nIf defined, the section will be displayed and it will prevent\nthe user from interacting with the rest of the UI."
+          ],
           "signature": [
-            "React.ComponentClass<",
-            "CreateIntegrationCardButtonProps",
-            ", any> | React.FunctionComponent<",
-            "CreateIntegrationCardButtonProps",
-            ">"
+            "(upselling: React.ReactNode) => void"
           ],
           "path": "x-pack/plugins/integration_assistant/public/types.ts",
           "deprecated": false,
-          "trackAdoption": false
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "integrationAssistant",
+              "id": "def-public.IntegrationAssistantPluginStart.renderUpselling.$1",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "upselling",
+              "description": [],
+              "signature": [
+                "React.ReactNode"
+              ],
+              "path": "x-pack/plugins/integration_assistant/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -86,7 +106,40 @@
       "path": "x-pack/plugins/integration_assistant/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "integrationAssistant",
+          "id": "def-server.IntegrationAssistantPluginSetup.setIsAvailable",
+          "type": "Function",
+          "tags": [],
+          "label": "setIsAvailable",
+          "description": [],
+          "signature": [
+            "(isAvailable: boolean) => void"
+          ],
+          "path": "x-pack/plugins/integration_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "integrationAssistant",
+              "id": "def-server.IntegrationAssistantPluginSetup.setIsAvailable.$1",
+              "type": "boolean",
+              "tags": [],
+              "label": "isAvailable",
+              "description": [],
+              "signature": [
+                "boolean"
+              ],
+              "path": "x-pack/plugins/integration_assistant/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },

@@ -6,24 +6,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { Logger } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 
 import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import { InvokeAIActionParamsSchema, RunActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
 export interface ActionsClientChatOpenAIParams {
-  actions: ActionsPluginStart;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
   llmType?: string;
   logger: Logger;
-  request: KibanaRequest;
   streaming?: boolean;
   traceId?: string;
   maxRetries?: number;
@@ -54,22 +54,20 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #temperature?: number;
 
   // Kibana variables
-  #actions: ActionsPluginStart;
+  #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest;
   #actionResultData: string;
   #traceId: string;
   #signal?: AbortSignal;
   #timeout?: number;
 
   constructor({
-    actions,
+    actionsClient,
     connectorId,
     traceId = uuidv4(),
     llmType,
     logger,
-    request,
     maxRetries,
     model,
     signal,
@@ -92,12 +90,11 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       azureOpenAIApiVersion: 'nothing',
       openAIApiKey: '',
     });
-    this.#actions = actions;
+    this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
     this.#traceId = traceId;
     this.llmType = llmType ?? LLM_TYPE;
     this.#logger = logger;
-    this.#request = request;
     this.#timeout = timeout;
     this.#actionResultData = '';
     this.streaming = streaming;
@@ -146,10 +143,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         )} `
       );
 
-      // create an actions client from the authenticated request context:
-      const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-
-      const actionResult = await actionsClient.execute(requestBody);
+      const actionResult = await this.#actionsClient.execute(requestBody);
 
       if (actionResult.status === 'error') {
         throw new Error(`${LLM_TYPE}: ${actionResult?.message} - ${actionResult?.serviceMessage}`);
