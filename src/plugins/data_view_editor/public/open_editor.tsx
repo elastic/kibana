@@ -11,7 +11,7 @@ import { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { createKibanaReactContext, DataPublicPluginStart, DataViewLazy } from './shared_imports';
+import { createKibanaReactContext, DataPublicPluginStart, DataView } from './shared_imports';
 
 import { CloseEditor, DataViewEditorContext, DataViewEditorProps } from './types';
 import { DataViewEditorLazy } from './components/data_view_editor_lazy';
@@ -55,7 +55,7 @@ export const getEditorOpener =
         }
       };
 
-      const onSaveIndexPattern = (indexPattern: DataViewLazy) => {
+      const onSaveIndexPattern = (indexPattern: DataView) => {
         closeEditor();
 
         if (onSave) {
