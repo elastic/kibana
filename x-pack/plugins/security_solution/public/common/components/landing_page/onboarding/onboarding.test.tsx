@@ -95,10 +95,8 @@ describe('OnboardingComponent', () => {
         false
       );
     });
-    it('should stay dismissed if it has been closed once', ()=> {
-      (useKibana().services.storage.get as jest.Mock).mockReturnValue(
-        false
-      );
+    it('should stay dismissed if it has been closed once', () => {
+      (useKibana().services.storage.get as jest.Mock).mockReturnValue(false);
       render();
       expect(renderResult.queryByTestId('avcResultsBanner')).toBeNull();
     });
