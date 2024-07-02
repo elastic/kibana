@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+export { VISUALIZE_EMBEDDABLE_TYPE, COMMON_VISUALIZATION_GROUPING } from './constants';
 export { VIS_EVENT_TO_TRIGGER } from './events';
 
 export { type HasVisualizeConfig, apiHasVisualizeConfig } from './interfaces/has_visualize_config';

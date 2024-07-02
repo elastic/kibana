@@ -10,12 +10,10 @@ import { act } from '@testing-library/react';
 
 import type { PackageInfo } from '../../../../../../../../common';
 
-import { ExperimentalFeaturesService } from '../../../../../../../services';
-
 import type { TestRenderer } from '../../../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 
-import { useGetAgentPolicies } from '../../../../../hooks';
+import { useGetAgentPolicies, useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 
@@ -23,6 +21,7 @@ jest.mock('../../../../../hooks', () => {
   return {
     ...jest.requireActual('../../../../../hooks'),
     useGetAgentPolicies: jest.fn(),
+    useMultipleAgentPolicies: jest.fn(),
     useGetOutputs: jest.fn().mockReturnValue({
       data: {
         items: [
@@ -61,6 +60,9 @@ jest.mock('../../../../../hooks', () => {
 const useGetAgentPoliciesMock = useGetAgentPolicies as jest.MockedFunction<
   typeof useGetAgentPolicies
 >;
+const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as jest.MockedFunction<
+  typeof useMultipleAgentPolicies
+>;
 
 describe('step select agent policy', () => {
   let testRenderer: TestRenderer;
@@ -74,12 +76,13 @@ describe('step select agent policy', () => {
         agentPolicies={[]}
         updateAgentPolicies={updateAgentPoliciesMock}
         setHasAgentPolicyError={mockSetHasAgentPolicyError}
-        selectedAgentPolicyIds={selectedAgentPolicyIds}
+        initialSelectedAgentPolicyIds={selectedAgentPolicyIds}
       />
     ));
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
+    useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: false });
     updateAgentPoliciesMock.mockReset();
   });
 
@@ -124,9 +127,7 @@ describe('step select agent policy', () => {
 
   describe('multiple agent policies', () => {
     beforeEach(() => {
-      jest
-        .spyOn(ExperimentalFeaturesService, 'get')
-        .mockReturnValue({ enableReusableIntegrationPolicies: true });
+      useMultipleAgentPoliciesMock.mockReturnValue({ canUseMultipleAgentPolicies: true });
 
       useGetAgentPoliciesMock.mockReturnValue({
         data: {

@@ -1,0 +1,109 @@
+openapi: 3.0.0
+info:
+  title: Chat Complete API endpoint
+  version: '2023-10-31'
+paths:
+  /api/elastic_assistant/chat/complete:
+    post:
+      operationId: ChatComplete
+      x-codegen-enabled: true
+      description: Creates a model response for the given chat conversation.
+      summary: Creates a model response for the given chat conversation.
+      tags:
+        - Chat Complete API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompleteProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    RootContext:
+      type: string
+      enum:
+        - security
+
+    ChatMessageRole:
+      type: string
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+
+    MessageData:
+      type: object
+      additionalProperties: true
+
+    ChatMessage:
+      type: object
+      description: AI assistant message.
+      required:
+        - 'role'
+      properties:
+        content:
+          type: string
+          description: Message content.
+        role:
+          $ref: '#/components/schemas/ChatMessageRole'
+          description: Message role.
+        data:
+          description: ECS object to attach to the context of the message.
+          $ref: '#/components/schemas/MessageData'
+        fields_to_anonymize:
+          type: array
+          items:
+            type: string
+
+    ChatCompleteProps:
+      type: object
+      properties:
+        conversationId:
+          type: string
+        promptId:
+          type: string
+        isStream:
+          type: boolean  
+        responseLanguage:
+          type: string
+        langSmithProject:
+          type: string
+        langSmithApiKey:
+          type: string
+        connectorId:
+          type: string
+        model:
+          type: string
+        persist:
+          type: boolean
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/ChatMessage'
+      required:
+        - messages
+        - persist
+        - connectorId
