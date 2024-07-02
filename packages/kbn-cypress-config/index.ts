@@ -24,10 +24,14 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
           return wp({
             webpackOptions: {
               resolve: {
-                extensions: ['.ts', '.tsx', '.js'],
+                extensions: ['.ts', '.tsx', '.js', '.yaml'],
               },
               module: {
                 rules: [
+                  {
+                    test: /\.ya?ml$/,
+                    use: 'yaml-loader',
+                  },
                   {
                     test: /\.(js|tsx?)$/,
                     exclude: /node_modules/,
