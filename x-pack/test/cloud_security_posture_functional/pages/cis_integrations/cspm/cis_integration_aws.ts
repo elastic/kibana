@@ -124,6 +124,7 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -159,6 +160,7 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
             tempAccessSessionToken
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -247,6 +249,7 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
             directAccessKeyId
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 
@@ -283,6 +286,7 @@ export default function (providerContext: FtrProviderContext) {
           (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
             tempAccessSessionToken
         ).to.be(true);
+        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
       });
     });
 

@@ -420,6 +420,7 @@ function SecretInputField({
           iconType="refresh"
           iconSide="left"
           size="xs"
+          data-test-subj={`button-replace-${fieldTestSelector}`}
         >
           <FormattedMessage
             id="xpack.fleet.editPackagePolicy.stepConfigure.fieldSecretValueSetEditButton"
