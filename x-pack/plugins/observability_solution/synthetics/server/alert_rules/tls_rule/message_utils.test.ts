@@ -10,7 +10,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { setTLSRecoveredAlertsContext } from './message_utils';
 import { TLSLatestPing } from './tls_rule_executor';
 
-describe('setRecoveredAlertsContext', () => {
+describe('setTLSRecoveredAlertsContext', () => {
   const timestamp = new Date('2024-07-02T00:00:00').toISOString();
   const notAfterTimestamp = new Date('2024-06-02T00:00:00').toISOString();
   const alertUuid = 'alert-id';
