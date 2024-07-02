@@ -10,9 +10,10 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
-import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
+import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
+import { CONVERSATIONS_TAB } from './const';
 
 interface Props {
   defaultConnector?: AIConnector;
@@ -23,6 +24,7 @@ interface Props {
   isDisabled?: boolean;
   isFlyoutMode: boolean;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
 }
 
@@ -39,6 +41,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isFlyoutMode,
     onConversationSelected,
     conversations,
+    conversationsLoaded,
     refetchConversationsState,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
@@ -94,6 +97,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             onSave={handleSave}
             isFlyoutMode={isFlyoutMode}
             conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
           />
         )}
       </>

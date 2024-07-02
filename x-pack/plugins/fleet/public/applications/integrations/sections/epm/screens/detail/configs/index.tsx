@@ -26,6 +26,7 @@ import { useGetInputsTemplatesQuery, useStartServices } from '../../../../../hoo
 import { PrereleaseCallout } from '../overview/overview';
 
 import { isPackagePrerelease } from '../../../../../../../../common/services';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 interface ConfigsProps {
   packageInfo: PackageInfo;
@@ -56,7 +57,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
 
   return (
     <EuiFlexGroup data-test-subj="epm.Configs" alignItems="flexStart">
-      <EuiFlexItem grow={1} />
+      <SideBarColumn grow={1} />
       <EuiFlexItem grow={7}>
         {isLoading && !configs ? (
           <EuiSkeletonText lines={10} />
