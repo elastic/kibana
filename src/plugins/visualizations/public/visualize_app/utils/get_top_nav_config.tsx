@@ -261,12 +261,10 @@ export const getTopNavConfig = (
     }
   };
 
+  const isByValueMode = !savedVis.id && originatingApp;
+
   const saveButtonLabel =
-    !savedVis.id && originatingApp
-      ? i18n.translate('visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel', {
-          defaultMessage: 'Save to library',
-        })
-      : originatingApp && savedVis.id
+    originatingApp && savedVis.id
       ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
@@ -275,7 +273,8 @@ export const getTopNavConfig = (
         });
 
   const showSaveButton =
-    visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
+    !isByValueMode &&
+    (visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls));
 
   const topNavMenu: TopNavMenuData[] = [
     ...(displayEditInLensItem
