@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { useKibana } from '../../../common/lib/kibana';
 import { useScheduleRuleRunMutation } from '../api/hooks/use_schedule_rule_run_mutation';
 import type { ScheduleBackfillProps } from '../types';
 
@@ -15,18 +16,29 @@ import * as i18n from '../translations';
 export function useScheduleRuleRun() {
   const { mutateAsync } = useScheduleRuleRunMutation();
   const { addError, addSuccess } = useAppToasts();
+  const { telemetry } = useKibana().services;
 
   const scheduleRuleRun = useCallback(
     async (options: ScheduleBackfillProps) => {
       try {
         const results = await mutateAsync(options);
+        telemetry.reportManualRuleRunExecute({
+          rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
+          status: 'success',
+          rulesCount: options.ruleIds.length,
+        });
         addSuccess(i18n.BACKFILL_SCHEDULE_SUCCESS(results.length));
         return results;
       } catch (error) {
         addError(error, { title: i18n.BACKFILL_SCHEDULE_ERROR_TITLE });
+        telemetry.reportManualRuleRunExecute({
+          rangeInMs: options.timeRange.endDate.diff(options.timeRange.startDate),
+          status: 'error',
+          rulesCount: options.ruleIds.length,
+        });
       }
     },
-    [addError, addSuccess, mutateAsync]
+    [addError, addSuccess, mutateAsync, telemetry]
   );
 
   return { scheduleRuleRun };
