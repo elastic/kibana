@@ -12,7 +12,7 @@ import { useKibana } from './use_kibana';
 
 // Errors
 const UNAUTHORIZED_ERROR = i18n.translate(
-  'xpack.observability_onboarding.installSystemIntegration.error.unauthorized',
+  'xpack.observability_onboarding.installIntegration.error.unauthorized',
   {
     defaultMessage:
       'Required kibana privilege {requiredKibanaPrivileges} is missing, please add the required privilege to the role of the authenticated user.',
@@ -23,19 +23,21 @@ const UNAUTHORIZED_ERROR = i18n.translate(
 );
 
 type ErrorType = 'AuthorizationError' | 'UnknownError';
-export interface SystemIntegrationError {
+export interface IntegrationInstallationError {
   type: ErrorType;
   message: string;
 }
 
 type IntegrationInstallStatus = 'installed' | 'installing' | 'install_failed' | 'not_installed';
 
-export const useInstallSystemIntegration = ({
+export const useInstallIntegrations = ({
   onIntegrationCreationSuccess,
   onIntegrationCreationFailure,
+  packages = ['system'],
 }: {
-  onIntegrationCreationSuccess: ({ version }: { version?: string }) => void;
-  onIntegrationCreationFailure: (error: SystemIntegrationError) => void;
+  onIntegrationCreationSuccess?: ({ versions }: { versions?: string[] }) => void;
+  onIntegrationCreationFailure: (error: IntegrationInstallationError) => void;
+  packages?: string[];
 }) => {
   const {
     services: { http },
@@ -48,20 +50,24 @@ export const useInstallSystemIntegration = ({
           headers: { 'Elastic-Api-Version': '2023-10-31' },
         };
 
-        const { item: systemIntegration } = await http.get<{
-          item: { version: string; status: IntegrationInstallStatus };
-        }>('/api/fleet/epm/packages/system', options);
+        const integrations = [];
+        for (const packageName of packages) {
+          const { item: integration } = await http.get<{
+            item: { version: string; status: IntegrationInstallStatus };
+          }>(`/api/fleet/epm/packages/${packageName}`, options);
 
-        if (systemIntegration.status !== 'installed') {
-          await http.post('/api/fleet/epm/packages/system', options);
+          if (integration.status !== 'installed') {
+            await http.post(`/api/fleet/epm/packages/${packageName}`, options);
+          }
+          integrations.push(integration);
         }
 
         return {
-          version: systemIntegration.version,
+          versions: integrations.map((integration) => integration.version),
         };
       },
-      onResolve: ({ version }: { version?: string }) => {
-        onIntegrationCreationSuccess({ version });
+      onResolve: ({ versions }: { versions?: string[] }) => {
+        onIntegrationCreationSuccess?.({ versions });
       },
       onReject: (requestError: any) => {
         if (requestError?.body?.statusCode === 403) {
