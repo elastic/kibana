@@ -67,11 +67,11 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   );
 
   const [showAVCBanner, setShowAVCBanner] = useState(
-    storage.get('securitySolution.avcBanner') ?? true
+    storage.get('securitySolution.showAvcBanner') ?? true
   );
   const onBannerDismiss = useCallback(() => {
     setShowAVCBanner(false);
-    storage.set('securitySolution.avcBanner', false);
+    storage.set('securitySolution.showAvcBanner', false);
   }, [storage]);
 
   useScrollToHash();

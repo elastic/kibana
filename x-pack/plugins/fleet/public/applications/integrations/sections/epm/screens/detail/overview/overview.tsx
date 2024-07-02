@@ -292,11 +292,11 @@ export const OverviewPage: React.FC<Props> = memo(
     const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
 
     const [showAVCBanner, setShowAVCBanner] = useState(
-      storage.get('securitySolution.avcBanner') ?? true
+      storage.get('securitySolution.showAvcBanner') ?? true
     );
     const onBannerDismiss = useCallback(() => {
       setShowAVCBanner(false);
-      storage.set('securitySolution.avcBanner', false);
+      storage.set('securitySolution.showAvcBanner', false);
     }, [storage]);
 
     return (
