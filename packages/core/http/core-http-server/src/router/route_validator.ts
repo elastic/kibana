@@ -72,6 +72,10 @@ export type RouteValidationFunction<T> = (
       error: RouteValidationError;
     };
 
+export interface ZodEsque<V> {
+  _output: V;
+}
+
 /**
  * Allowed property validation options: either @kbn/config-schema validations or custom validation functions
  *
@@ -79,7 +83,11 @@ export type RouteValidationFunction<T> = (
  *
  * @public
  */
-export type RouteValidationSpec<T> = ObjectType | Type<T> | RouteValidationFunction<T>;
+export type RouteValidationSpec<T> =
+  | ObjectType
+  | Type<T>
+  | ZodEsque<T>
+  | RouteValidationFunction<T>;
 
 /**
  * The configuration object to the RouteValidator class.
@@ -208,4 +216,4 @@ export type RouteValidator<P, Q, B> =
  * @return A @kbn/config-schema schema
  * @public
  */
-export type LazyValidator = () => Type<unknown>;
+export type LazyValidator = () => Type<unknown> | ZodEsque<unknown>;

@@ -9,6 +9,7 @@
 import { once } from 'lodash';
 import {
   isFullValidatorContainer,
+  ZodEsque,
   type RouteConfig,
   type RouteMethod,
   type RouteValidator,
@@ -20,7 +21,7 @@ function isStatusCode(key: string) {
 }
 
 interface ResponseValidation {
-  [statusCode: number]: { body: () => ObjectType | Type<unknown> };
+  [statusCode: number]: { body: () => ObjectType | Type<unknown> | ZodEsque<unknown> };
 }
 
 export function prepareResponseValidation(validation: ResponseValidation): ResponseValidation {
