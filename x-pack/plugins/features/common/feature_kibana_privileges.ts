@@ -272,4 +272,15 @@ export interface FeatureKibanaPrivileges {
    * grant. This property can only be set in the feature configuration overrides.
    */
   composedOf?: readonly FeatureKibanaPrivilegesReference[];
+
+  /**
+   * An optional list of other registered feature or sub-feature privileges that when combined grant an equivalent
+   * access should the feature this privilege belong to become deprecated.
+   */
+  replacedBy?:
+    | readonly FeatureKibanaPrivilegesReference[]
+    | {
+        default: readonly FeatureKibanaPrivilegesReference[];
+        minimal: readonly FeatureKibanaPrivilegesReference[];
+      };
 }

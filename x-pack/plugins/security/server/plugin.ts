@@ -320,6 +320,7 @@ export class SecurityPlugin
       getSession: this.getSession,
       getFeatures: () =>
         startServicesPromise.then((services) => services.features.getKibanaFeatures()),
+      subFeaturePrivilegeIterator: features.subFeaturePrivilegeIterator,
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,

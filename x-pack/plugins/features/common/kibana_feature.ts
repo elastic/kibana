@@ -149,6 +149,8 @@ export interface KibanaFeatureConfig {
    * are visible.
    */
   hidden?: boolean;
+
+  deprecated?: boolean;
 }
 
 export class KibanaFeature {
@@ -162,6 +164,10 @@ export class KibanaFeature {
 
   public get id() {
     return this.config.id;
+  }
+
+  public get deprecated() {
+    return this.config.deprecated;
   }
 
   public get hidden() {

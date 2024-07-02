@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+
 import type { RouteDefinitionParams } from '../..';
 import { compareRolesByName, transformElasticsearchRoleToRole } from '../../../authorization';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
@@ -14,6 +16,7 @@ export function defineGetAllRolesRoutes({
   router,
   authz,
   getFeatures,
+  subFeaturePrivilegeIterator,
   logger,
   buildFlavor,
   config,
@@ -21,10 +24,12 @@ export function defineGetAllRolesRoutes({
   router.get(
     {
       path: '/api/security/role',
+      validate: {
+        query: schema.maybe(schema.object({ replaceDeprecated: schema.maybe(schema.boolean()) })),
+      },
       options: {
         summary: `Get all roles`,
       },
-      validate: false,
     },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
@@ -41,11 +46,13 @@ export function defineGetAllRolesRoutes({
             .map(([roleName, elasticsearchRole]) =>
               transformElasticsearchRoleToRole(
                 features,
+                subFeaturePrivilegeIterator,
                 // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
                 elasticsearchRole,
                 roleName,
                 authz.applicationName,
-                logger
+                logger,
+                { replaceDeprecatedKibanaPrivileges: request.query?.replaceDeprecated ?? false }
               )
             )
             .filter((role) => {
