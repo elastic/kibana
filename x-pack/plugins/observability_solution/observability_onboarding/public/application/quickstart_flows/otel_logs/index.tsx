@@ -68,7 +68,7 @@ export const OtelLogsPanel: React.FC = () => {
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  const AGENT_CDN_BASE_URL = 'snapshots.elastic.co/8.15.0-5d6d1bc4/downloads/beats/elastic-agent';
+  const AGENT_CDN_BASE_URL = 'snapshots.elastic.co/8.15.0-2088c97b/downloads/beats/elastic-agent';
   const agentVersion = '8.15.0-SNAPSHOT';
   // TODO uncomment before merge
   // const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
