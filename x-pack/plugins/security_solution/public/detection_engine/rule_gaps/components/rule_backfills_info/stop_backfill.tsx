@@ -10,12 +10,20 @@ import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeleteBackfill } from '../../api/hooks/use_delete_backfill';
 import * as i18n from '../../translations';
+import type { BackfillRow } from '../../types';
+import { useKibana } from '../../../../common/lib/kibana';
 
-export const StopBackfill = ({ id }: { id: string }) => {
+export const StopBackfill = ({ backfill }: { backfill: BackfillRow }) => {
+  const { telemetry } = useKibana().services;
   const { addSuccess, addError } = useAppToasts();
   const deleteBackfillMutation = useDeleteBackfill({
     onSuccess: () => {
       closeModal();
+      telemetry.reportManualRuleRunCancelJob({
+        totalTasks: backfill.total,
+        completedTasks: backfill.complete,
+        errorTasks: backfill.error,
+      });
       addSuccess(i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_SUCCESS);
     },
     onError: (error) => {
@@ -29,7 +37,7 @@ export const StopBackfill = ({ id }: { id: string }) => {
   const showModal = () => setIsModalVisible(true);
   const closeModal = () => setIsModalVisible(false);
   const onConfirm = () => {
-    deleteBackfillMutation.mutate({ backfillId: id });
+    deleteBackfillMutation.mutate({ backfillId: backfill.id });
   };
 
   return (
