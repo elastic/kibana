@@ -151,8 +151,39 @@ export class DataGridService extends FtrService {
     await actionButton.click();
   }
 
+  /**
+   * Clicks grid cell 'filter for' action button
+   * @param rowIndex data row index starting from 0 (0 means 1st row)
+   * @param columnIndex column index starting from 0 (0 means 1st column)
+   */
+  public async clickCellFilterForButtonExcludingControlColumns(
+    rowIndex: number = 0,
+    columnIndex: number = 0
+  ) {
+    const controlsCount = await this.getControlColumnsCount();
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      controlsCount + columnIndex,
+      'filterForButton'
+    );
+    await actionButton.click();
+  }
+
   public async clickCellFilterOutButton(rowIndex: number = 0, columnIndex: number = 0) {
     const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterOutButton');
+    await actionButton.click();
+  }
+
+  public async clickCellFilterOutButtonExcludingControlColumns(
+    rowIndex: number = 0,
+    columnIndex: number = 0
+  ) {
+    const controlsCount = await this.getControlColumnsCount();
+    const actionButton = await this.getCellActionButton(
+      rowIndex,
+      controlsCount + columnIndex,
+      'filterOutButton'
+    );
     await actionButton.click();
   }
 

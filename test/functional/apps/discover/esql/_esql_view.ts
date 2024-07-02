@@ -558,7 +558,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.click('TextBasedLangEditor-expand');
-        await dataGrid.clickCellFilterForButton(0, 3);
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -569,7 +569,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         // negate
-        await dataGrid.clickCellFilterOutButton(0, 3);
+        await dataGrid.clickCellFilterOutButtonExcludingControlColumns(0, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -591,7 +591,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.click('TextBasedLangEditor-expand');
-        await dataGrid.clickCellFilterForButton(0, 3);
+        await dataGrid.clickCellFilterForButtonExcludingControlColumns(0, 1);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
