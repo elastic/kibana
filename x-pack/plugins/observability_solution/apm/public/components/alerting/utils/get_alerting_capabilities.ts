@@ -12,8 +12,10 @@ export const getAlertingCapabilities = (
   plugins: ApmPluginSetupDeps,
   capabilities: Capabilities
 ) => {
-  const canReadAlerts = !!capabilities.apm['alerting:show'];
-  const canSaveAlerts = !!capabilities.apm['alerting:save'];
+  const canReadAlerts =
+    !!capabilities.apm['alerting:show'] || !!capabilities.observability?.['apm:alerting:show'];
+  const canSaveAlerts =
+    !!capabilities.apm['alerting:save'] || !!capabilities.observability?.['apm:alerting:save'];
   const isAlertingPluginEnabled = !!plugins.alerting;
   const isAlertingAvailable = isAlertingPluginEnabled && (canReadAlerts || canSaveAlerts);
 

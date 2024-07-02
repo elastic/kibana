@@ -122,7 +122,9 @@ function BottomSection({
   onClickCreate: () => void;
 }) {
   const { core } = useApmPluginContext();
-  const canSave = !!core.application.capabilities.apm.save;
+  const canSave =
+    !!core.application.capabilities.apm.save ||
+    !!core.application.capabilities.observability?.['apm:save'];
 
   if (status === FETCH_STATUS.LOADING) {
     return <LoadingStatePrompt />;

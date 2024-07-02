@@ -196,7 +196,10 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     plugins.observabilityShared.navigation.registerSections(
       from(core.getStartServices()).pipe(
         map(([coreStart, pluginsStart]) => {
-          if (coreStart.application.capabilities.apm.show) {
+          if (
+            coreStart.application.capabilities.apm.show ||
+            coreStart.application.capabilities.observability?.['apm:show']
+          ) {
             return [
               // APM navigation
               {

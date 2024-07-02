@@ -142,7 +142,10 @@ export const MetricsAlertDropdown = () => {
     services: { observability },
   } = useKibana<InfraClientStartDeps>();
   const canCreateAlerts = useMemo(
-    () => Boolean(uiCapabilities?.infrastructure?.save),
+    () =>
+      Boolean(
+        uiCapabilities?.infrastructure?.save || uiCapabilities?.observability?.['infra:save']
+      ),
     [uiCapabilities]
   );
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);

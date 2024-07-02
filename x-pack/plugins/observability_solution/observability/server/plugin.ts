@@ -6,6 +6,7 @@
  */
 
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
+import { OBSERVABILITY_FEATURE } from '@kbn/observability-privileges';
 import {
   createUICapabilities as createCasesUICapabilities,
   getApiTags as getCasesApiTags,
@@ -226,7 +227,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    if (config.createO11yGenericFeatureId) {
+    if (config.createO11yGenericPrivilege) {
+      plugins.features.registerKibanaFeature(OBSERVABILITY_FEATURE);
+    } else if (config.createO11yGenericFeatureId) {
       plugins.features.registerKibanaFeature({
         id: observabilityFeatureId,
         name: i18n.translate('xpack.observability.nameFeatureTitle', {

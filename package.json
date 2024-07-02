@@ -645,6 +645,7 @@
     "@kbn/observability-logs-explorer-plugin": "link:x-pack/plugins/observability_solution/observability_logs_explorer",
     "@kbn/observability-onboarding-plugin": "link:x-pack/plugins/observability_solution/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/plugins/observability_solution/observability",
+    "@kbn/observability-privileges": "link:packages/kbn-observability-privileges",
     "@kbn/observability-shared-plugin": "link:x-pack/plugins/observability_solution/observability_shared",
     "@kbn/oidc-provider-plugin": "link:x-pack/test/security_api_integration/plugins/oidc_provider",
     "@kbn/open-telemetry-instrumented-plugin": "link:test/common/plugins/otel_metrics",

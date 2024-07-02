@@ -1232,6 +1232,8 @@
       "@kbn/observability-onboarding-plugin/*": ["x-pack/plugins/observability_solution/observability_onboarding/*"],
       "@kbn/observability-plugin": ["x-pack/plugins/observability_solution/observability"],
       "@kbn/observability-plugin/*": ["x-pack/plugins/observability_solution/observability/*"],
+      "@kbn/observability-privileges": ["packages/kbn-observability-privileges"],
+      "@kbn/observability-privileges/*": ["packages/kbn-observability-privileges/*"],
       "@kbn/observability-shared-plugin": ["x-pack/plugins/observability_solution/observability_shared"],
       "@kbn/observability-shared-plugin/*": ["x-pack/plugins/observability_solution/observability_shared/*"],
       "@kbn/oidc-provider-plugin": ["x-pack/test/security_api_integration/plugins/oidc_provider"],

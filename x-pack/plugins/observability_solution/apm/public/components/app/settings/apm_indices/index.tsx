@@ -85,7 +85,8 @@ export function ApmIndices() {
   const { services } = useKibana<ApmPluginStartDeps>();
 
   const { notifications, application } = core;
-  const canSave = application.capabilities.apm.save;
+  const canSave =
+    application.capabilities.apm.save || application.capabilities.observability?.['apm:save'];
 
   const [apmIndices, setApmIndices] = useState<Record<string, string>>({});
   const [isSaving, setIsSaving] = useState(false);
