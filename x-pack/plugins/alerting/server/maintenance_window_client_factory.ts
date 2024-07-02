@@ -10,16 +10,16 @@ import {
   Logger,
   SavedObjectsServiceStart,
   SECURITY_EXTENSION_ID,
+  SecurityServiceStart,
   UiSettingsServiceStart,
 } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { MaintenanceWindowClient } from './maintenance_window_client';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../common';
 
 export interface MaintenanceWindowClientFactoryOpts {
   logger: Logger;
   savedObjectsService: SavedObjectsServiceStart;
-  securityPluginStart?: SecurityPluginStart;
+  securityService: SecurityServiceStart;
   uiSettings: UiSettingsServiceStart;
 }
 
@@ -27,7 +27,7 @@ export class MaintenanceWindowClientFactory {
   private isInitialized = false;
   private logger!: Logger;
   private savedObjectsService!: SavedObjectsServiceStart;
-  private securityPluginStart?: SecurityPluginStart;
+  private securityService!: SecurityServiceStart;
   private uiSettings!: UiSettingsServiceStart;
 
   public initialize(options: MaintenanceWindowClientFactoryOpts) {
@@ -37,12 +37,12 @@ export class MaintenanceWindowClientFactory {
     this.isInitialized = true;
     this.logger = options.logger;
     this.savedObjectsService = options.savedObjectsService;
-    this.securityPluginStart = options.securityPluginStart;
+    this.securityService = options.securityService;
     this.uiSettings = options.uiSettings;
   }
 
   private createMaintenanceWindowClient(request: KibanaRequest, withAuth: boolean) {
-    const { securityPluginStart } = this;
+    const { securityService } = this;
     const savedObjectsClient = this.savedObjectsService.getScopedClient(request, {
       includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
       ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
@@ -55,11 +55,8 @@ export class MaintenanceWindowClientFactory {
       savedObjectsClient,
       uiSettings: uiSettingClient,
       async getUserName() {
-        if (!securityPluginStart || !request) {
-          return null;
-        }
-        const user = securityPluginStart.authc.getCurrentUser(request);
-        return user ? user.username : null;
+        const user = securityService.authc.getCurrentUser(request);
+        return user?.username ?? null;
       },
     });
   }
