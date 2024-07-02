@@ -12,7 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./ftr/landing_page'));
     loadTestFile(require.resolve('./ftr/navigation'));
     loadTestFile(require.resolve('./ftr/cases'));
-    loadTestFile(require.resolve('./advanced_settings'));
+    loadTestFile(require.resolve('./ftr/advanced_settings'));
     loadTestFile(require.resolve('./ml'));
   });
 }

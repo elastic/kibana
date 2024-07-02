@@ -9,8 +9,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
 import styled from 'styled-components';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
@@ -19,26 +17,25 @@ import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
 import type { SloItem, SloEmbeddableDeps } from './types';
-import { EDIT_SLO_ALERTS_ACTION } from '../../../ui_actions/edit_slo_alerts_panel';
 
 interface Props {
   deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
-  embeddable: any;
   onRenderComplete?: () => void;
   reloadSubject: Subject<FetchContext>;
   showAllGroupByInstances?: boolean;
+  onEdit: () => void;
 }
 
 export function SloAlertsWrapper({
-  embeddable,
   slos,
   deps,
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
   showAllGroupByInstances,
+  onEdit,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -102,11 +99,7 @@ export function SloAlertsWrapper({
         <EuiFlexItem grow={false}>
           <EuiLink
             onClick={() => {
-              const trigger = deps.uiActions.getTrigger(CONTEXT_MENU_TRIGGER);
-              deps.uiActions.getAction(EDIT_SLO_ALERTS_ACTION).execute({
-                trigger,
-                embeddable,
-              } as ActionExecutionContext);
+              onEdit();
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
           >

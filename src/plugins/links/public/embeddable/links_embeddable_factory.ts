@@ -14,6 +14,7 @@ import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   ErrorEmbeddable,
+  COMMON_EMBEDDABLE_GROUPING,
 } from '@kbn/embeddable-plugin/public';
 import {
   GetMigrationFunctionObjectFn,
@@ -55,7 +56,8 @@ export class LinksFactoryDefinition
     | ((state: EmbeddableStateWithType, stats: Record<string, any>) => Record<string, any>)
     | undefined;
   migrations?: MigrateFunctionsObject | GetMigrationFunctionObjectFn | undefined;
-  grouping?: UiActionsPresentableGrouping<unknown> | undefined;
+  grouping: UiActionsPresentableGrouping<unknown> = [COMMON_EMBEDDABLE_GROUPING.annotation];
+
   public readonly type = CONTENT_ID;
 
   public readonly isContainerType = false;

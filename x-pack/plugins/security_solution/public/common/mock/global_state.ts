@@ -47,6 +47,7 @@ import { initialGroupingState } from '../store/grouping/reducer';
 import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
+import { initialState as dataViewPickerInitialState } from '../../sourcerer/experimental/redux/reducer';
 
 const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
   mockIndexFields.map((field) => [field.name, field])
@@ -501,11 +502,11 @@ export const mockGlobalState: State = {
    */
   management: mockManagementState as ManagementState,
   discover: getMockDiscoverInTimelineState(),
+  dataViewPicker: dataViewPickerInitialState,
   notes: {
-    ids: ['1'],
     entities: {
       '1': {
-        eventId: 'event-id',
+        eventId: 'document-id-1',
         noteId: '1',
         note: 'note-1',
         timelineId: 'timeline-1',
@@ -516,11 +517,31 @@ export const mockGlobalState: State = {
         version: 'version',
       },
     },
+    ids: ['1'],
     status: {
-      fetchNotesByDocumentId: ReqStatus.Idle,
+      fetchNotesByDocumentIds: ReqStatus.Idle,
+      createNote: ReqStatus.Idle,
+      deleteNotes: ReqStatus.Idle,
+      fetchNotes: ReqStatus.Idle,
     },
     error: {
-      fetchNotesByDocumentId: null,
+      fetchNotesByDocumentIds: null,
+      createNote: null,
+      deleteNotes: null,
+      fetchNotes: null,
     },
+    pagination: {
+      page: 1,
+      perPage: 10,
+      total: 0,
+    },
+    sort: {
+      field: 'created' as const,
+      direction: 'desc' as const,
+    },
+    filter: '',
+    search: '',
+    selectedIds: [],
+    pendingDeleteIds: [],
   },
 };
