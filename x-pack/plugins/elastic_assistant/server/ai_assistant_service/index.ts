@@ -7,11 +7,11 @@
 
 import { DataStreamSpacesAdapter, FieldMap } from '@kbn/data-stream-adapter';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { AuthenticatedUser, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { Subject } from 'rxjs';
+import { attackDiscoveryFieldMap } from '../ai_assistant_data_clients/attack_discovery/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
@@ -28,6 +28,7 @@ import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clien
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
+import { AttackDiscoveryDataClient } from '../ai_assistant_data_clients/attack_discovery';
 import { createGetElserId, createPipeline, pipelineExists } from './helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -52,7 +53,12 @@ export interface CreateAIAssistantClientParams {
 }
 
 export type CreateDataStream = (params: {
-  resource: 'anonymizationFields' | 'conversations' | 'knowledgeBase' | 'prompts';
+  resource:
+    | 'anonymizationFields'
+    | 'conversations'
+    | 'knowledgeBase'
+    | 'prompts'
+    | 'attackDiscovery';
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
@@ -68,6 +74,7 @@ export class AIAssistantService {
   private knowledgeBaseDataStream: DataStreamSpacesAdapter;
   private promptsDataStream: DataStreamSpacesAdapter;
   private anonymizationFieldsDataStream: DataStreamSpacesAdapter;
+  private attackDiscoveryDataStream: DataStreamSpacesAdapter;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private initPromise: Promise<InitializationPromise>;
   private isKBSetupInProgress: boolean = false;
@@ -94,6 +101,11 @@ export class AIAssistantService {
       resource: 'anonymizationFields',
       kibanaVersion: options.kibanaVersion,
       fieldMap: assistantAnonymizationFieldsFieldMap,
+    });
+    this.attackDiscoveryDataStream = this.createDataStream({
+      resource: 'attackDiscovery',
+      kibanaVersion: options.kibanaVersion,
+      fieldMap: attackDiscoveryFieldMap,
     });
 
     this.initPromise = this.initializeResources();
@@ -201,6 +213,12 @@ export class AIAssistantService {
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
+
+      await this.attackDiscoveryDataStream.install({
+        esClient,
+        logger: this.options.logger,
+        pluginStop$: this.options.pluginStop$,
+      });
     } catch (error) {
       this.options.logger.error(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
@@ -218,24 +236,28 @@ export class AIAssistantService {
       knowledgeBase: getResourceName('component-template-knowledge-base'),
       prompts: getResourceName('component-template-prompts'),
       anonymizationFields: getResourceName('component-template-anonymization-fields'),
+      attackDiscovery: getResourceName('component-template-attack-discovery'),
     },
     aliases: {
       conversations: getResourceName('conversations'),
       knowledgeBase: getResourceName('knowledge-base'),
       prompts: getResourceName('prompts'),
       anonymizationFields: getResourceName('anonymization-fields'),
+      attackDiscovery: getResourceName('attack-discovery'),
     },
     indexPatterns: {
       conversations: getResourceName('conversations*'),
       knowledgeBase: getResourceName('knowledge-base*'),
       prompts: getResourceName('prompts*'),
       anonymizationFields: getResourceName('anonymization-fields*'),
+      attackDiscovery: getResourceName('attack-discovery*'),
     },
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
       knowledgeBase: getResourceName('index-template-knowledge-base'),
       prompts: getResourceName('index-template-prompts'),
       anonymizationFields: getResourceName('index-template-anonymization-fields'),
+      attackDiscovery: getResourceName('index-template-attack-discovery'),
     },
     pipelines: {
       knowledgeBase: getResourceName('ingest-pipeline-knowledge-base'),
@@ -334,6 +356,25 @@ export class AIAssistantService {
       kibanaVersion: this.options.kibanaVersion,
       ml: this.options.ml,
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
+      spaceId: opts.spaceId,
+    });
+  }
+
+  public async createAttackDiscoveryDataClient(
+    opts: CreateAIAssistantClientParams
+  ): Promise<AttackDiscoveryDataClient | null> {
+    const res = await this.checkResourcesInstallation(opts);
+
+    if (res === null) {
+      return null;
+    }
+
+    return new AttackDiscoveryDataClient({
+      logger: this.options.logger.get('attackDiscovery'),
+      currentUser: opts.currentUser,
+      elasticsearchClientPromise: this.options.elasticsearchClientPromise,
+      indexPatternsResourceName: this.resourceNames.aliases.attackDiscovery,
+      kibanaVersion: this.options.kibanaVersion,
       spaceId: opts.spaceId,
     });
   }
