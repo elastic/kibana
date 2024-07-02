@@ -76,7 +76,7 @@ describe('step select agent policy', () => {
         agentPolicies={[]}
         updateAgentPolicies={updateAgentPoliciesMock}
         setHasAgentPolicyError={mockSetHasAgentPolicyError}
-        selectedAgentPolicyIds={selectedAgentPolicyIds}
+        initialSelectedAgentPolicyIds={selectedAgentPolicyIds}
       />
     ));
 
