@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { waitGroup } from './kibana_migrator_utils';
 import { next } from './next';
 import type { State } from './state';
@@ -16,7 +16,7 @@ describe('migrations v2 next', () => {
   it('DONE returns null', () => {
     const state = { controlState: 'DONE' } as State;
     const action = next(
-      {} as ElasticsearchClient,
+      {} as ElasticsearchTraditionalClient,
       (() => {}) as any,
       waitGroup(),
       waitGroup(),
@@ -27,7 +27,7 @@ describe('migrations v2 next', () => {
   it('FATAL returns null', () => {
     const state = { controlState: 'FATAL', reason: '' } as State;
     const action = next(
-      {} as ElasticsearchClient,
+      {} as ElasticsearchTraditionalClient,
       (() => {}) as any,
       waitGroup(),
       waitGroup(),

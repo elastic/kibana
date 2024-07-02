@@ -7,7 +7,7 @@
  */
 
 import { defer, map, retry, timer, firstValueFrom, throwError } from 'rxjs';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { isRetryableEsClientError } from './retryable_es_client_errors';
 
 const scriptAllowedTypesKey = 'script.allowed_types';
@@ -17,7 +17,7 @@ export const isInlineScriptingEnabled = async ({
   maxRetries = 20,
   maxRetryDelay = 64,
 }: {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   maxRetries?: number;
   maxRetryDelay?: number;
 }): Promise<boolean> => {

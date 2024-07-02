@@ -21,6 +21,7 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { includedFields } from '../utils';
 import {
   Either,
@@ -132,12 +133,9 @@ export const performBulkGet = async <T>(
     _source: { includes: includedFields(type, fields) },
   }));
   const bulkGetResponse = bulkGetDocs.length
-    ? await client.mget<SavedObjectsRawDocSource>(
-        {
-          body: {
-            docs: bulkGetDocs,
-          },
-        },
+    ? // Applying this workaround because the types mismatch
+      await (client as ElasticsearchTraditionalClient).mget<SavedObjectsRawDocSource>(
+        { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;

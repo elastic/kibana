@@ -23,7 +23,7 @@ import {
   shareReplay,
 } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
@@ -31,7 +31,7 @@ import {
 
 /** @public */
 export interface PollEsNodesVersionOptions {
-  internalClient: ElasticsearchClient;
+  internalClient: ElasticsearchTraditionalClient;
   log: Logger;
   kibanaVersion: string;
   ignoreVersionMismatch: boolean;

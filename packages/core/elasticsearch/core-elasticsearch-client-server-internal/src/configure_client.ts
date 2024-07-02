@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
-import type { Logger } from '@kbn/logging';
+import {
+  Client as TraditionalClient,
+  HttpConnection,
+  ClusterConnectionPool,
+} from '@elastic/elasticsearch';
+import { Client as ServerlessClient } from '@elastic/elasticsearch-serverless';
 import type { ElasticsearchClientConfig } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { AgentFactoryProvider } from './agent_manager';
 import { parseClientOptions } from './client_config';
 import { instrumentEsQueryAndDeprecationLogger } from './log_query_and_deprecation';
 import { createTransport } from './create_transport';
-import type { AgentFactoryProvider } from './agent_manager';
 import { patchElasticsearchClient } from './patch_client';
 
 const noop = () => undefined;
@@ -20,7 +25,37 @@ const noop = () => undefined;
 // Apply ES client patches on module load
 patchElasticsearchClient();
 
-export const configureClient = (
+/**
+ * @private
+ */
+export type ElasticsearchClientFlavor = 'traditional' | 'serverless';
+
+/**
+ * @private
+ */
+export interface ConfigureClientOptions {
+  logger: Logger;
+  type: string;
+  scoped?: boolean;
+  getExecutionContext?: () => string | undefined;
+  agentFactoryProvider: AgentFactoryProvider;
+  kibanaVersion: string;
+  flavor: ElasticsearchClientFlavor;
+}
+
+export function configureClient(
+  config: ElasticsearchClientConfig,
+  options: ConfigureClientOptions & { flavor: 'serverless' }
+): ServerlessClient;
+export function configureClient(
+  config: ElasticsearchClientConfig,
+  options: ConfigureClientOptions & { flavor: 'traditional' }
+): TraditionalClient;
+export function configureClient(
+  config: ElasticsearchClientConfig,
+  options: ConfigureClientOptions
+): ServerlessClient | TraditionalClient;
+export function configureClient(
   config: ElasticsearchClientConfig,
   {
     logger,
@@ -29,18 +64,13 @@ export const configureClient = (
     getExecutionContext = noop,
     agentFactoryProvider,
     kibanaVersion,
-  }: {
-    logger: Logger;
-    type: string;
-    scoped?: boolean;
-    getExecutionContext?: () => string | undefined;
-    agentFactoryProvider: AgentFactoryProvider;
-    kibanaVersion: string;
-  }
-): Client => {
+    flavor,
+  }: ConfigureClientOptions
+): ServerlessClient | TraditionalClient {
   const clientOptions = parseClientOptions(config, scoped, kibanaVersion);
   const KibanaTransport = createTransport({ getExecutionContext });
-  const client = new Client({
+  const ClientConstructor = flavor === 'serverless' ? ServerlessClient : TraditionalClient;
+  const client = new ClientConstructor({
     ...clientOptions,
     agent: agentFactoryProvider.getAgentFactory(clientOptions.agent),
     Transport: KibanaTransport,
@@ -53,4 +83,4 @@ export const configureClient = (
   instrumentEsQueryAndDeprecationLogger({ logger, client, type, apisToRedactInLogs });
 
   return client;
-};
+}

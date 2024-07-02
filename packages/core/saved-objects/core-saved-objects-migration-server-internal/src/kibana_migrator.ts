@@ -16,8 +16,8 @@ import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchTraditionalClient,
 } from '@kbn/core-elasticsearch-server';
 import type {
   SavedObjectUnsanitizedDoc,
@@ -41,7 +41,7 @@ import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { runV2Migration } from './run_v2_migration';
 
 export interface KibanaMigratorOptions {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   typeRegistry: ISavedObjectTypeRegistry;
   defaultIndexTypesMap: IndexTypesMap;
   hashToVersionMap: Record<string, string>;
@@ -59,7 +59,7 @@ export interface KibanaMigratorOptions {
  * Manages the shape of mappings and documents in the Kibana index.
  */
 export class KibanaMigrator implements IKibanaMigrator {
-  private readonly client: ElasticsearchClient;
+  private readonly client: ElasticsearchTraditionalClient;
   private readonly documentMigrator: DocumentMigrator;
   private readonly kibanaIndex: string;
   private readonly log: Logger;

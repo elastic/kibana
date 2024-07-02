@@ -9,8 +9,8 @@
 import { omit } from 'lodash';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/function';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import { diffMappings } from '../core/diff_mappings';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { updateMappings } from './update_mappings';
@@ -18,7 +18,7 @@ import type { IncompatibleMappingException } from './update_mappings';
 
 /** @internal */
 export interface UpdateSourceMappingsPropertiesParams {
-  client: ElasticsearchClient;
+  client: ElasticsearchTraditionalClient;
   sourceIndex: string;
   indexMappings: IndexMapping;
   appMappings: IndexMapping;

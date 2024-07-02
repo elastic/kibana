@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchTraditionalClient } from '@kbn/core-elasticsearch-server';
 import * as Actions from './actions';
 
 type CleanableState = { sourceIndexPitId: string } | {};
 
-export async function cleanup(client: ElasticsearchClient, state?: CleanableState) {
+export async function cleanup(client: ElasticsearchTraditionalClient, state?: CleanableState) {
   if (!state) {
     return;
   }

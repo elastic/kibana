@@ -7,8 +7,8 @@
  */
 
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchTraditionalClient,
 } from '@kbn/core-elasticsearch-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type {
@@ -37,7 +37,7 @@ export interface MigratorContext {
   /** Virtual versions for the registered types */
   readonly typeVirtualVersions: VirtualVersionMap;
   /** The client to use for communications with ES */
-  readonly elasticsearchClient: ElasticsearchClient;
+  readonly elasticsearchClient: ElasticsearchTraditionalClient;
   /** The maximum number of retries to attempt for a failing action */
   readonly maxRetryAttempts: number;
   /** DocLinks for savedObjects. to reference online documentation */

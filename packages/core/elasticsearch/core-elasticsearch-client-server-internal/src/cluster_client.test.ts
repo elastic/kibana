@@ -87,7 +87,7 @@ describe('ClusterClient', () => {
     createInternalErrorHandlerMock.mockReset();
   });
 
-  it('creates a single internal and scoped client during initialization', () => {
+  it('creates a single internal, a forced-traditional internal and a scoped client during initialization', () => {
     const config = createConfig();
     const getExecutionContextMock = jest.fn();
 
@@ -99,23 +99,77 @@ describe('ClusterClient', () => {
       getExecutionContext: getExecutionContextMock,
       agentFactoryProvider,
       kibanaVersion,
+      flavor: 'traditional',
     });
 
-    expect(configureClientMock).toHaveBeenCalledTimes(2);
-    expect(configureClientMock).toHaveBeenCalledWith(config, {
+    expect(configureClientMock).toHaveBeenCalledTimes(3);
+    expect(configureClientMock).toHaveBeenNthCalledWith(1, config, {
       logger,
       agentFactoryProvider,
       kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
+      flavor: 'traditional',
     });
-    expect(configureClientMock).toHaveBeenCalledWith(config, {
+    expect(configureClientMock).toHaveBeenNthCalledWith(2, config, {
+      logger,
+      agentFactoryProvider,
+      kibanaVersion,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+      flavor: 'traditional',
+    });
+    expect(configureClientMock).toHaveBeenNthCalledWith(3, config, {
       logger,
       agentFactoryProvider,
       kibanaVersion,
       type: 'custom-type',
       getExecutionContext: getExecutionContextMock,
       scoped: true,
+      flavor: 'traditional',
+    });
+  });
+
+  it('in serverless, the 2nd call is forced-traditional', () => {
+    const config = createConfig();
+    const getExecutionContextMock = jest.fn();
+
+    new ClusterClient({
+      config,
+      logger,
+      authHeaders,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+      agentFactoryProvider,
+      kibanaVersion,
+      flavor: 'serverless',
+    });
+
+    expect(configureClientMock).toHaveBeenCalledTimes(3);
+    expect(configureClientMock).toHaveBeenNthCalledWith(1, config, {
+      logger,
+      agentFactoryProvider,
+      kibanaVersion,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+      flavor: 'serverless',
+    });
+    expect(configureClientMock).toHaveBeenNthCalledWith(2, config, {
+      logger,
+      agentFactoryProvider,
+      kibanaVersion,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+      flavor: 'traditional', // this one is forced
+    });
+    expect(configureClientMock).toHaveBeenNthCalledWith(3, config, {
+      logger,
+      agentFactoryProvider,
+      kibanaVersion,
+      type: 'custom-type',
+      getExecutionContext: getExecutionContextMock,
+      scoped: true,
+      flavor: 'serverless',
     });
   });
 
@@ -128,6 +182,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
 
       expect(clusterClient.asInternalUser).toBe(internalClient);
@@ -143,6 +198,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -172,6 +228,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -202,6 +259,7 @@ describe('ClusterClient', () => {
         getUnauthorizedErrorHandler,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -228,6 +286,7 @@ describe('ClusterClient', () => {
         getUnauthorizedErrorHandler,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -262,6 +321,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -291,6 +351,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -327,6 +388,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -363,6 +425,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -404,6 +467,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -435,6 +499,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
@@ -474,6 +539,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -511,6 +577,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -550,6 +617,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -583,6 +651,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { [headerKey]: 'foo' },
@@ -619,6 +688,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         headers: { foo: 'request' },
@@ -653,6 +723,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = {
         headers: {
@@ -688,6 +759,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = {
         headers: {
@@ -718,6 +790,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -746,6 +819,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest();
 
@@ -774,6 +848,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -812,6 +887,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         headers: {
@@ -848,6 +924,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({});
 
@@ -881,6 +958,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = httpServerMock.createKibanaRequest({
         kibanaRequestState: { requestId: 'my-fake-id', requestUuid: 'ignore-this-id' },
@@ -915,6 +993,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = {
         headers: {
@@ -950,6 +1029,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
       const request = {
         headers: {
@@ -977,6 +1057,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
 
       await clusterClient.close();
@@ -995,6 +1076,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
 
       let internalClientClosed = false;
@@ -1040,6 +1122,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
 
       internalClient.close.mockRejectedValue(new Error('error closing client'));
@@ -1057,6 +1140,7 @@ describe('ClusterClient', () => {
         authHeaders,
         agentFactoryProvider,
         kibanaVersion,
+        flavor: 'traditional',
       });
 
       await clusterClient.close();

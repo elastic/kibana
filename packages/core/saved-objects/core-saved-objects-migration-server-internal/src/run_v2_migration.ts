@@ -9,8 +9,8 @@
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
-  ElasticsearchClient,
   ElasticsearchCapabilities,
+  ElasticsearchTraditionalClient,
 } from '@kbn/core-elasticsearch-server';
 import type {
   ISavedObjectTypeRegistry,
@@ -57,7 +57,7 @@ export interface RunV2MigrationOpts {
   /** SO serializer to use for migration */
   serializer: ISavedObjectsSerializer;
   /** The client to use for communications with ES */
-  elasticsearchClient: ElasticsearchClient;
+  elasticsearchClient: ElasticsearchTraditionalClient;
   /** The configuration that drives the behavior of each migrator */
   migrationConfig: SavedObjectsMigrationConfigType;
   /** The definitions of the different saved object types */
