@@ -40,6 +40,9 @@ import {
   AgentPolicySummaryLine,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
+import { SideBarColumn } from '../../../components/side_bar_column';
+
+import { useMultipleAgentPolicies } from '../../../../../hooks';
 
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
@@ -369,7 +372,7 @@ export const PackagePoliciesPage = ({ name, version }: PackagePoliciesPanelProps
   return (
     <AgentPolicyRefreshContext.Provider value={{ refresh: refreshPolicies }}>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={1} />
+        <SideBarColumn grow={1} />
         <EuiFlexItem grow={7}>
           <EuiBasicTable
             items={packageAndAgentPolicies || []}

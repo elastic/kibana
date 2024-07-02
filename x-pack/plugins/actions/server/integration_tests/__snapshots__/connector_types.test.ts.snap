@@ -75,11 +75,6 @@ Object {
       "type": "number",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -107,11 +102,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -193,11 +183,6 @@ Object {
       "type": "number",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -266,11 +251,6 @@ Object {
                 },
               ],
               "type": "string",
-            },
-          },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
             },
           },
           "type": "object",
@@ -391,11 +371,6 @@ Object {
         },
       ],
       "type": "number",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -468,11 +443,6 @@ Object {
               "type": "string",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
         },
       ],
@@ -593,11 +563,6 @@ Object {
       "type": "number",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -643,11 +608,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -689,11 +649,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -740,11 +695,6 @@ Object {
         },
       },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -1001,11 +951,6 @@ Object {
           "type": "array",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
     },
     "timeWindow": Object {
@@ -1031,11 +976,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -1050,11 +990,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -1069,11 +1004,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -1118,11 +1048,6 @@ Object {
         },
       },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -1718,11 +1643,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -1928,11 +1848,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "rules": Array [
     Object {
       "args": Object {
@@ -2029,11 +1944,6 @@ Object {
                                 },
                               ],
                               "type": "string",
-                            },
-                          },
-                          "preferences": Object {
-                            "stripUnknown": Object {
-                              "objects": false,
                             },
                           },
                           "type": "object",
@@ -2318,25 +2228,10 @@ Object {
                     "type": "string",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -2344,6 +2239,341 @@ Object {
     },
   ],
   "type": "alternatives",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 1`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "ids": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "array",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 2`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "actionParameters": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+    "alertIds": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "type": "array",
+    },
+    "command": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "matches": Array [
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "contain",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+        Object {
+          "schema": Object {
+            "allow": Array [
+              "lift_containment",
+            ],
+            "flags": Object {
+              "error": [Function],
+              "only": true,
+            },
+            "type": "any",
+          },
+        },
+      ],
+      "type": "alternatives",
+    },
+    "comment": Object {
+      "flags": Object {
+        "default": [Function],
+        "error": [Function],
+        "presence": "optional",
+      },
+      "metas": Array [
+        Object {
+          "x-oas-optional": true,
+        },
+      ],
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "ids": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "array",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 3`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "ids": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "items": Array [
+        Object {
+          "flags": Object {
+            "error": [Function],
+            "presence": "optional",
+          },
+          "rules": Array [
+            Object {
+              "args": Object {
+                "method": [Function],
+              },
+              "name": "custom",
+            },
+          ],
+          "type": "string",
+        },
+      ],
+      "type": "array",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 4`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "url": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 5`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "clientId": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "clientSecret": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+  },
+  "type": "object",
+}
+`;
+
+exports[`Connector type config checks detect connector type changes for: .crowdstrike 6`] = `
+Object {
+  "flags": Object {
+    "default": Object {
+      "special": "deep",
+    },
+    "error": [Function],
+    "presence": "optional",
+  },
+  "keys": Object {
+    "subAction": Object {
+      "flags": Object {
+        "error": [Function],
+      },
+      "rules": Array [
+        Object {
+          "args": Object {
+            "method": [Function],
+          },
+          "name": "custom",
+        },
+      ],
+      "type": "string",
+    },
+    "subActionParams": Object {
+      "flags": Object {
+        "default": Object {
+          "special": "deep",
+        },
+        "error": [Function],
+        "presence": "optional",
+        "unknown": true,
+      },
+      "keys": Object {},
+      "preferences": Object {
+        "stripUnknown": Object {
+          "objects": false,
+        },
+      },
+      "type": "object",
+    },
+  },
+  "type": "object",
 }
 `;
 
@@ -2419,11 +2649,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -2504,11 +2729,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -2538,11 +2758,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -2570,11 +2785,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -2621,11 +2831,6 @@ Object {
         },
       },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -2907,11 +3112,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -3041,11 +3241,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -3152,11 +3347,6 @@ Object {
           "type": "string",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
     },
     "message": Object {
@@ -3249,11 +3439,6 @@ Object {
         },
       ],
       "type": "array",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -3378,11 +3563,6 @@ Object {
       "type": "number",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -3410,11 +3590,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -3539,11 +3714,6 @@ Object {
       "type": "number",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -3661,11 +3831,6 @@ Object {
         },
       ],
       "type": "number",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -3787,11 +3952,6 @@ Object {
       "type": "number",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -3865,11 +4025,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -3897,11 +4052,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -3948,11 +4098,6 @@ Object {
         },
       },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -4030,11 +4175,6 @@ Object {
       "type": "boolean",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -4047,11 +4187,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -4163,11 +4298,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -4209,11 +4339,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -4259,11 +4384,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -4303,17 +4423,7 @@ Object {
               "presence": "optional",
             },
             "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -4363,17 +4473,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -4408,17 +4508,7 @@ Object {
               "presence": "optional",
             },
             "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -4502,11 +4592,6 @@ Object {
                                 },
                               ],
                               "type": "string",
-                            },
-                          },
-                          "preferences": Object {
-                            "stripUnknown": Object {
-                              "objects": false,
                             },
                           },
                           "type": "object",
@@ -4876,25 +4961,10 @@ Object {
                     "type": "string",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -4929,17 +4999,7 @@ Object {
               "presence": "optional",
             },
             "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -4989,17 +5049,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -5049,17 +5099,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -5109,17 +5149,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -5140,11 +5170,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -5159,11 +5184,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -5290,11 +5310,6 @@ Object {
             },
           ],
           "type": "array",
-        },
-      },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
         },
       },
       "type": "object",
@@ -5439,17 +5454,7 @@ Object {
           "type": "array",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -5886,11 +5891,6 @@ Object {
                     "type": "alternatives",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -5975,11 +5975,6 @@ Object {
                     "type": "alternatives",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -6016,11 +6011,6 @@ Object {
                       },
                     ],
                     "type": "string",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
                   },
                 },
                 "type": "object",
@@ -6202,11 +6192,6 @@ Object {
                     "type": "any",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -6245,11 +6230,6 @@ Object {
                     "type": "any",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -6286,11 +6266,6 @@ Object {
                       "only": true,
                     },
                     "type": "any",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
                   },
                 },
                 "type": "object",
@@ -6331,11 +6306,6 @@ Object {
                     "type": "string",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -6357,11 +6327,6 @@ Object {
         },
       ],
       "type": "array",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -6483,11 +6448,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -6517,11 +6477,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -6549,11 +6504,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -6600,11 +6550,6 @@ Object {
         },
       },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -6660,11 +6605,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -6692,11 +6632,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -6950,11 +6885,6 @@ Object {
               "type": "string",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
         },
       ],
@@ -7101,11 +7031,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "rules": Array [
     Object {
       "args": Object {
@@ -7177,11 +7102,6 @@ Object {
                       },
                     ],
                     "type": "string",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
                   },
                 },
                 "type": "object",
@@ -7374,17 +7294,7 @@ Object {
           "type": "alternatives",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -7401,11 +7311,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -7420,11 +7325,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -7439,11 +7339,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -7487,11 +7382,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -7533,11 +7423,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -7584,11 +7469,6 @@ Object {
         },
       },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -7680,11 +7560,6 @@ Object {
         },
       ],
       "type": "alternatives",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -7786,11 +7661,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -7854,11 +7724,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -8535,11 +8400,6 @@ Object {
       "x-oas-optional": true,
     },
   ],
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -14282,11 +14142,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -19992,11 +19847,6 @@ Object {
         },
       ],
       "type": "alternatives",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -25706,11 +25556,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -25823,11 +25668,6 @@ Object {
             },
           ],
           "type": "string",
-        },
-      },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
         },
       },
       "type": "object",
@@ -26043,11 +25883,6 @@ Object {
               "x-oas-optional": true,
             },
           ],
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
         },
         "requiresApproval": Object {
@@ -26175,17 +26010,7 @@ Object {
           "type": "string",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -26217,11 +26042,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -26249,11 +26069,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -26302,11 +26117,6 @@ Object {
       "type": "object",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -26319,11 +26129,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -26336,11 +26141,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -26450,11 +26250,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -26614,11 +26409,6 @@ Object {
         "presence": "optional",
       },
       "type": "boolean",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -26826,11 +26616,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -26870,17 +26655,7 @@ Object {
               "presence": "optional",
             },
             "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -26930,17 +26705,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -26975,17 +26740,7 @@ Object {
               "presence": "optional",
             },
             "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -27069,11 +26824,6 @@ Object {
                                 },
                               ],
                               "type": "string",
-                            },
-                          },
-                          "preferences": Object {
-                            "stripUnknown": Object {
-                              "objects": false,
                             },
                           },
                           "type": "object",
@@ -27544,25 +27294,10 @@ Object {
                     "type": "alternatives",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -27621,17 +27356,7 @@ Object {
                 "type": "array",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -27754,25 +27479,10 @@ Object {
                     "type": "alternatives",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -27928,11 +27638,6 @@ Object {
         },
       ],
       "type": "alternatives",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -28138,11 +27843,6 @@ Object {
         },
       ],
       "type": "alternatives",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -28605,17 +28305,7 @@ Object {
                 "type": "alternatives",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -28674,17 +28364,7 @@ Object {
                 "type": "array",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -28848,11 +28528,6 @@ Object {
         "presence": "optional",
       },
       "type": "boolean",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -29060,11 +28735,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -29104,17 +28774,7 @@ Object {
               "presence": "optional",
             },
             "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -29164,17 +28824,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -29209,17 +28859,7 @@ Object {
               "presence": "optional",
             },
             "keys": Object {},
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -29303,11 +28943,6 @@ Object {
                                 },
                               ],
                               "type": "string",
-                            },
-                          },
-                          "preferences": Object {
-                            "stripUnknown": Object {
-                              "objects": false,
                             },
                           },
                           "type": "object",
@@ -30098,25 +29733,10 @@ Object {
                     "type": "alternatives",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -30175,17 +29795,7 @@ Object {
                 "type": "array",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -30204,11 +29814,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -30236,11 +29841,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -30281,11 +29881,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -30369,11 +29964,6 @@ Object {
               "type": "string",
             },
           },
-          "preferences": Object {
-            "stripUnknown": Object {
-              "objects": false,
-            },
-          },
           "type": "object",
         },
       ],
@@ -30391,11 +29981,6 @@ Object {
         },
       ],
       "type": "array",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -30436,11 +30021,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -30504,17 +30084,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -30651,17 +30221,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -30793,17 +30353,7 @@ Object {
                 "type": "string",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -30979,11 +30529,6 @@ Object {
                     "type": "string",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -31074,11 +30619,6 @@ Object {
                       },
                     ],
                     "type": "string",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
                   },
                 },
                 "type": "object",
@@ -31173,11 +30713,6 @@ Object {
                     "type": "string",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -31268,11 +30803,6 @@ Object {
                       },
                     ],
                     "type": "string",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
                   },
                 },
                 "type": "object",
@@ -31367,11 +30897,6 @@ Object {
                     "type": "string",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -31462,11 +30987,6 @@ Object {
                       },
                     ],
                     "type": "string",
-                  },
-                },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
                   },
                 },
                 "type": "object",
@@ -31561,11 +31081,6 @@ Object {
                     "type": "string",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
@@ -31585,17 +31100,7 @@ Object {
           "type": "alternatives",
         },
       },
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -31625,11 +31130,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -31720,11 +31220,6 @@ Object {
                                 },
                               ],
                               "type": "string",
-                            },
-                          },
-                          "preferences": Object {
-                            "stripUnknown": Object {
-                              "objects": false,
                             },
                           },
                           "type": "object",
@@ -32024,25 +31519,10 @@ Object {
                     "type": "alternatives",
                   },
                 },
-                "preferences": Object {
-                  "stripUnknown": Object {
-                    "objects": false,
-                  },
-                },
                 "type": "object",
               },
             },
-            "preferences": Object {
-              "stripUnknown": Object {
-                "objects": false,
-              },
-            },
             "type": "object",
-          },
-        },
-        "preferences": Object {
-          "stripUnknown": Object {
-            "objects": false,
           },
         },
         "type": "object",
@@ -32061,11 +31541,6 @@ Object {
     "presence": "optional",
   },
   "keys": Object {},
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -32093,11 +31568,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32140,11 +31610,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -32164,11 +31629,6 @@ Object {
         "error": [Function],
       },
       "type": "number",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32266,11 +31726,6 @@ Object {
           "x-oas-optional": true,
         },
       ],
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
     },
     "webhookUrl": Object {
@@ -32293,11 +31748,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32395,11 +31845,6 @@ Object {
           "x-oas-optional": true,
         },
       ],
-      "preferences": Object {
-        "stripUnknown": Object {
-          "objects": false,
-        },
-      },
       "type": "object",
     },
     "webhookUrl": Object {
@@ -32422,11 +31867,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32456,11 +31896,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32504,11 +31939,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32557,11 +31987,6 @@ Object {
       "type": "object",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -32589,11 +32014,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32625,11 +32045,6 @@ Object {
       "type": "string",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -32657,11 +32072,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -32967,11 +32377,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "type": "object",
 }
 `;
@@ -33177,11 +32582,6 @@ Object {
       "type": "alternatives",
     },
   },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
-    },
-  },
   "rules": Array [
     Object {
       "args": Object {
@@ -33224,11 +32624,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -33290,11 +32685,6 @@ Object {
         "presence": "optional",
       },
       "type": "boolean",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -33424,11 +32814,6 @@ Object {
         },
       ],
       "type": "alternatives",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
@@ -33584,11 +32969,6 @@ Object {
         },
       ],
       "type": "string",
-    },
-  },
-  "preferences": Object {
-    "stripUnknown": Object {
-      "objects": false,
     },
   },
   "type": "object",
