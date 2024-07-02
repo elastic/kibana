@@ -8,22 +8,31 @@
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
+
 import { Duration } from '../../typings';
+import { toMinutes } from '../../utils/slo/duration';
 
 interface Props {
+  longWindowDuration: Duration;
   initialDuration?: Duration;
   errors?: string[];
   onChange: (duration: Duration) => void;
 }
 
-export function LongWindowDuration({ initialDuration, onChange, errors }: Props) {
+export function ShortWindowDuration({
+  longWindowDuration,
+  initialDuration,
+  onChange,
+  errors,
+}: Props) {
   const [durationValue, setDurationValue] = useState<number>(initialDuration?.value ?? 1);
   const hasError = errors !== undefined && errors.length > 0;
+  const maxShortWindowDuration = toMinutes(longWindowDuration);
 
   const onDurationValueChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     setDurationValue(value);
-    onChange({ value, unit: 'h' });
+    onChange({ value, unit: 'm' });
   };
 
   return (
@@ -31,12 +40,12 @@ export function LongWindowDuration({ initialDuration, onChange, errors }: Props)
       <EuiFieldNumber
         isInvalid={hasError}
         min={1}
-        max={72}
+        max={maxShortWindowDuration}
         step={1}
         value={String(durationValue)}
         onChange={onDurationValueChange}
-        aria-label={i18n.translate('xpack.slo.rules.longWindow.valueLabel', {
-          defaultMessage: 'Long lookback period in hours',
+        aria-label={i18n.translate('xpack.slo.rules.shortWindow.valueLabel', {
+          defaultMessage: 'short lookback period in minutes',
         })}
         data-test-subj="durationValueInput"
       />
@@ -46,13 +55,14 @@ export function LongWindowDuration({ initialDuration, onChange, errors }: Props)
 
 const getRowLabel = () => (
   <>
-    {i18n.translate('xpack.slo.rules.longWindow.rowLabel', {
-      defaultMessage: 'Long lookback (hours)',
+    {i18n.translate('xpack.slo.rules.shortWindow.rowLabel', {
+      defaultMessage: 'Short lookback (min)',
     })}{' '}
     <EuiIconTip
       position="top"
-      content={i18n.translate('xpack.slo.rules.longWindowDuration.tooltip', {
-        defaultMessage: 'Long lookback period over which the burn rate is computed.',
+      content={i18n.translate('xpack.slo.rules.shortWindowDuration.tooltip', {
+        defaultMessage:
+          'Short lookback period over which the burn rate is computed. Used for faster recovery, a good default value is 1/12th of the long lookback period.',
       })}
     />
   </>
