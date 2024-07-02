@@ -9,7 +9,7 @@
     "cypress:changed-specs-only": "yarn cypress:run --changed-specs-only --env burn=2",
     "cypress": "NODE_OPTIONS=--openssl-legacy-provider node ../security_solution/scripts/start_cypress_parallel --config-file ../osquery/cypress/cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/cli_config",
     "cypress:open": "yarn cypress open",
-    "cypress:run": "yarn cypress run --spec ./cypress/e2e/all/saved_queries.cy.ts",
+    "cypress:run": "yarn cypress run",
     "cypress:serverless": "NODE_OPTIONS=--openssl-legacy-provider node ../security_solution/scripts/start_cypress_parallel --config-file ../osquery/cypress/serverless_cypress.config.ts --ftr-config-file ../../../x-pack/test/osquery_cypress/serverless_cli_config",
     "cypress:serverless:open": "yarn cypress:serverless open",
     "cypress:serverless:run": "yarn cypress:serverless run",
