@@ -47,9 +47,11 @@ describe('getHealthIndicators', () => {
     });
 
     const result = await getHealthIndicators(esClient);
-    expect(result[0]).toEqual(expect.objectContaining({
-      details: 'No disk usage data.'
-    }));
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        details: 'No disk usage data.',
+      })
+    );
   });
 
   it('returns unhealthy shards_capacity indicator', async () => {
