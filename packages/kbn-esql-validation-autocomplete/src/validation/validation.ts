@@ -220,7 +220,7 @@ function validateNestedFunctionArg(
           values: {
             name: astFunction.name,
             argType: parameterDefinition.type,
-            value: printFunctionSignature(actualArg) || actualArg.name,
+            value: printFunctionSignature(actualArg, false) || actualArg.name,
             givenType: argFn.signatures[0].returnType,
           },
           locations: actualArg.location,

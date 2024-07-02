@@ -163,6 +163,9 @@ export const useInvestigateInTimeline = ({
           columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
           indexNames: timeline.indexNames ?? [],
           show: true,
+          excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+            ? timeline.excludedRowRendererIds
+            : [],
         },
         to: toTimeline,
         ruleNote,

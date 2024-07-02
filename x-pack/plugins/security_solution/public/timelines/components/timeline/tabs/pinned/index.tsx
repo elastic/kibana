@@ -52,6 +52,8 @@ import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
+import { NotesFlyout } from '../../properties/notes_flyout';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
@@ -182,6 +184,21 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesEnabled'
   );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+  });
+
   const onToggleShowNotes = useCallback(
     (eventId?: string) => {
       const indexName = selectedPatterns.join(',');
@@ -207,6 +224,11 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
             },
           },
         });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
       }
     },
     [
@@ -215,6 +237,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       securitySolutionNotesEnabled,
       selectedPatterns,
       timelineId,
+      setNotesEventId,
+      showNotesFlyout,
     ]
   );
 
@@ -224,6 +248,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     timelineId,
     activeTab: TimelineTabs.pinned,
     refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
     onToggleShowNotes,
   });
 
@@ -236,38 +263,54 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, id: timelineId });
   }, [timelineId, onEventClosed]);
 
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
+
   if (unifiedComponentsInTimelineEnabled) {
     return (
-      <UnifiedTimelineBody
-        header={<></>}
-        columns={augmentedColumnHeaders}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        dataLoadingState={queryLoadingState}
-        pinnedEventIds={pinnedEventIds}
-        totalCount={events.length}
-        onEventClosed={onEventClosed}
-        expandedDetail={expandedDetail}
-        eventIdToNoteIds={eventIdToNoteIds}
-        showExpandedDetails={showExpandedDetails}
-        onChangePage={loadPage}
-        activeTab={TimelineTabs.pinned}
-        updatedAt={refreshedAt}
-        isTextBasedQuery={false}
-        pageInfo={pageInfo}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        trailingControlColumns={rowDetailColumn}
-      />
+      <>
+        {NotesFlyoutMemo}
+        <UnifiedTimelineBody
+          header={<></>}
+          columns={augmentedColumnHeaders}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          itemsPerPage={itemsPerPage}
+          itemsPerPageOptions={itemsPerPageOptions}
+          sort={sort}
+          events={events}
+          refetch={refetch}
+          dataLoadingState={queryLoadingState}
+          totalCount={events.length}
+          onEventClosed={onEventClosed}
+          expandedDetail={expandedDetail}
+          showExpandedDetails={showExpandedDetails}
+          onChangePage={loadPage}
+          activeTab={TimelineTabs.pinned}
+          updatedAt={refreshedAt}
+          isTextBasedQuery={false}
+          pageInfo={pageInfo}
+          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+          trailingControlColumns={rowDetailColumn}
+        />
+      </>
     );
   }
 
   return (
     <>
+      {NotesFlyoutMemo}
       <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
         <ScrollableFlexItem grow={2}>
           {timelineFullScreen && setTimelineFullScreen != null && (
