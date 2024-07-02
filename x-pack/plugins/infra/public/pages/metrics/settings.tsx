@@ -11,11 +11,12 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourceConfigurationSettings } from './settings/source_configuration_settings';
 
 export const MetricsSettingsPage = () => {
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const { application, http } = useKibana().services;
   return (
     <EuiErrorBoundary>
       <SourceConfigurationSettings
-        shouldAllowEdit={uiCapabilities?.infrastructure?.configureSource as boolean}
+        shouldAllowEdit={application?.capabilities?.infrastructure?.configureSource as boolean}
+        http={http}
       />
     </EuiErrorBoundary>
   );
