@@ -10189,15 +10189,16 @@ describe('validation logic', () => {
           );
         });
 
-        // See for details: https://github.com/elastic/kibana/pull/187290#discussion_r1661414755
-        describe.skip('order must be "asc" or "desc"', () => {
+        describe('order must be "asc" or "desc"', () => {
           testErrorsAndWarnings(
             'from a_index | stats var = top_list(stringField, 1, stringField)',
-            ['The order argument must be a string literal with value "asc" or "desc".']
+            ['Argument of [=] must be a constant, received [top_list(stringField,1,stringField)]']
           );
-          testErrorsAndWarnings('from a_index | stats var = top_list(stringField, 1, "asdf")', [
-            'The order argument must be a string literal with value "asc" or "desc".',
-          ]);
+          testErrorsAndWarnings(
+            'from a_index | stats var = top_list(stringField, 1, "asdf")',
+            [],
+            ['Invalid option ["asdf"] for top_list. Supported options: ["asc", "desc"].']
+          );
         });
 
         testErrorsAndWarnings('from a_index | sort top_list(stringField, numberField, "asc")', [
@@ -10258,6 +10259,87 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval top_list(stringField, 5, "asc") > 0', [
           'EVAL does not support function top_list',
         ]);
+      });
+
+      describe('st_distance', () => {
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_cartesianpoint("POINT (30 10)"), to_cartesianpoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")), to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row st_distance(to_geopoint("POINT (30 10)"), to_geopoint("POINT (30 10)"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'row var = st_distance(to_geopoint(to_geopoint("POINT (30 10)")), to_geopoint(to_geopoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = st_distance(true, true)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(booleanField, booleanField)', [
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+          'Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(geoPointField, geoPointField)',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval st_distance(geoPointField, geoPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval st_distance(cartesianPointField, cartesianPointField, extraArg)',
+          ['Error: [st_distance] function expects exactly 2 arguments, got 3.']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort st_distance(cartesianPointField, cartesianPointField)',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval st_distance(null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | eval st_distance(nullVar, nullVar)', []);
       });
     });
   });
