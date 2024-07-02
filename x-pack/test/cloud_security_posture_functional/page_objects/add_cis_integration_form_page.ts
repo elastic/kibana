@@ -257,7 +257,7 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const getReplaceSecretButton = async (secretField: string) => {
-    return await testSubjects.find(`button-replace${secretField}`);
+    return await testSubjects.find(`button-replace-${secretField}`);
   };
 
   return {

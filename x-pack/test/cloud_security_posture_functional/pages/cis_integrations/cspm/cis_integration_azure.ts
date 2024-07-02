@@ -111,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
             CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
           )) === tenantId
         ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('client secret')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
       });
     });
 
@@ -223,7 +223,7 @@ export default function (providerContext: FtrProviderContext) {
             CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID
           )) === tenantId
         ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('client secret')).to.not.be(null);
+        expect(await cisIntegration.getReplaceSecretButton('client-secret')).to.not.be(null);
       });
     });
 
