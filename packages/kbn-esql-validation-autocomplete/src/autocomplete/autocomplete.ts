@@ -173,7 +173,6 @@ export async function suggest(
   // check if all brackets are closed, otherwise close them
   const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
   const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
-  const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
   const charThatNeedMarkers = [',', ':'];
@@ -188,18 +187,10 @@ export async function suggest(
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
+
   // if there are unclosed brackets, close them
-  if (unclosedBrackets) {
-    for (const [char, count] of [
-      [')', unclosedRoundBrackets],
-      [']', unclosedSquaredBrackets],
-    ]) {
-      if (count) {
-        // inject the closing brackets
-        finalText += Array(count).fill(char).join('');
-      }
-    }
-  }
+  if (unclosedRoundBrackets) finalText += ')'.repeat(unclosedRoundBrackets);
+  if (unclosedSquaredBrackets) finalText += ']'.repeat(unclosedSquaredBrackets);
 
   const { ast } = await astProvider(finalText);
 
