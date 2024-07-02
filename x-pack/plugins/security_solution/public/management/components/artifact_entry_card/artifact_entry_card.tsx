@@ -48,9 +48,8 @@ export interface ArtifactEntryCardProps extends CommonArtifactEntryCardProps {
   hideComments?: boolean;
 }
 
-export interface ArtifactEntryCardDecoratorProps {
+export interface ArtifactEntryCardDecoratorProps extends CommonProps {
   item: MaybeImmutable<AnyArtifact>;
-  testIdPrefix?: string;
 }
 
 /**
@@ -111,7 +110,7 @@ export const ArtifactEntryCard = memo<ArtifactEntryCardProps>(
         <EuiHorizontalRule margin="none" />
 
         <CardSectionPanel className="bottom-section">
-          {Decorator && <Decorator item={item} testIdPrefix={getTestId('decorator')} />}
+          {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
           <CriteriaConditions
             os={artifact.os as CriteriaConditionsProps['os']}

@@ -6,19 +6,24 @@
  */
 
 import React, { memo } from 'react';
+import type { CommonProps } from '@elastic/eui';
 import { EuiToolTip, EuiText, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT } from '../../../../../../common/endpoint/service/artifacts/constants';
 
-interface ProcessDescendantsTooltipProps {
-  testIdPrefix?: string;
+interface ProcessDescendantsTooltipProps extends CommonProps {
   indicateExtraEntry?: boolean;
 }
 
 export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
-  ({ testIdPrefix, indicateExtraEntry = false }: ProcessDescendantsTooltipProps) => {
+  ({
+    indicateExtraEntry = false,
+    'data-test-subj': dataTestSubj,
+    ...commonProps
+  }: ProcessDescendantsTooltipProps) => {
     return (
       <EuiToolTip
+        {...commonProps}
         content={
           <EuiText size="s">
             <p>
@@ -48,11 +53,11 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
             </p>
           </EuiText>
         }
-        data-test-subj={testIdPrefix !== undefined ? `${testIdPrefix}-tooltipText` : undefined}
+        data-test-subj={dataTestSubj !== undefined ? `${dataTestSubj}-tooltipText` : undefined}
       >
         <EuiIcon
           type="iInCircle"
-          data-test-subj={testIdPrefix !== undefined ? `${testIdPrefix}-tooltipIcon` : undefined}
+          data-test-subj={dataTestSubj !== undefined ? `${dataTestSubj}-tooltipIcon` : undefined}
         />
       </EuiToolTip>
     );

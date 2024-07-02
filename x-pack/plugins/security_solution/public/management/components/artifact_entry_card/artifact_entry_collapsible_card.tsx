@@ -52,7 +52,7 @@ export const ArtifactEntryCollapsibleCard = memo<ArtifactEntryCollapsibleCardPro
             <EuiHorizontalRule margin="xs" />
 
             <CardSectionPanel>
-              {Decorator && <Decorator item={item} testIdPrefix={getTestId('decorator')} />}
+              {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
               <CriteriaConditions
                 os={artifact.os as CriteriaConditionsProps['os']}

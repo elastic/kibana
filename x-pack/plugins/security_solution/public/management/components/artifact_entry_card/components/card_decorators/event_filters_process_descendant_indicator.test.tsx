@@ -36,7 +36,7 @@ describe('EventFiltersProcessDescendantIndicator', () => {
     appTestContext = createAppRootMockRenderer();
     render = (props) => {
       renderResult = appTestContext.render(
-        <EventFiltersProcessDescendantIndicator testIdPrefix="test" {...props} />
+        <EventFiltersProcessDescendantIndicator data-test-subj="test" {...props} />
       );
       return renderResult;
     };

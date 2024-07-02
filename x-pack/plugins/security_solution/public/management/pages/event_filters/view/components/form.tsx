@@ -482,7 +482,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                 />
               </EuiText>
               <ProcessDescendantsTooltip
-                testIdPrefix={getTestId('filterProcessDescendantsTooltip')}
+                data-test-subj={getTestId('filterProcessDescendantsTooltip')}
               />
             </EuiFlexGroup>
           ),

@@ -129,7 +129,7 @@ export const ArtifactEntryCardMinified = memo(
               {getAccordionTitle()}
             </EuiButtonEmpty>
             <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
-              {Decorator && <Decorator item={item} testIdPrefix={getTestId('decorator')} />}
+              {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
               <CriteriaConditions
                 os={artifact.os as CriteriaConditionsProps['os']}

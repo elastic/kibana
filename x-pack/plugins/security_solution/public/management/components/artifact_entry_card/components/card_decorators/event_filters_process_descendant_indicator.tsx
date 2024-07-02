@@ -14,7 +14,7 @@ import { ProcessDescendantsTooltip } from '../../../../pages/event_filters/view/
 import type { ArtifactEntryCardDecoratorProps } from '../../artifact_entry_card';
 
 export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDecoratorProps>(
-  ({ item, testIdPrefix }) => {
+  ({ item, 'data-test-subj': dataTestSubj, ...commonProps }) => {
     const isProcessDescendantFeatureEnabled = useIsExperimentalFeatureEnabled(
       'filterProcessDescendantsForEventFiltersEnabled'
     );
@@ -26,8 +26,9 @@ export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDeco
       return (
         <>
           <EuiText
+            {...commonProps}
             data-test-subj={
-              testIdPrefix !== undefined ? `${testIdPrefix}-processDescendantIndication` : undefined
+              dataTestSubj !== undefined ? `${dataTestSubj}-processDescendantIndication` : undefined
             }
           >
             <code>
@@ -38,9 +39,9 @@ export const EventFiltersProcessDescendantIndicator = memo<ArtifactEntryCardDeco
                 />{' '}
                 <ProcessDescendantsTooltip
                   indicateExtraEntry
-                  testIdPrefix={
-                    testIdPrefix !== undefined
-                      ? `${testIdPrefix}-processDescendantIndication`
+                  data-test-subj={
+                    dataTestSubj !== undefined
+                      ? `${dataTestSubj}-processDescendantIndication`
                       : undefined
                   }
                 />
