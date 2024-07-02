@@ -6,23 +6,38 @@
  * Side Public License, v 1.
  */
 
-import { Airdrop, TRANSFER_DATA_TYPE } from '@kbn/airdrops';
-import { BehaviorSubject, filter, mergeMap, of, Subject } from 'rxjs';
+import { Airdrop, AirdropContent, TRANSFER_DATA_TYPE } from '@kbn/airdrops';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import {
+  BehaviorSubject,
+  filter,
+  firstValueFrom,
+  mergeMap,
+  of,
+  Subject,
+  Observable,
+  map,
+} from 'rxjs';
 
 export class AirdropService {
   static dropElement: HTMLElement | null = null;
 
+  private application: ApplicationStart | null = null;
   private documentEventListenersAdded = false;
   private _isDraggingOver$ = new BehaviorSubject<boolean>(false);
   private _isDragging$ = new BehaviorSubject<boolean>(false);
   private timeRef = 0;
   private airdrop$ = new Subject<Airdrop>();
+  private airdropContents$ = new BehaviorSubject<Map<string, Map<string, Set<AirdropContent>>>>(
+    new Map()
+  );
 
   constructor() {}
 
   setup() {}
 
-  start() {
+  start({ application }: { application: ApplicationStart }) {
+    this.application = application;
     this.addEventListeners();
 
     this._isDraggingOver$.subscribe((isDraggingOver) => {
@@ -42,15 +57,71 @@ export class AirdropService {
       setIsDragging: (isDragging: boolean) => {
         this._isDragging$.next(isDragging);
       },
-      getAirdrop$For: this.getAirdrop$For.bind(this),
+      getAirdrop$ForId: this.getAirdrop$ForId.bind(this),
+      getContents$ForGroup: this.getContents$ForGroup.bind(this),
+      registerAirdropContent: this.registerAirdropContent.bind(this),
     };
   }
 
-  public getAirdrop$For<T>(id: string, app?: string) {
+  public registerAirdropContent(content: AirdropContent): () => void {
+    this.getAirdropApp(content).then((application) => {
+      const contentsByApp = this.airdropContents$.getValue();
+      if (!contentsByApp.has(application)) {
+        contentsByApp.set(application, new Map());
+      }
+
+      const group = this.getGroupFromId(content.id);
+      const contentsByGroup = contentsByApp.get(application)!;
+      if (!contentsByGroup.has(group)) {
+        contentsByGroup.set(group, new Set());
+      }
+
+      contentsByGroup.get(group)!.add(content);
+      this.airdropContents$.next(contentsByApp);
+    });
+
+    const unregister = () => {
+      this.getAirdropApp(content).then((application) => {
+        const contentsByApp = this.airdropContents$.getValue();
+        const contentsByGroup = contentsByApp.get(application);
+        if (!contentsByGroup) return;
+
+        const group = this.getGroupFromId(content.id);
+        const contents = contentsByGroup.get(group);
+        if (!contents) return;
+
+        contents.delete(content);
+        this.airdropContents$.next(contentsByApp);
+      });
+    };
+
+    return unregister;
+  }
+
+  public getAirdrop$ForId<T>(id: string, app?: string) {
     return this.airdrop$.asObservable().pipe(
       filter((airdrop): airdrop is Airdrop<T> => {
         if (app && airdrop.app !== app) return false;
         return airdrop.id === id;
+      })
+    );
+  }
+
+  public getContents$ForGroup(group: string, app?: string): Observable<AirdropContent[]> {
+    if (!this.application) {
+      throw new Error('ApplicationStart not set');
+    }
+
+    return this.application.currentAppId$.pipe(
+      mergeMap((currentAppId = 'global') => {
+        return this.airdropContents$.asObservable().pipe(
+          map((contentsByApp) => {
+            const application = app ?? currentAppId;
+            const airdropsForGroup = contentsByApp.get(application)?.get(group);
+            if (!airdropsForGroup) return [];
+            return [...airdropsForGroup];
+          })
+        );
       })
     );
   }
@@ -100,12 +171,47 @@ export class AirdropService {
         if (this._isDragging$.getValue()) return;
         const data = e.dataTransfer.getData(TRANSFER_DATA_TYPE);
         const airdrop = JSON.parse(data);
-        this.airdrop$.next(airdrop);
-        console.log(airdrop);
+        this.onAirdrop(airdrop);
       }
     });
 
     this.documentEventListenersAdded = true;
+  }
+
+  private onAirdrop(airdrop: Airdrop) {
+    if (
+      airdrop.id === '__group__' &&
+      typeof airdrop.content === 'object' &&
+      airdrop.content !== null
+    ) {
+      // Emit all airdrops from the group
+      Object.entries(airdrop.content).forEach(([id, content]) => {
+        this.onAirdrop({ id, content, app: airdrop.app });
+      });
+      return;
+    }
+
+    this.airdrop$.next(airdrop);
+    console.log(airdrop);
+  }
+
+  private async getAirdropApp({ app }: { app?: string }) {
+    return app ?? (await this.getCurrentAppId());
+  }
+
+  private async getCurrentAppId(): Promise<string> {
+    const defaultValue = 'global';
+    if (!this.application) return defaultValue;
+
+    return await firstValueFrom(this.application.currentAppId$).then(
+      (appId) => appId ?? defaultValue
+    );
+  }
+
+  private getGroupFromId(id: string) {
+    const [group, _id] = id.split('.');
+    if (!_id) return 'default';
+    return group;
   }
 
   static async createDropElement() {

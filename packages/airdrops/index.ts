@@ -16,4 +16,4 @@ export {
   useOnDrop,
 } from './src';
 
-export type { Airdrop } from './src';
+export type { Airdrop, AirdropContent } from './src';

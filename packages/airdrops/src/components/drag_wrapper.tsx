@@ -10,14 +10,10 @@ import React, { type DragEvent } from 'react';
 import { TRANSFER_DATA_TYPE } from '../constants';
 
 import { useAirdrop } from '../services';
-import { Airdrop } from '../types';
+import type { Airdrop, AirdropContent } from '../types';
 
 export interface Props<T = Record<string, unknown>> {
-  content: {
-    id: string;
-    app?: string;
-    get: () => T;
-  };
+  content: AirdropContent<T>;
   children: React.ReactNode;
 }
 

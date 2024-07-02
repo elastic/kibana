@@ -15,7 +15,9 @@ import type { Observable } from 'rxjs';
 export interface AirdropServices {
   isDraggingOver$: Observable<boolean>;
   setIsDragging: (isDragging: boolean) => void;
-  getAirdrop$For: <T>(id: string, app?: string) => Observable<Airdrop<T>>;
+  getAirdrop$ForId: <T>(id: string, app?: string) => Observable<Airdrop<T>>;
+  getContents$ForGroup: (group: string, app?: string) => Observable<AirdropContent[]>;
+  registerAirdropContent(airdrop: AirdropContent): () => void;
 }
 
 /**
@@ -28,12 +30,19 @@ export interface KibanaDependencies {
   airdrop: {
     isDraggingOver$: Observable<boolean>;
     setIsDragging: (isDragging: boolean) => void;
-    getAirdrop$For: <T>(id: string, app?: string) => Observable<Airdrop<T>>;
+    getAirdrop$ForId: <T>(id: string, app?: string) => Observable<Airdrop<T>>;
+    getContents$ForGroup: (group: string, app?: string) => Observable<AirdropContent[]>;
+    registerAirdropContent(airdrop: AirdropContent): () => void;
   };
 }
 
 export interface Airdrop<T = unknown> {
   id: string;
+  label?: string;
   app?: string;
   content: T;
+}
+
+export interface AirdropContent<T = unknown> extends Omit<Airdrop<T>, 'content'> {
+  get: () => T;
 }

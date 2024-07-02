@@ -14,4 +14,6 @@ export { AirdropKibanaProvider, AirdropProvider } from './services';
 
 export { useOnDrop } from './use_ondrop';
 
-export type { Airdrop } from './types';
+export { useAirdrop } from './services';
+
+export type { Airdrop, AirdropContent } from './types';

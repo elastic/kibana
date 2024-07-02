@@ -44,6 +44,7 @@ export class AirdropPlugin
   }
 
   public start(core: CoreStart): AirdropPluginStart {
+    const { application } = core;
     AirdropService.createDropElement().then((element) => {
       if (!element) return;
 
@@ -51,7 +52,7 @@ export class AirdropPlugin
     });
 
     this.pluginStart = {
-      ...this.airdropService.start(),
+      ...this.airdropService.start({ application }),
     };
 
     return this.pluginStart;

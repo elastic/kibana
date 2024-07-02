@@ -6,22 +6,54 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC, useState } from 'react';
+import React, { type FC, useState, useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+
 import { type Props as AirdropDragButtonProps } from './airdrop_drag_button';
 import { DragWrapper } from './drag_wrapper';
+import { useAirdrop } from '../services';
 
-type Props = AirdropDragButtonProps;
+interface Props extends Omit<AirdropDragButtonProps, 'content'> {
+  description: string;
+  content?: AirdropDragButtonProps['content'];
+  group?: string;
+}
 
-export const AirdropPopover: FC<Props> = ({ iconSize, size, ...rest }) => {
+export const AirdropPopover: FC<Props> = ({
+  description,
+  group,
+  iconSize,
+  size,
+  content: _content,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { getContents$ForGroup } = useAirdrop();
+  const contents$ = useMemo(() => {
+    if (!group) return of([]);
+    return getContents$ForGroup(group);
+  }, [getContents$ForGroup, group]);
+  const contents = useObservable(contents$, []);
+  console.log('Airdrop contents for group', group, contents);
+
+  const content = useMemo<AirdropDragButtonProps['content']>(() => {
+    if (_content) return _content;
+
+    return {
+      id: '__group__',
+      get: () => contents.reduce((acc, c) => ({ ...acc, [c.id]: c.get() }), {}),
+    };
+  }, [_content, contents]);
+
   return (
     <EuiPopover
       button={
@@ -41,14 +73,19 @@ export const AirdropPopover: FC<Props> = ({ iconSize, size, ...rest }) => {
       <EuiPopoverTitle>Airdrop</EuiPopoverTitle>
       <div style={{ width: '300px' }}>
         <EuiText size="s">
-          <p>
-            Selfies migas stumptown hot chicken quinoa wolf green juice, mumblecore tattooed trust
-            fund hammock truffaut taxidermy kogi.
-          </p>
+          <p>{description}</p>
         </EuiText>
+
+        <EuiSpacer />
+
+        <ul>
+          {contents.map((c) => (
+            <li key={c.id}>{c.label ?? c.id}</li>
+          ))}
+        </ul>
       </div>
       <EuiPopoverFooter>
-        <DragWrapper {...rest}>
+        <DragWrapper content={content}>
           <EuiButton fullWidth size="s">
             Drag on other Kibana window
           </EuiButton>
