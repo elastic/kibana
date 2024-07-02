@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@elastic/charts';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';

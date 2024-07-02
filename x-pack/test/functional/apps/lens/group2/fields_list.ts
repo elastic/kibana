@@ -125,6 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('should show stats for a numeric runtime field', async () => {
           await PageObjects.lens.searchField('runtime');
+          await PageObjects.lens.waitForMissingField('Records');
           await PageObjects.lens.waitForField('runtime_number');
           const [fieldId] = await PageObjects.lens.findFieldIdsByType('number');
           await log.debug(`Opening field stats for ${fieldId}`);

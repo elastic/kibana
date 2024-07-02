@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
 import { EuiComboBox, EuiFormRow, EuiSpacer, EuiSwitch, EuiFieldText, EuiText } from '@elastic/eui';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
+import { useDebouncedValue } from '@kbn/visualization-utils';
 
 export interface IncludeExcludeOptions {
   label: string;

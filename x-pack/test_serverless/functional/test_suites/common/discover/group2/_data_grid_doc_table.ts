@@ -221,7 +221,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('add and remove columns', function () {
       const extraColumns = ['phpmemory', 'ip'];
-
+      const expectedFieldLength: Record<string, number> = {
+        phpmemory: 1,
+        ip: 4,
+      };
       afterEach(async function () {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clickFieldListItemRemove(column);
@@ -233,6 +236,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clearFieldSearchInput();
           await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
+            expectedFieldLength[column]
+          );
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
           // test the header now
@@ -245,6 +251,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         for (const column of extraColumns) {
           await PageObjects.unifiedFieldList.clearFieldSearchInput();
           await PageObjects.unifiedFieldList.findFieldByName(column);
+          await PageObjects.unifiedFieldList.waitUntilFieldlistHasCountOfFields(
+            expectedFieldLength[column]
+          );
           await PageObjects.unifiedFieldList.clickFieldListItemAdd(column);
           await PageObjects.header.waitUntilLoadingHasFinished();
         }
