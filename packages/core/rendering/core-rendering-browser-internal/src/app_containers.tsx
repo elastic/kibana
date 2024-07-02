@@ -11,6 +11,8 @@ import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { APP_WRAPPER_CLASS } from '@kbn/core-application-common';
+import { HelpTopic } from '@elastic/help-center-common';
+import { HostContextProvider, GuidePopover } from '@elastic/help-center-host';
 
 export const AppWrapper: FC<
   PropsWithChildren<{
@@ -25,5 +27,28 @@ export const AppWrapper: FC<
     >
       {children}
     </div>
+  );
+};
+
+export const HelpCenterWrapper: FC<
+  PropsWithChildren<{
+    helpTopics$: Observable<Record<string, HelpTopic>>;
+    helpCenterUrl$: Observable<string | undefined>;
+    version$: Observable<string | undefined>;
+  }>
+> = ({ helpTopics$, version$, helpCenterUrl$, children }) => {
+  const helpTopics = useObservable(helpTopics$);
+  const version = useObservable(version$);
+  const helpCenterUrl = useObservable(helpCenterUrl$);
+
+  if (!helpTopics || !version || !helpCenterUrl) {
+    return <>{children}</>;
+  }
+
+  return (
+    <HostContextProvider {...{ helpCenterUrl, helpTopics, version }}>
+      {children}
+      <GuidePopover />
+    </HostContextProvider>
   );
 };
