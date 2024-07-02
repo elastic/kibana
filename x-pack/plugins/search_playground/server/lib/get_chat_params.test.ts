@@ -39,6 +39,7 @@ describe('getChatParams', () => {
   const actions = {
     getActionsClientWithRequest: jest.fn(() => Promise.resolve(mockActionsClient)),
   } as unknown as ActionsPluginStartContract;
+
   const logger = jest.fn() as unknown as Logger;
   const request = jest.fn() as unknown as KibanaRequest;
 
@@ -89,11 +90,10 @@ describe('getChatParams', () => {
       temperature: 0,
       llmType: 'bedrock',
       traceId: 'test-uuid',
-      request: expect.anything(),
       logger: expect.anything(),
       model: 'custom-model',
       connectorId: '2',
-      actions: expect.anything(),
+      actionsClient: expect.anything(),
     });
     expect(result.chatPrompt).toContain('How does it work?');
   });
