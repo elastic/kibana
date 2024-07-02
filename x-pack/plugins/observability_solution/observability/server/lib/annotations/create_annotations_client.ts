@@ -182,13 +182,14 @@ export function createAnnotationsClient(params: {
             'slo.id': sloId,
           },
         });
-      } else {
-        mustNotClauses.push({
-          exists: {
-            field: 'slo.id',
-          },
-        });
       }
+      // else {
+      //   mustNotClauses.push({
+      //     exists: {
+      //       field: 'slo.id',
+      //     },
+      //   });
+      // }
       if (sloInstanceId && sloInstanceId !== '*') {
         shouldClauses.push({
           term: {
@@ -202,13 +203,14 @@ export function createAnnotationsClient(params: {
             'service.name': serviceName,
           },
         });
-      } else {
-        mustNotClauses.push({
-          exists: {
-            field: 'service.name',
-          },
-        });
       }
+      // else {
+      //   mustNotClauses.push({
+      //     exists: {
+      //       field: 'service.name',
+      //     },
+      //   });
+      // }
 
       const result = await esClient.search({
         index: readIndex,
