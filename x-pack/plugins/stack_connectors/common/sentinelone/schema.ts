@@ -16,14 +16,22 @@ export const SentinelOneSecretsSchema = schema.object({
   token: schema.string(),
 });
 
-export const SentinelOneBaseApiResponseSchema = schema.object({}, { unknowns: 'allow' });
-
-export const SentinelOneGetAgentsResponseSchema = schema.object({
+const SentinelOneApiListPagination = Object.freeze({
   pagination: schema.object({
     totalItems: schema.number(),
     nextCursor: schema.nullable(schema.string()),
   }),
+});
+
+const SentinelOneApiErrors = Object.freeze({
   errors: schema.nullable(schema.arrayOf(schema.string())),
+});
+
+export const SentinelOneBaseApiResponseSchema = schema.recordOf(schema.string(), schema.any());
+
+export const SentinelOneGetAgentsResponseSchema = schema.object({
+  ...SentinelOneApiListPagination,
+  ...SentinelOneApiErrors,
   data: schema.arrayOf(
     schema.object(
       {
@@ -151,7 +159,7 @@ export const SentinelOneGetAgentsResponseSchema = schema.object({
 });
 
 export const SentinelOneIsolateHostResponseSchema = schema.object({
-  errors: schema.nullable(schema.arrayOf(schema.string())),
+  ...SentinelOneApiErrors,
   data: schema.object(
     {
       affected: schema.number(),
@@ -175,7 +183,7 @@ export const SentinelOneFetchAgentFilesParamsSchema = schema.object({
 });
 
 export const SentinelOneFetchAgentFilesResponseSchema = schema.object({
-  errors: schema.nullable(schema.arrayOf(schema.string())),
+  ...SentinelOneApiErrors,
   data: schema.maybe(
     schema.object(
       {
@@ -224,11 +232,8 @@ export const SentinelOneGetActivitiesParamsSchema = schema.maybe(
 );
 
 export const SentinelOneGetActivitiesResponseSchema = schema.object({
-  errors: schema.maybe(schema.arrayOf(schema.string())),
-  pagination: schema.object({
-    nextCursor: schema.nullable(schema.string()),
-    totalItems: schema.number(),
-  }),
+  ...SentinelOneApiListPagination,
+  ...SentinelOneApiErrors,
   data: schema.arrayOf(
     schema.object(
       {
@@ -269,11 +274,8 @@ export const SentinelOneGetActivitiesResponseSchema = schema.object({
 export const AlertIds = schema.maybe(schema.arrayOf(schema.string()));
 
 export const SentinelOneGetRemoteScriptsResponseSchema = schema.object({
-  errors: schema.nullable(schema.arrayOf(schema.string())),
-  pagination: schema.object({
-    nextCursor: schema.nullable(schema.string()),
-    totalItems: schema.number(),
-  }),
+  ...SentinelOneApiListPagination,
+  ...SentinelOneApiErrors,
   data: schema.arrayOf(
     schema.object({
       id: schema.string(),
@@ -364,7 +366,7 @@ export const SentinelOneExecuteScriptParamsSchema = schema.object({
 });
 
 export const SentinelOneExecuteScriptResponseSchema = schema.object({
-  errors: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  ...SentinelOneApiErrors,
   data: schema.nullable(
     schema.object({
       pendingExecutionId: schema.nullable(schema.string()),
@@ -374,13 +376,6 @@ export const SentinelOneExecuteScriptResponseSchema = schema.object({
     })
   ),
 });
-
-export const SentinelOneGetRemoteScriptResultsParamsSchema = schema.object(
-  {
-    taskId: schema.string(),
-  },
-  { unknowns: 'allow' }
-);
 
 export const SentinelOneGetRemoteScriptResultsResponseSchema = schema.object(
   {
@@ -399,11 +394,8 @@ export const SentinelOneGetRemoteScriptStatusParamsSchema = schema.object(
 );
 
 export const SentinelOneGetRemoteScriptStatusResponseSchema = schema.object({
-  pagination: schema.object({
-    totalItems: schema.number(),
-    nextCursor: schema.nullable(schema.string()),
-  }),
-  errors: schema.nullable(schema.arrayOf(schema.object({ type: schema.string() }))),
+  ...SentinelOneApiListPagination,
+  ...SentinelOneApiErrors,
   data: schema.arrayOf(
     schema.object(
       {
@@ -592,17 +584,9 @@ export const SentinelOneBaseFilterSchema = schema.object({
   alertIds: AlertIds,
 });
 
-export const SentinelOneKillProcessParamsSchema = SentinelOneBaseFilterSchema.extends({
-  processName: schema.string(),
-});
-
 export const SentinelOneIsolateHostParamsSchema = SentinelOneBaseFilterSchema;
 
 export const SentinelOneGetAgentsParamsSchema = SentinelOneBaseFilterSchema;
-
-export const SentinelOneGetRemoteScriptsStatusParams = schema.object({
-  parentTaskId: schema.string(),
-});
 
 export const SentinelOneIsolateHostSchema = schema.object({
   subAction: schema.literal(SUB_ACTION.ISOLATE_HOST),
