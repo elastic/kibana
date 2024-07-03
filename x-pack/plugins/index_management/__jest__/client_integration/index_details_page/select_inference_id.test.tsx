@@ -5,9 +5,17 @@
  * 2.0.
  */
 
+import {
+  Form,
+  useForm,
+} from '../../../public/application/components/mappings_editor/shared_imports';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import {
+  SelectInferenceId,
+  SelectInferenceIdProps,
+} from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import React from 'react';
 
 const setNewInferenceEndpointMock = jest.fn();
 const mockDispatch = jest.fn();
@@ -46,21 +54,33 @@ jest.mock('../../../public/application/components/mappings_editor/mappings_state
   useDispatch: () => mockDispatch,
 }));
 
+function getTestForm(Component: React.FC<SelectInferenceIdProps>) {
+  return (defaultProps: SelectInferenceIdProps) => {
+    const { form } = useForm();
+    return (
+      <Form form={form}>
+        <Component {...(defaultProps as any)} />
+      </Form>
+    );
+  };
+}
+
 describe('SelectInferenceId', () => {
   let exists: any;
   let find: any;
 
   beforeAll(async () => {
-    const setup = registerTestBed(SelectInferenceId, {
-      defaultProps: {
-        'data-test-subj': 'data-inference-endpoint-list',
-        setCustomInferenceEndpointConfig: setNewInferenceEndpointMock,
-      },
+    const defaultProps: SelectInferenceIdProps = {
+      'data-test-subj': 'data-inference-endpoint-list',
+      setCustomInferenceEndpointConfig: setNewInferenceEndpointMock,
+    };
+    const setup = registerTestBed(getTestForm(SelectInferenceId), {
+      defaultProps,
       memoryRouter: { wrapComponent: false },
     });
 
     await act(async () => {
-      const testBed = setup();
+      const testBed = await setup();
       exists = testBed.exists;
       find = testBed.find;
     });

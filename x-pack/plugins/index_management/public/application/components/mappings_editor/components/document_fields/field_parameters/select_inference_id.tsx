@@ -58,14 +58,14 @@ const uncheckSelectedModelOption = (options: EuiSelectableOption[]) => {
     checkedOption.checked = undefined;
   }
 };
-interface Props {
+export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
   setCustomInferenceEndpointConfig: (config: CustomInferenceEndpointConfig) => void;
 }
-export const SelectInferenceId: React.FC<Props> = ({
+export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
   'data-test-subj': dataTestSubj,
   setCustomInferenceEndpointConfig,
-}: Props) => {
+}: SelectInferenceIdProps) => {
   const {
     core: { application },
     docLinks,
