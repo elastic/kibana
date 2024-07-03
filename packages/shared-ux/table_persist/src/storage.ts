@@ -22,7 +22,7 @@ export class Storage {
   }
 
   encodeKey(key: string) {
-    return `${this.prefix}${key}`;
+    return `${this.prefix}:${key}`;
   }
 
   set(key: string, val: unknown) {
