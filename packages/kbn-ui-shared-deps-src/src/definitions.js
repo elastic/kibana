@@ -52,9 +52,6 @@ const externals = {
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'react-router-dom-v5-compat': '__kbnSharedDeps__.ReactRouterDomV5Compat',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
-  '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
-  // this is how plugins/consumers from npm load monaco
-  'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
   'io-ts': '__kbnSharedDeps__.IoTs',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
@@ -98,7 +95,6 @@ const externals = {
   classnames: '__kbnSharedDeps__.Classnames',
   '@tanstack/react-query': '__kbnSharedDeps__.ReactQuery',
   '@tanstack/react-query-devtools': '__kbnSharedDeps__.ReactQueryDevtools',
-  '@kbn/code-editor': '__kbnSharedDeps__.KbnCodeEditor',
   '@kbn/esql-ast': '__kbnSharedDeps__.KbnEsqlAst',
 };
 

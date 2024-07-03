@@ -21,8 +21,6 @@ export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 
 export const IoTs = require('io-ts');
-export const KbnMonaco = require('@kbn/monaco');
-export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
 export const ReactDomServer = require('react-dom/server');
@@ -71,5 +69,4 @@ export const History = require('history');
 export const Classnames = require('classnames');
 export const ReactQuery = require('@tanstack/react-query');
 export const ReactQueryDevtools = require('@tanstack/react-query-devtools');
-export const KbnCodeEditor = require('@kbn/code-editor');
 export const KbnEsqlAst = require('@kbn/esql-ast');
