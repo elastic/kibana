@@ -109,7 +109,6 @@ describe('useSetupTechnology', () => {
 
     it('initializes with AGENTLESS technology if isAgentlessEnable is true', () => {
       const input = { type: CLOUDBEAT_AWS } as NewPackagePolicyInput;
-      // const agentPolicy = { id: 'agentless' } as AgentPolicy;
       const { result } = renderHook(() =>
         useSetupTechnology({
           input,

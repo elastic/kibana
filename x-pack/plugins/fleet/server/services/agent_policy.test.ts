@@ -119,7 +119,7 @@ describe('Agent policy', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    mockedAppContextService.getExperimentalFeatures.mockReturnValue({});
+    mockedAppContextService.getExperimentalFeatures.mockReturnValue({ agentless: false } as any);
   });
 
   afterEach(() => {
