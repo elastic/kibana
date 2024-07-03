@@ -9,10 +9,7 @@ import { compact } from 'lodash';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
-import { generateHistoryTransformId } from './transform/generate_history_transform_id';
-import { generateLatestTransformId } from './transform/generate_latest_transform_id';
+import { generateHistoryId, generateLatestId } from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { EntityDefinitionWithState } from './types';
 
@@ -56,14 +53,14 @@ async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
 ) {
-  const historyIngestPipelineId = generateHistoryIngestPipelineId(definition);
-  const latestIngestPipelineId = generateLatestIngestPipelineId(definition);
+  const historyIngestPipelineId = generateHistoryId(definition);
+  const latestIngestPipelineId = generateLatestId(definition);
   const [ingestPipelines, transforms] = await Promise.all([
     esClient.ingest.getPipeline({
       id: `${historyIngestPipelineId},${latestIngestPipelineId}`,
     }),
     esClient.transform.getTransformStats({
-      transform_id: [generateHistoryTransformId(definition), generateLatestTransformId(definition)],
+      transform_id: [generateHistoryId(definition), generateLatestId(definition)],
     }),
   ]);
 

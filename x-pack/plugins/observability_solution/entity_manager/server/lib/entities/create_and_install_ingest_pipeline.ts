@@ -7,11 +7,10 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+import { generateHistoryId, generateLatestId } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
-import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
 import { generateHistoryProcessors } from './ingest_pipeline/generate_history_processors';
-import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
+import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
 
 export async function createAndInstallHistoryIngestPipeline(
   esClient: ElasticsearchClient,
@@ -21,7 +20,7 @@ export async function createAndInstallHistoryIngestPipeline(
 ) {
   try {
     const historyProcessors = generateHistoryProcessors(definition, spaceId);
-    const historyId = generateHistoryIngestPipelineId(definition);
+    const historyId = generateHistoryId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline({
@@ -45,7 +44,7 @@ export async function createAndInstallLatestIngestPipeline(
 ) {
   try {
     const latestProcessors = generateLatestProcessors(definition, spaceId);
-    const latestId = generateLatestIngestPipelineId(definition);
+    const latestId = generateLatestId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline({

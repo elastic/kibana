@@ -15,11 +15,10 @@ import { generateHistoryMetricAggregations } from './generate_metric_aggregation
 import {
   ENTITY_DEFAULT_HISTORY_FREQUENCY,
   ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
-  ENTITY_HISTORY_BASE_PREFIX,
 } from '../../../../common/constants_entities';
 import { generateHistoryMetadataAggregations } from './generate_metadata_aggregations';
-import { generateHistoryTransformId } from './generate_history_transform_id';
-import { generateHistoryIngestPipelineId } from '../ingest_pipeline/generate_history_ingest_pipeline_id';
+import { generateHistoryId } from '../helpers/generate_component_id';
+import { generateHistoryIndexName } from '../helpers/generate_index_name';
 
 export function generateHistoryTransform(
   definition: EntityDefinition
@@ -31,7 +30,7 @@ export function generateHistoryTransform(
   }
 
   return {
-    transform_id: generateHistoryTransformId(definition),
+    transform_id: generateHistoryId(definition),
     defer_validation: true,
     source: {
       index: definition.indexPatterns,
@@ -44,8 +43,8 @@ export function generateHistoryTransform(
       }),
     },
     dest: {
-      index: `${ENTITY_HISTORY_BASE_PREFIX}.noop`,
-      pipeline: generateHistoryIngestPipelineId(definition),
+      index: `${generateHistoryIndexName({ id: 'noop' } as EntityDefinition)}`,
+      pipeline: generateHistoryId(definition),
     },
     frequency: definition.history.settings?.frequency ?? ENTITY_DEFAULT_HISTORY_FREQUENCY,
     sync: {

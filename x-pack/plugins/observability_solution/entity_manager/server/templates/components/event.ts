@@ -6,10 +6,16 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ENTITY_BASE_PREFIX,
+  ENTITY_SCHEMA_VERSION_V1,
+} from '@kbn/entityManager-plugin/common/constants_entities';
 
 export const entitiesEventComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
-  name: 'entities_v1_event',
+  name: `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_event`,
   _meta: {
+    description:
+      "Component template for the event fields used in the Elastic Entity Model's entity discovery framework",
     documentation: 'https://www.elastic.co/guide/en/ecs/current/ecs-event.html',
     ecs_version: '8.0.0',
   },

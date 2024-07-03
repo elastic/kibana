@@ -7,14 +7,16 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
-  ENTITY_HISTORY_BASE_PREFIX,
-  ENTITY_LATEST_BASE_PREFIX,
-} from '../../../../common/constants_entities';
+  ENTITY_INDEX_PREFIX,
+  ENTITY_SCHEMA_VERSION_V1,
+  ENTITY_LATEST,
+  ENTITY_HISTORY,
+} from '@kbn/entityManager-plugin/common/constants_entities';
 
 export function generateLatestIndexName(definition: EntityDefinition) {
-  return `${ENTITY_LATEST_BASE_PREFIX}.${definition.id}`;
+  return `${ENTITY_INDEX_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_LATEST}-${definition.id}`;
 }
 
 export function generateHistoryIndexName(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_BASE_PREFIX}.${definition.id}`;
+  return `${ENTITY_INDEX_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_HISTORY}-${definition.id}`;
 }

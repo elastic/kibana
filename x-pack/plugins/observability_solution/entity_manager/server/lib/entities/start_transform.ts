@@ -7,9 +7,8 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
+import { generateHistoryId, generateLatestId } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateLatestTransformId } from './transform/generate_latest_transform_id';
-import { generateHistoryTransformId } from './transform/generate_history_transform_id';
 
 export async function startTransform(
   esClient: ElasticsearchClient,
@@ -17,8 +16,8 @@ export async function startTransform(
   logger: Logger
 ) {
   try {
-    const historyTransformId = generateHistoryTransformId(definition);
-    const latestTransformId = generateLatestTransformId(definition);
+    const historyTransformId = generateHistoryId(definition);
+    const latestTransformId = generateLatestId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.transform.startTransform({ transform_id: historyTransformId }, { ignore: [409] }),
