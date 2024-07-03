@@ -14,9 +14,10 @@ describe('validateDefinitionCanCreateValidTransformIds(definition)', () => {
     expect(valid).toBeTruthy();
   });
 
-  it('shoulw dreturn false for a definition ID which is too long', () => {
+  it('should return false for a definition ID which is too long', () => {
     const entityDefinitionWithLongID = entityDefinition;
-    entityDefinitionWithLongID.id = 'a-really-really-really-really-really-really-really-really-really-really-long-id';
+    entityDefinitionWithLongID.id =
+      'a-really-really-really-really-really-really-really-really-really-really-long-id';
     const valid = validateDefinitionCanCreateValidTransformIds(entityDefinition);
     expect(valid).toBeFalsy();
   });

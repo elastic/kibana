@@ -11,9 +11,14 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { generateHistoryTransformId } from './generate_history_transform_id';
 import { generateLatestTransformId } from './generate_latest_transform_id';
 
-export function validateDefinitionCanCreateValidTransformIds(definition: EntityDefinition): boolean {
-    const historyTransformId = generateHistoryTransformId(definition);
-    const latestTransformId = generateLatestTransformId(definition);
+export function validateDefinitionCanCreateValidTransformIds(
+  definition: EntityDefinition
+): boolean {
+  const historyTransformId = generateHistoryTransformId(definition);
+  const latestTransformId = generateLatestTransformId(definition);
 
-    return historyTransformId.length <= TRANSFORM_ID_MAX_LENGTH && latestTransformId.length <= TRANSFORM_ID_MAX_LENGTH;
+  return (
+    historyTransformId.length <= TRANSFORM_ID_MAX_LENGTH &&
+    latestTransformId.length <= TRANSFORM_ID_MAX_LENGTH
+  );
 }
