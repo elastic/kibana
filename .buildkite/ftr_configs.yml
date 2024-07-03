@@ -575,6 +575,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/sources/indices/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/defend_workflows/configs/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/defend_workflows/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
