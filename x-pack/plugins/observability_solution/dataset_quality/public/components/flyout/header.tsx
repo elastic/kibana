@@ -20,6 +20,7 @@ import {
   flyoutOpenInDiscoverText,
   flyoutOpenInLogsExplorerText,
 } from '../../../common/translations';
+import { NavigationSource } from '../../services/telemetry';
 import { useRedirectLink } from '../../hooks';
 import { IntegrationIcon } from '../common';
 import { BasicDataStreamStats } from '../../../common/types';
@@ -30,6 +31,10 @@ export function Header({ titleAndLinkDetails }: { titleAndLinkDetails: BasicData
   const { euiTheme } = useEuiTheme();
   const redirectLinkProps = useRedirectLink({
     dataStreamStat: titleAndLinkDetails,
+    telemetry: {
+      page: 'details',
+      navigationSource: NavigationSource.Header,
+    },
   });
 
   return (
@@ -63,7 +68,7 @@ export function Header({ titleAndLinkDetails }: { titleAndLinkDetails: BasicData
             <EuiButton
               data-test-subj="datasetQualityHeaderButton"
               size="s"
-              {...redirectLinkProps}
+              {...redirectLinkProps.linkProps}
               iconType={
                 redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
               }

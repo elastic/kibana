@@ -713,6 +713,40 @@
       },
       {
         "parentPluginId": "@kbn/core-security-server",
+        "id": "def-common.CoreFipsService",
+        "type": "Interface",
+        "tags": [],
+        "label": "CoreFipsService",
+        "description": [
+          "\nCore's FIPS service\n"
+        ],
+        "path": "packages/core/security/core-security-server/src/fips.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.CoreFipsService.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [
+              "\nCheck if Kibana is configured to run in FIPS mode"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "packages/core/security/core-security-server/src/fips.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
         "id": "def-common.CoreSecurityDelegateContract",
         "type": "Interface",
         "tags": [],
@@ -881,6 +915,28 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-common.SecurityServiceSetup.fips",
+            "type": "Object",
+            "tags": [],
+            "label": "fips",
+            "description": [
+              "\nThe {@link CoreFipsService | FIPS service}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-security-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSecurityServerPluginApi",
+                "section": "def-common.CoreFipsService",
+                "text": "CoreFipsService"
+              }
+            ],
+            "path": "packages/core/security/core-security-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
