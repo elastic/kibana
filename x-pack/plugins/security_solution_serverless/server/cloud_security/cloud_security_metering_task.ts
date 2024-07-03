@@ -75,8 +75,6 @@ export const getUsageRecords = (
   }
   const roundedCreationTimestamp = creationTimestamp.toISOString();
 
-  const metadata = resourceSubtypeCounterMap ? { tier, ...resourceSubtypeCounterMap } : { tier };
-
   const usageRecord: UsageRecord = {
     id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
     usage_timestamp: minTimestamp,
@@ -86,11 +84,12 @@ export const getUsageRecords = (
       sub_type: cloudSecuritySolution,
       quantity: assetCount,
       period_seconds: periodSeconds,
+      ...(resourceSubtypeCounterMap && { metadata: resourceSubtypeCounterMap }),
     },
     source: {
       id: taskId,
       instance_group_id: projectId,
-      metadata,
+      metadata: { tier },
     },
   };
 

@@ -122,15 +122,16 @@ describe('getCloudSecurityUsageRecord', () => {
             sub_type: cloudSecuritySolution,
             quantity: 10,
             period_seconds: expect.any(Number),
+            metadata: {
+              [randomBillableAsset]: 10,
+              not_billable_asset: 11,
+            },
           },
           source: {
             id: taskId,
             instance_group_id: projectId,
             metadata: {
               tier: 'essentials',
-              [randomBillableAsset]: 10,
-
-              not_billable_asset: 11,
             },
           },
         },

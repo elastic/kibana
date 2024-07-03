@@ -66,18 +66,13 @@ export interface UsageMetrics {
   quantity: number;
   period_seconds?: number;
   cause?: string;
-  metadata?: unknown;
+  metadata?: ResourceSubtypeCounter;
 }
 
 export interface UsageSource {
   id: string;
   instance_group_id: string;
-  metadata?: UsageSourceMetadata;
-}
-
-export interface UsageSourceMetadata {
-  tier?: Tier;
-  resource_sub_type_count?: ResourceSubtypeCounter;
+  metadata?: { tier?: Tier };
 }
 
 export type Tier = ProductTier | 'none';
