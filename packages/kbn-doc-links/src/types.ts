@@ -537,6 +537,7 @@ export interface DocLinks {
     datastreamsDownsampling: string;
     installElasticAgent: string;
     installElasticAgentStandalone: string;
+    grantESAccessToStandaloneAgents: string;
     packageSignatures: string;
     upgradeElasticAgent: string;
     learnMoreBlog: string;
