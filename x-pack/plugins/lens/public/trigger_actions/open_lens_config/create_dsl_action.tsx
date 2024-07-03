@@ -9,6 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
 
 const ACTION_CREATE_DSL_LENS_CHART = 'ACTION_CREATE_DSL_LENS_CHART';
@@ -18,8 +19,8 @@ export const getAsyncHelpers = async () => await import('../../async_services');
 export class CreateDSLPanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CREATE_DSL_LENS_CHART;
   public id = ACTION_CREATE_DSL_LENS_CHART;
-  public order = 30;
-
+  public order = 50;
+  public grouping = COMMON_VISUALIZATION_GROUPING;
   constructor(
     protected readonly startDependencies: LensPluginStartDependencies,
     protected readonly core: CoreStart

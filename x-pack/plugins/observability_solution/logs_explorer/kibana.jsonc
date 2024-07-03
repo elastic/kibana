@@ -12,21 +12,16 @@
       "logsExplorer"
     ],
     "requiredPlugins": [
-      "controls",
       "data",
       "dataViews",
       "discover",
-      "embeddable",
       "fieldFormats",
-      "fleet",
-      "kibanaReact",
-      "kibanaUtils",
       "navigation",
       "share",
       "unifiedSearch",
     ],
     "optionalPlugins": [],
-    "requiredBundles": [],
+    "requiredBundles": ["controls","embeddable","fleet", "kibanaReact", "kibanaUtils"],
     "extraPublicDirs": [
       "common",
     ]

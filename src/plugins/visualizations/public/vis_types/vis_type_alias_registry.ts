@@ -118,6 +118,7 @@ export interface VisTypeAlias {
     visualizations: VisualizationsAppExtension;
     [appName: string]: unknown;
   };
+  order?: number;
 }
 
 let registry: VisTypeAlias[] = [];
