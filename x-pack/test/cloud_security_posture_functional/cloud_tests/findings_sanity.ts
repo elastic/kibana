@@ -11,22 +11,35 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const queryBar = getService('queryBar');
+  const testSubjects = getService('testSubjects');
 
   describe('Findings Page - Sanity Tests', function () {
     this.tags(['cloud_security_posture_ui_sanity']);
     let findings: typeof pageObjects.findings;
+    let latestFindingsTable: typeof findings.latestFindingsTable;
 
     before(async () => {
       findings = pageObjects.findings;
+      latestFindingsTable = pageObjects.findings.latestFindingsTable;
       await findings.navigateToLatestFindingsPage();
       await findings.waitForPluginInitialized();
     });
 
     describe('Findings - Querying data', () => {
-      beforeEach(async () => {
+      //   beforeEach(async () => {
+      //     const groupSelector = await findings.groupSelector();
+      //     await groupSelector.openDropDown();
+      //     await groupSelector.setValue('None');
+      //   });
+
+      afterEach(async () => {
+        // Reset the group selector to None
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('None');
+        // Reset search query
+        await queryBar.clearQuery();
+        await queryBar.submitQuery();
       });
 
       const testCases = [
@@ -74,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       testCases.forEach(
         ({ query, provider, expectedRowsCount, expectedGroupCount, expectedUnitCount }) => {
           it(`Querying ${provider} provider data`, async () => {
-            await queryBar.clearQuery();
+            // Execute the query
             await queryBar.setQuery(query);
             await queryBar.submitQuery();
             // Get the number of rows in the data table
@@ -88,12 +101,72 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await groupSelector.openDropDown();
             await groupSelector.setValue('Cloud account');
             const grouping = await findings.findingsGrouping();
-
+            // Check that the group count and unit count matches the expected values
             const groupCount = await grouping.getGroupCount();
             expect(groupCount).to.be(expectedGroupCount);
 
             const unitCount = await grouping.getUnitCount();
             expect(unitCount).to.be(expectedUnitCount);
+          });
+        }
+      );
+    });
+
+    describe('Findings - Sorting data', () => {
+      afterEach(async () => {
+        const paginationBtn = await testSubjects.find('tablePaginationPopoverButton');
+        await paginationBtn.click();
+        const pageSizeOption = await testSubjects.find('tablePagination-50-rows');
+        await pageSizeOption.click();
+      });
+
+      type SortDirection = 'asc' | 'desc';
+      type TestCase = [string, string, string, SortDirection, string];
+      const paginationAndsortingTestCases: TestCase[] = [
+        [
+          'cloud.provider : "aws" and resource.sub_type : "aws-iam-user" and result.evaluation : "passed"',
+          '250',
+          'rule.benchmark.rule_number',
+          'desc',
+          '1.7',
+        ],
+        [
+          'cloud.provider : "azure" and result.evaluation : "failed"',
+          '500',
+          'rule.benchmark.rule_number',
+          'asc',
+          '1.23',
+        ],
+        [
+          'cloud.provider : "gcp" and result.evaluation : "passed"',
+          '500',
+          'resource.sub_type',
+          'desc',
+          'gcp-storage-bucket',
+        ],
+      ];
+
+      paginationAndsortingTestCases.forEach(
+        ([query, paginationRowsCount, columnName, sortType, expectedResult]) => {
+          it(`Paginating and sorting data`, async () => {
+            // Run query
+            await queryBar.clearQuery();
+            await queryBar.setQuery(query);
+            await queryBar.submitQuery();
+            // Update latest findings table pagination
+            const paginationBtn = await testSubjects.find('tablePaginationPopoverButton');
+            await paginationBtn.click();
+            const pageSizeOption = await testSubjects.find(
+              `tablePagination-${paginationRowsCount}-rows`
+            );
+            await pageSizeOption.click();
+            // Sort by column
+            await latestFindingsTable.toggleColumnSort(columnName, sortType);
+            await pageObjects.header.waitUntilLoadingHasFinished();
+            const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
+            // Check that the first value matches the expected result
+            // Whole sorting logic functionality is checked in the findings.ts
+            expect(values[0]).to.equal(expectedResult);
           });
         }
       );
