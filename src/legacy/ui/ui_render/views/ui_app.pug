@@ -22,6 +22,10 @@ block content
     }
     .kibanaWelcomeView {
       background-color: #{darkMode ? '#25262E' : '#F5F7FA'};
+      width: 100vw;
+      height: calc(100vh - 50px);
+      display: flex;
+      align-items: center;
     }
 
     .kibanaWelcomeTitle {
@@ -56,38 +60,16 @@ block content
       margin-top: 24px;
     }
 
-    .kibanaLoader {
-      height: 128px;
-      width: 128px;
-      margin: 0 auto;
-      position: relative;
-      border: 2px solid transparent;
-      border-top: 2px solid #017D73;
-      border-radius: 100%;
-      display: block;
-      opacity: 0;
-      animation: rotation .75s .5s infinite linear, fadeIn 1s .5s ease-in-out forwards;
-    }
-
     .kibanaWelcomeLogoCircle {
       position: absolute;
       left: 4px;
       top: 4px;
       width: 120px;
       height: 120px;
-      padding: 20px;
-      background-color: #FFF;
-      border-radius: 50%;
-      animation: bounceIn .5s ease-in-out;
     }
 
     .kibanaWelcomeLogo {
-      background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHhtbG5zOnhsaW5rPSdodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rJyBoZWlnaHQ9JzQ0JyB3aWR0aD0nNDAnIHZpZXdCb3g9JzAgMCA0NCA0MCc+PGcgZmlsbD0nbm9uZSc+PGcgZmlsbD0nIzAwN0RDMyc+PHBhdGggZD0nTTE0Ljg3IDM1LjY3QzE0Ljg3IDMyLjg3IDE3LjE0IDMwLjYxIDE5Ljk0IDMwLjYxIDIyLjc0IDMwLjYxIDI1LjAxIDMyLjg4IDI1LjAxIDM1LjY3IDI1LjAxIDM4LjQ4IDIyLjc0IDQwLjc0IDE5Ljk0IDQwLjc0IDE3LjE0IDQwLjc0IDE0Ljg3IDM4LjQ3IDE0Ljg3IDM1LjY3ek0yOS42OSAyMC44NkMyOS42OSAxOC4wNiAzMS45NiAxNS43OSAzNC43NiAxNS43OSAzNy41NiAxNS43OSAzOS44MyAxOC4wNyAzOS44MyAyMC44NiAzOS44MyAyMy42NiAzNy41NiAyNS45NCAzNC43NiAyNS45MyAzMS45NSAyNS45MyAyOS42OSAyMy42NiAyOS42OSAyMC44NnpNLjA2IDM1LjY3Qy4wNiAzMi44NyAyLjMzIDMwLjYxIDUuMTMgMzAuNjEgNy45MyAzMC42MSAxMC4yIDMyLjg4IDEwLjIgMzUuNjcgMTAuMiAzOC40OCA3LjkzIDQwLjc1IDUuMTMgNDAuNzUgMi4zMyA0MC43NS4wNiAzOC40Ny4wNiAzNS42N3pNMjkuNjkgNi4wNUMyOS42OSAzLjI1IDMxLjk2Ljk4IDM0Ljc2Ljk4IDM3LjU2Ljk4IDM5LjgzIDMuMjUgMzkuODMgNi4wNiAzOS44MyA4Ljg2IDM3LjU2IDExLjEzIDM0Ljc2IDExLjEzIDMxLjk1IDExLjEyIDI5LjY5IDguODUgMjkuNjkgNi4wNXpNLjA2IDIwLjg2Qy4wNiAxOC4wNiAyLjMzIDE1Ljc5IDUuMTMgMTUuNzkgNy45MyAxNS43OSAxMC4yIDE4LjA2IDEwLjIgMjAuODYgMTAuMiAyMy42NiA3LjkzIDI1Ljk0IDUuMTMgMjUuOTQgMi4zMyAyNS45My4wNiAyMy42Ni4wNiAyMC44NnpNMTQuODcgNi4wNUMxNC44NyAzLjI1IDE3LjE0Ljk4IDE5Ljk0Ljk4IDIyLjc0Ljk4IDI1LjAxIDMuMjUgMjUuMDEgNi4wNiAyNS4wMSA4Ljg2IDIyLjc0IDExLjEzIDE5Ljk0IDExLjEzIDE3LjE0IDExLjEyIDE0Ljg3IDguODUgMTQuODcgNi4wNXonLz48L2c+PGcgZmlsbD0nIzAwMkQ1NicgdHJhbnNmb3JtPSd0cmFuc2xhdGUoMTQgMSknPjxwYXRoIGQ9J00wLjg3LDIwLjE3IEMwLjg3LDE3LjM3IDMuMTQsMTUuMSA1Ljk0LDE1LjEgQzguNzQsMTUuMSAxMS4wMSwxNy4zOCAxMS4wMSwyMC4xNyBDMTEuMDEsMjIuOTcgOC43NCwyNS4yNSA1Ljk0LDI1LjI1IEMzLjE0LDI1LjI1IDAuODcsMjIuOTggMC44NywyMC4xNyBaJy8+PC9nPjwvZz48L3N2Zz4=");
-      background-repeat: no-repeat;
-      background-size: contain;
-      width: 60px;
-      height: 60px;
-      margin: 8px 0px 8px 15px;
+      background-image: url("#{uiPublicUrl}/images/LR.gif");
     }
 
     @keyframes rotation {
@@ -122,7 +104,7 @@ block content
       }
     }
 
-  .kibanaWelcomeView(id="kbn_loading_message", style="display: none;", data-test-subj="kbnLoadingMessage")
+  .kibanaWelcomeView(id="kbn_loading_message", data-test-subj="kbnLoadingMessage")
     .kibanaLoaderWrap
       .kibanaLoader
       .kibanaWelcomeLogoCircle
