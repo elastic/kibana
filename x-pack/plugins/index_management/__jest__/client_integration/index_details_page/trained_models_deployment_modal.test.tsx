@@ -57,21 +57,20 @@ describe('When semantic_text is enabled', () => {
       defaultProps: {
         setIsModalVisible: setIsVisibleForErrorModal,
         refreshModal: tryAgainForErrorModal,
-        pendingDeployments: ['.elser-test-3'],
+        pendingDeployments: ['.elser-test-3', 'valid-model'],
         errorsInTrainedModelDeployment: ['.elser-test-3'],
       },
       memoryRouter: { wrapComponent: false },
     });
-    const { exists, find } = setup();
+    const { find } = setup();
 
-    it('should display the modal', () => {
-      expect(exists('trainedModelsErroredDeploymentModal')).toBe(true);
+    it('should display text related to errored deployments', () => {
+      expect(find('trainedModelsDeploymentModalText').text()).toContain('There was an error');
     });
 
-    it('should contain content related to semantic_text', () => {
-      expect(find('trainedModelsErrorDeploymentModalText').text()).toContain(
-        'There was an error when trying to deploy'
-      );
+    it('should display only the errored deployment', () => {
+      expect(find('trainedModelsDeploymentModal').text()).toContain('.elser-test-3');
+      expect(find('trainedModelsDeploymentModal').text()).not.toContain('valid-model');
     });
 
     it("should call refresh method if 'Try again' button is pressed", async () => {

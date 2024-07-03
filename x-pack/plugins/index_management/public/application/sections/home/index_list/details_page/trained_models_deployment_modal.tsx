@@ -39,148 +39,90 @@ export function TrainedModelsDeploymentModal({
   }, [pendingDeployments, setIsModalVisible]);
 
   useEffect(() => {
-    let isCancelled = false;
     const mlLocator = url?.locators.get(ML_APP_LOCATOR);
     const generateUrl = async () => {
       if (mlLocator) {
         const mlURL = await mlLocator.getUrl({
           page: TRAINED_MODELS_MANAGE,
         });
-        if (!isCancelled) {
-          setMlManagementPageUrl(mlURL);
-        }
+        setMlManagementPageUrl(mlURL);
       }
     };
     generateUrl();
-    return () => {
-      isCancelled = true;
-    };
   }, [url]);
 
-  const ErroredDeployments = pendingDeployments.filter(
+  const erroredDeployments = pendingDeployments.filter(
     (deployment) => deployment !== undefined && errorsInTrainedModelDeployment.includes(deployment)
   );
 
-  const PendingModelsDeploymentModal = () => {
-    const pendingDeploymentsList = pendingDeployments.map((deployment, index) => (
-      <li key={index}>
-        <EuiHealth textSize="xs" color="warning">
-          {deployment}
-        </EuiHealth>
-      </li>
-    ));
-
-    return (
-      <EuiConfirmModal
-        aria-labelledby={modalTitleId}
-        style={{ width: 600 }}
-        title={i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.titleLabel',
+  const pendingDeploymentsList = pendingDeployments.map((deployment, index) => (
+    <li key={index}>
+      <EuiHealth textSize="xs" color="danger">
+        {deployment}
+      </EuiHealth>
+    </li>
+  ));
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      style={{ width: 600 }}
+      title={
+        erroredDeployments.length > 0
+          ? i18n.translate(
+              'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorTitle',
+              {
+                defaultMessage: 'Models could not be deployed',
+              }
+            )
+          : i18n.translate('xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.titleLabel', {
+              defaultMessage: 'Models still deploying',
+            })
+      }
+      titleProps={{ id: modalTitleId }}
+      onCancel={closeModal}
+      onConfirm={refreshModal}
+      cancelButtonText={i18n.translate(
+        'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.closeButtonLabel',
+        {
+          defaultMessage: 'Close',
+        }
+      )}
+      confirmButtonText={i18n.translate(
+        'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.refreshButtonLabel',
+        {
+          defaultMessage: 'Refresh',
+        }
+      )}
+      defaultFocusedButton="confirm"
+      data-test-subj="trainedModelsDeploymentModal"
+    >
+      <p data-test-subj="trainedModelsDeploymentModalText">
+        {erroredDeployments.length > 0
+          ? i18n.translate(
+              'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorText',
+              {
+                defaultMessage: 'There was an error when trying to deploy the following models.',
+              }
+            )
+          : i18n.translate(
+              'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textAboutDeploymentsNotCompleted',
+              {
+                defaultMessage:
+                  'Some fields are referencing models that have not yet completed deployment. Deployment may take a few minutes to complete.',
+              }
+            )}
+      </p>
+      <ul style={{ listStyleType: 'none' }}>
+        {erroredDeployments.length > 0 ? erroredDeployments : pendingDeploymentsList}
+      </ul>
+      <EuiLink href={mlManagementPageUrl} target="_blank">
+        {i18n.translate(
+          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textTrainedModelManagementLink',
           {
-            defaultMessage: 'Models still deploying',
+            defaultMessage: 'Go to Trained Model Management',
           }
         )}
-        titleProps={{ id: modalTitleId }}
-        onCancel={closeModal}
-        onConfirm={refreshModal}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.closeButtonLabel',
-          {
-            defaultMessage: 'Close',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.refreshButtonLabel',
-          {
-            defaultMessage: 'Refresh',
-          }
-        )}
-        defaultFocusedButton="confirm"
-        data-test-subj="trainedModelsDeploymentModal"
-      >
-        <p data-test-subj="trainedModelsDeploymentModalText">
-          {i18n.translate(
-            'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textAboutDeploymentsNotCompleted',
-            {
-              defaultMessage:
-                'Some fields are referencing models that have not yet completed deployment. Deployment may take a few minutes to complete.',
-            }
-          )}
-        </p>
-        <ul style={{ listStyleType: 'none' }}>{pendingDeploymentsList}</ul>
-        <EuiLink href={mlManagementPageUrl} target="_blank">
-          {i18n.translate(
-            'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.textTrainedModelManagementLink',
-            {
-              defaultMessage: 'Go to Trained Model Management',
-            }
-          )}
-        </EuiLink>
-      </EuiConfirmModal>
-    );
-  };
-
-  const ErroredModelsDeploymentModal = () => {
-    const pendingDeploymentsList = pendingDeployments.map((deployment, index) => (
-      <li key={index}>
-        <EuiHealth textSize="xs" color="danger">
-          {deployment}
-        </EuiHealth>
-      </li>
-    ));
-
-    return (
-      <EuiConfirmModal
-        aria-labelledby={modalTitleId}
-        style={{ width: 600 }}
-        title={i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorTitle',
-          {
-            defaultMessage: 'Models could not be deployed',
-          }
-        )}
-        titleProps={{ id: modalTitleId }}
-        onCancel={closeModal}
-        onConfirm={refreshModal}
-        cancelButtonText={i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorCancelButtonLabel',
-          {
-            defaultMessage: 'Cancel',
-          }
-        )}
-        confirmButtonText={i18n.translate(
-          'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorTryAgainButtonLabel',
-          {
-            defaultMessage: 'Try again',
-          }
-        )}
-        defaultFocusedButton="confirm"
-        data-test-subj="trainedModelsErroredDeploymentModal"
-      >
-        <p data-test-subj="trainedModelsErrorDeploymentModalText">
-          {i18n.translate(
-            'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorText',
-            {
-              defaultMessage: 'There was an error when trying to deploy the following models.',
-            }
-          )}
-        </p>
-        <ul style={{ listStyleType: 'none' }}>{pendingDeploymentsList}</ul>
-        <EuiLink href={mlManagementPageUrl} target="_blank">
-          {i18n.translate(
-            'xpack.idxMgmt.indexDetails.trainedModelsDeploymentModal.deploymentErrorTrainedModelManagementLink',
-            {
-              defaultMessage: 'Go to Trained Model Management',
-            }
-          )}
-        </EuiLink>
-      </EuiConfirmModal>
-    );
-  };
-
-  return ErroredDeployments.length > 0 ? (
-    <ErroredModelsDeploymentModal />
-  ) : (
-    <PendingModelsDeploymentModal />
+      </EuiLink>
+    </EuiConfirmModal>
   );
 }
