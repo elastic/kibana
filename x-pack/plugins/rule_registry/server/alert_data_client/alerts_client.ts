@@ -349,23 +349,20 @@ export class AlertsClient {
           throw Boom.badData(errorMessage);
         }
 
-        if (result?.hits.hits.length > 0) {
-          // @ts-expect-error type mismatch: SearchHit._id is optional
-          await this.ensureAllAuthorized(result.hits.hits, operation);
+        // @ts-expect-error type mismatch: SearchHit._id is optional
+        await this.ensureAllAuthorized(result.hits.hits, operation);
 
-          result?.hits.hits.forEach((item) =>
-            this.auditLogger?.log(
-              alertAuditEvent({
-                action: operationAlertAuditActionMap[operation],
-                id: item._id,
-                ...this.getOutcome(operation),
-              })
-            )
-          );
-        }
-
-        return result;
+        result.hits.hits.forEach((item) =>
+          this.auditLogger?.log(
+            alertAuditEvent({
+              action: operationAlertAuditActionMap[operation],
+              id: item._id,
+              ...this.getOutcome(operation),
+            })
+          )
+        );
       }
+      return result;
     } catch (error) {
       const errorMessage = `Unable to retrieve alert details for alert with id of "${id}" or with query "${query}" and operation ${operation} \nError: ${error}`;
       this.logger.error(errorMessage);
