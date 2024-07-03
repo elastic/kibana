@@ -78,11 +78,10 @@ export const fetchDataStreamIntegrationFailedNotifier = (
 ) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.flyout.fetchIntegrationsFailed', {
-      defaultMessage: `${
-        integrationName
-          ? `We couldn't get ${integrationName} integration info.`
-          : `We couldn't get your integration`
-      }`,
+      defaultMessage: "We couldn't get {integrationName} integration info.",
+      values: {
+        integrationName,
+      },
     }),
     text: error.message,
   });
