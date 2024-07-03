@@ -21,14 +21,16 @@ import {
   flyoutOpenInLogsExplorerText,
 } from '../../../common/translations';
 import { useRedirectLink } from '../../hooks';
-import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 import { IntegrationIcon } from '../common';
+import { BasicDataStreamStats } from '../../../common/types';
 
-export function Header({ dataStreamStat }: { dataStreamStat: FlyoutDataset }) {
-  const { integration, title } = dataStreamStat;
+export function Header({ titleAndLinkDetails }: { titleAndLinkDetails: BasicDataStreamStats }) {
+  const { integration, title } = titleAndLinkDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
-  const redirectLinkProps = useRedirectLink({ dataStreamStat });
+  const redirectLinkProps = useRedirectLink({
+    dataStreamStat: titleAndLinkDetails,
+  });
 
   return (
     <EuiFlyoutHeader hasBorder>

@@ -10,8 +10,8 @@ import { useMemo, useCallback } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardType } from '../../common/data_streams_stats';
 import { useKibanaContextForPlugin } from '../utils';
+import { Dashboard } from '../../common/api_types';
 
 export const useFlyoutIntegrationActions = () => {
   const {
@@ -59,7 +59,7 @@ export const useFlyoutIntegrationActions = () => {
     [indexManagementLocator]
   );
   const getDashboardLinkProps = useCallback(
-    (dashboard: DashboardType) =>
+    (dashboard: Dashboard) =>
       getRouterLinkProps({
         href: dashboardLocator?.getRedirectUrl({ dashboardId: dashboard?.id } || ''),
         onClick: () => dashboardLocator?.navigate({ dashboardId: dashboard?.id } || ''),

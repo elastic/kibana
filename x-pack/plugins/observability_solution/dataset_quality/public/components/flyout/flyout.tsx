@@ -26,6 +26,7 @@ import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 import { FlyoutProps } from './types';
 import { FlyoutSummary } from './flyout_summary/flyout_summary';
+import { BasicDataStreamStats } from '../../../common/types';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
@@ -39,7 +40,16 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     timeRange,
     loadingState,
     flyoutLoading,
+    integration,
   } = useDatasetQualityFlyout();
+
+  const titleAndLinkDetails: BasicDataStreamStats = {
+    name: dataset.name,
+    integration: integration?.integrationDetails,
+    type: dataset.type,
+    namespace: dataset.namespace,
+    title: integration?.integrationDetails?.datasets?.[dataset.name] ?? dataset.name,
+  };
 
   return (
     <EuiFlyout
@@ -52,7 +62,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
         <EuiSkeletonRectangle width="100%" height={80} />
       ) : (
         <>
-          <Header dataStreamStat={dataset} />
+          <Header titleAndLinkDetails={titleAndLinkDetails} />
           <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
               <FlyoutSummary
@@ -80,11 +90,12 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
                     fieldFormats={fieldFormats}
                   />
 
-                  {dataStreamStat.integration && (
+                  {integration?.integrationDetails && (
                     <>
                       <EuiSpacer />
                       <IntegrationSummary
-                        integration={dataStreamStat.integration}
+                        integration={integration.integrationDetails}
+                        dashboards={integration?.dashboards ?? []}
                         dashboardsLoading={loadingState.datasetIntegrationsLoading}
                       />
                     </>

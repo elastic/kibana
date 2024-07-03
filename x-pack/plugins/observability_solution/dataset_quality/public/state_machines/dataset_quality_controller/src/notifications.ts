@@ -71,6 +71,15 @@ export const fetchIntegrationsFailedNotifier = (toasts: IToasts, error: Error) =
   });
 };
 
+export const fetchDataStreamIntegrationFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.flyout.fetchIntegrationsFailed', {
+      defaultMessage: "We couldn't get your integrations.",
+    }),
+    text: error.message,
+  });
+};
+
 export const noDatasetSelected = i18n.translate(
   'xpack.datasetQuality.fetchDatasetDetailsFailed.noDatasetSelected',
   {
