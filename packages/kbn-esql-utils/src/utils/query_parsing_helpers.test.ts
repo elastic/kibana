@@ -16,9 +16,6 @@ import {
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
     it('should return the index pattern string from esql queries', () => {
-      // const idxPattern0 = getIndexPatternFromESQLQuery('FROM "foo{{}}"');
-      // expect(idxPattern0).toBe('foo{{}}');
-
       const idxPattern1 = getIndexPatternFromESQLQuery('FROM foo');
       expect(idxPattern1).toBe('foo');
 
