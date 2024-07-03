@@ -34,7 +34,7 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   | (PackagePolicyCreateExtensionComponentProps & { isEditPage: false })
 ) & {
   validationResults?: PackagePolicyValidationResults;
-  agentPolicy?: AgentPolicy;
+  agentPolicies?: AgentPolicy[];
   packageInfo: PackageInfo;
   agentlessPolicy?: AgentPolicy;
   handleSetupTechnologyChange?: (setupTechnology: string) => void;
@@ -116,6 +116,12 @@ export interface PackagePolicyResponseExtension {
 export interface EndpointAgentTamperProtectionExtension {
   package: string;
   view: 'endpoint-agent-tamper-protection';
+  Component: LazyExoticComponent<ComponentType>;
+}
+
+export interface PliAuthBlockExtension {
+  package: string;
+  view: 'pli-auth-block';
   Component: LazyExoticComponent<ComponentType>;
 }
 
@@ -226,4 +232,5 @@ export type UIExtensionPoint =
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
   | PackagePolicyCreateMultiStepExtension
-  | EndpointAgentTamperProtectionExtension;
+  | EndpointAgentTamperProtectionExtension
+  | PliAuthBlockExtension;

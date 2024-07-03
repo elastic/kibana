@@ -15,9 +15,9 @@ import {
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
 } from './test_ids';
 import { VisualizationsSection } from './visualizations_section';
-import { mockContextValue } from '../mocks/mock_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
@@ -59,9 +59,9 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
   render(
     <IntlProvider locale="en">
       <TestProvider>
-        <RightPanelContext.Provider value={contextValue}>
+        <DocumentDetailsContext.Provider value={contextValue}>
           <VisualizationsSection />
-        </RightPanelContext.Provider>
+        </DocumentDetailsContext.Provider>
       </TestProvider>
     </IntlProvider>
   );

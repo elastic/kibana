@@ -599,8 +599,8 @@
             "pluginId": "@kbn/es-types",
             "scope": "common",
             "docId": "kibKbnEsTypesPluginApi",
-            "section": "def-common.ESQLSearchReponse",
-            "text": "ESQLSearchReponse"
+            "section": "def-common.ESQLSearchResponse",
+            "text": "ESQLSearchResponse"
           },
           "; params: ",
           {

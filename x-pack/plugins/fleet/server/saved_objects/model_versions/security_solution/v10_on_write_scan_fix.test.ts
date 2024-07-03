@@ -34,6 +34,7 @@ describe('backfill for modelVersion 10 - fix on_write_scan field', () => {
         },
         id: 'endpoint',
         policy_id: '',
+        policy_ids: [],
         enabled: true,
         namespace: '',
         revision: 0,

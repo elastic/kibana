@@ -7,7 +7,7 @@ You can also check out the dedicated app view, which enables easier search and f
 
 ## Directory: x-pack/plugins/cloud_security_posture
 
-**Total Tests:** 444 | **Skipped:** 5 (1.13%) | **Todo:** 0 (0.00%)
+**Total Tests:** 458 | **Skipped:** 5 (1.09%) | **Todo:** 0 (0.00%)
 
 ![](https://img.shields.io/badge/UT-brightgreen) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
 
@@ -69,7 +69,6 @@ You can also check out the dedicated app view, which enables easier search and f
 | [useNavigateFindings](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | describe |  |  |
 | [creates a URL to findings page with correct path, filter and dataViewId](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
 | [creates a URL to findings page with correct path and negated filter](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
-| [creates a URL to findings resource page with correct path and filter](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
 | [creates a URL to vulnerabilities page with correct path, filter and dataViewId](x-pack/plugins/cloud_security_posture/public/common/hooks/use_navigate_findings.test.ts) | it |  |  |
 | [useUrlQuery](x-pack/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts) | describe |  |  |
 | [uses default query when no query is provided](x-pack/plugins/cloud_security_posture/public/common/hooks/use_url_query.test.ts) | it |  |  |
@@ -266,6 +265,14 @@ You can also check out the dedicated app view, which enables easier search and f
 | [Should return undefined when datastream is undefined](x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/utils.test.ts) | it |  |  |
 | [Should return undefined when stream is undefined](x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/utils.test.ts) | it |  |  |
 | [Should return undefined when stream.var is invalid](x-pack/plugins/cloud_security_posture/public/components/fleet_extensions/utils.test.ts) | it |  |  |
+| [NoFindingsStates](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | describe |  |  |
+| [should show the indexing notification when CSPM is not installed and KSPM is indexing](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | it |  |  |
+| [should show the indexing notification when KSPM is not installed and CSPM is indexing](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | it |  |  |
+| [should show the indexing timout notification when CSPM is status is index-timeout](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | it |  |  |
+| [should show the indexing timout notification when KSPM is status is index-timeout](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | it |  |  |
+| [should show the unprivileged notification when CSPM is status is index-timeout](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | it |  |  |
+| [should show the unprivileged notification when KSPM is status is index-timeout](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | it |  |  |
+| [should show the not-installed notification when CSPM and KSPM status is not-installed](x-pack/plugins/cloud_security_posture/public/components/no_findings_states.test.tsx) | it |  |  |
 | [<BenchmarksTable />](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx) | describe |  |  |
 | [renders cis integration name](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx) | it |  |  |
 | [renders benchmark version](x-pack/plugins/cloud_security_posture/public/pages/benchmarks/benchmarks_table.test.tsx) | it |  |  |
@@ -335,6 +342,13 @@ You can also check out the dedicated app view, which enables easier search and f
 | [<Rules />](x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx) | describe |  |  |
 | [calls Benchmark API](x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx) | it |  |  |
 | [Display success state when result request is resolved](x-pack/plugins/cloud_security_posture/public/pages/rules/rules.test.tsx) | it |  |  |
+| [use_change_csp_rule_state](x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx) | describe |  |  |
+| [should call http.post with the correct parameters](x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx) | it |  |  |
+| [should cancel queries and update query data onMutate](x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx) | it |  |  |
+| [should invalidate queries onSettled](x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx) | it |  |  |
+| [should restore previous query data onError](x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx) | it |  |  |
+| [creates the new set of cache rules in a muted state when calling createRulesWithUpdatedState](x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx) | it |  |  |
+| [creates the new cache with rules in a unmute state](x-pack/plugins/cloud_security_posture/public/pages/rules/use_change_csp_rule_state.test.tsx) | it |  |  |
 | [<VulnerabilityFindingFlyout/>](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout.test.tsx) | describe |  |  |
 | [Header Info](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout.test.tsx) | describe |  |  |
 | [displays text details flyout header  info](x-pack/plugins/cloud_security_posture/public/pages/vulnerabilities/vulnerabilities_finding_flyout/vulnerability_finding_flyout.test.tsx) | it |  |  |
@@ -464,9 +478,9 @@ You can also check out the dedicated app view, which enables easier search and f
 
 ## Directory: x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture
 
-**Total Tests:** 37 | **Skipped:** 4 (10.81%) | **Todo:** 0 (0.00%)
+**Total Tests:** 37 | **Skipped:** 0 (0.00%) | **Todo:** 0 (0.00%)
 
-![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/SERVERLESS-pink) ![](https://img.shields.io/badge/API-INTEGRATION-purple) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
+![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/SERVERLESS-pink) ![](https://img.shields.io/badge/API-INTEGRATION-purple)
 
 <details>
 <summary>Test Details</summary>
@@ -490,10 +504,10 @@ You can also check out the dedicated app view, which enables easier search and f
 | [Should return 200 status code and paginate rules with a limit of PerPage](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/find_csp_benchmark_rule.ts) | it |  |  |
 | [cloud_security_posture](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/index.ts) | describe |  |  |
 | [GET /internal/cloud_security_posture/status](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | describe |  |  |
-| [STATUS = INDEXED TEST](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
-| [Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [STATUS = INDEXED TEST](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | describe |  |  |
+| [Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it |  |  |
+| [Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it |  |  |
+| [Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexed.ts) | it |  |  |
 | [GET /internal/cloud_security_posture/status](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | describe |  |  |
 | [STATUS = INDEXING TEST](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | describe |  |  |
 | [Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn](x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/status/status_indexing.ts) | it |  |  |
@@ -654,15 +668,21 @@ You can also check out the dedicated app view, which enables easier search and f
 
 ## Directory: x-pack/test/cloud_security_posture_functional
 
-**Total Tests:** 190 | **Skipped:** 37 (19.47%) | **Todo:** 2 (1.05%)
+**Total Tests:** 202 | **Skipped:** 41 (20.30%) | **Todo:** 3 (1.49%)
 
-![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/HAS-TODO-green) ![](https://img.shields.io/badge/HAS-SKIP-yellow)
+![](https://img.shields.io/badge/FTR-blue) ![](https://img.shields.io/badge/HAS-SKIP-yellow) ![](https://img.shields.io/badge/HAS-TODO-green)
 
 <details>
 <summary>Test Details</summary>
 
 | Test Label | Type | Skipped | Todo |
 |------------|------|---------|------|
+| [Access with custom roles](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
+| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
+| [Access with custom roles - rule page](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | describe |  |  |
+| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it |  |  |
+| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/benchmark.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
 | [Test adding Cloud Security Posture Integrations CNVM](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
 | [CNVM AWS](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | describe |  |  |
 | [Hyperlink on PostInstallation Modal should have the correct URL](x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts) | it |  |  |
@@ -748,6 +768,9 @@ You can also check out the dedicated app view, which enables easier search and f
 | [displays accurate summary compliance score](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  |  |
 | [TODO - Cloud Dashboard](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  | ![](https://img.shields.io/badge/todo-green) |
 | [todo - displays accurate summary compliance score](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  | ![](https://img.shields.io/badge/todo-green) |
+| [Access with custom roles](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | describe |  |  |
+| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it |  |  |
+| [todo - Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/compliance_dashboard.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) | ![](https://img.shields.io/badge/todo-green) |
 | [Findings Page - Alerts](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe |  |  |
 | [Create detection rule](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
 | [Creates a detection rule from the Take Action button and navigates to rule page](x-pack/test/cloud_security_posture_functional/pages/findings_alerts.ts) | it | ![](https://img.shields.io/badge/skipped-yellow) |  |
@@ -796,6 +819,9 @@ You can also check out the dedicated app view, which enables easier search and f
 | [Reset fields to default](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
 | [Findings Page - support muting rules](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
 | [verify only enabled rules appears](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Access with custom roles](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | describe |  |  |
+| [Access with valid user role](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
+| [Access with invalid user role](x-pack/test/cloud_security_posture_functional/pages/findings.ts) | it |  |  |
 | [Cloud Security Posture](x-pack/test/cloud_security_posture_functional/pages/index.ts) | describe |  |  |
 | [Cloud Posture Rules Page](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |
 | [Rules Page - Rules Counters](x-pack/test/cloud_security_posture_functional/pages/rules.ts) | describe | ![](https://img.shields.io/badge/skipped-yellow) |  |

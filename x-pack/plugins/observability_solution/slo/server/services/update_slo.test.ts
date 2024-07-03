@@ -42,14 +42,14 @@ describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let loggerMock: jest.Mocked<MockedLogger>;
+  let mockLogger: jest.Mocked<MockedLogger>;
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let updateSLO: UpdateSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
-    loggerMock = loggingSystemMock.createLogger();
+    mockLogger = loggingSystemMock.createLogger();
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
     updateSLO = new UpdateSLO(
@@ -57,7 +57,7 @@ describe('UpdateSLO', () => {
       mockTransformManager,
       mockSummaryTransformManager,
       mockEsClient,
-      loggerMock,
+      mockLogger,
       'some-space',
       httpServiceMock.createStartContract().basePath
     );
@@ -298,28 +298,52 @@ describe('UpdateSLO', () => {
   });
 
   describe('when error happens during the update', () => {
-    it('restores the previous SLO definition in the repository', async () => {
-      const slo = createSLO({
+    it('restores the previous SLO definition when updated summary transform install fails', async () => {
+      const originalSlo = createSLO({
         id: 'original-id',
         indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
       });
-      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
       mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
 
       const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
-      await expect(updateSLO.execute(slo.id, { indicator: newIndicator })).rejects.toThrowError(
-        'Transform install error'
+      await expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrowError('Transform install error');
+
+      expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).not.toHaveBeenCalled();
+      expect(mockTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+    });
+
+    it('restores the previous SLO definition and rollback succeeded operations until the summary transform start operation fails', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      mockSummaryTransformManager.start.mockRejectedValueOnce(
+        new Error('summary transform start error')
       );
 
-      expect(mockRepository.save).toHaveBeenCalledWith(slo);
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
 
-      // these calls are related to the updated slo
-      expect(mockSummaryTransformManager.stop).toMatchSnapshot();
-      expect(mockSummaryTransformManager.uninstall).toMatchSnapshot();
-      expect(mockTransformManager.stop).toMatchSnapshot();
-      expect(mockTransformManager.uninstall).toMatchSnapshot();
-      expect(mockEsClient.ingest.deletePipeline).toMatchSnapshot();
+      await expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrowError('summary transform start error');
+
+      expect(mockRepository.save).toHaveBeenCalledWith(originalSlo);
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockEsClient.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockTransformManager.stop).toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalled();
+
+      expect(mockSummaryTransformManager.stop).not.toHaveBeenCalled();
     });
   });
 

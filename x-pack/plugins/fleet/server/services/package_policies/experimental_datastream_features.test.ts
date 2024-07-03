@@ -108,6 +108,7 @@ function getNewTestPackagePolicy({
   const packagePolicy: NewPackagePolicy = {
     name: 'Test policy',
     policy_id: 'agent-policy',
+    policy_ids: ['agent-policy'],
     description: 'Test policy description',
     namespace: 'default',
     enabled: true,
@@ -148,6 +149,7 @@ function getExistingTestPackagePolicy({
     id: 'test-policy',
     name: 'Test policy',
     policy_id: 'agent-policy',
+    policy_ids: ['agent-policy'],
     description: 'Test policy description',
     namespace: 'default',
     enabled: true,

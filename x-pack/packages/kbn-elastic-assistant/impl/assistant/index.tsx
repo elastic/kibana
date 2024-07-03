@@ -39,6 +39,7 @@ import deepEqual from 'fast-deep-equal';
 
 import { find, isEmpty, uniqBy } from 'lodash';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { BlockBotCallToAction } from './block_bot/cta';
@@ -91,6 +92,7 @@ import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
 import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
+import { useFetchPrompts } from './api/prompts/use_fetch_prompts';
 
 export interface Props {
   conversationTitle?: string;
@@ -135,7 +137,6 @@ const AssistantComponent: React.FC<Props> = ({
     setLastConversationId,
     getLastConversationId,
     title,
-    allSystemPrompts,
     baseConversations,
   } = useAssistantContext();
 
@@ -182,6 +183,19 @@ const AssistantComponent: React.FC<Props> = ({
     isFetched: isFetchedAnonymizationFields,
   } = useFetchAnonymizationFields();
 
+  const {
+    data: { data: allPrompts },
+    refetch: refetchPrompts,
+    isLoading: isLoadingPrompts,
+  } = useFetchPrompts();
+
+  const allSystemPrompts = useMemo(() => {
+    if (!isLoadingPrompts) {
+      return allPrompts.filter((p) => p.promptType === PromptTypeEnum.system);
+    }
+    return [];
+  }, [allPrompts, isLoadingPrompts]);
+
   // Connector details
   const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({
     http,
@@ -220,7 +234,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (conversationsLoaded && Object.keys(conversations).length > 0) {
+    if (areConnectorsFetched && conversationsLoaded && Object.keys(conversations).length > 0) {
       setCurrentConversation((prev) => {
         const nextConversation =
           (currentConversationId && conversations[currentConversationId]) ||
@@ -256,13 +270,13 @@ const AssistantComponent: React.FC<Props> = ({
       });
     }
   }, [
+    areConnectorsFetched,
     conversationTitle,
     conversations,
+    conversationsLoaded,
+    currentConversationId,
     getDefaultConversation,
     getLastConversationId,
-    conversationsLoaded,
-    currentConversation?.id,
-    currentConversationId,
     isAssistantEnabled,
     isFlyoutMode,
   ]);
@@ -331,7 +345,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Show missing connector callout if no connectors are configured
 
   const showMissingConnectorCallout = useMemo(() => {
-    if (!isLoading && areConnectorsFetched) {
+    if (!isLoading && areConnectorsFetched && currentConversation?.id !== '') {
       if (!currentConversation?.apiConfig?.connectorId) {
         return true;
       }
@@ -342,7 +356,13 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return false;
-  }, [areConnectorsFetched, connectors, currentConversation?.apiConfig?.connectorId, isLoading]);
+  }, [
+    areConnectorsFetched,
+    connectors,
+    currentConversation?.apiConfig?.connectorId,
+    currentConversation?.id,
+    isLoading,
+  ]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -391,7 +411,11 @@ const AssistantComponent: React.FC<Props> = ({
   //  End Scrolling
 
   const selectedSystemPrompt = useMemo(
-    () => getDefaultSystemPrompt({ allSystemPrompts, conversation: currentConversation }),
+    () =>
+      getDefaultSystemPrompt({
+        allSystemPrompts,
+        conversation: currentConversation,
+      }),
     [allSystemPrompts, currentConversation]
   );
 
@@ -403,20 +427,21 @@ const AssistantComponent: React.FC<Props> = ({
     async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
       const updatedConv = await refetchResults();
 
+      let selectedConversation;
       if (cId === '') {
         setCurrentConversationId(cTitle);
-        setEditingSystemPromptId(
-          getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv?.data?.[cTitle] })
-            ?.id
-        );
+        selectedConversation = updatedConv?.data?.[cTitle];
         setCurrentConversationId(cTitle);
       } else {
-        const refetchedConversation = await refetchCurrentConversation({ cId });
-        setEditingSystemPromptId(
-          getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
-        );
+        selectedConversation = await refetchCurrentConversation({ cId });
         setCurrentConversationId(cId);
       }
+      setEditingSystemPromptId(
+        getDefaultSystemPrompt({
+          allSystemPrompts,
+          conversation: selectedConversation,
+        })?.id
+      );
     },
     [allSystemPrompts, refetchCurrentConversation, refetchResults]
   );
@@ -543,7 +568,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleOnChatCleared,
+    handleOnChatCleared: onChatCleared,
     handlePromptChange,
     handleSendMessage,
     handleRegenerateResponse,
@@ -560,6 +585,11 @@ const AssistantComponent: React.FC<Props> = ({
     setSelectedPromptContexts,
     setCurrentConversation,
   });
+
+  const handleOnChatCleared = useCallback(async () => {
+    await onChatCleared();
+    await refetchResults();
+  }, [onChatCleared, refetchResults]);
 
   const handleChatSend = useCallback(
     async (promptText: string) => {
@@ -628,18 +658,18 @@ const AssistantComponent: React.FC<Props> = ({
                 setIsSettingsModalVisible={setIsSettingsModalVisible}
                 setSelectedPromptContexts={setSelectedPromptContexts}
                 isFlyoutMode={isFlyoutMode}
+                allSystemPrompts={allSystemPrompts}
               />
             </ModalPromptEditorWrapper>
           )}
       </>
     ),
     [
-      abortStream,
-      refetchCurrentConversation,
-      currentConversation,
-      editingSystemPromptId,
       getComments,
+      abortStream,
+      currentConversation,
       showAnonymizedValues,
+      refetchCurrentConversation,
       handleRegenerateResponse,
       isEnabledKnowledgeBase,
       isEnabledRAGAlerts,
@@ -647,12 +677,14 @@ const AssistantComponent: React.FC<Props> = ({
       currentUserAvatar,
       isFlyoutMode,
       selectedPromptContextsCount,
+      editingSystemPromptId,
       isNewConversation,
       isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
       handleOnSystemPromptSelectionChange,
       selectedPromptContexts,
+      allSystemPrompts,
     ]
   );
 
@@ -698,8 +730,8 @@ const AssistantComponent: React.FC<Props> = ({
           conversation: payload,
           apiConfig: {
             ...payload?.apiConfig,
-            connectorId: defaultConnector?.id as string,
-            actionTypeId: defaultConnector?.actionTypeId as string,
+            connectorId: (defaultConnector?.id as string) ?? '',
+            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
             provider: apiConfig?.apiProvider,
             model: apiConfig?.defaultModel,
           },
@@ -720,27 +752,14 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      if (
-        showMissingConnectorCallout &&
-        areConnectorsFetched &&
-        defaultConnector &&
-        currentConversation
-      ) {
+      if (areConnectorsFetched && currentConversation?.id === '') {
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);
         }
       }
     })();
-  }, [
-    currentConversation,
-    defaultConnector,
-    refetchConversationsState,
-    setApiConfig,
-    showMissingConnectorCallout,
-    areConnectorsFetched,
-    mutateAsync,
-  ]);
+  }, [areConnectorsFetched, currentConversation, mutateAsync]);
 
   const handleCreateConversation = useCallback(async () => {
     const newChatExists = find(conversations, ['title', NEW_CHAT]);
@@ -861,6 +880,7 @@ const AssistantComponent: React.FC<Props> = ({
                     isSettingsModalVisible={isSettingsModalVisible}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     isFlyoutMode
+                    allSystemPrompts={allSystemPrompts}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -884,6 +904,7 @@ const AssistantComponent: React.FC<Props> = ({
       </EuiPanel>
     );
   }, [
+    allSystemPrompts,
     comments,
     connectorPrompt,
     currentConversation,
@@ -946,9 +967,11 @@ const AssistantComponent: React.FC<Props> = ({
                     setChatHistoryVisible={setChatHistoryVisible}
                     onConversationSelected={handleOnConversationSelected}
                     conversations={conversations}
+                    conversationsLoaded={conversationsLoaded}
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
                     isAssistantEnabled={isAssistantEnabled}
+                    refetchPrompts={refetchPrompts}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -1081,6 +1104,7 @@ const AssistantComponent: React.FC<Props> = ({
                         setIsSettingsModalVisible={setIsSettingsModalVisible}
                         trackPrompt={trackPrompt}
                         isFlyoutMode={isFlyoutMode}
+                        allPrompts={allPrompts}
                       />
                     </EuiPanel>
                   )}
@@ -1114,8 +1138,11 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues={showAnonymizedValues}
             title={title}
             conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
+            allPrompts={allPrompts}
+            refetchPrompts={refetchPrompts}
           />
         )}
 
@@ -1194,6 +1221,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             trackPrompt={trackPrompt}
             isFlyoutMode={isFlyoutMode}
+            allPrompts={allPrompts}
           />
         )}
       </EuiModalFooter>

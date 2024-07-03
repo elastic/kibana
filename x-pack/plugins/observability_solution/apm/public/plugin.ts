@@ -17,10 +17,11 @@ import {
   DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
+  SecurityServiceStart,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public/plugin';
+import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicSetup } from '@kbn/exploratory-view-plugin/public';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/public';
@@ -107,6 +108,7 @@ export interface ApmPluginSetupDeps {
 }
 
 export interface ApmServices {
+  securityService: SecurityServiceStart;
   telemetry: ITelemetryClient;
 }
 
@@ -390,6 +392,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {
+            securityService: coreStart.security,
             telemetry,
           },
         });

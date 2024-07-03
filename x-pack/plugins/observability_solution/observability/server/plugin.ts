@@ -36,6 +36,7 @@ import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/serve
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId } from '../common';
 import {
@@ -71,6 +72,7 @@ interface PluginSetup {
 interface PluginStart {
   alerting: PluginStartContract;
   spaces?: SpacesPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }
 
 const o11yRuleTypes = [
@@ -294,6 +296,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             ...plugins,
             core,
           },
+          dataViews: pluginStart.dataViews,
           spaces: pluginStart.spaces,
           ruleDataService,
           assistant: {

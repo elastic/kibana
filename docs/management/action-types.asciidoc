@@ -20,6 +20,10 @@ a| <<d3security-action-type,D3 Security>>
 
 | Send a request to D3 Security.
 
+a| <<gemini-action-type,{gemini}>>
+
+| Send a request to {gemini}.
+
 a| <<email-action-type,Email>>
 
 | Send email from your server.

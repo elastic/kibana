@@ -19,6 +19,7 @@ import {
   constructQueryOptions,
   constructSearch,
   convertSortField,
+  removeCustomFieldFromTemplates,
 } from './utils';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import type { CustomFieldsConfiguration } from '../../common/types/domain';
@@ -1128,6 +1129,291 @@ describe('utils', () => {
       expect(constructSearch(undefined, DEFAULT_NAMESPACE_STRING, savedObjectsSerializer)).toEqual(
         undefined
       );
+    });
+  });
+
+  describe('removeCustomFieldFromTemplates', () => {
+    const customFields = [
+      {
+        type: CustomFieldTypes.TEXT as const,
+        key: 'test_key_1',
+        label: 'My test label 1',
+        required: true,
+        defaultValue: 'My default value',
+      },
+      {
+        type: CustomFieldTypes.TOGGLE as const,
+        key: 'test_key_2',
+        label: 'My test label 2',
+        required: true,
+        defaultValue: true,
+      },
+      {
+        type: CustomFieldTypes.TEXT as const,
+        key: 'test_key_3',
+        label: 'My test label 3',
+        required: false,
+      },
+    ];
+
+    const templates = [
+      {
+        key: 'test_template_1',
+        name: 'First test template',
+        description: 'This is a first test template',
+        caseFields: {
+          customFields: [
+            {
+              type: CustomFieldTypes.TEXT as const,
+              key: 'test_key_1',
+              value: 'My default value',
+            },
+            {
+              type: CustomFieldTypes.TOGGLE as const,
+              key: 'test_key_2',
+              value: false,
+            },
+            {
+              type: CustomFieldTypes.TEXT as const,
+              key: 'test_key_3',
+              value: 'Test custom field',
+            },
+          ],
+        },
+      },
+      {
+        key: 'test_template_2',
+        name: 'Second test template',
+        description: 'This is a second test template',
+        tags: [],
+        caseFields: {
+          customFields: [
+            {
+              type: CustomFieldTypes.TEXT as const,
+              key: 'test_key_1',
+              value: 'My value',
+            },
+            {
+              type: CustomFieldTypes.TOGGLE as const,
+              key: 'test_key_2',
+              value: true,
+            },
+          ],
+        },
+      },
+    ];
+
+    it('removes custom field from template correctly', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates,
+        customFields: [customFields[0], customFields[1]],
+      });
+
+      expect(res).toEqual([
+        {
+          caseFields: {
+            customFields: [
+              {
+                key: 'test_key_1',
+                type: 'text',
+                value: 'My default value',
+              },
+              {
+                key: 'test_key_2',
+                type: 'toggle',
+                value: false,
+              },
+            ],
+          },
+          description: 'This is a first test template',
+          key: 'test_template_1',
+          name: 'First test template',
+        },
+        {
+          description: 'This is a second test template',
+          key: 'test_template_2',
+          name: 'Second test template',
+          tags: [],
+          caseFields: {
+            customFields: [
+              {
+                key: 'test_key_1',
+                type: 'text',
+                value: 'My value',
+              },
+              {
+                key: 'test_key_2',
+                type: 'toggle',
+                value: true,
+              },
+            ],
+          },
+        },
+      ]);
+    });
+
+    it('removes multiple custom fields from template correctly', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates,
+        customFields: [customFields[0]],
+      });
+
+      expect(res).toEqual([
+        {
+          caseFields: {
+            customFields: [
+              {
+                key: 'test_key_1',
+                type: 'text',
+                value: 'My default value',
+              },
+            ],
+          },
+          description: 'This is a first test template',
+          key: 'test_template_1',
+          name: 'First test template',
+        },
+        {
+          description: 'This is a second test template',
+          key: 'test_template_2',
+          name: 'Second test template',
+          tags: [],
+          caseFields: {
+            customFields: [
+              {
+                key: 'test_key_1',
+                type: 'text',
+                value: 'My value',
+              },
+            ],
+          },
+        },
+      ]);
+    });
+
+    it('removes all custom fields from templates when custom fields are empty', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates,
+        customFields: [],
+      });
+
+      expect(res).toEqual([
+        {
+          caseFields: {
+            customFields: [],
+          },
+          description: 'This is a first test template',
+          key: 'test_template_1',
+          name: 'First test template',
+        },
+        {
+          description: 'This is a second test template',
+          key: 'test_template_2',
+          name: 'Second test template',
+          tags: [],
+          caseFields: {
+            customFields: [],
+          },
+        },
+      ]);
+    });
+
+    it('removes all custom fields from templates when custom fields are undefined', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates,
+        customFields: undefined,
+      });
+
+      expect(res).toEqual([
+        { ...templates[0], caseFields: { customFields: [] } },
+        { ...templates[1], caseFields: { ...templates[1].caseFields, customFields: [] } },
+      ]);
+    });
+
+    it('does not remove custom field when templates do not have custom fields', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates: [
+          {
+            key: 'test_template_1',
+            name: 'First test template',
+            description: 'This is a first test template',
+            caseFields: null,
+          },
+          {
+            key: 'test_template_2',
+            name: 'Second test template',
+            caseFields: {
+              title: 'Test title',
+              description: 'this is test',
+            },
+          },
+        ],
+        customFields: [customFields[0], customFields[1]],
+      });
+
+      expect(res).toEqual([
+        {
+          caseFields: null,
+          description: 'This is a first test template',
+          key: 'test_template_1',
+          name: 'First test template',
+        },
+        {
+          key: 'test_template_2',
+          name: 'Second test template',
+          caseFields: {
+            description: 'this is test',
+            title: 'Test title',
+          },
+        },
+      ]);
+    });
+
+    it('does not remove custom field when templates have empty custom fields', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates: [
+          {
+            key: 'test_template_2',
+            name: 'Second test template',
+            caseFields: {
+              title: 'Test title',
+              description: 'this is test',
+              customFields: [],
+            },
+          },
+        ],
+        customFields: [customFields[0], customFields[1]],
+      });
+
+      expect(res).toEqual([
+        {
+          key: 'test_template_2',
+          name: 'Second test template',
+          caseFields: {
+            title: 'Test title',
+            description: 'this is test',
+            customFields: [],
+          },
+        },
+      ]);
+    });
+
+    it('does not remove custom field from empty templates', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates: [],
+        customFields: [customFields[0], customFields[1]],
+      });
+
+      expect(res).toEqual([]);
+    });
+
+    it('returns empty array when templates are undefined', () => {
+      const res = removeCustomFieldFromTemplates({
+        templates: undefined,
+        customFields: [customFields[0], customFields[1]],
+      });
+
+      expect(res).toEqual([]);
     });
   });
 });

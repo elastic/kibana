@@ -70,6 +70,9 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   };
 
   return {
+    /**
+     * Login to Kibana using SAML authentication with provided project-specfic role
+     */
     async loginWithRole(role: string) {
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getSessionCookieForRole(role);
@@ -100,14 +103,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             .set(svlCommonApi.getInternalRequestHeader())
             .set({ Cookie: `sid=${browserCookies[0].value}` });
 
-          const userData = await svlUserManager.getUserData(role);
+          const email = await svlUserManager.getEmail(role);
           // email returned from API call must match the email for the specified role
-          if (body.email === userData.email) {
+          if (body.email === email) {
             log.debug(`The new cookie is properly set for  '${role}' role`);
           } else {
             log.debug(`API response body: ${JSON.stringify(body)}`);
             throw new Error(
-              `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
+              `Cookie is not set properly, expected email is '${email}', but found '${body.email}'`
             );
           }
           // Verifying that we are logged in
@@ -121,10 +124,17 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       );
     },
 
+    /**
+     *
+     * Login to Kibana using SAML authentication with Admin role
+     */
     async loginAsAdmin() {
       await this.loginWithRole('admin');
     },
 
+    /**
+     * Login to Kibana using SAML authentication with Editor/Developer role
+     */
     async loginWithPrivilegedRole() {
       await this.loginWithRole(svlUserManager.DEFAULT_ROLE);
     },
@@ -138,6 +148,11 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       });
     },
 
+    /**
+     * Log out from Kibana, only required when test uses basic authentication: svlCommonPage.login()
+     *
+     * @deprecated in favor of role-based SAML authentication, no need to call it when test is migrated to SAML auth with `svlCommonPage.loginWithRole(role: string)`
+     */
     async forceLogout() {
       log.debug('SvlCommonPage.forceLogout');
       if (await find.existsByDisplayedByCssSelector('.login-form', 2000)) {
@@ -174,6 +189,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       });
     },
 
+    /**
+     * Login to Kibana with operator user using basic authentication via '/login' route
+     *
+     * @deprecated in favor of role-based SAML authentication: `svlCommonPage.loginWithRole(role: string)`
+     *
+     * Meta issue https://github.com/elastic/kibana/issues/183512
+     * Target date is end of June 2024
+     */
     async login() {
       await this.forceLogout();
 

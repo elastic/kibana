@@ -16,7 +16,6 @@
 
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
-    "@kbn/security-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",

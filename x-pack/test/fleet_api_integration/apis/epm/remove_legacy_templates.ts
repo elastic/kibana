@@ -98,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('legacy component template removal', async () => {
+  describe('Legacy component template removal', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -137,6 +137,8 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       await waitUntilLegacyComponentTemplatesCreated();
+      // wait 10s before uploading again to avoid getting 429
+      await sleep(10000);
       await installUploadPackage();
 
       const { component_templates: allComponentTemplates } =

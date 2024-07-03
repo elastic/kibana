@@ -21,7 +21,7 @@ export const getStatusRoute: CaseRoute = createCasesRoute({
   options: { deprecated: true },
   routerOptions: {
     access: 'public',
-    description: `Get case status summary`,
+    summary: `Get case status summary`,
   },
   handler: async ({ context, request, response }) => {
     try {

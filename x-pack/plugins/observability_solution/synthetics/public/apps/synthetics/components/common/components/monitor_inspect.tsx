@@ -70,6 +70,9 @@ const MonitorInspect = ({ isValid, monitorFields }: InspectorProps) => {
         monitor: monitorFields,
       });
     }
+    // FIXME: Dario couldn't find a solution for monitorFields
+    // which is not memoized downstream
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInspecting, hideParams]);
 
   let flyout;

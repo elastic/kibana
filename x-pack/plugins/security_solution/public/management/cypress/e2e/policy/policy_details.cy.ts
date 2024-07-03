@@ -19,7 +19,12 @@ import { loadPage } from '../../tasks/common';
 describe(
   'Policy Details',
   {
-    tags: ['@ess', '@serverless'],
+    tags: [
+      '@ess',
+      '@serverless',
+      // skipped on MKI since feature flags are not supported there
+      '@skipInServerlessMKI',
+    ],
     env: {
       ftrConfig: {
         kbnServerArgs: [

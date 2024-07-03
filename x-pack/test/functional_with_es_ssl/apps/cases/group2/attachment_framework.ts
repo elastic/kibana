@@ -235,8 +235,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders solutions selection', async () => {
           await openFlyout();
 
+          await testSubjects.click('caseOwnerSelector');
+
           for (const owner of TOTAL_OWNERS) {
-            await testSubjects.existOrFail(`${owner}RadioButton`);
+            await testSubjects.existOrFail(`${owner}OwnerOption`);
           }
 
           await closeFlyout();
@@ -263,7 +265,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Modal', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/157642
+      describe.skip('Modal', () => {
         const createdCases = new Map<string, string>();
 
         const openModal = async () => {
