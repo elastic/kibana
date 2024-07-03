@@ -2,11 +2,8 @@
   "type": "doc",
   "value": {
     "id": "task:ce7e1250-3322-11eb-94c1-db6995e83f6b",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
       "references": [
       ],
       "task": {
@@ -24,7 +21,8 @@
         "taskType": "sampleTaskNotRegisteredType"
       },
       "type": "task",
-      "updated_at": "2020-11-30T15:43:08.277Z"
+      "updated_at": "2020-11-30T15:43:08.277Z",
+      "typeMigrationVersion": "7.6.0"
     }
   }
 }
@@ -33,11 +31,8 @@
   "type": "doc",
   "value": {
     "id": "task:be7e1250-3322-11eb-94c1-db6995e83f6a",
-    "index": ".kibana_task_manager_1",
+    "index": ".kibana_task_manager",
     "source": {
-      "migrationVersion": {
-        "task": "7.6.0"
-      },
       "references": [
       ],
       "task": {
@@ -55,7 +50,8 @@
         "taskType": "sampleTaskRemovedType"
       },
       "type": "task",
-      "updated_at": "2020-11-30T15:43:08.277Z"
+      "updated_at": "2020-11-30T15:43:08.277Z",
+      "typeMigrationVersion": "7.6.0"
     }
   }
 }

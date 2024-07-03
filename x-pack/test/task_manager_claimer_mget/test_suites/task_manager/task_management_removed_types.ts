@@ -67,11 +67,11 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response: { body: SerializedConcreteTaskInstance }) => response.body);
     }
 
-    function currentTasks<State = unknown, Params = unknown>(): Promise<{
-      docs: Array<SerializedConcreteTaskInstance<State, Params>>;
-    }> {
+    function currentTask<State = unknown, Params = unknown>(
+      id: string
+    ): Promise<SerializedConcreteTaskInstance<State, Params>> {
       return request
-        .get('/api/sample_tasks')
+        .get(`/api/sample_tasks/task/${id}`)
         .expect(200)
         .then((response) => response.body);
     }
@@ -84,20 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-        expect(tasks.length).to.eql(3);
-
-        const taskIds = tasks.map((task) => task.id);
-        expect(taskIds).to.contain(scheduledTask.id);
-        expect(taskIds).to.contain(UNREGISTERED_TASK_TYPE_ID);
-        expect(taskIds).to.contain(REMOVED_TASK_TYPE_ID);
-
-        const scheduledTaskInstance = tasks.find((task) => task.id === scheduledTask.id);
-        const unregisteredTaskInstance = tasks.find(
-          (task) => task.id === UNREGISTERED_TASK_TYPE_ID
-        );
-        const removedTaskInstance = tasks.find((task) => task.id === REMOVED_TASK_TYPE_ID);
-
+        const scheduledTaskInstance = await currentTask(scheduledTask.id);
+        const unregisteredTaskInstance = await currentTask(UNREGISTERED_TASK_TYPE_ID);
+        const removedTaskInstance = await currentTask(REMOVED_TASK_TYPE_ID);
         expect(scheduledTaskInstance?.status).to.eql('claiming');
         expect(unregisteredTaskInstance?.status).to.eql('idle');
         expect(removedTaskInstance?.status).to.eql('unrecognized');
