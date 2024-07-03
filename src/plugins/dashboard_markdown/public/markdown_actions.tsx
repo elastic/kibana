@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
@@ -21,6 +22,8 @@ export const registerMarkdownActions = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_MARKDOWN_ACTION_ID,
     getIconType: () => 'visText',
+    order: 50,
+    grouping: [COMMON_EMBEDDABLE_GROUPING.annotation],
     isCompatible: async ({ embeddable }) => {
       return apiCanAddNewPanel(embeddable);
     },
@@ -40,7 +43,7 @@ export const registerMarkdownActions = (uiActions: UiActionsStart) => {
     },
     getDisplayName: () =>
       i18n.translate('dashboardMarkdown.addDisplayName', {
-        defaultMessage: 'Markdown',
+        defaultMessage: 'Text',
       }),
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_MARKDOWN_ACTION_ID);
