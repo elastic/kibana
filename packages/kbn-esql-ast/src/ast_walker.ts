@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { type ParserRuleContext } from 'antlr4';
+import { ParserRuleContext, TerminalNode } from 'antlr4';
 import {
   default as esql_parser,
   ArithmeticBinaryContext,
@@ -102,11 +102,23 @@ export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstIte
   return fromContexts.map((sourceCtx) => createSource(sourceCtx));
 }
 
+function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
+  const context = new ParserRuleContext();
+  context.start = node.symbol;
+  context.stop = node.symbol;
+  context.children = [node];
+  return context;
+}
 function extractIdentifiers(
   ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
   if (ctx instanceof MetadataOptionContext) {
-    return ctx.UNQUOTED_SOURCE_list().map((node) => node.parentCtx);
+    return ctx
+      .UNQUOTED_SOURCE_list()
+      .map((node) => {
+        return terminalNodeToParserRuleContext(node);
+      })
+      .flat();
   }
   if (ctx instanceof MvExpandCommandContext) {
     return wrapIdentifierAsArray(ctx.qualifiedName());
