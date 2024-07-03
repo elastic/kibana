@@ -36,7 +36,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-     - label: Running explore:network:runner:qa:serverless
+      - label: Running explore:network:runner:qa:serverless
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless
         key: explore:network:runner:qa:serverless
         agents:
@@ -49,9 +49,9 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2          
+              limit: 2
 
-     - label: explore:overview:runner:qa:serverless
+      - label: explore:overview:runner:qa:serverless
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
         key: explore:overview:runner:qa:serverless
         agents:
@@ -64,9 +64,9 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2          
+              limit: 2
 
-     - label: Running explore:users:runner:qa:serverless
+      - label: Running explore:users:runner:qa:serverless
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless
         key: explore:users:runner:qa:serverless
         agents:
@@ -79,4 +79,4 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2          
+              limit: 2

@@ -36,7 +36,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-     - label: Running explore:network:runner:qa:serverless:release
+      - label: Running explore:network:runner:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:network:runner:qa:serverless:release
         key: explore:network:runner:qa:serverless:release
         agents:
@@ -49,9 +49,9 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2          
+              limit: 2
 
-     - label: explore:overview:runner:qa:serverless:release
+      - label: explore:overview:runner:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless:release
         key: explore:overview:runner:qa:serverless:release
         agents:
@@ -64,9 +64,9 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2          
+              limit: 2
 
-     - label: Running explore:users:runner:qa:serverless:release
+      - label: Running explore:users:runner:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:users:runner:qa:serverless:release
         key: explore:users:runner:qa:serverless:release
         agents:
@@ -79,4 +79,4 @@ steps:
         retry:
           automatic:
             - exit_status: "1"
-              limit: 2                    
+              limit: 2
