@@ -52,7 +52,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
   // It's flaky only in Serverless
-  // Failing: See https://github.com/elastic/kibana/issues/186004
+  // Failing: See https://github.com/elastic/kibana/issues/187314
+  // Failing: See https://github.com/elastic/kibana/issues/187383
   describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@skipInServerless']);
     this.timeout(60_000 * 5);
