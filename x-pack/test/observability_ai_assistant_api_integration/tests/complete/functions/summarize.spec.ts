@@ -14,26 +14,21 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { Agent } from 'supertest';
 import expect from '@kbn/expect';
 import { Readable } from 'stream';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
 import { createLlmProxy, LlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe('when calling elasticsearch', () => {
+  describe('when calling summarize function', () => {
     let proxy: LlmProxy;
     let connectorId: string;
     let events: MessageAddEvent[];
 
     before(async () => {
       ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
-      await generateApmData(apmSynthtraceEsClient);
 
       const res = await observabilityAIAssistantAPIClient
         .editorUser({
@@ -47,21 +42,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     role: MessageRole.Assistant,
                     content: '',
                     function_call: {
-                      name: ELASTICSEARCH_FUNCTION_NAME,
+                      name: 'summarize',
                       trigger: MessageRole.User,
                       arguments: JSON.stringify({
-                        method: 'POST',
-                        path: 'traces*/_search',
-                        body: {
-                          size: 0,
-                          aggs: {
-                            services: {
-                              terms: {
-                                field: 'service.name',
-                              },
-                            },
-                          },
-                        },
+                        id: 'my-id',
+                        text: 'Hello world',
+                        is_correction: false,
+                        confidence: 1,
+                        public: false,
                       }),
                     },
                   },
@@ -76,16 +64,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       await proxy.waitForAllInterceptorsSettled();
-
       events = getMessageAddedEvents(res.body);
     });
 
     after(async () => {
       await deleteLLMProxyConnector({ supertest, connectorId, proxy });
-      await apmSynthtraceEsClient.clean();
     });
 
-    it('returns elasticsearch function response', async () => {
+    it('persists entry in knowledge base', async () => {
       const esFunctionResponse = events[0];
       const parsedEsResponse = JSON.parse(esFunctionResponse.message.message.content!).response;
 
@@ -156,19 +142,4 @@ async function deleteLLMProxyConnector({
     .expect(204);
 
   proxy.close();
-}
-
-async function generateApmData(apmSynthtraceEsClient: ApmSynthtraceEsClient) {
-  const serviceA = apm
-    .service({ name: 'foo', environment: 'production', agentName: 'java' })
-    .instance('a');
-
-  const events = timerange('now-15m', 'now')
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) => {
-      return serviceA.transaction({ transactionName: 'tx' }).timestamp(timestamp).duration(1000);
-    });
-
-  return apmSynthtraceEsClient.index(events);
 }
