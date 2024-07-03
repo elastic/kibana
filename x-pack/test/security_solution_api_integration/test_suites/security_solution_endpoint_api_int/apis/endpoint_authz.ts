@@ -113,13 +113,13 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: KILL_PROCESS_ROUTE,
-        body: () => ({ endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } }),
+        body: () => ({ endpoint_ids: [agentId], parameters: { entity_id: 'abc123' } }),
         version: '2023-10-31',
       },
       {
         method: 'post',
         path: SUSPEND_PROCESS_ROUTE,
-        body: () => ({ endpoint_ids: ['one'], parameters: { entity_id: 'abc123' } }),
+        body: () => ({ endpoint_ids: [agentId], parameters: { entity_id: 'abc123' } }),
         version: '2023-10-31',
       },
     ];
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'post',
         path: GET_FILE_ROUTE,
-        body: () => ({ endpoint_ids: ['one'], parameters: { path: '/opt/file/doc.txt' } }),
+        body: () => ({ endpoint_ids: [agentId], parameters: { path: '/opt/file/doc.txt' } }),
         version: '2023-10-31',
       },
     ];
@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         method: 'post',
         path: EXECUTE_ROUTE,
         version: '2023-10-31',
-        body: () => ({ endpoint_ids: ['one'], parameters: { command: 'ls -la' } }),
+        body: () => ({ endpoint_ids: [agentId], parameters: { command: 'ls -la' } }),
       },
     ];
 
