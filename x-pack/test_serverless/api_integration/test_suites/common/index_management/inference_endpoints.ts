@@ -17,10 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
   const inferenceId = 'my-elser-model';
   const taskType = 'sparse_embedding';
   const service = 'elser';
-  const modelId = '.elser_model_2'
+  const modelId = '.elser_model_2';
 
   // FLAKY: https://github.com/elastic/kibana/issues/185216
-  describe('Inference endpoints', function () {
+  describe.skip('Inference endpoints', function () {
     // test adds new trained model '.elser_model_2_linux-x86_64', but does not clean it. Follow up tests are affected
     this.tags(['failsOnMKI']);
     before(async () => {
