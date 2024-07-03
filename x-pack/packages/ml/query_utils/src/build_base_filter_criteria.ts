@@ -51,5 +51,6 @@ export function buildBaseFilterCriteria(
     filterCriteria.push(query);
   }
 
+  // @ts-expect-error upgrade typescript v5.1.6
   return filterCriteria;
 }

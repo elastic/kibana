@@ -294,6 +294,7 @@ describe('utils', () => {
             name: 'none',
             type: ConnectorTypes.swimlane as const,
             fields: {
+              // @ts-expect-error upgrade typescript v5.1.6
               issueType: '1',
               priority: 'test',
               parent: null,
@@ -334,6 +335,7 @@ describe('utils', () => {
             name: 'none',
             type: ConnectorTypes.swimlane as const,
             fields: {
+              // @ts-expect-error upgrade typescript v5.1.6
               issueType: '1',
               priority: 'test',
               parent: null,
