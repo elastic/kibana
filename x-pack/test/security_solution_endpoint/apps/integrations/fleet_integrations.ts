@@ -5,10 +5,6 @@
  * 2.0.
  */
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import {
-  deleteMetadataStream,
-  deleteAllDocsFromMetadataCurrentIndex,
-} from '../../../security_solution_api_integration/test_suites/security_solution_endpoint_api_int/apis/data_stream_helper';
 import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -17,6 +13,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const { deleteMetadataStream, deleteAllDocsFromMetadataCurrentIndex } = getService(
+    'endpointDataStreamHelpers'
+  );
 
   describe('When in the Fleet application', function () {
     targetTags(this, ['@ess', '@serverless']);

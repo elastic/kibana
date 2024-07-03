@@ -30,21 +30,22 @@ import {
   MetadataListResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
-import {
-  bulkIndex,
-  deleteAllDocsFromFleetAgents,
-  deleteAllDocsFromIndex,
-  deleteAllDocsFromMetadataCurrentIndex,
-  deleteAllDocsFromMetadataDatastream,
-  startTransform,
-  stopTransform,
-} from './data_stream_helper';
+
 import { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
+  const {
+    bulkIndex,
+    deleteAllDocsFromFleetAgents,
+    deleteAllDocsFromIndex,
+    deleteAllDocsFromMetadataCurrentIndex,
+    deleteAllDocsFromMetadataDatastream,
+    startTransform,
+    stopTransform,
+  } = getService('endpointDataStreamHelpers');
 
   describe('@ess @serverless test metadata apis', function () {
     describe('list endpoints GET route', () => {

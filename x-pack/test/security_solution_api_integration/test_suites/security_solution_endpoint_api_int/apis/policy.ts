@@ -7,11 +7,12 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../configs/ftr_provider_context';
-import { deletePolicyStream } from './data_stream_helper';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const { deletePolicyStream } = getService('endpointDataStreamHelpers');
+
   describe('@ess @serverless Endpoint policy api', function () {
     describe('GET /api/endpoint/policy_response', () => {
       before(

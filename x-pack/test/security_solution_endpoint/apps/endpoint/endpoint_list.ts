@@ -9,11 +9,6 @@ import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
 
-import {
-  deleteMetadataStream,
-  deleteAllDocsFromMetadataCurrentIndex,
-  deleteAllDocsFromMetadataUnitedIndex,
-} from '../../../security_solution_api_integration/test_suites/security_solution_endpoint_api_int/apis/data_stream_helper';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -23,6 +18,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
+  const {
+    deleteMetadataStream,
+    deleteAllDocsFromMetadataCurrentIndex,
+    deleteAllDocsFromMetadataUnitedIndex,
+  } = getService('endpointDataStreamHelpers');
 
   const expectedData = [
     [

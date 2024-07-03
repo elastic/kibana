@@ -7,11 +7,11 @@
 import { getRegistryUrl as getRegistryUrlFromIngest } from '@kbn/fleet-plugin/server';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
 import { FtrProviderContext } from '../configs/ftr_provider_context';
-import { getRegistryUrlFromTestEnv, isRegistryEnabled } from '../registry';
 import { ROLE } from '../services/roles_users';
 
 export default function endpointAPIIntegrationTests(providerContext: FtrProviderContext) {
   const { loadTestFile, getService } = providerContext;
+  const { getRegistryUrlFromTestEnv, isRegistryEnabled } = getService('endpointRegistryHelpers');
 
   describe('Endpoint plugin', function () {
     const ingestManager = getService('ingestManager');

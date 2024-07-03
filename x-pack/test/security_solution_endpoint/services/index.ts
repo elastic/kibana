@@ -17,6 +17,8 @@ import {
   KibanaSupertestWithCertProvider,
   KibanaSupertestWithCertWithoutAuthProvider,
 } from './supertest_with_cert';
+import { SecuritySolutionEndpointDataStreamHelper } from '../../security_solution_api_integration/config/services/security_solution_endpoint_data_stream_helper';
+import { SecuritySolutionEndpointRegistryHelper } from '../../security_solution_api_integration/config/services/security_solution_endpoint_registry_helper';
 
 export const services = {
   ...xPackFunctionalServices,
@@ -28,6 +30,8 @@ export const services = {
   detections: DetectionsTestService,
   endpointArtifactTestResources: EndpointArtifactsTestResources,
   policyTestResources: EndpointPolicyTestResourcesProvider,
+  endpointDataStreamHelpers: SecuritySolutionEndpointDataStreamHelper,
+  endpointRegistryHelpers: SecuritySolutionEndpointRegistryHelper,
 };
 
 export const svlServices = {

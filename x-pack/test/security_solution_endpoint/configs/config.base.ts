@@ -8,10 +8,6 @@
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from '../page_objects';
-import {
-  getRegistryUrlAsArray,
-  createEndpointDockerConfig,
-} from '../../security_solution_api_integration/test_suites/security_solution_endpoint_api_int/registry';
 import type { TargetTags } from '../target_tags';
 
 export const SUITE_TAGS: Record<
@@ -46,7 +42,8 @@ export const generateConfig = async ({
   services: any;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
-
+  const { createEndpointDockerConfig, getRegistryUrlAsArray } =
+    services.SecuritySolutionEndpointRegistryHelper();
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../../functional/config.base.js')
   );
