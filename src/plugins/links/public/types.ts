@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-
 import {
   HasEditCapabilities,
   HasInPlaceLibraryTransforms,
-  HasParentApi,
   HasType,
   PublishesPanelDescription,
   PublishesPanelTitle,
@@ -41,13 +38,8 @@ export type LinksParentApi = PresentationContainer &
 
 export type LinksApi = HasType<typeof CONTENT_ID> &
   DefaultEmbeddableApi<LinksSerializedState, LinksRuntimeState> &
-  HasParentApi<LinksParentApi> &
   HasEditCapabilities &
-  HasInPlaceLibraryTransforms<LinksRuntimeState> & {
-    layout$: BehaviorSubject<LinksLayoutType | undefined>;
-    links$: BehaviorSubject<ResolvedLink[] | undefined>;
-    savedObjectId$: BehaviorSubject<string | undefined>;
-  };
+  HasInPlaceLibraryTransforms<LinksRuntimeState>;
 
 export interface LinksByReferenceSerializedState {
   savedObjectId: string;

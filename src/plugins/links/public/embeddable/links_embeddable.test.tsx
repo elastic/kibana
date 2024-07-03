@@ -212,9 +212,7 @@ describe('getLinksEmbeddableFactory', () => {
           },
           references: [],
         });
-        expect(api.links$.value).toEqual(resolvedLinks);
-        expect(api.layout$.value).toEqual('vertical');
-        expect(api.savedObjectId$.value).toBe('123');
+        expect(api.libraryId$.value).toBe('123');
         expect(api.defaultPanelTitle!.value).toBe('links 001');
         expect(api.defaultPanelDescription!.value).toBe('some links');
       });
@@ -324,8 +322,6 @@ describe('getLinksEmbeddableFactory', () => {
           references,
         });
 
-        expect(api.links$.value).toEqual(resolvedLinks);
-        expect(api.layout$.value).toEqual('horizontal');
         expect(api.libraryId$.value).toBeUndefined();
       });
     });

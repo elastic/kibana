@@ -9,7 +9,6 @@
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { openEditorFlyout } from '../editor/open_editor_flyout';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { uiActions } from '../services/kibana_services';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
@@ -27,6 +26,7 @@ export const registerCreateLinksPanelAction = () => {
       if (!apiIsPresentationContainer(embeddable)) {
         throw new IncompatibleActionError();
       }
+      const { openEditorFlyout } = await import('../editor/open_editor_flyout');
       const runtimeState = await openEditorFlyout({
         parentDashboard: embeddable,
       });

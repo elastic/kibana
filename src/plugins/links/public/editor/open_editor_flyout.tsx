@@ -82,27 +82,23 @@ export async function openEditorFlyout({
     });
 
     const onSaveToLibrary = async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
-      const newState = {
+      const newState: LinksRuntimeState = {
         ...initialState,
         links: newLinks,
         layout: newLayout,
       };
 
-      try {
-        if (initialState?.savedObjectId) {
-          const { attributes, references } = serializeLinksAttributes(newState);
-          await linksClient.update({
-            id: initialState.savedObjectId,
-            data: attributes,
-            options: { references },
-          });
-          resolve(newState);
-        } else {
-          const saveResult = await runSaveToLibrary(newState);
-          resolve(saveResult);
-        }
-      } catch (e) {
-        reject(e);
+      if (initialState?.savedObjectId) {
+        const { attributes, references } = serializeLinksAttributes(newState);
+        await linksClient.update({
+          id: initialState.savedObjectId,
+          data: attributes,
+          options: { references },
+        });
+        resolve(newState);
+      } else {
+        const saveResult = await runSaveToLibrary(newState);
+        resolve(saveResult);
       }
       closeEditorFlyout(editorFlyout);
     };

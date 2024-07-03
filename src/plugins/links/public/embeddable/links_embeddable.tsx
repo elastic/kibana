@@ -7,20 +7,26 @@
  */
 
 import React, { createContext, useMemo } from 'react';
+import { cloneDeep } from 'lodash';
+import { BehaviorSubject } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
 import { EuiListGroup, EuiPanel } from '@elastic/eui';
 
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
+  apiPublishesPanelDescription,
+  apiPublishesPanelTitle,
+  apiPublishesSavedObjectId,
   initializeTitles,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { BehaviorSubject } from 'rxjs';
-import { cloneDeep } from 'lodash';
+import { apiIsPresentationContainer, SerializedPanelState } from '@kbn/presentation-containers';
+
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,
+  LinksLayoutType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../common/content_management';
@@ -30,13 +36,13 @@ import {
   LinksApi,
   LinksByReferenceSerializedState,
   LinksByValueSerializedState,
+  LinksParentApi,
   LinksRuntimeState,
   LinksSerializedState,
+  ResolvedLink,
 } from '../types';
 import { DISPLAY_NAME } from '../../common';
-import { initializeLinks } from './initialize_links';
 import { injectReferences } from '../../common/persistable_state';
-import { openEditorFlyout } from '../editor/open_editor_flyout';
 
 import '../components/links_component.scss';
 import { checkForDuplicateTitle, linksClient } from '../content_management';
@@ -45,8 +51,15 @@ import {
   deserializeLinksSavedObject,
   linksSerializeStateIsByReference,
 } from '../lib/deserialize_from_library';
+import { serializeLinksAttributes } from '../lib/serialize_attributes';
 
 export const LinksContext = createContext<LinksApi | null>(null);
+
+const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
+  apiIsPresentationContainer(parentApi) &&
+  apiPublishesSavedObjectId(parentApi) &&
+  apiPublishesPanelTitle(parentApi) &&
+  apiPublishesPanelDescription(parentApi);
 
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: ReactEmbeddableFactory<
@@ -86,43 +99,52 @@ export const getLinksEmbeddableFactory = () => {
       };
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const { linksApi, linksComparators, serializeLinks } = initializeLinks(state, parentApi);
+      const error$ = new BehaviorSubject<Error | undefined>(state.error);
+      if (!isParentApiCompatible(parentApi)) error$.next(new PanelIncompatibleError());
+
+      const links$ = new BehaviorSubject<ResolvedLink[] | undefined>(state.links);
+      const layout$ = new BehaviorSubject<LinksLayoutType | undefined>(state.layout);
+      const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
+      const defaultPanelDescription = new BehaviorSubject<string | undefined>(
+        state.defaultPanelDescription
+      );
       const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
-
-      const serializeState = async (): Promise<SerializedPanelState<LinksSerializedState>> => {
-        const { attributes, references } = serializeLinks();
-        if (savedObjectId$.value !== undefined) {
-          const linksByReferenceState: LinksByReferenceSerializedState = {
-            savedObjectId: savedObjectId$.value,
-            ...serializeTitles(),
-          };
-
-          return { rawState: linksByReferenceState, references: [] };
-        }
-
-        const linksByValueState: LinksByValueSerializedState = {
-          attributes,
-          ...serializeTitles(),
-        };
-        return { rawState: linksByValueState, references };
-      };
+      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
       const api = buildApi(
         {
           ...titlesApi,
-          ...linksApi,
+          blockingError: error$,
+          defaultPanelTitle,
+          defaultPanelDescription,
+          isEditingEnabled: () => Boolean(error$.value === undefined),
           libraryId$: savedObjectId$,
-          savedObjectId$,
           getTypeDisplayName: () => DISPLAY_NAME,
           getByValueRuntimeSnapshot: () => {
             const snapshot = api.snapshotRuntimeState();
             delete snapshot.savedObjectId;
             return snapshot;
           },
-          serializeState,
+          serializeState: async (): Promise<SerializedPanelState<LinksSerializedState>> => {
+            if (savedObjectId$.value !== undefined) {
+              const linksByReferenceState: LinksByReferenceSerializedState = {
+                savedObjectId: savedObjectId$.value,
+                ...serializeTitles(),
+              };
+              return { rawState: linksByReferenceState, references: [] };
+            }
+            const runtimeState = api.snapshotRuntimeState();
+            const { attributes, references } = serializeLinksAttributes(runtimeState);
+            const linksByValueState: LinksByValueSerializedState = {
+              attributes,
+              ...serializeTitles(),
+            };
+            return { rawState: linksByValueState, references };
+          },
           saveToLibrary: async (newTitle: string) => {
-            const { attributes, references } = await serializeLinks();
+            defaultPanelTitle.next(newTitle);
+            const runtimeState = api.snapshotRuntimeState();
+            const { attributes, references } = serializeLinksAttributes(runtimeState);
             const {
               item: { id },
             } = await linksClient.create({
@@ -153,16 +175,17 @@ export const getLinksEmbeddableFactory = () => {
           },
           onEdit: async () => {
             try {
+              const { openEditorFlyout } = await import('../editor/open_editor_flyout');
               const newState = await openEditorFlyout({
-                initialState: {
-                  links: linksApi.links$.value,
-                  layout: linksApi.layout$.value,
-                },
+                initialState: api.snapshotRuntimeState(),
                 parentDashboard: parentApi,
               });
               if (newState) {
-                linksApi.links$.next(newState.links);
-                linksApi.layout$.next(newState.layout);
+                links$.next(newState.links);
+                layout$.next(newState.layout);
+                defaultPanelTitle.next(newState.defaultPanelTitle);
+                defaultPanelDescription.next(newState.defaultPanelDescription);
+                savedObjectId$.next(newState.savedObjectId);
               }
             } catch {
               // do nothing, user cancelled
@@ -170,14 +193,32 @@ export const getLinksEmbeddableFactory = () => {
           },
         },
         {
-          ...linksComparators,
           ...titleComparators,
+          links: [
+            links$,
+            (nextLinks?: ResolvedLink[]) => links$.next(nextLinks ?? []),
+            (a, b) => Boolean(savedObjectId$.value) || fastIsEqual(a, b), // Editing attributes in a by-reference panel should not trigger unsaved changes.
+          ],
+          layout: [
+            layout$,
+            (nextLayout?: LinksLayoutType) => layout$.next(nextLayout ?? LINKS_VERTICAL_LAYOUT),
+            (a, b) => Boolean(savedObjectId$.value) || a === b,
+          ],
+          error: [error$, (nextError?: Error) => error$.next(nextError)],
+          defaultPanelDescription: [
+            defaultPanelDescription,
+            (nextDescription?: string) => defaultPanelDescription.next(nextDescription),
+          ],
+          defaultPanelTitle: [
+            defaultPanelTitle,
+            (nextTitle?: string) => defaultPanelTitle.next(nextTitle),
+          ],
           savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
         }
       );
 
       const Component = () => {
-        const [links, layout] = useBatchedOptionalPublishingSubjects(api.links$, api.layout$);
+        const [links, layout] = useBatchedOptionalPublishingSubjects(links$, layout$);
 
         const linkItems: { [id: string]: { id: string; content: JSX.Element } } = useMemo(() => {
           if (!links) return {};
@@ -192,7 +233,7 @@ export const getLinksEmbeddableFactory = () => {
                       key={currentLink.id}
                       link={currentLink}
                       layout={layout ?? LINKS_VERTICAL_LAYOUT}
-                      parentApi={api.parentApi}
+                      parentApi={parentApi as LinksParentApi}
                     />
                   ) : (
                     <ExternalLinkComponent

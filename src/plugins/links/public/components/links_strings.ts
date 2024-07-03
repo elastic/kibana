@@ -106,7 +106,7 @@ export const LinksStrings = {
         }),
       getErrorDuringSaveToastTitle: () =>
         i18n.translate('links.editor.unableToSaveToastTitle', {
-          defaultMessage: 'Error saving Link panel',
+          defaultMessage: 'Error saving links panel',
         }),
     },
     linkEditor: {
