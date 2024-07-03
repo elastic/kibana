@@ -46,6 +46,10 @@ import {
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import {
+  getCases,
+  waitForCases,
+} from '../../../../../../../cases_api_integration/common/lib/api/case';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
   createExceptionList,
@@ -104,11 +108,17 @@ export default ({ getService }: FtrProviderContext) => {
         useCreate: true,
         docsOnly: true,
       });
+      await deleteAllRules(supertest, log);
+
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
     afterEach(async () => {
       await esDeleteAllIndices('.preview.alerts*');
+      await esArchiver.unload(auditbeatPath);
+      await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
+      await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
+      await deleteAllRules(supertest, log);
     });
 
     after(async () => {
@@ -126,6 +136,35 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
+      expect(alerts.hits.hits.length).toBeGreaterThan(0);
+      expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).toEqual(ID);
+    });
+
+    // creates a real rule to determine if a case was opened by the system action
+    it('should create a case if a rule with the cases system action finds matching alerts', async () => {
+      const rule: QueryRuleCreateProps = {
+        ...getRuleForAlertTesting(['auditbeat-*']),
+        query: `_id:${ID}`,
+        actions: [
+          {
+            id: 'system-connector-.cases',
+            params: {
+              subAction: 'run',
+              subActionParams: {
+                timeWindow: '7d',
+                reopenClosedCases: false,
+                groupingBy: ['agent.name'],
+              },
+            },
+            action_type_id: '.cases',
+          },
+        ],
+      };
+      const createdRule = await createRule(supertest, log, rule);
+      const alerts = await getAlerts(supertest, log, es, createdRule);
+      await waitForCases({ supertest, log });
+      const cases = await getCases(supertest);
+      expect(cases.cases[0].totalAlerts).toBeGreaterThan(0);
       expect(alerts.hits.hits.length).toBeGreaterThan(0);
       expect(alerts.hits.hits[0]._source?.['kibana.alert.ancestors'][0].id).toEqual(ID);
     });

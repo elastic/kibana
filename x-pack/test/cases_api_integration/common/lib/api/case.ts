@@ -7,12 +7,14 @@
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
 import { Case } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
+import { CasePostRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
+import { ToolingLog } from '@kbn/tooling-log';
 import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
+import { waitFor } from '../../../../common/utils/security_solution/detections_response';
 
 export const createCase = async (
   supertest: SuperTest.Agent,
@@ -30,6 +32,46 @@ export const createCase = async (
     .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(params)
+    .expect(expectedHttpCode);
+
+  return theCase;
+};
+
+export const waitForCases = async ({
+  supertest,
+  log,
+}: {
+  supertest: SuperTest.Agent;
+  log: ToolingLog;
+}): Promise<void> => {
+  await waitFor(
+    async () => {
+      const response = await getCases(supertest);
+
+      // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
+      const cases = response;
+
+      return cases != null && cases.cases.length > 0 && cases?.cases[0]?.totalAlerts > 0;
+    },
+    'waitForCaseToAttachAlert',
+    log
+  );
+};
+
+export const getCases = async (
+  supertest: SuperTest.Agent,
+  expectedHttpCode: number = 200,
+  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
+  headers: Record<string, string | string[]> = {}
+): Promise<CasesFindResponse> => {
+  const apiCall = supertest.get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/_find`);
+
+  setupAuth({ apiCall, headers, auth });
+
+  const { body: theCase } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
     .expect(expectedHttpCode);
 
   return theCase;
