@@ -11,6 +11,7 @@ import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
 import { lt } from 'semver';
 import type {
+  AuthenticatedUser,
   ElasticsearchClient,
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateResponse,
@@ -20,7 +21,6 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
-import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
@@ -414,10 +414,20 @@ class AgentPolicyService {
 
   public async getByIDs(
     soClient: SavedObjectsClientContract,
-    ids: string[],
+    ids: Array<string | { id: string; spaceId?: string }>,
     options: { fields?: string[]; withPackagePolicies?: boolean; ignoreMissing?: boolean } = {}
   ): Promise<AgentPolicy[]> {
-    const objects = ids.map((id) => ({ ...options, id, type: SAVED_OBJECT_TYPE }));
+    const objects = ids.map((id) => {
+      if (typeof id === 'string') {
+        return { ...options, id, type: SAVED_OBJECT_TYPE };
+      }
+      return {
+        ...options,
+        id: id.id,
+        namespaces: id.spaceId ? [id.spaceId] : undefined,
+        type: SAVED_OBJECT_TYPE,
+      };
+    });
     const bulkGetResponse = await soClient.bulkGet<AgentPolicySOAttributes>(objects);
 
     const agentPolicies = await pMap(
@@ -432,7 +442,6 @@ class AgentPolicyService {
             throw new FleetError(agentPolicySO.error.message);
           }
         }
-
         const agentPolicy = mapAgentPolicySavedObjectToAgentPolicy(agentPolicySO);
         if (options.withPackagePolicies) {
           const agentPolicyWithPackagePolicies = await this.get(
@@ -999,15 +1008,21 @@ class AgentPolicyService {
           `Cannot delete agent policy ${id} that contains managed package policies`
         );
       }
+      const packagePoliciesToDelete = this.packagePoliciesWithoutMultiplePolicies(packagePolicies);
 
       await packagePolicyService.delete(
         soClient,
         esClient,
-        packagePolicies.map((p) => p.id),
+        packagePoliciesToDelete.map((p) => p.id),
         {
           force: options?.force,
           skipUnassignFromAgentPolicies: true,
         }
+      );
+      logger.debug(
+        `Deleted package policies with ids ${packagePoliciesToDelete
+          .map((policy) => policy.id)
+          .join(', ')}`
       );
     }
 
@@ -1540,6 +1555,16 @@ class AgentPolicyService {
         'supports_agentless is only allowed in serverless environments that support the agentless feature'
       );
     }
+  }
+
+  private packagePoliciesWithoutMultiplePolicies(packagePolicies: PackagePolicy[]) {
+    // Find package policies that don't have multiple agent policies and mark them for deletion
+    if (appContextService.getExperimentalFeatures().enableReusableIntegrationPolicies) {
+      return packagePolicies.filter(
+        (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
+      );
+    }
+    return packagePolicies;
   }
 }
 

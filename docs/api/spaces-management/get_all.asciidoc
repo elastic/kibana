@@ -72,7 +72,7 @@ The API returns the following:
     "initials": "MK",
     "disabledFeatures": ["discover"],
     "imageUrl": "",
-    "solution": "observability"
+    "solution": "oblt"
   }
 ]
 --------------------------------------------------

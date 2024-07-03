@@ -11,13 +11,18 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
-  ASSET_CRITICALITY_STATUS_URL,
-  ASSET_CRITICALITY_URL,
-  ASSET_CRITICALITY_PRIVILEGES_URL,
-  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  ASSET_CRITICALITY_PUBLIC_URL,
+  ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL,
+  ASSET_CRITICALITY_INTERNAL_STATUS_URL,
+  ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
+  API_VERSIONS,
+  ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
+import type {
+  AssetCriticalityRecord,
+  CreateAssetCriticalityRecord,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import querystring from 'querystring';
@@ -109,9 +114,9 @@ export const assetCriticalityRouteHelpersFactory = (
 ) => ({
   status: async () =>
     await supertest
-      .get(routeWithNamespace(ASSET_CRITICALITY_STATUS_URL, namespace))
+      .get(routeWithNamespace(ASSET_CRITICALITY_INTERNAL_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
@@ -120,9 +125,9 @@ export const assetCriticalityRouteHelpersFactory = (
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) =>
     await supertest
-      .post(routeWithNamespace(ASSET_CRITICALITY_URL, namespace))
+      .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
       .expect(expectStatusCode),
@@ -132,11 +137,11 @@ export const assetCriticalityRouteHelpersFactory = (
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) => {
     const qs = querystring.stringify({ id_field: idField, id_value: idValue });
-    const route = `${routeWithNamespace(ASSET_CRITICALITY_URL, namespace)}?${qs}`;
+    const route = `${routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace)}?${qs}`;
     return supertest
       .delete(route)
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .expect(expectStatusCode);
   },
@@ -146,12 +151,24 @@ export const assetCriticalityRouteHelpersFactory = (
     { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
   ) => {
     const qs = querystring.stringify({ id_field: idField, id_value: idValue });
-    const route = `${routeWithNamespace(ASSET_CRITICALITY_URL, namespace)}?${qs}`;
+    const route = `${routeWithNamespace(ASSET_CRITICALITY_PUBLIC_URL, namespace)}?${qs}`;
     return supertest
       .get(route)
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .expect(expectStatusCode);
+  },
+  bulkUpload: async (
+    records: CreateAssetCriticalityRecord[],
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
+    return supertest
+      .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_BULK_UPLOAD_URL, namespace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send({ records })
       .expect(expectStatusCode);
   },
   uploadCsv: async (
@@ -160,9 +177,9 @@ export const assetCriticalityRouteHelpersFactory = (
   ) => {
     const file = fileContent instanceof Buffer ? fileContent : Buffer.from(fileContent);
     return supertest
-      .post(routeWithNamespace(ASSET_CRITICALITY_CSV_UPLOAD_URL, namespace))
+      .post(routeWithNamespace(ASSET_CRITICALITY_PUBLIC_CSV_UPLOAD_URL, namespace))
       .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.public.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .attach('file', file, { filename: 'asset_criticality.csv' })
       .expect(expectStatusCode);
@@ -175,9 +192,9 @@ export const assetCriticalityRouteHelpersFactoryNoAuth = (
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
     await supertestWithoutAuth
-      .get(ASSET_CRITICALITY_PRIVILEGES_URL)
+      .get(ASSET_CRITICALITY_INTERNAL_PRIVILEGES_URL)
       .auth(username, password)
-      .set('elastic-api-version', '1')
+      .set('elastic-api-version', API_VERSIONS.internal.v1)
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),

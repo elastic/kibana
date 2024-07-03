@@ -8,7 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 
-import type { CloudStart } from '@kbn/cloud-plugin/server';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -52,6 +52,8 @@ import { ElasticsearchService } from './elasticsearch';
 import type { SecurityFeatureUsageServiceStart } from './feature_usage';
 import { SecurityFeatureUsageService } from './feature_usage';
 import { securityFeatures } from './features';
+import type { FipsServiceSetupInternal } from './fips';
+import { FipsService } from './fips';
 import { defineRoutes } from './routes';
 import { setupSavedObjects } from './saved_objects';
 import type { Session } from './session_management';
@@ -88,6 +90,7 @@ export interface PluginSetupDependencies {
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -176,6 +179,9 @@ export class SecurityPlugin
     return this.userProfileStart;
   };
 
+  private readonly fipsService: FipsService;
+  private fipsServiceSetup?: FipsServiceSetupInternal;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -198,6 +204,8 @@ export class SecurityPlugin
     );
 
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
+
+    this.fipsService = new FipsService(this.initializerContext.logger.get('fips'));
   }
 
   public setup(
@@ -278,6 +286,9 @@ export class SecurityPlugin
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
+
+    this.fipsServiceSetup = this.fipsService.setup({ config, license });
+    this.fipsServiceSetup.validateLicenseForFips();
 
     setupSpacesClient({
       spaces,

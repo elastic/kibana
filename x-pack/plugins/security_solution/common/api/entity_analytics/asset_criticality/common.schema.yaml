@@ -49,7 +49,6 @@ components:
         - high_impact
         - extreme_impact
       description: The criticality level of the asset.
-
     CreateAssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
@@ -57,12 +56,17 @@ components:
           properties:
             criticality_level:
               $ref: '#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality_level
+    CreateSingleAssetCriticalityRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateAssetCriticalityRecord'
+        - type: object
+          properties:
             refresh:
               type: string
               enum: [wait_for]
               description: If 'wait_for' the request will wait for the index refresh.
-          required:
-            - criticality_level
     DeleteAssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/AssetCriticalityRecordIdParts'
@@ -84,3 +88,46 @@ components:
               description: The time the record was created or updated.
           required:
             - '@timestamp'
+    AssetCriticalityBulkUploadErrorItem:
+      type: object
+      properties:
+        message:
+          type: string
+        index:
+          type: integer
+      required:
+        - message
+        - index
+    AssetCriticalityBulkUploadStats:
+      type: object
+      properties:
+        successful:
+          type: integer
+        failed:
+          type: integer
+        total:
+          type: integer
+      required:
+        - successful
+        - failed
+        - total
+    AssetCriticalityBulkUploadResponse:
+      type: object
+      example:
+        errors:
+          - message: 'Invalid ID field'
+            index: 0
+        stats:
+          successful: 1
+          failed: 1
+          total: 2
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/AssetCriticalityBulkUploadErrorItem'
+        stats:
+          $ref: '#/components/schemas/AssetCriticalityBulkUploadStats'
+      required:
+        - errors
+        - stats

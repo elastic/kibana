@@ -29,6 +29,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { ConnectorDefinition } from '@kbn/search-connectors-plugin/public';
+import type { SearchHomepagePluginStart } from '@kbn/search-homepage/public';
 import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -58,6 +59,7 @@ export interface KibanaLogicProps {
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   indexMappingComponent?: React.FC<IndexMappingProps>;
+  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
   lens?: LensPublicStart;
   ml?: MlPluginStart;
@@ -65,6 +67,7 @@ export interface KibanaLogicProps {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage?: SearchHomepagePluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   security?: SecurityPluginStart;
@@ -91,6 +94,7 @@ export interface KibanaValues {
   history: ScopedHistory;
   indexMappingComponent: React.FC<IndexMappingProps> | null;
   isCloud: boolean;
+  isSearchHomepageEnabled: boolean;
   isSidebarEnabled: boolean;
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
@@ -98,6 +102,7 @@ export interface KibanaValues {
   productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
+  searchHomepage: SearchHomepagePluginStart | null;
   searchPlayground: SearchPlaygroundPluginStart | null;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart | null;
   security: SecurityPluginStart | null;
@@ -129,6 +134,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     guidedOnboarding: [props.guidedOnboarding || null, {}],
     history: [props.history, {}],
     indexMappingComponent: [props.indexMappingComponent || null, {}],
+    isSearchHomepageEnabled: [props.isSearchHomepageEnabled, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],
     lens: [props.lens || null, {}],
     ml: [props.ml || null, {}],
@@ -143,6 +149,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
+    searchHomepage: [props.searchHomepage || null, {}],
     searchPlayground: [props.searchPlayground || null, {}],
     searchInferenceEndpoints: [props.searchInferenceEndpoints || null, {}],
     security: [props.security || null, {}],

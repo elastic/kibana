@@ -1,7 +1,9 @@
 - input: journald
   template_path: journald.yml.hbs
-  title: {{ data_stream_title }}
-  description: {{ data_stream_description }}
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
   vars:
     - name: include_matches
       type: text
