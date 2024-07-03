@@ -19,8 +19,8 @@ describe('validateDefinitionCanCreateValidTransformIds(definition)', () => {
     entityDefinitionWithLongID.id =
       'a-really-really-really-really-really-really-really-really-really-really-long-id';
 
-      expect(() => {
-        validateDefinitionCanCreateValidTransformIds(entityDefinition);
-      }).toThrow(EntityDefinitionIdTooLong);
+    expect(() => {
+      validateDefinitionCanCreateValidTransformIds(entityDefinition);
+    }).toThrow(EntityDefinitionIdTooLong);
   });
 });
