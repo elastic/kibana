@@ -20,6 +20,7 @@ import { handleEcsMapping } from './mapping';
 import { handleMissingKeys } from './missing';
 import { createPipeline } from './pipeline';
 import { handleValidateMappings } from './validate';
+import { LogFormat } from '../../constants';
 
 const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   ecs: {
@@ -84,7 +85,7 @@ const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   },
   logFormat: {
     value: (x: string, y?: string) => y ?? x,
-    default: () => 'json',
+    default: () => LogFormat.JSON,
   },
   ecsVersion: {
     value: (x: string, y?: string) => y ?? x,

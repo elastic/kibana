@@ -10,6 +10,24 @@ export interface IntegrationAssistantPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginStart {}
 
+export interface KVState {
+  ecs: object;
+  lastExecutedChain: string;
+  rawSamples: string[];
+  modifiedSamples: object[];
+  samples: string[];
+  exAnswer: string;
+  errors: object;
+  packageName: string;
+  dataStreamName: string;
+  finalized: boolean;
+  reviewed: boolean;
+  currentMapping: object;
+  results: object;
+  ecsVersion: string;
+  additionalProcessors: object[];
+}
+
 export interface CategorizationState {
   rawSamples: string[];
   samples: string[];
