@@ -31,37 +31,20 @@ export default function (providerContext: FtrProviderContext) {
   const log = getService('log');
 
   const getCspBenchmarkRules = async (benchmarkId: string): Promise<CspBenchmarkRule[]> => {
-    let retryCount = 0;
-    let arraySize = [];
+    let cspBenchmarkRules: CspBenchmarkRule[] = [];
+    await retry.try(async () => {
+      const cspBenchmarkRulesSavedObjects = await kibanaServer.savedObjects.find<CspBenchmarkRule>({
+        type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
+      });
 
-    while (retryCount < 10) {
-      try {
-        const kibanaServer2 = getService('kibanaServer');
-        const cspBenchmarkRules = await kibanaServer2.savedObjects.find<CspBenchmarkRule>({
-          type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
-        });
+      const requestedBenchmarkRules = cspBenchmarkRulesSavedObjects.saved_objects.filter(
+        (cspBenchmarkRule: any) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
+      );
 
-        const requestedBenchmarkRules = cspBenchmarkRules.saved_objects.filter(
-          (cspBenchmarkRule) => cspBenchmarkRule.attributes.metadata.benchmark.id === benchmarkId
-        );
-        arraySize.push(requestedBenchmarkRules);
-        if (requestedBenchmarkRules.length > 1) {
-          return requestedBenchmarkRules.map((item) => item.attributes);
-        } else {
-          throw new Error(`No benchmark rules found for benchmark ID: ${benchmarkId}`);
-        }
-      } catch (error) {
-        retryCount++;
-
-        await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay
-      }
-    }
-
-    throw new Error(
-      `Failed to retrieve benchmark rules after ${retryCount} attempts, with rule array size of ${JSON.stringify(
-        arraySize[0]
-      )}`
-    );
+      expect(requestedBenchmarkRules.length).greaterThan(1);
+      cspBenchmarkRules = requestedBenchmarkRules.map((item) => item.attributes);
+    });
+    return cspBenchmarkRules;
   };
 
   const getMockFinding = (rule: CspBenchmarkRule, evaluation: string) => ({
