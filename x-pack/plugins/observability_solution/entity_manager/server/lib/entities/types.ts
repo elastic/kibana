@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-let upgradeInProgress: boolean = false;
+import { EntityDefinition } from '@kbn/entities-schema';
 
-export function setUpgradeInProgress(show: boolean) {
-  upgradeInProgress = show;
-}
-
-export function isUpgradeInProgress(): boolean {
-  return upgradeInProgress;
-}
+export type EntityDefinitionWithState = EntityDefinition & {
+  state: { installed: boolean; running: boolean };
+};
