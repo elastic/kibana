@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  MessageAddEvent,
-  MessageRole,
-  StreamingChatResponseEvent,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Agent } from 'supertest';
+import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import { Readable } from 'stream';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
-import { createLlmProxy, LlmProxy } from '../../../common/create_llm_proxy';
+import { LlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { createLLMProxyConnector, deleteLLMProxyConnector, getMessageAddedEvents } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -99,66 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 }
 
-function decodeEvents(body: Readable | string) {
-  return String(body)
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
-}
-
-function getMessageAddedEvents(body: Readable | string) {
-  return decodeEvents(body).filter(
-    (event): event is MessageAddEvent => event.type === 'messageAdd'
-  );
-}
-
-async function createLLMProxyConnector({ log, supertest }: { log: ToolingLog; supertest: Agent }) {
-  const proxy = await createLlmProxy(log);
-
-  // intercept the LLM request and return a fixed response
-  proxy.intercept('conversation', () => true, 'Hello from LLM Proxy').completeAfterIntercept();
-
-  const response = await supertest
-    .post('/api/actions/connector')
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name: 'OpenAI Proxy',
-      connector_type_id: '.gen-ai',
-      config: {
-        apiProvider: 'OpenAI',
-        apiUrl: `http://localhost:${proxy.getPort()}`,
-      },
-      secrets: {
-        apiKey: 'my-api-key',
-      },
-    })
-    .expect(200);
-
-  return {
-    proxy,
-    connectorId: response.body.id,
-  };
-}
-
-async function deleteLLMProxyConnector({
-  supertest,
-  connectorId,
-  proxy,
-}: {
-  supertest: Agent;
-  connectorId: string;
-  proxy: LlmProxy;
-}) {
-  await supertest
-    .delete(`/api/actions/connector/${connectorId}`)
-    .set('kbn-xsrf', 'foo')
-    .expect(204);
-
-  proxy.close();
-}
-
-async function generateApmData(apmSynthtraceEsClient: ApmSynthtraceEsClient) {
+export async function generateApmData(apmSynthtraceEsClient: ApmSynthtraceEsClient) {
   const serviceA = apm
     .service({ name: 'foo', environment: 'production', agentName: 'java' })
     .instance('a');

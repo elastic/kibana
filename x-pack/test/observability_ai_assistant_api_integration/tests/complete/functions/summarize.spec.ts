@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import {
-  MessageAddEvent,
-  MessageRole,
-  StreamingChatResponseEvent,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Agent } from 'supertest';
+import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import { Readable } from 'stream';
-import { createLlmProxy, LlmProxy } from '../../../common/create_llm_proxy';
+import { LlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { createLLMProxyConnector, deleteLLMProxyConnector, getMessageAddedEvents } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const log = getService('log');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantAPIClient');
 
-  describe('when calling summarize function', () => {
+  // Skipped until Elser is available in tests
+  describe.skip('when calling summarize function', () => {
     let proxy: LlmProxy;
     let connectorId: string;
     let events: MessageAddEvent[];
@@ -30,7 +25,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     before(async () => {
       ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
 
-      const res = await observabilityAIAssistantAPIClient
+      const chatResponse = await observabilityAIAssistantAPIClient
         .editorUser({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
@@ -64,7 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       await proxy.waitForAllInterceptorsSettled();
-      events = getMessageAddedEvents(res.body);
+      events = getMessageAddedEvents(chatResponse.body);
     });
 
     after(async () => {
@@ -72,74 +67,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     });
 
     it('persists entry in knowledge base', async () => {
-      const esFunctionResponse = events[0];
-      const parsedEsResponse = JSON.parse(esFunctionResponse.message.message.content!).response;
+      const res = await observabilityAIAssistantAPIClient.editorUser({
+        endpoint: 'GET /internal/observability_ai_assistant/kb/entries',
+        params: {
+          query: {
+            query: '',
+            sortBy: 'doc_id',
+            sortDirection: 'asc',
+          },
+        },
+      });
 
-      expect(esFunctionResponse.message.message.name).to.be('elasticsearch');
-      expect(parsedEsResponse.hits.total.value).to.be(15);
-      expect(parsedEsResponse.aggregations.services.buckets).to.eql([
-        { key: 'foo', doc_count: 15 },
-      ]);
-      expect(events.length).to.be(2);
+      expect(res.body.entries).to.have.length(1);
     });
   });
-}
-
-function decodeEvents(body: Readable | string) {
-  return String(body)
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => JSON.parse(line) as StreamingChatResponseEvent);
-}
-
-function getMessageAddedEvents(body: Readable | string) {
-  return decodeEvents(body).filter(
-    (event): event is MessageAddEvent => event.type === 'messageAdd'
-  );
-}
-
-async function createLLMProxyConnector({ log, supertest }: { log: ToolingLog; supertest: Agent }) {
-  const proxy = await createLlmProxy(log);
-
-  // intercept the LLM request and return a fixed response
-  proxy.intercept('conversation', () => true, 'Hello from LLM Proxy').completeAfterIntercept();
-
-  const response = await supertest
-    .post('/api/actions/connector')
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name: 'OpenAI Proxy',
-      connector_type_id: '.gen-ai',
-      config: {
-        apiProvider: 'OpenAI',
-        apiUrl: `http://localhost:${proxy.getPort()}`,
-      },
-      secrets: {
-        apiKey: 'my-api-key',
-      },
-    })
-    .expect(200);
-
-  return {
-    proxy,
-    connectorId: response.body.id,
-  };
-}
-
-async function deleteLLMProxyConnector({
-  supertest,
-  connectorId,
-  proxy,
-}: {
-  supertest: Agent;
-  connectorId: string;
-  proxy: LlmProxy;
-}) {
-  await supertest
-    .delete(`/api/actions/connector/${connectorId}`)
-    .set('kbn-xsrf', 'foo')
-    .expect(204);
-
-  proxy.close();
 }
