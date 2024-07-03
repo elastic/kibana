@@ -13,6 +13,7 @@
     ],
     "requiredPlugins": [
       "kibanaReact",
+      "licensing",
       "triggersActionsUi",
       "actions",
       "stackConnectors",

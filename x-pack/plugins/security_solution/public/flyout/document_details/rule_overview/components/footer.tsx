@@ -30,7 +30,7 @@ export const RuleFooter = memo(() => {
             data-test-subj={RULE_OVERVIEW_NAVIGATE_TO_RULE_TEST_ID}
           >
             {i18n.translate('xpack.securitySolution.flyout.preview.rule.viewDetailsLabel', {
-              defaultMessage: 'Show rule details',
+              defaultMessage: 'Show full rule details',
             })}
           </EuiLink>
         </EuiFlexItem>

@@ -35,7 +35,7 @@ export interface UseChatSendProps {
 
 export interface UseChatSend {
   abortStream: () => void;
-  handleOnChatCleared: () => void;
+  handleOnChatCleared: () => Promise<void>;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
   handleRegenerateResponse: () => void;
