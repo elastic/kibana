@@ -85,12 +85,13 @@ export default function ({ getService }: FtrProviderContext) {
 
       await retry.try(async () => {
         const scheduledTaskInstance = await currentTask(scheduledTask.id);
-        const unregisteredTaskInstance = await currentTask(UNREGISTERED_TASK_TYPE_ID);
-        const removedTaskInstance = await currentTask(REMOVED_TASK_TYPE_ID);
         expect(scheduledTaskInstance?.status).to.eql('claiming');
-        expect(unregisteredTaskInstance?.status).to.eql('idle');
-        expect(removedTaskInstance?.status).to.eql('unrecognized');
       });
+
+      const unregisteredTaskInstance = await currentTask(UNREGISTERED_TASK_TYPE_ID);
+      const removedTaskInstance = await currentTask(REMOVED_TASK_TYPE_ID);
+      expect(unregisteredTaskInstance?.status).to.eql('idle');
+      expect(removedTaskInstance?.status).to.eql('unrecognized');
     });
   });
 }
