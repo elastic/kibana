@@ -278,6 +278,10 @@ export function AddCisIntegrationFormPageProvider({
     return await (await checkBox.findByCssSelector(`input[id='${id}']`)).getAttribute('checked');
   };
 
+  const getReplaceSecretButton = async (secretField: string) => {
+    return await testSubjects.find(`button-replace-${secretField}`);
+  };
+
   return {
     cisAzure,
     cisAws,
@@ -311,5 +315,6 @@ export function AddCisIntegrationFormPageProvider({
     getValueInEditPage,
     isOptionChecked,
     checkIntegrationPliAuthBlockExists,
+    getReplaceSecretButton,
   };
 }
