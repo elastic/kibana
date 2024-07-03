@@ -7,11 +7,11 @@
  */
 
 export {
-  DataViewField,
   isFilterable,
   isNestedField,
   isMultiField,
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
-} from '@kbn/data-view-utils';
+} from './utils';
 export * from './field_list';
+export * from './data_view_field';

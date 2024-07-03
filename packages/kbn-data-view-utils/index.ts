@@ -7,20 +7,6 @@
  */
 
 export * from './src/constants';
-export { DataViewField } from './src/fields';
-export {
-  shortenDottedString,
-  isFilterable,
-  isDataViewFieldSubtypeNested,
-  isDataViewFieldSubtypeMulti,
-  getDataViewFieldSubtypeNested,
-  getDataViewFieldSubtypeMulti,
-  getFieldSubtypeMulti,
-  getFieldSubtypeNested,
-  isMultiField,
-  isNestedField,
-  convertDatatableColumnToDataViewField,
-} from './src/utils';
-
+export { convertDatatableColumnToDataViewFieldSpec } from './src/utils/convert_to_data_view_field_spec';
 export { createRegExpPatternFrom } from './src/utils/create_regexp_pattern_from';
 export { testPatternAgainstAllowedList } from './src/utils/test_pattern_against_allowed_list';

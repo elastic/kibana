@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '..';
 import { DataViewField } from './data_view_field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { FieldSpec, RuntimeField } from '@kbn/data-views-plugin/common';
+import { FieldSpec, RuntimeField } from '../types';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 describe('Field', function () {
   function flatten(obj: Record<string, any>) {

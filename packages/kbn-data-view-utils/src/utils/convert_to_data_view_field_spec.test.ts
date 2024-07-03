@@ -7,9 +7,9 @@
  */
 
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { convertDatatableColumnToDataViewField } from './convert_to_data_view_field';
+import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
 
-describe('convertDatatableColumnToDataViewField', () => {
+describe('convertDatatableColumnToDataViewFieldSpec', () => {
   it('should return a DataViewField object for a counter column', () => {
     const column = {
       id: 'bytes_counter',
@@ -20,7 +20,7 @@ describe('convertDatatableColumnToDataViewField', () => {
       },
       isNull: false,
     };
-    const result = convertDatatableColumnToDataViewField(column);
+    const result = convertDatatableColumnToDataViewFieldSpec(column);
     expect(result).toEqual(
       expect.objectContaining({
         name: 'bytes_counter',
@@ -44,7 +44,7 @@ describe('convertDatatableColumnToDataViewField', () => {
       },
       isNull: false,
     };
-    const result = convertDatatableColumnToDataViewField(column);
+    const result = convertDatatableColumnToDataViewFieldSpec(column);
     expect(result).toEqual(
       expect.objectContaining({
         name: 'test',

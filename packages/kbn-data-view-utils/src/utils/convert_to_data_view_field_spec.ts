@@ -8,9 +8,12 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { DataViewField } from '../fields';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 
-export function convertDatatableColumnToDataViewField(column: DatatableColumn): DataViewField {
+/**
+ * Convert a datatable column to a DataViewFieldSpec
+ */
+export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColumn): FieldSpec {
   let esType = column.meta?.esType;
   let timeSeriesMetric: MappingTimeSeriesMetricType | undefined;
 
@@ -20,7 +23,9 @@ export function convertDatatableColumnToDataViewField(column: DatatableColumn): 
     timeSeriesMetric = 'counter';
   }
 
-  return new DataViewField({
+  // `DataViewField` class is defined in "data-views" plugin, so we can't create an instance of it from a package.
+  // We will return a data view field spec here instead then.
+  return {
     name: column.name,
     type: column.meta?.type ?? 'unknown',
     esTypes: esType ? [esType] : undefined,
@@ -28,5 +33,5 @@ export function convertDatatableColumnToDataViewField(column: DatatableColumn): 
     aggregatable: false,
     isNull: Boolean(column?.isNull),
     ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
-  });
+  };
 }
