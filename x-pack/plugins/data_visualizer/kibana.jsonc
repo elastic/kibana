@@ -29,6 +29,7 @@
       "cloud"
     ],
     "requiredBundles": [
+      "dataViews",
       "kibanaReact",
       "kibanaUtils",
       "maps",
@@ -37,6 +38,7 @@
       "uiActions",
       "lens",
       "textBasedLanguages",
+      "visualizations"
     ]
   }
 }

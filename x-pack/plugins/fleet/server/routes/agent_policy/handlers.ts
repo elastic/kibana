@@ -377,7 +377,9 @@ export const getFullAgentPolicy: FleetRequestHandler<
       const fullAgentPolicy = await agentPolicyService.getFullAgentPolicy(
         soClient,
         request.params.agentPolicyId,
-        { standalone: request.query.standalone === true }
+        {
+          standalone: request.query.standalone === true,
+        }
       );
       if (fullAgentPolicy) {
         const body: GetFullAgentPolicyResponse = {
