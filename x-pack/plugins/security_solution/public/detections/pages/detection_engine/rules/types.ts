@@ -193,7 +193,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: AlertingRuleAction[] | AlertingRuleSystemAction[];
+  actions: Array<AlertingRuleAction | AlertingRuleSystemAction>;
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
