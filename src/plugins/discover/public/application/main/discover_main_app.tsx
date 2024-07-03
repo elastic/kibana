@@ -35,12 +35,14 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
-  const { chrome, docLinks, data, spaces, history, filterManager } = services;
+  const { chrome, docLinks, data, spaces, history, filterManager, notifications } = services;
   const { registerAirdropContent } = useAirdrop();
 
-  const filtersAirdrop = useOnDrop<Filter[]>({ id: 'searchBar.filters' });
-  const queryAirdrop = useOnDrop<Query | AggregateQuery>({ id: 'searchBar.query' });
-  const selectedFieldsAirdrop = useOnDrop<string[] | undefined>({ id: 'searchBar.columns' });
+  const searchBarAirdrop = useOnDrop<{
+    filters?: Filter[];
+    query?: Query | AggregateQuery;
+    columns?: string[];
+  }>({ group: 'searchBar' });
 
   const { query } = data;
   const {
@@ -131,22 +133,21 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   }, [registerAirdropContent, getAppState]);
 
   useEffect(() => {
-    if (filtersAirdrop) {
-      filterManager.setAppFilters(filtersAirdrop.content);
-    }
-  }, [filtersAirdrop, filterManager]);
+    if (searchBarAirdrop) {
+      const { filters, query: _query, columns } = searchBarAirdrop.content;
+      if (filters) {
+        filterManager.setAppFilters(filters);
+      }
+      if (_query) {
+        query.queryString.setQuery(_query);
+      }
+      if (columns) {
+        updateAppState({ columns });
+      }
 
-  useEffect(() => {
-    if (queryAirdrop) {
-      query.queryString.setQuery(queryAirdrop.content);
+      notifications.toasts.addSuccess('Search bar content has been applied');
     }
-  }, [queryAirdrop, query]);
-
-  useEffect(() => {
-    if (selectedFieldsAirdrop) {
-      updateAppState({ columns: selectedFieldsAirdrop.content });
-    }
-  }, [selectedFieldsAirdrop, updateAppState]);
+  }, [searchBarAirdrop, filterManager, query, updateAppState, notifications]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 

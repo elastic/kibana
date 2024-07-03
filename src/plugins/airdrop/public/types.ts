@@ -16,6 +16,7 @@ export interface AirdropPluginStart {
   isDraggingOver$: Observable<boolean>;
   setIsDragging: (isDragging: boolean) => void;
   getAirdrop$ForId: <T>(id: string, app?: string) => Observable<Airdrop<T>>;
+  getAirdrop$ForGroup: <T>(group: string, app?: string) => Observable<Airdrop<T>>;
   getContents$ForGroup: (group: string, app?: string) => Observable<AirdropContent[]>;
   registerAirdropContent(content: AirdropContent): () => void;
 }

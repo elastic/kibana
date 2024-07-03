@@ -6,26 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { type FC, useState, useEffect } from 'react';
+import React, { type FC } from 'react';
 import { EuiCheckbox, useEuiTheme } from '@elastic/eui';
 import type { AirdropContent } from '../types';
 
 interface Props {
   contents: AirdropContent[];
-  onSelectionChange: (selected: AirdropContent[]) => void;
+  selected: string[];
+  toggleSelectContent: (id: string) => void;
 }
 
-export const GroupContentSelector: FC<Props> = ({ contents, onSelectionChange }) => {
-  const [selected, setSelected] = useState<string[]>([]);
+export const GroupContentSelector: FC<Props> = ({ contents, toggleSelectContent, selected }) => {
   const { euiTheme } = useEuiTheme();
-
-  useEffect(() => {
-    onSelectionChange(contents.filter(({ id }) => selected.includes(id)));
-  }, [contents, selected, onSelectionChange]);
-
-  useEffect(() => {
-    setSelected(contents.map(({ id }) => id));
-  }, [contents]);
 
   return (
     <ul
@@ -44,11 +36,9 @@ export const GroupContentSelector: FC<Props> = ({ contents, onSelectionChange })
             id={id}
             label={label ?? id}
             checked={selected.includes(id)}
-            onChange={() =>
-              setSelected(
-                selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id]
-              )
-            }
+            onChange={() => {
+              toggleSelectContent(id);
+            }}
           />
         </li>
       ))}

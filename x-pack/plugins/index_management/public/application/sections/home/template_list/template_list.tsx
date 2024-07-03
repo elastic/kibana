@@ -76,7 +76,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   location,
   history,
 }) => {
-  const { uiMetricService } = useServices();
+  const { uiMetricService, notificationService } = useServices();
   const {
     core: { executionContext, http },
   } = useAppContext();
@@ -290,10 +290,11 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           })
         )
       ).then(() => {
+        notificationService.showSuccessToast('Templates imported successfully!');
         reload();
       });
     }
-  }, [templatesAirdrop, http, reload]);
+  }, [templatesAirdrop, http, reload, notificationService]);
 
   let content;
 

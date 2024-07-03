@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -22,7 +22,6 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { Interpolation, Theme } from '@emotion/react';
 import { useAirdrop } from '../services';
-import type { AirdropContent } from '../types';
 import { type Props as AirdropDragButtonProps } from './airdrop_drag_button';
 import { DragWrapper } from './drag_wrapper';
 import { GroupContentSelector } from './group_content_selector';
@@ -44,8 +43,12 @@ export function AirdropPopover<T>({
   content: _content,
 }: Props<T>) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [selectedContent, setSelectedContent] = useState<AirdropContent[]>([]);
+  const [selected, setSelected] = useState<string[]>([]);
   const { getContents$ForGroup } = useAirdrop();
+
+  const toggleSelectContent = (id: string) => {
+    setSelected(selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id]);
+  };
 
   const contents$ = useMemo(() => {
     if (!group) return of([]);
@@ -53,13 +56,17 @@ export function AirdropPopover<T>({
   }, [getContents$ForGroup, group]);
   const contents = useObservable(contents$, []);
 
+  const selectedContent = useMemo(() => {
+    return contents.filter(({ id }) => selected.includes(id));
+  }, [contents, selected]);
+
   const content = useMemo<AirdropDragButtonProps['content']>(() => {
     if (_content) return _content;
 
     const hasAsyncGetters = selectedContent.some((c) => Boolean(c.getAsync));
     if (hasAsyncGetters) {
       return {
-        id: '__group__',
+        id: `__group__.${group}`,
         getAsync: async () => {
           const asyncContent: { [id: string]: unknown } = {};
           await Promise.all(
@@ -77,7 +84,7 @@ export function AirdropPopover<T>({
     }
 
     return {
-      id: '__group__',
+      id: `__group__.${group}`,
       get: () =>
         selectedContent.reduce((acc, c) => {
           if (!c.get) {
@@ -86,7 +93,11 @@ export function AirdropPopover<T>({
           return { ...acc, [c.id]: c.get() };
         }, {}),
     };
-  }, [_content, selectedContent]);
+  }, [_content, selectedContent, group]);
+
+  useEffect(() => {
+    setSelected(contents.map(({ id }) => id));
+  }, [contents]);
 
   return (
     <EuiPopover
@@ -116,7 +127,11 @@ export function AirdropPopover<T>({
         {contents.length > 0 && (
           <>
             <EuiSpacer />
-            <GroupContentSelector contents={contents} onSelectionChange={setSelectedContent} />
+            <GroupContentSelector
+              contents={contents}
+              selected={selected}
+              toggleSelectContent={toggleSelectContent}
+            />
           </>
         )}
       </div>

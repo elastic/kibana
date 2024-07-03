@@ -172,6 +172,8 @@ export const EditPolicy: React.FunctionComponent = () => {
         resetValues: true,
         defaultValue: airdropForm.content,
       });
+
+      toasts.addSuccess('Form data has been successfully loaded.');
     }
   }, [airdropForm, reset]);
 

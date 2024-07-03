@@ -58,6 +58,7 @@ export class AirdropService {
         this._isDragging$.next(isDragging);
       },
       getAirdrop$ForId: this.getAirdrop$ForId.bind(this),
+      getAirdrop$ForGroup: this.getAirdrop$ForGroup.bind(this),
       getContents$ForGroup: this.getContents$ForGroup.bind(this),
       registerAirdropContent: this.registerAirdropContent.bind(this),
     };
@@ -99,10 +100,21 @@ export class AirdropService {
   }
 
   public getAirdrop$ForId<T>(id: string, app?: string) {
+    // TODO: set app to current app if not provided
     return this.airdrop$.asObservable().pipe(
       filter((airdrop): airdrop is Airdrop<T> => {
         if (app && airdrop.app !== app) return false;
         return airdrop.id === id;
+      })
+    );
+  }
+
+  public getAirdrop$ForGroup<T>(group: string, app?: string) {
+    // TODO: set app to current app if not provided
+    return this.airdrop$.asObservable().pipe(
+      filter((airdrop): airdrop is Airdrop<T> => {
+        if (app && airdrop.app !== app) return false;
+        return airdrop.id === `__group__.${group}`;
       })
     );
   }
@@ -180,14 +192,25 @@ export class AirdropService {
 
   private onAirdrop(airdrop: Airdrop) {
     if (
-      airdrop.id === '__group__' &&
+      airdrop.id.includes('__group__.') &&
       typeof airdrop.content === 'object' &&
       airdrop.content !== null
     ) {
+      const serializedContent: { [id: string]: unknown } = {};
+      const group = airdrop.id.split('__group__.')[1];
       // Emit all airdrops from the group
       Object.entries(airdrop.content).forEach(([id, content]) => {
+        const contentId = id.split(`${group}.`)[1];
+        serializedContent[contentId] = content;
         this.onAirdrop({ id, content, app: airdrop.app });
       });
+
+      this.airdrop$.next({
+        id: airdrop.id,
+        app: airdrop.app,
+        content: serializedContent,
+      });
+
       return;
     }
 
