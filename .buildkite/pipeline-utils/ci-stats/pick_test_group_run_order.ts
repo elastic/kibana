@@ -134,14 +134,21 @@ interface FtrConfigsManifest {
 }
 
 function getEnabledFtrConfigs(patterns?: string[]) {
-  const configs: Array<string | { [configPath: string]: { queue: string } }> = [];
+  const configs: {
+    enabled: Array<string | { [configPath: string]: { queue: string } }>;
+    defaultQueue: string | undefined;
+  } = { enabled: [], defaultQueue: undefined };
   const uniqueQueues = new Set<string>();
 
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
     try {
-      const manifest = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8')) as FtrConfigsManifest;
+      const ymlData = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+      if (!isObj(ymlData)) {
+        throw new Error('expected yaml file to parse to an object');
+      }
+      const manifest = ymlData as FtrConfigsManifest;
 
-      configs.push(...(manifest?.enabled ?? []));
+      configs.enabled.push(...(manifest?.enabled ?? []));
       if (manifest.defaultQueue) {
         uniqueQueues.add(manifest.defaultQueue);
       }
@@ -152,11 +159,8 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   }
 
   try {
-    if (!isObj(configs)) {
-      throw new Error('expected yaml file to parse to an object');
-    }
-    if (!configs.enabled) {
-      throw new Error('expected yaml file to have an "enabled" key');
+    if (configs.enabled.length === 0) {
+      throw new Error('expected yaml files to have at least 1 "enabled" key');
     }
     if (uniqueQueues.size !== 1) {
       throw Error(
