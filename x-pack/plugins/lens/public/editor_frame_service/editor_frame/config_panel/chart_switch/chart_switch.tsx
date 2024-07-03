@@ -250,19 +250,7 @@ export const ChartSwitch = memo(function ChartSwitch({
           ? getCurrentVisualizationId(visualizationMap[visualization.activeId], visualization.state)
           : undefined;
       const lowercasedSearchTerm = searchTerm.toLowerCase();
-      // reorganize visualizations in groups
-      const grouped: Record<
-        string,
-        {
-          priority: number;
-          visualizations: Array<
-            VisualizationType & {
-              visualizationId: string;
-              selection: VisualizationSelection;
-            }
-          >;
-        }
-      > = {};
+
       // Will need it later on to quickly pick up the metadata from it
       const lookup: Record<
         string,
@@ -271,80 +259,54 @@ export const ChartSwitch = memo(function ChartSwitch({
           selection: VisualizationSelection;
         }
       > = {};
+      const chartSwitchPositions: Array<
+        VisualizationType & {
+          visualizationId: string;
+          selection: VisualizationSelection;
+        }
+      > = [];
       Object.entries(visualizationMap).forEach(([visualizationId, v]) => {
         for (const visualizationType of v.visualizationTypes) {
           const isSearchMatch =
             visualizationType.label.toLowerCase().includes(lowercasedSearchTerm) ||
             visualizationType.fullLabel?.toLowerCase().includes(lowercasedSearchTerm);
           if (isSearchMatch) {
-            grouped[visualizationType.groupLabel] = grouped[visualizationType.groupLabel] || {
-              priority: 0,
-              visualizations: [],
-            };
             const visualizationEntry = {
               ...visualizationType,
               visualizationId,
               selection: getSelection(visualizationId, visualizationType.id),
             };
-            grouped[visualizationType.groupLabel].priority += visualizationType.sortPriority || 0;
-            grouped[visualizationType.groupLabel].visualizations.push(visualizationEntry);
+            chartSwitchPositions.push(visualizationEntry);
             lookup[`${visualizationId}:${visualizationType.id}`] = visualizationEntry;
           }
         }
       });
 
       return {
-        visualizationTypes: Object.keys(grouped)
-          .sort((groupA, groupB) => {
-            return grouped[groupB].priority - grouped[groupA].priority;
+        visualizationTypes: chartSwitchPositions
+          .sort((a, b) => {
+            return a.sortPriority - b.sortPriority;
           })
-          .flatMap((group): SelectableEntry[] => {
-            const { visualizations } = grouped[group];
-            if (visualizations.length === 0) {
-              return [];
-            }
-            return [
-              {
-                key: group,
-                label: group,
-                isGroupLabel: true,
-                'aria-label': group,
-                'data-test-subj': `lnsChartSwitchPopover_${group}`,
-              } as SelectableEntry,
-            ].concat(
-              visualizations
-                // alphabetical order within each group
-                .sort((a, b) => {
-                  return (
-                    (b.sortOrder ?? 0) - (a.sortOrder ?? 0) ||
-                    (a.fullLabel || a.label).localeCompare(b.fullLabel || b.label)
-                  );
-                })
-                .map((v): SelectableEntry => {
-                  return {
-                    'aria-label': v.fullLabel || v.label,
-                    className: 'lnsChartSwitch__option',
-                    isGroupLabel: false,
-                    key: `${v.visualizationId}:${v.id}`,
-                    value: `${v.visualizationId}:${v.id}`,
-                    'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-                    label: v.fullLabel || v.label,
-                    prepend: (
-                      <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />
-                    ),
-                    append:
-                      v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
-                        <ChartOptionAppend
-                          dataLoss={v.selection.dataLoss}
-                          showExperimentalBadge={v.showExperimentalBadge}
-                          id={v.selection.subVisualizationId}
-                        />
-                      ) : null,
-                    // Apparently checked: null is not valid for TS
-                    ...(subVisualizationId === v.id && { checked: 'on' }),
-                  };
-                })
-            );
+          .map((v): SelectableEntry => {
+            return {
+              'aria-label': v.fullLabel || v.label,
+              className: 'lnsChartSwitch__option',
+              key: `${v.visualizationId}:${v.id}`,
+              value: `${v.visualizationId}:${v.id}`,
+              'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
+              label: v.fullLabel || v.label,
+              prepend: <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />,
+              append:
+                v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
+                  <ChartOptionAppend
+                    dataLoss={v.selection.dataLoss}
+                    showExperimentalBadge={v.showExperimentalBadge}
+                    id={v.selection.subVisualizationId}
+                  />
+                ) : null,
+              // Apparently checked: null is not valid for TS
+              ...(subVisualizationId === v.id && { checked: 'on' }),
+            };
           }),
         visualizationsLookup: lookup,
       };

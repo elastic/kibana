@@ -72,9 +72,6 @@ export const getDatatableVisualization = ({
       id: 'lnsDatatable',
       icon: IconChartDatatable,
       label: visualizationLabel,
-      groupLabel: i18n.translate('xpack.lens.datatable.groupLabel', {
-        defaultMessage: 'Tabular',
-      }),
       sortPriority: 5,
     },
   ],

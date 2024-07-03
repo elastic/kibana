@@ -57,10 +57,6 @@ import {
   GAUGE_MIN_NE_MAX,
 } from '../../user_messages_ids';
 
-const groupLabelForGauge = i18n.translate('xpack.lens.metric.groupLabel', {
-  defaultMessage: 'Goal and single value',
-});
-
 interface GaugeVisualizationDeps {
   paletteService: PaletteRegistry;
   theme: ThemeServiceStart;
@@ -77,41 +73,36 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     id: GaugeShapes.HORIZONTAL_BULLET,
     icon: IconChartHorizontalBullet,
     label: gaugeTitlesByType.horizontalBullet,
-    groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
-    sortOrder: 10,
+    sortPriority: 7,
   },
   [GaugeShapes.VERTICAL_BULLET]: {
     id: GaugeShapes.VERTICAL_BULLET,
     icon: IconChartVerticalBullet,
     label: gaugeTitlesByType.verticalBullet,
-    groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
-    sortOrder: 10,
+    sortPriority: 7,
   },
   [GaugeShapes.SEMI_CIRCLE]: {
     id: GaugeShapes.SEMI_CIRCLE,
     icon: IconChartGaugeSemiCircle,
     label: gaugeTitlesByType.semiCircle,
-    groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
-    sortOrder: 9,
+    sortPriority: 7,
   },
   [GaugeShapes.ARC]: {
     id: GaugeShapes.ARC,
     icon: IconChartGaugeArc,
     label: gaugeTitlesByType.arc,
-    groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
-    sortOrder: 8,
+    sortPriority: 7,
   },
   [GaugeShapes.CIRCLE]: {
     id: GaugeShapes.CIRCLE,
     icon: IconChartGaugeCircle,
     label: gaugeTitlesByType.circle,
-    groupLabel: groupLabelForGauge,
     showExperimentalBadge: true,
-    sortOrder: 7,
+    sortPriority: 7,
   },
 };
 

@@ -25,9 +25,9 @@ import type { PieChartType } from '../../../common/types';
 interface PartitionChartMeta {
   icon: ({ title, titleId, ...props }: Omit<EuiIconProps, 'type'>) => JSX.Element;
   label: string;
-  groupLabel: string;
   maxBuckets: number;
   isExperimental?: boolean;
+  sortPriority: number;
   toolbarPopover: {
     isDisabled?: boolean;
     categoryOptions: Array<{
@@ -51,10 +51,6 @@ interface PartitionChartMeta {
     getShowLegendDefault?: (bucketColumns: DatatableColumn[]) => boolean;
   };
 }
-
-const groupLabel = i18n.translate('xpack.lens.pie.groupLabel', {
-  defaultMessage: 'Proportion',
-});
 
 const categoryOptions: PartitionChartMeta['toolbarPopover']['categoryOptions'] = [
   {
@@ -143,7 +139,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     label: i18n.translate('xpack.lens.pie.donutLabel', {
       defaultMessage: 'Donut',
     }),
-    groupLabel,
     maxBuckets: 3,
     toolbarPopover: {
       categoryOptions,
@@ -153,13 +148,13 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     legend: {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
     },
+    sortPriority: 6,
   },
   pie: {
     icon: IconChartPie,
     label: i18n.translate('xpack.lens.pie.pielabel', {
       defaultMessage: 'Pie',
     }),
-    groupLabel,
     maxBuckets: 3,
     toolbarPopover: {
       categoryOptions,
@@ -168,13 +163,13 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     legend: {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
     },
+    sortPriority: 6,
   },
   treemap: {
     icon: IconChartTreemap,
     label: i18n.translate('xpack.lens.pie.treemaplabel', {
       defaultMessage: 'Treemap',
     }),
-    groupLabel,
     maxBuckets: 2,
     toolbarPopover: {
       categoryOptions: categoryOptionsTreemap,
@@ -183,13 +178,13 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     legend: {
       getShowLegendDefault: () => false,
     },
+    sortPriority: 11,
   },
   mosaic: {
     icon: IconChartMosaic,
     label: i18n.translate('xpack.lens.pie.mosaiclabel', {
       defaultMessage: 'Mosaic',
     }),
-    groupLabel,
     maxBuckets: 2,
     toolbarPopover: {
       categoryOptions: [],
@@ -198,13 +193,13 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
     legend: {
       getShowLegendDefault: () => false,
     },
+    sortPriority: 13,
   },
   waffle: {
     icon: IconChartWaffle,
     label: i18n.translate('xpack.lens.pie.wafflelabel', {
       defaultMessage: 'Waffle',
     }),
-    groupLabel,
     maxBuckets: 1,
     toolbarPopover: {
       isDisabled: true,
@@ -217,5 +212,6 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       hideNestedLegendSwitch: true,
       getShowLegendDefault: () => true,
     },
+    sortPriority: 9,
   },
 };

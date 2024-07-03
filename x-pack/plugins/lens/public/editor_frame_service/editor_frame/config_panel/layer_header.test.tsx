@@ -43,7 +43,7 @@ describe('LayerHeader', () => {
           icon: 'empty',
           id,
           label: faker.lorem.word(),
-          groupLabel: `${id}Group`,
+          sortPriority: 1,
         })),
       },
       hiddenVis: { ...createMockVisualization('hiddenVis'), hideFromChartSwitch: () => true },

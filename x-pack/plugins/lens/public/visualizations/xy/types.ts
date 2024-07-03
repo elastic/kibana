@@ -179,14 +179,6 @@ export interface XYState {
 
 export type State = XYState;
 
-const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
-  defaultMessage: 'Bar',
-});
-
-const groupLabelForLineAndArea = i18n.translate('xpack.lens.xyVisualization.lineGroupLabel', {
-  defaultMessage: 'Line and area',
-});
-
 export const visualizationTypes: VisualizationType[] = [
   {
     id: 'bar',
@@ -194,8 +186,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.barLabel', {
       defaultMessage: 'Bar vertical',
     }),
-    groupLabel: groupLabelForBar,
-    sortPriority: 4,
+    sortPriority: 1,
   },
   {
     id: 'bar_horizontal',
@@ -206,7 +197,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalFullLabel', {
       defaultMessage: 'Bar horizontal',
     }),
-    groupLabel: groupLabelForBar,
+    sortPriority: 1,
   },
   {
     id: 'bar_stacked',
@@ -214,7 +205,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarLabel', {
       defaultMessage: 'Bar vertical stacked',
     }),
-    groupLabel: groupLabelForBar,
+    sortPriority: 1,
   },
   {
     id: 'bar_percentage_stacked',
@@ -222,7 +213,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
       defaultMessage: 'Bar vertical percentage',
     }),
-    groupLabel: groupLabelForBar,
+    sortPriority: 1,
   },
   {
     id: 'bar_horizontal_stacked',
@@ -233,7 +224,7 @@ export const visualizationTypes: VisualizationType[] = [
     fullLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalFullLabel', {
       defaultMessage: 'Bar horizontal stacked',
     }),
-    groupLabel: groupLabelForBar,
+    sortPriority: 1,
   },
   {
     id: 'bar_horizontal_percentage_stacked',
@@ -247,7 +238,7 @@ export const visualizationTypes: VisualizationType[] = [
         defaultMessage: 'Bar horizontal percentage',
       }
     ),
-    groupLabel: groupLabelForBar,
+    sortPriority: 1,
   },
   {
     id: 'area',
@@ -255,7 +246,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.areaLabel', {
       defaultMessage: 'Area',
     }),
-    groupLabel: groupLabelForLineAndArea,
+    sortPriority: 3,
   },
   {
     id: 'area_stacked',
@@ -263,7 +254,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedAreaLabel', {
       defaultMessage: 'Area stacked',
     }),
-    groupLabel: groupLabelForLineAndArea,
+    sortPriority: 3,
   },
   {
     id: 'area_percentage_stacked',
@@ -271,7 +262,7 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
       defaultMessage: 'Area percentage',
     }),
-    groupLabel: groupLabelForLineAndArea,
+    sortPriority: 3,
   },
   {
     id: 'line',
@@ -279,7 +270,6 @@ export const visualizationTypes: VisualizationType[] = [
     label: i18n.translate('xpack.lens.xyVisualization.lineLabel', {
       defaultMessage: 'Line',
     }),
-    groupLabel: groupLabelForLineAndArea,
     sortPriority: 2,
   },
 ];

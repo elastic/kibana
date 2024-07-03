@@ -37,11 +37,7 @@ export const getVisualization = ({
       id: 'lnsChoropleth',
       icon: IconRegionMap,
       label: CHART_LABEL,
-      groupLabel: i18n.translate('xpack.maps.lens.groupLabel', {
-        defaultMessage: 'Map',
-      }),
-      sortPriority: 1,
-      showExperimentalBadge: false,
+      sortPriority: 10,
     },
   ],
 
@@ -87,9 +83,6 @@ export const getVisualization = ({
       groups: [
         {
           groupId: REGION_KEY_GROUP_ID,
-          groupLabel: i18n.translate('xpack.maps.lens.choroplethChart.regionKeyLabel', {
-            defaultMessage: 'Region key',
-          }),
           layerId: state.layerId,
           accessors: state.regionAccessor ? [{ columnId: state.regionAccessor }] : [],
           supportsMoreColumns: !state.regionAccessor,
@@ -100,9 +93,6 @@ export const getVisualization = ({
         },
         {
           groupId: METRIC_GROUP_ID,
-          groupLabel: i18n.translate('xpack.maps.lens.choroplethChart.metricValueLabel', {
-            defaultMessage: 'Metric',
-          }),
           layerId: state.layerId,
           accessors: state.valueAccessor ? [{ columnId: state.valueAccessor }] : [],
           supportsMoreColumns: !state.valueAccessor,

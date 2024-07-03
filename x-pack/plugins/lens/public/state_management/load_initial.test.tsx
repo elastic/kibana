@@ -94,7 +94,7 @@ describe('Initializing the store', () => {
               icon: 'empty',
               id: 'testVis',
               label: faker.lorem.word(),
-              groupLabel: 'testVisGroup',
+              sortPriority: 1,
             },
           ],
         },

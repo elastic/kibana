@@ -136,8 +136,8 @@ export const getPieVisualization = ({
     id: key,
     icon: meta.icon,
     label: meta.label,
-    groupLabel: meta.groupLabel,
     showExperimentalBadge: meta.isExperimental,
+    sortPriority: meta.sortPriority,
   })),
 
   getVisualizationTypeId(state) {

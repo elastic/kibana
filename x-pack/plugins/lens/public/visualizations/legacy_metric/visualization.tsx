@@ -164,9 +164,8 @@ export const getLegacyMetricVisualization = ({
       label: i18n.translate('xpack.lens.legacyMetric.label', {
         defaultMessage: 'Legacy Metric',
       }),
-      groupLabel: i18n.translate('xpack.lens.legacyMetric.groupLabel', {
-        defaultMessage: 'Goal and single value',
-      }),
+      isDeprecated: true,
+      sortPriority: 100,
     },
   ],
   hideFromChartSwitch(frame: FramePublicAPI) {

@@ -980,27 +980,19 @@ export interface VisualizationType {
    */
   fullLabel?: string;
   /**
-   * The group the visualization belongs to
-   */
-  groupLabel: string;
-  /**
-   * Adds to the priority of the group, accumulated from all visualizations within the same group
-   * Total priority is used to sort groups. Higher number means higher priority (aka top of list).
+   * Priority of the visualization for sorting in chart switch
+   * Lower number means higher priority (aka top of list).
    *
-   * @default 0
    */
-  sortPriority?: number;
-  /**
-   * The sort order of the visualization in the grouping
-   * Items arranged from highest on top to lowest on bottom.
-   *
-   * @default 0
-   */
-  sortOrder?: number;
+  sortPriority: number;
   /**
    * Indicates if visualization is in the experimental stage.
    */
   showExperimentalBadge?: boolean;
+  /**
+   * Indicates if visualization is deprecated.
+   */
+  isDeprecated?: boolean;
 }
 
 export interface VisualizationDisplayOptions {

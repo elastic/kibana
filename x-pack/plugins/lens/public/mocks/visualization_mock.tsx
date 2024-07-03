@@ -25,7 +25,7 @@ export function createMockVisualization(
         icon: 'empty',
         id,
         label: id,
-        groupLabel: `${id}Group`,
+        sortPriority: 1,
       },
     ],
     appendLayer: jest.fn(),

@@ -189,7 +189,7 @@ describe('chart_switch', () => {
           icon: 'empty',
           id,
           label: id,
-          groupLabel: `${id}Group`,
+          sortPriority: 1,
         })),
         getVisualizationTypeId: jest.fn((state) => state.type),
         getSuggestions: jest.fn((options) => {

@@ -46,9 +46,7 @@ export const getTagcloudVisualization = ({
       id: 'lnsTagcloud',
       icon: IconChartTagcloud,
       label: TAGCLOUD_LABEL,
-      groupLabel: i18n.translate('xpack.lens.pie.groupLabel', {
-        defaultMessage: 'Proportion',
-      }),
+      sortPriority: 12,
     },
   ],
 
