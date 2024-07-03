@@ -23,6 +23,7 @@ import type {
   RequiredField,
   RequiredFieldInput,
   RuleResponse,
+  RuleAction as RuleActionSchema,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   FindRulesResponse,
@@ -413,3 +414,11 @@ export const addEcsToRequiredFields = (requiredFields?: RequiredFieldInput[]): R
       ecs: isEcsField,
     };
   });
+
+export const separateActionsAndSystemAction = (
+  actionsClient: ActionsClient,
+  actions: RuleActionSchema[] | undefined
+) =>
+  !isEmpty(actions)
+    ? partition((action: RuleActionSchema) => actionsClient.isSystemAction(action.id))(actions)
+    : [[], actions];

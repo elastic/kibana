@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isEmpty } from 'lodash';
+
 import type {
   RuleAction as AlertingRuleAction,
   RuleSystemAction as AlertingRuleSystemAction,
@@ -17,6 +19,14 @@ import type {
 } from '../api/detection_engine/model/rule_response_actions';
 import { ResponseActionTypesEnum } from '../api/detection_engine/model/rule_response_actions';
 import type { RuleAction } from '../api/detection_engine/model';
+
+export const transformRuleActionsToAlertActions = (
+  newActions: RuleAction[] | undefined,
+  existingActions: AlertingRuleAction[] | AlertingRuleSystemAction[] | undefined
+): AlertingRuleAction[] | AlertingRuleSystemAction[] =>
+  !isEmpty(newActions) && newActions != null
+    ? newActions.map((action) => transformRuleToAlertAction(action))
+    : existingActions ?? [];
 
 export const transformRuleToAlertAction = ({
   group,

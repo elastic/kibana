@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { isEmpty, partition } from 'lodash';
 
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
@@ -45,6 +44,7 @@ import {
   transformAlertToRuleAction,
   transformAlertToRuleResponseAction,
   transformAlertToRuleSystemAction,
+  transformRuleActionsToAlertActions,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
 } from '../../../../../common/detection_engine/transform_actions';
@@ -86,6 +86,7 @@ import {
   convertAlertSuppressionToCamel,
   convertAlertSuppressionToSnake,
   migrateLegacyInvestigationFields,
+  separateActionsAndSystemAction,
 } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
@@ -449,23 +450,15 @@ export const convertUpdateAPIToInternalSchema = ({
   ruleUpdate,
   actionsClient,
 }: ConvertUpdateAPIToInternalSchemaProps) => {
-  const [ruleUpdateSystemActions, ruleUpdateActions] = partition(ruleUpdate.actions, (action) =>
-    actionsClient.isSystemAction(action.id)
+  const [ruleUpdateSystemActions, ruleUpdateActions] = separateActionsAndSystemAction(
+    actionsClient,
+    ruleUpdate.actions
   );
-
-  const [existingRuleUpdateSystemActions, existingRuleUpdateActions] = partition(
-    existingRule.actions,
-    (action) => actionsClient.isSystemAction(action.id)
+  const systemActions = transformRuleActionsToAlertActions(
+    ruleUpdateSystemActions,
+    existingRule.systemActions
   );
-
-  const systemActions =
-    (ruleUpdateSystemActions ?? existingRuleUpdateSystemActions).map((action) =>
-      transformRuleToAlertAction(action)
-    ) ?? [];
-  const alertActions =
-    (ruleUpdateActions ?? existingRuleUpdateActions).map((action) =>
-      transformRuleToAlertAction(action)
-    ) ?? [];
+  const alertActions = transformRuleActionsToAlertActions(ruleUpdateActions, existingRule.actions);
   const actions = transformToActionFrequency<RuleActionCamel>(
     alertActions as RuleActionCamel[],
     ruleUpdate.throttle
@@ -513,7 +506,7 @@ export const convertUpdateAPIToInternalSchema = ({
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
     actions,
-    systemActions,
+    ...(systemActions && { systemActions }),
   };
 
   return newInternalRule;
@@ -528,15 +521,16 @@ export const convertPatchAPIToInternalSchema = (
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
 
-  const [ruleUpdateSystemActions, ruleUpdateActions] = partition(nextParams.actions, (action) =>
-    actionsClient.isSystemAction(action.id)
+  const [ruleUpdateSystemActions, ruleUpdateActions] = separateActionsAndSystemAction(
+    actionsClient,
+    nextParams.actions
   );
-  const systemActions = !isEmpty(ruleUpdateSystemActions)
-    ? ruleUpdateSystemActions.map((action) => transformRuleToAlertAction(action))
-    : existingRule.systemActions;
-  const alertActions = !isEmpty(ruleUpdateActions)
-    ? ruleUpdateActions.map((action) => transformRuleToAlertAction(action))
-    : existingRule.actions;
+  const systemActions = transformRuleActionsToAlertActions(
+    ruleUpdateSystemActions,
+    existingRule.systemActions
+  );
+
+  const alertActions = transformRuleActionsToAlertActions(ruleUpdateActions, existingRule.actions);
 
   const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
   const actions = transformToActionFrequency(alertActions as RuleActionCamel[], throttle);
@@ -600,8 +594,9 @@ export const convertCreateAPIToInternalSchema = (
 ): InternalRuleCreate => {
   const { immutable = false, defaultEnabled = true } = options ?? {};
 
-  const [systemActions, externalActions] = partition(input.actions, (action) =>
-    actionsClient.isSystemAction(action.id)
+  const [systemActions, externalActions] = separateActionsAndSystemAction(
+    actionsClient,
+    input.actions
   );
 
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
@@ -655,7 +650,7 @@ export const convertCreateAPIToInternalSchema = (
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
     actions,
-    systemActions: alertSystemActions,
+    ...(alertSystemActions && { systemActions: alertSystemActions }),
   };
 };
 
