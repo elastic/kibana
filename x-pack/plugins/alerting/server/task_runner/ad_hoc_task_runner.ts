@@ -573,6 +573,10 @@ export class AdHocTaskRunner {
             : undefined,
       },
     });
+    this.shouldDeleteTask = !this.hasAnyPendingRuns();
+
+    // cleanup function is not called for timed out tasks
+    await this.cleanup();
   }
 
   async cleanup() {
