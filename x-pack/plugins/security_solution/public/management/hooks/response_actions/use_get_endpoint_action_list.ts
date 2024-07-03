@@ -19,13 +19,14 @@ interface ErrorType {
 }
 
 export const useGetEndpointActionList = (
-  query: EndpointActionListRequestQuery,
+  query: EndpointActionListRequestQuery = {},
   options: UseQueryOptions<ActionListApiResponse, IHttpFetchError<ErrorType>> = {}
 ): UseQueryResult<ActionListApiResponse, IHttpFetchError<ErrorType>> => {
   const http = useHttp();
 
   // prepend and append * to userIds for fuzzy search
   let userIds = query.userIds;
+
   if (typeof query.userIds === 'string') {
     userIds = `*${query.userIds}*`;
   } else if (Array.isArray(query.userIds)) {
@@ -40,17 +41,8 @@ export const useGetEndpointActionList = (
       return http.get<ActionListApiResponse>(BASE_ENDPOINT_ACTION_ROUTE, {
         version: '2023-10-31',
         query: {
-          agentIds: query.agentIds,
-          agentTypes: query.agentTypes,
-          commands: query.commands,
-          endDate: query.endDate,
-          page: query.page,
-          pageSize: query.pageSize,
-          startDate: query.startDate,
-          statuses: query.statuses,
-          userIds,
-          withOutputs: query.withOutputs,
-          types: query.types,
+          ...query,
+          ...(userIds ? { userIds } : {}),
         },
       });
     },
