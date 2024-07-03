@@ -5,20 +5,22 @@
  * 2.0.
  */
 
+import { EntityIdTooLong } from '../errors/entity_id_too_long_error';
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
 import { validateDefinitionCanCreateValidTransformIds } from './validate_transform_ids';
 
 describe('validateDefinitionCanCreateValidTransformIds(definition)', () => {
-  it('should return true for a definition ID which is not too long', () => {
-    const valid = validateDefinitionCanCreateValidTransformIds(entityDefinition);
-    expect(valid).toBeTruthy();
+  it('should not throw an error for a definition ID which is not too long', () => {
+    validateDefinitionCanCreateValidTransformIds(entityDefinition);
   });
 
-  it('should return false for a definition ID which is too long', () => {
+  it('should throw an error for a definition ID which is too long', () => {
     const entityDefinitionWithLongID = entityDefinition;
     entityDefinitionWithLongID.id =
       'a-really-really-really-really-really-really-really-really-really-really-long-id';
-    const valid = validateDefinitionCanCreateValidTransformIds(entityDefinition);
-    expect(valid).toBeFalsy();
+
+      expect(() => {
+        validateDefinitionCanCreateValidTransformIds(entityDefinition);
+      }).toThrow(EntityIdTooLong);
   });
 });

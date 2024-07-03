@@ -60,9 +60,7 @@ export async function installEntityDefinition({
   try {
     logger.debug(`Installing definition ${JSON.stringify(definition)}`);
 
-    if (!validateDefinitionCanCreateValidTransformIds(definition)) {
-      throw new EntityIdTooLong('ID is too long; the resulting transform ID will be invalid');
-    }
+    validateDefinitionCanCreateValidTransformIds(definition);
 
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
