@@ -70,13 +70,11 @@ Then for <field_name> field the diff algorithm should output the current version
 And <field_name> field should not be returned from the `upgrade/_review` API endpoint
 And <field_name> field should not be shown in the upgrade preview UI
 
-CASE: array fields should work the same agnostic of order
-
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version |
-| single line string | name       | "A"          | "A"             | "A"            |
-| number             | risk_score | 1            | 1               | 1              |
-| array of scalars   | tags       | ["A", "B"]   | ["A", "B"]      | ["A", "B"]     |
+| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
+| single line string | name       | "A"                     | "A"                     | "A"                     | "A"                     |
+| number             | risk_score | 1                       | 1                       | 1                       | 1                       |
+| array of scalars   | tags       | ["one", "two", "three"] | ["one", "three", "two"] | ["three", "one", "two"] | ["one", "three", "two"] |
 ```
 
 ### Rule field doesn't have an update but has a custom value - `ABA`
@@ -92,13 +90,11 @@ Then for <field_name> field the diff algorithm should output the current version
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
-CASE: array fields should work the same agnostic of order
-
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version |
-| single line string | name       | "A"          | "B"             | "A"            |
-| number             | risk_score | 1            | 2               | 1              |
-| array of scalars   | tags       | ["A", "B"]   | ["A", "B", "C"] | ["A", "B"]     |
+| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
+| single line string | name       | "A"                     | "B"                     | "A"                     | "B"                     |
+| number             | risk_score | 1                       | 2                       | 1                       | 2                       |
+| array of scalars   | tags       | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "three"] | ["one", "two", "four"]  |
 ```
 
 ### Rule field has an update and doesn't have a custom value - `AAB`
@@ -114,13 +110,11 @@ Then for <field_name> field the diff algorithm should output the target version 
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
-CASE: array fields should work the same agnostic of order
-
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version  |
-| single line string | name       | "A"          | "A"             | "B"             |
-| number             | risk_score | 1            | 1               | 2               |
-| array of scalars   | tags       | ["A", "B"]   | ["A", "B"]      | ["A", "B", "C"] |
+| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
+| single line string | name       | "A"                     | "A"                     | "B"                     | "B"                     |
+| number             | risk_score | 1                       | 1                       | 2                       | 2                       |
+| array of scalars   | tags       | ["one", "two", "three"] | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "four"]  |
 ```
 
 ### Rule field has an update and a custom value that are the same - `ABB`
@@ -137,13 +131,11 @@ Then for <field_name> field the diff algorithm should output the current version
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
-CASE: array fields should work the same agnostic of order
-
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version  |
-| single line string | name       | "A"          | "B"             | "B"             |
-| number             | risk_score | 1            | 2               | 2               |
-| array of scalars   | tags       | ["A", "B"]   | ["A", "B", "C"] | ["A", "B", "C"] |
+| algorithm          | field_name | base_version            | current_version         | target_version          | merged_version          |
+| single line string | name       | "A"                     | "B"                     | "B"                     | "B"                     |
+| number             | risk_score | 1                       | 2                       | 2                       | 2                       |
+| array of scalars   | tags       | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "four"]  | ["one", "two", "four"]  |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same - `ABC`
@@ -161,28 +153,33 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version  |
-| single line string | name       | "A"          | "B"             | "C"             |
-| number             | risk_score | 1            | 2               | 3               |
+| algorithm          | field_name | base_version | current_version | target_version  | merged_version |
+| single line string | name       | "A"          | "B"             | "C"             | "B"            |
+| number             | risk_score | 1            | 2               | 3               | 2              |
 ```
 
 #### **Scenario: `ABC` - Rule field is an array of scalar values**
 
-**Automation**: 1 integration test with mock rules + a set of unit tests for the algorithm
+**Automation**: 5 integration tests with mock rules + a set of unit tests for the algorithm
 
 ```Gherkin
 Given <field_name> field is customized by the user (current version != base version)
 And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
 Then for <field_name> field the diff algorithm should output a custom merged version with a solvable conflict
+And arrays should be deduplicated before comparison
+And arrays should be compared insensitive of case
+And arrays should be compared agnostic of order
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
-CASE: array fields should work the same agnostic of order
-
 Examples:
-| algorithm        | field_name | base_version | current_version | target_version | merged_version  |
-| array of scalars | tags       | ["A", "B"]   | ["B", "C"]      | ["B", "D"]     | ["B", "C", "D"] |
+| algorithm        | field_name | base_version            | current_version         | target_version            | merged_version                 |
+| array of scalars | tags       | ["one", "two", "three"] | ["one", "two", "four"]  | ["one", "two", "five"]    | ["one", "two", "four", "five"] |
+| array of scalars | tags       | ["one", "two", "three"] | ["two", "one"]          | ["one", "four"]           | ["one", "four"]                |
+| array of scalars | tags       | ["one", "two", "three"] | []                      | ["one", "two", "five"]    | ["five"]                       |
+| array of scalars | tags       | ["one", "two", "two"]   | ["two", "one", "three"] | ["three", "three", "one"] | ["one", "three"]               |
+| array of scalars | tags       | ["ONE", "one", "TWO"]   | ["one", "ONE"]          | ["ONE", "THREE"]          | ["ONE", "THREE"]               |
 ```
 
 ### Rule field has an update and a custom value that are the same and the rule base version doesn't exist - `-AA`
@@ -199,13 +196,11 @@ Then for <field_name> field the diff algorithm should output the current version
 And <field_name> field should not be returned from the `upgrade/_review` API endpoint
 And <field_name> field should not be shown in the upgrade preview UI
 
-CASE: array fields should work the same agnostic of order
-
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version  |
-| single line string | name       | N/A          | "A"             | "A"             |
-| number             | risk_score | N/A          | 1               | 1               |
-| array of scalars   | tags       | N/A          | ["A", "B", "C"] | ["A", "B", "C"] |
+| algorithm          | field_name | base_version | current_version         | target_version          | merged_version          |
+| single line string | name       | N/A          | "A"                     | "A"                     | "A"                     |
+| number             | risk_score | N/A          | 1                       | 1                       | 1                       |
+| array of scalars   | tags       | N/A          | ["one", "three", "two"] | ["three", "one", "two"] | ["one", "three", "two"] |
 ```
 
 ### Rule field has an update and a custom value that are NOT the same and the rule base version doesn't exist - `-BC`
@@ -223,9 +218,9 @@ And <field_name> field should be returned from the `upgrade/_review` API endpoin
 And <field_name> field should be shown in the upgrade preview UI
 
 Examples:
-| algorithm          | field_name | base_version | current_version | target_version  |
-| single line string | name       | N/A          | "B"             | "C"             |
-| number             | risk_score | N/A          | 2               | 3               |
+| algorithm          | field_name | base_version | current_version | target_version  | merged_version |
+| single line string | name       | N/A          | "B"             | "C"             | "C"            |
+| number             | risk_score | N/A          | 2               | 3               | 3              |
 ```
 
 #### **Scenario: `-BC` - Rule field is an array of scalar values**
@@ -237,12 +232,14 @@ Given <field_name> field is customized by the user (current version != base vers
 And <field_name> field is updated by Elastic in this upgrade (target version != base version)
 And customized <field_name> field is different than the Elastic update in this upgrade (current version != target version)
 Then for <field_name> field the diff algorithm should output a custom merged version with a solvable conflict
+And arrays should be deduplicated before comparison
+And arrays should be compared insensitive of case
+And arrays should be compared agnostic of order
 And <field_name> field should be returned from the `upgrade/_review` API endpoint
 And <field_name> field should be shown in the upgrade preview UI
 
-CASE: array fields should work the same agnostic of order
 
 Examples:
-| algorithm        | field_name | base_version | current_version | target_version | merged_version  |
-| array of scalars | tags       | N/A          | ["B", "C"]      | ["B", "D"]     | ["B", "C", "D"] |
+| algorithm        | field_name | base_version | current_version        | target_version         | merged_version                 |
+| array of scalars | tags       | N/A          | ["one", "two", "four"] | ["one", "two", "five"] | ["one", "two", "four", "five"] |
 ```
