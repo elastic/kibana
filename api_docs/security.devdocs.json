@@ -354,6 +354,22 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-public.SecurityLicense.getLicenseType",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicenseType",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-public.SecurityLicense.getUnavailableReason",
             "type": "Function",
             "tags": [],
@@ -665,6 +681,19 @@
                 "text": "LoginLayout"
               },
               " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.SecurityLicenseFeatures.allowFips",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowFips",
+            "description": [
+              "\nIndicates whether we allow FIPS mode"
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
@@ -5292,10 +5321,6 @@
               "path": "x-pack/plugins/encrypted_saved_objects/server/saved_objects/index.ts"
             },
             {
-              "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/plugin.ts"
-            },
-            {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
             },
@@ -5435,10 +5460,6 @@
           "trackAdoption": false,
           "references": [
             {
-              "plugin": "actions",
-              "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
-            },
-            {
               "plugin": "alerting",
               "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
             },
@@ -5485,10 +5506,6 @@
             {
               "plugin": "enterpriseSearch",
               "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-            },
-            {
-              "plugin": "lists",
-              "path": "x-pack/plugins/lists/server/get_user.ts"
             },
             {
               "plugin": "securitySolution",
@@ -7001,6 +7018,22 @@
           },
           {
             "parentPluginId": "security",
+            "id": "def-common.SecurityLicense.getLicenseType",
+            "type": "Function",
+            "tags": [],
+            "label": "getLicenseType",
+            "description": [],
+            "signature": [
+              "() => string | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
             "id": "def-common.SecurityLicense.getUnavailableReason",
             "type": "Function",
             "tags": [],
@@ -7312,6 +7345,19 @@
                 "text": "LoginLayout"
               },
               " | undefined"
+            ],
+            "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowFips",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowFips",
+            "description": [
+              "\nIndicates whether we allow FIPS mode"
             ],
             "path": "x-pack/packages/security/plugin_types_common/src/licensing/license_features.ts",
             "deprecated": false,
