@@ -977,7 +977,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: Invalid duplicated custom field keys in request: duplicated_key"`
+        `"Failed to bulk create cases: Error: Invalid duplicated customFields keys in request: duplicated_key"`
       );
     });
 
