@@ -48,10 +48,13 @@ export function* refreshOverviewTrendStats() {
     do {
       const res = yield call(
         trendsApi,
-        keys.splice(0, keys.length < 10 ? keys.length : 10).map((key: string) => ({
-          configId: trends[key].configId,
-          locationId: trends[key].locationId,
-        }))
+        keys
+          .splice(0, keys.length < 10 ? keys.length : 10)
+          .filter((key: string) => trends[key] !== null)
+          .map((key: string) => ({
+            configId: trends[key].configId,
+            locationId: trends[key].locationId,
+          }))
       );
       all = { ...all, ...res };
     } while (keys.length);

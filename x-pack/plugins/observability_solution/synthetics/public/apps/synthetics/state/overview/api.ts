@@ -61,5 +61,7 @@ export const fetchOverviewStatus = async (
 export const fetchOverviewTrendStats = async (
   filters: Array<{ configId: string; locationId: string }>
 ): Promise<any> => {
-  return apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, filters);
+  if (!filters.length) return [];
+  const res = apiService.post(SYNTHETICS_API_URLS.OVERVIEW_TRENDS, filters);
+  return res;
 };

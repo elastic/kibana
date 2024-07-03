@@ -54,6 +54,11 @@ export const OverviewGrid = memo(
     const { perPage } = pageState;
     const [page, setPage] = useState(1);
     const [vpage, setvpage] = useState<any[]>([]);
+    const [maxItem, setMaxItem] = useState(0);
+    console.log('vpage', vpage);
+    console.log('load data up to row', maxItem);
+
+    // offload the fetching of trend data to a new effect and the list will work better
 
     const dispatch = useDispatch();
     const intersectionRef = useRef(null);
@@ -70,6 +75,23 @@ export const OverviewGrid = memo(
     );
 
     const listHeight = Math.min(ITEM_HEIGHT * (monitorsSortedByStatus.length / 4), 800);
+    console.log('list height', listHeight);
+    let items = []; /*
+    // feasible technical way to match entities with rules, for rule types we have
+    // - today, there are many ways to configure alerts and are tied to data streams
+    // - APM, on the other hand, can be entity-based, like a namespace or service, and we can               have a strucured association between the entity and the alert
+       - when we get to a point that a user is looking through alist of entities, they will eventually be devfining alerts based on the entity
+       - when we're at that point we can see the alerts defined for a given entity. At that point we can allow people to define how well the alert is working to send information about prbolemsn with the given entity and allow them to configure their alerts properly
+    // enabling ml/alerts/slo by default, create poc that integrates these with an onboarding flow
+    // nginx, apache, problem child, lmd, dga
+    */
+    const listItems: any = [];
+    let ind = 0;
+    do {
+      items = monitorsSortedByStatus.slice(ind, ind + 4);
+      ind += 4;
+      if (items.length) listItems.push(items);
+    } while (items.length);
     const listRef: React.LegacyRef<FixedSizeList<any>> | undefined = React.createRef();
     const infiniteLoaderRef: React.LegacyRef<InfiniteLoader> = React.createRef();
     useEffect(() => {
@@ -111,51 +133,54 @@ export const OverviewGrid = memo(
                 {({ width }: EuiAutoSize) => (
                   <InfiniteLoader
                     ref={infiniteLoaderRef}
-                    isItemLoaded={(idx: number) => vpage[idx] !== undefined}
-                    itemCount={monitorsSortedByStatus.length + 1 / 4}
-                    loadMoreItems={(start: number, stop: number) => {
-                      const newRows = [];
-                      for (let i = start; i < stop; i++) {
-                        newRows.push(monitorsSortedByStatus.slice(i * 4, i * 4 + 4));
-                      }
-                      const fetchStatsActionPayload = [];
-                      for (const newRow of newRows) {
-                        for (const item of newRow) {
-                          fetchStatsActionPayload.push({
-                            configId: item.configId,
-                            locationId: item.location.id,
-                          });
-                        }
-                      }
-                      dispatch(trendStatsBatch.get(fetchStatsActionPayload));
-                      setvpage([...vpage, ...newRows]);
+                    isItemLoaded={(idx: number) => {
+                      return true;
+                      console.log('isitemloaded', idx);
+                      return vpage[idx] !== undefined;
                     }}
-                    minimumBatchSize={20}
-                    threshold={30}
+                    itemCount={listItems.length}
+                    loadMoreItems={(_start: number, stop: number) => {
+                      setMaxItem(stop);
+                      // console.log('load more items', start, stop);
+                      // const newRows = [];
+                      // const slice = listItems.slice(start, stop);
+                      // console.log('slice for', start, stop, slice, monitorsSortedByStatus);
+                      // const mapped = slice
+                      //   .flatMap((x: any) => x)
+                      //   .map(({ configId, location }: any) => ({
+                      //     configId,
+                      //     locationId: location.id,
+                      //   }));
+                      // console.log('mapped', mapped);
+                      // console.log('dispatching for ', start, stop);
+                      // dispatch(trendStatsBatch.get(mapped));
+                      // setvpage([...vpage, ...slice]);
+                    }}
+                    minimumBatchSize={8}
+                    threshold={8}
                   >
                     {({ onItemsRendered, ref }) => (
                       <FixedSizeList
-                        height={listHeight}
+                        height={800}
                         width={width}
                         onItemsRendered={onItemsRendered}
                         itemSize={ITEM_HEIGHT}
-                        itemCount={monitorsSortedByStatus.length + 1 / 4}
-                        itemData={monitorsSortedByStatus}
+                        itemCount={listItems.length}
+                        itemData={listItems}
                         ref={listRef}
                       >
                         {(props) => {
+                          console.log('the props', props);
                           return (
                             <EuiFlexGroup gutterSize="m" style={props.style}>
-                              {props.data
-                                .slice(props.index * 4, props.index * 4 + 4)
-                                .map((item: any, idx: number) => (
-                                  <EuiFlexItem key={props.index * 4 + idx}>
-                                    <MetricItem
-                                      monitor={monitorsSortedByStatus[props.index * 4 + idx]}
-                                      onClick={setFlyoutConfigCallback}
-                                    />
-                                  </EuiFlexItem>
-                                ))}
+                              {props.data[props.index].map((item: any, idx: number) => (
+                                <EuiFlexItem key={props.index * 4 + idx}>
+                                  <MetricItem
+                                    monitor={monitorsSortedByStatus[props.index * 4 + idx]}
+                                    onClick={setFlyoutConfigCallback}
+                                  />
+                                </EuiFlexItem>
+                              ))}
                             </EuiFlexGroup>
                           );
                         }}
@@ -170,7 +195,7 @@ export const OverviewGrid = memo(
           ) : (
             <GridItemsByGroup
               loaded={loaded}
-              currentMonitors={monitors}
+              currentMonitors={monitorsSortedByStatus}
               setFlyoutConfigCallback={setFlyoutConfigCallback}
             />
           )}
