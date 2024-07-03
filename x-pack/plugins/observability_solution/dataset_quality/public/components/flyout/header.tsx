@@ -47,7 +47,11 @@ export function Header({
   return (
     <EuiFlyoutHeader hasBorder>
       {loading ? (
-        <EuiSkeletonTitle size="s" />
+        <EuiSkeletonTitle
+          size="s"
+          data-test-subj="datasetQualityFlyoutIntegrationLoading"
+          className="datasetQualityFlyoutIntegrationLoading"
+        />
       ) : (
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow>
