@@ -6,11 +6,6 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import type {
-  AttackDiscoveryTelemetryEvent,
-  ReportAttackDiscoveriesGeneratedParams,
-  ReportAttackDiscoveryTelemetryEventParams,
-} from './events/attack_discovery/types';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import type { ML_JOB_TELEMETRY_STATUS, TelemetryEventTypes } from './constants';
 import type {
@@ -58,10 +53,22 @@ import type {
   OnboardingHubStepOpenParams,
   OnboardingHubTelemetryEvent,
 } from './events/onboarding/types';
+import type {
+  ManualRuleRunTelemetryEvent,
+  ReportManualRuleRunOpenModalParams,
+  ReportManualRuleRunExecuteParams,
+  ReportManualRuleRunCancelJobParams,
+  ReportManualRuleRunTelemetryEventParams,
+} from './events/manual_rule_run/types';
+import type {
+  EventLogTelemetryEvent,
+  ReportEventLogFilterByRunTypeParams,
+  ReportEventLogShowSourceEventDateRangeParams,
+  ReportEventLogTelemetryEventParams,
+} from './events/event_log/types';
 
 export * from './events/ai_assistant/types';
 export * from './events/alerts_grouping/types';
-export * from './events/attack_discovery/types';
 export * from './events/data_quality/types';
 export * from './events/onboarding/types';
 export type {
@@ -76,6 +83,8 @@ export type {
   ReportAssetCriticalityCsvImportedParams,
 } from './events/entity_analytics/types';
 export * from './events/document_details/types';
+export * from './events/manual_rule_run/types';
+export * from './events/event_log/types';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;
@@ -108,7 +117,6 @@ export interface ReportBreadcrumbClickedParams {
 export type TelemetryEventParams =
   | ReportAlertsGroupingTelemetryEventParams
   | ReportAssistantTelemetryEventParams
-  | ReportAttackDiscoveryTelemetryEventParams
   | ReportEntityAnalyticsTelemetryEventParams
   | ReportMLJobUpdateParams
   | ReportCellActionClickedParams
@@ -119,7 +127,9 @@ export type TelemetryEventParams =
   | ReportDocumentDetailsTelemetryEventParams
   | OnboardingHubStepOpenParams
   | OnboardingHubStepFinishedParams
-  | OnboardingHubStepLinkClickedParams;
+  | OnboardingHubStepLinkClickedParams
+  | ReportManualRuleRunTelemetryEventParams
+  | ReportEventLogTelemetryEventParams;
 
 export interface TelemetryClientStart {
   reportAlertsGroupingChanged(params: ReportAlertsGroupingChangedParams): void;
@@ -131,9 +141,6 @@ export interface TelemetryClientStart {
   reportAssistantMessageSent(params: ReportAssistantMessageSentParams): void;
   reportAssistantQuickPrompt(params: ReportAssistantQuickPromptParams): void;
   reportAssistantSettingToggled(params: ReportAssistantSettingToggledParams): void;
-
-  // Attack discovery
-  reportAttackDiscoveriesGenerated(params: ReportAttackDiscoveriesGeneratedParams): void;
 
   // Entity Analytics
   reportEntityDetailsClicked(params: ReportEntityDetailsClickedParams): void;
@@ -165,6 +172,17 @@ export interface TelemetryClientStart {
   reportOnboardingHubStepOpen(params: OnboardingHubStepOpenParams): void;
   reportOnboardingHubStepFinished(params: OnboardingHubStepFinishedParams): void;
   reportOnboardingHubStepLinkClicked(params: OnboardingHubStepLinkClickedParams): void;
+
+  // manual rule run
+  reportManualRuleRunOpenModal(params: ReportManualRuleRunOpenModalParams): void;
+  reportManualRuleRunExecute(params: ReportManualRuleRunExecuteParams): void;
+  reportManualRuleRunCancelJob(params: ReportManualRuleRunCancelJobParams): void;
+
+  // event log
+  reportEventLogFilterByRunType(params: ReportEventLogFilterByRunTypeParams): void;
+  reportEventLogShowSourceEventDateRange(
+    params: ReportEventLogShowSourceEventDateRangeParams
+  ): void;
 }
 
 export type TelemetryEvent =
@@ -173,7 +191,6 @@ export type TelemetryEvent =
   | EntityAnalyticsTelemetryEvent
   | DataQualityTelemetryEvents
   | DocumentDetailsTelemetryEvents
-  | AttackDiscoveryTelemetryEvent
   | {
       eventType: TelemetryEventTypes.MLJobUpdate;
       schema: RootSchema<ReportMLJobUpdateParams>;
@@ -190,4 +207,6 @@ export type TelemetryEvent =
       eventType: TelemetryEventTypes.BreadcrumbClicked;
       schema: RootSchema<ReportBreadcrumbClickedParams>;
     }
-  | OnboardingHubTelemetryEvent;
+  | OnboardingHubTelemetryEvent
+  | ManualRuleRunTelemetryEvent
+  | EventLogTelemetryEvent;

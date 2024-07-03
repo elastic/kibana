@@ -28,7 +28,6 @@ import {
   assistantMessageSentEvent,
   assistantQuickPrompt,
 } from './ai_assistant';
-import { insightsGeneratedEvent } from './attack_discovery';
 import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
 import {
   DocumentDetailsFlyoutOpenedEvent,
@@ -39,6 +38,12 @@ import {
   onboardingHubStepLinkClickedEvent,
   onboardingHubStepOpenEvent,
 } from './onboarding';
+import {
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+} from './manual_rule_run';
+import { eventLogFilterByRunTypeEvent, eventLogShowSourceEventDateRangeEvent } from './event_log';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -156,7 +161,6 @@ export const telemetryEvents = [
   assistantMessageSentEvent,
   assistantQuickPrompt,
   assistantSettingToggledEvent,
-  insightsGeneratedEvent,
   entityClickedEvent,
   entityAlertsClickedEvent,
   entityRiskFilteredEvent,
@@ -177,4 +181,9 @@ export const telemetryEvents = [
   onboardingHubStepOpenEvent,
   onboardingHubStepLinkClickedEvent,
   onboardingHubStepFinishedEvent,
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+  eventLogFilterByRunTypeEvent,
+  eventLogShowSourceEventDateRangeEvent,
 ];
