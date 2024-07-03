@@ -27,9 +27,11 @@ export const useAnnotations = ({
   domain,
   editAnnotation,
   slo,
+  setEditAnnotation,
 }: {
   slo?: SLOWithSummaryResponse;
   editAnnotation?: Annotation | null;
+  setEditAnnotation?: (annotation: Annotation | null) => void;
   domain?: {
     min: number | string;
     max: number | string;
@@ -68,7 +70,8 @@ export const useAnnotations = ({
     setValue('@timestampEnd', null);
     setIsCreateOpen(false);
     setSelectedEditAnnotation(null);
-  }, [setValue]);
+    setEditAnnotation?.(null);
+  }, [setEditAnnotation, setValue]);
 
   const { createAnnotation, updateAnnotation, deleteAnnotation, isLoading } = useAnnotationCRUDS();
   const AddAnnotationButton = useMemo(() => {

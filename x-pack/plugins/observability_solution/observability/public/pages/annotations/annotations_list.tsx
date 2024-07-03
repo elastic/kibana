@@ -174,7 +174,13 @@ export function AnnotationsList() {
       <EuiSpacer size="m" />
       <EuiInMemoryTable
         childrenBetween={
-          <AnnotationsListChart data={data ?? []} start={start} end={end} isEditing={isEditing} />
+          <AnnotationsListChart
+            data={data ?? []}
+            start={start}
+            end={end}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+          />
         }
         tableCaption={i18n.translate('xpack.observability.annotationsTableCaption', {
           defaultMessage: 'List of annotations for the selected time range.',

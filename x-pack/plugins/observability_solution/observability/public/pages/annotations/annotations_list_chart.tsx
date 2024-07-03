@@ -34,14 +34,17 @@ export function AnnotationsListChart({
   start,
   end,
   isEditing,
+  setIsEditing,
 }: {
   data: Annotation[];
   start: string;
   end: string;
   isEditing: Annotation | null;
+  setIsEditing: (annotation: Annotation | null) => void;
 }) {
   const { ObservabilityAnnotations, createAnnotation, onAnnotationClick } = useAnnotations({
     editAnnotation: isEditing,
+    setEditAnnotation: setIsEditing,
   });
 
   const brushEndListener: BrushEndListener = ({ x }) => {
