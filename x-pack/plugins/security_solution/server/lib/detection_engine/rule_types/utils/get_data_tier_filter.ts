@@ -15,7 +15,7 @@ export const getDataTierFilter = async ({
 }: {
   uiSettingsClient: IUiSettingsClient;
 }): Promise<Filter[]> => {
-  const excludedTiers = await uiSettingsClient.get<string[]>(
+  const excludedTiers = await uiSettingsClient.get<Array<'data_cold' | 'data_frozen'>>(
     EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION
   );
 
