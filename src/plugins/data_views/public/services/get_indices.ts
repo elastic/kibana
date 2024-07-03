@@ -26,7 +26,7 @@ const frozenLabel = i18n.translate('dataViews.frozenLabel', {
 });
 
 const rollupLabel = i18n.translate('dataViews.rollupLabel', {
-  defaultMessage: 'Rollup',
+  defaultMessage: 'Rollup (deprecated)',
 });
 
 const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexName: string) =>
@@ -35,7 +35,7 @@ const getIndexTags = (isRollupIndex: (indexName: string) => boolean) => (indexNa
         {
           key: INDEX_PATTERN_TYPE.ROLLUP,
           name: rollupLabel,
-          color: 'primary',
+          color: 'warning',
         },
       ]
     : [];

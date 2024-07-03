@@ -23,6 +23,7 @@ import {
   getNotebook,
   getNotebookCatalog,
   DEFAULT_NOTEBOOKS,
+  NOTEBOOKS_MAP,
   NotebookCatalogFetchOptions,
   getNotebookMetadata,
 } from './notebook_catalog';
@@ -65,7 +66,32 @@ describe('Notebook Catalog', () => {
   describe('getNotebookCatalog', () => {
     describe('static notebooks', () => {
       it('returns default notebooks when theres an empty catalog config', async () => {
-        await expect(getNotebookCatalog(staticOptions)).resolves.toBe(DEFAULT_NOTEBOOKS);
+        await expect(getNotebookCatalog(staticOptions)).resolves.toMatchObject(DEFAULT_NOTEBOOKS);
+      });
+      it.skip('returns requested list of notebooks when it exists', async () => {
+        // Re-enable this with actual list when we implement them
+        await expect(
+          getNotebookCatalog({ ...staticOptions, notebookList: 'ml' })
+        ).resolves.toMatchObject({
+          notebooks: [
+            NOTEBOOKS_MAP['03_elser'],
+            NOTEBOOKS_MAP['02_hybrid_search'],
+            NOTEBOOKS_MAP['04_multilingual'],
+          ],
+        });
+      });
+      it('returns default list if requested list doesnt exist', async () => {
+        await expect(
+          getNotebookCatalog({ ...staticOptions, notebookList: 'foo' })
+        ).resolves.toMatchObject({
+          notebooks: [
+            NOTEBOOKS_MAP['00_quick_start'],
+            NOTEBOOKS_MAP['01_keyword_querying_filtering'],
+            NOTEBOOKS_MAP['02_hybrid_search'],
+            NOTEBOOKS_MAP['03_elser'],
+            NOTEBOOKS_MAP['04_multilingual'],
+          ],
+        });
       });
     });
 
@@ -308,6 +334,97 @@ describe('Notebook Catalog', () => {
         expect(dynamicOptions.cache.catalog).toEqual({
           ...mockCatalog,
           timestamp: fakeNow,
+        });
+      });
+      describe('supports notebook lists', () => {
+        beforeEach(() => {
+          const mockCatalog: RemoteNotebookCatalog = {
+            notebooks: [
+              {
+                id: 'unit-test',
+                title: 'Test',
+                description: 'Test notebook',
+                url: 'http://localhost:3000/my_notebook.ipynb',
+              },
+              {
+                id: 'unit-test-002',
+                title: 'Test',
+                description: 'Test notebook 2',
+                url: 'http://localhost:3000/my_other_notebook.ipynb',
+              },
+            ],
+            lists: {
+              default: ['unit-test', 'unit-test-002'],
+              test: ['unit-test-002'],
+              vector: ['unit-test'],
+            },
+          };
+          const mockResp = {
+            status: 200,
+            statusText: 'OK',
+            ok: true,
+            json: jest.fn().mockResolvedValue(mockCatalog),
+          };
+          fetchMock.mockResolvedValue(mockResp);
+        });
+
+        it('can return a custom notebook list', async () => {
+          await expect(
+            getNotebookCatalog({ ...dynamicOptions, notebookList: 'test' })
+          ).resolves.toEqual({
+            notebooks: [
+              {
+                id: 'unit-test-002',
+                title: 'Test',
+                description: 'Test notebook 2',
+              },
+            ],
+          });
+          await expect(
+            getNotebookCatalog({ ...dynamicOptions, notebookList: 'vector' })
+          ).resolves.toEqual({
+            notebooks: [
+              {
+                id: 'unit-test',
+                title: 'Test',
+                description: 'Test notebook',
+              },
+            ],
+          });
+        });
+        it('returns default list when requested list not defined', async () => {
+          await expect(
+            getNotebookCatalog({ ...dynamicOptions, notebookList: 'foo' })
+          ).resolves.toEqual({
+            notebooks: [
+              {
+                id: 'unit-test',
+                title: 'Test',
+                description: 'Test notebook',
+              },
+              {
+                id: 'unit-test-002',
+                title: 'Test',
+                description: 'Test notebook 2',
+              },
+            ],
+          });
+        });
+        it('returns default list when list is not specified', async () => {
+          await expect(getNotebookCatalog(dynamicOptions)).resolves.toEqual({
+            notebooks: [
+              {
+                id: 'unit-test',
+                title: 'Test',
+                description: 'Test notebook',
+              },
+              {
+                id: 'unit-test-002',
+                title: 'Test',
+                description: 'Test notebook 2',
+              },
+            ],
+          });
         });
       });
     });
