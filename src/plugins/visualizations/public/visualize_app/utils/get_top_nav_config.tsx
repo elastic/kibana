@@ -44,6 +44,7 @@ import { getVizEditorOriginatingAppUrl } from './utils';
 
 import { NavigateToLensFn, SerializeStateFn } from './use/use_embeddable_api_handler';
 import './visualize_navigation.scss';
+import { VisualizeOutputState } from '../../react_embeddable/types';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -130,6 +131,7 @@ export const getTopNavConfig = (
    * Called when the user clicks "Save" button.
    */
   async function doSave(
+    rawState: VisualizeOutputState,
     saveOptions: SavedObjectSaveOpts & { dashboardId?: string; copyOnSave?: boolean }
   ) {
     const {
@@ -139,7 +141,7 @@ export const getTopNavConfig = (
       getDisplayName,
       getEsType,
       managed,
-    } = serializeState().rawState;
+    } = rawState;
 
     const newlyCreated = !Boolean(serializedVis.id) || saveOptions.copyOnSave;
     // vis.title was not bound and it's needed to reflect title into visState
@@ -170,6 +172,7 @@ export const getTopNavConfig = (
     };
 
     try {
+      console.log('Saving', visSavedObjectAttributes, saveOptions, serializeState().references);
       const id = await saveVisualization(
         visSavedObjectAttributes,
         saveOptions,
@@ -507,7 +510,7 @@ export const getTopNavConfig = (
               }
             },
             run: () => {
-              const serializedVis = serializeState().rawState.savedVis as VisSavedObject;
+              const { rawState } = serializeState();
               const onSave = async ({
                 newTitle,
                 newCopyOnSave,
@@ -521,12 +524,12 @@ export const getTopNavConfig = (
                 dashboardId?: string | null;
                 addToLibrary?: boolean;
               }) => {
-                const currentTitle = serializedVis.title;
-                serializedVis.title = newTitle;
-                serializedVis.description = newDescription;
+                const currentTitle = rawState.savedVis.title;
+                rawState.savedVis.title = newTitle;
+                rawState.savedVis.description = newDescription;
 
                 if (savedObjectsTagging) {
-                  serializedVis.tags = selectedTags;
+                  rawState.savedVis.tags = selectedTags;
                 }
 
                 const saveOptions = {
@@ -548,7 +551,7 @@ export const getTopNavConfig = (
                   setActiveUrl(appPath);
 
                   const state = {
-                    input: serializeState().rawState,
+                    input: rawState,
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
                     searchSessionId: data.search.session.getSessionId(),
@@ -567,10 +570,10 @@ export const getTopNavConfig = (
 
                 // We're adding the viz to a library so we need to save it and then
                 // add to a dashboard if necessary
-                const response = await doSave(saveOptions);
+                const response = await doSave(rawState, saveOptions);
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
-                  serializedVis.title = currentTitle;
+                  rawState.savedVis.title = currentTitle;
                 }
 
                 return response;
@@ -580,7 +583,7 @@ export const getTopNavConfig = (
               let tagOptions: React.ReactNode | undefined;
 
               if (savedObjectsTagging) {
-                selectedTags = serializedVis.tags || [];
+                selectedTags = rawState.savedVis.tags || [];
                 tagOptions = (
                   <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
                     initialSelection={selectedTags}
@@ -597,7 +600,7 @@ export const getTopNavConfig = (
               if (originatingApp) {
                 saveModal = (
                   <SavedObjectSaveModalOrigin
-                    documentInfo={serializedVis || { title: '' }}
+                    documentInfo={rawState.savedVis || { title: '' }}
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
@@ -625,9 +628,9 @@ export const getTopNavConfig = (
                 saveModal = (
                   <SavedObjectSaveModalDashboard
                     documentInfo={{
-                      id: visualizeCapabilities.save ? serializedVis?.id : undefined,
-                      title: serializedVis?.title || '',
-                      description: serializedVis?.description || '',
+                      id: visualizeCapabilities.save ? rawState.savedVis?.id : undefined,
+                      title: rawState.savedVis?.title || '',
+                      description: rawState.savedVis?.description || '',
                     }}
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
                     onSave={onSave}
@@ -640,7 +643,7 @@ export const getTopNavConfig = (
                     )}
                     onClose={() => {}}
                     mustCopyOnSaveMessage={
-                      serializedVis.managed // TODO: fix this
+                      rawState.savedVis.managed // TODO: fix this
                         ? i18n.translate('visualizations.topNavMenu.mustCopyOnSave', {
                             defaultMessage:
                               'Elastic manages this visualization. Save any changes to a new visualization.',
@@ -687,7 +690,8 @@ export const getTopNavConfig = (
               }
             },
             run: async () => {
-              const serializedVis = serializeState().rawState.savedVis;
+              const { rawState } = serializeState();
+              const serializedVis = rawState.savedVis;
               if (!serializedVis.id) {
                 return createVisReference();
               }
@@ -695,7 +699,7 @@ export const getTopNavConfig = (
                 confirmOverwrite: false,
                 returnToOrigin: true,
               };
-              return doSave(saveOptions);
+              return doSave(rawState, saveOptions);
             },
           },
         ]

@@ -55,6 +55,7 @@ export const deserializeState = async (
   const references: Reference[] = state.references ?? [];
 
   const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
+  console.log('deserializedSavedVis', deserializedSavedVis, serializedState, references);
   const vis = await createVisInstance(deserializedSavedVis);
   return {
     ...serializedState,

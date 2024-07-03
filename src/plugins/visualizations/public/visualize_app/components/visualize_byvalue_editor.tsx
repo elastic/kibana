@@ -28,6 +28,7 @@ import {
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { useVisEditorBreadcrumbs } from '../utils/use/use_vis_editor_breadcrumbs';
 import type { VisualizeSavedVisInputState } from '../../react_embeddable/types';
+import { PersistedState } from '../../persisted_state';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -105,6 +106,11 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     appState,
     byValueVisInstance
   );
+  const uiState = useMemo(
+    () => new PersistedState(currentAppState?.uiState ?? {}),
+    [currentAppState]
+  );
+
   useLinkedSearchUpdates(services, eventEmitter, appState, byValueVisInstance);
   useDataViewUpdates(services, eventEmitter, appState, byValueVisInstance);
   useVisEditorBreadcrumbs({
@@ -151,6 +157,8 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
             filters={filterManager.getFilters()}
             query={queryString.getQuery() as Query}
             dataView={currentAppState?.dataView}
+            uiState={uiState}
+            linked={Boolean(currentAppState?.linked)}
           />
         </EuiErrorBoundary>
       )}
