@@ -48,6 +48,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
             databaseDocumentID,
             indices,
             filters,
+            agentId: state.tree?.lastResponse?.parameters?.agentId || '',
           },
         };
         state.resolverComponentInstanceID = resolverComponentInstanceID;
@@ -78,6 +79,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
           databaseDocumentID: parameters.databaseDocumentID,
           indices: parameters.indices,
           filters: parameters.filters,
+          agentId: parameters.agentId,
         },
       };
       return draft;
@@ -104,6 +106,14 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
         /** Only handle this if we are expecting a response */
         state.tree = {
           ...state.tree,
+          ...(state.tree?.currentParameters
+            ? {
+                currentParameters: {
+                  ...state.tree.currentParameters,
+                  agentId: parameters.agentId,
+                },
+              }
+            : {}),
           /**
            * Store the last received data, as well as the databaseDocumentID it relates to.
            */
@@ -143,12 +153,12 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
   .withHandling(
     immerCase(
       serverReturnedNodeEventsInCategory,
-      (draft, { id, events, cursor, nodeID, eventCategory }) => {
+      (draft, { id, events, cursor, nodeID, eventCategory, agentId }) => {
         // The data in the action could be irrelevant if the panel view or parameters have changed since the corresponding request was made. In that case, ignore this action.
         const state: Draft<DataState> = draft[id].data;
         if (
           nodeEventsInCategoryModel.isRelevantToPanelViewAndParameters(
-            { events, cursor, nodeID, eventCategory },
+            { events, cursor, nodeID, eventCategory, agentId },
             selectors.panelViewAndParameters(state)
           )
         ) {
@@ -159,6 +169,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
               cursor,
               nodeID,
               eventCategory,
+              agentId,
             });
             // The 'updatedWith' method will fail if the old and new data don't represent events from the same node and event category
             if (updated) {
@@ -171,7 +182,7 @@ export const dataReducer = reducerWithInitialState(initialAnalyzerState)
             }
           } else {
             // There is no existing data, use the new data.
-            state.nodeEventsInCategory = { events, cursor, nodeID, eventCategory };
+            state.nodeEventsInCategory = { events, cursor, nodeID, eventCategory, agentId };
           }
           // else the action is stale, ignore it
         }
