@@ -69,14 +69,6 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/blocklist/constants.ts"
           },
           {
@@ -102,6 +94,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
             "plugin": "securitySolution",
@@ -189,19 +189,19 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -229,26 +229,6 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
@@ -306,6 +286,26 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -381,19 +381,19 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/event_filters/constants.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/fleet_integration/handlers/create_event_filters.ts"
           },
           {
             "plugin": "securitySolution",
@@ -453,14 +453,6 @@
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/constants.ts"
           },
           {
@@ -478,6 +470,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/host_isolation_exceptions/host_isolation_exceptions_api_client.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
             "plugin": "securitySolution",
@@ -754,14 +754,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/trusted_apps/constants.ts"
           },
           {
@@ -787,6 +779,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/management/pages/policy/view/policy_hooks.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/server/endpoint/lib/artifacts/lists.ts"
           },
           {
             "plugin": "securitySolution",
