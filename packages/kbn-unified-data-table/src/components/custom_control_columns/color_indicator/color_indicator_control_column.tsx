@@ -29,6 +29,7 @@ const ColorIndicatorCell: React.FC<ColorIndicatorCellParams> = ({
   const color: string = (row && getRowIndicatorColor(row, euiTheme)) || 'transparent';
   return (
     <div
+      data-test-subj="unifiedDataTableRowColorIndicatorCell"
       css={css`
         background: ${color};
         width: ${COLOR_INDICATOR_WIDTH}px;
