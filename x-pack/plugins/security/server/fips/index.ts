@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-let upgradeInProgress: boolean = false;
+export { FipsService } from './fips_service';
 
-export function setUpgradeInProgress(show: boolean) {
-  upgradeInProgress = show;
-}
-
-export function isUpgradeInProgress(): boolean {
-  return upgradeInProgress;
-}
+export type { FipsServiceSetupInternal, FipsServiceSetupParams } from './fips_service';

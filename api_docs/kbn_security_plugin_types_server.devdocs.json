@@ -3233,10 +3233,6 @@
                 "path": "x-pack/plugins/security/server/plugin.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
               },
@@ -3283,10 +3279,6 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/get_user.ts"
               },
               {
                 "plugin": "securitySolution",

@@ -31,17 +31,18 @@ import { LanguageDefinition } from '../types';
 import './code_box.scss';
 
 interface CodeBoxProps {
-  languages: LanguageDefinition[];
+  languages?: LanguageDefinition[];
   codeSnippet: string;
   // overrides the language type for syntax highlighting
   languageType?: string;
-  selectedLanguage: LanguageDefinition;
-  setSelectedLanguage: (language: LanguageDefinition) => void;
-  assetBasePath: string;
+  selectedLanguage?: LanguageDefinition;
+  setSelectedLanguage?: (language: LanguageDefinition) => void;
+  assetBasePath?: string;
   application?: ApplicationStart;
   consolePlugin?: ConsolePluginStart;
-  sharePlugin: SharePluginStart;
+  sharePlugin?: SharePluginStart;
   consoleRequest?: string;
+  showTopBar?: boolean;
 }
 
 export const CodeBox: React.FC<CodeBoxProps> = ({
@@ -55,23 +56,28 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
   setSelectedLanguage,
   sharePlugin,
   consoleRequest,
+  showTopBar = true,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const items = languages.map((language) => (
-    <EuiContextMenuItem
-      key={language.id}
-      icon={`${assetBasePath}/${language.iconType}`}
-      onClick={() => {
-        setSelectedLanguage(language);
-        setIsPopoverOpen(false);
-      }}
-    >
-      {language.name}
-    </EuiContextMenuItem>
-  ));
+  const items = languages
+    ? languages.map((language) => (
+        <EuiContextMenuItem
+          key={language.id}
+          icon={`${assetBasePath}/${language.iconType}`}
+          onClick={() => {
+            if (setSelectedLanguage) {
+              setSelectedLanguage(language);
+              setIsPopoverOpen(false);
+            }
+          }}
+        >
+          {language.name}
+        </EuiContextMenuItem>
+      ))
+    : [];
 
-  const button = (
+  const button = selectedLanguage ? (
     <EuiThemeProvider colorMode="dark">
       <EuiButtonEmpty
         aria-label={i18n.translate('searchApiPanels.welcomeBanner.codeBox.selectAriaLabel', {
@@ -85,52 +91,64 @@ export const CodeBox: React.FC<CodeBoxProps> = ({
         {selectedLanguage.name}
       </EuiButtonEmpty>
     </EuiThemeProvider>
-  );
+  ) : null;
 
   return (
     <EuiThemeProvider colorMode="dark">
       <EuiPanel paddingSize="xs" className="codeBoxPanel" data-test-subj="codeBlockControlsPanel">
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
-          <EuiFlexItem>
-            <EuiThemeProvider colorMode="light">
-              <EuiPopover
-                button={button}
-                isOpen={isPopoverOpen}
-                closePopover={() => setIsPopoverOpen(false)}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
-              >
-                <EuiContextMenuPanel items={items} size="s" />
-              </EuiPopover>
-            </EuiThemeProvider>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={codeSnippet}>
-              {(copy) => (
-                <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
-                  {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
-                    defaultMessage: 'Copy',
-                  })}
-                </EuiButtonEmpty>
+        {showTopBar && (
+          <>
+            <EuiFlexGroup
+              alignItems="center"
+              responsive={false}
+              gutterSize="s"
+              justifyContent={languages && languages.length !== 0 ? 'spaceBetween' : 'flexEnd'}
+            >
+              {languages && button && (
+                <EuiFlexItem>
+                  <EuiThemeProvider colorMode="light">
+                    <EuiPopover
+                      button={button}
+                      isOpen={isPopoverOpen}
+                      closePopover={() => setIsPopoverOpen(false)}
+                      panelPaddingSize="none"
+                      anchorPosition="downLeft"
+                    >
+                      <EuiContextMenuPanel items={items} size="s" />
+                    </EuiPopover>
+                  </EuiThemeProvider>
+                </EuiFlexItem>
               )}
-            </EuiCopy>
-          </EuiFlexItem>
-          {consoleRequest !== undefined && (
-            <EuiFlexItem grow={false}>
-              <TryInConsoleButton
-                request={consoleRequest}
-                application={application}
-                consolePlugin={consolePlugin}
-                sharePlugin={sharePlugin}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-        <EuiHorizontalRule margin="none" />
+              <EuiFlexItem grow={false}>
+                <EuiCopy textToCopy={codeSnippet}>
+                  {(copy) => (
+                    <EuiButtonEmpty color="text" iconType="copyClipboard" size="s" onClick={copy}>
+                      {i18n.translate('searchApiPanels.welcomeBanner.codeBox.copyButtonLabel', {
+                        defaultMessage: 'Copy',
+                      })}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiCopy>
+              </EuiFlexItem>
+              {consoleRequest !== undefined && sharePlugin && (
+                <EuiFlexItem grow={false}>
+                  <TryInConsoleButton
+                    request={consoleRequest}
+                    application={application}
+                    consolePlugin={consolePlugin}
+                    sharePlugin={sharePlugin}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="none" />
+          </>
+        )}
         <EuiCodeBlock
+          isCopyable={!showTopBar}
           transparentBackground
           fontSize="m"
-          language={languageType || selectedLanguage.languageStyling || selectedLanguage.id}
+          language={languageType || selectedLanguage?.languageStyling || selectedLanguage?.id}
           overflowHeight={500}
           className="codeBoxCodeBlock"
         >
