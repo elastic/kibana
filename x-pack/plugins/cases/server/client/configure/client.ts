@@ -18,6 +18,8 @@ import type {
   ConfigurationAttributes,
   Configurations,
   ConnectorMappings,
+  CustomFieldsConfiguration,
+  TemplatesConfiguration,
 } from '../../../common/types/domain';
 import type {
   ConfigurationPatchRequest,
@@ -42,13 +44,17 @@ import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
-import { combineAuthorizedAndOwnerFilter } from '../utils';
+import { combineAuthorizedAndOwnerFilter, removeCustomFieldFromTemplates } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
-import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
-import { validateCustomFieldTypesInRequest } from './validators';
+import { validateDuplicatedKeysInRequest } from '../validators';
+import {
+  validateCustomFieldTypesInRequest,
+  validateTemplatesCustomFieldsInRequest,
+} from './validators';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 
 /**
  * Defines the internal helper functions.
@@ -90,6 +96,52 @@ export interface ConfigureSubClient {
    */
   create(configuration: ConfigurationRequest): Promise<Configuration>;
 }
+
+/**
+ * validate templates in configuration
+ */
+const validateTemplates = async ({
+  templates,
+  clientArgs,
+  customFields,
+}: {
+  templates: TemplatesConfiguration | undefined;
+  clientArgs: CasesClientArgs;
+  customFields: CustomFieldsConfiguration | undefined;
+}) => {
+  const { licensingService } = clientArgs.services;
+
+  validateDuplicatedKeysInRequest({
+    requestFields: templates,
+    fieldName: 'templates',
+  });
+
+  if (templates && templates.length) {
+    /**
+     * Assign users to a template is only available to Platinum+
+     */
+    const hasAssigneesInTemplate = templates.some((template) =>
+      Boolean(template.caseFields?.assignees && template.caseFields?.assignees.length > 0)
+    );
+
+    const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+    if (hasAssigneesInTemplate && !hasPlatinumLicenseOrGreater) {
+      throw Boom.forbidden(
+        'In order to assign users to cases, you must be subscribed to an Elastic Platinum license'
+      );
+    }
+
+    if (hasAssigneesInTemplate) {
+      licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
+    }
+
+    validateTemplatesCustomFieldsInRequest({
+      templates,
+      customFieldsConfiguration: customFields,
+    });
+  }
+};
 
 /**
  * These functions should not be exposed on the plugin contract. They are for internal use to support the CRUD of
@@ -251,9 +303,12 @@ export async function update(
   try {
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
-    validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
+    validateDuplicatedKeysInRequest({
+      requestFields: request.customFields,
+      fieldName: 'customFields',
+    });
 
-    const { version, ...queryWithoutVersion } = request;
+    const { version, templates, ...queryWithoutVersion } = request;
 
     const configuration = await caseConfigureService.get({
       unsecuredSavedObjectsClient,
@@ -263,6 +318,17 @@ export async function update(
     validateCustomFieldTypesInRequest({
       requestCustomFields: request.customFields,
       originalCustomFields: configuration.attributes.customFields,
+    });
+
+    await validateTemplates({
+      templates,
+      clientArgs,
+      customFields: configuration.attributes.customFields,
+    });
+
+    const updatedTemplates = removeCustomFieldFromTemplates({
+      templates,
+      customFields: request.customFields,
     });
 
     await authorization.ensureAuthorized({
@@ -320,6 +386,7 @@ export async function update(
       configurationId: configuration.id,
       updatedAttributes: {
         ...queryWithoutVersionAndConnector,
+        ...(updatedTemplates && { templates: updatedTemplates }),
         ...(connector != null && { connector }),
         updated_at: updateDate,
         updated_by: user,
@@ -364,8 +431,15 @@ export async function create(
     const validatedConfigurationRequest =
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
 
-    validateDuplicatedCustomFieldKeysInRequest({
-      requestCustomFields: validatedConfigurationRequest.customFields,
+    validateDuplicatedKeysInRequest({
+      requestFields: validatedConfigurationRequest.customFields,
+      fieldName: 'customFields',
+    });
+
+    await validateTemplates({
+      templates: validatedConfigurationRequest.templates,
+      clientArgs,
+      customFields: validatedConfigurationRequest.customFields,
     });
 
     let error = null;
@@ -441,6 +515,7 @@ export async function create(
       attributes: {
         ...validatedConfigurationRequest,
         customFields: validatedConfigurationRequest.customFields ?? [],
+        templates: validatedConfigurationRequest.templates ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,

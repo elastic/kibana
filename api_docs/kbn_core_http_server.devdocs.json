@@ -4200,6 +4200,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/config_data.ts"
               },
               {
@@ -6799,6 +6803,10 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
               },
               {
                 "plugin": "enterpriseSearch",
@@ -15922,15 +15930,19 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/prompts/bulk_actions_route.ts"
               },
               {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/anonymization_fields/bulk_actions_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/chat/chat_complete_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
               },
               {
                 "plugin": "elasticAssistant",
