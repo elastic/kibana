@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Common Rule Attributes
-  version: "not applicable"
+  version: 'not applicable'
 paths: {}
 components:
   x-codegen-enabled: false
@@ -54,12 +54,12 @@ components:
         processors:
           type: array
           items:
-            $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
+            $ref: '../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem'
           description: The processors to execute.
         on_failure:
           type: array
           items:
-            $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
+            $ref: '../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem'
           description: The processors to execute if the pipeline fails.
 
     InputType:
@@ -105,16 +105,16 @@ components:
         inputTypes:
           type: array
           items:
-            $ref: "#/components/schemas/InputType"
+            $ref: '#/components/schemas/InputType'
           description: The input types of the dataStream.
         rawSamples:
-          $ref: "#/components/schemas/RawSamples"
+          $ref: '#/components/schemas/RawSamples'
           description: The raw samples of the dataStream.
         pipeline:
-          $ref: "#/components/schemas/Pipeline"
+          $ref: '#/components/schemas/Pipeline'
           description: The pipeline of the dataStream.
         docs:
-          $ref: "#/components/schemas/Docs"
+          $ref: '#/components/schemas/Docs'
           description: The documents of the dataStream.
 
     Integration:
@@ -138,8 +138,22 @@ components:
         dataStreams:
           type: array
           items:
-            $ref: "#/components/schemas/DataStream"
+            $ref: '#/components/schemas/DataStream'
           description: The dataStreams of the integration.
         logo:
           type: string
           description: The logo of the integration.
+
+    LangSmithOptions:
+      type: object
+      description: The LangSmith options object.
+      required:
+        - project
+        - apiKey
+      properties:
+        projectName:
+          type: string
+          description: The project name.
+        apiKey:
+          type: string
+          description: The apiKey to use for tracing.

@@ -18,12 +18,11 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import { MessagesPlaceholder } from '@langchain/core/prompts';
+import { APMTracer, withAssistantSpan } from '@kbn/langchain/server/tracers/apm';
 import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';
-import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
