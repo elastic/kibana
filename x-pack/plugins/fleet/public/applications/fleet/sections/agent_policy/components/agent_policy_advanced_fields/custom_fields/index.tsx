@@ -24,11 +24,13 @@ import { GlobalDataTagsTable } from './global_data_tags_table';
 interface Props {
   agentPolicy: Partial<AgentPolicy | NewAgentPolicy>;
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
+  isDisabled?: boolean;
 }
 
 export const CustomFields: React.FunctionComponent<Props> = ({
   agentPolicy,
   updateAgentPolicy,
+  isDisabled,
 }) => {
   const isAgentPolicy = (policy: Partial<AgentPolicy | NewAgentPolicy>): policy is AgentPolicy => {
     return (policy as AgentPolicy).package_policies !== undefined;
@@ -103,6 +105,7 @@ export const CustomFields: React.FunctionComponent<Props> = ({
       }
     >
       <GlobalDataTagsTable
+        isDisabled={isDisabled}
         updateAgentPolicy={updateAgentPolicy}
         globalDataTags={agentPolicy.global_data_tags ? agentPolicy.global_data_tags : []}
       />

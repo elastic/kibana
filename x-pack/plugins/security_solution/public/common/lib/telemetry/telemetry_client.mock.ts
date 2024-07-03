@@ -35,4 +35,9 @@ export const createTelemetryClientMock = (): jest.Mocked<TelemetryClientStart> =
   reportAssetCriticalityCsvPreviewGenerated: jest.fn(),
   reportAssetCriticalityFileSelected: jest.fn(),
   reportAssetCriticalityCsvImported: jest.fn(),
+  reportEventLogFilterByRunType: jest.fn(),
+  reportEventLogShowSourceEventDateRange: jest.fn(),
+  reportManualRuleRunCancelJob: jest.fn(),
+  reportManualRuleRunExecute: jest.fn(),
+  reportManualRuleRunOpenModal: jest.fn(),
 });
