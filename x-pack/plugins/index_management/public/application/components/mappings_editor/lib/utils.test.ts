@@ -420,6 +420,7 @@ describe('utils', () => {
         selectedDataTypes: ['Boolean'],
       },
       inferenceToModelIdMap: {},
+      mappingViewFields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
     };
     test('returns list of matching fields with search term', () => {
       expect(getFieldsMatchingFilterFromState(sampleState, ['Boolean'])).toEqual({
