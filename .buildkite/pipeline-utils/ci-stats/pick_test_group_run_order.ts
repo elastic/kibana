@@ -127,30 +127,23 @@ function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
 }
 
-interface PartialConfigs {
-  enabled?: string[];
-  disabled?: string[];
+interface FtrConfigsManifest {
   defaultQueue?: string;
+  disabled?: string[];
+  enabled?: Array<string | { [configPath: string]: { queue: string } }>;
 }
 
 function getEnabledFtrConfigs(patterns?: string[]) {
-  const configs: {
-    enabled: Array<string | { [configPath: string]: { queue: string } }>;
-    uniqueQueues: Set<string>;
-    defaultQueue?: string;
-  } = {
-    enabled: [],
-    uniqueQueues: new Set<string>(),
-  };
+  const configs: Array<string | { [configPath: string]: { queue: string } }> = [];
+  const uniqueQueues = new Set<string>();
+
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
     try {
-      const partialConfigs: PartialConfigs = loadYaml(
-        Fs.readFileSync(manifestRelPath, 'utf8')
-      ) as PartialConfigs;
+      const manifest = loadYaml(Fs.readFileSync(manifestRelPath, 'utf8')) as FtrConfigsManifest;
 
-      configs.enabled = configs.enabled.concat(partialConfigs?.enabled ?? []);
-      if (partialConfigs.defaultQueue) {
-        configs.uniqueQueues.add(partialConfigs.defaultQueue);
+      configs.push(...(manifest?.enabled ?? []));
+      if (manifest.defaultQueue) {
+        uniqueQueues.add(manifest.defaultQueue);
       }
     } catch (_) {
       const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
@@ -165,14 +158,14 @@ function getEnabledFtrConfigs(patterns?: string[]) {
     if (!configs.enabled) {
       throw new Error('expected yaml file to have an "enabled" key');
     }
-    if (configs.uniqueQueues.size !== 1) {
+    if (uniqueQueues.size !== 1) {
       throw Error(
-        `FTR configs yml files should define the same 'defaultQueue': ${[
-          ...configs.uniqueQueues,
+        `FTR manifest yml files should define the same 'defaultQueue', but found different ones: ${[
+          ...uniqueQueues,
         ].join(' ')}`
       );
     }
-    configs.defaultQueue = configs.uniqueQueues.values().next().value;
+    configs.defaultQueue = uniqueQueues.values().next().value;
 
     if (
       !Array.isArray(configs.enabled) ||
