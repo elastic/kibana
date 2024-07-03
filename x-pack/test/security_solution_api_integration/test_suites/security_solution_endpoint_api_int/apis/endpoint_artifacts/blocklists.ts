@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
               .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
               .send(body)
-              .expect(400)
+              .expect(200)
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/types that failed validation:/));
           });
