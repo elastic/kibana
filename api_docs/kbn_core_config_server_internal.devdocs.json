@@ -48,15 +48,25 @@
         "parentPluginId": "@kbn/core-config-server-internal",
         "id": "def-common.ensureValidConfiguration",
         "type": "Function",
-        "tags": [],
+        "tags": [
+          "private"
+        ],
         "label": "ensureValidConfiguration",
-        "description": [],
+        "description": [
+          "\nValidate the entire Kibana configuration object, including the detection of extra keys."
+        ],
         "signature": [
           "(configService: ",
-          "ConfigService",
+          "IConfigService",
           ", params: ",
-          "ConfigValidateParameters",
-          " | undefined) => Promise<void>"
+          {
+            "pluginId": "@kbn/core-config-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreConfigServerInternalPluginApi",
+            "section": "def-common.EnsureValidConfigurationParameters",
+            "text": "EnsureValidConfigurationParameters"
+          },
+          ") => Promise<void>"
         ],
         "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
         "deprecated": false,
@@ -68,9 +78,11 @@
             "type": "Object",
             "tags": [],
             "label": "configService",
-            "description": [],
+            "description": [
+              "The {@link IConfigService } instance that has the raw configuration preloaded."
+            ],
             "signature": [
-              "ConfigService"
+              "IConfigService"
             ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
@@ -83,22 +95,75 @@
             "type": "Object",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "{@link EnsureValidConfigurationParameters | Options} to enable/disable extra edge-cases."
+            ],
             "signature": [
-              "ConfigValidateParameters",
-              " | undefined"
+              {
+                "pluginId": "@kbn/core-config-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreConfigServerInternalPluginApi",
+                "section": "def-common.EnsureValidConfigurationParameters",
+                "text": "EnsureValidConfigurationParameters"
+              }
             ],
             "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": false
+            "isRequired": true
           }
         ],
         "returnComment": [],
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-config-server-internal",
+        "id": "def-common.EnsureValidConfigurationParameters",
+        "type": "Interface",
+        "tags": [
+          "private"
+        ],
+        "label": "EnsureValidConfigurationParameters",
+        "description": [
+          "\nParameters for the helper {@link ensureValidConfiguration}\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-config-server-internal",
+            "scope": "common",
+            "docId": "kibKbnCoreConfigServerInternalPluginApi",
+            "section": "def-common.EnsureValidConfigurationParameters",
+            "text": "EnsureValidConfigurationParameters"
+          },
+          " extends ",
+          "ConfigValidateParameters"
+        ],
+        "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-config-server-internal",
+            "id": "def-common.EnsureValidConfigurationParameters.stripUnknownKeys",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "stripUnknownKeys",
+            "description": [
+              "\nSet to `true` to ignore any unknown keys and discard them from the final validated config object."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": []
