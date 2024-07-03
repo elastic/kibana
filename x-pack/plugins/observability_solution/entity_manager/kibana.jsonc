@@ -9,9 +9,6 @@
       "xpack",
       "entityManager"
     ],
-    "optionalPlugins": [
-      "spaces"
-    ],
     "requiredPlugins": [
       "security",
       "encryptedSavedObjects",
