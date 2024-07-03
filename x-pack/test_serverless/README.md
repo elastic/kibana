@@ -60,7 +60,9 @@ added like this to a test suite:
 
 ```
 describe('my test suite', function () {
-  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']); // SKIPS ON ALL ENVIRONMENTS, INCLUDING MKI
+  // skip tests in both regular KBN serverless pipelines that start Kibana in serverless mode against serverless ES node, 
+  // and pipelines creating serverless projects in MKI (Cloud)
+  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']); 
   // or for a single tag: this.tags('skipSvlSec');
   [...]
 });
