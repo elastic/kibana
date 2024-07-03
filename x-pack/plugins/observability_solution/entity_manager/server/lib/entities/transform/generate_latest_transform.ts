@@ -10,11 +10,12 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import {
   ENTITY_DEFAULT_LATEST_FREQUENCY,
   ENTITY_DEFAULT_LATEST_SYNC_DELAY,
+  ENTITY_LATEST_BASE_PREFIX
 } from '../../../../common/constants_entities';
 import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
 import { generateLatestIngestPipelineId } from '../ingest_pipeline/generate_latest_ingest_pipeline_id';
 import { generateLatestTransformId } from './generate_latest_transform_id';
-import { generateHistoryIndexName, generateLatestIndexName } from '../helpers/generate_index_name';
+import { generateHistoryIndexName } from '../helpers/generate_index_name';
 import { generateLatestMetricAggregations } from './generate_metric_aggregations';
 
 export function generateLatestTransform(
@@ -27,7 +28,7 @@ export function generateLatestTransform(
       index: `${generateHistoryIndexName(definition)}.*`,
     },
     dest: {
-      index: generateLatestIndexName(definition),
+      index: `${ENTITY_LATEST_BASE_PREFIX}.noop`,
       pipeline: generateLatestIngestPipelineId(definition),
     },
     frequency: definition.latest?.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
