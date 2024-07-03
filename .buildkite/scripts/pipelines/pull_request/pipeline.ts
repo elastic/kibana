@@ -9,7 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
+import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
@@ -43,6 +43,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     const pipeline = [];
 
+    pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
@@ -82,7 +83,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_onboarding/,
+        /^x-pack\/plugins\/observability_solution\/observability_onboarding/,
         /^x-pack\/plugins\/fleet/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -306,7 +307,11 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     if (
-      ((await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
+      ((await doAnyChangesMatch([
+        /^x-pack\/plugins\/osquery/,
+        /^x-pack\/test\/osquery_cypress/,
+        /^x-pack\/plugins\/security_solution/,
+      ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {

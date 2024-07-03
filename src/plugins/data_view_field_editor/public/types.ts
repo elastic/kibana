@@ -38,12 +38,12 @@ export interface PluginStart {
   /**
    * Method to open the data view field editor fly-out
    */
-  openEditor(options: OpenFieldEditorOptions): () => void;
+  openEditor(options: OpenFieldEditorOptions): Promise<CloseEditor>;
   /**
    * Method to open the data view field delete fly-out
    * @param options Configuration options for the fly-out
    */
-  openDeleteModal(options: OpenFieldDeleteModalOptions): () => void;
+  openDeleteModal(options: OpenFieldDeleteModalOptions): CloseEditor;
   fieldFormatEditors: FormatEditorServiceStart['fieldFormatEditors'];
   /**
    * Convenience method for user permissions checks

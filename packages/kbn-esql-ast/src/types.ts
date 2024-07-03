@@ -46,9 +46,9 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
 }
 
 export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
-  indices: ESQLSource[];
-  aggregates?: ESQLAstItem[];
-  grouping?: ESQLAstItem[];
+  sources: ESQLSource[];
+  aggregates?: ESQLAstField[];
+  grouping?: ESQLAstField[];
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
@@ -147,7 +147,7 @@ export interface ESQLParamLiteral<ParamType extends string = string> extends ESQ
   type: 'literal';
   literalType: 'param';
   paramType: ParamType;
-  value?: string | number;
+  value: string | number;
 }
 
 /**
