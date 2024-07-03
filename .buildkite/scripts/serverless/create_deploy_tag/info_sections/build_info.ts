@@ -79,8 +79,8 @@ export async function getQAFBuildContainingCommit(
 
   // Find the first build that contains this commit
   const build = qafBuilds
-    // Only search across scheduled builds, triggered builds might run with different commits
-    .filter((e) => e.source === 'schedule')
+    // Scheduled and manually tagged builds will have this variable, other builds might have non-relevant commits
+    .filter((e) => e.env.PRE_RELEASE_CHECK?.match(/(1|true)/i))
     .find((kbBuild) => {
       const commitShaIndex = recentGitCommits.findIndex((c) => c.sha === commitSha);
 

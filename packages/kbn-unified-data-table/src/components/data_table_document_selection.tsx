@@ -32,7 +32,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
 
   const toggleDocumentSelectionLabel = i18n.translate('unifiedDataTable.grid.selectDoc', {
-    defaultMessage: `Select document '{rowNumber}'`,
+    defaultMessage: `Select document ''{rowNumber}''`,
     values: { rowNumber: rowIndex + 1 },
   });
 

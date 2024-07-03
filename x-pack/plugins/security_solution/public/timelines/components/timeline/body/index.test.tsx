@@ -27,7 +27,6 @@ import type { Props } from '.';
 import { StatefulBody } from '.';
 import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
-import { timelineActions } from '../../../store';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
@@ -38,8 +37,10 @@ import type {
   DroppableProvided,
   DroppableStateSnapshot,
 } from '@hello-pangea/dnd';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );
@@ -93,6 +94,13 @@ jest.mock('react-redux', () => {
   return {
     ...original,
     useDispatch: () => mockDispatch,
+  };
+});
+
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => {
+  return {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
   };
 });
 
@@ -329,151 +337,63 @@ describe('Body', () => {
       });
     });
   });
-  describe('action on event', () => {
-    const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
-      wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
-      wrapper.update();
-      wrapper
-        .find('[data-test-subj="new-note-tabs"] textarea')
-        .simulate('change', { target: { value: note } });
-      wrapper.update();
-      wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
-      wrapper.update();
-    };
-
-    beforeEach(() => {
-      mockDispatch.mockClear();
-    });
-
-    test('Add a note to an event', async () => {
-      const wrapper = await getWrapper(<StatefulBody {...props} />);
-
-      addaNoteToEvent(wrapper, 'hello world');
-      wrapper.update();
-      expect(mockDispatch).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          payload: {
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: expect.anything(),
-          },
-          type: timelineActions.addNoteToEvent({
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: '11',
-          }).type,
-        })
-      );
-    });
-
-    test('Add two notes to an event', async () => {
-      const state: State = {
-        ...mockGlobalState,
-        timeline: {
-          ...mockGlobalState.timeline,
-          timelineById: {
-            ...mockGlobalState.timeline.timelineById,
-            [TimelineId.test]: {
-              ...mockGlobalState.timeline.timelineById[TimelineId.test],
-              id: 'timeline-test',
-              pinnedEventIds: { 1: true },
-            },
-          },
-        },
-      };
-
-      const store = createMockStore(state);
-
-      const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
-
-      const wrapper = await getWrapper(<Proxy {...props} />, { store });
-
-      addaNoteToEvent(wrapper, 'hello world');
-      mockDispatch.mockClear();
-      addaNoteToEvent(wrapper, 'new hello world');
-      expect(mockDispatch).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          payload: {
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: expect.anything(),
-          },
-          type: timelineActions.addNoteToEvent({
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: '11',
-          }).type,
-        })
-      );
-    });
-  });
 
   describe('event details', () => {
     beforeEach(() => {
       mockDispatch.mockReset();
     });
-    test('call the right reduce action to show event details for query tab', async () => {
+
+    test('open the expandable flyout to show event details for query tab', async () => {
       const wrapper = await getWrapper(<StatefulBody {...props} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          id: 'timeline-test',
-          panelView: 'eventDetail',
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
           params: {
-            eventId: '1',
+            id: '1',
             indexName: undefined,
-            refetch: mockRefetch,
+            scopeId: 'timeline-test',
           },
-          tabType: 'query',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
-    test('call the right reduce action to show event details for pinned tab', async () => {
+    test('open the expandable flyout to show event details for pinned tab', async () => {
       const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.pinned} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          id: 'timeline-test',
-          panelView: 'eventDetail',
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
           params: {
-            eventId: '1',
+            id: '1',
             indexName: undefined,
-            refetch: mockRefetch,
+            scopeId: 'timeline-test',
           },
-          tabType: 'pinned',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
 
-    test('call the right reduce action to show event details for notes tab', async () => {
+    test('open the expandable flyout to show event details for notes tab', async () => {
       const wrapper = await getWrapper(<StatefulBody {...props} tabType={TimelineTabs.notes} />);
 
       wrapper.find(`[data-test-subj="expand-event"]`).first().simulate('click');
       wrapper.update();
-      expect(mockDispatch).toBeCalledTimes(1);
-      expect(mockDispatch.mock.calls[0][0]).toEqual({
-        payload: {
-          id: 'timeline-test',
-          panelView: 'eventDetail',
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockOpenFlyout).toHaveBeenCalledWith({
+        right: {
+          id: DocumentDetailsRightPanelKey,
           params: {
-            eventId: '1',
+            id: '1',
             indexName: undefined,
-            refetch: mockRefetch,
+            scopeId: 'timeline-test',
           },
-          tabType: 'notes',
         },
-        type: 'x-pack/security_solution/local/timeline/TOGGLE_DETAIL_PANEL',
       });
     });
   });

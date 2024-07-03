@@ -17,9 +17,9 @@ export const getChangePointDetectionComponent = (
   coreStart: CoreStart,
   pluginStart: AiopsPluginStartDeps
 ): ChangePointDetectionSharedComponent => {
-  return (props) => {
+  return React.memo((props) => {
     return <ChangePointDetectionLazy coreStart={coreStart} pluginStart={pluginStart} {...props} />;
-  };
+  });
 };
 
 export type { ChangePointDetectionSharedComponent } from './change_point_detection';

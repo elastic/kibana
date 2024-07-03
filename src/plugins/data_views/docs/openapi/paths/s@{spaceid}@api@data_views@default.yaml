@@ -1,5 +1,5 @@
 get:
-  summary: Retrieves the default data view identifier.
+  summary: Get the default data view identifier
   operationId: getDefaultDataView
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -27,7 +27,7 @@ get:
           schema:
             $ref: '../components/schemas/400_response.yaml'
 post:
-  summary: Sets the default data view identifier.
+  summary: Sets the default data view identifier
   operationId: setDefaultDatailView
   description: >
     This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -46,7 +46,8 @@ post:
             - data_view_id
           properties:
             data_view_id:
-              type: ['string', 'null']
+              type: string
+              nullable: true
               description: >
                 The data view identifier.
                 NOTE: The API does not validate whether it is a valid identifier.

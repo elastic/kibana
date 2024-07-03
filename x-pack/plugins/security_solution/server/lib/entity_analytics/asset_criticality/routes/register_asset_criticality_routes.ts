@@ -4,13 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { assetCriticalityStatusRoute } from './status';
-import { assetCriticalityUpsertRoute } from './upsert';
-import { assetCriticalityGetRoute } from './get';
-import { assetCriticalityDeleteRoute } from './delete';
-import { assetCriticalityPrivilegesRoute } from './privileges';
-import { assetCriticalityCSVUploadRoute } from './upload_csv';
+import { assetCriticalityInternalStatusRoute } from './status';
+import { assetCriticalityPublicUpsertRoute, assetCriticalityInternalUpsertRoute } from './upsert';
+import { assetCriticalityInternalGetRoute, assetCriticalityPublicGetRoute } from './get';
+import { assetCriticalityPublicDeleteRoute, assetCriticalityInternalDeleteRoute } from './delete';
+import { assetCriticalityInternalPrivilegesRoute } from './privileges';
+import {
+  assetCriticalityInternalCSVUploadRoute,
+  assetCriticalityPublicCSVUploadRoute,
+} from './upload_csv';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { assetCriticalityPublicBulkUploadRoute } from './bulk_upload';
 
 export const registerAssetCriticalityRoutes = ({
   router,
@@ -18,10 +22,18 @@ export const registerAssetCriticalityRoutes = ({
   config,
   getStartServices,
 }: EntityAnalyticsRoutesDeps) => {
-  assetCriticalityStatusRoute(router, logger);
-  assetCriticalityUpsertRoute(router, logger);
-  assetCriticalityGetRoute(router, logger);
-  assetCriticalityDeleteRoute(router, logger);
-  assetCriticalityPrivilegesRoute(router, logger, getStartServices);
-  assetCriticalityCSVUploadRoute(router, logger, config, getStartServices);
+  // Internal routes
+  assetCriticalityInternalCSVUploadRoute(router, logger, config, getStartServices);
+  assetCriticalityInternalDeleteRoute(router, logger);
+  assetCriticalityInternalGetRoute(router, logger);
+  assetCriticalityInternalPrivilegesRoute(router, logger, getStartServices);
+  assetCriticalityInternalStatusRoute(router, logger);
+  assetCriticalityInternalUpsertRoute(router, logger);
+
+  // Public routes
+  assetCriticalityPublicCSVUploadRoute(router, logger, config, getStartServices);
+  assetCriticalityPublicBulkUploadRoute(router, logger, config);
+  assetCriticalityPublicDeleteRoute(router, logger);
+  assetCriticalityPublicGetRoute(router, logger);
+  assetCriticalityPublicUpsertRoute(router, logger);
 };

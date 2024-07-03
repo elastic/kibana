@@ -81,13 +81,5 @@ export const useNavigateFindings = () => {
   return useNavigate(findingsNavigation.findings_default.path, data?.id);
 };
 
-export const useNavigateFindingsByResource = () => {
-  const { data } = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
-  return useNavigate(findingsNavigation.findings_by_resource.path, data?.id);
-};
-
 export const useNavigateVulnerabilities = () =>
   useNavigate(findingsNavigation.vulnerabilities.path);
-
-export const useNavigateVulnerabilitiesByResource = () =>
-  useNavigate(findingsNavigation.vulnerabilities_by_resource.path);

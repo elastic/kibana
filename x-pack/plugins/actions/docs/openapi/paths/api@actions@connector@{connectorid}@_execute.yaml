@@ -1,5 +1,5 @@
 post:
-  summary: Runs a connector.
+  summary: Run a connector
   operationId: runConnector
   description: >
     You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.

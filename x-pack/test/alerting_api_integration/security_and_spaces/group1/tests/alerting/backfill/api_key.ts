@@ -10,7 +10,10 @@ import moment from 'moment';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-objects-server';
 import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
-import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
+import {
+  AD_HOC_RUN_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+} from '@kbn/alerting-plugin/server/saved_objects';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
 import {
@@ -35,7 +38,9 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
       await runInvalidateTask();
     });
 
-    after(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     async function getAdHocRunSO(id: string) {
       const result = await es.get({
@@ -132,6 +137,7 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         .send(getRule())
         .expect(200);
       const ruleId1 = rresponse1.body.id;
+      objectRemover.add(spaceId, ruleId1, 'rule', 'alerting');
 
       const rresponse2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/api/alerting/rule`)
@@ -140,6 +146,29 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         .send(getRule())
         .expect(200);
       const ruleId2 = rresponse2.body.id;
+      objectRemover.add(spaceId, ruleId2, 'rule', 'alerting');
+
+      // wait for each rule to run once
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: ruleId1,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
+      });
+      await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId,
+          type: RULE_SAVED_OBJECT_TYPE,
+          id: ruleId2,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
+      });
 
       // schedule backfill for rule 1
       const response = await supertestWithoutAuth
@@ -176,14 +205,15 @@ export default function apiKeyBackfillTests({ getService }: FtrProviderContext) 
         currentStart = runAt;
       });
 
-      // delete both rules which will mark the api keys for invalidation
+      // update API key both rules which will mark the api keys for invalidation
       await supertestWithoutAuth
-        .delete(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId1}`)
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId1}/_update_api_key`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .expect(204);
+
       await supertestWithoutAuth
-        .delete(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId2}`)
+        .post(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId2}/_update_api_key`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
         .expect(204);

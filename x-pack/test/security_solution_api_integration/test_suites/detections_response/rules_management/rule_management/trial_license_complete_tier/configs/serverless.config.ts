@@ -12,4 +12,7 @@ export default createTestConfig({
     reportName:
       'Rules Management - Rule Management Integration Tests - Serverless Env - Complete Tier',
   },
+  kbnTestServerArgs: [
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify(['manualRuleRunEnabled'])}`,
+  ],
 });

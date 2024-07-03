@@ -40,6 +40,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./single_metric_job'));
 
     if (!isCcs) {
+      loadTestFile(require.resolve('./job_expanded_details'));
       loadTestFile(require.resolve('./single_metric_job_without_datafeed_start'));
       loadTestFile(require.resolve('./multi_metric_job'));
       loadTestFile(require.resolve('./population_job'));

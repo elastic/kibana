@@ -34,7 +34,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
     const builder = new LensConfigBuilder(dataViews, formulaAPI);
 
     return builder.build(params) as Promise<LensAttributes>;
-  }, [params.chartType, params.dataset, dataViews]);
+  }, [params, dataViews, lens]);
 
   const injectFilters = useCallback(
     ({ filters, query }: { filters: Filter[]; query: Query }): LensAttributes | null => {

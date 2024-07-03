@@ -16,8 +16,10 @@ import { defer, BehaviorSubject } from 'rxjs';
 import { notificationServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock as fieldFormats } from '@kbn/field-formats-plugin/common/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { PreviewController } from '../../../public/components/preview/preview_controller';
 import { FieldEditorProvider, Context } from '../../../public/components/field_editor_context';
 import { FieldPreviewProvider } from '../../../public/components/preview';
@@ -150,9 +152,17 @@ export const WithFieldEditorDependencies =
 
     const mergedDependencies = merge({}, dependencies, overridingDependencies);
     const previewController = new PreviewController({
+      deps: {
+        dataViews: dataViewPluginMocks.createStartContract(),
+        search,
+        fieldFormats,
+        usageCollection: {
+          reportUiCounter: jest.fn(),
+        } as UsageCollectionStart,
+        notifications: notificationServiceMock.createStartContract(),
+      },
       dataView,
-      search,
-      fieldFormats,
+      onSave: jest.fn(),
       fieldTypeToProcess: 'runtime',
     });
 

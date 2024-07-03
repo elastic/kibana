@@ -12,10 +12,9 @@ exports[`ConditionsSectionExpression renders when enabled with empty conditions 
   <EuiButtonEmpty
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add new condition"
       id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-      values={Object {}}
     />
   </EuiButtonEmpty>
 </Fragment>
@@ -29,10 +28,9 @@ exports[`ConditionsSectionExpression renders when enabled with no conditions sup
   <EuiButtonEmpty
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add new condition"
       id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-      values={Object {}}
     />
   </EuiButtonEmpty>
 </Fragment>
@@ -55,10 +53,9 @@ exports[`ConditionsSectionExpression renders when enabled with one condition 1`]
   <EuiButtonEmpty
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add new condition"
       id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-      values={Object {}}
     />
   </EuiButtonEmpty>
 </Fragment>
@@ -90,10 +87,9 @@ exports[`ConditionsSectionExpression renders when enabled with two conditions 1`
   <EuiButtonEmpty
     onClick={[Function]}
   >
-    <FormattedMessage
+    <MemoizedFormattedMessage
       defaultMessage="Add new condition"
       id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
-      values={Object {}}
     />
   </EuiButtonEmpty>
 </Fragment>

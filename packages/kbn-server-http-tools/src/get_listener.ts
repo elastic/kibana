@@ -8,6 +8,7 @@
 
 import http from 'http';
 import https from 'https';
+import http2 from 'http2';
 import { getServerTLSOptions } from './get_tls_options';
 import type { IHttpConfig, ServerListener } from './types';
 
@@ -19,7 +20,10 @@ export function getServerListener(
   config: IHttpConfig,
   options: GetServerListenerOptions = {}
 ): ServerListener {
-  return configureHttp1Listener(config, options);
+  const useHTTP2 = config.protocol === 'http2';
+  return useHTTP2
+    ? configureHttp2Listener(config, options)
+    : configureHttp1Listener(config, options);
 }
 
 const configureHttp1Listener = (
@@ -49,6 +53,26 @@ const configureHttp1Listener = (
       socket.destroy(err);
     }
   });
+
+  return listener;
+};
+
+const configureHttp2Listener = (
+  config: IHttpConfig,
+  { configureTLS = true }: GetServerListenerOptions = {}
+): ServerListener => {
+  const useTLS = configureTLS && config.ssl.enabled;
+  const tlsOptions = useTLS ? getServerTLSOptions(config.ssl) : undefined;
+
+  const listener = useTLS
+    ? http2.createSecureServer({
+        ...tlsOptions,
+        // allow ALPN negotiation fallback to HTTP/1.x
+        allowHTTP1: true,
+      })
+    : http2.createServer({});
+
+  listener.setTimeout(config.socketTimeout);
 
   return listener;
 };

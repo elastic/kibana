@@ -17,6 +17,7 @@ import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
 import { escapeCdata } from '../../mocha/xml';
 import { getUniqueJunitReportPath } from '../../report_path';
+import { prettifyCommandLine } from '../../prettify_command_line';
 
 interface ReporterOptions {
   reportName?: string;
@@ -71,6 +72,7 @@ export default class JestJUnitReporter extends BaseReporter {
       tests: results.numTotalTests,
       failures: results.numFailedTests,
       skipped: results.numPendingTests,
+      'command-line': prettifyCommandLine(process.argv),
     });
 
     // top level test results are the files/suites
@@ -83,6 +85,7 @@ export default class JestJUnitReporter extends BaseReporter {
         failures: suite.numFailingTests,
         skipped: suite.numPendingTests,
         file: suite.testFilePath,
+        'command-line': prettifyCommandLine(process.argv),
       });
 
       // nested in there are the tests in that file

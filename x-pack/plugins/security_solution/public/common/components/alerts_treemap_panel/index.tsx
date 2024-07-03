@@ -10,6 +10,7 @@ import type { EuiComboBox } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -24,6 +25,7 @@ import { HeaderSection } from '../header_section';
 import { InspectButtonContainer } from '../inspect';
 import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from '../alerts_treemap/query';
 import type { AlertsTreeMapAggregation } from '../alerts_treemap/types';
+import { useKibana } from '../../lib/kibana';
 
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
 
@@ -81,23 +83,26 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   title,
 }: Props) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
+  const { uiSettings } = useKibana().services;
 
   // create a unique, but stable (across re-renders) query id
   const uniqueQueryId = useMemo(() => `${ALERTS_TREEMAP_ID}-${uuidv4()}`, []);
 
   const additionalFilters = useMemo(() => {
     try {
+      const config = getEsQueryConfig(uiSettings);
       return [
         buildEsQuery(
           undefined,
           query != null ? [query] : [],
-          filters?.filter((f) => f.meta.disabled === false) ?? []
+          filters?.filter((f) => f.meta.disabled === false) ?? [],
+          config
         ),
       ];
     } catch (e) {
       return [];
     }
-  }, [query, filters]);
+  }, [query, filters, uiSettings]);
 
   const {
     data: alertsData,

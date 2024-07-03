@@ -70,7 +70,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         return;
       }
 
-      const newSampleSize = Number(event.target.value);
+      const newSampleSize = parseInt(event.target.value, 10) ?? RANGE_MIN_SAMPLE_SIZE;
 
       if (newSampleSize >= MIN_ALLOWED_SAMPLE_SIZE) {
         setActiveSampleSize(newSampleSize);

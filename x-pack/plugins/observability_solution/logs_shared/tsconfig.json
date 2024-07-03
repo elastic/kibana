@@ -38,6 +38,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/search-types",
     "@kbn/discover-shared-plugin",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/test-jest-helpers"
   ]
 }

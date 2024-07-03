@@ -80,6 +80,9 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       {
         defaultMessage:
           '<em>[technical preview]</em> Use simulated function calling. Simulated function calling does not need API support for functions or tools, but it may decrease performance. Simulated function calling is currently always enabled for non-OpenAI connector, regardless of this setting.',
+        values: {
+          em: (chunks) => `<em>${chunks}</em>`,
+        },
       }
     ),
     schema: schema.boolean(),

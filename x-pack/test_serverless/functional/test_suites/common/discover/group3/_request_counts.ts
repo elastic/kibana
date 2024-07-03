@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'bfetch:disable': true,
+        // 'bfetch:disable': true, // bfetch is already disabled in serverless
         // TODO: Removed ES|QL setting since ES|QL isn't supported in Serverless
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();

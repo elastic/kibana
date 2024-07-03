@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
+import { ElasticV3ServerShipper } from '@kbn/ebt/shippers/elastic_v3/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 import { telemetryCollectionManagerPluginMock } from '@kbn/telemetry-collection-manager-plugin/server/mocks';

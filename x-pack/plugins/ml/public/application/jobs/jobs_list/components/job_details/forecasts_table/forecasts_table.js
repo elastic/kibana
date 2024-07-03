@@ -325,6 +325,7 @@ export class ForecastsTable extends Component {
               }
               iconType="visLine"
               aria-label={viewForecastAriaLabel}
+              data-test-subj="mlJobListForecastTabOpenSingleMetricViewButton"
             />
           );
         },
@@ -333,6 +334,7 @@ export class ForecastsTable extends Component {
 
     return (
       <EuiInMemoryTable
+        data-test-subj="mlJobListForecastTable"
         compressed={true}
         items={forecasts}
         columns={columns}

@@ -140,6 +140,7 @@ describe('SyntheticsService', () => {
 
     service.apiClient.locations = locations;
     service.locations = locations;
+    service.isAllowed = true;
 
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});

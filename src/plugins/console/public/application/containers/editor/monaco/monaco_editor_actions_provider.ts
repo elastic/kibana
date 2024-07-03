@@ -7,7 +7,7 @@
  */
 
 import { CSSProperties, Dispatch } from 'react';
-import { debounce } from 'lodash';
+import { debounce, range } from 'lodash';
 import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -20,6 +20,7 @@ import { Actions } from '../../../stores/request';
 import {
   AutocompleteType,
   containsUrlParams,
+  getAutoIndentedRequests,
   getBodyCompletionItems,
   getCurlRequest,
   getDocumentationLinkFromAutocomplete,
@@ -31,9 +32,9 @@ import {
   getUrlPathCompletionItems,
   replaceRequestVariables,
   SELECTED_REQUESTS_CLASSNAME,
+  shouldTriggerSuggestions,
   stringifyRequest,
   trackSentRequests,
-  getAutoIndentedRequests,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -41,6 +42,10 @@ import { StorageQuotaError } from '../../../components/storage_quota_error';
 import { ContextValue } from '../../../contexts';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
+const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
+const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
+const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
+const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -53,10 +58,25 @@ export class MonacoEditorActionsProvider {
     this.highlightedLines = this.editor.createDecorationsCollection();
     this.editor.focus();
 
-    const debouncedHighlightRequests = debounce(() => this.highlightRequests(), 200, {
-      leading: true,
-    });
+    const debouncedHighlightRequests = debounce(
+      () => this.highlightRequests(),
+      DEBOUNCE_HIGHLIGHT_WAIT_MS,
+      {
+        leading: true,
+      }
+    );
     debouncedHighlightRequests();
+
+    const debouncedTriggerSuggestions = debounce(
+      () => {
+        this.triggerSuggestions();
+      },
+      DEBOUNCE_AUTOCOMPLETE_WAIT_MS,
+      {
+        leading: false,
+        trailing: true,
+      }
+    );
 
     // init all listeners
     editor.onDidChangeCursorPosition(async (event) => {
@@ -70,6 +90,13 @@ export class MonacoEditorActionsProvider {
     });
     editor.onDidContentSizeChange(async (event) => {
       await debouncedHighlightRequests();
+    });
+
+    editor.onKeyUp((event) => {
+      // trigger autocomplete on backspace
+      if (event.keyCode === monaco.KeyCode.Backspace) {
+        debouncedTriggerSuggestions();
+      }
     });
   }
 
@@ -184,7 +211,7 @@ export class MonacoEditorActionsProvider {
   public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
     const {
       services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
-      startServices,
+      ...startServices
     } = context;
     const { toasts } = notifications;
     try {
@@ -347,7 +374,7 @@ export class MonacoEditorActionsProvider {
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     context: monaco.languages.CompletionContext
-  ) {
+  ): Promise<monaco.languages.CompletionList> {
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -384,7 +411,12 @@ export class MonacoEditorActionsProvider {
         position.lineNumber
       );
       const requestStartLineNumber = requests[0].startLineNumber;
-      const suggestions = getBodyCompletionItems(model, position, requestStartLineNumber);
+      const suggestions = await getBodyCompletionItems(
+        model,
+        position,
+        requestStartLineNumber,
+        this
+      );
       return {
         suggestions,
       };
@@ -394,12 +426,12 @@ export class MonacoEditorActionsProvider {
       suggestions: [],
     };
   }
-  public provideCompletionItems(
+  public async provideCompletionItems(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
-  ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
+  ): Promise<monaco.languages.CompletionList> {
     return this.getSuggestions(model, position, context);
   }
 
@@ -563,6 +595,44 @@ export class MonacoEditorActionsProvider {
       // If the start line of the request is before the current line, then the cursor is inside the request
       // The next request edge is the end line of the request
       this.editor.setPosition({ lineNumber: firstRequestAfter.endLineNumber, column: 1 });
+    }
+  }
+
+  /*
+   * This function is to get an array of line contents
+   * from startLine to endLine including both line numbers
+   */
+  public getLines(startLine: number, endLine: number): string[] {
+    const model = this.editor.getModel();
+    if (!model) {
+      return [];
+    }
+    // range returns an array not including the end of the range, so we need to add 1
+    return range(startLine, endLine + 1).map((lineNumber) => model.getLineContent(lineNumber));
+  }
+
+  /*
+   * This function returns the current position of the cursor
+   */
+  public getCurrentPosition(): monaco.IPosition {
+    return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
+  }
+
+  private triggerSuggestions() {
+    const model = this.editor.getModel();
+    const position = this.editor.getPosition();
+    if (!model || !position) {
+      return;
+    }
+    const lineContentBefore = model.getValueInRange({
+      startLineNumber: position.lineNumber,
+      startColumn: 1,
+      endLineNumber: position.lineNumber,
+      endColumn: position.column,
+    });
+    // if the line is empty or it matches specified regex, trigger suggestions
+    if (!lineContentBefore.trim() || shouldTriggerSuggestions(lineContentBefore)) {
+      this.editor.trigger(TRIGGER_SUGGESTIONS_ACTION_LABEL, TRIGGER_SUGGESTIONS_HANDLER_ID, {});
     }
   }
 }

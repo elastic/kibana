@@ -46,6 +46,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -84,6 +85,7 @@ import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
+import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 
 export type SortOrder = [string, string];
@@ -266,7 +268,7 @@ export interface UnifiedDataTableProps {
     theme: ThemeServiceStart;
     fieldFormats: FieldFormatsStart;
     uiSettings: IUiSettingsClient;
-    dataViewFieldEditor: DataViewFieldEditorStart;
+    dataViewFieldEditor?: DataViewFieldEditorStart;
     toastNotifications: ToastsStart;
     storage: Storage;
     data: DataPublicPluginStart;
@@ -339,6 +341,10 @@ export interface UnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
+   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
+   */
+  additionalFieldGroups?: AdditionalFieldGroups;
+  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -376,6 +382,12 @@ export interface UnifiedDataTableProps {
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
+  /**
+   *
+   * Custom cell Popover Render Component.
+   *
+   */
+  renderCellPopover?: EuiDataGridProps['renderCellPopover'];
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -435,6 +447,7 @@ export const UnifiedDataTable = ({
   rowsPerPageOptions,
   visibleCellActions,
   externalCustomRenderers,
+  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -444,6 +457,7 @@ export const UnifiedDataTable = ({
   customControlColumnsConfiguration,
   enableComparisonMode,
   cellContext,
+  renderCellPopover,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -593,7 +607,7 @@ export const UnifiedDataTable = ({
         useNewFieldsApi,
         shouldShowFieldHandler,
         closePopover: () => dataGridRef.current?.closeCellPopover(),
-        fieldFormats: services.fieldFormats,
+        fieldFormats,
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
         isPlainRecord,
@@ -604,10 +618,15 @@ export const UnifiedDataTable = ({
       useNewFieldsApi,
       shouldShowFieldHandler,
       maxDocFieldsDisplayed,
-      services.fieldFormats,
+      fieldFormats,
       externalCustomRenderers,
       isPlainRecord,
     ]
+  );
+
+  const renderCustomPopover = useMemo(
+    () => renderCellPopover ?? getCustomCellPopoverRenderer(),
+    [renderCellPopover]
   );
 
   /**
@@ -627,19 +646,21 @@ export const UnifiedDataTable = ({
   const editField = useMemo(
     () =>
       onFieldEdited
-        ? (fieldName: string) => {
-            closeFieldEditor.current = services.dataViewFieldEditor.openEditor({
-              ctx: {
-                dataView,
-              },
-              fieldName,
-              onSave: async () => {
-                await onFieldEdited();
-              },
-            });
+        ? async (fieldName: string) => {
+            closeFieldEditor.current =
+              onFieldEdited &&
+              (await services?.dataViewFieldEditor?.openEditor({
+                ctx: {
+                  dataView,
+                },
+                fieldName,
+                onSave: async () => {
+                  await onFieldEdited();
+                },
+              }));
           }
         : undefined,
-    [dataView, onFieldEdited, services.dataViewFieldEditor]
+    [dataView, onFieldEdited, services?.dataViewFieldEditor]
   );
 
   const timeFieldName = dataView.timeFieldName;
@@ -733,7 +754,8 @@ export const UnifiedDataTable = ({
           uiSettings,
           toastNotifications,
         },
-        hasEditDataViewPermission: () => dataViewFieldEditor.userPermissions.editIndexPattern(),
+        hasEditDataViewPermission: () =>
+          Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
         valueToStringConverter,
         onFilter,
         editField,
@@ -1028,6 +1050,7 @@ export const UnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
+              additionalFieldGroups={additionalFieldGroups}
               selectedDocs={usedSelectedDocs}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
@@ -1061,6 +1084,7 @@ export const UnifiedDataTable = ({
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={customTrailingControlColumn}
               cellContext={cellContext}
+              renderCellPopover={renderCustomPopover}
             />
           )}
         </div>

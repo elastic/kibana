@@ -43,7 +43,7 @@ export const useObservedUserDetails = ({
   skip = false,
   startDate,
 }: UseUserDetails): [boolean, UserDetailsArgs] => {
-  const isNewUserDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
   const {
     loading,
     result: response,
@@ -81,9 +81,9 @@ export const useObservedUserDetails = ({
         from: startDate,
         to: endDate,
       },
-      filterQuery: isNewUserDetailsFlyoutEnabled ? NOT_EVENT_KIND_ASSET_FILTER : undefined,
+      filterQuery: !expandableFlyoutDisabled ? NOT_EVENT_KIND_ASSET_FILTER : undefined,
     }),
-    [endDate, indexNames, startDate, userName, isNewUserDetailsFlyoutEnabled]
+    [endDate, indexNames, startDate, userName, expandableFlyoutDisabled]
   );
 
   useEffect(() => {

@@ -96,6 +96,7 @@ export class KbnClientRequester {
       Url.parse(options.url).protocol === 'https:'
         ? new Https.Agent({
             ca: options.certificateAuthorities,
+            rejectUnauthorized: false,
           })
         : null;
   }

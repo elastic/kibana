@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { RightPanelContext } from '../context';
+import { DocumentDetailsContext } from '../../shared/context';
 import {
   INSIGHTS_HEADER_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
@@ -29,6 +29,7 @@ import { useAlertPrevalence } from '../../../../common/containers/alerts/use_ale
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandSection } from '../hooks/use_expand_section';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
 
 jest.mock('../../../../common/containers/alerts/use_alert_prevalence');
 
@@ -74,7 +75,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const mockUseSourcererDataView = jest.fn().mockReturnValue({ selectedPatterns });
-jest.mock('../../../../common/containers/sourcerer', () => {
+jest.mock('../../../../sourcerer/containers', () => {
   return {
     useSourcererDataView: (...props: unknown[]) => mockUseSourcererDataView(...props),
   };
@@ -96,12 +97,17 @@ jest.mock('../hooks/use_fetch_threat_intelligence');
 
 jest.mock('../../shared/hooks/use_prevalence');
 
-const renderInsightsSection = (contextValue: RightPanelContext) =>
+const mockUseTourContext = useTourContext as jest.Mock;
+jest.mock('../../../../common/components/guided_onboarding_tour', () => ({
+  useTourContext: jest.fn().mockReturnValue({ activeStep: 1, isTourShown: jest.fn(() => true) }),
+}));
+
+const renderInsightsSection = (contextValue: DocumentDetailsContext) =>
   render(
     <TestProviders>
-      <RightPanelContext.Provider value={contextValue}>
+      <DocumentDetailsContext.Provider value={contextValue}>
         <InsightsSection />
-      </RightPanelContext.Provider>
+      </DocumentDetailsContext.Provider>
     </TestProviders>
   );
 
@@ -128,7 +134,7 @@ describe('<InsightsSection />', () => {
     const contextValue = {
       eventId: 'some_Id',
       getFieldsData: mockGetFieldsData,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
 
@@ -144,7 +150,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
     expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).not.toBeVisible();
@@ -157,7 +163,21 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
       getFieldsData: mockGetFieldsData,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
+
+    const wrapper = renderInsightsSection(contextValue);
+    expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
+  });
+
+  it('should render the component expanded if guided onboarding tour is shown', () => {
+    (useExpandSection as jest.Mock).mockReturnValue(false);
+    mockUseTourContext.mockReturnValue({ activeStep: 7, isTourShown: jest.fn(() => true) });
+
+    const contextValue = {
+      eventId: 'some_Id',
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      getFieldsData: mockGetFieldsData,
+    } as unknown as DocumentDetailsContext;
 
     const wrapper = renderInsightsSection(contextValue);
     expect(wrapper.getByTestId(INSIGHTS_CONTENT_TEST_ID)).toBeVisible();
@@ -176,7 +196,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: true,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId } = renderInsightsSection(contextValue);
 
@@ -199,7 +219,7 @@ describe('<InsightsSection />', () => {
       eventId: 'some_Id',
       getFieldsData,
       documentIsSignal: false,
-    } as unknown as RightPanelContext;
+    } as unknown as DocumentDetailsContext;
 
     const { getByTestId, queryByTestId } = renderInsightsSection(contextValue);
 

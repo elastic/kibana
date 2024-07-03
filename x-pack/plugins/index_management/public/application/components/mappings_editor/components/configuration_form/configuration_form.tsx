@@ -19,6 +19,7 @@ import { SourceFieldSection } from './source_field_section';
 import { MetaFieldSection } from './meta_field_section';
 import { RoutingSection } from './routing_section';
 import { MapperSizePluginSection } from './mapper_size_plugin_section';
+import { SubobjectsSection } from './subobjects_section';
 import { configurationFormSchema } from './configuration_form_schema';
 
 interface Props {
@@ -42,6 +43,7 @@ const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
     metaField,
     _routing,
     _size,
+    subobjects,
   } = formData;
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
@@ -55,6 +57,7 @@ const formSerializer = (formData: GenericObject, sourceFieldMode?: string) => {
     _meta: metaField,
     _routing,
     _size,
+    subobjects,
   };
 
   return serialized;
@@ -77,6 +80,7 @@ const formDeserializer = (formData: GenericObject) => {
     _routing,
     // For the Mapper Size plugin
     _size,
+    subobjects,
   } = formData;
 
   return {
@@ -95,6 +99,7 @@ const formDeserializer = (formData: GenericObject) => {
     metaField: _meta ?? {},
     _routing,
     _size,
+    subobjects,
   };
 };
 
@@ -177,6 +182,8 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
       )}
       <RoutingSection />
       {isMapperSizeSectionVisible && <MapperSizePluginSection />}
+      <EuiSpacer size="xl" />
+      <SubobjectsSection />
     </Form>
   );
 });

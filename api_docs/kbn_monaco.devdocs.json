@@ -482,7 +482,7 @@
             "label": "getSources",
             "description": [],
             "signature": [
-              "CallbackFn<{}, { name: string; hidden: boolean; }> | undefined"
+              "CallbackFn<{}, { name: string; hidden: boolean; title?: string | undefined; dataStreams?: { name: string; title?: string | undefined; }[] | undefined; }> | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
@@ -1182,6 +1182,9 @@
             "tags": [],
             "label": "url",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-monaco/src/console/types.ts",
             "deprecated": false,
             "trackAdoption": false

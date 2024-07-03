@@ -18,20 +18,17 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 
+import { PrivilegesWarningIconWrapper } from '../../common';
+import { notAvailableLabel } from '../../../../common/translations';
+import type { getSummaryKpis } from './get_summary_kpis';
+
 export function FlyoutSummaryKpiItem({
   title,
   value,
   link,
   isLoading,
-}: {
-  title: string;
-  value: string;
-  link?: {
-    label: string;
-    href: string;
-  };
-  isLoading: boolean;
-}) {
+  userHasPrivilege,
+}: ReturnType<typeof getSummaryKpis>[number] & { isLoading: boolean }) {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -44,9 +41,20 @@ export function FlyoutSummaryKpiItem({
     >
       <EuiFlexGroup alignItems="stretch" direction="column" wrap={false}>
         <EuiFlexItem css={{ gap: euiTheme.size.xs }}>
-          <EuiTitle data-test-subj={`datasetQualityFlyoutKpiTitle-${title}`} size="xxxs">
-            <h6>{title}</h6>
-          </EuiTitle>
+          <EuiFlexGroup>
+            <EuiTitle data-test-subj={`datasetQualityFlyoutKpiTitle-${title}`} size="xxxs">
+              <h6>{title}</h6>
+            </EuiTitle>
+
+            <PrivilegesWarningIconWrapper
+              hasPrivileges={userHasPrivilege}
+              title={title}
+              mode="popover"
+              popoverCss={{ marginLeft: 'auto' }}
+            >
+              <></>
+            </PrivilegesWarningIconWrapper>
+          </EuiFlexGroup>
           {link ? (
             <EuiLink
               data-test-subj={`datasetQualityFlyoutKpiLink-${title}`}
@@ -55,8 +63,7 @@ export function FlyoutSummaryKpiItem({
                 alignItems: 'center',
                 width: 'fit-content',
               }}
-              href={link.href}
-              target="_blank"
+              {...link.props}
             >
               <EuiText
                 css={{
@@ -79,7 +86,7 @@ export function FlyoutSummaryKpiItem({
             isLoading={isLoading}
           >
             <EuiTitle data-test-subj={`datasetQualityFlyoutKpiValue-${title}`} size="s">
-              <h3 className="eui-textNoWrap">{value}</h3>
+              <h3 className="eui-textNoWrap">{userHasPrivilege ? value : notAvailableLabel}</h3>
             </EuiTitle>
           </EuiSkeletonTitle>
         </EuiFlexItem>

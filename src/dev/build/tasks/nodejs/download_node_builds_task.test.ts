@@ -36,6 +36,7 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
+    targetServerlessPlatforms: false,
     dockerContextUseLocalArtifact: false,
     dockerCrossCompile: false,
     dockerNamespace: null,
@@ -48,11 +49,13 @@ async function setup({ failOnUrl }: { failOnUrl?: string } = {}) {
   });
 
   getNodeDownloadInfo.mockImplementation((_: Config, platform: Platform) => {
-    return {
-      url: `${platform.getName()}:url`,
-      downloadPath: `${platform.getName()}:downloadPath`,
-      downloadName: `${platform.getName()}:downloadName`,
-    };
+    return [
+      {
+        url: `${platform.getName()}:url`,
+        downloadPath: `${platform.getName()}:downloadPath`,
+        downloadName: `${platform.getName()}:downloadName`,
+      },
+    ];
   });
 
   getNodeShasums.mockReturnValue({
@@ -85,26 +88,6 @@ it('downloads node builds for each platform', async () => {
           "shaAlgorithm": "sha256",
           "shaChecksum": "linux:sha256",
           "url": "linux:url",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "linux:downloadPath",
-          "log": <ToolingLog>,
-          "maxAttempts": 3,
-          "shaAlgorithm": "sha256",
-          "shaChecksum": "linux:sha256",
-          "url": "linux:url",
-        },
-      ],
-      Array [
-        Object {
-          "destination": "darwin:downloadPath",
-          "log": <ToolingLog>,
-          "maxAttempts": 3,
-          "shaAlgorithm": "sha256",
-          "shaChecksum": "darwin:sha256",
-          "url": "darwin:url",
         },
       ],
       Array [

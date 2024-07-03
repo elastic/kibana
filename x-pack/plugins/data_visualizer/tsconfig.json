@@ -81,7 +81,13 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/presentation-publishing",
     "@kbn/shared-ux-utility",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/unified-field-list",
+    "@kbn/content-management-utils",
+    "@kbn/core-lifecycle-browser",
+    "@kbn/presentation-containers",
+    "@kbn/react-kibana-mount",
+    "@kbn/visualizations-plugin"
   ],
   "exclude": [
     "target/**/*",

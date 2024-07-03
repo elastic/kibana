@@ -126,7 +126,7 @@ function createDefaultChangeSpacesHandler(
 
     if (spacesToAdd.length > 0 && spacesToRemove.length > 0 && !isSharedToAllSpaces) {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddRemoveText', {
-        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTargetAdd}. '{object}' was removed from {spacesTargetRemove}.`,
+        defaultMessage: `''{object}'' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTargetAdd}. ''{object}'' was removed from {spacesTargetRemove}.`,
         values: {
           object: title,
           relativesCount,
@@ -137,7 +137,7 @@ function createDefaultChangeSpacesHandler(
       });
     } else if (spacesToAdd.length > 0) {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessAddText', {
-        defaultMessage: `'{object}' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTarget}.`,
+        defaultMessage: `''{object}'' {relativesCount, plural, =0 {was} =1 {and {relativesCount} related object were} other {and {relativesCount} related objects were}} added to {spacesTarget}.`,
         values: {
           object: title,
           relativesCount,
@@ -147,7 +147,7 @@ function createDefaultChangeSpacesHandler(
       });
     } else {
       toastText = i18n.translate('xpack.spaces.shareToSpace.shareSuccessRemoveText', {
-        defaultMessage: `'{object}' was removed from {spacesTarget}.`,
+        defaultMessage: `''{object}'' was removed from {spacesTarget}.`,
         values: {
           object: title,
           spacesTarget: getSpacesTargetString(spacesToRemove),
@@ -353,7 +353,7 @@ export const ShareToSpaceFlyoutInternal = (props: ShareToSpaceFlyoutProps) => {
           description: `Object noun can be plural or singular, examples: "Failed to update objects", "Failed to update job"`,
         }),
         toastMessage: i18n.translate('xpack.spaces.shareToSpace.shareErrorText', {
-          defaultMessage: `Unable to update '{object}' {relativesCount, plural, =0 {} =1 {or {relativesCount} related object} other {or one or more of {relativesCount} related objects}}.`,
+          defaultMessage: `Unable to update ''{object}'' {relativesCount, plural, =0 {} =1 {or {relativesCount} related object} other {or one or more of {relativesCount} related objects}}.`,
           values: {
             object: savedObjectTarget.title,
             relativesCount: spacesToAdd.length > 0 ? referenceGraph.length - 1 : 0,
