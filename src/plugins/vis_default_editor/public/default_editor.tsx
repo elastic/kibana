@@ -93,7 +93,7 @@ function DefaultEditor({
     parentApi.dataView$.next(dataView);
   }, [parentApi, dataView]);
 
-  const editorInitialWidth = 30; //getInitialWidth(vis.type.editorConfig.defaultSize);
+  const editorInitialWidth = 30; // getInitialWidth(vis.type.editorConfig.defaultSize);
 
   return (
     <EuiErrorBoundary>
