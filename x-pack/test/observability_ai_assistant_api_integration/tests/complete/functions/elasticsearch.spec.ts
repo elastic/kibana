@@ -16,6 +16,7 @@ import expect from '@kbn/expect';
 import { Readable } from 'stream';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
 import { createLlmProxy, LlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -46,7 +47,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                     role: MessageRole.Assistant,
                     content: '',
                     function_call: {
-                      name: 'elasticsearch',
+                      name: ELASTICSEARCH_FUNCTION_NAME,
                       trigger: MessageRole.User,
                       arguments: JSON.stringify({
                         method: 'POST',
