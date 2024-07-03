@@ -17,6 +17,7 @@ import {
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
 } from './create_and_install_transform';
+import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitions } from './find_entity_definition';
@@ -27,6 +28,7 @@ import {
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
+import { EntityIdTooLong } from './errors/entity_id_too_long_error';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;
@@ -57,6 +59,11 @@ export async function installEntityDefinition({
 
   try {
     logger.debug(`Installing definition ${JSON.stringify(definition)}`);
+
+    if (!validateDefinitionCanCreateValidTransformIds(definition)) {
+      throw new EntityIdTooLong('ID is too long; the resulting transform ID will be invalid');
+    }
+
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
 
