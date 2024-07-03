@@ -360,7 +360,7 @@ export interface InternalRuleUpdate {
     interval: string;
   };
   actions: RuleActionArrayCamel;
-  systemActions: AlertingRuleSystemAction[];
+  systemActions?: AlertingRuleSystemAction[];
   params: RuleParams;
   throttle?: RuleActionThrottle | null;
   notifyWhen?: RuleActionNotifyWhen | null;

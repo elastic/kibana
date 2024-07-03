@@ -11,12 +11,7 @@ import { isEmpty, partition } from 'lodash';
 import { stringifyZodError } from '@kbn/zod-helpers';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-import type {
-  ResolvedSanitizedRule,
-  RuleSystemAction,
-  SanitizedRule,
-  SanitizedRuleAction,
-} from '@kbn/alerting-plugin/common';
+import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RequiredOptional } from '@kbn/zod-helpers';
@@ -533,20 +528,15 @@ export const convertPatchAPIToInternalSchema = (
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
 
-  const [existingRuleSystemActions, existingRuleActions]: [
-    RuleSystemAction[],
-    SanitizedRuleAction[]
-  ] = partition(existingRule.actions, (action) => actionsClient.isSystemAction(action.id));
-
   const [ruleUpdateSystemActions, ruleUpdateActions] = partition(nextParams.actions, (action) =>
     actionsClient.isSystemAction(action.id)
   );
   const systemActions = !isEmpty(ruleUpdateSystemActions)
     ? ruleUpdateSystemActions.map((action) => transformRuleToAlertAction(action))
-    : existingRuleSystemActions;
+    : existingRule.systemActions;
   const alertActions = !isEmpty(ruleUpdateActions)
     ? ruleUpdateActions.map((action) => transformRuleToAlertAction(action))
-    : existingRuleActions;
+    : existingRule.actions;
 
   const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
   const actions = transformToActionFrequency(alertActions as RuleActionCamel[], throttle);
@@ -593,7 +583,7 @@ export const convertPatchAPIToInternalSchema = (
     },
     schedule: { interval: nextParams.interval ?? existingRule.schedule.interval },
     actions,
-    systemActions,
+    ...(systemActions && { systemActions }),
   };
 };
 

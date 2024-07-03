@@ -30,11 +30,15 @@ describe('DetectionRulesClient.updateRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  const actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system_action:id'),
+  let actionsClient = {
+    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
   } as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
+    actionsClient = {
+      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as jest.Mocked<ActionsClient>;
+
     rulesClient = rulesClientMock.create();
     detectionRulesClient = createDetectionRulesClient({ actionsClient, rulesClient, mlAuthz });
   });
@@ -55,6 +59,254 @@ describe('DetectionRulesClient.updateRule', () => {
             ruleId: ruleUpdate.rule_id,
             description: ruleUpdate.description,
           }),
+        }),
+      })
+    );
+  });
+
+  it('calls the rulesClient with actions and system actions', async () => {
+    const ruleUpdate = {
+      ...getCreateRulesSchemaMock(),
+      actions: [
+        {
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              timeWindow: '7d',
+              reopenClosedCases: false,
+              groupingBy: ['agent.name'],
+            },
+          },
+          action_type_id: '.cases',
+          uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+        },
+        {
+          id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          action_type_id: '.slack',
+          uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+            throttle: null,
+          },
+          group: 'default',
+        },
+      ],
+    };
+    const existingRule = getRuleMock(getQueryRuleParams());
+    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+    rulesClient.update.mockResolvedValue(
+      getRuleMock(getQueryRuleParams(), {
+        actions: [
+          {
+            id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            actionTypeId: '.slack',
+            uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+            frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+            group: 'default',
+          },
+        ],
+        systemActions: [
+          {
+            id: 'system-connector-.cases',
+            params: {
+              subAction: 'run',
+              subActionParams: {
+                timeWindow: '7d',
+                reopenClosedCases: false,
+                groupingBy: ['agent.name'],
+              },
+            },
+            actionTypeId: '.cases',
+            uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+          },
+        ],
+      })
+    );
+
+    await detectionRulesClient.updateRule({ ruleUpdate });
+
+    expect(rulesClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          actions: expect.arrayContaining([
+            {
+              id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              actionTypeId: '.slack',
+              uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+                throttle: null,
+              },
+              group: 'default',
+            },
+          ]),
+          systemActions: expect.arrayContaining([
+            {
+              id: 'system-connector-.cases',
+              params: {
+                subAction: 'run',
+                subActionParams: {
+                  timeWindow: '7d',
+                  reopenClosedCases: false,
+                  groupingBy: ['agent.name'],
+                },
+              },
+              actionTypeId: '.cases',
+              uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+            },
+          ]),
+        }),
+      })
+    );
+  });
+
+  it('calls the rulesClient when updating a system action groupingBy property from agent.name to agent.type', async () => {
+    const ruleUpdate = {
+      ...getCreateRulesSchemaMock(),
+      actions: [
+        {
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              timeWindow: '7d',
+              reopenClosedCases: false,
+              groupingBy: ['agent.type'], // changing this value
+            },
+          },
+          action_type_id: '.cases',
+          uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+        },
+        {
+          id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          action_type_id: '.slack',
+          uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+            throttle: null,
+          },
+          group: 'default',
+        },
+      ],
+    };
+    const existingRule = getRuleMock(getQueryRuleParams(), {
+      systemActions: [
+        {
+          id: 'system-connector-.cases',
+          params: {
+            subAction: 'run',
+            subActionParams: {
+              timeWindow: '7d',
+              reopenClosedCases: false,
+              groupingBy: ['agent.name'], // changing this value
+            },
+          },
+          actionTypeId: '.cases',
+          uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+        },
+      ],
+      actions: [
+        {
+          id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+          params: {
+            message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+          },
+          actionTypeId: '.slack',
+          uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+          frequency: {
+            summary: true,
+            notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+            throttle: null,
+          },
+          group: 'default',
+        },
+      ],
+    });
+    (readRules as jest.Mock).mockResolvedValueOnce(existingRule);
+    rulesClient.update.mockResolvedValue(
+      getRuleMock(getQueryRuleParams(), {
+        actions: [
+          {
+            id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            actionTypeId: '.slack',
+            uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+            frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+            group: 'default',
+          },
+        ],
+        systemActions: [
+          {
+            id: 'system-connector-.cases',
+            params: {
+              subAction: 'run',
+              subActionParams: {
+                timeWindow: '7d',
+                reopenClosedCases: false,
+                groupingBy: ['agent.type'],
+              },
+            },
+            actionTypeId: '.cases',
+            uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+          },
+        ],
+      })
+    );
+
+    await detectionRulesClient.updateRule({ ruleUpdate });
+
+    expect(rulesClient.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          actions: expect.arrayContaining([
+            {
+              id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              actionTypeId: '.slack',
+              uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+                throttle: null,
+              },
+              group: 'default',
+            },
+          ]),
+          systemActions: expect.arrayContaining([
+            {
+              id: 'system-connector-.cases',
+              params: {
+                subAction: 'run',
+                subActionParams: {
+                  timeWindow: '7d',
+                  reopenClosedCases: false,
+                  groupingBy: ['agent.type'],
+                },
+              },
+              actionTypeId: '.cases',
+              uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+            },
+          ]),
         }),
       })
     );
