@@ -32,6 +32,7 @@ import { useTabs } from './hooks/use_tabs';
 import { ViewSpaceContextProvider } from './hooks/view_space_context_provider';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, type Space } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
+import { SpaceSolutionBadge } from '../../space_solution_badge';
 import type { SpacesManager } from '../../spaces_manager';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
@@ -49,7 +50,7 @@ const getSelectedTabId = (selectedTabId?: string) => {
 interface PageProps {
   capabilities: Capabilities;
   allowFeatureVisibility: boolean; // FIXME: handle this
-  solutionNavExperiment: Promise<boolean>; // FIXME: handle this
+  solutionNavExperiment?: Promise<boolean>;
   getFeatures: FeaturesPluginStart['getFeatures'];
   getUrlForApp: ApplicationStart['getUrlForApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
@@ -74,6 +75,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     spacesManager,
     history,
     onLoadSpace,
+    solutionNavExperiment,
     selectedTabId: _selectedTabId,
   } = props;
 
@@ -87,6 +89,7 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const [tabs, selectedTabContent] = useTabs(space, features, roles, selectedTabId);
   const { capabilities, getUrlForApp, navigateToUrl } = props;
+  const [isSolutionNavEnabled, setIsSolutionNavEnabled] = useState(false);
 
   useEffect(() => {
     if (!spaceId) {
@@ -133,6 +136,13 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
       onLoadSpace?.(space);
     }
   }, [onLoadSpace, space]);
+
+  useEffect(() => {
+    solutionNavExperiment?.then((isEnabled) => {
+      console.log(isEnabled ? 'yeah' : 'nope');
+      setIsSolutionNavEnabled(isEnabled);
+    });
+  }, [solutionNavExperiment]);
 
   if (!space) {
     return null;
@@ -221,6 +231,15 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
             <EuiTitle size="l">
               <h1 data-test-subj="spaceTitle">
                 {space.name}
+                {isSolutionNavEnabled ? (
+                  <>
+                    {' '}
+                    <SpaceSolutionBadge
+                      solution={space.solution}
+                      data-test-subj={`space-solution-badge-${space.solution}`}
+                    />
+                  </>
+                ) : null}
                 {userActiveSpace?.id === space.id ? (
                   <>
                     {' '}
