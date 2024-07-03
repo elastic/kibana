@@ -57,10 +57,10 @@ import {
   StringLiteralContext,
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
-  IndexIdentifierContext,
   InlineCastContext,
   InputNamedOrPositionalParamContext,
   InputParamContext,
+  IndexPatternContext,
 } from './antlr/esql_parser';
 import {
   createSource,
@@ -98,8 +98,7 @@ import type {
 } from './types';
 
 export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  const fromContexts = ctx.getTypedRuleContexts(IndexIdentifierContext);
-
+  const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
   return fromContexts.map((sourceCtx) => createSource(sourceCtx));
 }
 
@@ -107,7 +106,7 @@ function extractIdentifiers(
   ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
   if (ctx instanceof MetadataOptionContext) {
-    return wrapIdentifierAsArray(ctx.indexIdentifier_list());
+    return ctx.UNQUOTED_SOURCE_list().map((node) => node.parentCtx);
   }
   if (ctx instanceof MvExpandCommandContext) {
     return wrapIdentifierAsArray(ctx.qualifiedName());
