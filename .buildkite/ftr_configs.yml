@@ -91,6 +91,10 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
+  # http/2 security muted tests
+  - x-pack/test/security_functional/saml.http2.config.ts
+  - x-pack/test/security_functional/oidc.http2.config.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -580,6 +584,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
-disabled:
-  - x-pack/test/security_functional/saml.http2.config.ts
-  - x-pack/test/security_functional/oidc.http2.config.ts
