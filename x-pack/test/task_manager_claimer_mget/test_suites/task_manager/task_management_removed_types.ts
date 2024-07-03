@@ -76,8 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         .then((response) => response.body);
     }
 
-    // flaky
-    it.skip('should successfully schedule registered tasks, not claim unregistered tasks and mark removed task types as unrecognized', async () => {
+    it('should successfully schedule registered tasks, not claim unregistered tasks and mark removed task types as unrecognized', async () => {
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
         schedule: { interval: `1s` },
