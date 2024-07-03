@@ -6,6 +6,7 @@
  */
 
 import type { FC } from 'react';
+import { useRef } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import {
@@ -22,8 +23,9 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
+  EuiProgress,
 } from '@elastic/eui';
-import { groupBy } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
@@ -47,6 +49,7 @@ import {
 import { isDefined } from '@kbn/ml-is-defined';
 import { useStorage } from '@kbn/ml-local-storage';
 import { dynamic } from '@kbn/shared-ux-utility';
+import useMountedState from 'react-use/lib/useMountedState';
 import { getModelStateColor } from './get_model_state_color';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
@@ -57,6 +60,7 @@ import { StatsBar } from '../components/stats_bar';
 import { useMlKibana } from '../contexts/kibana';
 import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type {
+  ModelDownloadState,
   ModelPipelines,
   TrainedModelConfigResponse,
   TrainedModelDeploymentStatsResponse,
@@ -94,6 +98,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   arch?: string;
   softwareLicense?: string;
   licenseUrl?: string;
+  downloadState?: ModelDownloadState;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -127,10 +132,14 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
+const DOWNLOAD_POLL_INTERVAL = 3000;
+
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
 }) => {
+  const isMounted = useMountedState();
+
   const {
     services: {
       application: { capabilities },
@@ -320,6 +329,9 @@ export const ModelsList: FC<Props> = ({
     }
     setIsInitialized(true);
     setIsLoading(false);
+
+    await fetchDownloadStatus();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemIdToExpandedRowMap, isNLPEnabled]);
 
@@ -399,6 +411,82 @@ export const ModelsList: FC<Props> = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const downLoadStatusFetchInProgress = useRef(false);
+  /**
+   * Updates model list with download status
+   */
+  const fetchDownloadStatus = useCallback(
+    /**
+     * @param downloadInProgress Set of model ids that reports download in progress
+     */
+    async (downloadInProgress: Set<string> = new Set<string>()) => {
+      // Allows only single fetch to be in progress
+      if (downLoadStatusFetchInProgress.current && downloadInProgress.size === 0) return;
+
+      try {
+        downLoadStatusFetchInProgress.current = true;
+
+        const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
+
+        if (isMounted()) {
+          setItems((prevItems) => {
+            return prevItems.map((item) => {
+              const newItem = { ...item };
+              if (downloadStatus[item.model_id]) {
+                newItem.downloadState = downloadStatus[item.model_id];
+              } else {
+                if (downloadInProgress.has(item.model_id)) {
+                  // Change downloading state to downloaded
+                  delete newItem.downloadState;
+                  newItem.state = MODEL_STATE.DOWNLOADED;
+                }
+              }
+              return newItem;
+            });
+          });
+        }
+
+        const downloadedModelIds = Array.from<string>(downloadInProgress).filter(
+          (v) => !downloadStatus[v]
+        );
+
+        if (downloadedModelIds.length > 0) {
+          // Show success toast
+          displaySuccessToast(
+            i18n.translate('xpack.ml.trainedModels.modelsList.downloadCompleteSuccess', {
+              defaultMessage:
+                '"{modelIds}" {modelIdsLength, plural, one {has} other {have}} been downloaded successfully.',
+              values: {
+                modelIds: downloadedModelIds.join(', '),
+                modelIdsLength: downloadedModelIds.length,
+              },
+            })
+          );
+        }
+
+        Object.keys(downloadStatus).forEach((modelId) => {
+          if (downloadStatus[modelId]) {
+            downloadInProgress.add(modelId);
+          }
+        });
+        downloadedModelIds.forEach((v) => {
+          downloadInProgress.delete(v);
+        });
+
+        if (isEmpty(downloadStatus)) {
+          downLoadStatusFetchInProgress.current = false;
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_POLL_INTERVAL));
+        await fetchDownloadStatus(downloadInProgress);
+      } catch (e) {
+        downLoadStatusFetchInProgress.current = false;
+      }
+    },
+    [trainedModelsApiService, displaySuccessToast, isMounted]
+  );
 
   /**
    * Unique inference types from models
@@ -589,19 +677,47 @@ export const ModelsList: FC<Props> = ({
     },
     {
       width: '10%',
-      field: 'state',
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
         defaultMessage: 'State',
       }),
       align: 'left',
       truncateText: false,
-      render: (state: ModelState) => {
+      render: ({ state, downloadState }: ModelItem) => {
         const config = getModelStateColor(state);
-        return config ? (
+        if (!config) return null;
+
+        const isDownloadInProgress = state === MODEL_STATE.DOWNLOADING && downloadState;
+
+        const label = (
           <EuiHealth textSize={'xs'} color={config.color}>
             {config.name}
           </EuiHealth>
-        ) : null;
+        );
+
+        return (
+          <EuiFlexGroup direction={'column'} gutterSize={'none'}>
+            {isDownloadInProgress ? (
+              <EuiFlexItem>
+                <EuiProgress
+                  label={label}
+                  valueText={
+                    <>
+                      {((downloadState.downloaded_parts / downloadState.total_parts) * 100).toFixed(
+                        0
+                      ) + '%'}
+                    </>
+                  }
+                  value={downloadState?.downloaded_parts}
+                  max={downloadState?.total_parts}
+                  size="xs"
+                  color={config.color}
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem>{label}</EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        );
       },
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
     },

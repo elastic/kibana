@@ -51,7 +51,8 @@ export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
   recalculatingScore: boolean;
   queryId: string;
-  openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  openDetailsPanel?: (tab: EntityDetailsLeftPanelTab) => void;
+  isPreviewMode?: boolean;
 }
 
 const RiskSummaryComponent = <T extends RiskScoreEntity>({
@@ -59,6 +60,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   recalculatingScore,
   queryId,
   openDetailsPanel,
+  isPreviewMode,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
@@ -110,7 +112,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
         'xpack.securitySolution.flyout.entityDetails.riskSummary.casesAttachmentLabel',
         {
           defaultMessage:
-            'Risk score for {entityType, select, host {host} user {user}} {entityName}',
+            'Risk score for {entityType, select, user {user} other {host}} {entityName}',
           values: {
             entityName: entityData?.name,
             entityType: isUserRiskData(riskData) ? 'user' : 'host',
@@ -189,7 +191,9 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           link: riskScoreData.loading
             ? undefined
             : {
-                callback: () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS),
+                callback: openDetailsPanel
+                  ? () => openDetailsPanel(EntityDetailsLeftPanelTab.RISK_INPUTS)
+                  : undefined,
                 tooltip: (
                   <FormattedMessage
                     id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
@@ -197,7 +201,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
                   />
                 ),
               },
-          iconType: 'arrowStart',
+          iconType: !isPreviewMode ? 'arrowStart' : undefined,
         }}
         expand={{
           expandable: false,

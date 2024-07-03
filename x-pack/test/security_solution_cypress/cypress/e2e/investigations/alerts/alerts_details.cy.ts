@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { disableExpandableFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
 import {
   ALERT_FLYOUT,
   CELL_TEXT,
@@ -38,13 +37,14 @@ import {
   waitForPageToBeLoaded as waitForRuleDetailsPageToBeLoaded,
 } from '../../../tasks/rule_details';
 
-describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
+// this functionality is now not used anymore (though still accessible if customers turn the `expandableFlyoutDisabled` feature flag on
+// the code will be removed entirely for `8.16 (see https://github.com/elastic/security-team/issues/7462)
+describe.skip('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
   describe('Basic functions', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       createRule(getNewRule());
       login();
-      disableExpandableFlyout();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -70,7 +70,6 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       deleteAlertsAndRules();
       createRule({ ...getUnmappedRule(), investigation_fields: { field_names: ['event.kind'] } });
       login();
-      disableExpandableFlyout();
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -143,7 +142,6 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
       deleteAlertsAndRules();
       createRule(getNewRule());
       login();
-      disableExpandableFlyout();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();
@@ -196,7 +194,6 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       createRule(getNewRule());
       login();
-      disableExpandableFlyout();
       visitWithTimeRange(ALERTS_URL);
       waitForAlertsToPopulate();
       expandFirstAlert();

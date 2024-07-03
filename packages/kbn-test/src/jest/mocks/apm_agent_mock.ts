@@ -10,6 +10,8 @@ import type { Agent, Transaction } from 'elastic-apm-node';
 
 const transaction: jest.Mocked<Transaction> = {
   addLabels: jest.fn().mockReturnValue(true),
+  addLink: jest.fn(),
+  addLinks: jest.fn(),
   ensureParentId: jest.fn().mockReturnValue(''),
   setLabel: jest.fn().mockReturnValue(true),
   setOutcome: jest.fn(),

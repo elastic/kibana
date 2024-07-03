@@ -34,7 +34,11 @@ import {
   getStorage,
 } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
-import { MetricsTracker, EmbeddableConsoleDependencies } from '../../../types';
+import {
+  MetricsTracker,
+  EmbeddableConsoleDependencies,
+  ConsoleStartServices,
+} from '../../../types';
 
 import { createApi, createEsHostService } from '../../lib';
 import { EsHostService } from '../../lib/es_host_service';
@@ -47,7 +51,7 @@ import {
 import { Main } from '../main';
 import { EditorContentSpinner } from '../../components';
 
-interface ConsoleDependencies {
+interface ConsoleDependencies extends ConsoleStartServices {
   autocompleteInfo: AutocompleteInfo;
   docLinks: DocLinksStart['links'];
   docLinkVersion: string;
@@ -70,7 +74,7 @@ const loadDependencies = async (
     docLinks: { DOC_LINK_VERSION, links },
     http,
     notifications,
-    theme: { theme$ },
+    ...startServices
   } = core;
   const trackUiMetric = createUsageTracker(usageCollection);
   trackUiMetric.load('opened_embedded_app');
@@ -86,6 +90,7 @@ const loadDependencies = async (
 
   autocompleteInfo.mapping.setup(http, settings);
   return {
+    ...startServices,
     autocompleteInfo,
     docLinks: links,
     docLinkVersion: DOC_LINK_VERSION,
@@ -96,7 +101,7 @@ const loadDependencies = async (
     objectStorageClient,
     settings,
     storage,
-    theme$,
+    theme$: startServices.theme.theme$,
     trackUiMetric,
   };
 };
@@ -113,8 +118,6 @@ interface ConsoleWrapperProps
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
   const { core, usageCollection, onKeyDown, isMonacoEnabled, isOpen } = props;
-  const { analytics, i18n, theme } = core;
-  const startServices = { analytics, i18n, theme };
 
   useEffect(() => {
     if (dependencies === null && isOpen) {
@@ -144,11 +147,13 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     settings,
     storage,
     trackUiMetric,
+    ...startServices
   } = dependencies;
   return (
     <KibanaRenderContextProvider {...core}>
       <ServicesContextProvider
         value={{
+          ...startServices,
           docLinkVersion,
           docLinks,
           services: {
@@ -165,7 +170,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
           config: {
             isMonacoEnabled,
           },
-          startServices,
         }}
       >
         <RequestContextProvider>

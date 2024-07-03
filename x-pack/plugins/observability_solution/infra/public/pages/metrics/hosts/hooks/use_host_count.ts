@@ -12,15 +12,16 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { catchError, map, Observable, of, startWith, tap } from 'rxjs';
 import createContainer from 'constate';
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { HOST_NAME_FIELD, TIMESTAMP_FIELD } from '../../../../../common/constants';
 import type { ITelemetryClient } from '../../../../services/telemetry';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
-import { useMetricsDataViewContext } from './use_metrics_data_view';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {
-  const { dataView, metricAlias } = useMetricsDataViewContext();
+  const { metricsView } = useMetricsDataViewContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
@@ -37,12 +38,12 @@ export const useHostCount = () => {
             ...query.bool.filter,
             {
               exists: {
-                field: 'host.name',
+                field: HOST_NAME_FIELD,
               },
             },
             {
               range: {
-                [dataView?.timeFieldName ?? '@timestamp']: {
+                [metricsView?.timeFieldName ?? TIMESTAMP_FIELD]: {
                   gte: searchCriteria.dateRange.from,
                   lte: searchCriteria.dateRange.to,
                 },
@@ -57,7 +58,7 @@ export const useHostCount = () => {
           params: {
             allow_no_indices: true,
             ignore_unavailable: true,
-            index: metricAlias,
+            index: metricsView?.indices,
             size: 0,
             track_total_hits: false,
             body: {
@@ -65,7 +66,7 @@ export const useHostCount = () => {
               aggs: {
                 count: {
                   cardinality: {
-                    field: 'host.name',
+                    field: HOST_NAME_FIELD,
                   },
                 },
               },
@@ -76,8 +77,8 @@ export const useHostCount = () => {
       };
     }, [
       buildQuery,
-      dataView?.timeFieldName,
-      metricAlias,
+      metricsView?.indices,
+      metricsView?.timeFieldName,
       searchCriteria.dateRange.from,
       searchCriteria.dateRange.to,
     ]),

@@ -255,6 +255,7 @@ export class AlertingEventLogger {
           typeId: type?.id,
           type: RULE_SAVED_OBJECT_TYPE,
           namespace: this.context?.namespace,
+          relation: SAVED_OBJECT_REL_PRIMARY,
         });
       }
     }

@@ -443,6 +443,26 @@ export abstract class AbstractDataView {
   }
 
   /**
+   * Only used by search source to process sorting of scripted fields
+   * @param name field name
+   * @returns DataViewFieldBase
+   */
+  getScriptedField(name: string): DataViewFieldBase | undefined {
+    // runtime fields override scripted fields
+    if (this.runtimeFieldMap[name]) {
+      return;
+    }
+
+    const field = this.scriptedFieldsMap[name];
+    if (field) {
+      return {
+        ...field,
+        scripted: true,
+      };
+    }
+  }
+
+  /**
    * Checks if runtime field exists
    * @param name field name
    */

@@ -14,6 +14,12 @@ import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
@@ -38,9 +44,9 @@ import { TimelineId, TimelineTabs } from '../../../../../../common/types/timelin
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
 
 import type { TimelineModel } from '../../../../store/model';
@@ -61,6 +67,8 @@ import {
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import { NotesFlyout } from '../../properties/notes_flyout';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -203,7 +211,80 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     timerangeKind,
   });
 
-  const leadingControlColumns = useTimelineControlColumn(columns, sort);
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const { openFlyout } = useExpandableFlyoutApi();
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+  });
+
+  const onToggleShowNotes = useCallback(
+    (eventId?: string) => {
+      const indexName = selectedPatterns.join(',');
+      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          left: {
+            id: DocumentDetailsLeftPanelKey,
+            path: {
+              tab: LeftPanelNotesTab,
+            },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+        });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
+      }
+    },
+    [
+      expandableFlyoutDisabled,
+      openFlyout,
+      securitySolutionNotesEnabled,
+      selectedPatterns,
+      timelineId,
+      showNotesFlyout,
+      setNotesEventId,
+    ]
+  );
+
+  const leadingControlColumns = useTimelineControlColumn({
+    columns,
+    sort,
+    timelineId,
+    activeTab: TimelineTabs.query,
+    refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
+    onToggleShowNotes,
+  });
 
   useEffect(() => {
     dispatch(
@@ -257,43 +338,67 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [timelineDataService, combinedQueries, kqlQueryLanguage]);
   // </Synchronisation of the timeline data service>
 
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
+
   if (unifiedComponentsInTimelineEnabled) {
     return (
-      <UnifiedTimelineBody
-        header={
-          <QueryTabHeader
-            activeTab={activeTab}
-            filterManager={timelineFilterManager}
-            show={show && activeTab === TimelineTabs.query}
-            showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
-            status={status}
-            timelineId={timelineId}
-            showEventsCountBadge={showEventsCountBadge}
-            totalCount={totalCount}
-          />
-        }
-        columns={augmentedColumnHeaders}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        dataLoadingState={dataLoadingState}
-        totalCount={isBlankTimeline ? 0 : totalCount}
-        onEventClosed={onEventClosed}
-        expandedDetail={expandedDetail}
-        showExpandedDetails={showExpandedDetails}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        eventIdToNoteIds={eventIdToNoteIds}
-        pinnedEventIds={pinnedEventIds}
-        onChangePage={loadPage}
-        activeTab={activeTab}
-        updatedAt={refreshedAt}
-        isTextBasedQuery={false}
-        pageInfo={pageInfo}
-      />
+      <>
+        <TimelineRefetch
+          id={`${timelineId}-${TimelineTabs.query}`}
+          inputId={InputsModelId.timeline}
+          inspect={inspect}
+          loading={isQueryLoading}
+          refetch={refetch}
+          skip={!canQueryTimeline}
+        />
+        {NotesFlyoutMemo}
+
+        <UnifiedTimelineBody
+          header={
+            <QueryTabHeader
+              activeTab={activeTab}
+              filterManager={timelineFilterManager}
+              show={show && activeTab === TimelineTabs.query}
+              showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
+              status={status}
+              timelineId={timelineId}
+              showEventsCountBadge={showEventsCountBadge}
+              totalCount={totalCount}
+            />
+          }
+          columns={augmentedColumnHeaders}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          itemsPerPage={itemsPerPage}
+          itemsPerPageOptions={itemsPerPageOptions}
+          sort={sort}
+          events={events}
+          refetch={refetch}
+          dataLoadingState={dataLoadingState}
+          totalCount={isBlankTimeline ? 0 : totalCount}
+          onEventClosed={onEventClosed}
+          expandedDetail={expandedDetail}
+          showExpandedDetails={showExpandedDetails}
+          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+          onChangePage={loadPage}
+          activeTab={activeTab}
+          updatedAt={refreshedAt}
+          isTextBasedQuery={false}
+          pageInfo={pageInfo}
+        />
+      </>
     );
   }
 
@@ -307,6 +412,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
+      {NotesFlyoutMemo}
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
           <QueryTabHeader
@@ -340,6 +446,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 })}
                 leadingControlColumns={leadingControlColumns as ControlColumnProps[]}
                 trailingControlColumns={timelineEmptyTrailingControlColumns}
+                onToggleShowNotes={onToggleShowNotes}
               />
             </StyledEuiFlyoutBody>
 

@@ -7,6 +7,7 @@
 
 import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useEnablement } from '../../../hooks';
 import { selectOverviewState } from '../../../state';
 
 export const useCanUsePublicLocById = (configId: string) => {
@@ -14,12 +15,18 @@ export const useCanUsePublicLocById = (configId: string) => {
     data: { monitors },
   } = useSelector(selectOverviewState);
 
+  const { isServiceAllowed } = useEnablement();
+
   const hasManagedLocation = monitors?.filter(
     (mon) => mon.configId === configId && mon.location.isServiceManaged
   );
 
   const canUsePublicLocations =
     useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+
+  if (!isServiceAllowed) {
+    return false;
+  }
 
   return hasManagedLocation ? !!canUsePublicLocations : true;
 };

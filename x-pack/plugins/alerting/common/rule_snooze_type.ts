@@ -5,21 +5,4 @@
  * 2.0.
  */
 
-import { RRuleParams } from './rrule_type';
-
-export interface RuleSnoozeSchedule {
-  duration: number;
-  rRule: RRuleParams;
-  // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
-  id?: string;
-  skipRecurrences?: string[];
-}
-
-// Type signature of has to be repeated here to avoid issues with SavedObject compatibility
-// RuleSnooze = RuleSnoozeSchedule[] throws typescript errors across the whole lib
-export type RuleSnooze = Array<{
-  duration: number;
-  rRule: RRuleParams;
-  id?: string;
-  skipRecurrences?: string[];
-}>;
+export type { RuleSnoozeSchedule, RuleSnooze } from '@kbn/alerting-types';

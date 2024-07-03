@@ -32,7 +32,6 @@ import {
   of,
   type Observable,
   type Subscription,
-  take,
 } from 'rxjs';
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -93,6 +92,8 @@ export class ProjectNavigationService {
   private navigationChangeSubscription?: Subscription;
   private unlistenHistory?: () => void;
 
+  constructor(private isServerless: boolean) {}
+
   public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
     this.application = application;
     this.navLinksService = navLinksService;
@@ -114,9 +115,7 @@ export class ProjectNavigationService {
     );
 
     return {
-      setProjectHome: (homeHref: string) => {
-        this.projectHome$.next(homeHref);
-      },
+      setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
         return this.projectHome$.asObservable();
       },
@@ -161,45 +160,18 @@ export class ProjectNavigationService {
           this.activeNodes$,
           chromeBreadcrumbs$,
           this.projectName$,
-          this.solutionNavDefinitions$,
-          this.nextSolutionNavDefinitionId$,
-          this.activeSolutionNavDefinitionId$,
           this.cloudLinks$,
         ]).pipe(
-          map(
-            ([
+          map(([projectBreadcrumbs, activeNodes, chromeBreadcrumbs, projectName, cloudLinks]) => {
+            return buildBreadcrumbs({
+              projectName,
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
-              projectName,
-              solutionNavDefinitions,
-              nextSolutionNavDefinitionId,
-              activeSolutionNavDefinitionId,
               cloudLinks,
-            ]) => {
-              const solutionNavigations =
-                Object.keys(solutionNavDefinitions).length > 0 &&
-                (nextSolutionNavDefinitionId !== null || activeSolutionNavDefinitionId !== null)
-                  ? {
-                      definitions: solutionNavDefinitions,
-                      activeId: activeSolutionNavDefinitionId,
-                      onChange: (id: string) => {
-                        this.goToSolutionHome(id);
-                        this.changeActiveSolutionNavigation(id);
-                      },
-                    }
-                  : undefined;
-
-              return buildBreadcrumbs({
-                projectName,
-                projectBreadcrumbs,
-                activeNodes,
-                chromeBreadcrumbs,
-                solutionNavigations,
-                cloudLinks,
-              });
-            }
-          )
+              isServerless: this.isServerless,
+            });
+          })
         );
       },
       /** In stateful Kibana, get the registered solution navigations */
@@ -251,22 +223,9 @@ export class ProjectNavigationService {
           this.navigationTree$.next(navigationTree);
           this.navigationTreeUi$.next(navigationTreeUI);
           this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
+          this.updateActiveProjectNavigationNodes();
 
-          // Verify if the current location is part of the navigation tree of
-          // the initiated solution. If not, we need to find the correct solution
-          const activeNodes = this.updateActiveProjectNavigationNodes();
-          let willChangeSolution = false;
-
-          if (activeNodes.length === 0) {
-            const solutionForCurrentLocation = this.findSolutionForCurrentLocation();
-            if (solutionForCurrentLocation) {
-              willChangeSolution = true;
-              this.goToSolutionHome(solutionForCurrentLocation);
-              this.changeActiveSolutionNavigation(solutionForCurrentLocation);
-            }
-          }
-
-          if (!initialised && !willChangeSolution) {
+          if (!initialised) {
             this.activeSolutionNavDefinitionId$.next(id);
             initialised = true;
           }
@@ -345,48 +304,6 @@ export class ProjectNavigationService {
       });
   }
 
-  /**
-   * When we are in stateful Kibana with multiple solution navigations, it is possible that a user
-   * lands on a page that does not belong to the current active solution navigation. In this case,
-   * we need to find the correct solution navigation based on the current location and switch to it.
-   */
-  private findSolutionForCurrentLocation(): string | null {
-    if (Object.keys(this.solutionNavDefinitions$.getValue()).length === 0) return null;
-
-    let idFound: string | null = null;
-
-    combineLatest([this.solutionNavDefinitions$, this.location$])
-      .pipe(take(1))
-      .subscribe(([definitions, location]) => {
-        Object.entries(definitions).forEach(([id, definition]) => {
-          if (idFound) return;
-
-          combineLatest([definition.navigationTree$, this.deepLinksMap$, this.cloudLinks$])
-            .pipe(
-              take(1),
-              map(([def, deepLinksMap, cloudLinks]) =>
-                parseNavigationTree(def, {
-                  deepLinks: deepLinksMap,
-                  cloudLinks,
-                })
-              )
-            )
-            .subscribe(({ navigationTree }) => {
-              const maybeActiveNodes = this.findActiveNodes({
-                location,
-                flattendTree: flattenNav(navigationTree),
-              });
-
-              if (maybeActiveNodes.length > 0) {
-                idFound = id;
-              }
-            });
-        });
-      });
-
-    return idFound;
-  }
-
   private setSideNavComponent(component: SideNavComponent | null) {
     this.customProjectSideNavComponent$.next({ current: component });
   }
@@ -408,30 +325,23 @@ export class ProjectNavigationService {
           return;
         }
 
-        const { sideNavComponent } = definition;
+        const { sideNavComponent, homePage = '' } = definition;
+        const homePageLink = this.navLinksService?.get(homePage);
+
         if (sideNavComponent) {
           this.setSideNavComponent(sideNavComponent);
         }
+
+        if (homePageLink) {
+          this.setProjectHome(homePageLink.href);
+        }
+
         this.initNavigation(nextId, definition.navigationTree$);
       });
   }
 
-  private goToSolutionHome(id: string) {
-    const definitions = this.solutionNavDefinitions$.getValue();
-    const definition = definitions[id];
-    if (!definition) {
-      throw new Error(`No solution navigation definition found for id ${id}`);
-    }
-
-    // Navigate to the new home page if it's defined
-    const link = this.navLinksService?.get(definition.homePage ?? 'undefined');
-    if (!link) {
-      throw new Error(`No home page defined for solution navigation ${definition.id}`);
-    }
-
-    const location = createLocation(link.url);
-    this.location$.next(location);
-    this.application?.navigateToUrl(link.url);
+  private setProjectHome(homeHref: string) {
+    this.projectHome$.next(homeHref);
   }
 
   private changeActiveSolutionNavigation(id: string | null) {

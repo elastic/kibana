@@ -7,7 +7,13 @@
 
 import expect from '@kbn/expect';
 import { DatasetQualityFtrProviderContext } from './config';
-import { datasetNames, getInitialTestLogs, getLogsForDataset } from './data';
+import {
+  createDegradedFieldsRecord,
+  datasetNames,
+  getInitialTestLogs,
+  getLogsForDataset,
+  productionNamespace,
+} from './data';
 
 const integrationActions = {
   overview: 'Overview',
@@ -27,415 +33,414 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const retry = getService('retry');
   const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
+  const apacheAccessDatasetName = 'apache.access';
+  const apacheAccessDatasetHumanName = 'Apache access logs';
+  const apacheIntegrationId = 'apache';
+  const apachePkg = {
+    name: 'apache',
+    version: '1.14.0',
+  };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/182154
-  describe.skip('Dataset quality flyout', () => {
+  const bitbucketDatasetName = 'atlassian_bitbucket.audit';
+  const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
+  const bitbucketPkg = {
+    name: 'atlassian_bitbucket',
+    version: '1.14.0',
+  };
+
+  const degradedDatasetName = datasetNames[2];
+
+  describe('Flyout', () => {
     before(async () => {
-      await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
+      // Install Apache Integration and ingest logs for it
+      await PageObjects.observabilityLogsExplorer.installPackage(apachePkg);
+
+      // Install Bitbucket Integration (package which does not has Dashboards) and ingest logs for it
+      await PageObjects.observabilityLogsExplorer.installPackage(bitbucketPkg);
+
+      await synthtrace.index([
+        // Ingest basic logs
+        getInitialTestLogs({ to, count: 4 }),
+        // Ingest Degraded Logs
+        createDegradedFieldsRecord({
+          to: new Date().toISOString(),
+          count: 2,
+          dataset: degradedDatasetName,
+        }),
+        // Index 15 logs for `logs-apache.access` dataset
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 15,
+          dataset: apacheAccessDatasetName,
+          namespace: productionNamespace,
+        }),
+        // Index degraded docs for Apache integration
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 1,
+          dataset: apacheAccessDatasetName,
+          namespace: productionNamespace,
+          isMalformed: true,
+        }),
+        // Index logs for Bitbucket integration
+        getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }),
+      ]);
+
       await PageObjects.datasetQuality.navigateTo();
     });
 
     after(async () => {
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(apachePkg);
+      await PageObjects.observabilityLogsExplorer.uninstallPackage(bitbucketPkg);
       await synthtrace.clean();
-      await PageObjects.observabilityLogsExplorer.removeInstalledPackages();
     });
 
-    it('opens the flyout for the right dataset', async () => {
-      const testDatasetName = datasetNames[1];
+    describe('open flyout', () => {
+      it('should open the flyout for the right dataset', async () => {
+        const testDatasetName = datasetNames[1];
 
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
+        await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
-      await testSubjects.existOrFail(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutTitle
-      );
-    });
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutTitle
+        );
 
-    it('shows the correct last activity', async () => {
-      const testDatasetName = datasetNames[0];
-
-      // Update last activity for the dataset
-      await PageObjects.datasetQuality.closeFlyout();
-      await synthtrace.index(
-        getLogsForDataset({ to: new Date().toISOString(), count: 1, dataset: testDatasetName })
-      );
-      await PageObjects.datasetQuality.refreshTable();
-
-      const cols = await PageObjects.datasetQuality.parseDatasetTable();
-
-      const datasetNameCol = cols['Dataset Name'];
-      const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-
-      const testDatasetRowIndex = datasetNameColCellTexts.findIndex(
-        (dName: string) => dName === testDatasetName
-      );
-
-      const lastActivityText = (await cols['Last Activity'].getCellTexts())[testDatasetRowIndex];
-
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
-
-      const lastActivityTextExists = await PageObjects.datasetQuality.doestTextExistInFlyout(
-        lastActivityText,
-        `[data-test-subj=${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutFieldValue}]`
-      );
-
-      expect(lastActivityTextExists).to.eql(true);
-    });
-
-    it('reflects the breakdown field state in url', async () => {
-      const testDatasetName = datasetNames[0];
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
-
-      const breakdownField = 'service.name';
-      await PageObjects.datasetQuality.selectBreakdownField(breakdownField);
-
-      // Wait for URL to contain "breakdownField:service.name"
-      await retry.tryForTime(5000, async () => {
-        const currentUrl = await browser.getCurrentUrl();
-        expect(decodeURIComponent(currentUrl)).to.contain(`breakdownField:${breakdownField}`);
+        await PageObjects.datasetQuality.closeFlyout();
       });
 
-      // Clear breakdown field
-      await PageObjects.datasetQuality.selectBreakdownField('No breakdown');
+      it('reflects the breakdown field state in url', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
 
-      // Wait for URL to not contain "breakdownField"
-      await retry.tryForTime(5000, async () => {
-        const currentUrl = await browser.getCurrentUrl();
-        expect(currentUrl).to.not.contain('breakdownField');
+        const breakdownField = 'service.name';
+        await PageObjects.datasetQuality.selectBreakdownField(breakdownField);
+
+        // Wait for URL to contain "breakdownField:service.name"
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(decodeURIComponent(currentUrl)).to.contain(`breakdownField:${breakdownField}`);
+        });
+
+        // Clear breakdown field
+        await PageObjects.datasetQuality.selectBreakdownField('No breakdown');
+
+        // Wait for URL to not contain "breakdownField"
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          expect(currentUrl).to.not.contain('breakdownField');
+        });
+        await PageObjects.datasetQuality.closeFlyout();
       });
     });
 
-    it('shows the integration details', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      const apacheIntegrationId = 'apache';
+    describe('integrations', () => {
+      it('should hide the integration section for non integrations', async () => {
+        const testDatasetName = datasetNames[1];
 
-      await PageObjects.observabilityLogsExplorer.navigateTo();
+        await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+        await testSubjects.missingOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors
+            .datasetQualityFlyoutFieldsListIntegrationDetails
+        );
 
-      // Index 10 logs for `logs-apache.access` dataset
-      await synthtrace.index(
-        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
-      );
-
-      await PageObjects.datasetQuality.navigateTo();
-
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-      const integrationNameElements = await PageObjects.datasetQuality.getFlyoutElementsByText(
-        '[data-test-subj=datasetQualityFlyoutFieldValue]',
-        apacheIntegrationId
-      );
-
-      await PageObjects.datasetQuality.closeFlyout();
-
-      expect(integrationNameElements.length).to.eql(1);
-    });
-
-    it('goes to log explorer page when open button is clicked', async () => {
-      const testDatasetName = datasetNames[2];
-      await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
-
-      await (await PageObjects.datasetQuality.getFlyoutLogsExplorerButton()).click();
-
-      // Confirm dataset selector text in observability logs explorer
-      const datasetSelectorText =
-        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-      expect(datasetSelectorText).to.eql(testDatasetName);
-    });
-
-    it('shows summary KPIs', async () => {
-      await PageObjects.datasetQuality.navigateTo();
-
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-      const summary = await PageObjects.datasetQuality.parseFlyoutKpis();
-      expect(summary).to.eql({
-        docsCountTotal: '0',
-        size: '0.0 B',
-        services: '0',
-        hosts: '0',
-        degradedDocs: '0',
-      });
-    });
-
-    it('shows the updated KPIs', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-      const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis();
-
-      // Set time range to 3 days ago
-      const flyoutBodyContainer = await testSubjects.find(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutBody
-      );
-      await PageObjects.datasetQuality.setDatePickerLastXUnits(flyoutBodyContainer, 3, 'd');
-
-      // Index 2 doc 2 days ago
-      const time2DaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000;
-      await synthtrace.index(
-        getLogsForDataset({
-          to: time2DaysAgo,
-          count: 2,
-          dataset: apacheAccessDatasetName,
-          isMalformed: false,
-        })
-      );
-
-      // Index 5 degraded docs 2 days ago
-      await synthtrace.index(
-        getLogsForDataset({
-          to: time2DaysAgo,
-          count: 5,
-          dataset: apacheAccessDatasetName,
-          isMalformed: true,
-        })
-      );
-
-      await PageObjects.datasetQuality.refreshFlyout();
-      const summaryAfter = await PageObjects.datasetQuality.parseFlyoutKpis();
-
-      expect(parseInt(summaryAfter.docsCountTotal, 10)).to.be.greaterThan(
-        parseInt(summaryBefore.docsCountTotal, 10)
-      );
-
-      expect(parseInt(summaryAfter.degradedDocs, 10)).to.be.greaterThan(
-        parseInt(summaryBefore.degradedDocs, 10)
-      );
-
-      expect(parseInt(summaryAfter.size, 10)).to.be.greaterThan(parseInt(summaryBefore.size, 10));
-      expect(parseInt(summaryAfter.services, 10)).to.be.greaterThan(
-        parseInt(summaryBefore.services, 10)
-      );
-      expect(parseInt(summaryAfter.hosts, 10)).to.be.greaterThan(parseInt(summaryBefore.hosts, 10));
-    });
-
-    it('shows the right number of services', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-      const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis();
-      const testServices = ['test-srv-1', 'test-srv-2'];
-
-      // Index 2 docs with different services
-      const timeNow = Date.now();
-      await synthtrace.index(
-        getLogsForDataset({
-          to: timeNow,
-          count: 2,
-          dataset: apacheAccessDatasetName,
-          isMalformed: false,
-          services: testServices,
-        })
-      );
-
-      await PageObjects.datasetQuality.refreshFlyout();
-      const summaryAfter = await PageObjects.datasetQuality.parseFlyoutKpis();
-
-      expect(parseInt(summaryAfter.services, 10)).to.eql(
-        parseInt(summaryBefore.services, 10) + testServices.length
-      );
-    });
-
-    it('goes to log explorer for degraded docs when show all is clicked', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-      const degradedDocsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.degradedDocs}`;
-      await testSubjects.click(degradedDocsShowAllSelector);
-      await browser.switchTab(1);
-
-      // Confirm dataset selector text in observability logs explorer
-      const datasetSelectorText =
-        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-      expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
-
-      await browser.closeCurrentWindow();
-      await browser.switchTab(0);
-    });
-
-    // Blocked by https://github.com/elastic/kibana/issues/181705
-    it.skip('goes to infra hosts for hosts when show all is clicked', async () => {
-      const apacheAccessDatasetHumanName = 'Apache access logs';
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-
-      const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
-      await testSubjects.click(hostsShowAllSelector);
-      await browser.switchTab(1);
-
-      // Confirm url contains metrics/hosts
-      await retry.tryForTime(5000, async () => {
-        const currentUrl = await browser.getCurrentUrl();
-        const parsedUrl = new URL(currentUrl);
-        expect(parsedUrl.pathname).to.contain('/app/metrics/hosts');
+        await PageObjects.datasetQuality.closeFlyout();
       });
 
-      await browser.closeCurrentWindow();
-      await browser.switchTab(0);
-    });
+      it('should shows the integration section for integrations', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-    it('Integration actions menu is present with correct actions', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
+        const integrationNameElements = await PageObjects.datasetQuality.getFlyoutElementsByText(
+          '[data-test-subj=datasetQualityFlyoutFieldValue]',
+          apacheIntegrationId
+        );
 
-      await PageObjects.observabilityLogsExplorer.navigateTo();
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors
+            .datasetQualityFlyoutFieldsListIntegrationDetails
+        );
 
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+        expect(integrationNameElements.length).to.eql(1);
 
-      // Index 10 logs for `logs-apache.access` dataset
-      await synthtrace.index(
-        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
-      );
-
-      await PageObjects.datasetQuality.navigateTo();
-
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-      await PageObjects.datasetQuality.openIntegrationActionsMenu();
-
-      const actions = await Promise.all(
-        Object.values(integrationActions).map((action) =>
-          PageObjects.datasetQuality.getIntegrationActionButtonByAction(action)
-        )
-      );
-
-      expect(actions.length).to.eql(3);
-    });
-
-    it('Integration dashboard action hidden for integrations without dashboards', async () => {
-      const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-      const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
-
-      await PageObjects.observabilityLogsExplorer.navigateTo();
-
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.installPackage({
-        name: 'atlassian_bitbucket',
-        version: '1.14.0',
+        await PageObjects.datasetQuality.closeFlyout();
       });
 
-      // Index 10 logs for `atlassian_bitbucket.audit` dataset
-      await synthtrace.index(getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }));
+      it('should show the integration actions menu with correct actions', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+        await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-      await PageObjects.datasetQuality.navigateTo();
+        const actions = await Promise.all(
+          Object.values(integrationActions).map((action) =>
+            PageObjects.datasetQuality.getIntegrationActionButtonByAction(action)
+          )
+        );
 
-      await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
-      await PageObjects.datasetQuality.openIntegrationActionsMenu();
-
-      await testSubjects.missingOrFail(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
-          integrationActions.viewDashboards
-        )
-      );
-    });
-
-    it('Integration overview action should navigate to the integration overview page', async () => {
-      const bitbucketDatasetName = 'atlassian_bitbucket.audit';
-      const bitbucketDatasetHumanName = 'Bitbucket Audit Logs';
-
-      await PageObjects.observabilityLogsExplorer.navigateTo();
-
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.installPackage({
-        name: 'atlassian_bitbucket',
-        version: '1.14.0',
+        expect(actions.length).to.eql(3);
+        await PageObjects.datasetQuality.closeFlyout();
       });
 
-      // Index 10 logs for `atlassian_bitbucket.audit` dataset
-      await synthtrace.index(getLogsForDataset({ to, count: 10, dataset: bitbucketDatasetName }));
+      it('should hide integration dashboard for integrations without dashboards', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+        await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-      await PageObjects.datasetQuality.navigateTo();
-
-      await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
-      await PageObjects.datasetQuality.openIntegrationActionsMenu();
-
-      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
-        integrationActions.overview
-      );
-
-      await action.click();
-
-      await retry.tryForTime(5000, async () => {
-        const currentUrl = await browser.getCurrentUrl();
-        const parsedUrl = new URL(currentUrl);
-
-        expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
+        await testSubjects.missingOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutIntegrationAction(
+            integrationActions.viewDashboards
+          )
+        );
+        await PageObjects.datasetQuality.closeFlyout();
       });
-    });
 
-    it('Integration template action should navigate to the index template page', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
+      it('Should navigate to integration overview page on clicking integration overview action', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(bitbucketDatasetHumanName);
+        await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-      await PageObjects.observabilityLogsExplorer.navigateTo();
+        const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+          integrationActions.overview
+        );
 
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+        await action.click();
 
-      // Index 10 logs for `logs-apache.access` dataset
-      await synthtrace.index(
-        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
-      );
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
 
-      await PageObjects.datasetQuality.navigateTo();
+          expect(parsedUrl.pathname).to.contain('/app/integrations/detail/atlassian_bitbucket');
+        });
 
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-      await PageObjects.datasetQuality.openIntegrationActionsMenu();
+        await PageObjects.datasetQuality.navigateTo();
+      });
 
-      await retry.tryForTime(5000, async () => {
+      it('should navigate to index template page in clicking Integration template', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+        await PageObjects.datasetQuality.openIntegrationActionsMenu();
+
         const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
           integrationActions.template
         );
 
         await action.click();
 
-        const currentUrl = await browser.getCurrentUrl();
-        const parsedUrl = new URL(currentUrl);
-        expect(parsedUrl.pathname).to.contain(
-          `/app/management/data/index_management/templates/logs-${apacheAccessDatasetName}`
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          expect(parsedUrl.pathname).to.contain(
+            `/app/management/data/index_management/templates/logs-${apacheAccessDatasetName}`
+          );
+        });
+        await PageObjects.datasetQuality.navigateTo();
+      });
+
+      it('should navigate to the selected dashboard on clicking integration dashboard action ', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+        await PageObjects.datasetQuality.openIntegrationActionsMenu();
+
+        const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+          integrationActions.viewDashboards
         );
+
+        await action.click();
+
+        const dashboardButtons = await PageObjects.datasetQuality.getIntegrationDashboardButtons();
+        const firstDashboardButton = await dashboardButtons[0];
+        const dashboardText = await firstDashboardButton.getVisibleText();
+
+        await firstDashboardButton.click();
+
+        const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
+
+        expect(breadcrumbText).to.eql(dashboardText);
+
+        await PageObjects.datasetQuality.navigateTo();
       });
     });
 
-    it('Integration dashboard action should navigate to the selected dashboard', async () => {
-      const apacheAccessDatasetName = 'apache.access';
-      const apacheAccessDatasetHumanName = 'Apache access logs';
+    describe('summary panel', () => {
+      it('should show summary KPIs', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-      await PageObjects.observabilityLogsExplorer.navigateTo();
+        const { docsCountTotal, degradedDocs, services, hosts, size } =
+          await PageObjects.datasetQuality.parseFlyoutKpis();
+        expect(parseInt(docsCountTotal, 10)).to.be(226);
+        expect(parseInt(degradedDocs, 10)).to.be(1);
+        expect(parseInt(services, 10)).to.be(3);
+        expect(parseInt(hosts, 10)).to.be(52);
+        expect(parseInt(size, 10)).to.be.greaterThan(0);
 
-      // Add initial integrations
-      await PageObjects.observabilityLogsExplorer.setupInitialIntegrations();
+        await PageObjects.datasetQuality.closeFlyout();
+      });
+    });
 
-      // Index 10 logs for `logs-apache.access` dataset
-      await synthtrace.index(
-        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
-      );
+    describe('navigation', () => {
+      afterEach(async () => {
+        // Navigate back to dataset quality page after each test
+        await PageObjects.datasetQuality.navigateTo();
+      });
 
-      await PageObjects.datasetQuality.navigateTo();
+      it('should go to log explorer page when the open in log explorer button is clicked', async () => {
+        const testDatasetName = datasetNames[2];
+        await PageObjects.datasetQuality.openDatasetFlyout(testDatasetName);
 
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-      await PageObjects.datasetQuality.openIntegrationActionsMenu();
+        const logExplorerButton = await PageObjects.datasetQuality.getFlyoutLogsExplorerButton();
 
-      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
-        integrationActions.viewDashboards
-      );
+        await logExplorerButton.click();
 
-      await action.click();
+        // Confirm dataset selector text in observability logs explorer
+        const datasetSelectorText =
+          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
+        expect(datasetSelectorText).to.eql(testDatasetName);
+      });
 
-      const dashboardButtons = await PageObjects.datasetQuality.getIntegrationDashboardButtons();
-      const firstDashboardButton = await dashboardButtons[0];
-      const dashboardText = await firstDashboardButton.getVisibleText();
+      it('should go log explorer for degraded docs when the show all button is clicked', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
 
-      await firstDashboardButton.click();
+        const degradedDocsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.degradedDocs}`;
+        await testSubjects.click(degradedDocsShowAllSelector);
 
-      const breadcrumbText = await testSubjects.getVisibleText('breadcrumb last');
+        // Confirm dataset selector text in observability logs explorer
+        const datasetSelectorText =
+          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
+        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+      });
 
-      expect(breadcrumbText).to.eql(dashboardText);
+      // Blocked by https://github.com/elastic/kibana/issues/181705
+      // Its a test written ahead of its time.
+      it.skip('goes to infra hosts for hosts when show all is clicked', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+
+        const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
+        await testSubjects.click(hostsShowAllSelector);
+
+        // Confirm url contains metrics/hosts
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          expect(parsedUrl.pathname).to.contain('/app/metrics/hosts');
+        });
+      });
+    });
+
+    describe('degraded fields table', () => {
+      it(' should show empty degraded fields table when no degraded fields are present', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(datasetNames[0]);
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedTableNoData
+        );
+
+        await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should show the degraded fields table with data when present', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+        );
+
+        const rows =
+          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+
+        expect(rows.length).to.eql(2);
+
+        await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should display Spark Plot for every row of degraded fields', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+        const rows =
+          await PageObjects.datasetQuality.getDatasetQualityFlyoutDegradedFieldTableRows();
+
+        const sparkPlots = await testSubjects.findAll(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualitySparkPlot
+        );
+
+        expect(rows.length).to.be(sparkPlots.length);
+
+        await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should sort the table when the count table header is clicked', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+        const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
+
+        const countColumn = table['Docs count'];
+        const cellTexts = await countColumn.getCellTexts();
+
+        await countColumn.sort('ascending');
+        const sortedCellTexts = await countColumn.getCellTexts();
+
+        expect(cellTexts.reverse()).to.eql(sortedCellTexts);
+
+        await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      it('should update the URL when the table is sorted', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+        const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
+        const countColumn = table['Docs count'];
+
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const pageState = parsedUrl.searchParams.get('pageState');
+
+          expect(decodeURIComponent(pageState as string)).to.contain(
+            'sort:(direction:desc,field:count)'
+          );
+        });
+
+        countColumn.sort('ascending');
+
+        await retry.tryForTime(5000, async () => {
+          const currentUrl = await browser.getCurrentUrl();
+          const parsedUrl = new URL(currentUrl);
+          const pageState = parsedUrl.searchParams.get('pageState');
+
+          expect(decodeURIComponent(pageState as string)).to.contain(
+            'sort:(direction:asc,field:count)'
+          );
+        });
+
+        await PageObjects.datasetQuality.closeFlyout();
+      });
+
+      // This is the only test which ingest data during the test.
+      // This block tests the refresh behavior of the degraded fields table.
+      // Even though this test ingest data, it can also be freely moved inside
+      // this describe block, and it won't affect any of the existing tests
+      it('should update the table when new data is ingested and the flyout is refreshed using the time selector', async () => {
+        await PageObjects.datasetQuality.openDatasetFlyout(degradedDatasetName);
+
+        const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
+
+        const countColumn = table['Docs count'];
+        const cellTexts = await countColumn.getCellTexts();
+
+        await synthtrace.index([
+          createDegradedFieldsRecord({
+            to: new Date().toISOString(),
+            count: 2,
+            dataset: degradedDatasetName,
+          }),
+        ]);
+
+        await PageObjects.datasetQuality.refreshFlyout();
+
+        const updatedTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
+        const updatedCountColumn = updatedTable['Docs count'];
+
+        const updatedCellTexts = await updatedCountColumn.getCellTexts();
+
+        const singleValuePreviously = parseInt(cellTexts[0], 10);
+        const singleValueNow = parseInt(updatedCellTexts[0], 10);
+
+        expect(singleValueNow).to.be.greaterThan(singleValuePreviously);
+
+        await PageObjects.datasetQuality.closeFlyout();
+      });
     });
   });
 }

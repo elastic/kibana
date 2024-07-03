@@ -108,6 +108,7 @@ interface AgentBase {
   components?: FleetServerAgentComponent[];
   agent?: FleetServerAgentMetadata;
   unhealthy_reason?: UnhealthyReason[];
+  namespaces?: string[];
 }
 
 export enum UnhealthyReason {
@@ -348,6 +349,11 @@ export interface FleetServerAgent {
    * Unhealthy reason: input, output, other
    */
   unhealthy_reason?: UnhealthyReason[];
+
+  /**
+   * Namespaces
+   */
+  namespaces?: string[];
 }
 
 /**

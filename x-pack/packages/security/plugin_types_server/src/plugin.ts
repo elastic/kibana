@@ -21,6 +21,8 @@ export interface SecurityPluginSetup {
   license: SecurityLicense;
   /**
    * Exposes services for audit logging.
+   *
+   * @deprecated in favor of Core's `security` service
    */
   audit: AuditServiceSetup;
   /**
@@ -35,6 +37,8 @@ export interface SecurityPluginSetup {
 export interface SecurityPluginStart {
   /**
    * Authentication services to confirm the user is who they say they are.
+   *
+   * @deprecated in favor of Core's `security` service
    */
   authc: AuthenticationServiceStart;
   /**
@@ -43,6 +47,8 @@ export interface SecurityPluginStart {
   authz: AuthorizationServiceSetup;
   /**
    * User profiles services to retrieve user profiles.
+   *
+   * @deprecated in favor of Core's `userProfile` service
    */
   userProfiles: UserProfileServiceStart;
 }

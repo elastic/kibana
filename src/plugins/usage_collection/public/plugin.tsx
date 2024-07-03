@@ -110,17 +110,16 @@ export class UsageCollectionPlugin
   private subscriptions: Subscription[] = [];
   private reporter?: Reporter;
   private config: PublicConfigType;
-  constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<PublicConfigType>();
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.config = initContext.config.get<PublicConfigType>();
   }
 
   public setup({ http }: CoreSetup): UsageCollectionSetup {
     const localStorage = new Storage(window.localStorage);
-    const debug = this.config.uiCounters.debug;
 
     this.reporter = createReporter({
       localStorage,
-      debug,
+      logger: this.initContext.logger.get('reporter'),
       fetch: http,
     });
 

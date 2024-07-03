@@ -117,10 +117,6 @@ export async function getServiceUrls({
     elasticsearch = 'http://127.0.0.1:9200';
   }
 
-  if (!elasticsearch) {
-    throw new Error('Could not determine an Elasticsearch target');
-  }
-
   const parsedTarget = parse(elasticsearch);
 
   let auth = parsedTarget.auth;

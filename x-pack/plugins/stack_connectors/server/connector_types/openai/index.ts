@@ -67,7 +67,7 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       i18n.translate('xpack.stackConnectors.genAi.configurationErrorApiProvider', {
         defaultMessage: 'Error configuring OpenAI action: {err}',
         values: {
-          err,
+          err: err.toString(),
         },
       })
     );

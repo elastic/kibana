@@ -14,6 +14,11 @@ import { connect } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsRightPanelKey,
+} from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import type { ControlColumnProps } from '../../../../../../common/types';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
@@ -23,10 +28,10 @@ import { StatefulBody } from '../../body';
 import { Footer, footerHeight } from '../../footer';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { EventDetailsWidthProvider } from '../../../../../common/components/events_viewer/event_details_width_context';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useTimelineFullScreen } from '../../../../../common/containers/use_full_screen';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
@@ -46,6 +51,9 @@ import {
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
+import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
+import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
+import { NotesFlyout } from '../../properties/notes_flyout';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
@@ -171,7 +179,80 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       timerangeKind: undefined,
     });
 
-  const leadingControlColumns = useTimelineControlColumn(columns, sort);
+  const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+  const { openFlyout } = useExpandableFlyoutApi();
+  const securitySolutionNotesEnabled = useIsExperimentalFeatureEnabled(
+    'securitySolutionNotesEnabled'
+  );
+
+  const {
+    associateNote,
+    notes,
+    isNotesFlyoutVisible,
+    closeNotesFlyout,
+    showNotesFlyout,
+    eventId: noteEventId,
+    setNotesEventId,
+  } = useNotesInFlyout({
+    eventIdToNoteIds,
+    refetch,
+    timelineId,
+  });
+
+  const onToggleShowNotes = useCallback(
+    (eventId?: string) => {
+      const indexName = selectedPatterns.join(',');
+      if (eventId && !expandableFlyoutDisabled && securitySolutionNotesEnabled) {
+        openFlyout({
+          right: {
+            id: DocumentDetailsRightPanelKey,
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+          left: {
+            id: DocumentDetailsLeftPanelKey,
+            path: {
+              tab: LeftPanelNotesTab,
+            },
+            params: {
+              id: eventId,
+              indexName,
+              scopeId: timelineId,
+            },
+          },
+        });
+      } else {
+        if (eventId) {
+          setNotesEventId(eventId);
+          showNotesFlyout();
+        }
+      }
+    },
+    [
+      expandableFlyoutDisabled,
+      openFlyout,
+      securitySolutionNotesEnabled,
+      selectedPatterns,
+      timelineId,
+      setNotesEventId,
+      showNotesFlyout,
+    ]
+  );
+
+  const leadingControlColumns = useTimelineControlColumn({
+    columns,
+    sort,
+    timelineId,
+    activeTab: TimelineTabs.pinned,
+    refetch,
+    events,
+    pinnedEventIds,
+    eventIdToNoteIds,
+    onToggleShowNotes,
+  });
 
   const isQueryLoading = useMemo(
     () => [DataLoadingState.loading, DataLoadingState.loadingMore].includes(queryLoadingState),
@@ -182,38 +263,54 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     onEventClosed({ tabType: TimelineTabs.pinned, id: timelineId });
   }, [timelineId, onEventClosed]);
 
+  const NotesFlyoutMemo = useMemo(() => {
+    return (
+      <NotesFlyout
+        associateNote={associateNote}
+        eventId={noteEventId}
+        show={isNotesFlyoutVisible}
+        notes={notes}
+        onClose={closeNotesFlyout}
+        onCancel={closeNotesFlyout}
+        timelineId={timelineId}
+      />
+    );
+  }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
+
   if (unifiedComponentsInTimelineEnabled) {
     return (
-      <UnifiedTimelineBody
-        header={<></>}
-        columns={augmentedColumnHeaders}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        itemsPerPage={itemsPerPage}
-        itemsPerPageOptions={itemsPerPageOptions}
-        sort={sort}
-        events={events}
-        refetch={refetch}
-        dataLoadingState={queryLoadingState}
-        pinnedEventIds={pinnedEventIds}
-        totalCount={events.length}
-        onEventClosed={onEventClosed}
-        expandedDetail={expandedDetail}
-        eventIdToNoteIds={eventIdToNoteIds}
-        showExpandedDetails={showExpandedDetails}
-        onChangePage={loadPage}
-        activeTab={TimelineTabs.pinned}
-        updatedAt={refreshedAt}
-        isTextBasedQuery={false}
-        pageInfo={pageInfo}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
-        trailingControlColumns={rowDetailColumn}
-      />
+      <>
+        {NotesFlyoutMemo}
+        <UnifiedTimelineBody
+          header={<></>}
+          columns={augmentedColumnHeaders}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          itemsPerPage={itemsPerPage}
+          itemsPerPageOptions={itemsPerPageOptions}
+          sort={sort}
+          events={events}
+          refetch={refetch}
+          dataLoadingState={queryLoadingState}
+          totalCount={events.length}
+          onEventClosed={onEventClosed}
+          expandedDetail={expandedDetail}
+          showExpandedDetails={showExpandedDetails}
+          onChangePage={loadPage}
+          activeTab={TimelineTabs.pinned}
+          updatedAt={refreshedAt}
+          isTextBasedQuery={false}
+          pageInfo={pageInfo}
+          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+          trailingControlColumns={rowDetailColumn}
+        />
+      </>
     );
   }
 
   return (
     <>
+      {NotesFlyoutMemo}
       <FullWidthFlexGroup data-test-subj={`${TimelineTabs.pinned}-tab`}>
         <ScrollableFlexItem grow={2}>
           {timelineFullScreen && setTimelineFullScreen != null && (

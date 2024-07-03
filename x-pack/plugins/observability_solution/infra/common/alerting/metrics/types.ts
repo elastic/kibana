@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as rt from 'io-ts';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { SnapshotCustomMetricInput } from '../../http_api';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
@@ -16,20 +16,6 @@ export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory
 export enum InfraRuleType {
   MetricThreshold = 'metrics.alert.threshold',
   InventoryThreshold = 'metrics.alert.inventory.threshold',
-}
-
-export interface InfraRuleTypeParams {
-  [InfraRuleType.MetricThreshold]: MetricThresholdParams;
-  [InfraRuleType.InventoryThreshold]: InventoryMetricConditions;
-}
-
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  OUTSIDE_RANGE = 'outside',
 }
 
 export enum Aggregators {
@@ -53,27 +39,6 @@ export enum AlertStates {
   ERROR,
 }
 
-const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
-const metricAnomalyMetricRT = rt.union([
-  rt.literal('memory_usage'),
-  rt.literal('network_in'),
-  rt.literal('network_out'),
-]);
-const metricAnomalyInfluencerFilterRT = rt.type({
-  fieldName: rt.string,
-  fieldValue: rt.string,
-});
-
-export interface MetricAnomalyParams {
-  nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
-  metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
-  alertInterval?: string;
-  sourceId?: string;
-  spaceId?: string;
-  threshold: Exclude<ML_ANOMALY_THRESHOLD, ML_ANOMALY_THRESHOLD.LOW>;
-  influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
-}
-
 // Types for the executor
 
 export interface InventoryMetricConditions {
@@ -82,10 +47,10 @@ export interface InventoryMetricConditions {
   timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
-  comparator: Comparator;
+  comparator: COMPARATORS | LEGACY_COMPARATORS;
   customMetric?: SnapshotCustomMetricInput;
   warningThreshold?: number[];
-  warningComparator?: Comparator;
+  warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
 }
 
 export interface InventoryMetricThresholdParams {
@@ -111,8 +76,8 @@ interface BaseMetricExpressionParams {
   timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
-  comparator: Comparator;
-  warningComparator?: Comparator;
+  comparator: COMPARATORS | LEGACY_COMPARATORS;
+  warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
   warningThreshold?: number[];
 }
 

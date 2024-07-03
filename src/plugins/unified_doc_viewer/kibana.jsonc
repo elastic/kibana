@@ -9,5 +9,6 @@
     "browser": true,
     "requiredBundles": ["kibanaUtils"],
     "requiredPlugins": ["data", "discoverShared", "fieldFormats"],
+    "optionalPlugins": ["fieldsMetadata"]
   }
 }

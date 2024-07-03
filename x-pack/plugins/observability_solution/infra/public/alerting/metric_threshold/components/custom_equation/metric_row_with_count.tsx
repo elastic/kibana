@@ -7,7 +7,6 @@
 import { EuiFormRow, EuiHorizontalRule, EuiFlexItem, EuiFlexGroup, EuiSelect } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { DataViewBase } from '@kbn/es-query';
 import { MetricsExplorerKueryBar } from '../../../../pages/metrics/metrics_explorer/components/kuery_bar';
 import { Aggregators, CustomMetricAggTypes } from '../../../../../common/alerting/metrics';
 import { MetricRowControls } from './metric_row_controls';
@@ -16,7 +15,6 @@ import { MetricRowBaseProps } from './types';
 interface MetricRowWithCountProps extends MetricRowBaseProps {
   agg?: Aggregators;
   filter?: string;
-  dataView: DataViewBase;
 }
 
 export const MetricRowWithCount = ({
@@ -27,7 +25,6 @@ export const MetricRowWithCount = ({
   disableDelete,
   onChange,
   aggregationTypes,
-  dataView,
 }: MetricRowWithCountProps) => {
   const aggOptions = useMemo(
     () =>
@@ -95,7 +92,6 @@ export const MetricRowWithCount = ({
             <MetricsExplorerKueryBar
               placeholder={' '}
               compressed
-              derivedIndexPattern={dataView}
               onChange={handleFilterChange}
               onSubmit={handleFilterChange}
               value={filter}

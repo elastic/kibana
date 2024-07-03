@@ -31,11 +31,17 @@ import {
   waitForExecutionEventLog,
   waitForNumRuleRuns,
 } from './helpers/alerting_wait_for_helpers';
+import type { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esClient = getService('es');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAdmin: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Alerting rules', function () {
     // Timeout of 360000ms exceeded
@@ -45,15 +51,17 @@ export default function ({ getService }: FtrProviderContext) {
     let connectorId: string;
     let ruleId: string;
 
+    before(async () => {
+      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+    });
+
     afterEach(async () => {
-      await supertest
-        .delete(`/api/actions/connector/${connectorId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
-      await supertest
-        .delete(`/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo');
+      await supertest.delete(`/api/actions/connector/${connectorId}`).set(internalReqHeader);
+      await supertest.delete(`/api/alerting/rule/${ruleId}`).set(internalReqHeader);
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         conflicts: 'proceed',
@@ -66,14 +74,18 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -160,14 +172,18 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -248,7 +264,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await runRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         ruleId,
       });
 
@@ -281,13 +299,17 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Should fail
       const createdConnector = await createSlackConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Slack Connector: Alerting API test',
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -332,14 +354,18 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -381,7 +407,15 @@ export default function ({ getService }: FtrProviderContext) {
       ruleId = createdRule.id;
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
+        numOfRuns: 3,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,
@@ -407,14 +441,18 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -460,7 +498,15 @@ export default function ({ getService }: FtrProviderContext) {
       ruleId = createdRule.id;
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
+        numOfRuns: 3,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,
@@ -486,14 +532,18 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
         ruleTypeId: RULE_TYPE_ID,
@@ -596,7 +646,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await runRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         ruleId,
       });
 
@@ -634,14 +686,18 @@ export default function ({ getService }: FtrProviderContext) {
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         enabled: false,
         consumer: 'alerts',
         name: 'always fire',
@@ -698,7 +754,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Wait until alerts schedule actions twice to ensure actions had a chance to skip
       // execution once before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 2, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
+        numOfRuns: 2,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,
@@ -725,14 +789,18 @@ export default function ({ getService }: FtrProviderContext) {
       await createIndex({ esClient, indexName: ALERT_ACTION_INDEX });
 
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         enabled: false,
         consumer: 'alerts',
         name: 'always fire',
@@ -790,7 +858,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Wait until alerts schedule actions twice to ensure actions had a chance to skip
       // execution once before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 2, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
+        numOfRuns: 2,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,
@@ -814,14 +890,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     it(`should unmute all instances when unmuting an alert`, async () => {
       const createdConnector = await createIndexConnector({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
       });
       connectorId = createdConnector.id;
 
       const createdRule = await createEsQueryRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc: roleAdmin,
+        internalReqHeader,
         enabled: false,
         consumer: 'alerts',
         name: 'always fire',

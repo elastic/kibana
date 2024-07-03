@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* Error Rate */
 
 import React from 'react';
+import type { ObservabilityPublicPluginsStart } from '@kbn/observability-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 
 export function ViewInAPMButton({
@@ -29,8 +29,12 @@ export function ViewInAPMButton({
   to: string;
   kuery?: string;
 }) {
-  const { share } = useApmPluginContext();
-  const serviceNavigator = share.url.locators.get(APM_APP_LOCATOR_ID);
+  // this component is rendered in the Observability Plugin, so we can use the ObservabilityPublicPluginsStart type
+  const {
+    services: { share },
+  } = useKibana<ObservabilityPublicPluginsStart>();
+
+  const serviceNavigator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
 
   if (!serviceNavigator) {
     return null;

@@ -22,7 +22,33 @@ export const questionMarkRegex = /\?/;
 export const variableTemplateRegex = /\${(\w+)}/g;
 export const numberStartRegex = /[-\d]/;
 export const digitRegex = /[\d]/;
+export const lettersRegex = /[A-Za-z]/;
 export const END_OF_URL_TOKEN = '__url_path_end__';
+
+/*
+ * This regex matches a string that has a method with a whitespace after it, for example "GET ".
+ * In this case autocomplete suggestions should be triggered for an url.
+ */
+export const methodWhitespaceRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+$/i;
+/*
+ * This regex matches a string that has
+ * a method and some parts of an url ending with a slash, a question mark or an equals sign,
+ * for example "GET _search/", "GET _search?", "GET _search?param=".
+ * In this case autocomplete suggestions should be triggered for an url part or param.
+ */
+export const methodWithUrlRegex = /^\s*(GET|POST|PUT|PATCH|DELETE)\s+[a-z0-9\/._\-?=&]*[?=\/]$/i;
+/*
+ * This regex matches a string that has
+ * optional whitespace characters and a double quote, for example `  "`.
+ * In this case autocomplete suggestions should be triggered for a property name.
+ */
+export const propertyNameRegex = /^\s*"$/;
+/*
+ * This regex matches a string that has
+ * a property name, a colon and an optional double quote, for example `"query" : "`.
+ * In this case autocomplete suggestions should be triggered for a property value.
+ */
+export const propertyValueRegex = /^\s*"[a-zA-Z0-9_]+"\s*:\s*"?$/;
 
 /*
  * i18n for autocomplete labels

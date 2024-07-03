@@ -89,8 +89,8 @@ export const getAnomalySwimLaneEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     AnomalySwimLaneEmbeddableState,
-    AnomalySwimLaneEmbeddableApi,
-    AnomalySwimlaneRuntimeState
+    AnomalySwimlaneRuntimeState,
+    AnomalySwimLaneEmbeddableApi
   > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     deserializeState: (state) => state.rawState,
@@ -199,7 +199,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           ...swimLaneComparators,
         }
       );
-
       const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
         api.timeRange$,
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)

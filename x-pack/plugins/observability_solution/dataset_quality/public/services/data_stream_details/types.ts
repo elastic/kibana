@@ -13,6 +13,8 @@ import {
   DataStreamDetails,
   GetIntegrationDashboardsParams,
   GetIntegrationDashboardsResponse,
+  GetDataStreamDegradedFieldsParams,
+  DegradedFieldResponse,
 } from '../../../common/data_streams_stats';
 
 export type DataStreamDetailsServiceSetup = void;
@@ -28,6 +30,9 @@ export interface DataStreamDetailsServiceStartDeps {
 export interface IDataStreamDetailsClient {
   getDataStreamSettings(params: GetDataStreamSettingsParams): Promise<DataStreamSettings>;
   getDataStreamDetails(params: GetDataStreamDetailsParams): Promise<DataStreamDetails>;
+  getDataStreamDegradedFields(
+    params: GetDataStreamDegradedFieldsParams
+  ): Promise<DegradedFieldResponse>;
   getIntegrationDashboards(
     params: GetIntegrationDashboardsParams
   ): Promise<GetIntegrationDashboardsResponse>;

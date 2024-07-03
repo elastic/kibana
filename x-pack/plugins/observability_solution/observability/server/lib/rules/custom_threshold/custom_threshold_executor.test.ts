@@ -13,9 +13,9 @@ import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   Aggregators,
-  Comparator,
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
@@ -234,7 +234,7 @@ describe('The custom threshold alert type', () => {
     beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -251,7 +251,7 @@ describe('The custom threshold alert type', () => {
         },
       });
     const setResults = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       shouldFire: boolean = false,
       isNoData: boolean = false
@@ -271,62 +271,62 @@ describe('The custom threshold alert type', () => {
         },
       ]);
     test('alerts as expected with the > comparator', async () => {
-      setResults(Comparator.GT, [0.75], true);
-      await execute(Comparator.GT, [0.75]);
+      setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.GT, [1.5], false);
-      await execute(Comparator.GT, [1.5]);
+      setResults(COMPARATORS.GREATER_THAN, [1.5], false);
+      await execute(COMPARATORS.GREATER_THAN, [1.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the < comparator', async () => {
-      setResults(Comparator.LT, [1.5], true);
-      await execute(Comparator.LT, [1.5]);
+      setResults(COMPARATORS.LESS_THAN, [1.5], true);
+      await execute(COMPARATORS.LESS_THAN, [1.5]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.LT, [0.75], false);
-      await execute(Comparator.LT, [0.75]);
+      setResults(COMPARATORS.LESS_THAN, [0.75], false);
+      await execute(COMPARATORS.LESS_THAN, [0.75]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the >= comparator', async () => {
-      setResults(Comparator.GT_OR_EQ, [0.75], true);
-      await execute(Comparator.GT_OR_EQ, [0.75]);
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [0.75]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.GT_OR_EQ, [1.0], true);
-      await execute(Comparator.GT_OR_EQ, [1.0]);
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], true);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.GT_OR_EQ, [1.5], false);
-      await execute(Comparator.GT_OR_EQ, [1.5]);
+      setResults(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5], false);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the <= comparator', async () => {
-      setResults(Comparator.LT_OR_EQ, [1.5], true);
-      await execute(Comparator.LT_OR_EQ, [1.5]);
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5], true);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.5]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.LT_OR_EQ, [1.0], true);
-      await execute(Comparator.LT_OR_EQ, [1.0]);
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0], true);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.LT_OR_EQ, [0.75], false);
-      await execute(Comparator.LT_OR_EQ, [0.75]);
+      setResults(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75], false);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [0.75]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts as expected with the between comparator', async () => {
-      setResults(Comparator.BETWEEN, [0, 1.5], true);
-      await execute(Comparator.BETWEEN, [0, 1.5]);
+      setResults(COMPARATORS.BETWEEN, [0, 1.5], true);
+      await execute(COMPARATORS.BETWEEN, [0, 1.5]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.BETWEEN, [0, 0.75], false);
-      await execute(Comparator.BETWEEN, [0, 0.75]);
+      setResults(COMPARATORS.BETWEEN, [0, 0.75], false);
+      await execute(COMPARATORS.BETWEEN, [0, 0.75]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
-    test('alerts as expected with the outside range comparator', async () => {
-      setResults(Comparator.OUTSIDE_RANGE, [0, 0.75], true);
-      await execute(Comparator.OUTSIDE_RANGE, [0, 0.75]);
+    test('alerts as expected with the not between comparator', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 0.75], true);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 0.75]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
-      setResults(Comparator.OUTSIDE_RANGE, [0, 1.5], false);
-      await execute(Comparator.OUTSIDE_RANGE, [0, 1.5]);
+      setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('reports expected values to the action context', async () => {
-      setResults(Comparator.GT, [0.75], true);
-      await execute(Comparator.GT, [0.75]);
+      setResults(COMPARATORS.GREATER_THAN, [0.75], true);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       const reportedAlert = getLastReportedAlert(instanceID);
       expect(reportedAlert?.context?.group).toBeUndefined();
       expect(reportedAlert?.context?.reason).toBe(
@@ -339,7 +339,7 @@ describe('The custom threshold alert type', () => {
     beforeEach(() => jest.clearAllMocks());
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string[] = ['groupByField'],
       metrics?: CustomThresholdExpressionMetric[],
@@ -369,7 +369,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -379,7 +379,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -389,7 +389,7 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
       expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
     });
@@ -398,7 +398,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1.5],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -408,7 +408,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1.5],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -418,7 +418,7 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [1.5]);
+      await execute(COMPARATORS.LESS_THAN, [1.5]);
       expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
       expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
@@ -427,7 +427,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [5],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -437,7 +437,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [5],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -447,7 +447,7 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [5]);
+      await execute(COMPARATORS.GREATER_THAN, [5]);
       expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
       expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
@@ -456,7 +456,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -466,7 +466,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -476,7 +476,7 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(getLastReportedAlert(instanceIdA)?.context?.group).toEqual([
         { field: 'groupByField', value: 'a' },
       ]);
@@ -489,7 +489,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -506,7 +506,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -523,7 +523,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -541,7 +541,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult1 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['groupByField'],
         [
@@ -557,7 +557,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -567,7 +567,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -577,7 +577,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: null,
             timestamp: new Date().toISOString(),
@@ -588,7 +588,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult2 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['groupByField'],
         [
@@ -607,7 +607,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -617,7 +617,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -628,7 +628,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult3 } = await execute(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         ['groupByField', 'groupByField-else'],
         [
@@ -644,7 +644,7 @@ describe('The custom threshold alert type', () => {
     });
 
     const executeWithFilter = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       filterQuery: string,
       metrics?: any,
@@ -679,7 +679,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -696,7 +696,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -713,7 +713,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -731,7 +731,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult1 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.2'
@@ -741,7 +741,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -751,7 +751,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -761,7 +761,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: null,
             timestamp: new Date().toISOString(),
@@ -772,7 +772,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult2 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
@@ -785,7 +785,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -795,7 +795,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -806,7 +806,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult3 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'different' }),
         [
@@ -825,7 +825,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -842,7 +842,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -859,7 +859,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             metrics: [
               {
@@ -877,7 +877,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult1 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.2'
@@ -887,7 +887,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -897,7 +897,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: null,
             timestamp: new Date().toISOString(),
@@ -907,7 +907,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: null,
             timestamp: new Date().toISOString(),
@@ -918,7 +918,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const { state: stateResult2 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
@@ -934,7 +934,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -944,7 +944,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: null,
             timestamp: new Date().toISOString(),
@@ -957,7 +957,7 @@ describe('The custom threshold alert type', () => {
       // Consider c as untracked
       services.alertsClient.isTrackedAlert.mockImplementation((id: string) => id !== 'c');
       const { state: stateResult3 } = await executeWithFilter(
-        Comparator.GT,
+        COMPARATORS.GREATER_THAN,
         [0.75],
         JSON.stringify({ query: 'q' }),
         'test.metric.1',
@@ -973,7 +973,7 @@ describe('The custom threshold alert type', () => {
   describe('querying with a groupBy parameter host.name and rule tags', () => {
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string[] = ['host.name'],
       metrics?: any,
@@ -1008,7 +1008,7 @@ describe('The custom threshold alert type', () => {
         {
           'host-01': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1021,7 +1021,7 @@ describe('The custom threshold alert type', () => {
           },
           'host-02': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -1034,7 +1034,7 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(getLastReportedAlert(instanceIdA)?.context?.tags).toStrictEqual([
         'host-01_tag1',
         'host-01_tag2',
@@ -1053,7 +1053,7 @@ describe('The custom threshold alert type', () => {
   describe('querying without a groupBy parameter and rule tags', () => {
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       threshold: number[],
       groupBy: string = '',
       metrics?: any,
@@ -1086,7 +1086,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.75],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1098,7 +1098,7 @@ describe('The custom threshold alert type', () => {
       ]);
 
       const instanceID = '*';
-      await execute(Comparator.GT, [0.75]);
+      await execute(COMPARATORS.GREATER_THAN, [0.75]);
       expect(getLastReportedAlert(instanceID)?.context?.tags).toStrictEqual([
         'ruleTag1',
         'ruleTag2',
@@ -1109,7 +1109,7 @@ describe('The custom threshold alert type', () => {
   describe('querying with multiple criteria', () => {
     afterAll(() => clearInstances());
     const execute = (
-      comparator: Comparator,
+      comparator: COMPARATORS,
       thresholdA: number[],
       thresholdB: number[],
       groupBy: string = '',
@@ -1148,7 +1148,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1160,7 +1160,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
@@ -1171,7 +1171,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const instanceID = '*';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
     });
     test('sends no alert when some, but not all, criteria cross the threshold', async () => {
@@ -1179,7 +1179,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT_OR_EQ,
+            comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1191,7 +1191,7 @@ describe('The custom threshold alert type', () => {
         {},
       ]);
       const instanceID = '*';
-      await execute(Comparator.LT_OR_EQ, [1.0], [2.5]);
+      await execute(COMPARATORS.LESS_THAN_OR_EQUALS, [1.0], [2.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     test('alerts only on groups that meet all criteria when querying with a groupBy parameter', async () => {
@@ -1199,7 +1199,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1209,7 +1209,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
@@ -1221,7 +1221,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metrics: [
               {
@@ -1238,7 +1238,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metrics: [
               {
@@ -1257,7 +1257,7 @@ describe('The custom threshold alert type', () => {
       ]);
       const instanceIdA = 'a';
       const instanceIdB = 'b';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0], 'groupByField');
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0], 'groupByField');
       expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
       expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
     });
@@ -1266,7 +1266,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [1.0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1278,7 +1278,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT_OR_EQ,
+            comparator: COMPARATORS.GREATER_THAN_OR_EQUALS,
             threshold: [3.0],
             metrics: [
               {
@@ -1296,7 +1296,7 @@ describe('The custom threshold alert type', () => {
         },
       ]);
       const instanceID = '*';
-      await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
+      await execute(COMPARATORS.GREATER_THAN_OR_EQUALS, [1.0], [3.0]);
       const reportedAlert = getLastReportedAlert(instanceID);
       const reasons = reportedAlert?.context?.reason;
       expect(reasons).toBe(
@@ -1308,7 +1308,7 @@ describe('The custom threshold alert type', () => {
   describe('querying with the count aggregator', () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -1329,7 +1329,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.9],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1339,13 +1339,13 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.GT, [0.9]);
+      await execute(COMPARATORS.GREATER_THAN, [0.9]);
       expect(getLastReportedAlert(instanceID)).toHaveAlertAction();
       setEvaluationResults([
         {
           '*': {
             ...customThresholdCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [0.5],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1355,12 +1355,12 @@ describe('The custom threshold alert type', () => {
           },
         },
       ]);
-      await execute(Comparator.LT, [0.5]);
+      await execute(COMPARATORS.LESS_THAN, [0.5]);
       expect(getLastReportedAlert(instanceID)).toBe(undefined);
     });
     describe('with a groupBy parameter', () => {
       const executeGroupBy = (
-        comparator: Comparator,
+        comparator: COMPARATORS,
         threshold: number[],
         sourceId: string = 'default',
         state?: any
@@ -1390,7 +1390,7 @@ describe('The custom threshold alert type', () => {
           {
             a: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 1,
               timestamp: new Date().toISOString(),
@@ -1400,7 +1400,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 1,
               timestamp: new Date().toISOString(),
@@ -1410,14 +1410,14 @@ describe('The custom threshold alert type', () => {
             },
           },
         ]);
-        const resultState = await executeGroupBy(Comparator.LT_OR_EQ, [0]);
+        const resultState = await executeGroupBy(COMPARATORS.LESS_THAN_OR_EQUALS, [0]);
         expect(getLastReportedAlert(instanceIdA)).toBe(undefined);
         expect(getLastReportedAlert(instanceIdB)).toBe(undefined);
         setEvaluationResults([
           {
             a: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 0,
               timestamp: new Date().toISOString(),
@@ -1427,7 +1427,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdCountCriterion,
-              comparator: Comparator.LT_OR_EQ,
+              comparator: COMPARATORS.LESS_THAN_OR_EQUALS,
               threshold: [0],
               currentValue: 0,
               timestamp: new Date().toISOString(),
@@ -1437,7 +1437,7 @@ describe('The custom threshold alert type', () => {
             },
           },
         ]);
-        await executeGroupBy(Comparator.LT_OR_EQ, [0], 'empty-response', resultState);
+        await executeGroupBy(COMPARATORS.LESS_THAN_OR_EQUALS, [0], 'empty-response', resultState);
         expect(getLastReportedAlert(instanceIdA)).toHaveAlertAction();
         expect(getLastReportedAlert(instanceIdB)).toHaveAlertAction();
       });
@@ -1446,7 +1446,7 @@ describe('The custom threshold alert type', () => {
 
   describe('querying recovered alert with a count aggregator', () => {
     afterAll(() => clearInstances());
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
+    const execute = (comparator: COMPARATORS, threshold: number[], sourceId: string = 'default') =>
       executor({
         ...mockOptions,
         services,
@@ -1467,7 +1467,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0.9],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1488,7 +1488,7 @@ describe('The custom threshold alert type', () => {
           ]),
         };
       });
-      await execute(Comparator.GT, [0.9]);
+      await execute(COMPARATORS.GREATER_THAN, [0.9]);
       const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
       expect(getViewInAppUrl).toBeCalledWith({
         dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
@@ -1519,7 +1519,7 @@ describe('The custom threshold alert type', () => {
           criteria: [
             {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [1],
               metrics: [
                 {
@@ -1538,7 +1538,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metrics: [
               {
@@ -1567,7 +1567,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metrics: [
               {
@@ -1602,7 +1602,7 @@ describe('The custom threshold alert type', () => {
           criteria: [
             {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [1],
               metrics: [
                 {
@@ -1614,7 +1614,7 @@ describe('The custom threshold alert type', () => {
             },
             {
               ...customThresholdCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [30],
             },
           ],
@@ -1626,7 +1626,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.LT,
+            comparator: COMPARATORS.LESS_THAN,
             threshold: [1],
             metrics: [
               {
@@ -1675,7 +1675,7 @@ describe('The custom threshold alert type', () => {
           criteria: [
             {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics,
             },
@@ -1700,7 +1700,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1723,7 +1723,7 @@ describe('The custom threshold alert type', () => {
         {
           '*': {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1746,7 +1746,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
@@ -1756,7 +1756,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -1780,7 +1780,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1797,7 +1797,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1824,7 +1824,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1841,7 +1841,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1858,7 +1858,7 @@ describe('The custom threshold alert type', () => {
           },
           c: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             metrics: [
               {
@@ -1884,7 +1884,7 @@ describe('The custom threshold alert type', () => {
         {
           a: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 1,
             timestamp: new Date().toISOString(),
@@ -1894,7 +1894,7 @@ describe('The custom threshold alert type', () => {
           },
           b: {
             ...customThresholdNonCountCriterion,
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
             threshold: [0],
             currentValue: 3,
             timestamp: new Date().toISOString(),
@@ -1923,7 +1923,7 @@ describe('The custom threshold alert type', () => {
             criteria: [
               {
                 ...customThresholdNonCountCriterion,
-                comparator: Comparator.GT,
+                comparator: COMPARATORS.GREATER_THAN,
                 threshold: [0],
                 metrics,
               },
@@ -1944,7 +1944,7 @@ describe('The custom threshold alert type', () => {
           {
             '*': {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -1967,7 +1967,7 @@ describe('The custom threshold alert type', () => {
           {
             '*': {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -1990,7 +1990,7 @@ describe('The custom threshold alert type', () => {
           {
             a: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               currentValue: 1,
               timestamp: new Date().toISOString(),
@@ -2000,7 +2000,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               currentValue: 3,
               timestamp: new Date().toISOString(),
@@ -2022,7 +2022,7 @@ describe('The custom threshold alert type', () => {
           {
             a: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -2039,7 +2039,7 @@ describe('The custom threshold alert type', () => {
             },
             b: {
               ...customThresholdNonCountCriterion,
-              comparator: Comparator.GT,
+              comparator: COMPARATORS.GREATER_THAN,
               threshold: [0],
               metrics: [
                 {
@@ -2116,7 +2116,7 @@ declare global {
 }
 
 const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   metrics: [
     {
       aggType: Aggregators.AVERAGE,
@@ -2131,7 +2131,7 @@ const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
 
 const mockedCountFilter = 'mockedCountFilter';
 const customThresholdCountCriterion: CustomMetricExpressionParams = {
-  comparator: Comparator.GT,
+  comparator: COMPARATORS.GREATER_THAN,
   metrics: [
     {
       aggType: Aggregators.COUNT,

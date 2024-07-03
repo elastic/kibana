@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './query_signals/query_signals_route';
-export * from './set_signal_status/set_signal_status_route';
-export * from './set_signal_status/set_signal_status_type_dependents';
+export * from './query_signals/query_signals_route.gen';
+export * from './set_signal_status/set_signals_status_route.gen';

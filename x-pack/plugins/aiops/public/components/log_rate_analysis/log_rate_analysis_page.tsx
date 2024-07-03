@@ -18,7 +18,13 @@ import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
-import { useLogRateAnalysisStateContext } from '@kbn/aiops-components';
+import {
+  useAppDispatch,
+  useCurrentSelectedSignificantItem,
+  useCurrentSelectedGroup,
+  setInitialAnalysisStart,
+  setDocumentCountChartData,
+} from '@kbn/aiops-log-rate-analysis/state';
 
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -35,16 +41,14 @@ import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
 
 import { LogRateAnalysisContent } from './log_rate_analysis_content/log_rate_analysis_content';
-interface Props {
-  stickyHistogram?: boolean;
-}
 
-export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
+export const LogRateAnalysisPage: FC = () => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { currentSelectedSignificantItem, currentSelectedGroup, setInitialAnalysisStart } =
-    useLogRateAnalysisStateContext();
+  const currentSelectedGroup = useCurrentSelectedGroup();
+  const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
+  const dispatch = useAppDispatch();
 
   const [stateFromUrl, setUrlState] = usePageUrlState<LogRateAnalysisPageUrlState>(
     'logRateAnalysis',
@@ -89,7 +93,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     stateFromUrl
   );
 
-  const { timefilter } = useData(
+  const { documentStats, timefilter, earliest, latest, intervalMs } = useData(
     dataView,
     'log_rate_analysis',
     searchQuery,
@@ -97,6 +101,23 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     currentSelectedSignificantItem,
     currentSelectedGroup
   );
+
+  // TODO Since `useData` isn't just used within Log Rate Analysis, this is a bit of
+  // a workaround to pass the result on to the redux store. At least this ensures
+  // we now use `useData` only once across Log Rate Analysis! Originally `useData`
+  // was quite general, but over time it got quite some specific features used
+  // across Log Rate Analysis and Pattern Analysis. We discussed that we should
+  // split this up into more specific hooks.
+  useEffect(() => {
+    dispatch(
+      setDocumentCountChartData({
+        earliest,
+        latest,
+        intervalMs,
+        documentStats,
+      })
+    );
+  }, [documentStats, dispatch, earliest, intervalMs, latest]);
 
   useEffect(
     // TODO: Consolidate this hook/function with the one in `x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx`
@@ -144,7 +165,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
 
   useEffect(
     () => {
-      setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp));
+      dispatch(setInitialAnalysisStart(appStateToWindowParameters(stateFromUrl.wp)));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
@@ -179,7 +200,6 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
             onWindowParametersChange={onWindowParametersHandler}
-            stickyHistogram={stickyHistogram}
           />
         </EuiFlexGroup>
       </EuiPageSection>

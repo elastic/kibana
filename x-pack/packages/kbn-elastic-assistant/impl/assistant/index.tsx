@@ -220,7 +220,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    if (conversationsLoaded && Object.keys(conversations).length > 0) {
+    if (areConnectorsFetched && conversationsLoaded && Object.keys(conversations).length > 0) {
       setCurrentConversation((prev) => {
         const nextConversation =
           (currentConversationId && conversations[currentConversationId]) ||
@@ -256,13 +256,13 @@ const AssistantComponent: React.FC<Props> = ({
       });
     }
   }, [
+    areConnectorsFetched,
     conversationTitle,
     conversations,
+    conversationsLoaded,
+    currentConversationId,
     getDefaultConversation,
     getLastConversationId,
-    conversationsLoaded,
-    currentConversation?.id,
-    currentConversationId,
     isAssistantEnabled,
     isFlyoutMode,
   ]);
@@ -331,7 +331,7 @@ const AssistantComponent: React.FC<Props> = ({
   // Show missing connector callout if no connectors are configured
 
   const showMissingConnectorCallout = useMemo(() => {
-    if (!isLoading && areConnectorsFetched) {
+    if (!isLoading && areConnectorsFetched && currentConversation?.id !== '') {
       if (!currentConversation?.apiConfig?.connectorId) {
         return true;
       }
@@ -342,7 +342,13 @@ const AssistantComponent: React.FC<Props> = ({
     }
 
     return false;
-  }, [areConnectorsFetched, connectors, currentConversation?.apiConfig?.connectorId, isLoading]);
+  }, [
+    areConnectorsFetched,
+    connectors,
+    currentConversation?.apiConfig?.connectorId,
+    currentConversation?.id,
+    isLoading,
+  ]);
 
   const isSendingDisabled = useMemo(() => {
     return isDisabled || showMissingConnectorCallout;
@@ -543,7 +549,7 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleOnChatCleared,
+    handleOnChatCleared: onChatCleared,
     handlePromptChange,
     handleSendMessage,
     handleRegenerateResponse,
@@ -560,6 +566,11 @@ const AssistantComponent: React.FC<Props> = ({
     setSelectedPromptContexts,
     setCurrentConversation,
   });
+
+  const handleOnChatCleared = useCallback(async () => {
+    await onChatCleared();
+    await refetchResults();
+  }, [onChatCleared, refetchResults]);
 
   const handleChatSend = useCallback(
     async (promptText: string) => {
@@ -698,8 +709,8 @@ const AssistantComponent: React.FC<Props> = ({
           conversation: payload,
           apiConfig: {
             ...payload?.apiConfig,
-            connectorId: defaultConnector?.id as string,
-            actionTypeId: defaultConnector?.actionTypeId as string,
+            connectorId: (defaultConnector?.id as string) ?? '',
+            actionTypeId: (defaultConnector?.actionTypeId as string) ?? '.gen-ai',
             provider: apiConfig?.apiProvider,
             model: apiConfig?.defaultModel,
           },
@@ -720,27 +731,14 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     (async () => {
-      if (
-        showMissingConnectorCallout &&
-        areConnectorsFetched &&
-        defaultConnector &&
-        currentConversation
-      ) {
+      if (areConnectorsFetched && currentConversation?.id === '') {
         const conversation = await mutateAsync(currentConversation);
         if (currentConversation.id === '' && conversation) {
           setCurrentConversationId(conversation.id);
         }
       }
     })();
-  }, [
-    currentConversation,
-    defaultConnector,
-    refetchConversationsState,
-    setApiConfig,
-    showMissingConnectorCallout,
-    areConnectorsFetched,
-    mutateAsync,
-  ]);
+  }, [areConnectorsFetched, currentConversation, mutateAsync]);
 
   const handleCreateConversation = useCallback(async () => {
     const newChatExists = find(conversations, ['title', NEW_CHAT]);
@@ -946,6 +944,7 @@ const AssistantComponent: React.FC<Props> = ({
                     setChatHistoryVisible={setChatHistoryVisible}
                     onConversationSelected={handleOnConversationSelected}
                     conversations={conversations}
+                    conversationsLoaded={conversationsLoaded}
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
                     isAssistantEnabled={isAssistantEnabled}
@@ -1114,6 +1113,7 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues={showAnonymizedValues}
             title={title}
             conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={refetchConversationsState}
           />

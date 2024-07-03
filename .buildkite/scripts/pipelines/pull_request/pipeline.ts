@@ -9,7 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import prConfigs from '../../../pull_requests.json';
-import { areChangesSkippable, doAnyChangesMatch } from '#pipeline-utils';
+import { areChangesSkippable, doAnyChangesMatch, getAgentImageConfig } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
@@ -25,16 +25,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed.map((r) => new Re
 const getPipeline = (filename: string, removeSteps = true) => {
   const str = fs.readFileSync(filename).toString();
   return removeSteps ? str.replace(/^steps:/, '') : str;
-};
-
-const uploadPipeline = (pipelineContent: string | object) => {
-  const str =
-    typeof pipelineContent === 'string' ? pipelineContent : JSON.stringify(pipelineContent);
-
-  execSync('buildkite-agent pipeline upload', {
-    input: str,
-    stdio: ['pipe', 'inherit', 'inherit'],
-  });
 };
 
 (async () => {
@@ -53,6 +43,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     const pipeline = [];
 
+    pipeline.push(getAgentImageConfig({ returnYaml: true }));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
 
     if (await doAnyChangesMatch([/^packages\/kbn-handlebars/])) {
@@ -92,7 +83,7 @@ const uploadPipeline = (pipelineContent: string | object) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/observability_onboarding/,
+        /^x-pack\/plugins\/observability_solution\/observability_onboarding/,
         /^x-pack\/plugins\/fleet/,
       ])) ||
       GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
@@ -155,15 +146,14 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
     }
 
-    if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml'));
-    }
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-security')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));
+    } else if (GITHUB_PR_LABELS.includes('ci:build-serverless-image')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/build_project.yml'));
     }
 
     if (
@@ -317,7 +307,11 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      ((await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
+      ((await doAnyChangesMatch([
+        /^x-pack\/plugins\/osquery/,
+        /^x-pack\/test\/osquery_cypress/,
+        /^x-pack\/plugins\/security_solution/,
+      ])) ||
         GITHUB_PR_LABELS.includes('ci:all-cypress-suites')) &&
       !GITHUB_PR_LABELS.includes('ci:skip-cypress-osquery')
     ) {
@@ -329,9 +323,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     // remove duplicated steps
-    uploadPipeline([...new Set(pipeline)].join('\n'));
+    console.log([...new Set(pipeline)].join('\n'));
   } catch (ex) {
-    console.error('PR pipeline generation error', ex.message);
+    console.error('Error while generating the pipeline steps: ' + ex.message, ex);
     process.exit(1);
   }
 })();

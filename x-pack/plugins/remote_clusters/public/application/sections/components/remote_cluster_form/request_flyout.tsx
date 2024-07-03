@@ -43,7 +43,7 @@ export class RequestFlyout extends PureComponent<Props> {
               {name ? (
                 <FormattedMessage
                   id="xpack.remoteClusters.requestFlyout.namedTitle"
-                  defaultMessage="Request for '{name}'"
+                  defaultMessage="Request for ''{name}''"
                   values={{ name }}
                 />
               ) : (
