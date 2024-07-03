@@ -9,8 +9,10 @@ import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import Boom from '@hapi/boom';
+import {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
@@ -50,12 +52,6 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
         pageIndex = 0,
         pageSize = DEFAULT_ALERTS_GROUP_BY_FIELD_SIZE,
       } = request.body;
-      if (pageIndex < 0 || pageIndex > 100) {
-        throw Boom.badRequest(`Page index is out of range (0 - 100)`);
-      }
-      if (pageSize < 0 || pageSize > 100) {
-        throw Boom.badRequest(`Page size is out of range (0 - 100)`);
-      }
       try {
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
@@ -64,7 +60,7 @@ export const getAlertsGroupAggregations = (router: IRouter<RacRequestHandlerCont
           groupByField,
           aggregations,
           filters: filters as QueryDslQueryContainer[],
-          sort,
+          sort: sort as SortCombinations[],
           pageIndex,
           pageSize,
         });

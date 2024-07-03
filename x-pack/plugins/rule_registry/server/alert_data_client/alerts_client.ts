@@ -30,6 +30,7 @@ import {
   InlineScript,
   MappingRuntimeFields,
   QueryDslQueryContainer,
+  SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleTypeParams, PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/server';
 import {
@@ -44,7 +45,11 @@ import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import { TypeOf } from 'io-ts';
-import { MAX_ALERTS_GROUPING_QUERY_SIZE } from './constants';
+import {
+  MAX_ALERTS_GROUPING_QUERY_SIZE,
+  MAX_ALERTS_PAGES,
+  MAX_PAGINATED_ALERTS,
+} from './constants';
 import { BrowserFields } from '../../common';
 import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
@@ -706,7 +711,7 @@ export class AlertsClient {
       let activeAlertCount = 0;
       let recoveredAlertCount = 0;
       (
-        ((responseAlertSum.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
+        ((responseAlertSum?.aggregations?.count as estypes.AggregationsMultiBucketAggregateBase)
           ?.buckets as estypes.AggregationsStringTermsBucketKeys[]) ?? []
       ).forEach((b) => {
         if (b.key === ALERT_STATUS_ACTIVE) {
@@ -721,13 +726,15 @@ export class AlertsClient {
         recoveredAlertCount,
         activeAlerts:
           (
-            responseAlertSum.aggregations
+            responseAlertSum?.aggregations
               ?.active_alerts_bucket as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
         recoveredAlerts:
           (
-            (responseAlertSum.aggregations?.recovered_alerts as estypes.AggregationsFilterAggregate)
-              ?.container as estypes.AggregationsAutoDateHistogramAggregate
+            (
+              responseAlertSum?.aggregations
+                ?.recovered_alerts as estypes.AggregationsFilterAggregate
+            )?.container as estypes.AggregationsAutoDateHistogramAggregate
           )?.buckets ?? [],
       };
     } catch (error) {
@@ -1058,7 +1065,7 @@ export class AlertsClient {
     /**
      * Any sort options to apply to the groupByField aggregations
      */
-    sort?: object[];
+    sort?: SortCombinations[];
     /**
      * The page index to start from
      */
@@ -1069,6 +1076,16 @@ export class AlertsClient {
     pageSize: number;
   }) {
     const uniqueValue = uuidv4();
+    if (pageIndex > MAX_ALERTS_PAGES) {
+      throw Boom.badRequest(
+        'The provided pageIndex value is too high. The maximum allowed pageIndex value is ${maxPerPage}.'
+      );
+    }
+    if (Math.max(pageIndex, pageIndex * pageSize) > MAX_PAGINATED_ALERTS) {
+      throw Boom.badRequest(
+        'The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.'
+      );
+    }
     return this.find({
       featureIds,
       aggs: {
