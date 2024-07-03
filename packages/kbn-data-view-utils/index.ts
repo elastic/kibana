@@ -21,3 +21,6 @@ export {
   isNestedField,
   convertDatatableColumnToDataViewField,
 } from './src/utils';
+
+export { createRegExpPatternFrom } from './src/utils/create_regexp_pattern_from';
+export { testPatternAgainstAllowedList } from './src/utils/test_pattern_against_allowed_list';

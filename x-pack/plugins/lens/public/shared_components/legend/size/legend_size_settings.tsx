@@ -85,7 +85,7 @@ export const LegendSizeSettings = ({
     <EuiFormRow
       display="columnCompressed"
       label={i18n.translate('xpack.lens.shared.legendSizeSetting.label', {
-        defaultMessage: 'Legend width',
+        defaultMessage: 'Width',
       })}
       fullWidth
     >

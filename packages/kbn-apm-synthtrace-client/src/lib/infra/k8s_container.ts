@@ -47,5 +47,13 @@ export function k8sContainer(id: string, uid: string, nodeName: string): K8sCont
     'container.id': id,
     'kubernetes.pod.uid': uid,
     'kubernetes.node.name': nodeName,
+    'container.name': `container-${id}`,
+    'container.runtime': 'containerd',
+    'container.image.name': 'image-1',
+    'host.name': 'host-1',
+    'cloud.instance.id': 'instance-1',
+    'cloud.image.id': 'image-1',
+    'cloud.provider': 'aws',
+    'event.dataset': 'kubernetes.container',
   });
 }

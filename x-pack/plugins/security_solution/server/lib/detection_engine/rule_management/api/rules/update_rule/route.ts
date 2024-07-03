@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { UpdateRuleResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   UpdateRuleRequestBody,
@@ -14,13 +15,12 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/detection_rules_client/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
-import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
+import { validateResponseActionsPermissions } from '../../../utils/validate';
 
 export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -80,12 +80,12 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
             existingRule
           );
 
-          const rule = await detectionRulesClient.updateRule({
+          const updatedRule = await detectionRulesClient.updateRule({
             ruleUpdate: request.body,
           });
 
           return response.ok({
-            body: transformValidate(rule),
+            body: updatedRule,
           });
         } catch (err) {
           const error = transformError(err);

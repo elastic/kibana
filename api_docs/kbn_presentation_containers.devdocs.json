@@ -768,7 +768,7 @@
             "label": "expandPanel",
             "description": [],
             "signature": [
-              "(panelId?: string | undefined) => void"
+              "(panelId: string) => void"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
             "deprecated": false,
@@ -782,12 +782,12 @@
                 "label": "panelId",
                 "description": [],
                 "signature": [
-                  "string | undefined"
+                  "string"
                 ],
                 "path": "packages/presentation/presentation_containers/interfaces/panel_management.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1139,7 +1139,7 @@
                 "section": "def-common.SerializedPanelState",
                 "text": "SerializedPanelState"
               },
-              "<SerializedState>"
+              "<SerializedState> | undefined"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/child_state.ts",
             "deprecated": false,
@@ -1194,7 +1194,7 @@
             "tags": [],
             "label": "snapshotRuntimeState",
             "description": [
-              "\nSerializes all runtime state exactly as it appears. This could be used\nto rehydrate a component's state without needing to deserialize it."
+              "\nSerializes all runtime state exactly as it appears. This can be used\nto rehydrate a component's state without needing to serialize then deserialize it."
             ],
             "signature": [
               "() => RuntimeState"

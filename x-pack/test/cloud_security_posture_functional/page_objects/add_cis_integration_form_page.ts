@@ -31,6 +31,9 @@ export function AddCisIntegrationFormPageProvider({
     getPostInstallCloudFormationModal: async () => {
       return await testSubjects.find('postInstallCloudFormationModal');
     },
+    showLaunchCloudFormationAgentlessButton: async () => {
+      return await testSubjects.exists('launchCloudFormationAgentlessButton');
+    },
   };
 
   const cisGcp = {
@@ -89,6 +92,9 @@ export function AddCisIntegrationFormPageProvider({
       const fieldValue = (await (await testSubjects.find(field)).getAttribute(value)) ?? '';
       return fieldValue;
     },
+    showLaunchCloudShellAgentlessButton: async () => {
+      return await testSubjects.exists('launchGoogleCloudShellAgentlessButton');
+    },
   };
 
   const isRadioButtonChecked = async (selector: string) => {
@@ -108,6 +114,15 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.common.navigateToUrl(
       'fleet', // Defined in Security Solution plugin
       'integrations/cloud_security_posture/add-integration/cspm',
+      { shouldUseHashForSubUrl: false }
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
+  const navigateToAddIntegrationCspmWithVersionPage = async (packageVersion: string) => {
+    await PageObjects.common.navigateToUrl(
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration/cspm`,
       { shouldUseHashForSubUrl: false }
     );
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -181,6 +196,13 @@ export function AddCisIntegrationFormPageProvider({
     return await optionToBeClicked;
   };
 
+  const clickAccordianButton = async (text: string) => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    const advancedAccordian = await testSubjects.find(text);
+    await advancedAccordian.scrollIntoView();
+    await advancedAccordian.click();
+  };
+
   const clickOptionButton = async (text: string) => {
     const optionToBeClicked = await findOptionInPage(text);
     await optionToBeClicked.scrollIntoView();
@@ -199,6 +221,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const getPostInstallModal = async () => {
     return await testSubjects.find('confirmModalTitleText');
+  };
+
+  const checkIntegrationPliAuthBlockExists = async () => {
+    return await testSubjects.exists('cloud-security-posture-integration-pli-auth-block');
   };
 
   const fillInTextField = async (selector: string, text: string) => {
@@ -252,11 +278,16 @@ export function AddCisIntegrationFormPageProvider({
     return await (await checkBox.findByCssSelector(`input[id='${id}']`)).getAttribute('checked');
   };
 
+  const getReplaceSecretButton = async (secretField: string) => {
+    return await testSubjects.find(`button-replace-${secretField}`);
+  };
+
   return {
     cisAzure,
     cisAws,
     cisGcp,
     navigateToAddIntegrationCspmPage,
+    navigateToAddIntegrationCspmWithVersionPage,
     navigateToAddIntegrationCnvmPage,
     navigateToAddIntegrationKspmPage,
     navigateToIntegrationCspList,
@@ -273,6 +304,7 @@ export function AddCisIntegrationFormPageProvider({
     clickOptionButton,
     clickSaveButton,
     clickSaveIntegrationButton,
+    clickAccordianButton,
     getPostInstallModal,
     fillInTextField,
     chooseDropDown,
@@ -282,5 +314,7 @@ export function AddCisIntegrationFormPageProvider({
     selectValue,
     getValueInEditPage,
     isOptionChecked,
+    checkIntegrationPliAuthBlockExists,
+    getReplaceSecretButton,
   };
 }

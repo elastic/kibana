@@ -38,6 +38,16 @@ export interface SchemaStructureEntry {
 }
 
 /**
+ * Global validation Options to be provided when calling the `schema.validate()` method.
+ */
+export interface SchemaValidationOptions {
+  /**
+   * Remove unknown config keys
+   */
+  stripUnknownKeys?: boolean;
+}
+
+/**
  * Options for dealing with unknown keys:
  * - allow: unknown keys will be permitted
  * - ignore: unknown keys will not fail validation, but will be stripped out
@@ -125,10 +135,20 @@ export abstract class Type<V> {
     return this;
   }
 
-  public validate(value: any, context: Record<string, any> = {}, namespace?: string): V {
+  /**
+   * Validates the provided value against this schema.
+   * If valid, the resulting output will be returned, otherwise an exception will be thrown.
+   */
+  public validate(
+    value: unknown,
+    context: Record<string, unknown> = {},
+    namespace?: string,
+    validationOptions?: SchemaValidationOptions
+  ): V {
     const { value: validatedValue, error } = this.internalSchema.validate(value, {
       context,
       presence: 'required',
+      stripUnknown: { objects: validationOptions?.stripUnknownKeys === true },
     });
 
     if (error) {

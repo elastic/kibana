@@ -28,7 +28,7 @@ export const generateApiKey = async (
     name: `${indexName}-connector`,
     role_descriptors: {
       [`${toAlphanumeric(indexName)}-connector-role`]: {
-        cluster: ['monitor'],
+        cluster: ['monitor', 'manage_connector'],
         index: [
           {
             names: [indexName, aclIndexName, `${CONNECTORS_INDEX}*`],
