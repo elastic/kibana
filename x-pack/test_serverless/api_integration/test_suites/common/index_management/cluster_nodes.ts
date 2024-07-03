@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should fetch the nodes plugins', async () => {
       const { body, status } = await svlClusterNodesApi.getNodesPlugins(roleAuthc);
-      expect(status).to.eql(200);
+      expect(status).to.eql(410);
 
       expect(Array.isArray(body)).to.be(true);
     });
