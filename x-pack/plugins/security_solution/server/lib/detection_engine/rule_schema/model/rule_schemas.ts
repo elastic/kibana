@@ -347,7 +347,7 @@ export interface InternalRuleCreate {
   };
   enabled: IsRuleEnabled;
   actions: RuleActionArrayCamel;
-  systemActions: AlertingRuleSystemAction[];
+  systemActions?: AlertingRuleSystemAction[];
   params: RuleParams;
   throttle?: RuleActionThrottle | null;
   notifyWhen?: RuleActionNotifyWhen | null;
