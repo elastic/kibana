@@ -142,6 +142,7 @@ describe('useSemanticText', () => {
           type: 'semantic_text',
           inferenceId: 'e5',
         }),
+        setFieldValue: jest.fn(),
       },
       thirdPartyModel: {
         getFormData: jest.fn().mockReturnValue({
@@ -150,6 +151,7 @@ describe('useSemanticText', () => {
           type: 'semantic_text',
           inferenceId: 'openai',
         }),
+        setFieldValue: jest.fn(),
       },
       elasticModelEndpointCreatedfromFlyout: {
         getFormData: jest.fn().mockReturnValue({
@@ -158,6 +160,7 @@ describe('useSemanticText', () => {
           type: 'semantic_text',
           inferenceId: 'my_elser_endpoint',
         }),
+        setFieldValue: jest.fn(),
       },
     };
   });
