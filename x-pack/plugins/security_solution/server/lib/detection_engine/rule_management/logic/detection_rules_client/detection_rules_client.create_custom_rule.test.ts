@@ -29,12 +29,16 @@ describe('DetectionRulesClient.createCustomRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  const actionsClient = {
+  let actionsClient = {
     isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
   } as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     jest.resetAllMocks();
+
+    actionsClient = {
+      isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
+    } as unknown as jest.Mocked<ActionsClient>;
 
     rulesClient = rulesClientMock.create();
     // creates a rule with a system action and a connector action
@@ -64,6 +68,18 @@ describe('DetectionRulesClient.createCustomRule', () => {
   it('should create a rule with actions and system actions', async () => {
     rulesClient.create.mockResolvedValue(
       getRuleMock(getQueryRuleParams(), {
+        actions: [
+          {
+            id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+            actionTypeId: '.slack',
+            uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+            frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+            group: 'default',
+          },
+        ],
         systemActions: [
           {
             id: 'system-connector-.cases',
@@ -77,18 +93,6 @@ describe('DetectionRulesClient.createCustomRule', () => {
             },
             actionTypeId: '.cases',
             uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
-          },
-        ],
-        actions: [
-          {
-            id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
-            params: {
-              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-            },
-            actionTypeId: '.slack',
-            uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
-            frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
-            group: 'default',
           },
         ],
       })
@@ -126,11 +130,44 @@ describe('DetectionRulesClient.createCustomRule', () => {
       ],
     };
 
-    await detectionRulesClient.createCustomRule({ params });
+    await detectionRulesClient.createCustomRule({
+      params,
+    });
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          actions: expect.arrayContaining([
+            {
+              id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              actionTypeId: '.slack',
+              uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+                throttle: null,
+              },
+              group: 'default',
+            },
+          ]),
+          systemActions: expect.arrayContaining([
+            {
+              id: 'system-connector-.cases',
+              params: {
+                subAction: 'run',
+                subActionParams: {
+                  timeWindow: '7d',
+                  reopenClosedCases: false,
+                  groupingBy: ['agent.name'],
+                },
+              },
+              actionTypeId: '.cases',
+              uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+            },
+          ]),
           enabled: true,
           params: expect.objectContaining({
             description: params.description,
@@ -185,6 +222,21 @@ describe('DetectionRulesClient.createCustomRule', () => {
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          systemActions: expect.arrayContaining([
+            {
+              id: 'system-connector-.cases',
+              params: {
+                subAction: 'run',
+                subActionParams: {
+                  timeWindow: '7d',
+                  reopenClosedCases: false,
+                  groupingBy: ['agent.name'],
+                },
+              },
+              actionTypeId: '.cases',
+              uuid: 'e62cbe00-a0e1-44d9-9585-c39e5da63d6f',
+            },
+          ]),
           enabled: true,
           params: expect.objectContaining({
             description: params.description,
@@ -237,6 +289,22 @@ describe('DetectionRulesClient.createCustomRule', () => {
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          actions: expect.arrayContaining([
+            {
+              id: 'b7da98d0-e1ef-4954-969f-e69c9ef5f65d',
+              params: {
+                message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              },
+              actionTypeId: '.slack',
+              uuid: '4c3601b5-74b9-4330-b2f3-fea4ea3dc046',
+              frequency: {
+                summary: true,
+                notifyWhen: 'onActiveAlert' as 'onActiveAlert', // needed for type check on line 127
+                throttle: null,
+              },
+              group: 'default',
+            },
+          ]),
           enabled: true,
           params: expect.objectContaining({
             description: params.description,
