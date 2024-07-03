@@ -28,7 +28,6 @@ import {
   stopAndDeleteLatestTransform,
 } from './stop_and_delete_transform';
 import { uninstallEntityDefinition } from './uninstall_entity_definition';
-import { EntityIdTooLong } from './errors/entity_id_too_long_error';
 
 export interface InstallDefinitionParams {
   esClient: ElasticsearchClient;

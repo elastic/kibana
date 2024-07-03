@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityIdTooLong } from '../errors/entity_id_too_long_error';
+import { EntityDefinitionIdTooLong } from '../errors/entity_definition_id_too_long_error';
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
 import { validateDefinitionCanCreateValidTransformIds } from './validate_transform_ids';
 
@@ -21,6 +21,6 @@ describe('validateDefinitionCanCreateValidTransformIds(definition)', () => {
 
       expect(() => {
         validateDefinitionCanCreateValidTransformIds(entityDefinition);
-      }).toThrow(EntityIdTooLong);
+      }).toThrow(EntityDefinitionIdTooLong);
   });
 });

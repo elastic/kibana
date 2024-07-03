@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-export class EntityIdTooLong extends Error {
+export class EntityDefinitionIdTooLong extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'EntityIdTooLong';
+    this.name = 'EntityDefinitionIdTooLong';
   }
 }
