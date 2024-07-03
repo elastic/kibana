@@ -1646,6 +1646,18 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/ml/hooks/use_ml_rule_config.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/ml/hooks/use_ml_rule_config.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/common/components/ml/hooks/use_ml_rule_config.ts"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
           },
           {
