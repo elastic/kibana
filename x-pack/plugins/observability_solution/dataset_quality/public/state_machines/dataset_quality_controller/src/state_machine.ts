@@ -278,10 +278,10 @@ export const createPureDatasetQualityControllerStateMachine = (
                           states: {
                             fetching: {
                               invoke: {
-                                src: 'loadDataStreamIntegrations',
+                                src: 'loadDataStreamIntegration',
                                 onDone: {
                                   target: 'done',
-                                  actions: ['storeDataStreamIntegrations'],
+                                  actions: ['storeDataStreamIntegration'],
                                 },
                                 onError: {
                                   target: 'done',
@@ -649,7 +649,7 @@ export const createPureDatasetQualityControllerStateMachine = (
             integrations: [],
           };
         }),
-        storeDataStreamIntegrations: assign((context, event: DoneInvokeEvent<Integration>) => {
+        storeDataStreamIntegration: assign((context, event: DoneInvokeEvent<Integration>) => {
           return 'data' in event
             ? {
                 flyout: {
@@ -724,8 +724,10 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchIntegrationDashboardsFailedNotifier(toasts, event.data),
       notifyFetchIntegrationsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchIntegrationsFailedNotifier(toasts, event.data),
-      notifyFetchDatasetIntegrationsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDataStreamIntegrationFailedNotifier(toasts, event.data),
+      notifyFetchDatasetIntegrationsFailed: (context, event: DoneInvokeEvent<Error>) => {
+        const integrationName = context.flyout.datasetSettings?.integration;
+        return fetchDataStreamIntegrationFailedNotifier(toasts, event.data, integrationName);
+      },
     },
     services: {
       loadDataStreamStats: (context) =>
@@ -795,7 +797,7 @@ export const createDatasetQualityControllerStateMachine = ({
           }),
         });
       },
-      loadDataStreamIntegrations: (context) => {
+      loadDataStreamIntegration: (context) => {
         if (context.flyout.datasetSettings?.integration && context.flyout.dataset) {
           const { type } = context.flyout.dataset;
           return dataStreamDetailsClient.getDataStreamIntegration({

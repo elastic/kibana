@@ -20,10 +20,10 @@ import { useSelector } from '@xstate/react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { TimeRangeConfig } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
-import { BasicDataStreamStats } from '../../common/types';
+import { BasicDataStream } from '../../common/types';
 import { useRedirectLinkTelemetry } from './use_telemetry';
 
-export const useRedirectLink = <T extends BasicDataStreamStats>({
+export const useRedirectLink = <T extends BasicDataStream>({
   dataStreamStat,
   query,
   timeRangeConfig,
@@ -109,7 +109,7 @@ export const useRedirectLink = <T extends BasicDataStreamStats>({
   ]);
 };
 
-const buildLogsExplorerConfig = <T extends BasicDataStreamStats>({
+const buildLogsExplorerConfig = <T extends BasicDataStream>({
   locator,
   dataStreamStat,
   query,
@@ -158,7 +158,7 @@ const buildLogsExplorerConfig = <T extends BasicDataStreamStats>({
   return { routerLinkProps: logsExplorerLinkProps, navigate: navigateToLogsExplorer };
 };
 
-const buildDiscoverConfig = <T extends BasicDataStreamStats>({
+const buildDiscoverConfig = <T extends BasicDataStream>({
   locatorClient,
   dataStreamStat,
   query,

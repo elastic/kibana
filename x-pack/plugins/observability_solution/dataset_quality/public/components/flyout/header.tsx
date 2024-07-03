@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutHeader,
+  EuiSkeletonTitle,
   EuiTitle,
   useEuiShadow,
   useEuiTheme,
@@ -23,9 +24,15 @@ import {
 import { NavigationSource } from '../../services/telemetry';
 import { useRedirectLink } from '../../hooks';
 import { IntegrationIcon } from '../common';
-import { BasicDataStreamStats } from '../../../common/types';
+import { BasicDataStream } from '../../../common/types';
 
-export function Header({ titleAndLinkDetails }: { titleAndLinkDetails: BasicDataStreamStats }) {
+export function Header({
+  titleAndLinkDetails,
+  loading,
+}: {
+  titleAndLinkDetails: BasicDataStream;
+  loading: boolean;
+}) {
   const { integration, title } = titleAndLinkDetails;
   const euiShadow = useEuiShadow('s');
   const { euiTheme } = useEuiTheme();
@@ -39,47 +46,51 @@ export function Header({ titleAndLinkDetails }: { titleAndLinkDetails: BasicData
 
   return (
     <EuiFlyoutHeader hasBorder>
-      <EuiFlexGroup justifyContent="flexStart">
-        <EuiFlexItem grow>
-          <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
-            <EuiTitle data-test-subj="datasetQualityFlyoutTitle">
-              <h3>{title}</h3>
-            </EuiTitle>
-            <div
+      {loading ? (
+        <EuiSkeletonTitle size="s" />
+      ) : (
+        <EuiFlexGroup justifyContent="flexStart">
+          <EuiFlexItem grow>
+            <EuiFlexGroup gutterSize="m" justifyContent="flexStart" alignItems="center">
+              <EuiTitle data-test-subj="datasetQualityFlyoutTitle">
+                <h3>{title}</h3>
+              </EuiTitle>
+              <div
+                css={css`
+                  ${euiShadow};
+                  padding: ${euiTheme.size.xs};
+                  border-radius: ${euiTheme.size.xxs};
+                `}
+              >
+                <IntegrationIcon integration={integration} />
+              </div>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup
               css={css`
-                ${euiShadow};
-                padding: ${euiTheme.size.xs};
-                border-radius: ${euiTheme.size.xxs};
+                margin-right: ${euiTheme.size.l};
               `}
+              gutterSize="s"
+              justifyContent="flexEnd"
+              alignItems="center"
             >
-              <IntegrationIcon integration={integration} />
-            </div>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup
-            css={css`
-              margin-right: ${euiTheme.size.l};
-            `}
-            gutterSize="s"
-            justifyContent="flexEnd"
-            alignItems="center"
-          >
-            <EuiButton
-              data-test-subj="datasetQualityHeaderButton"
-              size="s"
-              {...redirectLinkProps.linkProps}
-              iconType={
-                redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
-              }
-            >
-              {redirectLinkProps.isLogsExplorerAvailable
-                ? flyoutOpenInLogsExplorerText
-                : flyoutOpenInDiscoverText}
-            </EuiButton>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              <EuiButton
+                data-test-subj="datasetQualityHeaderButton"
+                size="s"
+                {...redirectLinkProps.linkProps}
+                iconType={
+                  redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
+                }
+              >
+                {redirectLinkProps.isLogsExplorerAvailable
+                  ? flyoutOpenInLogsExplorerText
+                  : flyoutOpenInDiscoverText}
+              </EuiButton>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </EuiFlyoutHeader>
   );
 }

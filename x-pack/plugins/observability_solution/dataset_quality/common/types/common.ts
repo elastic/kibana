@@ -17,9 +17,10 @@ export interface Coordinate {
   y: Maybe<number>;
 }
 
-export interface BasicDataStreamStats {
+export interface BasicDataStream {
   type: string;
   name: DataStreamStatType['name'];
+  rawName: string;
   namespace: string;
   title: string;
   integration?: Integration;

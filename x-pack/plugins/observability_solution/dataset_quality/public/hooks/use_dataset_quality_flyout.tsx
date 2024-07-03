@@ -31,8 +31,11 @@ export const useDatasetQualityFlyout = () => {
   const loadingState = useSelector(service, (state) => ({
     dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
     dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
-    datasetIntegrationsLoading: state.matches(
+    datasetIntegrationDashboardLoading: state.matches(
       'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDashboards.fetching'
+    ),
+    datasetIntegrationDone: state.matches(
+      'flyout.initializing.dataStreamSettings.initializeIntegrations.integrationDetails.done'
     ),
   }));
 
