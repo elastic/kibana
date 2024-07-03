@@ -156,7 +156,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI assistant on rule creation form when query has error
    */
-  AIAssistantOnRuleCreationFormEnabled: false,
+  AIAssistantOnRuleCreationFormEnabled: true,
 
   /**
    * Disables the timeline save tour.
