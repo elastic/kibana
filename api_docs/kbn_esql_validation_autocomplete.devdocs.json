@@ -2075,7 +2075,7 @@
             "section": "def-common.ESQLFunction",
             "text": "ESQLFunction"
           },
-          ") => string"
+          ", useCaps: boolean) => string"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
@@ -2096,6 +2096,21 @@
                 "section": "def-common.ESQLFunction",
                 "text": "ESQLFunction"
               }
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.printFunctionSignature.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "useCaps",
+            "description": [],
+            "signature": [
+              "boolean"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
