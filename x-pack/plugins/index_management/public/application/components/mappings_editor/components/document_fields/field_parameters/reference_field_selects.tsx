@@ -12,11 +12,7 @@ import { useMappingsState } from '../../../mappings_state_context';
 import { SuperSelectField, UseField } from '../../../shared_imports';
 import { SuperSelectOption } from '../../../types';
 
-interface Props {
-  'data-test-subj'?: string;
-}
-
-export const ReferenceFieldSelects = ({ 'data-test-subj': dataTestSubj }: Props) => {
+export const ReferenceFieldSelects = () => {
   const { fields, mappingViewFields } = useMappingsState();
 
   const allFields = {
@@ -45,7 +41,7 @@ export const ReferenceFieldSelects = ({ 'data-test-subj': dataTestSubj }: Props)
           euiFieldProps={{
             options: referenceFieldOptions,
           }}
-          data-test-subj={dataTestSubj}
+          data-test-subj="referenceFieldSelect"
         />
       )}
     </UseField>

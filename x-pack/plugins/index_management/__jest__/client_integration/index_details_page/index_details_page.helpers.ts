@@ -318,7 +318,7 @@ export const setup = async ({
       });
     },
     isReferenceFieldVisible: async () => {
-      expect(exists('referenceField.select')).toBe(true);
+      expect(exists('referenceFieldSelect')).toBe(true);
     },
     selectInferenceIdButtonExists: async () => {
       expect(exists('selectInferenceId')).toBe(true);

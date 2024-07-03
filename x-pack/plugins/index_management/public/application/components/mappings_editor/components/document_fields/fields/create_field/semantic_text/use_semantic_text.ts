@@ -36,10 +36,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
 
   const fieldTypeValue = form.getFormData()?.type;
   useEffect(() => {
-    if (!Array.isArray(fieldTypeValue) || fieldTypeValue.length === 0) {
-      return;
-    }
-    if (fieldTypeValue[0]?.value === 'semantic_text') {
+    if (fieldTypeValue === 'semantic_text') {
       const allFields = {
         byId: {
           ...fields.byId,
