@@ -34,7 +34,7 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   | (PackagePolicyCreateExtensionComponentProps & { isEditPage: false })
 ) & {
   validationResults?: PackagePolicyValidationResults;
-  agentPolicy?: AgentPolicy;
+  agentPolicies?: AgentPolicy[];
   packageInfo: PackageInfo;
   agentlessPolicy?: AgentPolicy;
   handleSetupTechnologyChange?: (setupTechnology: string) => void;
