@@ -268,6 +268,7 @@ export interface GcpFormProps {
   setIsValid: (isValid: boolean) => void;
   onChange: any;
   disabled: boolean;
+  isEditPage?: boolean;
 }
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: GcpFields) =>
@@ -372,6 +373,7 @@ export const GcpCredentialsForm = ({
   setIsValid,
   onChange,
   disabled,
+  isEditPage,
 }: GcpFormProps) => {
   /* Create a subset of properties from GcpField to use for hiding value of credentials json and credentials file when user switch from Manual to Cloud Shell, we wanna keep Project and Organization ID */
   const subsetOfGcpField = (({ ['gcp.credentials.file']: a, ['gcp.credentials.json']: b }) => ({
@@ -495,6 +497,7 @@ export const GcpCredentialsForm = ({
           }
           isOrganization={isOrganization}
           packageInfo={packageInfo}
+          isEditPage={isEditPage}
         />
       )}
 
@@ -511,12 +514,14 @@ export const GcpInputVarFields = ({
   isOrganization,
   disabled,
   packageInfo,
+  isEditPage,
 }: {
   fields: Array<GcpFields[keyof GcpFields] & { value: string; id: string }>;
   onChange: (key: string, value: string) => void;
   isOrganization: boolean;
   disabled: boolean;
   packageInfo: PackageInfo;
+  isEditPage?: boolean;
 }) => {
   const getFieldById = (id: keyof GcpInputFields['fields']) => {
     return fields.find((element) => element.id === id);
@@ -619,7 +624,7 @@ export const GcpInputVarFields = ({
                   }}
                   errors={[]}
                   forceShowErrors={false}
-                  isEditPage={true}
+                  isEditPage={isEditPage}
                 />
               </Suspense>
             </EuiFormRow>

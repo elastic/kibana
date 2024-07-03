@@ -781,6 +781,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           setIsValid={setIsValid}
           disabled={isEditPage}
           setupTechnology={setupTechnology}
+          isEditPage={isEditPage}
         />
         <EuiSpacer />
       </>
