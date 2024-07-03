@@ -286,10 +286,10 @@ function safeTripleQuoteRemoval(text: string | undefined) {
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
-    safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
-    safeBackticksRemoval(ctx.getText()) ||
     safeSingleQuoteRemoval(ctx.getText()) ||
-    safeTripleQuoteRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
+    safeTripleQuoteRemoval(ctx.getText()) ||
+    safeBackticksRemoval(getQuotedText(ctx)?.getText()) ||
+    safeBackticksRemoval(ctx.getText()); // for some reason some quoted text is not detected correctly by the parser
   // TODO - understand why <missing null> is now returned as the match text for the FROM command
   return result === '<missing null>' ? '' : result;
 }
