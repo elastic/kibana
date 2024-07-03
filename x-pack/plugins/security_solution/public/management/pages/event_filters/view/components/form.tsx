@@ -14,8 +14,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiButtonGroup,
-  EuiToolTip,
-  EuiIcon,
   useEuiTheme,
   EuiForm,
   EuiFormRow,
@@ -84,6 +82,7 @@ import { EffectedPolicySelect } from '../../../../components/effected_policy_sel
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
+import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -458,33 +457,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     );
 
     const filterTypeOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
-      const descendantsTooltip = (
-        <EuiToolTip
-          content={
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltip"
-                  defaultMessage="Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted."
-                />
-              </p>
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltipVersionInfo"
-                  defaultMessage="Process descendant filtering works only with Agents v8.15 and newer."
-                />
-              </p>
-            </EuiText>
-          }
-          data-test-subj={getTestId('filterProcessDescendants-tooltipText')}
-        >
-          <EuiIcon
-            type="iInCircle"
-            data-test-subj={getTestId('filterProcessDescendants-tooltipIcon')}
-          />
-        </EuiToolTip>
-      );
-
       return [
         {
           id: 'events',
@@ -509,7 +481,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                   defaultMessage="Process Descendants"
                 />
               </EuiText>
-              {descendantsTooltip}
+              <ProcessDescendantsTooltip
+                data-test-subj={getTestId('filterProcessDescendantsTooltip')}
+              />
             </EuiFlexGroup>
           ),
           iconType: isFilterProcessDescendantsSelected ? 'checkInCircleFilled' : 'empty',
