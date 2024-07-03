@@ -55,7 +55,7 @@ interface UseSettingsUpdater {
 
 export const useSettingsUpdater = (
   conversations: Record<string, Conversation>,
-  allSystemPrompts: FindPromptsResponse,
+  allPrompts: FindPromptsResponse,
   conversationsLoaded: boolean,
   anonymizationFields: FindAnonymizationFieldsResponse
 ): UseSettingsUpdater => {
@@ -79,12 +79,12 @@ export const useSettingsUpdater = (
   const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
     useState<ConversationsBulkActions>({});
   // Quick Prompts
-  const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] = useState<PromptResponse[]>(
-    allSystemPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
+  const [quickPromptSettings, setUpdatedQuickPromptSettings] = useState<PromptResponse[]>(
+    allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
   );
   // System Prompts
-  const [updatedSystemPromptSettings, setUpdatedSystemPromptSettings] = useState<PromptResponse[]>(
-    allSystemPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+  const [systemPromptSettings, setUpdatedSystemPromptSettings] = useState<PromptResponse[]>(
+    allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
   );
   // Anonymization
   const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =
@@ -108,21 +108,15 @@ export const useSettingsUpdater = (
     setConversationSettings(conversations);
     setConversationsSettingsBulkActions({});
     setUpdatedQuickPromptSettings(
-      allSystemPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
+      allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
     );
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
     setUpdatedSystemPromptSettings(
-      allSystemPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
+      allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
     );
     setUpdatedAnonymizationData(anonymizationFields);
-  }, [
-    allSystemPrompts,
-    anonymizationFields,
-    assistantStreamingEnabled,
-    conversations,
-    knowledgeBase,
-  ]);
+  }, [allPrompts, anonymizationFields, assistantStreamingEnabled, conversations, knowledgeBase]);
 
   const hasBulkConversations =
     conversationsSettingsBulkActions.create ||
@@ -246,9 +240,9 @@ export const useSettingsUpdater = (
     conversationsSettingsBulkActions,
     knowledgeBase: updatedKnowledgeBaseSettings,
     assistantStreamingEnabled: updatedAssistantStreamingEnabled,
-    quickPromptSettings: updatedQuickPromptSettings,
+    quickPromptSettings,
     resetSettings,
-    systemPromptSettings: updatedSystemPromptSettings,
+    systemPromptSettings,
     saveSettings,
     updatedAnonymizationData,
     setUpdatedAnonymizationData,

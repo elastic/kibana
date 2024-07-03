@@ -118,7 +118,7 @@ describe('SystemPrompt', () => {
       render(
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
+          editingSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -488,7 +488,7 @@ describe('SystemPrompt', () => {
       <TestProviders>
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
+          editingSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -508,7 +508,7 @@ describe('SystemPrompt', () => {
       <TestProviders>
         <SystemPrompt
           conversation={BASE_CONVERSATION}
-          editingSystemPromptId={BASE_CONVERSATION.id}
+          editingSystemPromptId={mockSystemPrompt.id}
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}

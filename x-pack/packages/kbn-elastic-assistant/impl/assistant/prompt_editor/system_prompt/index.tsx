@@ -36,9 +36,9 @@ const SystemPromptComponent: React.FC<Props> = ({
 }) => {
   const selectedPrompt = useMemo(() => {
     if (editingSystemPromptId !== undefined) {
-      return allSystemPrompts?.find((p) => p.id === editingSystemPromptId);
+      return allSystemPrompts.find((p) => p.id === editingSystemPromptId);
     } else {
-      return allSystemPrompts?.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId);
+      return allSystemPrompts.find((p) => p.id === conversation?.apiConfig?.defaultSystemPromptId);
     }
   }, [allSystemPrompts, conversation?.apiConfig?.defaultSystemPromptId, editingSystemPromptId]);
 
