@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// test comment
 import _ from 'lodash';
 import { kibanaPackageJson as pkg } from '@kbn/utils';
 import Command from './command';
