@@ -97,22 +97,40 @@ export default ({ getService }: FtrProviderContext) => {
       it('should match expected values', async () => {
         const resp = await runRequest(USER.ML_POWERUSER);
 
-        expect(resp.upgrade_mode).to.eql(false);
+        expect(resp.upgrade_mode).to.eql(false, 'upgrade_mode should be false');
 
         // defaults should always be the same
-        expect(resp.defaults).to.eql(expectedDefaults);
+        expect(resp.defaults).to.eql(expectedDefaults, 'defaults should match expected values');
 
         // native code should always be present but values depend on the build
-        expect(resp.native_code).to.not.eql(undefined);
-        expect(resp.native_code.version).to.not.eql(undefined);
-        expect(resp.native_code.build_hash).to.not.eql(undefined);
+        expect(resp.native_code).to.not.eql(undefined, 'native_code should be present');
+        expect(resp.native_code.version).to.not.eql(
+          undefined,
+          'native_code.version should be present'
+        );
+        expect(resp.native_code.build_hash).to.not.eql(
+          undefined,
+          'native_code.build_hash should be present'
+        );
 
         // limits should always be present but values depend on hardware
-        expect(resp.limits).to.not.eql(undefined);
-        expect(resp.limits.total_ml_memory).to.not.eql(undefined);
-        expect(resp.limits.total_ml_processors).to.not.eql(undefined);
-        expect(resp.limits.effective_max_model_memory_limit).to.not.eql(undefined);
-        expect(resp.limits.max_single_ml_node_processors).to.not.eql(undefined);
+        expect(resp.limits).to.not.eql(undefined, 'limits should be present');
+        expect(resp.limits.total_ml_memory).to.not.eql(
+          undefined,
+          'total_ml_memory should be present'
+        );
+        expect(resp.limits.total_ml_processors).to.not.eql(
+          undefined,
+          'total_ml_processors should be present'
+        );
+        expect(resp.limits.effective_max_model_memory_limit).to.not.eql(
+          undefined,
+          'effective_max_model_memory_limit should be present'
+        );
+        expect(resp.limits.max_single_ml_node_processors).to.not.eql(
+          undefined,
+          'max_single_ml_node_processors should be present'
+        );
       });
     });
   });
