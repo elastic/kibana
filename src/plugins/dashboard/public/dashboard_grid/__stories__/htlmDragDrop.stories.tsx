@@ -17,16 +17,21 @@ export default {
 };
 
 export const GridLayoutStorybook = () => {
-  const [gridLayout1, setGridLayout1] = useState<GridLayout>({
-    panel1: { column: 0, row: 0, width: 12, height: 6, id: 'panel1' },
-    panel2: { column: 0, row: 6, width: 8, height: 4, id: 'panel2' },
-    panel3: { column: 8, row: 6, width: 12, height: 4, id: 'panel3' },
-    panel4: { column: 0, row: 10, width: 48, height: 4, id: 'panel4' },
-    panel5: { column: 12, row: 0, width: 36, height: 6, id: 'panel5' },
-    panel6: { column: 24, row: 6, width: 24, height: 4, id: 'panel6' },
-    panel7: { column: 20, row: 6, width: 4, height: 2, id: 'panel7' },
-    panel8: { column: 20, row: 8, width: 4, height: 2, id: 'panel8' },
-  });
+  const [gridLayout1, setGridLayout1] = useState<GridLayout>([
+    {
+      panel1: { column: 0, row: 0, width: 12, height: 6, id: 'panel1' },
+      panel2: { column: 0, row: 6, width: 8, height: 4, id: 'panel2' },
+      panel3: { column: 8, row: 6, width: 12, height: 4, id: 'panel3' },
+      panel4: { column: 0, row: 10, width: 48, height: 4, id: 'panel4' },
+      panel5: { column: 12, row: 0, width: 36, height: 6, id: 'panel5' },
+      panel6: { column: 24, row: 6, width: 24, height: 4, id: 'panel6' },
+      panel7: { column: 20, row: 6, width: 4, height: 2, id: 'panel7' },
+      panel8: { column: 20, row: 8, width: 4, height: 2, id: 'panel8' },
+    },
+    {
+      panel9: { column: 0, row: 0, width: 12, height: 6, id: 'panel9' },
+    },
+  ]);
 
   return (
     <KibanaGridLayout

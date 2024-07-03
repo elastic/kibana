@@ -25,8 +25,8 @@ export const KibanaGridElement = ({
   gridData: GridData;
   isBeingDragged: boolean;
   anyDragActive: boolean;
-  setDraggingId: (id: string | undefined) => void;
-  setResizingId: (id: string | undefined) => void;
+  setDraggingId: (id: string) => void;
+  setResizingId: (id: string) => void;
   updateShift: (pos: { x: number; y: number }) => void;
 }) => {
   const divRef = useRef<HTMLDivElement>(null);

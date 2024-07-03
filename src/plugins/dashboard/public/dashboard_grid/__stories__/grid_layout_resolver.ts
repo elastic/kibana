@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GridData, GridLayout } from './types';
+import { GridData, GridRow } from './types';
 
 const collides = (panelA: GridData, panelB: GridData) => {
   if (panelA.id === panelB.id) return false; // same panel
@@ -19,7 +19,7 @@ const collides = (panelA: GridData, panelB: GridData) => {
 
 const getAllCollisionsWithPanel = (
   panelToCheck: GridData,
-  gridLayout: GridLayout,
+  gridLayout: GridRow,
   keysInOrder: string[]
 ): GridData[] => {
   const collidingPanels: GridData[] = [];
@@ -33,7 +33,7 @@ const getAllCollisionsWithPanel = (
   return collidingPanels;
 };
 
-const getKeysInOrder = (gridLayout: GridLayout, draggedId?: string): string[] => {
+const getKeysInOrder = (gridLayout: GridRow, draggedId?: string): string[] => {
   const keys = Object.keys(gridLayout);
   return keys.sort((panelKeyA, panelKeyB) => {
     const panelA = gridLayout[panelKeyA];
@@ -56,14 +56,16 @@ const getKeysInOrder = (gridLayout: GridLayout, draggedId?: string): string[] =>
   });
 };
 
-export const resolveGridLayout = (originalLayout: GridLayout, dragRequest: GridData) => {
+export const resolveGrid = (originalLayout: GridRow, dragRequest?: GridData): GridRow => {
   const gridLayout = { ...originalLayout };
 
   // Apply drag request
-  gridLayout[dragRequest.id] = dragRequest;
+  if (dragRequest) {
+    gridLayout[dragRequest.id] = dragRequest;
+  }
 
   // push all panels down if they collide with another panel
-  const sortedKeys = getKeysInOrder(gridLayout, dragRequest.id);
+  const sortedKeys = getKeysInOrder(gridLayout, dragRequest?.id);
 
   for (const key of sortedKeys) {
     const panel = gridLayout[key];
@@ -76,11 +78,11 @@ export const resolveGridLayout = (originalLayout: GridLayout, dragRequest: GridD
       }
     }
   }
-  const compactedGrid = compactGridLayout(gridLayout);
+  const compactedGrid = compactGrid(gridLayout);
   return compactedGrid;
 };
 
-export const compactGridLayout = (originalLayout: GridLayout) => {
+export const compactGrid = (originalLayout: GridRow) => {
   const gridLayout = { ...originalLayout };
   // compact all vertical space.
   const sortedKeysAfterMove = getKeysInOrder(gridLayout);

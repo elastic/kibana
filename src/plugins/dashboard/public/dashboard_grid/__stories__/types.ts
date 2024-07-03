@@ -6,16 +6,34 @@
  * Side Public License, v 1.
  */
 
-export interface GridLayout {
+export type GridLayout = GridRow[];
+
+export interface PixelCoordinate {
+  x: number;
+  y: number;
+}
+
+export interface GridCoordinate {
+  column: number;
+  row: number;
+}
+
+export interface GridRow {
   [key: string]: GridData;
 }
 
-export interface GridData {
+export interface GridData extends GridCoordinate {
   id: string;
-  column: number;
-  row: number;
   width: number;
   height: number;
+}
+
+export type RuntimeGridSettings = GridSettings & { columnPixelWidth: number };
+
+export interface InteractionData {
+  type: 'drag' | 'resize';
+  panelData: GridData;
+  targetedRow: number;
 }
 
 export interface GridSettings {
