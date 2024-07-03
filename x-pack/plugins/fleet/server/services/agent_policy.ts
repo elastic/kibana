@@ -1009,7 +1009,7 @@ class AgentPolicyService {
         );
       }
       const { policiesWithSingleAP: packagePoliciesToDelete, policiesWithMultipleAP } =
-        this.packagePoliciesWithoutMultiplePolicies(packagePolicies);
+        this.packagePoliciesWithSingleAndMultiplePolicies(packagePolicies);
 
       if (packagePoliciesToDelete.length > 0) {
         await packagePolicyService.delete(
@@ -1022,7 +1022,7 @@ class AgentPolicyService {
           }
         );
         logger.debug(
-          `Deleted package policies with ids ${packagePoliciesToDelete
+          `Deleted package policies with single agent policy with ids ${packagePoliciesToDelete
             .map((policy) => policy.id)
             .join(', ')}`
         );
@@ -1042,7 +1042,7 @@ class AgentPolicyService {
           })
         );
         logger.debug(
-          `Updated package policies with ids ${policiesWithMultipleAP
+          `Updated package policies with multiple agent policies with ids ${policiesWithMultipleAP
             .map((policy) => policy.id)
             .join(', ')}`
         );
@@ -1580,7 +1580,7 @@ class AgentPolicyService {
     }
   }
 
-  private packagePoliciesWithoutMultiplePolicies(packagePolicies: PackagePolicy[]): {
+  private packagePoliciesWithSingleAndMultiplePolicies(packagePolicies: PackagePolicy[]): {
     policiesWithSingleAP: PackagePolicy[];
     policiesWithMultipleAP: PackagePolicy[];
   } {
