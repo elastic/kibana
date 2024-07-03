@@ -26,6 +26,7 @@ export function useProcessList(
   to: number,
   sortBy: SortBy,
   searchFilter: object,
+  sourceId: string,
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>
 ) {
   const { metricsView } = useMetricsDataViewContext();
@@ -50,7 +51,7 @@ export function useProcessList(
     'POST',
     JSON.stringify({
       hostTerm,
-      indexPattern: metricsView?.indices,
+      sourceId,
       to,
       sortBy: parsedSortBy,
       searchFilter,
