@@ -12,9 +12,9 @@ servers:
 paths:
   /api/note:
     delete:
-      operationId: DeleteNote
       x-codegen-enabled: true
-      description: Deletes a note from a timeline.
+      operationId: deleteNote
+      summary: Deletes a note from a timeline.
       tags:
         - access:securitySolution
       requestBody:
@@ -34,5 +34,12 @@ paths:
                     type: string
                     nullable: true
       responses:
-        200:
+        '200':
           description: Indicates the note was successfully deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object

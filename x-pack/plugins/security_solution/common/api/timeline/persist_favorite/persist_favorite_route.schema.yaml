@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Elastic Security - Timeline - Favorite API (https://www.elastic.co/guide/en/security/current/timeline-api-delete.html)
+  title: Elastic Security - Timeline - Favorite API
   version: '2023-10-31'
 servers:
   - url: 'http://{kibana_host}:{port}'
@@ -12,13 +12,13 @@ servers:
 paths:
   /api/timeline/_favorite:
     patch:
-      operationId: PersistFavorite
       x-codegen-enabled: true
-      description: Persists a given users favorite status of a timeline.
+      operationId: persistFavoriteRoute
+      summary: Persists a given users favorite status of a timeline.
       tags:
         - access:securitySolution
       requestBody:
-        description: The required timeline fields used to create a new timeline along with optional fields that will be created if not provided.
+        description: The required fields used to favorite a (template) timeline.
         required: true
         content:
           application/json:
@@ -39,7 +39,7 @@ paths:
                   nullable: true
                   $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
       responses:
-        200:
+        '200':
           description: Indicates the favorite status was successfully updated.
           content:
             application/json:
@@ -53,7 +53,7 @@ paths:
                     properties:
                       persistFavorite:
                         $ref: '../model/components.schema.yaml#/components/schemas/FavoriteTimelineResponse'
-        403:
+        '403':
           description: Indicates the user does not have the required permissions to persist the favorite status.
           content:
             application:json:

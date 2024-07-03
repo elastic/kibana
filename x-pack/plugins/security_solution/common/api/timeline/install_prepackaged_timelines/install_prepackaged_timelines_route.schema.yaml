@@ -12,9 +12,9 @@ servers:
 paths:
   /api/timeline/_prepackaged:
     post:
-      operationId: InstallPrepackedTimelines
       x-codegen-enabled: true
-      description: Installs prepackaged timelines.
+      operationId: installPrepackedTimelines
+      summary: Installs prepackaged timelines.
       tags:
         - access:securitySolution
       requestBody:
@@ -43,7 +43,7 @@ paths:
                   items:
                     $ref: '../model/components.schema.yaml#/components/schemas/SavedTimeline'
       responses:
-        200:
+        '200':
           description: Indicates the installation of prepackaged timelines was successful.
           content:
             application/json:
@@ -53,7 +53,7 @@ paths:
                 properties:
                   data:
                     $ref: '../model/components.schema.yaml#/components/schemas/ImportTimelineResult'
-        500:
+        '500':
           description: Indicates the installation of prepackaged timelines was unsuccessful.
           content:
             application:json:

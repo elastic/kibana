@@ -15,9 +15,9 @@ servers:
 paths:
   /api/timeline/_export:
     post:
-      operationId: ExportTimelines
       x-codegen-enabled: true
-      description: Exports timelines as an NDJSON file
+      operationId: exportTimelines
+      summary: Exports timelines as an NDJSON file
       tags:
         - access:securitySolution
       parameters:
@@ -28,7 +28,7 @@ paths:
             type: string
           description: The name of the file to export
       requestBody:
-        description: The id of the timelines to export
+        description: The ids of the timelines to export
         required: true
         content:
           application/json:
@@ -42,14 +42,14 @@ paths:
                   items:
                     type: string
       responses:
-        200:
+        '200':
           description: Indicates the timelines were successfully exported
           content:
             application/ndjson:
               schema:
                 type: string
                 description: NDJSON of the exported timelines
-        400:
+        '400':
           description: Indicates that the export size limit was exceeded
           content:
             application/ndjson:
