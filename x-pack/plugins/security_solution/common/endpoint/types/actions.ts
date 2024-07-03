@@ -180,13 +180,13 @@ export interface LogsEndpointActionResponse<
   meta?: TMeta;
 }
 
-interface ResponseActionParametersWithPid {
+export interface ResponseActionParametersWithPid {
   pid: number;
   entity_id?: never;
   process_name?: never;
 }
 
-interface ResponseActionParametersWithEntityId {
+export interface ResponseActionParametersWithEntityId {
   pid?: never;
   process_name?: never;
   entity_id: string;
