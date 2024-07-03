@@ -50,10 +50,11 @@ export const useSetupTechnology = ({
       return;
     }
 
-    if (
-      agentPolicyIds.length > 0 &&
-      (!agentlessPolicyId || !agentPolicyIds.includes(agentlessPolicyId))
-    ) {
+    const hasAgentPolicies = agentPolicyIds.length > 0;
+    const agentlessPolicyIsAbsent =
+      !agentlessPolicyId || !agentPolicyIds.includes(agentlessPolicyId);
+
+    if (hasAgentPolicies && agentlessPolicyIsAbsent) {
       /*
         handle case when agent policy is coming from outside,
         e.g. from the get param or when coming to integration from a specific agent policy
