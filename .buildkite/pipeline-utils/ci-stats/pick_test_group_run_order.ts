@@ -127,6 +127,12 @@ function isObj(x: unknown): x is Record<string, unknown> {
   return typeof x === 'object' && x !== null;
 }
 
+interface PartialConfigs {
+  enabled?: string[];
+  disabled?: string[];
+  defaultQueue?: string;
+}
+
 function getEnabledFtrConfigs(patterns?: string[]) {
   const configs: {
     enabled: Array<string | { [configPath: string]: { queue: string } }>;
@@ -138,11 +144,12 @@ function getEnabledFtrConfigs(patterns?: string[]) {
   };
   for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
     try {
-      const partialConfigs: { enabled?: string[]; disabled?: string[]; defaultQueue?: string } =
-        loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+      const partialConfigs: PartialConfigs = loadYaml(
+        Fs.readFileSync(manifestRelPath, 'utf8')
+      ) as PartialConfigs;
 
-      configs.enabled = configs.enabled.concat(partialConfigs.enabled ?? []);
-      if (partialConfigs.defaultQueue) {
+      configs.enabled = configs.enabled.concat(partialConfigs?.enabled ?? []);
+      if (partialConfigs?.defaultQueue) {
         configs.uniqueQueues.add(partialConfigs.defaultQueue);
       }
     } catch (_) {
