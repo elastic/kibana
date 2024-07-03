@@ -34,7 +34,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/logging",
     "@kbn/crypto-browser",
-    "@kbn/data-view-utils",
   ],
   "exclude": [
     "target/**/*",

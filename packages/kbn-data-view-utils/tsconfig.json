@@ -17,9 +17,6 @@
   ],
   "kbn_references": [
     "@kbn/data-views-plugin",
-    "@kbn/field-types",
-    "@kbn/field-formats-plugin",
-    "@kbn/es-query",
     "@kbn/expressions-plugin",
   ]
 }
