@@ -10,6 +10,10 @@ import type { Filter } from '@kbn/es-query';
 
 import { EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION } from '../../../../../common/constants';
 
+/**
+ * reads Kibana advanced settings for filtering data tiers during rule executions
+ * returns {@link Filter} array
+ */
 export const getDataTierFilter = async ({
   uiSettingsClient,
 }: {
