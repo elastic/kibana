@@ -138,10 +138,12 @@ const DistributionBarPart = ({
     data-test-subj={rest['data-test-subj']}
     aria-label={rest['aria-label']}
     onClick={distributionOnClick}
-    style={{
-      flex: value,
+    css={{
       background: color,
       height: '100%',
+    }}
+    style={{
+      flex: value,
     }}
   />
 );
