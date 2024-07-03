@@ -310,12 +310,15 @@ export const DataControlEditor = ({
             <EuiFormRow
               label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
             >
-              <CompatibleControlTypesComponent
-                fieldRegistry={fieldRegistry}
-                selectedFieldName={selectedFieldName}
-                selectedControlType={selectedControlType}
-                setSelectedControlType={setSelectedControlType}
-              />
+              {/* wrapping in `div` so that focus gets passed properly to the form row */}
+              <div>
+                <CompatibleControlTypesComponent
+                  fieldRegistry={fieldRegistry}
+                  selectedFieldName={selectedFieldName}
+                  selectedControlType={selectedControlType}
+                  setSelectedControlType={setSelectedControlType}
+                />
+              </div>
             </EuiFormRow>
           </EuiDescribedFormGroup>
           <EuiDescribedFormGroup
