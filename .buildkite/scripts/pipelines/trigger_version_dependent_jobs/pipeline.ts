@@ -55,6 +55,7 @@ async function main() {
     }
     case 'artifacts-trigger': {
       pipelineSteps.push(...getArtifactBuildTriggers());
+      break;
     }
     default: {
       throw new Error(`Unknown pipeline set: ${pipelineSetName}`);
