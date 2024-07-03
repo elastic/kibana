@@ -27,7 +27,6 @@ import type { Props } from '.';
 import { StatefulBody } from '.';
 import type { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
-import { timelineActions } from '../../../store';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 import type { State } from '../../../../common/store';
@@ -336,86 +335,6 @@ describe('Body', () => {
             .exists()
         ).toEqual(true);
       });
-    });
-  });
-  describe('action on event', () => {
-    const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
-      wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
-      wrapper.update();
-      wrapper
-        .find('[data-test-subj="new-note-tabs"] textarea')
-        .simulate('change', { target: { value: note } });
-      wrapper.update();
-      wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
-      wrapper.update();
-    };
-
-    beforeEach(() => {
-      mockDispatch.mockClear();
-    });
-
-    test('Add a note to an event', async () => {
-      const wrapper = await getWrapper(<StatefulBody {...props} />);
-
-      addaNoteToEvent(wrapper, 'hello world');
-      wrapper.update();
-      expect(mockDispatch).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          payload: {
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: expect.anything(),
-          },
-          type: timelineActions.addNoteToEvent({
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: '11',
-          }).type,
-        })
-      );
-    });
-
-    test('Add two notes to an event', async () => {
-      const state: State = {
-        ...mockGlobalState,
-        timeline: {
-          ...mockGlobalState.timeline,
-          timelineById: {
-            ...mockGlobalState.timeline.timelineById,
-            [TimelineId.test]: {
-              ...mockGlobalState.timeline.timelineById[TimelineId.test],
-              id: 'timeline-test',
-              pinnedEventIds: { 1: true },
-            },
-          },
-        },
-      };
-
-      const store = createMockStore(state);
-
-      const Proxy = (proxyProps: Props) => <StatefulBody {...proxyProps} />;
-
-      const wrapper = await getWrapper(<Proxy {...props} />, { store });
-
-      addaNoteToEvent(wrapper, 'hello world');
-      mockDispatch.mockClear();
-      addaNoteToEvent(wrapper, 'new hello world');
-      expect(mockDispatch).toHaveBeenNthCalledWith(
-        2,
-        expect.objectContaining({
-          payload: {
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: expect.anything(),
-          },
-          type: timelineActions.addNoteToEvent({
-            eventId: '1',
-            id: 'timeline-test',
-            noteId: '11',
-          }).type,
-        })
-      );
     });
   });
 

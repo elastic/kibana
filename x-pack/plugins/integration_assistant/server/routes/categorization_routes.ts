@@ -20,6 +20,7 @@ import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 import { getCategorizationGraph } from '../graphs/categorization';
 import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { buildRouteValidationWithZod } from '../util/route_validation';
+import { withAvailability } from './with_availability';
 
 export function registerCategorizationRoutes(
   router: IRouter<IntegrationAssistantRouteHandlerContext>
@@ -43,49 +44,50 @@ export function registerCategorizationRoutes(
           },
         },
       },
-      async (context, req, res): Promise<IKibanaResponse<CategorizationResponse>> => {
-        const { packageName, dataStreamName, rawSamples, currentPipeline } = req.body;
-        const services = await context.resolve(['core']);
-        const { client } = services.core.elasticsearch;
-        const { getStartServices, logger } = await context.integrationAssistant;
-        const [, { actions: actionsPlugin }] = await getStartServices();
+      withAvailability(
+        async (context, req, res): Promise<IKibanaResponse<CategorizationResponse>> => {
+          const { packageName, dataStreamName, rawSamples, currentPipeline } = req.body;
+          const services = await context.resolve(['core']);
+          const { client } = services.core.elasticsearch;
+          const { getStartServices, logger } = await context.integrationAssistant;
+          const [, { actions: actionsPlugin }] = await getStartServices();
 
-        try {
-          const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
-          const connector = req.body.connectorId
-            ? await actionsClient.get({ id: req.body.connectorId })
-            : (await actionsClient.getAll()).filter(
-                (connectorItem) => connectorItem.actionTypeId === '.bedrock'
-              )[0];
+          try {
+            const actionsClient = await actionsPlugin.getActionsClientWithRequest(req);
+            const connector = req.body.connectorId
+              ? await actionsClient.get({ id: req.body.connectorId })
+              : (await actionsClient.getAll()).filter(
+                  (connectorItem) => connectorItem.actionTypeId === '.bedrock'
+                )[0];
 
-          const abortSignal = getRequestAbortedSignal(req.events.aborted$);
-          const isOpenAI = connector.actionTypeId === '.gen-ai';
-          const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
+            const abortSignal = getRequestAbortedSignal(req.events.aborted$);
+            const isOpenAI = connector.actionTypeId === '.gen-ai';
+            const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
-          const model = new llmClass({
-            actions: actionsPlugin,
-            connectorId: connector.id,
-            request: req,
-            logger,
-            llmType: isOpenAI ? 'openai' : 'bedrock',
-            model: connector.config?.defaultModel,
-            temperature: 0.05,
-            maxTokens: 4096,
-            signal: abortSignal,
-            streaming: false,
-          });
+            const model = new llmClass({
+              actionsClient,
+              connectorId: connector.id,
+              logger,
+              llmType: isOpenAI ? 'openai' : 'bedrock',
+              model: connector.config?.defaultModel,
+              temperature: 0.05,
+              maxTokens: 4096,
+              signal: abortSignal,
+              streaming: false,
+            });
 
-          const graph = await getCategorizationGraph(client, model);
-          const results = await graph.invoke({
-            packageName,
-            dataStreamName,
-            rawSamples,
-            currentPipeline,
-          });
-          return res.ok({ body: CategorizationResponse.parse(results) });
-        } catch (e) {
-          return res.badRequest({ body: e });
+            const graph = await getCategorizationGraph(client, model);
+            const results = await graph.invoke({
+              packageName,
+              dataStreamName,
+              rawSamples,
+              currentPipeline,
+            });
+            return res.ok({ body: CategorizationResponse.parse(results) });
+          } catch (e) {
+            return res.badRequest({ body: e });
+          }
         }
-      }
+      )
     );
 }
