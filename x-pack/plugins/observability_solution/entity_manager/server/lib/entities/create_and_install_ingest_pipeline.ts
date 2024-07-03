@@ -16,7 +16,7 @@ import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_hist
 export async function createAndInstallHistoryIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
-  logger: Logger,
+  logger: Logger
 ) {
   try {
     const historyProcessors = generateHistoryProcessors(definition);
@@ -39,7 +39,7 @@ export async function createAndInstallHistoryIngestPipeline(
 export async function createAndInstallLatestIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
-  logger: Logger,
+  logger: Logger
 ) {
   try {
     const latestProcessors = generateLatestProcessors(definition);
