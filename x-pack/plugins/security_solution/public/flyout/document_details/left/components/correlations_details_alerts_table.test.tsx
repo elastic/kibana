@@ -8,24 +8,49 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { EuiBasicTable } from '@elastic/eui';
-import { CorrelationsDetailsAlertsTable, columns } from './correlations_details_alerts_table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { CorrelationsDetailsAlertsTable } from './correlations_details_alerts_table';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
+import { CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID } from './test_ids';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { mockContextValue } from '../../shared/mocks/mock_context';
+import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
+import { ALERT_PREVIEW_BANNER } from '../../preview';
+import { DocumentDetailsContext } from '../../shared/context';
 
 jest.mock('../hooks/use_paginated_alerts');
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiBasicTable: jest.fn(() => <div data-testid="mock-euibasictable" />),
+jest.mock('../../../../common/hooks/use_experimental_features');
+const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
 const TEST_ID = 'TEST';
-const scopeId = 'scopeId';
-const eventId = 'eventId';
+const alertIds = ['id1', 'id2', 'id3'];
+
+const renderCorrelationsTable = (panelContext: DocumentDetailsContext) =>
+  render(
+    <TestProviders>
+      <DocumentDetailsContext.Provider value={panelContext}>
+        <CorrelationsDetailsAlertsTable
+          title={<p>{'title'}</p>}
+          loading={false}
+          alertIds={alertIds}
+          scopeId={mockContextValue.scopeId}
+          eventId={mockContextValue.eventId}
+          data-test-subj={TEST_ID}
+        />
+      </DocumentDetailsContext.Provider>
+    </TestProviders>
+  );
 
 describe('CorrelationsDetailsAlertsTable', () => {
-  const alertIds = ['id1', 'id2', 'id3'];
-
   beforeEach(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     jest.mocked(usePaginatedAlerts).mockReturnValue({
       setPagination: jest.fn(),
       setSorting: jest.fn(),
@@ -64,44 +89,45 @@ describe('CorrelationsDetailsAlertsTable', () => {
   });
 
   it('renders EuiBasicTable with correct props', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <CorrelationsDetailsAlertsTable
-          title={<p>{'title'}</p>}
-          loading={false}
-          alertIds={alertIds}
-          scopeId={scopeId}
-          eventId={eventId}
-          data-test-subj={TEST_ID}
-        />
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId, queryAllByRole } =
+      renderCorrelationsTable(mockContextValue);
+
     expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
+    expect(getByTestId(`${TEST_ID}Table`)).toBeInTheDocument();
+    expect(
+      queryByTestId(CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID)
+    ).not.toBeInTheDocument();
 
     expect(jest.mocked(usePaginatedAlerts)).toHaveBeenCalled();
 
-    expect(jest.mocked(EuiBasicTable)).toHaveBeenCalledWith(
-      expect.objectContaining({
-        loading: false,
-        items: [
-          {
-            '@timestamp': '2022-01-01',
-            'kibana.alert.rule.name': 'Rule1',
-            'kibana.alert.reason': 'Reason1',
-            'kibana.alert.severity': 'Severity1',
-          },
-          {
-            '@timestamp': '2022-01-02',
-            'kibana.alert.rule.name': 'Rule2',
-            'kibana.alert.reason': 'Reason2',
-            'kibana.alert.severity': 'Severity2',
-          },
-        ],
-        columns,
-        pagination: { pageIndex: 0, pageSize: 5, totalItemCount: 10, pageSizeOptions: [5, 10, 20] },
-        sorting: { sort: { field: '@timestamp', direction: 'asc' }, enableAllColumns: true },
-      }),
-      expect.anything()
-    );
+    expect(queryAllByRole('columnheader').length).toBe(4);
+    expect(queryAllByRole('row').length).toBe(3); // 1 header row and 2 data rows
+    expect(queryAllByRole('row')[1].textContent).toContain('Jan 1, 2022 @ 00:00:00.000');
+    expect(queryAllByRole('row')[1].textContent).toContain('Reason1');
+    expect(queryAllByRole('row')[1].textContent).toContain('Rule1');
+    expect(queryAllByRole('row')[1].textContent).toContain('Severity1');
+  });
+
+  it('renders open preview button when feature flag is on', () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    const { getByTestId, getAllByTestId } = renderCorrelationsTable({
+      ...mockContextValue,
+      isPreviewMode: true,
+    });
+
+    expect(getByTestId(`${TEST_ID}InvestigateInTimeline`)).toBeInTheDocument();
+    expect(getAllByTestId(CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID).length).toBe(2);
+
+    getAllByTestId(CORRELATIONS_DETAILS_ALERT_PREVIEW_BUTTON_TEST_ID)[0].click();
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+      id: DocumentDetailsPreviewPanelKey,
+      params: {
+        id: '1',
+        indexName: 'index',
+        scopeId: mockContextValue.scopeId,
+        banner: ALERT_PREVIEW_BANNER,
+        isPreviewMode: true,
+      },
+    });
   });
 });

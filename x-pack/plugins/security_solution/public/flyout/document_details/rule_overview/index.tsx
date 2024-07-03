@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
-import { EuiFlyoutBody } from '@elastic/eui';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 import type { DocumentDetailsRuleOverviewPanelKey } from '../shared/constants/panel_keys';
 import { RuleOverview } from './components/rule_overview';
 import { RuleFooter } from './components/footer';
@@ -25,11 +25,11 @@ export interface RuleOverviewPanelProps extends FlyoutPanelProps {
 export const RuleOverviewPanel: React.FC = memo(() => {
   return (
     <>
-      <EuiFlyoutBody>
+      <FlyoutBody>
         <div style={{ marginTop: '-15px' }}>
           <RuleOverview />
         </div>
-      </EuiFlyoutBody>
+      </FlyoutBody>
       <RuleFooter />
     </>
   );
