@@ -26,6 +26,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -48,6 +49,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={connectorsAreConfigured}
           isDisabledActions={false}
@@ -70,6 +72,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -97,6 +100,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -119,6 +123,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -142,6 +147,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId="testConnectorId"
           connectorsAreConfigured={true}
           isDisabledActions={false}
@@ -165,6 +171,7 @@ describe('Header', () => {
     render(
       <TestProviders>
         <Header
+          stats={null}
           connectorId={connectorId}
           connectorsAreConfigured={true}
           isDisabledActions={false}
