@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-interface APIKeyResponse {
+export interface APIKeyResponse {
   apiKey: {
     api_key: string;
     encoded: string;
@@ -17,13 +17,12 @@ interface APIKeyResponse {
   };
 }
 
-export const generateApiKey = async ({
-  indexName,
-  keyName,
-}: {
+export interface GenerateApiKeyApiArgs {
   indexName: string;
   keyName: string;
-}) => {
+}
+
+export const generateApiKey = async ({ indexName, keyName }: GenerateApiKeyApiArgs) => {
   const route = `/internal/enterprise_search/${indexName}/api_keys`;
 
   return await HttpLogic.values.http.post<APIKeyResponse>(route, {
@@ -34,3 +33,5 @@ export const generateApiKey = async ({
 };
 
 export const GenerateApiKeyLogic = createApiLogic(['generate_api_key_logic'], generateApiKey);
+
+export type GenerateApiKeyApiLogicActions = Actions<GenerateApiKeyApiArgs, APIKeyResponse>;

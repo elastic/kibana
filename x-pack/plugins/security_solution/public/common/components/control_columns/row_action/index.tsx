@@ -231,6 +231,7 @@ const RowActionComponent = ({
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
           refetch={refetch}
+          showNotes={!expandableFlyoutDisabled && securitySolutionNotesEnabled ? true : false}
         />
       )}
     </>
