@@ -8,13 +8,13 @@
 import { EuiPanel, EuiSpacer, EuiConfirmModal, EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
 import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
 import { AIConnector } from '../../../connectorland/connector_selector';
 import * as i18n from './translations';
 
-import { Prompt } from '../../types';
 import { ConversationsBulkActions } from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
 import { useConversationDeleted } from '../conversation_settings/use_conversation_deleted';
@@ -27,7 +27,7 @@ import { CONVERSATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_conte
 import { useSessionPagination } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { DEFAULT_PAGE_SIZE } from '../../settings/const';
 interface Props {
-  allSystemPrompts: Prompt[];
+  allSystemPrompts: PromptResponse[];
   assistantStreamingEnabled: boolean;
   connectors: AIConnector[] | undefined;
   conversationSettings: Record<string, Conversation>;
