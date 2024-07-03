@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TelemetryEvent } from '../../../server/lib/telemetry/types';
-import { TelemetryEventTypes } from '../../common/lib/telemetry';
+import type { TelemetryEvent } from '../../types';
+import { TelemetryEventTypes } from '../../constants';
 
 export const openNoteInExpandableFlyoutClickedEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.OpenNoteInExpandableFlyoutClicked,

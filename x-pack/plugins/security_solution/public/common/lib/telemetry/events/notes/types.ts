@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/ebt';
-import type { TelemetryEventTypes } from '../../common/lib/telemetry';
+import type { TelemetryEventTypes } from '../../constants';
 
 export interface OpenNoteInExpandableFlyoutClickedParams {
   location: string;

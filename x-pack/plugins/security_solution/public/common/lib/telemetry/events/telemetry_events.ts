@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  addNoteFromExpandableFlyoutClickedEvent,
-  openNoteInExpandableFlyoutClickedEvent,
-} from '../../../../notes/telemetry';
 import type { TelemetryEvent } from '../types';
 import { TelemetryEventTypes } from '../constants';
 import {
@@ -48,6 +44,10 @@ import {
   manualRuleRunOpenModalEvent,
 } from './manual_rule_run';
 import { eventLogFilterByRunTypeEvent, eventLogShowSourceEventDateRangeEvent } from './event_log';
+import {
+  addNoteFromExpandableFlyoutClickedEvent,
+  openNoteInExpandableFlyoutClickedEvent,
+} from './notes';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,

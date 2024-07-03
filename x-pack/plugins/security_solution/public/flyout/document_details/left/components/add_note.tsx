@@ -113,7 +113,7 @@ export const AddNote = memo(({ eventId }: AddNewNoteProps) => {
       })
     );
     telemetry.reportAddNoteFromExpandableFlyoutClicked({
-      isRelatedToATimeline: checked && activeTimeline?.savedObjectId,
+      isRelatedToATimeline: checked && activeTimeline?.savedObjectId !== null,
     });
     setEditorValue('');
   }, [activeTimeline?.savedObjectId, checked, dispatch, editorValue, eventId, telemetry]);

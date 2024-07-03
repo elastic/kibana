@@ -192,10 +192,10 @@ const RowActionComponent = ({
       },
     });
     telemetry.reportOpenNoteInExpandableFlyoutClicked({
-      location: timelineId,
+      location: tableId,
     });
     telemetry.reportDetailsFlyoutOpened({
-      location: timelineId,
+      location: tableId,
       panel: 'left',
     });
   }, [eventId, indexName, openFlyout, tableId, telemetry]);

@@ -9,7 +9,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type {
   AddNoteFromExpandableFlyoutClickedParams,
   OpenNoteInExpandableFlyoutClickedParams,
-} from '../../../notes/telemetry/types';
+} from './events/notes/types';
 import type {
   TelemetryClientStart,
   ReportAlertsGroupingChangedParams,

@@ -261,7 +261,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         });
         telemetry.reportDetailsFlyoutOpened({
           location: timelineId,
-          panel: 'right-left',
+          panel: 'left',
         });
       } else {
         if (eventId) {

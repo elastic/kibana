@@ -20,7 +20,7 @@ import {
   DocumentDetailsRightPanelKey,
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import type { ControlColumnProps } from '../../../../../../common/types';
-import {} from '../../../../../../common/types';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { timelineActions, timelineSelectors } from '../../../../store';
 import type { Direction } from '../../../../../../common/search_strategy';
 import { useTimelineEvents } from '../../../../containers';
@@ -55,7 +55,6 @@ import { useTimelineControlColumn } from '../shared/use_timeline_control_columns
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useNotesInFlyout } from '../../properties/use_notes_in_flyout';
 import { NotesFlyout } from '../../properties/notes_flyout';
-import { useKibana } from '../../../../../common/lib/kibana';
 
 const ExitFullScreenContainer = styled.div`
   width: 180px;
