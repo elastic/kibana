@@ -50,5 +50,18 @@ describe('context', () => {
         },
       });
     });
+
+    describe('METRICS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
+      test.only('returns sources position', async () => {
+        const { context } = await getContext('METRICS ');
+
+        expect(context).toMatchObject({
+          type: 'expression',
+          command: {
+            name: 'metrics',
+          },
+        });
+      });
+    });
   });
 });
