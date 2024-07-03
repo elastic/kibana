@@ -115,13 +115,12 @@ export function getFieldSearchMatchingHighlight(
   displayName: string,
   fieldSearchHighlight?: string
 ): string {
-  const searchHighlight = (fieldSearchHighlight || '').trim();
-  if (
-    (searchHighlight.includes('*') || searchHighlight.includes(' ')) &&
-    fieldNameWildcardMatcher({ name: displayName }, searchHighlight)
-  ) {
-    return displayName;
+  if (!fieldSearchHighlight) {
+    return '';
   }
-
-  return searchHighlight;
+  const searchHighlight = (fieldSearchHighlight || '').trim();
+  if (displayName.toLowerCase().indexOf(searchHighlight.toLowerCase()) > -1) {
+    return searchHighlight;
+  }
+  return displayName;
 }
