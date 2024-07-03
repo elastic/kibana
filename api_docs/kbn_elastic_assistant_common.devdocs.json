@@ -853,6 +853,23 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveries",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveries",
+        "description": [
+          "\nArray of attack discoveries"
+        ],
+        "signature": [
+          "{ timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.AttackDiscovery",
         "type": "Type",
         "tags": [],
@@ -861,9 +878,114 @@
           "\nAn attack discovery generated from one or more alerts"
         ],
         "signature": [
-          "{ title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }"
+          "{ timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryCancelRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryCancelRequestParams",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/cancel_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryCancelRequestParamsInput",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryCancelRequestParamsInput",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/cancel_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryCancelResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryCancelResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/cancel_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryCreateProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryCreateProps",
+        "description": [],
+        "signature": [
+          "{ status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; id?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryGetRequestParams",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryGetRequestParams",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/get_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryGetRequestParamsInput",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryGetRequestParamsInput",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/get_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryGetResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryGetResponse",
+        "description": [],
+        "signature": [
+          "{ stats: { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }[]; data?: { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; } | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/get_attack_discovery_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -876,7 +998,7 @@
         "label": "AttackDiscoveryPostRequestBody",
         "description": [],
         "signature": [
-          "{ connectorId: string; actionTypeId: string; size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }"
+          "{ size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
         "deprecated": false,
@@ -891,7 +1013,7 @@
         "label": "AttackDiscoveryPostRequestBodyInput",
         "description": [],
         "signature": [
-          "{ connectorId: string; actionTypeId: string; size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; }"
+          "{ size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
         "deprecated": false,
@@ -906,9 +1028,105 @@
         "label": "AttackDiscoveryPostResponse",
         "description": [],
         "signature": [
-          "{ connector_id?: string | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }"
+          "{ id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryResponse",
+        "description": [],
+        "signature": [
+          "{ id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStat",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryStat",
+        "description": [
+          "\nAttack discovery stats"
+        ],
+        "signature": [
+          "{ connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStats",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryStats",
+        "description": [
+          "\nStats on existing attack discovery documents"
+        ],
+        "signature": [
+          "{ newDiscoveriesCount: number; newConnectorResultsCount: number; statsPerConnector: { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryStatus",
+        "description": [
+          "\nThe status of the attack discovery."
+        ],
+        "signature": [
+          "\"running\" | \"succeeded\" | \"failed\" | \"canceled\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStatusEnum",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryStatusEnum",
+        "description": [],
+        "signature": [
+          "{ running: \"running\"; succeeded: \"succeeded\"; failed: \"failed\"; canceled: \"canceled\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryUpdateProps",
+        "type": "Type",
+        "tags": [],
+        "label": "AttackDiscoveryUpdateProps",
+        "description": [],
+        "signature": [
+          "{ id: string; backingIndex: string; apiConfig?: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[] | undefined; status?: \"running\" | \"succeeded\" | \"failed\" | \"canceled\" | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; generationIntervals?: { date: string; durationMs: number; }[] | undefined; failureReason?: string | undefined; lastViewedAt?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -999,6 +1217,100 @@
           "{ total: number; succeeded: number; failed: number; skipped: number; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteProps",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompleteProps",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteRequestBody",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompleteRequestBody",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteRequestBodyInput",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompleteRequestBodyInput",
+        "description": [],
+        "signature": [
+          "{ connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatMessage",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatMessage",
+        "description": [
+          "\nAI assistant message."
+        ],
+        "signature": [
+          "{ role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatMessageRole",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatMessageRole",
+        "description": [
+          "\nMessage role."
+        ],
+        "signature": [
+          "\"user\" | \"system\" | \"assistant\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatMessageRoleEnum",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatMessageRoleEnum",
+        "description": [],
+        "signature": [
+          "{ user: \"user\"; system: \"system\"; assistant: \"assistant\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1495,6 +1807,18 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL",
+        "description": [],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL",
         "type": "string",
         "tags": [],
@@ -1675,7 +1999,7 @@
         "label": "ELASTIC_AI_ASSISTANT_URL",
         "description": [],
         "signature": [
-          "\"/api/elastic_assistant\""
+          "\"/api/security_ai_assistant\""
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/constants.ts",
         "deprecated": false,
@@ -1969,6 +2293,23 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GenerationInterval",
+        "type": "Type",
+        "tags": [],
+        "label": "GenerationInterval",
+        "description": [
+          "\nRun durations for the attack discovery"
+        ],
+        "signature": [
+          "{ date: string; durationMs: number; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GetCapabilitiesResponse",
         "type": "Type",
         "tags": [],
@@ -2207,6 +2548,21 @@
           "{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; isError?: boolean | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.MessageData",
+        "type": "Type",
+        "tags": [],
+        "label": "MessageData",
+        "description": [],
+        "signature": [
+          "{} & { [k: string]: unknown; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2718,6 +3074,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.RootContext",
+        "type": "Type",
+        "tags": [],
+        "label": "RootContext",
+        "description": [],
+        "signature": [
+          "\"security\""
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.SortOrder",
         "type": "Type",
         "tags": [],
@@ -3090,15 +3461,105 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveries",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveries",
+        "description": [],
+        "signature": [
+          "Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>, \"many\">"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.AttackDiscovery",
         "type": "Object",
         "tags": [],
         "label": "AttackDiscovery",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }>"
+          "Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>"
         ],
-        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryCancelRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryCancelRequestParams",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ connectorId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; }, { connectorId: string; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/cancel_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryCancelResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryCancelResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodString; lastViewedAt: Zod.ZodString; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; attackDiscoveries: Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>, \"many\">; apiConfig: Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }>; namespace: Zod.ZodString; backingIndex: Zod.ZodString; generationIntervals: Zod.ZodArray<Zod.ZodObject<{ date: Zod.ZodString; durationMs: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { date: string; durationMs: number; }, { date: string; durationMs: number; }>, \"many\">; averageIntervalMs: Zod.ZodNumber; failureReason: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/cancel_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryCreateProps",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryCreateProps",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; attackDiscoveries: Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>, \"many\">; apiConfig: Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; }, \"strip\", Zod.ZodTypeAny, { status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; id?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, { status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; id?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryGetRequestParams",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryGetRequestParams",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ connectorId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; }, { connectorId: string; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/get_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryGetResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryGetResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ data: Zod.ZodOptional<Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodString; lastViewedAt: Zod.ZodString; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; attackDiscoveries: Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>, \"many\">; apiConfig: Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }>; namespace: Zod.ZodString; backingIndex: Zod.ZodString; generationIntervals: Zod.ZodArray<Zod.ZodObject<{ date: Zod.ZodString; durationMs: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { date: string; durationMs: number; }, { date: string; durationMs: number; }>, \"many\">; averageIntervalMs: Zod.ZodNumber; failureReason: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }>>; stats: Zod.ZodArray<Zod.ZodObject<{ hasViewed: Zod.ZodBoolean; count: Zod.ZodNumber; connectorId: Zod.ZodString; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }, { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { stats: { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }[]; data?: { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; } | undefined; }, { stats: { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }[]; data?: { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; } | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/get_attack_discovery_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3111,7 +3572,7 @@
         "label": "AttackDiscoveryPostRequestBody",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ alertsIndexPattern: Zod.ZodString; anonymizationFields: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; field: Zod.ZodString; allowed: Zod.ZodOptional<Zod.ZodBoolean>; anonymized: Zod.ZodOptional<Zod.ZodBoolean>; updatedAt: Zod.ZodOptional<Zod.ZodString>; updatedBy: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodOptional<Zod.ZodString>; createdBy: Zod.ZodOptional<Zod.ZodString>; namespace: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }, { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }>, \"many\">; connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; model: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; size: Zod.ZodNumber; subAction: Zod.ZodEnum<[\"invokeAI\", \"invokeStream\"]>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, { connectorId: string; actionTypeId: string; size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; }>"
+          "Zod.ZodObject<{ alertsIndexPattern: Zod.ZodString; anonymizationFields: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; field: Zod.ZodString; allowed: Zod.ZodOptional<Zod.ZodBoolean>; anonymized: Zod.ZodOptional<Zod.ZodBoolean>; updatedAt: Zod.ZodOptional<Zod.ZodString>; updatedBy: Zod.ZodOptional<Zod.ZodString>; createdAt: Zod.ZodOptional<Zod.ZodString>; createdBy: Zod.ZodOptional<Zod.ZodString>; namespace: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }, { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }>, \"many\">; apiConfig: Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; model: Zod.ZodOptional<Zod.ZodString>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; size: Zod.ZodNumber; subAction: Zod.ZodEnum<[\"invokeAI\", \"invokeStream\"]>; }, \"strip\", Zod.ZodTypeAny, { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; }, { size: number; subAction: \"invokeAI\" | \"invokeStream\"; alertsIndexPattern: string; anonymizationFields: { id: string; field: string; timestamp?: string | undefined; allowed?: boolean | undefined; anonymized?: boolean | undefined; updatedAt?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; createdBy?: string | undefined; namespace?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
         "deprecated": false,
@@ -3126,9 +3587,99 @@
         "label": "AttackDiscoveryPostResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ connector_id: Zod.ZodOptional<Zod.ZodString>; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; attackDiscoveries: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }, { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }>, \"many\">>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; status: Zod.ZodOptional<Zod.ZodString>; trace_data: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { connector_id?: string | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { connector_id?: string | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; mitreAttackTactics?: string[] | undefined; }[] | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; status?: string | undefined; trace_data?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodString; lastViewedAt: Zod.ZodString; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; attackDiscoveries: Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>, \"many\">; apiConfig: Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }>; namespace: Zod.ZodString; backingIndex: Zod.ZodString; generationIntervals: Zod.ZodArray<Zod.ZodObject<{ date: Zod.ZodString; durationMs: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { date: string; durationMs: number; }, { date: string; durationMs: number; }>, \"many\">; averageIntervalMs: Zod.ZodNumber; failureReason: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/post_attack_discovery_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; timestamp: Zod.ZodOptional<Zod.ZodString>; updatedAt: Zod.ZodString; lastViewedAt: Zod.ZodString; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; createdAt: Zod.ZodString; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; users: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; attackDiscoveries: Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>, \"many\">; apiConfig: Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }>; namespace: Zod.ZodString; backingIndex: Zod.ZodString; generationIntervals: Zod.ZodArray<Zod.ZodObject<{ date: Zod.ZodString; durationMs: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { date: string; durationMs: number; }, { date: string; durationMs: number; }>, \"many\">; averageIntervalMs: Zod.ZodNumber; failureReason: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }, { id: string; namespace: string; createdAt: string; updatedAt: string; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; users: { id?: string | undefined; name?: string | undefined; }[]; apiConfig: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }; lastViewedAt: string; attackDiscoveries: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[]; backingIndex: string; generationIntervals: { date: string; durationMs: number; }[]; averageIntervalMs: number; timestamp?: string | undefined; alertsContextCount?: number | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; failureReason?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStat",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryStat",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ hasViewed: Zod.ZodBoolean; count: Zod.ZodNumber; connectorId: Zod.ZodString; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }, { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStats",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryStats",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ newDiscoveriesCount: Zod.ZodNumber; newConnectorResultsCount: Zod.ZodNumber; statsPerConnector: Zod.ZodArray<Zod.ZodObject<{ hasViewed: Zod.ZodBoolean; count: Zod.ZodNumber; connectorId: Zod.ZodString; status: Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }, { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { newDiscoveriesCount: number; newConnectorResultsCount: number; statsPerConnector: { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }[]; }, { newDiscoveriesCount: number; newConnectorResultsCount: number; statsPerConnector: { connectorId: string; count: number; status: \"running\" | \"succeeded\" | \"failed\" | \"canceled\"; hasViewed: boolean; }[]; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStatus",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryStatus",
+        "description": [],
+        "signature": [
+          "Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryStatusEnum",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryStatusEnum",
+        "description": [],
+        "signature": [
+          "{ running: \"running\"; succeeded: \"succeeded\"; failed: \"failed\"; canceled: \"canceled\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AttackDiscoveryUpdateProps",
+        "type": "Object",
+        "tags": [],
+        "label": "AttackDiscoveryUpdateProps",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ id: Zod.ZodString; apiConfig: Zod.ZodOptional<Zod.ZodObject<{ connectorId: Zod.ZodString; actionTypeId: Zod.ZodString; defaultSystemPromptId: Zod.ZodOptional<Zod.ZodString>; provider: Zod.ZodOptional<Zod.ZodEnum<[\"OpenAI\", \"Azure OpenAI\"]>>; model: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }, { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; }>>; alertsContextCount: Zod.ZodOptional<Zod.ZodNumber>; attackDiscoveries: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; id: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; summaryMarkdown: Zod.ZodString; title: Zod.ZodString; timestamp: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }, { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }>, \"many\">>; status: Zod.ZodOptional<Zod.ZodEnum<[\"running\", \"succeeded\", \"failed\", \"canceled\"]>>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; generationIntervals: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ date: Zod.ZodString; durationMs: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { date: string; durationMs: number; }, { date: string; durationMs: number; }>, \"many\">>; backingIndex: Zod.ZodString; failureReason: Zod.ZodOptional<Zod.ZodString>; lastViewedAt: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id: string; backingIndex: string; apiConfig?: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[] | undefined; status?: \"running\" | \"succeeded\" | \"failed\" | \"canceled\" | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; generationIntervals?: { date: string; durationMs: number; }[] | undefined; failureReason?: string | undefined; lastViewedAt?: string | undefined; }, { id: string; backingIndex: string; apiConfig?: { connectorId: string; actionTypeId: string; defaultSystemPromptId?: string | undefined; provider?: \"OpenAI\" | \"Azure OpenAI\" | undefined; model?: string | undefined; } | undefined; alertsContextCount?: number | undefined; attackDiscoveries?: { timestamp: string; title: string; alertIds: string[]; detailsMarkdown: string; entitySummaryMarkdown: string; summaryMarkdown: string; id?: string | undefined; mitreAttackTactics?: string[] | undefined; }[] | undefined; status?: \"running\" | \"succeeded\" | \"failed\" | \"canceled\" | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; generationIntervals?: { date: string; durationMs: number; }[] | undefined; failureReason?: string | undefined; lastViewedAt?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3219,6 +3770,81 @@
           "Zod.ZodObject<{ failed: Zod.ZodNumber; skipped: Zod.ZodNumber; succeeded: Zod.ZodNumber; total: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { total: number; succeeded: number; failed: number; skipped: number; }, { total: number; succeeded: number; failed: number; skipped: number; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/bulk_crud_conversations_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteProps",
+        "type": "Object",
+        "tags": [],
+        "label": "ChatCompleteProps",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodString>; promptId: Zod.ZodOptional<Zod.ZodString>; isStream: Zod.ZodOptional<Zod.ZodBoolean>; responseLanguage: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; model: Zod.ZodOptional<Zod.ZodString>; persist: Zod.ZodBoolean; messages: Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; }, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteRequestBody",
+        "type": "Object",
+        "tags": [],
+        "label": "ChatCompleteRequestBody",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ conversationId: Zod.ZodOptional<Zod.ZodString>; promptId: Zod.ZodOptional<Zod.ZodString>; isStream: Zod.ZodOptional<Zod.ZodBoolean>; responseLanguage: Zod.ZodOptional<Zod.ZodString>; langSmithProject: Zod.ZodOptional<Zod.ZodString>; langSmithApiKey: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; model: Zod.ZodOptional<Zod.ZodString>; persist: Zod.ZodBoolean; messages: Zod.ZodArray<Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; }, { connectorId: string; persist: boolean; messages: { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }[]; conversationId?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; model?: string | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatMessage",
+        "type": "Object",
+        "tags": [],
+        "label": "ChatMessage",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ content: Zod.ZodOptional<Zod.ZodString>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; data: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; fields_to_anonymize: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }, { role: \"user\" | \"system\" | \"assistant\"; content?: string | undefined; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; fields_to_anonymize?: string[] | undefined; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatMessageRole",
+        "type": "Object",
+        "tags": [],
+        "label": "ChatMessageRole",
+        "description": [],
+        "signature": [
+          "Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatMessageRoleEnum",
+        "type": "Object",
+        "tags": [],
+        "label": "ChatMessageRoleEnum",
+        "description": [],
+        "signature": [
+          "{ user: \"user\"; system: \"system\"; assistant: \"assistant\"; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3812,6 +4438,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GenerationInterval",
+        "type": "Object",
+        "tags": [],
+        "label": "GenerationInterval",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ date: Zod.ZodString; durationMs: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { date: string; durationMs: number; }, { date: string; durationMs: number; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.GetCapabilitiesResponse",
         "type": "Object",
         "tags": [],
@@ -4031,6 +4672,21 @@
           "Zod.ZodObject<{ content: Zod.ZodString; reader: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>>; role: Zod.ZodEnum<[\"system\", \"user\", \"assistant\"]>; timestamp: Zod.ZodString; isError: Zod.ZodOptional<Zod.ZodBoolean>; traceData: Zod.ZodOptional<Zod.ZodObject<{ transactionId: Zod.ZodOptional<Zod.ZodString>; traceId: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { transactionId?: string | undefined; traceId?: string | undefined; }, { transactionId?: string | undefined; traceId?: string | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; isError?: boolean | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, { timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; reader?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; isError?: boolean | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.MessageData",
+        "type": "Object",
+        "tags": [],
+        "label": "MessageData",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{}, \"strip\", Zod.ZodUnknown, Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\">, Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\">>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4406,6 +5062,21 @@
           "Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/conversations/common_attributes.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.RootContext",
+        "type": "Object",
+        "tags": [],
+        "label": "RootContext",
+        "description": [],
+        "signature": [
+          "Zod.ZodLiteral<\"security\">"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

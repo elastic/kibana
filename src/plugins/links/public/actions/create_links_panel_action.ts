@@ -8,7 +8,8 @@
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { APP_ICON, APP_NAME, CONTENT_ID } from '../../common';
 import { uiActions } from '../services/kibana_services';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
@@ -19,6 +20,7 @@ export const registerCreateLinksPanelAction = () => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_LINKS_PANEL_ACTION_ID,
     getIconType: () => APP_ICON,
+    order: 10,
     isCompatible: async ({ embeddable }) => {
       return apiIsPresentationContainer(embeddable);
     },
@@ -40,7 +42,8 @@ export const registerCreateLinksPanelAction = () => {
         initialState,
       });
     },
+    grouping: [COMMON_EMBEDDABLE_GROUPING.annotation],
     getDisplayName: () => APP_NAME,
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_LINKS_PANEL_ACTION_ID);
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_LINKS_PANEL_ACTION_ID);
 };
