@@ -186,9 +186,6 @@ data:
         endpoints: 
         - \${env:ES_ENDPOINT}
         api_key: \${env:ES_API_KEY}
-        #logs_index: logs-otel.generic-default
-        # Metrics are not supported yet
-        #metrics_index: metrics-otel.generic-default
         mapping:
           mode: ecs
     processors:
@@ -385,8 +382,8 @@ data:
         collection_interval: 20s
         endpoint: \${env:K8S_NODE_NAME}:10250
         node: '\${env:K8S_NODE_NAME}'
-        # Verify if this can be removed for all CSPs
-        #insecure_skip_verify: true
+        # Required to work for all CSPs without an issue
+        insecure_skip_verify: true
         k8s_api_config:
           auth_type: serviceAccount
         metric_groups:
