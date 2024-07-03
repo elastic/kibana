@@ -18,7 +18,7 @@ import {
   telemetryIndexPattern,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 
-export function SecuritySolutionEndpointDataStreamHelper() {
+export function SecuritySolutionEndpointDataStreamHelpers() {
   function deleteDataStream(getService: (serviceName: 'es') => Client, index: string) {
     const client = getService('es');
     return client.transport.request(

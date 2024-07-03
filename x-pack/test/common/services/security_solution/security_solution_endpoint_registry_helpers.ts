@@ -9,7 +9,7 @@ import path from 'path';
 import { defineDockerServersConfig } from '@kbn/test';
 import { dockerImage as ingestDockerImage } from '../../../fleet_api_integration/config.base';
 
-export function SecuritySolutionEndpointRegistryHelper() {
+export function SecuritySolutionEndpointRegistryHelpers() {
   /**
    * This is used by CI to set the docker registry port
    * you can also define this environment variable locally when running tests which

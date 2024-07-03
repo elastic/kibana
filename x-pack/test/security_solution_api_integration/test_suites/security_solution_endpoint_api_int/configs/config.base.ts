@@ -22,7 +22,7 @@ export const generateConfig = async ({
   services: any;
 }): Promise<Config> => {
   const { createEndpointDockerConfig, getRegistryUrlAsArray } =
-    services.SecuritySolutionEndpointRegistryHelper();
+    services.SecuritySolutionEndpointRegistryHelpers();
   return {
     ...baseConfig.getAll(),
     testFiles: [require.resolve('../apis')],
