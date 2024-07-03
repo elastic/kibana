@@ -23,7 +23,7 @@ describe('DetectionRulesClient.deleteRule', () => {
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient({ actionsClient, rulesClient, mlAuthz });
   });
 
   it('should call rulesClient.delete passing the expected ruleId', async () => {

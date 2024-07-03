@@ -37,7 +37,7 @@ describe('DetectionRulesClient.createCustomRule', () => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient({ actionsClient, rulesClient, mlAuthz });
   });
 
   it('should create a rule with the correct parameters and options', async () => {

@@ -37,7 +37,7 @@ describe('DetectionRulesClient.patchRule', () => {
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient({ actionsClient, rulesClient, mlAuthz });
   });
 
   it('calls the rulesClient with expected params', async () => {

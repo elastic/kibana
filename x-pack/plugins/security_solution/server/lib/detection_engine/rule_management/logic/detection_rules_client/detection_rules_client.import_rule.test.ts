@@ -48,7 +48,7 @@ describe('DetectionRulesClient.importRule', () => {
     rulesClient = rulesClientMock.create();
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
-    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient({ actionsClient, rulesClient, mlAuthz });
   });
 
   it('calls rulesClient.create with the correct parameters when rule_id does not match an installed rule', async () => {

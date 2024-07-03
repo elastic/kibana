@@ -36,7 +36,7 @@ describe('DetectionRulesClient.upgradePrebuiltRule', () => {
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
-    detectionRulesClient = createDetectionRulesClient(actionsClient, rulesClient, mlAuthz);
+    detectionRulesClient = createDetectionRulesClient({ actionsClient, rulesClient, mlAuthz });
   });
 
   it('throws if no matching rule_id is found', async () => {
