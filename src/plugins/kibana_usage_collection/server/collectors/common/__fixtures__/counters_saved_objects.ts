@@ -10,7 +10,7 @@ import type { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/serv
 
 export const rawServerCounters: UsageCountersSavedObject[] = [
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:my_event:count:server:20210409',
     attributes: {
       domainId: 'myApp',
@@ -24,7 +24,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2021-04-09T08:17:57.693Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'Kibana_home:intersecting_event:loaded:server:20201023',
     attributes: {
       domainId: 'Kibana_home',
@@ -38,7 +38,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2020-10-23T11:27:57.067Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:my_event_4457914848544:count:server:20210409',
     attributes: {
       domainId: 'myApp',
@@ -52,7 +52,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2021-04-09T08:18:03.030Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:my_event_malformed:count:server:20210409',
     attributes: {
       domainId: 'myApp',
@@ -67,7 +67,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2021-04-09T08:18:03.030Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:my_event_4457914848544_2:count:server:20210409',
     attributes: {
       domainId: 'myApp',
@@ -81,7 +81,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2021-04-09T08:18:03.031Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:only_reported_in_usage_counters:count:server:20210409',
     attributes: {
       domainId: 'myApp',
@@ -95,7 +95,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2021-04-09T08:18:03.031Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:namespaced_counter:count:server:20240627:first',
     namespaces: ['first'],
     attributes: {
@@ -110,7 +110,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2024-06-27T08:18:03.031Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:namespaced_counter:count:server:20240627:second',
     namespaces: ['second'],
     attributes: {
@@ -125,7 +125,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2024-06-27T09:18:03.031Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:namespaced_counter:count:server:20240627:third',
     namespaces: ['third'],
     attributes: {
@@ -140,7 +140,7 @@ export const rawServerCounters: UsageCountersSavedObject[] = [
     updated_at: '2024-06-27T10:18:03.031Z',
   },
   {
-    type: 'counter',
+    type: 'usage-counter',
     id: 'myApp:namespaced_counter:count:server:20240627:default',
     namespaces: ['default'],
     attributes: {

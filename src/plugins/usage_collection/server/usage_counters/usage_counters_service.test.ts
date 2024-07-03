@@ -117,7 +117,7 @@ describe('UsageCountersService', () => {
     expect(mockIncrementCounter.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "counter",
+          "usage-counter",
           "test-counter:counterA:count:server:20210409",
           Array [
             Object {
@@ -135,7 +135,7 @@ describe('UsageCountersService', () => {
           },
         ],
         Array [
-          "counter",
+          "usage-counter",
           "test-counter:counterB:count:server:20210409",
           Array [
             Object {

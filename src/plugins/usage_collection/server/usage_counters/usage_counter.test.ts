@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import * as Rx from 'rxjs';
-import * as rxOp from 'rxjs';
 import { UsageCounter } from './usage_counter';
 import type { UsageCounters } from '../../common';
 
@@ -21,7 +20,7 @@ describe('UsageCounter', () => {
 
   describe('#incrementCounter', () => {
     it('#incrementCounter calls counter$.next', async () => {
-      const result = rxOp.firstValueFrom(counter$.pipe(rxOp.take(1), rxOp.toArray()));
+      const result = Rx.firstValueFrom(counter$.pipe(Rx.take(1), Rx.toArray()));
       usageCounter.incrementCounter({
         counterName: 'test',
         counterType: 'type',
@@ -42,7 +41,7 @@ describe('UsageCounter', () => {
     });
 
     it('passes default configs to counter$', async () => {
-      const result = rxOp.firstValueFrom(counter$.pipe(rxOp.take(1), rxOp.toArray()));
+      const result = Rx.firstValueFrom(counter$.pipe(Rx.take(1), Rx.toArray()));
       usageCounter.incrementCounter({ counterName: 'test' });
       await expect(result).resolves.toEqual([
         {

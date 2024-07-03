@@ -37,7 +37,7 @@ export interface UsageCountersSavedObjectAttributes {
 export type UsageCountersSavedObject = SavedObject<UsageCountersSavedObjectAttributes>;
 
 /** The Saved Objects type for Usage Counters **/
-export const USAGE_COUNTERS_SAVED_OBJECT_TYPE = 'counter';
+export const USAGE_COUNTERS_SAVED_OBJECT_TYPE = 'usage-counter';
 
 export const registerUsageCountersSavedObjectTypes = (
   savedObjectsSetup: SavedObjectsServiceSetup

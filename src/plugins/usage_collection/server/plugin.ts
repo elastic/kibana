@@ -29,7 +29,7 @@ export interface UsageCollectionSetup {
   /**
    * Creates and registers a usage counter to collect daily aggregated plugin counter events
    */
-  createUsageCounter: (type: string, source?: 'server' | 'ui') => UsageCounter;
+  createUsageCounter: (type: string) => UsageCounter;
   /**
    * Returns a usage counter by type
    */

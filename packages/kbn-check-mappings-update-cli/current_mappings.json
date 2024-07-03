@@ -812,23 +812,6 @@
     "dynamic": false,
     "properties": {}
   },
-  "counter": {
-    "dynamic": false,
-    "properties": {
-      "counterName": {
-        "type": "keyword"
-      },
-      "counterType": {
-        "type": "keyword"
-      },
-      "domainId": {
-        "type": "keyword"
-      },
-      "source": {
-        "type": "keyword"
-      }
-    }
-  },
   "csp-rule-template": {
     "dynamic": false,
     "properties": {
@@ -3421,6 +3404,23 @@
           }
         },
         "type": "text"
+      }
+    }
+  },
+  "usage-counter": {
+    "dynamic": false,
+    "properties": {
+      "counterName": {
+        "type": "keyword"
+      },
+      "counterType": {
+        "type": "keyword"
+      },
+      "domainId": {
+        "type": "keyword"
+      },
+      "source": {
+        "type": "keyword"
       }
     }
   },

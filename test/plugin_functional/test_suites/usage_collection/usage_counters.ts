@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     await new Promise((res) => setTimeout(res, 10 * 1000));
 
     return await supertest
-      .get('/api/saved_objects/_find?type=counter')
+      .get('/api/saved_objects/_find?type=usage-counter')
       .set('kbn-xsrf', 'true')
       .expect(200)
       .then(({ body }) => {

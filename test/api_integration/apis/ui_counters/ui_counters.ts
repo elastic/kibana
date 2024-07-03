@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
     const {
       body: { saved_objects: savedObjects },
     } = await supertest
-      .get('/api/saved_objects/_find?type=counter')
+      .get('/api/saved_objects/_find?type=usage-counter')
       .set('kbn-xsrf', 'kibana')
       .expect(200);
 

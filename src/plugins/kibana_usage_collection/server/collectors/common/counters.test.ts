@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { transformRawCounter, createCounterFetcher } from './counters';
 import { rawServerCounters, rawUiCounters } from './__fixtures__/counters_saved_objects';
+
+const mockLogger = loggingSystemMock.create();
 
 describe('transformRawCounter', () => {
   it('transforms usage counters savedObject raw entries', () => {
@@ -95,7 +97,7 @@ describe('createCounterFetcher', () => {
   it('returns saved objects only from a given source', async () => {
     // @ts-expect-error incomplete mock implementation
     soClientMock.find.mockImplementation(async ({ type, filter }) => {
-      if (type !== 'counter') {
+      if (type !== 'usage-counter') {
         throw new Error(`unexpected type ${type}`);
       }
 
@@ -108,9 +110,13 @@ describe('createCounterFetcher', () => {
       throw new Error(`unexpected filter ${filter}`);
     });
 
-    const fetch = createCounterFetcher('counter.attributes.source: server', (dailyEvents) => ({
-      dailyEvents,
-    }));
+    const fetch = createCounterFetcher(
+      mockLogger.get(),
+      'counter.attributes.source: server',
+      (dailyEvents) => ({
+        dailyEvents,
+      })
+    );
     // @ts-expect-error incomplete mock implementation
     const { dailyEvents } = await fetch({ soClient: soClientMock });
     expect(dailyEvents).toHaveLength(5);

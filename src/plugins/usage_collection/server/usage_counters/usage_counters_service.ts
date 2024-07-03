@@ -152,7 +152,7 @@ export class UsageCountersService {
     );
   }
 
-  private createUsageCounter = (domainId: string, source?: 'ui' | 'server'): IUsageCounter => {
+  private createUsageCounter = (domainId: string): IUsageCounter => {
     if (this.counterSets.get(domainId)) {
       throw new Error(`Usage counter set "${domainId}" already exists.`);
     }

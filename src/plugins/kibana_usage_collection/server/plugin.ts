@@ -126,14 +126,14 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
 
-    registerUiCountersUsageCollector(usageCollection);
+    registerUiCountersUsageCollector(usageCollection, this.logger);
 
     registerUsageCountersRollups(
       this.logger.get('usage-counters-rollup'),
       getSavedObjectsClient,
       pluginStop$
     );
-    registerUsageCountersUsageCollector(usageCollection);
+    registerUsageCountersUsageCollector(usageCollection, this.logger);
 
     registerOpsStatsCollector(usageCollection, metric$);
 

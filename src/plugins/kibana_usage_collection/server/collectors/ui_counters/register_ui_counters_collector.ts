@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { UsageCounters } from '@kbn/usage-collection-plugin/common';
 import {
   type UsageCollectionSetup,
@@ -29,7 +30,10 @@ export interface UiUsageCounters {
 const UI: UsageCounters.v1.CounterEventSource = 'ui';
 const UI_COUNTERS_FILTER = `${USAGE_COUNTERS_SAVED_OBJECT_TYPE}.attributes.source: ${UI}`;
 
-export function registerUiCountersUsageCollector(usageCollection: UsageCollectionSetup) {
+export function registerUiCountersUsageCollector(
+  usageCollection: UsageCollectionSetup,
+  logger: Logger
+) {
   const collector = usageCollection.makeUsageCollector<UiUsageCounters>({
     type: 'ui_counters',
     schema: {
@@ -63,7 +67,7 @@ export function registerUiCountersUsageCollector(usageCollection: UsageCollectio
         },
       },
     },
-    fetch: createCounterFetcher(UI_COUNTERS_FILTER, toDailyEvents),
+    fetch: createCounterFetcher(logger, UI_COUNTERS_FILTER, toDailyEvents),
     isReady: () => true,
   });
 

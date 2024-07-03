@@ -43,7 +43,6 @@ const previouslyRegisteredTypes = [
   'config-global',
   'connector_token',
   'core-usage-stats',
-  'counter',
   'csp-rule-template',
   'csp_rule',
   'dashboard',
@@ -147,7 +146,8 @@ const previouslyRegisteredTypes = [
   'synthetics-dynamic-settings',
   'uptime-synthetics-api-key',
   'url',
-  'usage-counters',
+  'usage-counter',
+  'usage-counters', // deprecated in favor of 'usage-counter'
   'visualization',
   'workplace_search_telemetry',
 ].sort();

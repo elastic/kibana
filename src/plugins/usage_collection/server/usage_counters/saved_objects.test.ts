@@ -56,7 +56,7 @@ describe('storeCounter', () => {
     expect(internalRepository.incrementCounter).toBeCalledTimes(1);
     expect(internalRepository.incrementCounter.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "counter",
+        "usage-counter",
         "a:b:c:ui:20210409",
         Array [
           Object {

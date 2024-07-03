@@ -7,6 +7,7 @@
  */
 
 import moment from 'moment';
+import { Logger } from '@kbn/logging';
 import {
   CollectorFetchContext,
   UsageCountersSavedObject,
@@ -24,6 +25,7 @@ export interface CounterEvent {
 }
 
 export function createCounterFetcher<T>(
+  logger: Logger,
   filter: string,
   transform: (counters: CounterEvent[]) => T
 ) {
@@ -33,7 +35,7 @@ export function createCounterFetcher<T>(
       namespaces: ['*'],
       fields: ['count', 'counterName', 'counterType', 'domainId'],
       filter,
-      perPage: 1000,
+      perPage: 100,
     });
 
     const dailyEvents: CounterEvent[] = [];
@@ -45,8 +47,9 @@ export function createCounterFetcher<T>(
           if (event) {
             dailyEvents.push(event);
           }
-        } catch (_) {
+        } catch (err) {
           // swallow error; allows sending successfully transformed objects.
+          logger.debug('Error collecting usage-counter details: ' + err.message);
         }
       });
     }
@@ -88,12 +91,10 @@ function mergeCounters(counters: CounterEvent[]): CounterEvent[] {
     if (!existingCounter) {
       acc[key] = counter;
       return acc;
+    } else {
+      acc[key].total = existingCounter.total + counter.total;
+      acc[key].lastUpdatedAt = counter.lastUpdatedAt;
     }
-    acc[key] = {
-      ...existingCounter,
-      ...counter,
-      total: existingCounter.total + counter.total,
-    };
     return acc;
   }, {} as Record<string, CounterEvent>);
 
