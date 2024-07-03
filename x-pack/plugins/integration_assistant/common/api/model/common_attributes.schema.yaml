@@ -148,7 +148,7 @@ components:
       type: object
       description: The LangSmith options object.
       required:
-        - project
+        - projectName
         - apiKey
       properties:
         projectName:
