@@ -161,6 +161,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
           query={queryString.getQuery() as Query}
           dataView={currentAppState?.dataView}
           uiState={uiState}
+          linked={false}
         />
       </EuiErrorBoundary>
     </VisualizeEditorCommon>

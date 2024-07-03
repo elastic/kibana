@@ -22,12 +22,12 @@ import {
   VisParams,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
-import { decode } from '@kbn/rison';
 import { Reference } from '@kbn/content-management-utils';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SerializedTitles } from '@kbn/presentation-publishing';
 import {
   VisualizeApi,
+  VisualizeRuntimeState,
   VisualizeSerializedState,
 } from '@kbn/visualizations-plugin/public/react_embeddable/types';
 import { SerializeStateFn } from '@kbn/visualizations-plugin/public/visualize_app/utils/use/use_embeddable_api_handler';
@@ -114,7 +114,11 @@ function DefaultEditor({
               data-title={titles.title}
               data-description={titles.description}
             >
-              <ReactEmbeddableRenderer<VisualizeSerializedState, VisualizeApi>
+              <ReactEmbeddableRenderer<
+                VisualizeSerializedState,
+                VisualizeRuntimeState,
+                VisualizeApi
+              >
                 type={VISUALIZE_EMBEDDABLE_TYPE}
                 getParentApi={() => ({
                   ...parentApi,

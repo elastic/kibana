@@ -57,7 +57,7 @@ export const isVisualizeSavedObjectState = (
 
 export type VisualizeApi = HasEditCapabilities &
   HasVisualizeConfig &
-  DefaultEmbeddableApi<VisualizeSerializedState> & {
+  DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     subscribeToInitialRender: (listener: () => void) => void;
     subscribeToVisData: (listener: (data: unknown) => void) => void;

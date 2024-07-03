@@ -30,17 +30,21 @@ import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getTimeFilter, getUiActions } from '../services';
-import { VisSavedObject } from '../types';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { SerializedVis, Vis } from '../vis';
 import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { deserializeState, serializeState } from './state';
-import { VisualizeApi, VisualizeRuntimeState, VisualizeSerializedState } from './types';
+import {
+  ExtraSavedObjectProperties,
+  VisualizeApi,
+  VisualizeRuntimeState,
+  VisualizeSerializedState,
+} from './types';
 
 export const getVisualizeEmbeddableFactory: (
   embeddableStart: EmbeddableStart
-) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeApi, VisualizeRuntimeState> = (
+) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeRuntimeState, VisualizeApi> = (
   embeddableStart
 ) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
@@ -53,7 +57,9 @@ export const getVisualizeEmbeddableFactory: (
 
     const vis$ = new BehaviorSubject<Vis>(state.vis);
     const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
-    const savedObjectProperties$ = new BehaviorSubject<Partial<VisSavedObject> | undefined>({});
+    const savedObjectProperties$ = new BehaviorSubject<ExtraSavedObjectProperties | undefined>(
+      undefined
+    );
     const visData$ = new BehaviorSubject<unknown>({});
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
@@ -82,11 +88,12 @@ export const getVisualizeEmbeddableFactory: (
       {
         ...titlesApi,
         serializeState: () => {
+          const savedObjectProperties = savedObjectProperties$.getValue();
           return serializeState({
             serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
             id: savedObjectId$.getValue(),
-            savedObjectProperties: savedObjectProperties$.getValue(),
+            ...(savedObjectProperties ? { savedObjectProperties } : {}),
           });
         },
         getVis: () => vis$.getValue(),
