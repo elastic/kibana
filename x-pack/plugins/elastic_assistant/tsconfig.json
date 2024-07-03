@@ -27,7 +27,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
     "@kbn/ml-plugin",
-    "@kbn/apm-utils",
     "@kbn/elastic-assistant-common",
     "@kbn/core-http-router-server-mocks",
     "@kbn/data-stream-adapter",

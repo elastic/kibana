@@ -18,6 +18,8 @@
     "@kbn/logging",
     "@kbn/actions-plugin",
     "@kbn/logging-mocks",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/apm-utils",
+    "@kbn/tooling-log"
   ]
 }
