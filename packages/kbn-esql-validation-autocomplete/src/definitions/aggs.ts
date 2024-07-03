@@ -295,8 +295,6 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
               type: 'string',
               noNestingFunctions: true,
               optional: false,
-              constantOnly: true,
-              literalOptions: ['asc', 'desc'],
             },
           ],
           returnType: 'number',
