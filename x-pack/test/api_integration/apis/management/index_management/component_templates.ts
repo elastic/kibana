@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow an existing component template to be updated', async () => {
-        const { status /* , body */ } = await updateComponentTemplate(COMPONENT_NAME, {
+        const { status, body } = await updateComponentTemplate(COMPONENT_NAME, {
           ...COMPONENT,
           version: 1,
           _kbnMeta: {
@@ -250,10 +250,9 @@ export default function ({ getService }: FtrProviderContext) {
           },
         });
         expect(status).to.eql(200);
-        // TODO-TRE: Let's go over this in review
-        // expect(body).to.eql({
-        //   acknowledged: true,
-        // });
+        expect(body).to.eql({
+          acknowledged: true,
+        });
       });
 
       it('should not allow a non-existing component template to be updated', async () => {

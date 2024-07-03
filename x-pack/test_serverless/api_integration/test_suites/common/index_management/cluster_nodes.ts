@@ -24,11 +24,11 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    it('should fetch the nodes plugins', async () => {
+    it('should NOT fetch the nodes plugins in serverless', async () => {
       const { body, status } = await svlClusterNodesApi.getNodesPlugins(roleAuthc);
       expect(status).to.eql(410);
 
-      expect(Array.isArray(body)).to.be(true);
+      expect(Array.isArray(body)).to.be(false);
     });
   });
 }
