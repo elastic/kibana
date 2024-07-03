@@ -114,4 +114,14 @@ describe.skip('useBulkGetUserProfiles', () => {
 
     expect(addError).toHaveBeenCalled();
   });
+
+  it('does not call the bulkGetUserProfiles if the array of uids is empty', async () => {
+    const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
+
+    renderHook(() => useBulkGetUserProfiles({ uids: [] }), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    expect(spyOnBulkGetUserProfiles).not.toHaveBeenCalled();
+  });
 });

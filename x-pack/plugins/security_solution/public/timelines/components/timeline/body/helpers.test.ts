@@ -238,7 +238,7 @@ describe('helpers', () => {
       ).toEqual('Unpin alert');
     });
 
-    test('it indicates the event is NOT pinned when `isPinned` is `false` and the event has notes', () => {
+    test('it indicates the event is pinned when `isPinned` is `false` and the event has notes', () => {
       expect(
         getPinTooltip({
           isAlert: false,
@@ -246,10 +246,10 @@ describe('helpers', () => {
           eventHasNotes: true,
           timelineType: TimelineType.default,
         })
-      ).toEqual('Pin event');
+      ).toEqual('This event cannot be unpinned because it has notes');
     });
 
-    test('it indicates the alert is NOT pinned when `isPinned` is `false` and the alert has notes', () => {
+    test('it indicates the alert is pinned when `isPinned` is `false` and the alert has notes', () => {
       expect(
         getPinTooltip({
           isAlert: true,
@@ -257,7 +257,7 @@ describe('helpers', () => {
           eventHasNotes: true,
           timelineType: TimelineType.default,
         })
-      ).toEqual('Pin alert');
+      ).toEqual('This alert cannot be unpinned because it has notes');
     });
 
     test('it indicates the event is NOT pinned when `isPinned` is `false` and the event does NOT have notes', () => {
