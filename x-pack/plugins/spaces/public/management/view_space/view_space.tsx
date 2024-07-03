@@ -6,9 +6,9 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -77,7 +77,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     selectedTabId: _selectedTabId,
   } = props;
 
-  const [activeSpaceId, setActiveSpaceId] = useState<string | null>(null);
   const selectedTabId = getSelectedTabId(_selectedTabId);
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
@@ -88,12 +87,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const [tabs, selectedTabContent] = useTabs(space, features, roles, selectedTabId);
   const { capabilities, getUrlForApp, navigateToUrl } = props;
-
-  useEffect(() => {
-    spacesManager.getActiveSpace().then(({ id: nextSpaceId }) => {
-      setActiveSpaceId(nextSpaceId);
-    });
-  }, [spacesManager]);
 
   useEffect(() => {
     if (!spaceId) {
@@ -187,15 +180,11 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   };
 
   const SwitchButton = () => {
-    if (activeSpaceId === space.id) {
-      return <EuiCallOut>This is the current space.</EuiCallOut>;
-    }
-
-    const { serverBasePath } = props;
-
     if (userActiveSpace?.id === space.id) {
       return null;
     }
+
+    const { serverBasePath } = props;
 
     // use href to force full page reload (needed in order to change spaces)
     return (
@@ -230,8 +219,23 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1 data-test-subj="spaceTitle">{space.name}</h1>
+              <h1 data-test-subj="spaceTitle">
+                {space.name}
+                {userActiveSpace?.id === space.id ? (
+                  <>
+                    {' '}
+                    <EuiBadge color="primary">
+                      <FormattedMessage
+                        id="xpack.spaces.management.spaceDetails.space.badge.isCurrent"
+                        description="Text for a badge shown in the Space details the particular Space is the one currently in the user session."
+                        defaultMessage="current"
+                      />
+                    </EuiBadge>
+                  </>
+                ) : null}
+              </h1>
             </EuiTitle>
+
             <EuiText size="s">
               <p>
                 {space.description ?? (
