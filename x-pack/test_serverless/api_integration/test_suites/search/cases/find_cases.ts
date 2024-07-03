@@ -6,17 +6,30 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
 
   describe('find_cases', () => {
+    let roleAuthc: RoleCredentials;
+
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('viewer');
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
     it('403 when calling find cases API', async () => {
-      await supertest
+      await supertestWithoutAuth
         .get(`${CASES_URL}/_find`)
-        .set('kbn-xsrf', 'foo')
-        .set('x-elastic-internal-origin', 'foo')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set(roleAuthc.apiKeyHeader)
         .expect(403);
     });
   });
