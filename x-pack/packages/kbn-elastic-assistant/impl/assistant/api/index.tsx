@@ -11,6 +11,7 @@ import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
 import { TraceOptions } from '../types';
 export * from './conversations';
+export * from './prompts';
 
 export interface FetchConnectorExecuteAction {
   conversationId: string;
