@@ -140,4 +140,29 @@ describe('getGroupAggregations()', () => {
       _source: false,
     });
   });
+
+  test('rejects with invalid pagination options', async () => {
+    const alertsClient = new AlertsClient(alertsClientParams);
+
+    expect(() =>
+      alertsClient.getGroupAggregations({
+        featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+        groupByField: 'kibana.alert.rule.name',
+        pageIndex: 101,
+        pageSize: 50,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"The provided pageIndex value is too high. The maximum allowed pageIndex value is 100."`
+    );
+    expect(() =>
+      alertsClient.getGroupAggregations({
+        featureIds: ['apm', 'infrastructure', 'logs', 'observability', 'slo', 'uptime'],
+        groupByField: 'kibana.alert.rule.name',
+        pageIndex: 10,
+        pageSize: 5000,
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"The number of documents is too high. Paginating through more than 10000 documents is not possible."`
+    );
+  });
 });

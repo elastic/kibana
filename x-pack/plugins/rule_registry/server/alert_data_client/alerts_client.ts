@@ -1075,12 +1075,12 @@ export class AlertsClient {
     const uniqueValue = uuidv4();
     if (pageIndex > MAX_ALERTS_PAGES) {
       throw Boom.badRequest(
-        'The provided pageIndex value is too high. The maximum allowed pageIndex value is ${maxPerPage}.'
+        `The provided pageIndex value is too high. The maximum allowed pageIndex value is ${MAX_ALERTS_PAGES}.`
       );
     }
     if (Math.max(pageIndex, pageIndex * pageSize) > MAX_PAGINATED_ALERTS) {
       throw Boom.badRequest(
-        'The number of documents is too high. Paginating through more than ${MAX_DOCS_PER_PAGE} documents is not possible.'
+        `The number of documents is too high. Paginating through more than ${MAX_PAGINATED_ALERTS} documents is not possible.`
       );
     }
     return this.find({
