@@ -19,13 +19,13 @@ import { memoizedGetTimelineColumnHeaders } from './utils';
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
   const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const defaultColumns = useMemo(
-    () => (unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders),
-    [unifiedComponentsInTimelineEnabled]
+    () => (!unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders),
+    [unifiedComponentsInTimelineDisabled]
   );
 
   const localColumns = useMemo(

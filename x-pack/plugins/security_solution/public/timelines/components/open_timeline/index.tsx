@@ -161,8 +161,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
-    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-      'unifiedComponentsInTimelineEnabled'
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
     );
 
     const {
@@ -252,11 +252,11 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           dispatch(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
-              columns: unifiedComponentsInTimelineEnabled ? defaultUdtHeaders : defaultHeaders,
+              columns: !unifiedComponentsInTimelineDisabled ? defaultUdtHeaders : defaultHeaders,
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
-              excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+              excludedRowRendererIds: !unifiedComponentsInTimelineDisabled
                 ? timelineDefaults.excludedRowRendererIds
                 : [],
             })
@@ -273,7 +273,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         dispatch,
         dataViewId,
         selectedPatterns,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       ]
     );
 
@@ -375,7 +375,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
           onOpenTimeline,
           timelineId,
           timelineType: timelineTypeToOpen,
-          unifiedComponentsInTimelineEnabled,
+          unifiedComponentsInTimelineDisabled,
         });
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps

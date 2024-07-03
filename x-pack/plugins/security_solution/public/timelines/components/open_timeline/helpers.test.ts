@@ -497,7 +497,7 @@ describe('helpers', () => {
       });
     });
 
-    test('should produce correct model if unifiedComponentsInTimelineEnabled is true', () => {
+    test('should produce correct model if unifiedComponentsInTimelineDisabled is false', () => {
       const timeline = {
         savedObjectId: 'savedObject-1',
         title: 'Awesome Timeline',
@@ -523,7 +523,7 @@ describe('helpers', () => {
       });
     });
 
-    test('should produce correct model if unifiedComponentsInTimelineEnabled is true and custom set of columns is passed', () => {
+    test('should produce correct model if unifiedComponentsInTimelineDisabled is false and custom set of columns is passed', () => {
       const customColumns = defaultUdtHeaders.slice(0, 2);
       const timeline = {
         savedObjectId: 'savedObject-1',
@@ -773,7 +773,7 @@ describe('helpers', () => {
         });
       });
     });
-    describe('open a timeline when unifiedComponentsInTimelineEnabled is true', () => {
+    describe('open a timeline when unifiedComponentsInTimelineDisabled is false', () => {
       const untitledTimeline = { ...mockSelectedTimeline, title: '' };
       const onOpenTimeline = jest.fn();
       afterEach(() => {
@@ -788,7 +788,7 @@ describe('helpers', () => {
           timelineType: TimelineType.default,
           onOpenTimeline,
           openTimeline: true,
-          unifiedComponentsInTimelineEnabled: true,
+          unifiedComponentsInTimelineDisabled: false,
         };
         (resolveTimeline as jest.Mock).mockResolvedValue(untitledTimeline);
         renderHook(async () => {
@@ -824,7 +824,7 @@ describe('helpers', () => {
           timelineType: TimelineType.default,
           onOpenTimeline: undefined,
           openTimeline: true,
-          unifiedComponentsInTimelineEnabled: true,
+          unifiedComponentsInTimelineDisabled: false,
         };
 
         (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);
@@ -863,7 +863,7 @@ describe('helpers', () => {
           timelineType: TimelineType.default,
           onOpenTimeline,
           openTimeline: true,
-          unifiedComponentsInTimelineEnabled: true,
+          unifiedComponentsInTimelineDisabled: false,
         };
 
         (resolveTimeline as jest.Mock).mockResolvedValue(mockSelectedTimeline);

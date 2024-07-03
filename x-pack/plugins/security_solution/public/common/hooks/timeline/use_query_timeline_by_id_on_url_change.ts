@@ -42,8 +42,8 @@ export const useQueryTimelineByIdOnUrlChange = () => {
   const oldSearch = usePrevious(search);
   const timelineIdFromReduxStore = flyoutTimeline?.savedObjectId ?? '';
 
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const [previousTimeline, currentTimeline] = useMemo(() => {
@@ -74,7 +74,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
         graphEventId,
         timelineId: newId,
         openTimeline: true,
-        unifiedComponentsInTimelineEnabled,
+        unifiedComponentsInTimelineDisabled,
       });
     }
   }, [
@@ -84,7 +84,7 @@ export const useQueryTimelineByIdOnUrlChange = () => {
     activeTab,
     graphEventId,
     queryTimelineById,
-    unifiedComponentsInTimelineEnabled,
+    unifiedComponentsInTimelineDisabled,
   ]);
 };
 

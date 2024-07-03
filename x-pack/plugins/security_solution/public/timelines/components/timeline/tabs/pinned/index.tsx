@@ -102,8 +102,8 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
-  const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-    'unifiedComponentsInTimelineEnabled'
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
+    'unifiedComponentsInTimelineDisabled'
   );
 
   const filterQuery = useMemo(() => {
@@ -277,7 +277,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
     );
   }, [associateNote, closeNotesFlyout, isNotesFlyoutVisible, noteEventId, notes, timelineId]);
 
-  if (unifiedComponentsInTimelineEnabled) {
+  if (!unifiedComponentsInTimelineDisabled) {
     return (
       <>
         {NotesFlyoutMemo}

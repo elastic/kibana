@@ -91,8 +91,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
     const dispatch = useDispatch();
 
-    const unifiedComponentsInTimelineEnabled = useIsExperimentalFeatureEnabled(
-      'unifiedComponentsInTimelineEnabled'
+    const unifiedComponentsInTimelineDisabled = !useIsExperimentalFeatureEnabled(
+      'unifiedComponentsInTimelineDisabled'
     );
 
     const { defaultColumns } = useDeepEqualSelector((state) =>
@@ -242,7 +242,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
           </EventsTh>
         )}
 
-        {!unifiedComponentsInTimelineEnabled && (
+        {unifiedComponentsInTimelineDisabled && (
           <EventsTh role="button">
             <StatefulRowRenderersBrowser timelineId={timelineId} />
           </EventsTh>
@@ -275,7 +275,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
             </EventsThContent>
           </EventsTh>
         )}
-        {tabType !== TimelineTabs.eql && !unifiedComponentsInTimelineEnabled && (
+        {tabType !== TimelineTabs.eql && unifiedComponentsInTimelineDisabled && (
           <EventsTh role="button" data-test-subj="timeline-sorting-fields">
             <EventsThContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip content={i18n.SORT_FIELDS}>
