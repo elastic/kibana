@@ -25,7 +25,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     },
   });
 
-  registry.when('field candidates without data', { config: 'trial', archives: [] }, () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/187421
+  registry.when.skip('field candidates without data', { config: 'trial', archives: [] }, () => {
     it('handles the empty state', async () => {
       const response = await apmApiClient.readUser({
         endpoint,
