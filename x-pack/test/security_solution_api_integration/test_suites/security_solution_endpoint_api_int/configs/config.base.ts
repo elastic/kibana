@@ -21,8 +21,7 @@ export const generateConfig = async ({
   target: keyof typeof SUITE_TAGS;
   services: any;
 }): Promise<Config> => {
-  const { createEndpointDockerConfig, getRegistryUrlAsArray } =
-    services.SecuritySolutionEndpointRegistryHelpers();
+  const { createEndpointDockerConfig, getRegistryUrlAsArray } = services.endpointRegistryHelpers();
   return {
     ...baseConfig.getAll(),
     testFiles: [require.resolve('../apis')],

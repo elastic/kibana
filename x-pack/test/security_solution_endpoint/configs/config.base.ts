@@ -42,8 +42,7 @@ export const generateConfig = async ({
   services: any;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
-  const { createEndpointDockerConfig, getRegistryUrlAsArray } =
-    services.SecuritySolutionEndpointRegistryHelpers();
+  const { createEndpointDockerConfig, getRegistryUrlAsArray } = services.endpointRegistryHelpers();
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../../functional/config.base.js')
   );
