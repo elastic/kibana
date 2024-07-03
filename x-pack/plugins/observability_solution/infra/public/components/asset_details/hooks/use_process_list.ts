@@ -29,8 +29,6 @@ export function useProcessList(
   sourceId: string,
   request$?: BehaviorSubject<(() => Promise<unknown>) | undefined>
 ) {
-  const { metricsView } = useMetricsDataViewContext();
-
   const decodeResponse = (response: any) => {
     return pipe(
       ProcessListAPIResponseRT.decode(response),
