@@ -26190,102 +26190,102 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats var = weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | stats var = weighted_avg(numberField, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | stats weighted_avg(numberField, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField, \"asc\"))",
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(weighted_avg(numberField, numberField, \"asc\"))",
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField))",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField, \"asc\")) + weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats round(weighted_avg(numberField, numberField, \"asc\")) + weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats weighted_avg(numberField / 2, numberField, \"asc\")",
+      "query": "from a_index | stats weighted_avg(numberField / 2, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = weighted_avg(numberField / 2, numberField, \"asc\")",
+      "query": "from a_index | stats var0 = weighted_avg(numberField / 2, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField, \"asc\")",
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField, \"asc\")",
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats weighted_avg(numberField, numberField, \"asc\") by round(numberField / 2)",
+      "query": "from a_index | stats weighted_avg(numberField, numberField) by round(numberField / 2)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField, \"asc\") by var1 = round(numberField / 2)",
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2)",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField, \"asc\") by round(numberField / 2), ipField",
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), ipField",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, \"asc\") by var1 = round(numberField / 2), ipField",
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), ipField",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField, \"asc\") by round(numberField / 2), numberField / 2",
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), numberField / 2",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, \"asc\") by var1 = round(numberField / 2), numberField / 2",
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), numberField / 2",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | stats var = weighted_avg(avg(numberField), avg(numberField), \"a\")",
+      "query": "from a_index | stats var = weighted_avg(avg(numberField), avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
@@ -26293,7 +26293,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats weighted_avg(avg(numberField), avg(numberField), \"a\")",
+      "query": "from a_index | stats weighted_avg(avg(numberField), avg(numberField))",
       "error": [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
@@ -26301,7 +26301,7 @@
       "warning": []
     },
     {
-      "query": "from a_index | stats weighted_avg(booleanField, booleanField, \"a\")",
+      "query": "from a_index | stats weighted_avg(booleanField, booleanField)",
       "error": [
         "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]",
         "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]"
@@ -26309,233 +26309,62 @@
       "warning": []
     },
     {
-      "query": "from a_index | sort weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | sort weighted_avg(numberField, numberField)",
       "error": [
         "SORT does not support function weighted_avg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | where weighted_avg(numberField, numberField)",
       "error": [
         "WHERE does not support function weighted_avg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | where weighted_avg(numberField, numberField, \"asc\") > 0",
+      "query": "from a_index | where weighted_avg(numberField, numberField) > 0",
       "error": [
         "WHERE does not support function weighted_avg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField)",
       "error": [
         "EVAL does not support function weighted_avg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval var = weighted_avg(numberField, numberField, \"asc\") > 0",
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField) > 0",
       "error": [
         "EVAL does not support function weighted_avg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval weighted_avg(numberField, numberField, \"asc\")",
+      "query": "from a_index | eval weighted_avg(numberField, numberField)",
       "error": [
         "EVAL does not support function weighted_avg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | eval weighted_avg(numberField, numberField, \"asc\") > 0",
+      "query": "from a_index | eval weighted_avg(numberField, numberField) > 0",
       "error": [
         "EVAL does not support function weighted_avg"
       ],
       "warning": []
     },
     {
-      "query": "from a_index | stats weighted_avg(null, null, null)",
+      "query": "from a_index | stats weighted_avg(null, null)",
       "error": [],
       "warning": []
     },
     {
-      "query": "row nullVar = null | stats weighted_avg(nullVar, nullVar, nullVar)",
+      "query": "row nullVar = null | stats weighted_avg(nullVar, nullVar)",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = weighted_avg(numberField, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats weighted_avg(numberField, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField, stringField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(weighted_avg(numberField, numberField, stringField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField, stringField)) + weighted_avg(numberField, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats round(weighted_avg(numberField, numberField, stringField)) + weighted_avg(numberField, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats weighted_avg(numberField / 2, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = weighted_avg(numberField / 2, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, stringField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats weighted_avg(numberField, numberField, stringField) by round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField, stringField) by var1 = round(numberField / 2)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField, stringField) by round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, stringField) by var1 = round(numberField / 2), ipField",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField, stringField) by round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, stringField) by var1 = round(numberField / 2), numberField / 2",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats var = weighted_avg(avg(numberField), avg(numberField), avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats weighted_avg(avg(numberField), avg(numberField), avg(numberField))",
-      "error": [
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
-        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | stats weighted_avg(booleanField, booleanField, booleanField)",
-      "error": [
-        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]",
-        "Argument of [weighted_avg] must be [string], found value [booleanField] type [boolean]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort weighted_avg(numberField, numberField, stringField)",
-      "error": [
-        "SORT does not support function weighted_avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where weighted_avg(numberField, numberField, stringField)",
-      "error": [
-        "WHERE does not support function weighted_avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where weighted_avg(numberField, numberField, stringField) > 0",
-      "error": [
-        "WHERE does not support function weighted_avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = weighted_avg(numberField, numberField, stringField)",
-      "error": [
-        "EVAL does not support function weighted_avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = weighted_avg(numberField, numberField, stringField) > 0",
-      "error": [
-        "EVAL does not support function weighted_avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval weighted_avg(numberField, numberField, stringField)",
-      "error": [
-        "EVAL does not support function weighted_avg"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval weighted_avg(numberField, numberField, stringField) > 0",
-      "error": [
-        "EVAL does not support function weighted_avg"
-      ],
       "warning": []
     },
     {
