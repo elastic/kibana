@@ -36,6 +36,7 @@ import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
+import { licenseService } from '../common/hooks/use_license';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -149,24 +150,27 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
   const currentAppId = useObservable(currentAppId$, '');
-
+  const hasEnterpriseLicence = licenseService.isEnterprise();
   useEffect(() => {
     const migrateConversationsFromLocalStorage = once(async () => {
-      const res = await getUserConversations({
-        http,
-      });
       if (
+        hasEnterpriseLicence &&
         assistantAvailability.isAssistantEnabled &&
-        assistantAvailability.hasAssistantPrivilege &&
-        res.total === 0
+        assistantAvailability.hasAssistantPrivilege
       ) {
-        await createConversations(notifications, http, storage);
+        const res = await getUserConversations({
+          http,
+        });
+        if (res.total === 0) {
+          await createConversations(notifications, http, storage);
+        }
       }
     });
     migrateConversationsFromLocalStorage();
   }, [
     assistantAvailability.hasAssistantPrivilege,
     assistantAvailability.isAssistantEnabled,
+    hasEnterpriseLicence,
     http,
     notifications,
     storage,
@@ -174,7 +178,11 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
-      if (assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege) {
+      if (
+        hasEnterpriseLicence &&
+        assistantAvailability.isAssistantEnabled &&
+        assistantAvailability.hasAssistantPrivilege
+      ) {
         const res = await getPrompts({
           http,
           toasts: notifications.toasts,
@@ -189,6 +197,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
   }, [
     assistantAvailability.hasAssistantPrivilege,
     assistantAvailability.isAssistantEnabled,
+    hasEnterpriseLicence,
     http,
     notifications,
   ]);
