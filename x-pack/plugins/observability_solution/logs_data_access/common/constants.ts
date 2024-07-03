@@ -5,12 +5,4 @@
  * 2.0.
  */
 
-let upgradeInProgress: boolean = false;
-
-export function setUpgradeInProgress(show: boolean) {
-  upgradeInProgress = show;
-}
-
-export function isUpgradeInProgress(): boolean {
-  return upgradeInProgress;
-}
+export const DEFAULT_LOG_SOURCES = ['logs-*-*'];

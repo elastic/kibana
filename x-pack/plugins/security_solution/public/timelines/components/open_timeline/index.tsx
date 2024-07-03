@@ -57,6 +57,7 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { timelineDefaults } from '../../store/defaults';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -255,6 +256,9 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
               dataViewId,
               indexNames: selectedPatterns,
               show: false,
+              excludedRowRendererIds: unifiedComponentsInTimelineEnabled
+                ? timelineDefaults.excludedRowRendererIds
+                : [],
             })
           );
         }
