@@ -219,7 +219,6 @@ export const getCloudSecurityUsageRecord = async ({
   esClient,
   projectId,
   taskId,
-  lastSuccessfulReport,
   cloudSecuritySolution,
   tier,
   logger,

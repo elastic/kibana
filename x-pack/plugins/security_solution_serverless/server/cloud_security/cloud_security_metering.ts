@@ -39,8 +39,8 @@ export const cloudSecurityMetringCallback = async ({
 
     const promiseResults = await Promise.allSettled(
       cloudSecuritySolutions.map((cloudSecuritySolution) => {
-        if (cloudSecuritySolution === CLOUD_DEFEND) {
-          return getCloudDefendUsageRecords({
+        if (cloudSecuritySolution !== CLOUD_DEFEND) {
+          return getCloudSecurityUsageRecord({
             esClient,
             projectId,
             logger,
@@ -50,7 +50,9 @@ export const cloudSecurityMetringCallback = async ({
             tier,
           });
         }
-        return getCloudSecurityUsageRecord({
+
+        // since lastSuccessfulReport is not used by getCloudSecurityUsageRecord, we want to verify if it is used by getCloudDefendUsageRecords before getCloudSecurityUsageRecord.
+        return getCloudDefendUsageRecords({
           esClient,
           projectId,
           logger,
