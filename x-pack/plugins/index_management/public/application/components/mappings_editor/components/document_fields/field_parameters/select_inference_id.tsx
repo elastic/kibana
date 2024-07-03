@@ -39,13 +39,12 @@ import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/compon
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
-import { Form, UseField, useForm } from '../../../shared_imports';
+import { UseField } from '../../../shared_imports';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
 import { CustomInferenceEndpointConfig, DeploymentState } from '../../../types';
-import { UseField } from '../../../shared_imports';
 import { useDispatch, useMappingsState } from '../../../mappings_state_context';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
@@ -124,18 +123,18 @@ export const SelectInferenceId: React.FC<Props> = ({
     ];
   }, []);
 
-  const { isLoading, data: models } = useLoadInferenceEndpoints();
+  const { isLoading, data: endpoints } = useLoadInferenceEndpoints();
 
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
     const inferenceIdOptions =
-      models?.map((model: InferenceAPIConfigResponse) => ({
+      endpoints?.map((model: InferenceAPIConfigResponse) => ({
         label: model.model_id,
         'data-test-subj': `custom-inference_${model.model_id}`,
       })) || [];
 
     return inferenceIdOptions;
-  }, [models]);
+  }, [endpoints]);
 
   useEffect(() => {
     const mergedOptions = {

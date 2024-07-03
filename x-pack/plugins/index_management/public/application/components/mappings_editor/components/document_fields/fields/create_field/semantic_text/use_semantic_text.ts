@@ -121,7 +121,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
     if (!inferenceId || !referenceField || !name) {
       return;
     }
-    const inferenceData = inferenceToModelIdMap?.[inferenceId as string];
+    const inferenceData = inferenceToModelIdMap?.[inferenceId];
     if (!inferenceData) {
       return;
     }
@@ -134,12 +134,12 @@ export function useSemanticText(props: UseSemanticTextProps) {
     dispatch({ type: 'field.add', value });
 
     try {
-            const inferenceModels = await getInferenceEndpoints();
-      const inferenceModel = inferenceModels.data?.some(
+      const inferenceEndpoints = await getInferenceEndpoints();
+      const hasInferenceEndpoint = inferenceEndpoints.data?.some(
         (inference) => inference.model_id === inferenceId
       );
       // if inference endpoint exists already, do not create new inference endpoint
-      if (inferenceModel) {
+      if (hasInferenceEndpoint) {
         return;
       }
       // Only show toast if it's an internal Elastic model that hasn't been deployed yet
