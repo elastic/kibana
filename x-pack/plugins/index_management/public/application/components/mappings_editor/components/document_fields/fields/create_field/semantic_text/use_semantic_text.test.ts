@@ -93,9 +93,11 @@ jest.mock('../../../../../mappings_state_context', () => ({
         isDeployable: true,
         trainedModelId: '.elser_model_2',
       },
-      fields: {},
-      mappingViewFields: {},
     },
+    fields: {
+      byId: {},
+    },
+    mappingViewFields: { byId: {} },
   }),
   useDispatch: () => mockDispatch,
 }));
@@ -134,27 +136,27 @@ describe('useSemanticText', () => {
     jest.clearAllMocks();
     mockForm = {
       form: {
-        getFields: jest.fn().mockReturnValue({
-          referenceField: { value: 'title' },
-          name: { value: 'sem' },
-          type: { value: [{ value: 'semantic_text' }] },
-          inferenceId: { value: 'e5' },
+        getFormData: jest.fn().mockReturnValue({
+          referenceField: 'title',
+          name: 'sem',
+          type: 'semantic_text',
+          inferenceId: 'e5',
         }),
       },
       thirdPartyModel: {
-        getFields: jest.fn().mockReturnValue({
-          referenceField: { value: 'title' },
-          name: { value: 'semantic_text_openai_endpoint' },
-          type: { value: [{ value: 'semantic_text' }] },
-          inferenceId: { value: 'openai' },
+        getFormData: jest.fn().mockReturnValue({
+          referenceField: 'title',
+          name: 'semantic_text_openai_endpoint',
+          type: 'semantic_text',
+          inferenceId: 'openai',
         }),
       },
       elasticModelEndpointCreatedfromFlyout: {
-        getFields: jest.fn().mockReturnValue({
-          referenceField: { value: 'title' },
-          name: { value: 'semantic_text_elserServiceType_endpoint' },
-          type: { value: [{ value: 'semantic_text' }] },
-          inferenceId: { value: 'my_elser_endpoint' },
+        getFormData: jest.fn().mockReturnValue({
+          referenceField: 'title',
+          name: 'semantic_text_elserServiceType_endpoint',
+          type: 'semantic_text',
+          inferenceId: 'my_elser_endpoint',
         }),
       },
     };
@@ -171,7 +173,7 @@ describe('useSemanticText', () => {
       result.current.handleSemanticText(mockField.openai, mockConfig.openai);
     });
     expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.addSemanticText',
+      type: 'field.add',
       value: mockField.openai,
     });
     expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
@@ -193,7 +195,7 @@ describe('useSemanticText', () => {
     });
 
     expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.addSemanticText',
+      type: 'field.add',
       value: mockField.my_elser_endpoint,
     });
     expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
@@ -217,7 +219,7 @@ describe('useSemanticText', () => {
     });
 
     expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.addSemanticText',
+      type: 'field.add',
       value: mockField.elser_model_2,
     });
     expect(mlMock.mlApi.inferenceModels.createInferenceEndpoint).toHaveBeenCalledWith(
@@ -247,7 +249,7 @@ describe('useSemanticText', () => {
     });
 
     expect(mockDispatch).toHaveBeenCalledWith({
-      type: 'field.addSemanticText',
+      type: 'field.add',
       value: mockField.e5,
     });
 

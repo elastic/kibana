@@ -16,21 +16,19 @@ import { useDispatch } from '../application/components/mappings_editor/mappings_
 import {
   DefaultInferenceModels,
   DeploymentState,
+  Field,
   NormalizedFields,
+  SemanticTextField,
 } from '../application/components/mappings_editor/types';
 import { getInferenceEndpoints } from '../application/services/api';
-
-interface InferenceModel {
-  data: InferenceAPIConfigResponse[];
-}
 
 type DeploymentStatusType = Record<string, DeploymentState>;
 
 const getCustomInferenceIdMap = (
   deploymentStatsByModelId: DeploymentStatusType,
-  models?: InferenceModel
+  models?: InferenceAPIConfigResponse[]
 ) => {
-  return models?.data.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
+  return models?.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
     const inferenceId = model.model_id;
 
     const trainedModelId =
@@ -80,6 +78,10 @@ const getDefaultInferenceIds = (deploymentStatsByModelId: DeploymentStatusType) 
   };
 };
 
+function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
+  return Boolean(field.inference_id && field.type === 'semantic_text');
+}
+
 export const useDetailsPageMappingsModelManagement = (
   fields: NormalizedFields,
   inferenceToModelIdMap?: InferenceToModelIdMap
@@ -102,7 +104,10 @@ export const useDetailsPageMappingsModelManagement = (
     const { inferenceModels, trainedModelStats } = await fetchInferenceModelsAndTrainedModelStats();
     const deploymentStatsByModelId = getTrainedModelStats(trainedModelStats);
     const defaultInferenceIds = getDefaultInferenceIds(deploymentStatsByModelId);
-    const modelIdMap = getCustomInferenceIdMap(deploymentStatsByModelId, inferenceModels);
+    const modelIdMap = getCustomInferenceIdMap(
+      deploymentStatsByModelId,
+      inferenceModels?.data || []
+    );
 
     dispatch({
       type: 'inferenceToModelIdMap.update',
@@ -112,14 +117,14 @@ export const useDetailsPageMappingsModelManagement = (
 
   const inferenceIdsInPendingList = useMemo(() => {
     return Object.values(deNormalize(fields))
-      .filter((field) => field.type === 'semantic_text' && field.inference_id)
+      .filter(isSemanticTextField)
       .map((field) => field.inference_id);
   }, [fields]);
 
   const pendingDeployments = useMemo(() => {
     return inferenceIdsInPendingList
       .map((inferenceId) => {
-        if (inferenceId === undefined) {
+        if (!inferenceId) {
           return undefined;
         }
         const trainedModelId = inferenceToModelIdMap?.[inferenceId]?.trainedModelId ?? '';

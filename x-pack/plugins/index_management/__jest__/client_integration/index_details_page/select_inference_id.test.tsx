@@ -9,9 +9,8 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
 
-const onChangeMock = jest.fn();
-const setValueMock = jest.fn();
 const setNewInferenceEndpointMock = jest.fn();
+const mockDispatch = jest.fn();
 
 jest.mock('../../../public/application/app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
@@ -41,6 +40,12 @@ jest.mock(
     }),
   })
 );
+
+jest.mock('../../../public/application/components/mappings_editor/mappings_state_context', () => ({
+  useMappingsState: () => ({ inferenceToModelIdMap: {} }),
+  useDispatch: () => mockDispatch,
+}));
+
 describe('SelectInferenceId', () => {
   let exists: any;
   let find: any;
@@ -48,10 +53,8 @@ describe('SelectInferenceId', () => {
   beforeAll(async () => {
     const setup = registerTestBed(SelectInferenceId, {
       defaultProps: {
-        onChange: onChangeMock,
         'data-test-subj': 'data-inference-endpoint-list',
-        setValue: setValueMock,
-        setNewInferenceEndpoint: setNewInferenceEndpointMock,
+        setCustomInferenceEndpointConfig: setNewInferenceEndpointMock,
       },
       memoryRouter: { wrapComponent: false },
     });

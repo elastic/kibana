@@ -34,7 +34,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
   const dispatch = useDispatch();
   const { showSuccessToasts, showErrorToasts } = useMLModelNotificationToasts();
 
-  const fieldTypeValue = form.getFields()?.type?.value;
+  const fieldTypeValue = form.getFormData()?.type;
   useEffect(() => {
     if (!Array.isArray(fieldTypeValue) || fieldTypeValue.length === 0) {
       return;
