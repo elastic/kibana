@@ -32,11 +32,11 @@ type MetricVisualizationStateOptionals = Pick<
 export const metricStateDefaults: Required<
   Pick<
     MetricVisualizationStateOptionals,
-    'titlesTextAlign' | 'valuesTextAlign' | 'valueFontMode' | 'valueFontSize'
+    'titlesTextAlign' | 'valuesTextAlign' | 'iconAlign' | 'valueFontMode'
   >
 > = {
   titlesTextAlign: 'left',
   valuesTextAlign: 'right',
+  iconAlign: 'left',
   valueFontMode: 'default',
-  valueFontSize: 36,
 };

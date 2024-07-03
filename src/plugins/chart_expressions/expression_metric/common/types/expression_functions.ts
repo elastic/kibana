@@ -40,6 +40,7 @@ export interface MetricArguments {
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
   valuesTextAlign: MetricStyle['valuesTextAlign'];
+  iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
   color?: string;
   icon?: string;

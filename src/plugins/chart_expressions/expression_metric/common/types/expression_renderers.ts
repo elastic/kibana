@@ -29,6 +29,7 @@ export interface MetricVisParam {
   progressDirection?: LayoutDirection;
   titlesTextAlign: MetricStyle['titlesTextAlign'];
   valuesTextAlign: MetricStyle['valuesTextAlign'];
+  iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
   maxCols: number;
   minTiles?: number;

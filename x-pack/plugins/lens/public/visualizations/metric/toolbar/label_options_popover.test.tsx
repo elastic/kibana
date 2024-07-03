@@ -44,8 +44,8 @@ describe('LabelOptionsPopover', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
     titlesTextAlign: 'left',
     valuesTextAlign: 'right',
+    iconAlign: 'left',
     valueFontMode: 'default',
-    valueFontSize: 36,
   };
 
   const mockSetState = jest.fn();

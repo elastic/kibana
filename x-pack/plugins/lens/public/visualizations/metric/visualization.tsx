@@ -25,7 +25,7 @@ import {
   Suggestion,
   UserMessage,
 } from '../../types';
-import { GROUP_ID, LENS_METRIC_ID, metricStateDefaults } from './constants';
+import { GROUP_ID, LENS_METRIC_ID } from './constants';
 import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
@@ -45,11 +45,6 @@ export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric
   return showingBar(state) && isMetricNumeric
     ? euiLightVars.euiColorPrimary
     : euiThemeVars.euiColorEmptyShade;
-};
-
-export const getValueFontSize = (state: MetricVisualizationState) => {
-  const mode = state.valueFontMode ?? metricStateDefaults.valueFontMode;
-  return mode === 'custom' ? state.valueFontSize ?? metricStateDefaults.valueFontSize : mode;
 };
 
 export const supportedDataTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);

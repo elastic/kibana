@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MetricVisualizationState } from '../types';
 import { VisualOptionsPopover } from './visual_options_popover';
-import { EuiButtonGroupTestHarness, EuiSelectTestHarness } from '@kbn/test-eui-helpers';
+import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 
 jest.mock('lodash', () => ({
   ...jest.requireActual('lodash'),
@@ -50,8 +50,8 @@ describe('VisualOptionsPopover', () => {
     trendlineBreakdownByAccessor: 'trendline-breakdown-col-id',
     titlesTextAlign: 'left',
     valuesTextAlign: 'right',
+    iconAlign: 'left',
     valueFontMode: 'default',
-    valueFontSize: 36,
   };
 
   const mockSetState = jest.fn();
@@ -100,54 +100,41 @@ describe('VisualOptionsPopover', () => {
     ]);
   });
 
-  describe('valueFontSize', () => {
-    it('should set valueFontMode', async () => {
-      renderToolbarOptions({ ...fullState });
-      const textOptionsButton = screen.getByTestId('lnsVisualOptionsButton');
-      textOptionsButton.click();
+  it('should set valueFontMode', async () => {
+    renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsVisualOptionsButton');
+    textOptionsButton.click();
 
-      const modeSelect = new EuiSelectTestHarness('lens-value-font-mode-select');
+    const modeBtnGroup = new EuiButtonGroupTestHarness('lens-value-font-mode-btn');
 
-      expect(modeSelect.selected).toBe('default');
+    expect(modeBtnGroup.selected.textContent).toBe('Default');
 
-      modeSelect.select('fit');
-      modeSelect.select('custom');
-      modeSelect.select('default');
+    modeBtnGroup.select('Fit');
+    modeBtnGroup.select('Default');
 
-      expect(mockSetState.mock.calls.map(([s]) => s.valueFontMode)).toEqual([
-        'fit',
-        'custom',
-        'default',
-      ]);
-    });
+    expect(mockSetState.mock.calls.map(([s]) => s.valueFontMode)).toEqual(['fit', 'default']);
+  });
 
-    it.each<MetricVisualizationState['valueFontMode']>(['default', 'fit'])(
-      'should disable fontSize for %s mode',
-      async (valueFontMode) => {
-        renderToolbarOptions({ ...fullState, valueFontMode });
-        const textOptionsButton = screen.getByTestId('lnsVisualOptionsButton');
-        textOptionsButton.click();
+  it('should set iconAlign', async () => {
+    renderToolbarOptions({ ...fullState, icon: 'sortUp' });
+    const textOptionsButton = screen.getByTestId('lnsVisualOptionsButton');
+    textOptionsButton.click();
 
-        const fontSize = screen.getByTestId('lens-value-font-size');
+    const iconAlignBtnGroup = new EuiButtonGroupTestHarness('lens-icon-alignment-btn');
 
-        expect(fontSize).toBeDisabled();
-      }
-    );
+    expect(iconAlignBtnGroup.selected.textContent).toBe('Left');
 
-    it('should set fontSize in custom mode', async () => {
-      renderToolbarOptions({ ...fullState, valueFontMode: 'custom' });
-      const textOptionsButton = screen.getByTestId('lnsVisualOptionsButton');
-      textOptionsButton.click();
+    iconAlignBtnGroup.select('Right');
+    iconAlignBtnGroup.select('Left');
 
-      const fontSize = screen.getByTestId('lens-value-font-size');
+    expect(mockSetState.mock.calls.map(([s]) => s.iconAlign)).toEqual(['right', 'left']);
+  });
 
-      expect(fontSize).toBeEnabled();
-      expect(fontSize).toHaveValue(36);
+  it.each([undefined, 'empty'])('should hide iconAlign option when icon is %j', async (icon) => {
+    renderToolbarOptions({ ...fullState, icon });
+    const textOptionsButton = screen.getByTestId('lnsVisualOptionsButton');
+    textOptionsButton.click();
 
-      fireEvent.change(fontSize, { target: { value: 50 } });
-
-      expect(fontSize).toHaveValue(50);
-      expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ valueFontSize: 50 }));
-    });
+    expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
   });
 });

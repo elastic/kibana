@@ -10,7 +10,7 @@ import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CollapseFunction } from '@kbn/visualizations-plugin/common';
 import type { LayerType } from '../../../common/types';
 
-export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number> | 'custom';
+export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 
 export interface MetricVisualizationState {
   layerId: string;
@@ -28,8 +28,8 @@ export interface MetricVisualizationState {
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
   valuesTextAlign?: MetricStyle['valuesTextAlign'];
+  iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
-  valueFontSize?: number;
   color?: string;
   icon?: string;
   palette?: PaletteOutput<CustomPaletteParams>;

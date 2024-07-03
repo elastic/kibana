@@ -337,6 +337,7 @@ export const MetricVis = ({
                   blendingBackground: euiThemeVars.euiColorEmptyShade,
                   titlesTextAlign: config.metric.titlesTextAlign,
                   valuesTextAlign: config.metric.valuesTextAlign,
+                  iconAlign: config.metric.iconAlign,
                   valueFontSize: config.metric.valueFontSize,
                 },
               },

@@ -7,22 +7,12 @@
 
 import React, { FC } from 'react';
 
-import {
-  EuiFormRow,
-  EuiIconTip,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiSelectOption,
-} from '@elastic/eui';
+import { EuiFormRow, EuiIconTip, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { MetricStyle } from '@elastic/charts';
-import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { ToolbarPopover } from '../../../shared_components';
-import { MetricVisualizationState } from '../types';
+import { MetricVisualizationState, ValueFontMode } from '../types';
 import { metricStateDefaults } from '../constants';
 
 export interface VisualOptionsPopoverProps {
@@ -52,93 +42,66 @@ export const VisualOptionsPopover: FC<VisualOptionsPopoverProps> = ({ state, set
           setState({ ...state, valuesTextAlign });
         }}
       />
+      {state.icon && state.icon !== 'empty' && (
+        <IconAlignmentOption
+          value={state.iconAlign ?? metricStateDefaults.iconAlign}
+          onChange={(iconAlign) => {
+            setState({ ...state, iconAlign });
+          }}
+        />
+      )}
       <ValueFontOption
-        mode={state.valueFontMode ?? metricStateDefaults.valueFontMode}
-        fontSize={state.valueFontSize ?? metricStateDefaults.valueFontSize}
-        onChangeMode={(valueFontMode) => {
-          setState({ ...state, valueFontMode });
-        }}
-        onChangeFontSize={(valueFontSize) => {
-          setState({ ...state, valueFontSize });
+        value={state.valueFontMode ?? metricStateDefaults.valueFontMode}
+        onChange={(value) => {
+          setState({ ...state, valueFontMode: value });
         }}
       />
     </ToolbarPopover>
   );
 };
 
-type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number> | 'custom';
-
-const valueFontModes: Array<{ value: ValueFontMode } & Pick<EuiSelectOption, 'text'>> = [
+const valueFontModes: Array<{
+  id: ValueFontMode;
+  label: string;
+}> = [
   {
-    value: 'default',
-    text: i18n.translate('xpack.lens.metric.toolbarVisOptions.default', {
+    id: 'default',
+    label: i18n.translate('xpack.lens.metric.toolbarVisOptions.default', {
       defaultMessage: 'Default',
     }),
   },
   {
-    value: 'fit',
-    text: i18n.translate('xpack.lens.metric.toolbarVisOptions.fit', {
+    id: 'fit',
+    label: i18n.translate('xpack.lens.metric.toolbarVisOptions.fit', {
       defaultMessage: 'Fit',
-    }),
-  },
-  {
-    value: 'custom',
-    text: i18n.translate('xpack.lens.metric.toolbarVisOptions.custom', {
-      defaultMessage: 'Custom',
     }),
   },
 ];
 
 function ValueFontOption({
-  mode,
-  fontSize,
-  onChangeMode,
-  onChangeFontSize,
+  value,
+  onChange,
 }: {
-  mode: typeof valueFontModes[number]['value'];
-  fontSize: number;
-  onChangeMode: (mode: ValueFontMode) => void;
-  onChangeFontSize: (fontSize: number) => void;
+  value: typeof valueFontModes[number]['id'];
+  onChange: (mode: ValueFontMode) => void;
 }) {
-  const dbFontValue = useDebouncedValue<number>({
-    onChange: onChangeFontSize,
-    value: fontSize,
-  });
-
   const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.valueFontSize', {
     defaultMessage: 'Value fontSize',
   });
 
   return (
     <EuiFormRow display="columnCompressed" label={label}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSelect
-            fullWidth
-            compressed
-            data-test-subj="lens-value-font-mode-select"
-            options={valueFontModes}
-            value={mode}
-            onChange={({ target }) => {
-              onChangeMode(target.value as ValueFontMode);
-            }}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFieldNumber
-            compressed
-            append={i18n.translate('xpack.lens.shared.pixel', {
-              defaultMessage: 'px',
-            })}
-            min={8}
-            step={1}
-            data-test-subj="lens-value-font-size"
-            value={dbFontValue.inputValue}
-            disabled={mode !== 'custom'}
-            onChange={({ target }) => dbFontValue.handleInputChange(+target.value)}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiButtonGroup
+        isFullWidth
+        legend={label}
+        data-test-subj="lens-value-font-mode-btn"
+        buttonSize="compressed"
+        idSelected={value}
+        options={valueFontModes}
+        onChange={(mode) => {
+          onChange(mode as ValueFontMode);
+        }}
+      />
     </EuiFormRow>
   );
 }
@@ -186,7 +149,7 @@ function TitlesAlignmentOption({
           {label}{' '}
           <EuiIconTip
             content={i18n.translate('xpack.lens.metric.toolbarVisOptions.titlesAlignmentTip', {
-              defaultMessage: 'Alignment of the title and subtitle',
+              defaultMessage: 'Alignment of the Title and Subtitle',
             })}
             iconProps={{
               className: 'eui-alignTop',
@@ -221,8 +184,8 @@ function ValuesAlignmentOption({
   value: MetricStyle['valuesTextAlign'];
   onChange: (alignment: MetricStyle['valuesTextAlign']) => void;
 }) {
-  const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.valueAlignment', {
-    defaultMessage: 'Value Alignment',
+  const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.valuesAlignment', {
+    defaultMessage: 'Values Alignment',
   });
 
   return (
@@ -233,8 +196,8 @@ function ValuesAlignmentOption({
           {label}{' '}
           <EuiIconTip
             color="subdued"
-            content={i18n.translate('xpack.lens.metric.toolbarVisOptions.valueAlignmentTip', {
-              defaultMessage: 'Alignment of the value',
+            content={i18n.translate('xpack.lens.metric.toolbarVisOptions.valuesAlignmentTip', {
+              defaultMessage: 'Alignment of the Primary and Secondary Metric',
             })}
             iconProps={{
               className: 'eui-alignTop',
@@ -255,6 +218,52 @@ function ValuesAlignmentOption({
         idSelected={value}
         onChange={(alignment) => {
           onChange(alignment as MetricStyle['valuesTextAlign']);
+        }}
+      />
+    </EuiFormRow>
+  );
+}
+
+const iconAlignmentOptions: Array<{
+  id: MetricStyle['titlesTextAlign'] | MetricStyle['valuesTextAlign'];
+  label: string;
+}> = [
+  {
+    id: 'left',
+    label: i18n.translate('xpack.lens.shared.left', {
+      defaultMessage: 'Left',
+    }),
+  },
+  {
+    id: 'right',
+    label: i18n.translate('xpack.lens.shared.right', {
+      defaultMessage: 'Right',
+    }),
+  },
+];
+
+function IconAlignmentOption({
+  value,
+  onChange,
+}: {
+  value: MetricStyle['iconAlign'];
+  onChange: (alignment: MetricStyle['iconAlign']) => void;
+}) {
+  const label = i18n.translate('xpack.lens.metric.toolbarVisOptions.iconAlignment', {
+    defaultMessage: 'Icon Alignment',
+  });
+
+  return (
+    <EuiFormRow display="columnCompressed" label={label}>
+      <EuiButtonGroup
+        isFullWidth
+        legend={label}
+        data-test-subj="lens-icon-alignment-btn"
+        buttonSize="compressed"
+        options={iconAlignmentOptions}
+        idSelected={value}
+        onChange={(alignment) => {
+          onChange(alignment as MetricStyle['iconAlign']);
         }}
       />
     </EuiFormRow>
