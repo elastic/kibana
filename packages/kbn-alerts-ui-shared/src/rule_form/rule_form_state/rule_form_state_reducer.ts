@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { RuleActionParams } from '@kbn/alerting-types';
+import { omit } from 'lodash';
+import { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../../common';
 import { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
 
@@ -63,6 +66,43 @@ export type RuleFormStateReducerAction =
   | {
       type: 'setMetadata';
       payload: Record<string, unknown>;
+    }
+  | {
+      type: 'addAction';
+      payload: RuleUiAction;
+    }
+  | {
+      type: 'removeAction';
+      payload: string;
+    }
+  | {
+      type: 'setActionProperty';
+      payload: {
+        uuid: string;
+        key: string;
+        value: unknown;
+      };
+    }
+  | {
+      type: 'setActionParams';
+      payload: {
+        uuid: string;
+        value: RuleActionParams;
+      };
+    }
+  | {
+      type: 'setActionError';
+      payload: {
+        uuid: string;
+        errors: RuleFormActionsErrors;
+      };
+    }
+  | {
+      type: 'setActionParamsError';
+      payload: {
+        uuid: string;
+        errors: RuleFormParamsErrors;
+      };
     };
 
 const getUpdateWithValidation =
@@ -186,6 +226,99 @@ export const ruleFormStateReducer = (
       return {
         ...ruleFormState,
         metadata: payload,
+      };
+    }
+    case 'addAction': {
+      const { payload } = action;
+      return updateWithValidation(() => ({
+        ...formData,
+        actions: [...formData.actions, payload],
+      }));
+    }
+    case 'removeAction': {
+      const { payload } = action;
+      return {
+        ...ruleFormState,
+        ...updateWithValidation(() => ({
+          ...formData,
+          actions: formData.actions.filter((existingAction) => existingAction.uuid !== payload),
+        })),
+        ...(ruleFormState.actionsErrors
+          ? {
+              actionsErrors: omit(ruleFormState.actionsErrors, payload),
+            }
+          : {}),
+        ...(ruleFormState.actionsParamsErrors
+          ? {
+              actionsParamsErrors: omit(ruleFormState.actionsParamsErrors, payload),
+            }
+          : {}),
+      };
+    }
+    case 'setActionProperty': {
+      const {
+        payload: { uuid, key, value },
+      } = action;
+      return updateWithValidation(() => ({
+        ...formData,
+        actions: formData.actions.map((existingAction) => {
+          if (existingAction.uuid === uuid) {
+            return {
+              ...existingAction,
+              [key]: value,
+            };
+          }
+          return existingAction;
+        }),
+      }));
+    }
+    case 'setActionParams': {
+      const {
+        payload: { uuid, value },
+      } = action;
+      return updateWithValidation(() => ({
+        ...formData,
+        actions: formData.actions.map((existingAction) => {
+          if (existingAction.uuid === uuid) {
+            return {
+              ...existingAction,
+              params: value,
+            };
+          }
+          return existingAction;
+        }),
+      }));
+    }
+    case 'setActionError': {
+      const {
+        payload: { uuid, errors },
+      } = action;
+      const newActionsError = {
+        ...(ruleFormState.actionsErrors || {})[uuid],
+        ...errors,
+      };
+      return {
+        ...ruleFormState,
+        actionsErrors: {
+          ...ruleFormState.actionsErrors,
+          [uuid]: newActionsError,
+        },
+      };
+    }
+    case 'setActionParamsError': {
+      const {
+        payload: { uuid, errors },
+      } = action;
+      const newActionsParamsError = {
+        ...(ruleFormState.actionsParamsErrors || {})[uuid],
+        ...errors,
+      };
+      return {
+        ...ruleFormState,
+        actionsParamsErrors: {
+          ...ruleFormState.actionsParamsErrors,
+          [uuid]: newActionsParamsError,
+        },
       };
     }
     default: {

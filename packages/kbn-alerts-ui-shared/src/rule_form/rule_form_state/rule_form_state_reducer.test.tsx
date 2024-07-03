@@ -62,6 +62,7 @@ const initialState: RuleFormState = {
   formData: {
     name: 'test-rule',
     tags: [],
+    actions: [],
     params: {
       paramsValue: 'value-1',
     },
@@ -96,6 +97,7 @@ describe('ruleFormStateReducer', () => {
       params: {
         test: 'hello',
       },
+      actions: [],
       schedule: { interval: '2m' },
       consumer: 'logs',
     };

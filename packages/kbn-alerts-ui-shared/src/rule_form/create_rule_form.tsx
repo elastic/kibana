@@ -9,9 +9,9 @@
 import React, { useCallback } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { AlertConsumers, type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
-import { ALERTING_FEATURE_ID, DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
+import { DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
@@ -45,7 +45,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const {
     ruleTypeId,
     plugins,
-    consumer = ALERTING_FEATURE_ID,
+    consumer = AlertConsumers.STACK_ALERTS,
     multiConsumerSelection,
     validConsumers = DEFAULT_VALID_CONSUMERS,
     filteredRuleTypes = [],
@@ -98,8 +98,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           tags: newFormData.tags,
           params: newFormData.params,
           schedule: newFormData.schedule,
-          // TODO: Will add actions in the actions PR
-          actions: [],
+          actions: newFormData.actions,
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
         },
@@ -144,12 +143,14 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
               ruleType,
               minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
             }),
+            actions: [],
           }),
           plugins,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleTypeModel: ruleTypeModel,
           selectedRuleType: ruleType,
           validConsumers,
+          canShowConsumerSelection: true,
           multiConsumerSelection: getInitialMultiConsumer({
             multiConsumerSelection,
             validConsumers,

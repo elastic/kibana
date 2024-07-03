@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -79,6 +80,12 @@ export const RuleDefinition = () => {
       return false;
     }
     if (!authorizedConsumers.length) {
+      return false;
+    }
+    if (
+      authorizedConsumers.length <= 1 ||
+      authorizedConsumers.includes(AlertConsumers.OBSERVABILITY)
+    ) {
       return false;
     }
     return (

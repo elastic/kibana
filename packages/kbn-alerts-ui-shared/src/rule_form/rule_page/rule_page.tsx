@@ -73,7 +73,7 @@ export const RulePage = (props: RulePageProps) => {
         title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
         children: (
           <>
-            <RuleActions onClick={() => {}} />
+            <RuleActions />
             <EuiSpacer />
             <EuiHorizontalRule margin="none" />
           </>

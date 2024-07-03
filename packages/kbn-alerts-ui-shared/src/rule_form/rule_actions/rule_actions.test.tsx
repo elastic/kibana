@@ -18,13 +18,13 @@ describe('Rule actions', () => {
   });
 
   test('Renders correctly', () => {
-    render(<RuleActions onClick={mockOnChange} />);
+    render(<RuleActions />);
 
     expect(screen.getByTestId('ruleActions')).toBeInTheDocument();
   });
 
   test('Calls onChange when button is click', () => {
-    render(<RuleActions onClick={mockOnChange} />);
+    render(<RuleActions />);
 
     fireEvent.click(screen.getByTestId('ruleActionsAddActionButton'));
 

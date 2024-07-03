@@ -32,14 +32,22 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
-  const { baseErrors, paramsErrors } = useRuleFormState();
+  const {
+    formData: { actions },
+    baseErrors = {},
+    paramsErrors = {},
+    actionsErrors = {},
+    actionsParamsErrors = {},
+  } = useRuleFormState();
 
   const hasErrors = useMemo(() => {
     return hasRuleErrors({
-      baseErrors: baseErrors || {},
-      paramsErrors: paramsErrors || {},
+      baseErrors,
+      paramsErrors,
+      actionsErrors,
+      actionsParamsErrors,
     });
-  }, [baseErrors, paramsErrors]);
+  }, [baseErrors, paramsErrors, actionsErrors, actionsParamsErrors]);
 
   const saveButtonText = useMemo(() => {
     if (isEdit) {
@@ -58,11 +66,13 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
 
   const onSaveClick = useCallback(() => {
     if (isEdit) {
-      onSave();
-    } else {
+      return onSave();
+    }
+    if (actions.length === 0) {
       setShowCreateConfirmation(true);
     }
-  }, [isEdit, onSave]);
+    onSave();
+  }, [actions, isEdit, onSave]);
 
   const onCreateConfirmClick = useCallback(() => {
     setShowCreateConfirmation(false);

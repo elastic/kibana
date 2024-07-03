@@ -73,8 +73,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           tags: newFormData.tags,
           schedule: newFormData.schedule,
           params: newFormData.params,
-          // TODO: Will add actions in the actions PR
-          actions: [],
+          actions: newFormData.actions,
           notifyWhen: newFormData.notifyWhen,
           alertDelay: newFormData.alertDelay,
         },

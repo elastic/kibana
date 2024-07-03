@@ -31,6 +31,7 @@ const formDataMock: RuleFormData = {
     index: ['.kibana'],
     timeField: 'alert.executionStatus.lastExecutionDate',
   },
+  actions: [],
   consumer: 'stackAlerts',
   schedule: { interval: '1m' },
   tags: [],
@@ -152,6 +153,8 @@ describe('hasRuleErrors', () => {
     let result = hasRuleErrors({
       baseErrors: {},
       paramsErrors: {},
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeFalsy();
@@ -161,6 +164,8 @@ describe('hasRuleErrors', () => {
         name: ['error'],
       },
       paramsErrors: {},
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeTruthy();
@@ -169,7 +174,10 @@ describe('hasRuleErrors', () => {
       baseErrors: {},
       paramsErrors: {
         someValue: ['error'],
+        
       },
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeTruthy();
@@ -179,6 +187,8 @@ describe('hasRuleErrors', () => {
       paramsErrors: {
         someValue: 'error',
       },
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeTruthy();
@@ -190,6 +200,8 @@ describe('hasRuleErrors', () => {
           someValue: ['error'],
         },
       },
+      actionsErrors: {},
+      actionsParamsErrors: {},
     });
 
     expect(result).toBeTruthy();

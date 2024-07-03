@@ -48,6 +48,7 @@ export interface TriggersActionsUiExampleComponentParams {
   docLinks: CoreStart['docLinks'];
   i18n: CoreStart['i18n'];
   theme: CoreStart['theme'];
+  settings: CoreStart['settings'];
   history: ScopedHistory;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -63,6 +64,7 @@ const TriggersActionsUiExampleApp = ({
   http,
   application,
   notification,
+  settings,
   docLinks,
   i18n,
   theme,
@@ -200,7 +202,9 @@ const TriggersActionsUiExampleApp = ({
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                   }}
                   returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
@@ -224,7 +228,9 @@ const TriggersActionsUiExampleApp = ({
                     data,
                     dataViews,
                     unifiedSearch,
+                    settings,
                     ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
                   }}
                   returnUrl={application.getUrlForApp('triggersActionsUiExample')}
                 />
@@ -262,7 +268,7 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element, history }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application, i18n, theme } = core;
+  const { http, notifications, docLinks, application, i18n, theme, settings } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
 
@@ -286,6 +292,7 @@ export const renderApp = (
               docLinks={docLinks}
               i18n={i18n}
               theme={theme}
+              settings={settings}
               triggersActionsUi={deps.triggersActionsUi}
               data={deps.data}
               charts={deps.charts}

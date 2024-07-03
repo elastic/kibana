@@ -35,8 +35,8 @@ import { isEmpty, partition, some } from 'lodash';
 import {
   ActionVariable,
   RuleActionAlertsFilterProperty,
+  RuleActionFrequency,
   RuleActionParam,
-  RuleNotifyWhenType,
 } from '@kbn/alerting-plugin/common';
 import {
   getDurationNumberInItsUnit,
@@ -94,7 +94,6 @@ export type ActionTypeFormProps = {
   hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
-  defaultNotifyWhenValue?: RuleNotifyWhenType;
   featureId: string;
   producerId: string;
   ruleTypeId?: string;
@@ -146,7 +145,6 @@ export const ActionTypeForm = ({
   hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
-  defaultNotifyWhenValue,
   producerId,
   featureId,
   ruleTypeId,
@@ -369,44 +367,32 @@ export const ActionTypeForm = ({
       ? isActionGroupDisabledForActionType(actionGroupId, actionTypeId)
       : false;
 
+  const onActionFrequencyChange = (frequency: RuleActionFrequency | undefined) => {
+    const { notifyWhen, throttle, summary } = frequency || {};
+
+    setActionFrequencyProperty('notifyWhen', notifyWhen, index);
+
+    if (throttle) {
+      setActionThrottle(getDurationNumberInItsUnit(throttle));
+      setActionThrottleUnit(getDurationUnitValue(throttle));
+    }
+
+    setActionFrequencyProperty('throttle', throttle ? throttle : null, index);
+
+    setActionFrequencyProperty('summary', summary, index);
+  };
+
   const actionNotifyWhen = (
     <RuleActionsNotifyWhen
       frequency={actionItem.frequency}
       throttle={actionThrottle}
       throttleUnit={actionThrottleUnit}
       hasAlertsMappings={hasAlertsMappings}
-      onNotifyWhenChange={useCallback(
-        (notifyWhen) => {
-          setActionFrequencyProperty('notifyWhen', notifyWhen, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onThrottleChange={useCallback(
-        (throttle: number | null, throttleUnit: string) => {
-          if (throttle) {
-            setActionThrottle(throttle);
-            setActionThrottleUnit(throttleUnit);
-          }
-          setActionFrequencyProperty(
-            'throttle',
-            throttle ? `${throttle}${throttleUnit}` : null,
-            index
-          );
-        },
-        [setActionFrequencyProperty, index]
-      )}
-      onSummaryChange={useCallback(
-        (summary: boolean) => {
-          // use the default message when a user toggles between action frequencies
-          setUseDefaultMessage(true);
-          setActionFrequencyProperty('summary', summary, index);
-        },
-        [setActionFrequencyProperty, index]
-      )}
+      onChange={onActionFrequencyChange}
       showMinimumThrottleWarning={showMinimumThrottleWarning}
       showMinimumThrottleUnitWarning={showMinimumThrottleUnitWarning}
       notifyWhenSelectOptions={notifyWhenSelectOptions}
-      defaultNotifyWhenValue={defaultNotifyWhenValue}
+      onUseDefaultMessage={() => setUseDefaultMessage(true)}
     />
   );
 

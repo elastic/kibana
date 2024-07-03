@@ -49,6 +49,7 @@ const formDataMock: RuleFormData = {
     index: ['.kibana'],
     timeField: 'alert.executionStatus.lastExecutionDate',
   },
+  actions: [],
   consumer: 'stackAlerts',
   schedule: { interval: '1m' },
   tags: [],

@@ -552,7 +552,6 @@ export const ActionForm = ({
               hasAlertsMappings={hasAlertsMappings}
               minimumThrottleInterval={minimumThrottleInterval}
               notifyWhenSelectOptions={notifyWhenSelectOptions}
-              defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}
               featureId={featureId}
               producerId={producerId}
               ruleTypeId={ruleTypeId}

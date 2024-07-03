@@ -467,3 +467,71 @@ export const RULE_FORM_PAGE_RULE_DETAILS_TITLE = i18n.translate(
 export const RULE_FORM_RETURN_TITLE = i18n.translate('alertsUIShared.ruleForm.returnTitle', {
   defaultMessage: 'Return',
 });
+
+export const MODAL_SEARCH_PLACEHOLDER = i18n.translate(
+  'alertsUIShared.ruleForm.modalSearchPlaceholder',
+  {
+    defaultMessage: 'Search',
+  }
+);
+
+export const MODAL_SEARCH_CLEAR_FILTERS_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.modalSearchClearFiltersText',
+  {
+    defaultMessage: 'Clear filters',
+  }
+);
+
+export const ACTION_TYPE_MODAL_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalTitle',
+  {
+    defaultMessage: 'Select connector',
+  }
+);
+
+export const ACTION_TYPE_MODAL_FILTER_ALL = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalFilterAll',
+  {
+    defaultMessage: 'All',
+  }
+);
+
+export const ACTION_TYPE_MODAL_EMPTY_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalEmptyTitle',
+  {
+    defaultMessage: 'No connectors found',
+  }
+);
+
+export const ACTION_TYPE_MODAL_EMPTY_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.actionTypeModalEmptyText',
+  {
+    defaultMessage: 'Try a different search or change your filter settings.',
+  }
+);
+
+export const ACTION_ERROR_TOOLTIP = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionErrorToolTip',
+  {
+    defaultMessage: 'Action contains errors.',
+  }
+);
+
+export const ACTION_WARNING_TITLE = i18n.translate(
+  'alertsUIShared.ruleActionsItem.actionWarningsTitle',
+  {
+    defaultMessage: '1 warning',
+  }
+);
+
+export const TECH_PREVIEW_LABEL = i18n.translate('alertsUIShared.technicalPreviewBadgeLabel', {
+  defaultMessage: 'Technical preview',
+});
+
+export const TECH_PREVIEW_DESCRIPTION = i18n.translate(
+  'alertsUIShared.technicalPreviewBadgeDescription',
+  {
+    defaultMessage:
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  }
+);
