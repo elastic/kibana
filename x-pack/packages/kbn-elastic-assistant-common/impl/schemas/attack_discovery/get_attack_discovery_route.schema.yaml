@@ -28,11 +28,13 @@ paths:
                 properties:
                   data:
                     $ref: './common_attributes.schema.yaml#/components/schemas/AttackDiscoveryResponse'
-                  entryExists:
-                    type: boolean
-                    description: Indicates if an attack discovery exists for the given connectorId
+                  stats:
+                    type: array
+                    description: Attack discovery stats per connector
+                    items:
+                      $ref: './common_attributes.schema.yaml#/components/schemas/AttackDiscoveryStat'
                 required:
-                  - entryExists
+                  - stats
         '400':
           description: Generic Error
           content:
