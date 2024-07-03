@@ -1,23 +1,26 @@
-import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
-import { RoleCredentials } from 'x-pack/test_serverless/shared/services';
-import {
-  deleteIndex,
-  addIndex,
-  createPackagePolicy,
-} from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
-import {
-  cnvmFindingsMockDataForMetering,
-  cspmFindingsMockDataForMetering,
-  defendForContainersHeartbeatsForMetering,
-  kspmFindingsMockDataForMetering,
-} from './mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import expect from '@kbn/expect';
 import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
+import { RoleCredentials } from '../../../../../shared/services';
+import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import {
+  deleteIndex,
+  addIndex,
+  createPackagePolicy,
+  createCloudDefendPackagePolicy,
+} from '../../../../../../test/api_integration/apis/cloud_security_posture/helper'; // eslint-disable-line @kbn/imports/no_boundary_crossing
+
+import { UsageRecord, getInterceptedRequestPayload, setupMockServer } from './mock_usage_server'; // eslint-disable-line @kbn/imports/no_boundary_crossing
 
 const CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS = 'metrics-cloud_defend.heartbeat-default';
 
@@ -97,7 +100,23 @@ export default function (providerContext: FtrProviderContext) {
         roleAuthc,
         internalRequestHeader
       );
-      await addIndex(es, cspmFindingsMockDataForMetering, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+      const billableFindings = getMockFindings({
+        postureType: 'cspm',
+        isBillableAsset: true,
+        numberOfFindings: 5,
+      });
+
+      const notBillableFindings = getMockFindings({
+        postureType: 'cspm',
+        isBillableAsset: false,
+        numberOfFindings: 10,
+      });
+
+      await addIndex(
+        es,
+        [...billableFindings, ...notBillableFindings],
+        LATEST_FINDINGS_INDEX_DEFAULT_NS
+      );
 
       let interceptedRequestBody: UsageRecord[] = [];
       await retry.try(async () => {
@@ -110,7 +129,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(2);
+      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for KSPM', async () => {
@@ -125,7 +144,23 @@ export default function (providerContext: FtrProviderContext) {
         roleAuthc,
         internalRequestHeader
       );
-      await addIndex(es, kspmFindingsMockDataForMetering, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+      const billableFindings = getMockFindings({
+        postureType: 'kspm',
+        isBillableAsset: true,
+        numberOfFindings: 3,
+      });
+
+      const notBillableFindings = getMockFindings({
+        postureType: 'kspm',
+        isBillableAsset: false,
+        numberOfFindings: 11,
+      });
+
+      await addIndex(
+        es,
+        [...billableFindings, ...notBillableFindings],
+        LATEST_FINDINGS_INDEX_DEFAULT_NS
+      );
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -139,7 +174,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(1);
+      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for CNVM', async () => {
@@ -154,7 +189,13 @@ export default function (providerContext: FtrProviderContext) {
         roleAuthc,
         internalRequestHeader
       );
-      await addIndex(es, cnvmFindingsMockDataForMetering, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
+
+      const billableFindings = getMockFindings({
+        postureType: 'cnvm',
+        numberOfFindings: 2,
+      });
+
+      await addIndex(es, billableFindings, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
 
       let interceptedRequestBody: UsageRecord[] = [];
 
@@ -168,17 +209,29 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(2);
+      expect(interceptedRequestBody[0].usage.quantity).to.be(billableFindings.length);
     });
 
     it('Should intercept usage API request for Defend for Containers', async () => {
-      await es.indices.putMapping({
-        index: CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS,
-        properties: { event: { properties: { ingested: { type: 'date' } } } },
+      await createCloudDefendPackagePolicy(
+        supertestWithoutAuth,
+        agentPolicyId,
+        roleAuthc,
+        internalRequestHeader
+      );
+
+      const blockActionEnabledHeartbeats = getMockDefendForContainersHeartbeats({
+        isBlockActionEnables: true,
+        numberOfHearbeats: 2,
+      });
+
+      const blockActionDisabledHeartbeats = getMockDefendForContainersHeartbeats({
+        isBlockActionEnables: false,
+        numberOfHearbeats: 2,
       });
       await addIndex(
         es,
-        defendForContainersHeartbeatsForMetering,
+        [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
         CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
       );
 
@@ -193,11 +246,112 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
-      expect(interceptedRequestBody.length).to.be(2);
+      expect(interceptedRequestBody.length).to.be(blockActionEnabledHeartbeats.length);
       expect(interceptedRequestBody[0].usage.type).to.be('cloud_security');
-      expect(interceptedRequestBody[0].usage.quantity).to.be(1);
-      expect(interceptedRequestBody[1].usage.quantity).to.be(1);
-      expect(interceptedRequestBody[0].usage.period_seconds).to.be(3600);
+    });
+
+    it('Should intercept usage API request with all integrations usage records', async () => {
+      // Create one package policy - it takes care forCSPM, KSMP and CNVM
+      await createPackagePolicy(
+        supertestWithoutAuth,
+        agentPolicyId,
+        'cspm',
+        'cloudbeat/cis_aws',
+        'aws',
+        'cspm',
+        'CSPM-1',
+        roleAuthc,
+        internalRequestHeader
+      );
+
+      // Create Defend for Containers package policy
+      await createCloudDefendPackagePolicy(
+        supertestWithoutAuth,
+        agentPolicyId,
+        roleAuthc,
+        internalRequestHeader
+      );
+      const billableFindingsCSPM = getMockFindings({
+        postureType: 'cspm',
+        isBillableAsset: true,
+        numberOfFindings: 5,
+      });
+
+      const notBillableFindingsCSPM = getMockFindings({
+        postureType: 'cspm',
+        isBillableAsset: false,
+        numberOfFindings: 10,
+      });
+
+      const billableFindingsKSPM = getMockFindings({
+        postureType: 'kspm',
+        isBillableAsset: true,
+        numberOfFindings: 3,
+      });
+
+      const billableFindingsCNVM = getMockFindings({
+        postureType: 'cnvm',
+        numberOfFindings: 2,
+      });
+
+      const notBillableFindingsKSPM = getMockFindings({
+        postureType: 'kspm',
+        isBillableAsset: false,
+        numberOfFindings: 11,
+      });
+
+      const blockActionEnabledHeartbeats = getMockDefendForContainersHeartbeats({
+        isBlockActionEnables: true,
+        numberOfHearbeats: 2,
+      });
+
+      const blockActionDisabledHeartbeats = getMockDefendForContainersHeartbeats({
+        isBlockActionEnables: false,
+        numberOfHearbeats: 2,
+      });
+
+      await Promise.all([
+        addIndex(
+          es,
+          [
+            ...billableFindingsCSPM,
+            ...notBillableFindingsCSPM,
+            ...billableFindingsKSPM,
+            ...notBillableFindingsKSPM,
+          ],
+          LATEST_FINDINGS_INDEX_DEFAULT_NS
+        ),
+        addIndex(es, [...billableFindingsCNVM], LATEST_VULNERABILITIES_INDEX_DEFAULT_NS),
+        addIndex(
+          es,
+          [...blockActionEnabledHeartbeats, ...blockActionDisabledHeartbeats],
+          CLOUD_DEFEND_HEARTBEAT_INDEX_DEFAULT_NS
+        ),
+      ]);
+
+      // Intercept and verify usage API request
+      let interceptedRequestBody: UsageRecord[] = [];
+
+      await retry.try(async () => {
+        interceptedRequestBody = getInterceptedRequestPayload();
+        const usageSubTypes = interceptedRequestBody.map((record) => record.usage.sub_type);
+
+        expect(usageSubTypes).to.contain('cspm');
+        expect(usageSubTypes).to.contain('kspm');
+        expect(usageSubTypes).to.contain('cnvm');
+        expect(usageSubTypes).to.contain('cloud_defend');
+      });
+
+      const totalUsageQuantity = interceptedRequestBody.reduce(
+        (acc, record) => acc + record.usage.quantity,
+        0
+      );
+      expect(totalUsageQuantity).to.be(
+        billableFindingsCSPM.length +
+          billableFindingsKSPM.length +
+          billableFindingsCNVM.length +
+          blockActionEnabledHeartbeats.length
+      );
     });
   });
 }

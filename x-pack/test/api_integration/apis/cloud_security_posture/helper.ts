@@ -145,6 +145,117 @@ export async function createPackagePolicy(
   return postPackageResponse.item;
 }
 
+export async function createCloudDefendPackagePolicy(
+  supertest: SuperTestAgent,
+  agentPolicyId: string,
+  roleAuthc?: RoleCredentials,
+  internalRequestHeader?: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string }
+) {
+  const version = '1.2.5';
+
+  const { body: postPackageResponse } =
+    roleAuthc && internalRequestHeader
+      ? await supertest
+          .post(`/api/fleet/package_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader)
+          .send({
+            policy_id: agentPolicyId,
+            package: {
+              name: 'cloud_defend',
+              version,
+            },
+            name: 'cloud_defend-1',
+            description: '',
+            namespace: 'default',
+            inputs: {
+              'cloud_defend-cloud_defend/control': {
+                enabled: true,
+                vars: {
+                  configuration:
+                    'process:\n  selectors:\n    - name: allProcesses\n      operation: [fork, exec]\n  responses:\n    - match: [allProcesses]\n      actions: [log]\nfile:\n  selectors:\n    - name: executableChanges\n      operation: [createExecutable, modifyExecutable]\n  responses:\n    - match: [executableChanges]\n      actions: [alert]\n',
+                },
+                streams: {
+                  'cloud_defend.alerts': {
+                    enabled: true,
+                  },
+                  'cloud_defend.file': {
+                    enabled: true,
+                  },
+                  'cloud_defend.heartbeat': {
+                    enabled: true,
+                    vars: {
+                      period: '30m',
+                    },
+                  },
+                  'cloud_defend.metrics': {
+                    enabled: true,
+                    vars: {
+                      period: '24h',
+                    },
+                  },
+                  'cloud_defend.process': {
+                    enabled: true,
+                  },
+                },
+              },
+            },
+            force: true,
+          })
+          .expect(200)
+      : await supertest
+          .post(`/api/fleet/package_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            policy_id: agentPolicyId,
+            package: {
+              name: 'cloud_defend',
+              version,
+            },
+            name: 'cloud_defend-1',
+            description: '',
+            namespace: 'default',
+            inputs: {
+              'cloud_defend-cloud_defend/control': {
+                enabled: true,
+                vars: {
+                  configuration:
+                    'process:\n  selectors:\n    - name: allProcesses\n      operation: [fork, exec]\n  responses:\n    - match: [allProcesses]\n      actions: [log]\nfile:\n  selectors:\n    - name: executableChanges\n      operation: [createExecutable, modifyExecutable]\n  responses:\n    - match: [executableChanges]\n      actions: [alert]\n',
+                },
+                streams: {
+                  'cloud_defend.alerts': {
+                    enabled: true,
+                  },
+                  'cloud_defend.file': {
+                    enabled: true,
+                  },
+                  'cloud_defend.heartbeat': {
+                    enabled: true,
+                    vars: {
+                      period: '30m',
+                    },
+                  },
+                  'cloud_defend.metrics': {
+                    enabled: true,
+                    vars: {
+                      period: '24h',
+                    },
+                  },
+                  'cloud_defend.process': {
+                    enabled: true,
+                  },
+                },
+              },
+            },
+            force: true,
+          })
+          .expect(200);
+
+  return postPackageResponse.item;
+}
+
 export const createUser = async (security: SecurityService, userName: string, roleName: string) => {
   await security.user.create(userName, {
     password: 'changeme',

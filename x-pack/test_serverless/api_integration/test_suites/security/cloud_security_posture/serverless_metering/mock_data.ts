@@ -8,94 +8,103 @@ import Chance from 'chance';
 
 const chance = new Chance();
 
-export const cspmFindingsMockDataForMetering = [
-  {
-    resource: { id: chance.guid(), name: `Pod`, sub_type: 'aws-s3' },
-    rule: {
-      benchmark: {
-        posture_type: 'cspm',
-      },
-      type: 'process',
-    },
-  },
-  {
-    resource: { id: chance.guid(), name: `Pod`, sub_type: 'aws-rds' },
-    rule: {
-      benchmark: {
-        posture_type: 'cspm',
-      },
-      type: 'process',
-    },
-  },
-  {
-    resource: { id: chance.guid(), name: `Pod`, sub_type: 'not-billable-asset' },
-    rule: {
-      benchmark: {
-        posture_type: 'cspm',
-      },
-      type: 'process',
-    },
-  },
-];
-export const kspmFindingsMockDataForMetering = [
-  {
-    resource: { id: chance.guid(), name: `kubelet`, sub_type: 'node' },
-    rule: {
-      benchmark: {
-        posture_type: 'kspm',
-      },
-    },
-    agent: { id: chance.guid() },
-  },
-  {
-    resource: { id: chance.guid(), name: `kubelet`, sub_type: 'not billable resource' },
-    rule: {
-      benchmark: {
-        posture_type: 'kspm',
-      },
-    },
-    agent: { id: chance.guid() },
-  },
-];
+// see https://github.com/elastic/security-team/issues/8970 for billable asset definition
+export const BILLABLE_ASSETS_CONFIG = {
+  cspm: [
+    // 'aws-ebs', we can't include EBS volumes until https://github.com/elastic/security-team/issues/9283 is resolved
+    // 'aws-ec2', we can't include EC2 instances until https://github.com/elastic/security-team/issues/9254 is resolved
+    'aws-s3',
+    'aws-rds',
+    'azure-disk',
+    'azure-document-db-database-account',
+    'azure-flexible-mysql-server-db',
+    'azure-flexible-postgresql-server-db',
+    'azure-mysql-server-db',
+    'azure-postgresql-server-db',
+    'azure-sql-server',
+    'azure-storage-account',
+    'azure-vm',
+    'gcp-bigquery-dataset',
+    'gcp-compute-disk',
+    'gcp-compute-instance',
+    'gcp-sqladmin-instance',
+    'gcp-storage-bucket',
+  ],
+  kspm: ['Node', 'node'],
+};
+export const getMockFindings = ({
+  postureType,
+  isBillableAsset,
+  numberOfFindings,
+}: {
+  postureType: string;
+  isBillableAsset?: boolean;
+  numberOfFindings: number;
+}) => {
+  return Array.from({ length: numberOfFindings }, () => mockFiniding(postureType, isBillableAsset));
+};
 
-export const cnvmFindingsMockDataForMetering = [
-  {
-    cloud: {
-      instance: {
-        id: chance.guid(),
+const mockFiniding = (postureType: string, isBillableAsset?: boolean) => {
+  if (postureType === 'cspm') {
+    const randomAsset = isBillableAsset
+      ? chance.pickone(BILLABLE_ASSETS_CONFIG.cspm)
+      : 'not-billable-asset';
+    return {
+      resource: { id: chance.guid(), sub_type: randomAsset },
+      rule: {
+        benchmark: {
+          posture_type: 'cspm',
+        },
       },
-    },
-  },
-  {
-    cloud: {
-      instance: {
-        id: chance.guid(),
-      },
-    },
-  },
-];
+    };
+  }
+  if (postureType === 'kspm') {
+    const randomAsset = isBillableAsset
+      ? chance.pickone(BILLABLE_ASSETS_CONFIG.kspm)
+      : 'not-billable-asset';
 
-export const defendForContainersHeartbeatsForMetering = [
-  {
+    return {
+      resource: { id: chance.guid(), sub_type: randomAsset },
+      rule: {
+        benchmark: {
+          posture_type: 'kspm',
+        },
+      },
+      agent: { id: chance.guid() },
+    };
+  }
+  if (postureType === 'cnvm') {
+    return {
+      cloud: {
+        instance: {
+          id: chance.guid(),
+        },
+      },
+    };
+  }
+};
+
+export const getMockDefendForContainersHeartbeats = ({
+  isBlockActionEnables,
+  numberOfHearbeats,
+}: {
+  isBlockActionEnables: boolean;
+  numberOfHearbeats: number;
+}) => {
+  return Array.from({ length: numberOfHearbeats }, () =>
+    mockDefendForContainersHeartbeats(isBlockActionEnables)
+  );
+};
+const mockDefendForContainersHeartbeats = (isBlockActionEnables: boolean) => {
+  return {
     agent: {
       id: chance.guid(),
     },
     cloud_defend: {
-      block_action_enabled: true,
+      block_action_enabled: isBlockActionEnables,
     },
     event: {
       ingested: new Date().toISOString(),
     },
-  },
-  {
-    agent: {
-      id: chance.guid(),
-    },
-    cloud_defend: {
-      block_action_enabled: true,
-    },
-    event: {
-      ingested: new Date().toISOString(),
-    },
-  },
-];
+  };
+};
