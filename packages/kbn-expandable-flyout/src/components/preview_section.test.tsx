@@ -31,32 +31,18 @@ describe('PreviewSection', () => {
   const component = <div>{'component'}</div>;
   const left = 500;
 
-  it('should render close button in header', () => {
-    const showBackButton = false;
-
+  it('should render back button and close button in header', () => {
     const { getByTestId } = render(
       <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
+        <PreviewSection component={component} leftPosition={left} />
       </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should render back button in header', () => {
-    const showBackButton = true;
-
-    const { getByTestId } = render(
-      <TestProvider state={context}>
-        <PreviewSection component={component} leftPosition={left} showBackButton={showBackButton} />
-      </TestProvider>
-    );
-
     expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render banner', () => {
-    const showBackButton = false;
     const title = 'test';
     const banner: PreviewBanner = {
       title,
@@ -66,12 +52,7 @@ describe('PreviewSection', () => {
 
     const { getByTestId, getByText } = render(
       <TestProvider state={context}>
-        <PreviewSection
-          component={component}
-          leftPosition={left}
-          showBackButton={showBackButton}
-          banner={banner}
-        />
+        <PreviewSection component={component} leftPosition={left} banner={banner} />
       </TestProvider>
     );
 

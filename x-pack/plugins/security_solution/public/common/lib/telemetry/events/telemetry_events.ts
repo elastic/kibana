@@ -38,6 +38,12 @@ import {
   onboardingHubStepLinkClickedEvent,
   onboardingHubStepOpenEvent,
 } from './onboarding';
+import {
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+} from './manual_rule_run';
+import { eventLogFilterByRunTypeEvent, eventLogShowSourceEventDateRangeEvent } from './event_log';
 
 const mlJobUpdateEvent: TelemetryEvent = {
   eventType: TelemetryEventTypes.MLJobUpdate,
@@ -175,4 +181,9 @@ export const telemetryEvents = [
   onboardingHubStepOpenEvent,
   onboardingHubStepLinkClickedEvent,
   onboardingHubStepFinishedEvent,
+  manualRuleRunCancelJobEvent,
+  manualRuleRunExecuteEvent,
+  manualRuleRunOpenModalEvent,
+  eventLogFilterByRunTypeEvent,
+  eventLogShowSourceEventDateRangeEvent,
 ];

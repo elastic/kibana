@@ -11,7 +11,7 @@ import { useComponentTemplatesContext } from '../application/components/componen
 
 export function useMLModelNotificationToasts() {
   const { toasts } = useComponentTemplatesContext();
-  const showSuccessToasts = () => {
+  const showSuccessToasts = (modelName: string) => {
     return toasts.addSuccess({
       title: i18n.translate(
         'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
@@ -20,7 +20,10 @@ export function useMLModelNotificationToasts() {
         }
       ),
       text: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeploymentNotification', {
-        defaultMessage: '1 model is being deployed on your ml_node.',
+        defaultMessage: 'Model {modelName} is being deployed on your machine learning node.',
+        values: {
+          modelName,
+        },
       }),
     });
   };
