@@ -77,6 +77,9 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
     onLoadSpace,
     solutionNavExperiment,
     selectedTabId: _selectedTabId,
+    capabilities,
+    getUrlForApp,
+    navigateToUrl,
   } = props;
 
   const selectedTabId = getSelectedTabId(_selectedTabId);
@@ -88,7 +91,6 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   const [isLoadingFeatures, setIsLoadingFeatures] = useState(true);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
   const [tabs, selectedTabContent] = useTabs(space, features, roles, selectedTabId);
-  const { capabilities, getUrlForApp, navigateToUrl } = props;
   const [isSolutionNavEnabled, setIsSolutionNavEnabled] = useState(false);
 
   useEffect(() => {
@@ -111,15 +113,17 @@ export const ViewSpacePage: FC<PageProps> = (props) => {
   }, [spaceId, spacesManager]);
 
   useEffect(() => {
-    if (spaceId) {
-      const getRoles = async () => {
-        const result = await spacesManager.getRolesForSpace(spaceId);
-        setRoles(result);
-        setIsLoadingRoles(false);
-      };
-
-      getRoles().catch(handleApiError);
+    if (!spaceId) {
+      return;
     }
+
+    const getRoles = async () => {
+      const result = await spacesManager.getRolesForSpace(spaceId);
+      setRoles(result);
+      setIsLoadingRoles(false);
+    };
+
+    getRoles().catch(handleApiError);
   }, [spaceId, spacesManager]);
 
   useEffect(() => {
