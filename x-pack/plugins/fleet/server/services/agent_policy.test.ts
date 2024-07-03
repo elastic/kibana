@@ -530,31 +530,6 @@ describe('Agent policy', () => {
           })
         );
       });
-
-      it('should delete all integration polices', async () => {
-        mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
-          {
-            id: 'package-1',
-            policy_id: ['policy_1'],
-            policy_ids: ['policy_1', 'int_policy_2'],
-          },
-          {
-            id: 'package-2',
-            policy_id: ['policy_1'],
-            policy_ids: ['policy_1'],
-          },
-          {
-            id: 'package-3',
-          },
-        ] as any);
-        await agentPolicyService.delete(soClient, esClient, 'mocked');
-        expect(mockedPackagePolicyService.delete).toBeCalledWith(
-          expect.anything(),
-          expect.anything(),
-          ['package-1', 'package-2', 'package-3'],
-          expect.anything()
-        );
-      });
     });
 
     describe('with enableReusableIntegrationPolicies enabled', () => {

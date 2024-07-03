@@ -1585,16 +1585,13 @@ class AgentPolicyService {
     policiesWithMultipleAP: PackagePolicy[];
   } {
     // Find package policies that don't have multiple agent policies and mark them for deletion
-    if (appContextService.getExperimentalFeatures().enableReusableIntegrationPolicies) {
-      const policiesWithSingleAP = packagePolicies.filter(
-        (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
-      );
-      const policiesWithMultipleAP = packagePolicies.filter(
-        (policy) => policy?.policy_ids && policy?.policy_ids.length > 1
-      );
-      return { policiesWithSingleAP, policiesWithMultipleAP };
-    }
-    return { policiesWithSingleAP: packagePolicies, policiesWithMultipleAP: [] };
+    const policiesWithSingleAP = packagePolicies.filter(
+      (policy) => !policy?.policy_ids || policy?.policy_ids.length <= 1
+    );
+    const policiesWithMultipleAP = packagePolicies.filter(
+      (policy) => policy?.policy_ids && policy?.policy_ids.length > 1
+    );
+    return { policiesWithSingleAP, policiesWithMultipleAP };
   }
 }
 
