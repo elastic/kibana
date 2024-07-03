@@ -43,6 +43,11 @@ import {
 import { generateId } from '../../../../id_generator/id_generator';
 import { ChartOptionAppend } from './chart_option_append';
 
+type VisChartSwitchPosition = VisualizationType & {
+  visualizationId: string;
+  selection: VisualizationSelection;
+};
+
 interface VisualizationSelection {
   visualizationId: string;
   subVisualizationId: string;
@@ -72,6 +77,21 @@ function computeListHeight(list: SelectableEntry[], maxHeight: number): number {
   }
   return Math.min(list.length * ENTRY_HEIGHT, maxHeight);
 }
+
+const sortByPriority = (a: VisualizationType, b: VisualizationType) => {
+  return a.sortPriority - b.sortPriority;
+};
+
+const deprecatedGroupChartSwitchElement = {
+  key: 'deprecated',
+  value: 'deprecated',
+  label: i18n.translate('xpack.lens.configPanel.deprecated', {
+    defaultMessage: 'Deprecated',
+  }),
+  isGroupLabel: true,
+  'aria-label': 'deprecated',
+  'data-test-subj': `lnsChartSwitchPopover_deprecated`,
+};
 
 function safeFnCall<TReturn>(action: () => TReturn, defaultReturnValue: TReturn): TReturn {
   try {
@@ -259,12 +279,9 @@ export const ChartSwitch = memo(function ChartSwitch({
           selection: VisualizationSelection;
         }
       > = {};
-      const chartSwitchPositions: Array<
-        VisualizationType & {
-          visualizationId: string;
-          selection: VisualizationSelection;
-        }
-      > = [];
+
+      const chartSwitchPositions: VisChartSwitchPosition[] = [];
+      const deprecatedChartSwitchPositions: VisChartSwitchPosition[] = [];
       Object.entries(visualizationMap).forEach(([visualizationId, v]) => {
         for (const visualizationType of v.visualizationTypes) {
           const isSearchMatch =
@@ -276,38 +293,50 @@ export const ChartSwitch = memo(function ChartSwitch({
               visualizationId,
               selection: getSelection(visualizationId, visualizationType.id),
             };
-            chartSwitchPositions.push(visualizationEntry);
+            if (visualizationEntry.isDeprecated) {
+              deprecatedChartSwitchPositions.push(visualizationEntry);
+            } else {
+              chartSwitchPositions.push(visualizationEntry);
+            }
             lookup[`${visualizationId}:${visualizationType.id}`] = visualizationEntry;
           }
         }
       });
 
+      const toSelectableEntry = (v: VisChartSwitchPosition): SelectableEntry => {
+        return {
+          'aria-label': v.fullLabel || v.label,
+          className: 'lnsChartSwitch__option',
+          key: `${v.visualizationId}:${v.id}`,
+          value: `${v.visualizationId}:${v.id}`,
+          'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
+          label: v.fullLabel || v.label,
+          prepend: <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />,
+          append:
+            v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
+              <ChartOptionAppend
+                dataLoss={v.selection.dataLoss}
+                showExperimentalBadge={v.showExperimentalBadge}
+                id={v.selection.subVisualizationId}
+              />
+            ) : null,
+          // Apparently checked: null is not valid for TS
+          ...(subVisualizationId === v.id && { checked: 'on' }),
+        };
+      };
+
       return {
         visualizationTypes: chartSwitchPositions
-          .sort((a, b) => {
-            return a.sortPriority - b.sortPriority;
-          })
-          .map((v): SelectableEntry => {
-            return {
-              'aria-label': v.fullLabel || v.label,
-              className: 'lnsChartSwitch__option',
-              key: `${v.visualizationId}:${v.id}`,
-              value: `${v.visualizationId}:${v.id}`,
-              'data-test-subj': `lnsChartSwitchPopover_${v.id}`,
-              label: v.fullLabel || v.label,
-              prepend: <EuiIcon className="lnsChartSwitch__chartIcon" type={v.icon || 'empty'} />,
-              append:
-                v.selection.dataLoss !== 'nothing' || v.showExperimentalBadge ? (
-                  <ChartOptionAppend
-                    dataLoss={v.selection.dataLoss}
-                    showExperimentalBadge={v.showExperimentalBadge}
-                    id={v.selection.subVisualizationId}
-                  />
-                ) : null,
-              // Apparently checked: null is not valid for TS
-              ...(subVisualizationId === v.id && { checked: 'on' }),
-            };
-          }),
+          .sort(sortByPriority)
+          .map(toSelectableEntry)
+          .concat(
+            deprecatedChartSwitchPositions.length
+              ? [
+                  deprecatedGroupChartSwitchElement,
+                  ...deprecatedChartSwitchPositions.map(toSelectableEntry),
+                ]
+              : []
+          ),
         visualizationsLookup: lookup,
       };
     },
