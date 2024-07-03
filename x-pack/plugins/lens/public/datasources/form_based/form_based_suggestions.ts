@@ -370,7 +370,7 @@ export function getDatasourceSuggestionsForVisualizeField(
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
   // Identify the field by the indexPatternId and the fieldName
   const indexPattern = indexPatterns[indexPatternId];
-  const field = indexPattern?.getFieldByName(fieldName);
+  const field = indexPattern?.getFieldByName(fieldName) ?? documentField;
 
   if (layerIds.length !== 0 || !field) return [];
   const newId = generateId();
