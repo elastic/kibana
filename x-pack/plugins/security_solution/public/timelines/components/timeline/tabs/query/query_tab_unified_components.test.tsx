@@ -159,6 +159,14 @@ const { storage: storageMock } = createSecuritySolutionStorageMock();
 let useTimelineEventsMock = jest.fn();
 
 describe('query tab with unified timeline', () => {
+  beforeAll(() => {
+    // https://github.com/atlassian/react-beautiful-dnd/issues/1593#issuecomment-614069266
+    Object.defineProperty(window, '__@hello-pangea/dnd-disable-dev-warnings', {
+      get() {
+        return true;
+      },
+    });
+  });
   const kibanaServiceMock: StartServices = {
     ...createStartServicesMock(),
     storage: storageMock,

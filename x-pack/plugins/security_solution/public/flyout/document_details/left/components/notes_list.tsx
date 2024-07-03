@@ -80,7 +80,7 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
   const dispatch = useDispatch();
   const { addError: addErrorToast } = useAppToasts();
 
-  const unifiedComponentsInTimelineDisabled = !useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineDisabled'
   );
 

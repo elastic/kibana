@@ -11,6 +11,7 @@ import { TimelineType, TimelineStatus, RowRendererId } from '../../../common/api
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
+import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
@@ -19,9 +20,9 @@ export const timelineDefaults: SubsetTimelineModel &
   Pick<TimelineModel, 'eqlOptions' | 'resolveTimelineConfig' | 'sampleSize' | 'rowHeight'> = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.query,
-  columns: defaultHeaders,
+  columns: defaultUdtHeaders,
   documentType: '',
-  defaultColumns: defaultHeaders,
+  defaultColumns: defaultUdtHeaders,
   dataProviders: [],
   dataViewId: null,
   dateRange: { start, end },

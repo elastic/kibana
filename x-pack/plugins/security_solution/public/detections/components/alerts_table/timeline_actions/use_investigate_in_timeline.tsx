@@ -144,7 +144,7 @@ export const useInvestigateInTimeline = ({
     timelineType: TimelineType.default,
   });
 
-  const unifiedComponentsInTimelineDisabled = !useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineDisabled'
   );
   const updateTimeline = useUpdateTimeline();

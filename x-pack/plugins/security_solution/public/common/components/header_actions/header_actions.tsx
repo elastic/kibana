@@ -91,7 +91,7 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = memo(
     const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
     const dispatch = useDispatch();
 
-    const unifiedComponentsInTimelineDisabled = !useIsExperimentalFeatureEnabled(
+    const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
       'unifiedComponentsInTimelineDisabled'
     );
 

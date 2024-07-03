@@ -48,7 +48,7 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
     SourcererScopeName.timeline
   );
 
-  const unifiedComponentsInTimelineDisabled = !useIsExperimentalFeatureEnabled(
+  const unifiedComponentsInTimelineDisabled = useIsExperimentalFeatureEnabled(
     'unifiedComponentsInTimelineDisabled'
   );
 

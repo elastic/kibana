@@ -31,6 +31,12 @@ import {
 } from './__mocks__';
 import { resolveTimeline } from '../../containers/api';
 import { defaultUdtHeaders } from '../timeline/unified_components/default_headers';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../common';
+import { allowedExperimentalValues } from '../../../../common';
+
+jest.mock('../../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -135,6 +141,14 @@ describe('helpers', () => {
 
   beforeEach(() => {
     mockResults = cloneDeep(mockTimelineResults);
+
+    (useIsExperimentalFeatureEnabledMock as jest.Mock).mockImplementation(
+      (featureFlag: keyof ExperimentalFeatures) => {
+        return featureFlag === 'unifiedComponentsInTimelineDisabled'
+          ? false
+          : allowedExperimentalValues[featureFlag];
+      }
+    );
   });
 
   describe('#getPinnedEventCount', () => {
@@ -302,6 +316,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
+        columns: defaultUdtHeaders,
       });
     });
 
@@ -318,6 +333,7 @@ describe('helpers', () => {
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         timelineType: TimelineType.template,
+        columns: defaultUdtHeaders,
       });
     });
 
@@ -333,6 +349,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
+        columns: defaultUdtHeaders,
       });
     });
 
@@ -346,6 +363,7 @@ describe('helpers', () => {
       const newTimeline = defaultTimelineToTimelineModel(timeline, false);
       expect(newTimeline).toEqual({
         ...defaultTimeline,
+        columns: defaultUdtHeaders,
       });
     });
 
@@ -469,13 +487,19 @@ describe('helpers', () => {
         timelineType: TimelineType.template,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.template);
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineType.template,
+        false
+      );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-10-28T11:37:31.655Z', start: '2020-10-27T11:37:31.655Z' },
         status: TimelineStatus.immutable,
         timelineType: TimelineType.template,
         title: 'Awesome Timeline',
+        columns: defaultUdtHeaders,
       });
     });
 
@@ -488,12 +512,18 @@ describe('helpers', () => {
         timelineType: TimelineType.default,
       };
 
-      const newTimeline = defaultTimelineToTimelineModel(timeline, false, TimelineType.default);
+      const newTimeline = defaultTimelineToTimelineModel(
+        timeline,
+        false,
+        TimelineType.default,
+        false
+      );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
         dateRange: { end: '2020-07-08T08:20:18.966Z', start: '2020-07-07T08:20:18.966Z' },
         status: TimelineStatus.active,
         title: 'Awesome Timeline',
+        columns: defaultUdtHeaders,
       });
     });
 
@@ -510,7 +540,7 @@ describe('helpers', () => {
         timeline,
         false,
         TimelineType.default,
-        true
+        false
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,
@@ -538,7 +568,7 @@ describe('helpers', () => {
         timeline,
         false,
         TimelineType.default,
-        true
+        false
       );
       expect(newTimeline).toEqual({
         ...defaultTimeline,

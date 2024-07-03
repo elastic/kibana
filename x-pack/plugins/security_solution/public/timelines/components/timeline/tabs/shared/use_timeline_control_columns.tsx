@@ -94,7 +94,7 @@ export const useTimelineControlColumn = ({
            * the number of rows in the table currently rendered.
            *
            * */
-          if (props.rowIndex >= events.length) return <></>;
+          if ('rowIndex' in props && props.rowIndex >= events.length) return <></>;
           props.setCellProps({
             className:
               props.expandedEventId === events[props.rowIndex]?._id
