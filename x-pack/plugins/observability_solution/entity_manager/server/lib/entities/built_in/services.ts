@@ -18,9 +18,6 @@ export const builtInServicesEntityDefinition: EntityDefinition = entityDefinitio
     timestampField: '@timestamp',
     interval: '1m',
   },
-  latest: {
-    lookback: '5m',
-  },
   identityFields: ['service.name', { field: 'service.environment', optional: true }],
   displayNameTemplate: '{{service.name}}{{#service.environment}}:{{.}}{{/service.environment}}',
   metadata: [
