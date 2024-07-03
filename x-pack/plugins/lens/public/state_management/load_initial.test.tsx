@@ -95,6 +95,7 @@ describe('Initializing the store', () => {
               id: 'testVis',
               label: faker.lorem.word(),
               sortPriority: 1,
+              description: faker.lorem.sentence(),
             },
           ],
         },

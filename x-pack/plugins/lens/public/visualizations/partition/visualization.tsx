@@ -138,6 +138,7 @@ export const getPieVisualization = ({
     label: meta.label,
     showExperimentalBadge: meta.isExperimental,
     sortPriority: meta.sortPriority,
+    description: meta.description,
   })),
 
   getVisualizationTypeId(state) {

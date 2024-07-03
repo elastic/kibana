@@ -38,6 +38,9 @@ export const getVisualization = ({
       icon: IconRegionMap,
       label: CHART_LABEL,
       sortPriority: 10,
+      description: i18n.translate('xpack.lens.regionMap.visualizationDescription', {
+        defaultMessage: 'Show geographic data using colored regions.',
+      }),
     },
   ],
 

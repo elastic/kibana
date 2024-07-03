@@ -28,6 +28,7 @@ interface PartitionChartMeta {
   maxBuckets: number;
   isExperimental?: boolean;
   sortPriority: number;
+  description: string;
   toolbarPopover: {
     isDisabled?: boolean;
     categoryOptions: Array<{
@@ -149,6 +150,9 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
     },
     sortPriority: 6,
+    description: i18n.translate('xpack.lens.pie.visualizationDescription', {
+      defaultMessage: 'Display proportions of a whole in a circular format.',
+    }),
   },
   pie: {
     icon: IconChartPie,
@@ -164,6 +168,9 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       getShowLegendDefault: (bucketColumns) => bucketColumns.length > 1,
     },
     sortPriority: 6,
+    description: i18n.translate('xpack.lens.pie.visualizationDescription', {
+      defaultMessage: 'Display proportions of a whole in a circular format.',
+    }),
   },
   treemap: {
     icon: IconChartTreemap,
@@ -179,6 +186,9 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       getShowLegendDefault: () => false,
     },
     sortPriority: 11,
+    description: i18n.translate('xpack.lens.treemap.visualizationDescription', {
+      defaultMessage: 'Use nested rectangles to show proportionality.',
+    }),
   },
   mosaic: {
     icon: IconChartMosaic,
@@ -194,6 +204,9 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       getShowLegendDefault: () => false,
     },
     sortPriority: 13,
+    description: i18n.translate('xpack.lens.mosaic.visualizationDescription', {
+      defaultMessage: 'Show proportions of categorical data via rectangles.',
+    }),
   },
   waffle: {
     icon: IconChartWaffle,
@@ -213,5 +226,8 @@ export const PartitionChartsMeta: Record<PieChartType, PartitionChartMeta> = {
       getShowLegendDefault: () => true,
     },
     sortPriority: 9,
+    description: i18n.translate('xpack.lens.waffle.visualizationDescription', {
+      defaultMessage: 'Represent data proportions via a grid of colored cells.',
+    }),
   },
 };

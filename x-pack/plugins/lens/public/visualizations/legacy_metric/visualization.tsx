@@ -166,6 +166,9 @@ export const getLegacyMetricVisualization = ({
       }),
       isDeprecated: true,
       sortPriority: 100,
+      description: i18n.translate('xpack.lens.legacyMetric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
+      }),
     },
   ],
   hideFromChartSwitch(frame: FramePublicAPI) {

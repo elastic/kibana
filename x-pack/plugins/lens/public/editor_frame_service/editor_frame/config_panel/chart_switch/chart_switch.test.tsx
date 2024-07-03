@@ -20,6 +20,7 @@ import {
 import { DatasourcePublicAPI, SuggestionRequest, DatasourceSuggestion } from '../../../../types';
 import { ChartSwitch, ChartSwitchProps } from './chart_switch';
 import { LensAppState, applyChanges } from '../../../../state_management';
+import faker from 'faker';
 
 const mockFrame = (layers: string[]) => ({
   ...createMockFramePublicAPI(),
@@ -190,6 +191,7 @@ describe('chart_switch', () => {
           id,
           label: id,
           sortPriority: 1,
+          description: faker.lorem.sentence(),
         })),
         getVisualizationTypeId: jest.fn((state) => state.type),
         getSuggestions: jest.fn((options) => {

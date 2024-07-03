@@ -75,6 +75,9 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.horizontalBullet,
     showExperimentalBadge: true,
     sortPriority: 7,
+    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+      defaultMessage: 'Show progress to a goal in linear or arced style.',
+    }),
   },
   [GaugeShapes.VERTICAL_BULLET]: {
     id: GaugeShapes.VERTICAL_BULLET,
@@ -82,6 +85,9 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.verticalBullet,
     showExperimentalBadge: true,
     sortPriority: 7,
+    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+      defaultMessage: 'Show progress to a goal in linear or arced style.',
+    }),
   },
   [GaugeShapes.SEMI_CIRCLE]: {
     id: GaugeShapes.SEMI_CIRCLE,
@@ -89,6 +95,9 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.semiCircle,
     showExperimentalBadge: true,
     sortPriority: 7,
+    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+      defaultMessage: 'Show progress to a goal in linear or arced style.',
+    }),
   },
   [GaugeShapes.ARC]: {
     id: GaugeShapes.ARC,
@@ -96,6 +105,9 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.arc,
     showExperimentalBadge: true,
     sortPriority: 7,
+    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+      defaultMessage: 'Show progress to a goal in linear or arced style.',
+    }),
   },
   [GaugeShapes.CIRCLE]: {
     id: GaugeShapes.CIRCLE,
@@ -103,6 +115,9 @@ export const CHART_NAMES: Record<GaugeShape, VisualizationType> = {
     label: gaugeTitlesByType.circle,
     showExperimentalBadge: true,
     sortPriority: 7,
+    description: i18n.translate('xpack.lens.gauge.visualizationDescription', {
+      defaultMessage: 'Show progress to a goal in linear or arced style.',
+    }),
   },
 };
 

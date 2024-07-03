@@ -47,6 +47,9 @@ export const getTagcloudVisualization = ({
       icon: IconChartTagcloud,
       label: TAGCLOUD_LABEL,
       sortPriority: 12,
+      description: i18n.translate('xpack.lens.tagcloud.visualizationDescription', {
+        defaultMessage: 'Visualize text data frequency or importance.',
+      }),
     },
   ],
 

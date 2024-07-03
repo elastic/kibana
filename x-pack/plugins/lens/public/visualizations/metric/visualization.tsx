@@ -308,6 +308,9 @@ export const getMetricVisualization = ({
       label: metricLabel,
       showExperimentalBadge: true,
       sortPriority: 4,
+      description: i18n.translate('xpack.lens.metric.visualizationDescription', {
+        defaultMessage: 'Present individual key metrics or KPIs.',
+      }),
     },
   ],
 

@@ -112,6 +112,9 @@ export const getHeatmapVisualization = ({
         defaultMessage: 'Heat map',
       }),
       sortPriority: 8,
+      description: i18n.translate('xpack.lens.heatmap.visualizationDescription', {
+        defaultMessage: 'Show density or distribution across two dimensions.',
+      }),
     },
   ],
 

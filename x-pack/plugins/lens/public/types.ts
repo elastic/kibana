@@ -975,6 +975,7 @@ export interface VisualizationType {
    * Visible label used in the chart switcher and above the workspace panel in collapsed state
    */
   label: string;
+  description: string;
   /**
    * Optional label used in visualization type search if chart switcher is expanded and for tooltips
    */

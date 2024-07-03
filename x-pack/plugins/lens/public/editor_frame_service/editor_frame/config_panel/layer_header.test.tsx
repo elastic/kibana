@@ -43,6 +43,7 @@ describe('LayerHeader', () => {
           icon: 'empty',
           id,
           label: faker.lorem.word(),
+          description: faker.lorem.sentence(),
           sortPriority: 1,
         })),
       },

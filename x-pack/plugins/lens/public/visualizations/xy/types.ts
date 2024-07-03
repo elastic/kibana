@@ -187,6 +187,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar vertical',
     }),
     sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
   },
   {
     id: 'bar_horizontal',
@@ -198,6 +201,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar horizontal',
     }),
     sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
   },
   {
     id: 'bar_stacked',
@@ -206,6 +212,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar vertical stacked',
     }),
     sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
   },
   {
     id: 'bar_percentage_stacked',
@@ -214,6 +223,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar vertical percentage',
     }),
     sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
   },
   {
     id: 'bar_horizontal_stacked',
@@ -225,6 +237,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar horizontal stacked',
     }),
     sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
   },
   {
     id: 'bar_horizontal_percentage_stacked',
@@ -239,6 +254,9 @@ export const visualizationTypes: VisualizationType[] = [
       }
     ),
     sortPriority: 1,
+    description: i18n.translate('xpack.lens.bar.visualizationDescription', {
+      defaultMessage: 'Compare categories or groups of data via bars.',
+    }),
   },
   {
     id: 'area',
@@ -247,6 +265,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Area',
     }),
     sortPriority: 3,
+    description: i18n.translate('xpack.lens.area.visualizationDescription', {
+      defaultMessage: 'Compare distributions of cumulative data trends.',
+    }),
   },
   {
     id: 'area_stacked',
@@ -255,6 +276,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Area stacked',
     }),
     sortPriority: 3,
+    description: i18n.translate('xpack.lens.area.visualizationDescription', {
+      defaultMessage: 'Compare distributions of cumulative data trends.',
+    }),
   },
   {
     id: 'area_percentage_stacked',
@@ -263,6 +287,9 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Area percentage',
     }),
     sortPriority: 3,
+    description: i18n.translate('xpack.lens.area.visualizationDescription', {
+      defaultMessage: 'Compare distributions of cumulative data trends.',
+    }),
   },
   {
     id: 'line',
@@ -271,5 +298,8 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Line',
     }),
     sortPriority: 2,
+    description: i18n.translate('xpack.lens.line.visualizationDescription', {
+      defaultMessage: 'Reveal variations in data over time or categorically.',
+    }),
   },
 ];

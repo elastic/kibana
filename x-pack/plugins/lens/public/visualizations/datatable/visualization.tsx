@@ -73,6 +73,9 @@ export const getDatatableVisualization = ({
       icon: IconChartDatatable,
       label: visualizationLabel,
       sortPriority: 5,
+      description: i18n.translate('xpack.lens.datatable.visualizationDescription', {
+        defaultMessage: 'Organize data in structured rows and columns.',
+      }),
     },
   ],
 
