@@ -90,7 +90,26 @@ function ValueFontOption({
   });
 
   return (
-    <EuiFormRow display="columnCompressed" label={label}>
+    <EuiFormRow
+      display="columnCompressed"
+      label={
+        <span>
+          {label}{' '}
+          <EuiIconTip
+            content={i18n.translate('xpack.lens.metric.toolbarVisOptions.valueFontSizeTip', {
+              defaultMessage: 'Font size of the Primary metric value',
+            })}
+            iconProps={{
+              className: 'eui-alignTop',
+            }}
+            color="subdued"
+            position="top"
+            size="s"
+            type="questionInCircle"
+          />
+        </span>
+      }
+    >
       <EuiButtonGroup
         isFullWidth
         legend={label}
