@@ -31,7 +31,7 @@ import type {
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { KibanaFeature, KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Role } from '@kbn/security-plugin-types-common';
@@ -44,11 +44,11 @@ type RolesAPIClient = ReturnType<ViewSpaceServices['getRolesAPIClient']> extends
   ? R
   : never;
 
-type KibanaPrivilegeBase = 'all' | 'read';
+type KibanaPrivilegeBase = keyof NonNullable<KibanaFeatureConfig['privileges']>;
 
 interface Props {
   space: Space;
-  spaceRoles: Role[];
+  roles: Role[];
   features: KibanaFeature[];
   isReadOnly: boolean;
 }
@@ -65,7 +65,7 @@ const filterRolesAssignedToSpace = (roles: Role[], space: Space) => {
   );
 };
 
-export const ViewSpaceAssignedRoles: FC<Props> = ({ space, spaceRoles, features, isReadOnly }) => {
+export const ViewSpaceAssignedRoles: FC<Props> = ({ space, roles, features, isReadOnly }) => {
   const [showRolesPrivilegeEditor, setShowRolesPrivilegeEditor] = useState(false);
   const [roleAPIClientInitialized, setRoleAPIClientInitialized] = useState(false);
   const [systemRoles, setSystemRoles] = useState<Role[]>([]);
@@ -156,7 +156,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, spaceRoles, features,
     });
   }
 
-  const rolesInUse = filterRolesAssignedToSpace(spaceRoles, space);
+  const rolesInUse = filterRolesAssignedToSpace(roles, space);
 
   if (!rolesInUse) {
     return null;
@@ -168,7 +168,6 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, spaceRoles, features,
         <PrivilegesRolesForm
           features={features}
           space={space}
-          spaceRoles={spaceRoles}
           closeFlyout={() => {
             setShowRolesPrivilegeEditor(false);
           }}
@@ -225,7 +224,7 @@ export const ViewSpaceAssignedRoles: FC<Props> = ({ space, spaceRoles, features,
   );
 };
 
-interface PrivilegesRolesFormProps extends Omit<Props, 'isReadOnly'> {
+interface PrivilegesRolesFormProps extends Omit<Props, 'isReadOnly' | 'roles'> {
   closeFlyout: () => void;
   onSaveClick: () => void;
   systemRoles: Role[];
@@ -239,15 +238,12 @@ const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOptio
   }));
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
-  const { spaceRoles, onSaveClick, closeFlyout, features, roleAPIClient, systemRoles } = props;
+  const { onSaveClick, closeFlyout, features, roleAPIClient, systemRoles } = props;
 
   const [space, setSpaceState] = useState(props.space);
-  const [selectedRoles, setSelectedRoles] = useState(
-    createRolesComboBoxOptions(filterRolesAssignedToSpace(spaceRoles, space))
-  );
-
-  const [spacePrivilege, setSpacePrivilege] = useState<KibanaPrivilegeBase | 'custom'>(
-    space.disabledFeatures.length ? 'custom' : 'all'
+  const [spacePrivilege, setSpacePrivilege] = useState<KibanaPrivilegeBase | 'custom'>('all');
+  const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
+    []
   );
 
   const [assigningToRole, setAssigningToRole] = useState(false);
@@ -295,7 +291,6 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
 
                   return prevRoles.concat(newlyAdded);
                 } else {
-                  // TODO: handle from role from space
                   return value;
                 }
               });
