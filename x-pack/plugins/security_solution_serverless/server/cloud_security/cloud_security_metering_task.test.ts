@@ -123,8 +123,8 @@ describe('getCloudSecurityUsageRecord', () => {
             quantity: 10,
             period_seconds: expect.any(Number),
             metadata: {
-              [randomBillableAsset]: 10,
-              not_billable_asset: 11,
+              [randomBillableAsset]: '10',
+              not_billable_asset: '11',
             },
           },
           source: {

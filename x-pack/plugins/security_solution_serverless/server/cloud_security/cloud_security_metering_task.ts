@@ -49,6 +49,7 @@ export const getUsageRecords = (
 
     resourceSubtypeCounterMap = assetCountAggregation.resource_sub_type.buckets.reduce(
       (resourceMap, item) => {
+        // By the usage spec, the resource subtype counter should be a string // https://github.com/elastic/usage-api/blob/main/api/user-v1-spec.yml
         resourceMap[item.key] = String(item.unique_assets.value);
         return resourceMap;
       },
