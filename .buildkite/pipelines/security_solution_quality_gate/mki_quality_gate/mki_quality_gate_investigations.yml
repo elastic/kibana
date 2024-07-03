@@ -21,9 +21,9 @@ steps:
   - group: "API MKI - Investigations"
     key: api_test_investigations
     steps:
-      - label: Running investigations:saved-objects:runner:qa:serverless:release
-        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless:release
-        key: investigations:saved-objects:runner:qa:serverless:release
+      - label: Running investigations:timeline:runner:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:timeline:runner:qa:serverless:release
+        key: investigations:timeline:runner:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
           imageProject: elastic-images-prod
@@ -35,7 +35,7 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
-              
+
       - label: Running investigations:saved-objects:runner:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless:release
         key: investigations:saved-objects:runner:qa:serverless:release
