@@ -159,6 +159,10 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   const { pageSize, sort, onTableChange } = useEuiTablePersist({
     tableId: 'enrichPolicies',
     initialPageSize: 50,
+    initialSort: {
+      field: 'name',
+      direction: 'asc',
+    },
   });
 
   const pagination = {
