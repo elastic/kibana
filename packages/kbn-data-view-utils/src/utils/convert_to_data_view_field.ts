@@ -27,6 +27,6 @@ export function convertDatatableColumnToDataViewField(column: DatatableColumn): 
     searchable: true,
     aggregatable: false,
     isNull: Boolean(column?.isNull),
-    timeSeriesMetric,
+    ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
   });
 }
