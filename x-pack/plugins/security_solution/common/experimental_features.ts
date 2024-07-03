@@ -176,6 +176,11 @@ export const allowedExperimentalValues = Object.freeze({
   riskEnginePrivilegesRouteEnabled: true,
 
   /**
+   * Enables alerts suppression for machine learning rules
+   */
+  alertSuppressionForMachineLearningRuleEnabled: false,
+
+  /**
    * Enables experimental Experimental S1 integration data to be available in Analyzer
    */
   sentinelOneDataInAnalyzerEnabled: true,
@@ -232,7 +237,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
    */
-  unifiedManifestEnabled: false,
+  unifiedManifestEnabled: true,
 
   /**
    *  Enables Security AI Assistant's Flyout mode
