@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { TextBasedLanguagesPlugin } from './plugin';
-export type { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
-export type { TextBasedLanguagesPluginStart } from './types';
-export { TextBasedLangEditor } from './create_editor';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { getUiSettings } from './ui_settings';
 
-export function plugin() {
-  return new TextBasedLanguagesPlugin();
+export class EsqlServerPlugin implements Plugin {
+  public setup(core: CoreSetup) {
+    core.uiSettings.register(getUiSettings());
+    return {};
+  }
+
+  public start(core: CoreStart) {
+    return {};
+  }
+
+  public stop() {}
 }

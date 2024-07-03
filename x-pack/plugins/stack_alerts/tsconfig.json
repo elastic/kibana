@@ -38,7 +38,7 @@
     "@kbn/discover-plugin",
     "@kbn/rule-data-utils",
     "@kbn/alerts-as-data-utils",
-    "@kbn/text-based-languages",
+    "@kbn/esql",
     "@kbn/text-based-editor",
     "@kbn/expressions-plugin",
     "@kbn/core-http-browser",

@@ -19,22 +19,22 @@ import {
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
 
-interface TextBasedLanguagesPluginStart {
+interface EsqlPluginStart {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
 }
 
-interface TextBasedLanguagesPluginSetup {
+interface EsqlPluginSetup {
   indexManagement: IndexManagementPluginSetup;
   uiActions: UiActionsSetup;
 }
 
-export class TextBasedLanguagesPlugin implements Plugin<{}, void> {
+export class EsqlPlugin implements Plugin<{}, void> {
   private indexManagement?: IndexManagementPluginSetup;
 
-  public setup(_: CoreSetup, { indexManagement, uiActions }: TextBasedLanguagesPluginSetup) {
+  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetup) {
     this.indexManagement = indexManagement;
 
     uiActions.registerTrigger(updateESQLQueryTrigger);
@@ -44,7 +44,7 @@ export class TextBasedLanguagesPlugin implements Plugin<{}, void> {
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions }: TextBasedLanguagesPluginStart
+    { dataViews, expressions, data, uiActions }: EsqlPluginStart
   ): void {
     const appendESQLAction = new UpdateESQLQueryAction(data);
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);

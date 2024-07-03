@@ -1,4 +1,4 @@
-# @kbn/text-based-languages
+# @kbn/esql
 
 ## Component properties
 The editor accepts the following properties:
@@ -11,8 +11,8 @@ The editor accepts the following properties:
 - isLoading: As the editor is not responsible for the data fetching request, the consumer could update this property when the data are being fetched. If this property is defined, the query history component will be rendered
 ```
 
-To use it on your application, you need to add the textBasedLanguages to your requiredBundles and the @kbn/text-based-languages to your tsconfig.json and use the component like that:
-import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+To use it on your application, you need to add the textBasedLanguages to your requiredBundles and the @kbn/esql to your tsconfig.json and use the component like that:
+import { TextBasedLangEditor } from '@kbn/esql/public';
 
  <TextBasedLangEditor
   query={query}

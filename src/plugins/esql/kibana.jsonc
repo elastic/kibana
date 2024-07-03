@@ -1,9 +1,9 @@
 {
   "type": "plugin",
-  "id": "@kbn/text-based-languages",
+  "id": "@kbn/esql",
   "owner": "@elastic/kibana-esql",
   "plugin": {
-    "id": "textBasedLanguages",
+    "id": "esql",
     "server": true,
     "browser": true,
     "optionalPlugins": [

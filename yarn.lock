@@ -6657,7 +6657,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/text-based-languages@link:src/plugins/text_based_languages":
+"@kbn/esql@link:src/plugins/esql":
   version "0.0.0"
   uid ""
 

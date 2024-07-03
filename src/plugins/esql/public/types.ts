@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { TextBasedLanguagesEditorProps } from '@kbn/text-based-editor';
 
-export const plugin = async () => {
-  const { TextBasedLanguagesServerPlugin } = await import('./plugin');
-  return new TextBasedLanguagesServerPlugin();
-};
+export interface EsqlPluginStart {
+  Editor: React.ComponentType<TextBasedLanguagesEditorProps>;
+}
