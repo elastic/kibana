@@ -7,8 +7,8 @@
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
-export const entitiesBaseComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
-  name: 'entities_v1_base',
+export const entitiesLatestBaseComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
+  name: 'entities_v1_latest_base',
   _meta: {
     documentation: 'https://www.elastic.co/guide/en/ecs/current/ecs-base.html',
     ecs_version: '8.0.0',
@@ -16,9 +16,6 @@ export const entitiesBaseComponentTemplateConfig: ClusterPutComponentTemplateReq
   template: {
     mappings: {
       properties: {
-        '@timestamp': {
-          type: 'date',
-        },
         labels: {
           type: 'object',
         },
