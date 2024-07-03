@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ZodType } from 'zod';
+import type { ZodType } from '@kbn/zod';
 import { schema, Type } from '@kbn/config-schema';
 import type { CoreVersionedRouter, Router } from '@kbn/core-http-router-server-internal';
 import { createLargeSchema } from './oas_converter/kbn_config_schema/lib.test.util';

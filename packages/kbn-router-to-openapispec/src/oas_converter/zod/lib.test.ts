@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import { is, convert, convertPathParameters, convertQuery } from './lib';
 
 import { createLargeSchema } from './lib.test.util';

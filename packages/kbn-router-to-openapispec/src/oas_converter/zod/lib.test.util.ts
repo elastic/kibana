@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 
 export function createLargeSchema() {
   return z.object({

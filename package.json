@@ -931,6 +931,7 @@
     "@kbn/visualizations-plugin": "link:src/plugins/visualizations",
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
+    "@kbn/zod": "link:packages/kbn-zod",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
     "@langchain/community": "^0.2.4",
     "@langchain/core": "0.2.3",
