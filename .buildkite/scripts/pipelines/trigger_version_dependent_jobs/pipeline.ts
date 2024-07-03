@@ -85,6 +85,7 @@ function getESForwardPipelineTriggers(): BuildkiteTriggerStep[] {
         commit: 'HEAD',
         env: {
           ES_SNAPSHOT_MANIFEST: `https://storage.googleapis.com/kibana-ci-es-snapshots-daily/${version}/manifest-latest-verified.json`,
+          DRY_RUN: process.env.DRY_RUN,
         },
       },
     } as BuildkiteTriggerStep;
@@ -109,6 +110,9 @@ function getArtifactSnapshotPipelineTriggers() {
         message: process.env.MESSAGE || `Snapshot artifact build for ${branch}`,
         branch,
         commit: 'HEAD',
+        env: {
+          DRY_RUN: process.env.DRY_RUN,
+        },
       },
     } as BuildkiteTriggerStep;
   });
@@ -132,6 +136,9 @@ function getArtifactStagingPipelineTriggers() {
         message: process.env.MESSAGE || `Staging artifact build for ${branch}`,
         branch,
         commit: 'HEAD',
+        env: {
+          DRY_RUN: process.env.DRY_RUN,
+        },
       },
     } as BuildkiteTriggerStep;
   });
@@ -159,6 +166,9 @@ function getArtifactBuildTriggers() {
           message: process.env.MESSAGE || `Artifact build for ${branch}`,
           branch,
           commit: 'HEAD',
+          env: {
+            DRY_RUN: process.env.DRY_RUN,
+          },
         },
       } as BuildkiteTriggerStep)
   );
