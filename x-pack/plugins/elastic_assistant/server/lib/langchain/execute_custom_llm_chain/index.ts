@@ -18,7 +18,8 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 import { MessagesPlaceholder } from '@langchain/core/prompts';
-import { APMTracer, withAssistantSpan } from '@kbn/langchain/server/tracers/apm';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../tracers/apm/with_assistant_span';
 import { EsAnonymizationFieldsSchema } from '../../../ai_assistant_data_clients/anonymization_fields/types';
 import { transformESSearchToAnonymizationFields } from '../../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { AgentExecutor } from '../executors/types';

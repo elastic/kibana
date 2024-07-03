@@ -11,7 +11,8 @@ import { streamFactory, StreamResponseWithHeaders } from '@kbn/ml-response-strea
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
-import { APMTracer, withAssistantSpan } from '@kbn/langchain/server/tracers/apm';
+import { APMTracer } from '@kbn/langchain/server/tracers/apm';
+import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';

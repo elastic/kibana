@@ -45,6 +45,7 @@
     "@kbn/langchain",
     "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
+    "@kbn/apm-utils",
   ],
   "exclude": [
     "target/**/*",

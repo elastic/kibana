@@ -6,4 +6,3 @@
  */
 
 export { APMTracer } from './apm_tracer';
-export { withAssistantSpan } from './with_assistant_span';
