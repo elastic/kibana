@@ -52,7 +52,7 @@ export type ResponseError =
 export interface IKibanaResponse<T extends HttpResponsePayload | ResponseError = any> {
   readonly status: number;
   readonly payload?: T;
-  readonly options: HttpResponseOptions;
+  readonly options: HttpResponseOptions<T>;
 }
 
 export function isKibanaResponse(response?: Record<string, any>): response is IKibanaResponse {

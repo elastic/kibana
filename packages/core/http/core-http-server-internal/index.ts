@@ -28,3 +28,5 @@ export {
 } from './src/external_url';
 
 export { createCookieSessionStorageFactory } from './src/cookie_session_storage';
+
+export { createRepository, createClient } from './src/route_repository';

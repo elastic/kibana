@@ -8,6 +8,7 @@
 import { Server } from '@hapi/hapi';
 import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import {
+  CoreSetup,
   CoreStart,
   Plugin,
   PluginConfigDescriptor,
@@ -19,6 +20,8 @@ import { Logger } from '@kbn/logging';
 import { alertsLocatorID } from '@kbn/observability-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { GetMetricIndicesOptions } from '@kbn/metrics-data-access-plugin/server';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { createClient, createRepository } from '@kbn/core-http-server-internal';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { publicConfigKeys } from '../common/plugin_config_types';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
@@ -290,6 +293,8 @@ export class InfraServerPlugin
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
+    spaceTimeExperiment(core);
+
     return {
       inventoryViews,
       metricsExplorerViews,
@@ -316,4 +321,69 @@ export class InfraServerPlugin
   }
 
   stop() {}
+}
+
+interface ExperimentRequestHandlerContext {
+  licensing: LicensingApiRequestHandlerContext;
+}
+
+async function spaceTimeExperiment(core: CoreSetup) {
+  const myDependencies = {
+    customClient: {
+      getConversations: () => {},
+    },
+  };
+  const { createRoute, registerRoutes } = createRepository<
+    ExperimentRequestHandlerContext,
+    typeof myDependencies
+  >(core, myDependencies);
+
+  const api1Route1 = createRoute({
+    endpoint: 'GET /api/route/{param} 23-23-23',
+    handler: (context, request, response, dependencies) => {
+      // const { params, query, body } = request;
+      return response.ok({
+        body: {
+          message: 'OK' as const,
+        },
+      });
+    },
+    validate: {
+      params: schema.object({
+        param: schema.string(),
+      }),
+      query: schema.object({
+        test: schema.number(),
+      }),
+      body: schema.object({
+        myBody: schema.string(),
+      }),
+    },
+  });
+
+  const api1 = {
+    ...api1Route1,
+  };
+  registerRoutes(api1);
+
+  const callEndpoint = createClient<typeof api1>({} as any);
+  const response = await callEndpoint('GET /api/route/{param} 23-23-23', {
+    body: {
+      myBody: '123',
+    },
+    params: {
+      param: '123',
+    },
+    query: {
+      test: 123,
+    },
+  });
+
+  const { payload, status, options } = response;
+  if (!payload) {
+    return;
+  }
+  const { message } = payload;
+  // eslint-disable-next-line no-console
+  console.log(message, status, options);
 }
