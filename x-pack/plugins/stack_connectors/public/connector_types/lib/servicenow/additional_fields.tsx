@@ -25,16 +25,6 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
   messageVariables,
   onChange,
 }) => {
-  /**
-   * Hide the component if the value is not defined.
-   * This is needed for the intermediate release process.
-   * Users will not be able to use the field if they have never set it.
-   * On the next Serverless release the check will be removed.
-   */
-  if (value === undefined) {
-    return null;
-  }
-
   return (
     <JsonEditorWithMessageVariables
       messageVariables={messageVariables}
