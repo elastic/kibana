@@ -6,3 +6,4 @@ disabled:
   - x-pack/test/functional_enterprise_search/cypress.config.ts
   - x-pack/test/functional_enterprise_search/visual_config.ts
   - x-pack/test/functional_enterprise_search/cli_config.ts
+  - x-pack/test/functional/apps/search_playground/config.ts

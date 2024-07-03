@@ -72,3 +72,6 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
+  - x-pack/test/api_integration/apis/cloud_security_posture/config.ts
+  - x-pack/test/cloud_security_posture_api/config.ts
+  - x-pack/test/cloud_security_posture_functional/config.ts

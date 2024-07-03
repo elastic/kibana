@@ -351,3 +351,5 @@ enabled:
   - x-pack/performance/journeys_e2e/apm_service_inventory.ts
   - x-pack/performance/journeys_e2e/infra_hosts_view.ts
   - x-pack/test/custom_branding/config.ts
+  - x-pack/test/fleet_cypress/cli_config.ts
+  - x-pack/test/fleet_cypress/visual_config.ts

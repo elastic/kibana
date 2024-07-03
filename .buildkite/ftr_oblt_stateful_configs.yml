@@ -40,4 +40,5 @@ enabled:
   - x-pack/test/observability_ai_assistant_api_integration/enterprise/config.ts
   - x-pack/test/observability_ai_assistant_functional/enterprise/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
+  - x-pack/test/functional/apps/apm/config.ts
   
