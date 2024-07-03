@@ -18,15 +18,16 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
-import { QuickPrompt } from '../types';
 
 interface Props {
   isDisabled?: boolean;
   onQuickPromptDeleted: (quickPromptTitle: string) => void;
-  onQuickPromptSelectionChange: (quickPrompt?: QuickPrompt | string) => void;
-  quickPrompts: QuickPrompt[];
-  selectedQuickPrompt?: QuickPrompt;
+  onQuickPromptSelectionChange: (quickPrompt?: PromptResponse | string) => void;
+  quickPrompts: PromptResponse[];
+  selectedQuickPrompt?: PromptResponse;
+  resetSettings?: () => void;
 }
 
 export type QuickPromptSelectorOption = EuiComboBoxOptionOption<{ isDefault: boolean }>;
@@ -40,6 +41,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     quickPrompts,
     onQuickPromptDeleted,
     onQuickPromptSelectionChange,
+    resetSettings,
     selectedQuickPrompt,
   }) => {
     // Form options
@@ -48,8 +50,9 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         value: {
           isDefault: qp.isDefault ?? false,
         },
-        label: qp.title,
-        'data-test-subj': qp.title,
+        label: qp.name,
+        'data-test-subj': qp.name,
+        id: qp.id,
         color: qp.color,
       }))
     );
@@ -60,7 +63,8 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
               value: {
                 isDefault: true,
               },
-              label: selectedQuickPrompt.title,
+              label: selectedQuickPrompt.name,
+              id: selectedQuickPrompt.id,
               color: selectedQuickPrompt.color,
             },
           ]
@@ -69,14 +73,16 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
 
     const handleSelectionChange = useCallback(
       (quickPromptSelectorOption: QuickPromptSelectorOption[]) => {
+        // Reset settings on every selection change to avoid option saved automatically on settings management page
+        resetSettings?.();
         const newQuickPrompt =
           quickPromptSelectorOption.length === 0
             ? undefined
-            : quickPrompts.find((qp) => qp.title === quickPromptSelectorOption[0]?.label) ??
+            : quickPrompts.find((qp) => qp.name === quickPromptSelectorOption[0]?.label) ??
               quickPromptSelectorOption[0]?.label;
         onQuickPromptSelectionChange(newQuickPrompt);
       },
-      [onQuickPromptSelectionChange, quickPrompts]
+      [onQuickPromptSelectionChange, resetSettings, quickPrompts]
     );
 
     // Callback for when user types to create a new quick prompt
@@ -96,6 +102,7 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
         const newOption = {
           value: searchValue,
           label: searchValue,
+          id: searchValue,
         };
 
         if (!optionExists) {
@@ -121,11 +128,12 @@ export const QuickPromptSelector: React.FC<Props> = React.memo(
     // Callback for when user deletes a quick prompt
     const onDelete = useCallback(
       (label: string) => {
+        const deleteId = options.find((o) => o.label === label)?.id;
         setOptions(options.filter((o) => o.label !== label));
         if (selectedOptions?.[0]?.label === label) {
           handleSelectionChange([]);
         }
-        onQuickPromptDeleted(label);
+        onQuickPromptDeleted(deleteId ?? label);
       },
       [handleSelectionChange, onQuickPromptDeleted, options, selectedOptions]
     );

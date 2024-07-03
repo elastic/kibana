@@ -49,9 +49,8 @@ export const getChatParams = async (
   switch (connector.actionTypeId) {
     case OPENAI_CONNECTOR_ID:
       chatModel = new ActionsClientChatOpenAI({
-        actions,
+        actionsClient,
         logger,
-        request,
         connectorId,
         model,
         traceId: uuidv4(),
@@ -70,9 +69,8 @@ export const getChatParams = async (
     case BEDROCK_CONNECTOR_ID:
       llmType = 'bedrock';
       chatModel = new ActionsClientLlm({
-        actions,
+        actionsClient,
         logger,
-        request,
         connectorId,
         model,
         traceId: uuidv4(),
