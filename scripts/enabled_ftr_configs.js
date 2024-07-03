@@ -10,11 +10,23 @@ require('../src/setup_node_env');
 
 var yaml = require('js-yaml');
 var fs = require('fs');
+var allManifestsRelPaths = [
+  'ftr_base_serverless_configs.yml',
+  'ftr_oblt_serverless_configs.yml',
+  'ftr_security_serverless_configs.yml',
+  'ftr_search_serverless_configs.yml',
+  'ftr_platform_stateful_configs.yml',
+  'ftr_oblt_stateful_configs.yml',
+  'ftr_security_stateful_configs.yml',
+  'ftr_search_stateful_configs.yml',
+];
 
 try {
-  yaml.load(fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8')).enabled.forEach(function (x) {
-    console.log(x);
-  });
+  for (var manifestRelPath of allManifestsRelPaths) {
+    yaml.load(fs.readFileSync(manifestRelPath, 'utf8')).enabled.forEach(function (x) {
+      console.log(x);
+    });
+  }
 } catch (e) {
   console.log(e);
 }

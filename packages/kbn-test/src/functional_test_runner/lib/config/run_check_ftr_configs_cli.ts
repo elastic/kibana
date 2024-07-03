@@ -12,7 +12,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import { FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
+import { ALL_FTR_MANIFEST_REL_PATHS, FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
 
 const THIS_PATH = Path.resolve(
   REPO_ROOT,
@@ -75,15 +75,15 @@ export async function runCheckFtrConfigsCli() {
       if (invalid.length) {
         const invalidList = invalid.map((path) => Path.relative(REPO_ROOT, path)).join('\n  - ');
         log.error(
-          `The following files look like FTR configs which are not listed in .buildkite/ftr_configs.yml:\n  - ${invalidList}`
+          `The following files look like FTR configs which are not listed in one of manifest files:\n ${ALL_FTR_MANIFEST_REL_PATHS}:\n  - ${invalidList}`
         );
         throw createFailError(
-          `Please add the listed paths to .buildkite/ftr_configs.yml. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
+          `Please add the listed paths to the correct manifest file. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
         );
       }
     },
     {
-      description: 'Check that all FTR configs are in .buildkite/ftr_configs.yml',
+      description: 'Check that all FTR configs are listed in manifest files',
     }
   );
 }

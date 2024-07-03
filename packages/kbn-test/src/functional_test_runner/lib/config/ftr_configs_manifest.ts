@@ -12,7 +12,12 @@ import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import JsYaml from 'js-yaml';
 
-export const FTR_CONFIGS_MANIFEST_REL = '.buildkite/ftr_configs.yml';
+const ftrConfigsManifestsSourcePath = Path.resolve(REPO_ROOT, './ftr_configs_manifests.json');
+const ftrManifests: {
+  serverless: string[];
+  stateful: string[];
+} = JSON.parse(Fs.readFileSync(ftrConfigsManifestsSourcePath, 'utf8'));
+export const ALL_FTR_MANIFEST_REL_PATHS = ftrManifests.stateful.concat(ftrManifests.serverless);
 
 interface FtrConfigWithOptions {
   [configPath: string]: {
@@ -26,9 +31,16 @@ interface FtrConfigsManifest {
   enabled: Array<string | FtrConfigWithOptions>;
 }
 
-const ftrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
-  Fs.readFileSync(Path.resolve(REPO_ROOT, FTR_CONFIGS_MANIFEST_REL), 'utf8')
-);
+const ftrConfigsManifest: FtrConfigsManifest = { enabled: [], disabled: [], defaultQueue: '' };
+
+for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+  const partialFtrConfigsManifest: FtrConfigsManifest = JsYaml.safeLoad(
+    Fs.readFileSync(Path.resolve(REPO_ROOT, manifestRelPath), 'utf8')
+  );
+  // merge enabled and disabled configs from multiple manifests
+  ftrConfigsManifest.enabled.concat(partialFtrConfigsManifest.enabled);
+  ftrConfigsManifest.disabled.concat(partialFtrConfigsManifest.disabled);
+}
 
 export const FTR_CONFIGS_MANIFEST_PATHS = [
   Object.values(ftrConfigsManifest.enabled),

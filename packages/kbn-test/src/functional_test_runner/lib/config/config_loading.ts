@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { FtrConfigProvider, GenericFtrProviderContext } from '../../public_types';
 import { Config } from './config';
 import { EsVersion } from '../es_version';
-import { FTR_CONFIGS_MANIFEST_REL, FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
+import { ALL_FTR_MANIFEST_REL_PATHS, FTR_CONFIGS_MANIFEST_PATHS } from './ftr_configs_manifest';
 
 interface LoadSettingsOptions {
   path: string;
@@ -67,7 +67,7 @@ async function getConfigModule({
   ) {
     const rel = Path.relative(REPO_ROOT, resolvedPath);
     throw createFlagError(
-      `Refusing to load FTR Config at [${rel}] which is not listed in [${FTR_CONFIGS_MANIFEST_REL}]. All FTR Config files must be listed there, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
+      `Refusing to load FTR Config at [${rel}] which is not listed in [${ALL_FTR_MANIFEST_REL_PATHS}]. All FTR Config files must be listed in one of manifest files, use the "enabled" key if the FTR Config should be run on automatically on PR CI, or the "disabled" key if it is run manually or by a special job.`
     );
   }
 

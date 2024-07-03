@@ -17,6 +17,9 @@ import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 
+import { serverless, stateful } from './ftr_configs_manifests.json';
+export const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
+
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
 // TODO: remove this after https://github.com/elastic/kibana-operations/issues/15 is finalized
@@ -126,14 +129,45 @@ function isObj(x: unknown): x is Record<string, unknown> {
 }
 
 function getEnabledFtrConfigs(patterns?: string[]) {
+  const configs: {
+    enabled: Array<string | { [configPath: string]: { queue: string } }>;
+    uniqueQueues: Set<string>;
+    defaultQueue?: string;
+  } = {
+    enabled: [],
+    uniqueQueues: new Set<string>(),
+  };
+  for (const manifestRelPath of ALL_FTR_MANIFEST_REL_PATHS) {
+    try {
+      const partialConfigs: { enabled?: string[]; disabled?: string[]; defaultQueue?: string } =
+        loadYaml(Fs.readFileSync(manifestRelPath, 'utf8'));
+
+      configs.enabled = configs.enabled.concat(partialConfigs.enabled ?? []);
+      if (partialConfigs.defaultQueue) {
+        configs.uniqueQueues.add(partialConfigs.defaultQueue);
+      }
+    } catch (_) {
+      const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
+      throw new Error(`unable to parse ${manifestRelPath} file: ${error.message}`);
+    }
+  }
+
   try {
-    const configs = loadYaml(Fs.readFileSync('.buildkite/ftr_configs.yml', 'utf8'));
     if (!isObj(configs)) {
       throw new Error('expected yaml file to parse to an object');
     }
     if (!configs.enabled) {
       throw new Error('expected yaml file to have an "enabled" key');
     }
+    if (configs.uniqueQueues.size !== 1) {
+      throw Error(
+        `FTR configs yml files should define the same 'defaultQueue': ${[
+          ...configs.uniqueQueues,
+        ].join(' ')}`
+      );
+    }
+    configs.defaultQueue = configs.uniqueQueues.values().next().value;
+
     if (
       !Array.isArray(configs.enabled) ||
       !configs.enabled.every(
@@ -167,11 +201,10 @@ function getEnabledFtrConfigs(patterns?: string[]) {
         ftrConfigsByQueue.set(queue, [path]);
       }
     }
-
     return { defaultQueue, ftrConfigsByQueue };
   } catch (_) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to parse ftr_configs.yml file: ${error.message}`);
+    throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
   }
 }
 
