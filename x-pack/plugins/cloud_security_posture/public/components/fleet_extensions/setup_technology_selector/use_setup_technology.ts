@@ -12,13 +12,13 @@ import { CLOUDBEAT_AWS, CLOUDBEAT_GCP, CLOUDBEAT_AZURE } from '../../../../commo
 
 export const useSetupTechnology = ({
   input,
-  agentPolicy,
+  agentPolicies,
   agentlessPolicy,
   handleSetupTechnologyChange,
   isEditPage,
 }: {
   input: NewPackagePolicyInput;
-  agentPolicy?: AgentPolicy;
+  agentPolicies?: AgentPolicy[];
   agentlessPolicy?: AgentPolicy;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
   isEditPage: boolean;
@@ -28,10 +28,10 @@ export const useSetupTechnology = ({
   const isCspmAzure = input.type === CLOUDBEAT_AZURE;
   const isAgentlessSupportedForCloudProvider = isCspmAws || isCspmGcp || isCspmAzure;
   const isAgentlessAvailable = Boolean(isAgentlessSupportedForCloudProvider && agentlessPolicy);
-  const agentPolicyId = agentPolicy?.id;
+  const agentPolicyIds = (agentPolicies || []).map((policy: AgentPolicy) => policy.id);
   const agentlessPolicyId = agentlessPolicy?.id;
   const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(() => {
-    if (isEditPage && agentPolicyId === SetupTechnology.AGENTLESS) {
+    if (isEditPage && agentPolicyIds.includes(SetupTechnology.AGENTLESS)) {
       return SetupTechnology.AGENTLESS;
     }
 
@@ -50,7 +50,11 @@ export const useSetupTechnology = ({
       return;
     }
 
-    if (agentPolicyId && agentPolicyId !== agentlessPolicyId) {
+    const hasAgentPolicies = agentPolicyIds.length > 0;
+    const agentlessPolicyIsAbsent =
+      !agentlessPolicyId || !agentPolicyIds.includes(agentlessPolicyId);
+
+    if (hasAgentPolicies && agentlessPolicyIsAbsent) {
       /*
         handle case when agent policy is coming from outside,
         e.g. from the get param or when coming to integration from a specific agent policy
@@ -65,7 +69,7 @@ export const useSetupTechnology = ({
     } else {
       setSetupTechnology(SetupTechnology.AGENT_BASED);
     }
-  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable, isDirty, isEditPage]);
+  }, [agentPolicyIds, agentlessPolicyId, isAgentlessAvailable, isDirty, isEditPage]);
 
   useEffect(() => {
     if (isEditPage) {
