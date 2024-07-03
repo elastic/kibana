@@ -89,4 +89,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/serverless.integrations_feature_flag.config.ts

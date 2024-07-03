@@ -72,4 +72,3 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/integrations_feature_flag.config.ts
