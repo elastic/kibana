@@ -452,7 +452,11 @@ describe('create_query', () => {
                     standard: {
                       query: {
                         nested: {
-                          inner_hits: { _source: ['field2.inference.chunks.text'], size: 2 },
+                          inner_hits: {
+                            _source: ['field2.inference.chunks.text'],
+                            name: 'index1.field2',
+                            size: 2,
+                          },
                           path: 'field2.inference.chunks',
                           query: {
                             sparse_vector: {
@@ -570,7 +574,11 @@ describe('create_query', () => {
                     standard: {
                       query: {
                         nested: {
-                          inner_hits: { _source: ['field2.inference.chunks.text'], size: 2 },
+                          inner_hits: {
+                            _source: ['field2.inference.chunks.text'],
+                            name: 'index1.field2',
+                            size: 2,
+                          },
                           path: 'field2.inference.chunks',
                           query: {
                             knn: {

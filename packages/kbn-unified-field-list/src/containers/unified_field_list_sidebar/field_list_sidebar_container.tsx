@@ -163,8 +163,8 @@ const UnifiedFieldListSidebarContainer = memo(
       const editField = useMemo(
         () =>
           dataView && dataViewFieldEditor && searchMode === 'documents' && canEditDataView
-            ? (fieldName?: string) => {
-                const ref = dataViewFieldEditor.openEditor({
+            ? async (fieldName?: string) => {
+                const ref = await dataViewFieldEditor.openEditor({
                   ctx: {
                     dataView,
                   },

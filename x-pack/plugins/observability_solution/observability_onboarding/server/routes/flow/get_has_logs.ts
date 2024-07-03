@@ -7,52 +7,24 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
 import { AGENT_ID } from '../../../common/es_fields';
-import {
-  LogFilesState,
-  ObservabilityOnboardingType,
-  SystemLogsState,
-} from '../../saved_objects/observability_onboarding_status';
-import { ElasticAgentStepPayload } from '../types';
 
-export async function getHasLogs({
-  type,
-  state,
-  esClient,
-  payload,
-}: {
-  type: ObservabilityOnboardingType;
-  state?: LogFilesState | SystemLogsState;
-  esClient: ElasticsearchClient;
-  payload?: ElasticAgentStepPayload;
-}) {
-  if (!state) {
-    return false;
-  }
-
+export async function getHasLogs(esClient: ElasticsearchClient, agentId: string) {
   try {
-    const { namespace } = state;
-    const index =
-      type === 'logFiles'
-        ? `logs-${(state as LogFilesState).datasetName}-${namespace}`
-        : [`logs-system.syslog-${namespace}`, `logs-system.auth-${namespace}`];
-
-    const agentId = payload?.agentId;
-
-    const { hits } = await esClient.search({
-      index,
+    const result = await esClient.search({
+      index: ['logs-*', 'metrics-*'],
       ignore_unavailable: true,
+      size: 0,
       terminate_after: 1,
-      body: {
-        query: {
-          bool: {
-            filter: [...termQuery(AGENT_ID, agentId)],
-          },
+      query: {
+        bool: {
+          filter: termQuery(AGENT_ID, agentId),
         },
       },
     });
-    const total = hits.total as { value: number };
-    return total.value > 0;
+    const { value } = result.hits.total as estypes.SearchTotalHits;
+    return value > 0;
   } catch (error) {
     if (error.statusCode === 404) {
       return false;

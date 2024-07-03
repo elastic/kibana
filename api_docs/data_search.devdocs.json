@@ -2414,7 +2414,7 @@
             "label": "asScopedProvider",
             "description": [],
             "signature": [
-              "({ savedObjects, elasticsearch }: ",
+              "({ security, savedObjects, elasticsearch }: ",
               {
                 "pluginId": "@kbn/core-lifecycle-server",
                 "scope": "common",
@@ -2593,7 +2593,7 @@
                 "id": "def-server.SearchSessionService.asScopedProvider.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjects, elasticsearch }",
+                "label": "{ security, savedObjects, elasticsearch }",
                 "description": [],
                 "signature": [
                   {

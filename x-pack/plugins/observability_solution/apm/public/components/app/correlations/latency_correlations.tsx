@@ -10,14 +10,13 @@ import { useHistory } from 'react-router-dom';
 import { orderBy } from 'lodash';
 
 import {
-  EuiIcon,
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
   EuiBadge,
+  EuiIconTip,
 } from '@elastic/eui';
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
@@ -123,25 +122,28 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         width: '116px',
         field: 'correlation',
         name: (
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
+          <>
+            {i18n.translate(
+              'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
               {
-                defaultMessage:
-                  'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
+                defaultMessage: 'Correlation',
               }
             )}
-          >
-            <>
-              {i18n.translate(
-                'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
+            &nbsp;
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationColumnDescription',
                 {
-                  defaultMessage: 'Correlation',
+                  defaultMessage:
+                    'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
                 }
               )}
-              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-            </>
-          </EuiToolTip>
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </>
         ),
         render: (_, { correlation }) => {
           return <div>{asPreciseDecimal(correlation, 2)}</div>;
@@ -364,6 +366,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         {showCorrelationsTable && (
           <CorrelationsTable<LatencyCorrelation>
             columns={mlCorrelationColumns}
+            rowHeader="correlation"
             significantTerms={histogramTerms}
             status={progress.isRunning ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
             setPinnedSignificantTerm={setPinnedSignificantTerm}

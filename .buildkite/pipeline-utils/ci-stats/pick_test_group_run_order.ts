@@ -16,8 +16,9 @@ import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
-
 import { serverless, stateful } from './ftr_configs_manifests.json';
+import { getAgentImageConfig } from '#pipeline-utils';
+
 export const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
@@ -28,9 +29,7 @@ const getAgentRule = (queueName: string = 'n2-4-spot') => {
   if (process.env?.BUILDKITE_AGENT_META_DATA_QUEUE === 'gobld') {
     const [kind, cores, spot] = queueName.split('-');
     return {
-      provider: 'gcp',
-      image: 'family/kibana-ubuntu-2004',
-      imageProject: 'elastic-images-prod',
+      ...getAgentImageConfig(),
       machineType: `${kind}-standard-${cores}`,
       preemptible: spot === 'spot',
     };
