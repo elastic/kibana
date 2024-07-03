@@ -2,7 +2,7 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-es-forward
+  name: bk-kibana-es-forward-compatibility-testing
   description: Forward compatibility testing between Kibana 7.17 and ES 8+
   links:
     - url: 'https://buildkite.com/elastic/kibana-es-forward-compatibility-testing'
