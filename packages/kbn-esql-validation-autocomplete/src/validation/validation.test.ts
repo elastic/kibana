@@ -10253,6 +10253,18 @@ describe('validation logic', () => {
         testErrorsAndWarnings('from a_index | eval top(stringField, 5, "asc") > 0', [
           'EVAL does not support function top',
         ]);
+        testErrorsAndWarnings('from a_index | stats var = top(stringField, 5, "asc")', []);
+        testErrorsAndWarnings('from a_index | stats top(stringField, 5, "asc")', []);
+
+        testErrorsAndWarnings('from a_index | stats top(stringField, numberField, "asc")', [
+          'Argument of [top] must be a constant, received [numberField]',
+        ]);
+
+        testErrorsAndWarnings('from a_index | stats top(null, null, null)', []);
+        testErrorsAndWarnings('row nullVar = null | stats top(nullVar, nullVar, nullVar)', [
+          'Argument of [top] must be a constant, received [nullVar]',
+          'Argument of [top] must be a constant, received [nullVar]',
+        ]);
       });
 
       describe('st_distance', () => {
@@ -10334,6 +10346,323 @@ describe('validation logic', () => {
 
         testErrorsAndWarnings('from a_index | eval st_distance(null, null)', []);
         testErrorsAndWarnings('row nullVar = null | eval st_distance(nullVar, nullVar)', []);
+      });
+
+      describe('weighted_avg', () => {
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(numberField, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField, "asc"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField, "asc"))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField, "asc")) + weighted_avg(numberField, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField, "asc")) + weighted_avg(numberField, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField / 2, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField / 2, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, "asc")',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField, numberField, "asc") by round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField, "asc") by var1 = round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField, "asc") by round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, "asc") by var1 = round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField, "asc") by round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, "asc") by var1 = round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(avg(numberField), avg(numberField), "a")',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(avg(numberField), avg(numberField), "a")',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(booleanField, booleanField, "a")',
+          [
+            'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings('from a_index | sort weighted_avg(numberField, numberField, "asc")', [
+          'SORT does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | where weighted_avg(numberField, numberField, "asc")',
+          ['WHERE does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where weighted_avg(numberField, numberField, "asc") > 0',
+          ['WHERE does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(numberField, numberField, "asc")',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(numberField, numberField, "asc") > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | eval weighted_avg(numberField, numberField, "asc")', [
+          'EVAL does not support function weighted_avg',
+        ]);
+
+        testErrorsAndWarnings(
+          'from a_index | eval weighted_avg(numberField, numberField, "asc") > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings('from a_index | stats weighted_avg(null, null, null)', []);
+        testErrorsAndWarnings(
+          'row nullVar = null | stats weighted_avg(nullVar, nullVar, nullVar)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField, stringField))',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = round(weighted_avg(numberField, numberField, stringField)) + weighted_avg(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats round(weighted_avg(numberField, numberField, stringField)) + weighted_avg(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField / 2, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField / 2, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, stringField)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(numberField, numberField, stringField) by round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var0 = weighted_avg(numberField, numberField, stringField) by var1 = round(numberField / 2)',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField, stringField) by round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, stringField) by var1 = round(numberField / 2), ipField',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), weighted_avg(numberField, numberField, stringField) by round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField, stringField) by var1 = round(numberField / 2), numberField / 2',
+          []
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats var = weighted_avg(avg(numberField), avg(numberField), avg(numberField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(avg(numberField), avg(numberField), avg(numberField))',
+          [
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | stats weighted_avg(booleanField, booleanField, booleanField)',
+          [
+            'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]',
+            'Argument of [weighted_avg] must be [string], found value [booleanField] type [boolean]',
+          ]
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | sort weighted_avg(numberField, numberField, stringField)',
+          ['SORT does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where weighted_avg(numberField, numberField, stringField)',
+          ['WHERE does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | where weighted_avg(numberField, numberField, stringField) > 0',
+          ['WHERE does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(numberField, numberField, stringField)',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = weighted_avg(numberField, numberField, stringField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval weighted_avg(numberField, numberField, stringField)',
+          ['EVAL does not support function weighted_avg']
+        );
+
+        testErrorsAndWarnings(
+          'from a_index | eval weighted_avg(numberField, numberField, stringField) > 0',
+          ['EVAL does not support function weighted_avg']
+        );
       });
     });
   });
