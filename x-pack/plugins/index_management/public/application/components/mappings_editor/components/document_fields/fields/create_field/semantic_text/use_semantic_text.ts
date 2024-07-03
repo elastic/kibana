@@ -16,8 +16,8 @@ import { FormHook } from '../../../../../shared_imports';
 import { CustomInferenceEndpointConfig, Field, SemanticTextField } from '../../../../../types';
 import { useMLModelNotificationToasts } from '../../../../../../../../hooks/use_ml_model_status_toasts';
 
-import { getInferenceModels } from '../../../../../../../services/api';
 import { getFieldByPathName } from '../../../../../reducer';
+import { getInferenceEndpoints } from '../../../../../../../services/api';
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
   ml?: MlPluginStart;
@@ -76,7 +76,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (data.inference_id === undefined) {
         throw new Error(
           i18n.translate('xpack.idxMgmt.mappingsEditor.createField.undefinedInferenceIdError', {
-            defaultMessage: 'Inference ID is undefined while creating the inference endpoint.',
+            defaultMessage: 'Inference ID is undefined',
           })
         );
       }
@@ -134,7 +134,7 @@ export function useSemanticText(props: UseSemanticTextProps) {
     dispatch({ type: 'field.add', value });
 
     try {
-      const inferenceModels = await getInferenceModels();
+            const inferenceModels = await getInferenceEndpoints();
       const inferenceModel = inferenceModels.data?.some(
         (inference) => inference.model_id === inferenceId
       );
@@ -142,10 +142,9 @@ export function useSemanticText(props: UseSemanticTextProps) {
       if (inferenceModel) {
         return;
       }
-
-      if (trainedModelId) {
-        // show toasts only if it's an Elastic model
-        showSuccessToasts();
+      // Only show toast if it's an internal Elastic model that hasn't been deployed yet
+      if (trainedModelId && inferenceData.isDeployable && !inferenceData.isDeployed) {
+        showSuccessToasts(trainedModelId);
       }
 
       await createInferenceEndpoint(trainedModelId, data, customInferenceEndpointConfig);

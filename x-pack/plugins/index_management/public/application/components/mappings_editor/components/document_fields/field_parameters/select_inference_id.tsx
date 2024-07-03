@@ -39,7 +39,8 @@ import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/compon
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
-import { useLoadInferenceModels } from '../../../../../services/api';
+import { Form, UseField, useForm } from '../../../shared_imports';
+import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
 import { useMLModelNotificationToasts } from '../../../../../../hooks/use_ml_model_status_toasts';
@@ -123,7 +124,7 @@ export const SelectInferenceId: React.FC<Props> = ({
     ];
   }, []);
 
-  const { isLoading, data: models } = useLoadInferenceModels();
+  const { isLoading, data: models } = useLoadInferenceEndpoints();
 
   const [options, setOptions] = useState<EuiSelectableOption[]>([...defaultInferenceIds]);
   const inferenceIdOptionsFromModels = useMemo(() => {
