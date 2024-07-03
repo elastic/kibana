@@ -231,11 +231,18 @@ const permissionsPolicyViolation: EventTypeOpts<PermissionsPolicyViolationEvent>
         optional: true,
       },
     },
+    featureId: {
+      type: 'text',
+      _meta: {
+        description: '"featureId" field of Reporting API permissions policy violation report.',
+        optional: true,
+      },
+    },
     policyId: {
       type: 'text',
       _meta: {
         description: '"policyId" field of Reporting API permissions policy violation report.',
-        optional: false,
+        optional: true,
       },
     },
     sourceFile: {
