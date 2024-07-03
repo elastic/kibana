@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../../assistant_context/types';
-import { Prompt } from '../../../types';
 
 export const getSelectedConversations = (
-  allSystemPrompts: Prompt[],
+  allSystemPrompts: PromptResponse[],
   conversationSettings: Record<string, Conversation>,
   systemPromptId: string
 ) => {
