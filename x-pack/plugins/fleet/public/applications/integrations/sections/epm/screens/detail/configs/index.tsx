@@ -53,6 +53,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
       {error ? (
         <EuiFlexItem grow={7}>
           <EuiCallOut
+            data-test-subj="configsTab.errorCallout"
             title={
               <FormattedMessage
                 id="xpack.fleet.epm.InputTemplates.errorTitle"
@@ -89,7 +90,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 </>
               )}
               <EuiText>
-                <p>
+                <p data-test-subj="configsTab.info">
                   <FormattedMessage
                     id="xpack.fleet.epm.InputTemplates.mainText"
                     defaultMessage="View sample configurations for each of the {name} integration's data streams below. Copy/paste this YML into your {elasticAgentYml} file or into a file within your {inputsDir} directory. For more information, see the {userGuideLink}"
@@ -117,6 +118,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 <>
                   <EuiSpacer size="s" />
                   <EuiCallOut
+                    data-test-subj="configsTab.notInstalled"
                     title={
                       <FormattedMessage
                         id="xpack.fleet.epm.InputTemplates.installCallout"
@@ -129,7 +131,13 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
                 </>
               )}
               <EuiSpacer size="s" />
-              <EuiCodeBlock language="yaml" isCopyable={true} paddingSize="s" overflowHeight={1000}>
+              <EuiCodeBlock
+                language="yaml"
+                isCopyable={true}
+                paddingSize="s"
+                overflowHeight={1000}
+                data-test-subj="configsTab.codeblock"
+              >
                 {configs}
               </EuiCodeBlock>
             </>
