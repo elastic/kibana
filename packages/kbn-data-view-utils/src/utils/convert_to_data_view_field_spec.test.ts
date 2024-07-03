@@ -45,6 +45,7 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
       isNull: false,
     };
     const result = convertDatatableColumnToDataViewFieldSpec(column);
+    expect(result.timeSeriesMetric).toBeUndefined();
     expect(result).toEqual(
       expect.objectContaining({
         name: 'test',
@@ -53,7 +54,6 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
         searchable: true,
         aggregatable: false,
         isNull: false,
-        timeSeriesMetric: undefined,
       })
     );
   });
