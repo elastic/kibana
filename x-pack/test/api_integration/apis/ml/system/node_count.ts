@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
     return body;
   }
 
-  describe('POST ml/ml_node_count', function () {
+  describe('GET ml/ml_node_count', function () {
     describe('get ml node count', () => {
       it('should match expected values', async () => {
         const resp = await runRequest(USER.ML_POWERUSER, 200);
