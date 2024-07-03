@@ -34,6 +34,7 @@ viewer:
         - ".fleet-actions*"
         - "risk-score.risk-score-*"
         - ".asset-criticality.asset-criticality-*"
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -100,6 +101,10 @@ editor:
         - "read"
         - "write"
       allow_restricted_indices: false
+    - names:
+        - ".ml-anomalies-*"
+      privileges:
+        - read
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -155,6 +160,7 @@ t1_analyst:
         - ".fleet-actions*"
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -203,6 +209,7 @@ t2_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -265,6 +272,7 @@ t3_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -284,6 +292,7 @@ t3_analyst:
         - feature_siem.process_operations_all
         - feature_siem.actions_log_management_all # Response actions history
         - feature_siem.file_operations_all
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.read
@@ -330,6 +339,7 @@ threat_intelligence_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -389,6 +399,7 @@ rule_author:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -454,6 +465,7 @@ soc_manager:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
   applications:
@@ -515,6 +527,7 @@ detections_admin:
         - metrics-endpoint.metadata_current_*
         - .fleet-agents*
         - .fleet-actions*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -573,6 +586,10 @@ platform_engineer:
       privileges:
         - read
         - write
+    - names:
+        - ".ml-anomalies-*"
+      privileges:
+        - read
   applications:
     - application: "kibana-.kibana"
       privileges:
@@ -624,6 +641,7 @@ endpoint_operations_analyst:
         - .lists*
         - .items*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
@@ -692,6 +710,7 @@ endpoint_policy_manager:
         - packetbeat-*
         - winlogbeat-*
         - risk-score.risk-score-*
+        - ".ml-anomalies-*"
       privileges:
         - read
     - names:
