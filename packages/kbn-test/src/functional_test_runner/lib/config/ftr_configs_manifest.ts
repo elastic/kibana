@@ -12,7 +12,10 @@ import Fs from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import JsYaml from 'js-yaml';
 
-const ftrConfigsManifestsSourcePath = Path.resolve(REPO_ROOT, './ftr_configs_manifests.json');
+const ftrConfigsManifestsSourcePath = Path.resolve(
+  REPO_ROOT,
+  '.buildkite/ftr_configs_manifests.json'
+);
 const ftrManifests: {
   serverless: string[];
   stateful: string[];

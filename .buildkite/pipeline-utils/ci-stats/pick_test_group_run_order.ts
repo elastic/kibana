@@ -16,10 +16,10 @@ import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
-import { serverless, stateful } from './ftr_configs_manifests.json';
+import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { getAgentImageConfig } from '#pipeline-utils';
 
-export const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
+const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
@@ -149,7 +149,7 @@ function getEnabledFtrConfigs(patterns?: string[]) {
       ) as PartialConfigs;
 
       configs.enabled = configs.enabled.concat(partialConfigs?.enabled ?? []);
-      if (partialConfigs?.defaultQueue) {
+      if (partialConfigs.defaultQueue) {
         configs.uniqueQueues.add(partialConfigs.defaultQueue);
       }
     } catch (_) {
