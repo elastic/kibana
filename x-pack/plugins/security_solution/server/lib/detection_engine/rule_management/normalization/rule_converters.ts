@@ -123,6 +123,7 @@ export const typeSpecificSnakeToCamel = (
         language: params.language,
         query: params.query,
         alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
+        responseActions: params.response_actions?.map(transformRuleToAlertResponseAction),
       };
     }
     case 'threat_match': {
@@ -641,6 +642,7 @@ export const typeSpecificCamelToSnake = (
         language: params.language,
         query: params.query,
         alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
+        response_actions: params.responseActions?.map(transformAlertToRuleResponseAction),
       };
     }
     case 'threat_match': {

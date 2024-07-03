@@ -18,6 +18,7 @@ import {
   getIndexListFromEsqlQuery,
 } from '@kbn/securitysolution-utils';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import { buildEsqlSearchRequest } from './build_esql_search_request';
 import { performEsqlRequest } from './esql_request';
 import { wrapEsqlAlerts } from './wrap_esql_alerts';
@@ -42,6 +43,7 @@ import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { CreateQueryRuleAdditionalOptions } from '../types';
 
 export const esqlExecutor = async ({
   runOpts: {
@@ -63,6 +65,7 @@ export const esqlExecutor = async ({
   spaceId,
   experimentalFeatures,
   licensing,
+  scheduleNotificationResponseActionsService,
 }: {
   runOpts: RunOpts<EsqlRuleParams>;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
@@ -71,6 +74,7 @@ export const esqlExecutor = async ({
   version: string;
   experimentalFeatures: ExperimentalFeatures;
   licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService?: CreateQueryRuleAdditionalOptions['scheduleNotificationResponseActionsService'];
 }) => {
   const ruleParams = completeRule.ruleParams;
   /**
@@ -228,6 +232,16 @@ export const esqlExecutor = async ({
         }
       }
 
+      if (
+        completeRule.ruleParams.responseActions?.length &&
+        result.createdSignalsCount &&
+        scheduleNotificationResponseActionsService
+      ) {
+        scheduleNotificationResponseActionsService({
+          signals: result.createdSignals.map(expandDottedObject),
+          responseActions: completeRule.ruleParams.responseActions,
+        });
+      }
       // no more results will be found
       if (response.values.length < size) {
         ruleExecutionLogger.debug(

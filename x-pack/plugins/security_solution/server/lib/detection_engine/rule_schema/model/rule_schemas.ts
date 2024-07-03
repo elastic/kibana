@@ -180,6 +180,7 @@ export const EsqlSpecificRuleParams = z.object({
   type: z.literal('esql'),
   language: z.literal('esql'),
   query: RuleQuery,
+  responseActions: z.array(RuleResponseAction).optional(),
   alertSuppression: AlertSuppressionCamel.optional(),
 });
 

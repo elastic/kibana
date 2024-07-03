@@ -323,7 +323,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
     if (!experimentalFeatures.esqlRulesDisabled) {
-      plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType(ruleOptions)));
+      plugins.alerting.registerType(
+        securityRuleTypeWrapper(
+          createEsqlAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+        )
+      );
     }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(

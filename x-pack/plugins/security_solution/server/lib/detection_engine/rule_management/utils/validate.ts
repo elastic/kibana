@@ -21,7 +21,7 @@ import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import { isQueryRule } from '../../../../../common/detection_engine/utils';
+import { isQueryRule, isEsqlRule } from '../../../../../common/detection_engine/utils';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../../..';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import {
@@ -66,11 +66,17 @@ export const validateResponseActionsPermissions = async (
 ): Promise<void> => {
   const { experimentalFeatures } = await securitySolution.getConfig();
 
-  if (!experimentalFeatures.endpointResponseActionsEnabled || !isQueryRule(ruleUpdate.type)) {
+  if (
+    !experimentalFeatures.endpointResponseActionsEnabled ||
+    (!isQueryRule(ruleUpdate.type) && !isEsqlRule(ruleUpdate.type))
+  ) {
     return;
   }
 
-  if (!isQueryRulePayload(ruleUpdate) || (existingRule && !isQueryRuleObject(existingRule))) {
+  if (
+    !rulePayloadContainsResponseActions(ruleUpdate) ||
+    (existingRule && !ruleObjectContainsResponseActions(existingRule))
+  ) {
     return;
   }
 
@@ -110,10 +116,15 @@ export const validateResponseActionsPermissions = async (
   });
 };
 
-function isQueryRulePayload(rule: RuleCreateProps | RuleUpdateProps): rule is QueryRule {
+// TODO TC: figure out typings
+function rulePayloadContainsResponseActions(
+  rule: RuleCreateProps | RuleUpdateProps
+): rule is QueryRule {
   return 'response_actions' in rule;
 }
 
-function isQueryRuleObject(rule?: RuleAlertType): rule is Rule<UnifiedQueryRuleParams> {
+function ruleObjectContainsResponseActions(
+  rule?: RuleAlertType
+): rule is Rule<UnifiedQueryRuleParams> {
   return rule != null && 'params' in rule && 'responseActions' in rule?.params;
 }
