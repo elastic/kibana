@@ -174,16 +174,15 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
 
   useEffect(() => {
     const createSecurityPrompts = once(async () => {
-      const res = await getPrompts({
-        http,
-        toasts: notifications.toasts,
-      });
-      if (
-        assistantAvailability.isAssistantEnabled &&
-        assistantAvailability.hasAssistantPrivilege &&
-        res.total === 0
-      ) {
-        await createBasePrompts(notifications, http);
+      if (assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege) {
+        const res = await getPrompts({
+          http,
+          toasts: notifications.toasts,
+        });
+
+        if (res.total === 0) {
+          await createBasePrompts(notifications, http);
+        }
       }
     });
     createSecurityPrompts();
