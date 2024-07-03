@@ -35,8 +35,7 @@ steps:
           automatic:
             - exit_status: "1"
               limit: 2
-
-    steps:
+              
       - label: Running investigations:saved-objects:runner:qa:serverless
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
         key: investigations:saved-objects:runner:qa:serverless
