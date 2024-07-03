@@ -34,7 +34,7 @@ export async function getDataStreamSettings({
 
   // Getting the 1st item from the data streams endpoint as we will be passing the exact DS name
   const [dataStreamInfo] = await dataStreamService.getMatchingDataStreams(esClient, dataStream);
-  const integration = dataStreamInfo._meta?.package?.name;
+  const integration = dataStreamInfo?._meta?.package?.name;
 
   return {
     createdOn,
