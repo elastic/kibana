@@ -8,8 +8,6 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import { merge } from 'lodash';
 import { UrlObject } from 'url';
-import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import {
   editorUser,
   viewerUser,
@@ -20,40 +18,15 @@ import {
 } from '../../../../test/analytics/services/kibana_ebt';
 import {
   ObservabilityAIAssistantFtrConfig,
-  CreateTest as CreateTestAPI,
   createObservabilityAIAssistantAPIConfig,
 } from '../../observability_ai_assistant_api_integration/common/config';
-import {
-  getScopedApiClient,
-  ObservabilityAIAssistantAPIClient,
-} from '../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
-import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
-import { ObservabilityAIAssistantUIProvider, ObservabilityAIAssistantUIService } from './ui';
-
-export interface TestConfig extends CreateTestAPI {
-  services: Omit<CreateTestAPI['services'], 'observabilityAIAssistantAPIClient'> &
-    InheritedServices & {
-      observabilityAIAssistantUI: (
-        context: InheritedFtrProviderContext
-      ) => Promise<ObservabilityAIAssistantUIService>;
-      observabilityAIAssistantAPIClient: () => Promise<{
-        adminUser: ObservabilityAIAssistantAPIClient;
-        viewerUser: ObservabilityAIAssistantAPIClient;
-        editorUser: ObservabilityAIAssistantAPIClient;
-      }>;
-      kibana_ebt_server: (context: InheritedFtrProviderContext) => EBTHelpersContract;
-      kibana_ebt_ui: (context: InheritedFtrProviderContext) => EBTHelpersContract;
-      apmSynthtraceEsClient: (
-        context: InheritedFtrProviderContext
-      ) => Promise<ApmSynthtraceEsClient>;
-    };
-}
+import { getScopedApiClient } from '../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
+import { InheritedFtrProviderContext } from '../ftr_provider_context';
+import { ObservabilityAIAssistantUIProvider } from './ui';
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-export function createTestConfig(
-  config: ObservabilityAIAssistantFtrConfig
-): ({ readConfigFile }: FtrConfigProviderContext) => Promise<TestConfig> {
+export function createTestConfig(config: ObservabilityAIAssistantFtrConfig) {
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile, log, esVersion }: FtrConfigProviderContext) => {

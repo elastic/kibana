@@ -7,11 +7,14 @@
 
 import {
   MessageAddEvent,
+  MessageRole,
   StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Agent } from 'supertest';
 import { Readable } from 'stream';
+import { ELASTICSEARCH_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/elasticsearch';
+import { CreateTest } from '../../../common/config';
 import { createLlmProxy, LlmProxy } from '../../../common/create_llm_proxy';
 
 function decodeEvents(body: Readable | string) {
@@ -77,4 +80,51 @@ export async function deleteLLMProxyConnector({
     .expect(204);
 
   proxy.close();
+}
+
+export function foo(
+  connectorId: string,
+  observabilityAIAssistantAPIClient: Awaited<
+    ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
+  >
+) {
+  return observabilityAIAssistantAPIClient
+    .editorUser({
+      endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
+      params: {
+        body: {
+          messages: [
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: ELASTICSEARCH_FUNCTION_NAME,
+                  trigger: MessageRole.User,
+                  arguments: JSON.stringify({
+                    method: 'POST',
+                    path: 'traces*/_search',
+                    body: {
+                      size: 0,
+                      aggs: {
+                        services: {
+                          terms: {
+                            field: 'service.name',
+                          },
+                        },
+                      },
+                    },
+                  }),
+                },
+              },
+            },
+          ],
+          connectorId,
+          persist: false,
+          screenContexts: [],
+        },
+      },
+    })
+    .expect(200);
 }

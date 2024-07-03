@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
 import { LlmProxy } from '../../../common/create_llm_proxy';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { createLLMProxyConnector, deleteLLMProxyConnector, getMessageAddedEvents } from './helpers';
+import { createLLMProxyConnector, deleteLLMProxyConnector } from './helpers';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -20,12 +20,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   describe.skip('when calling summarize function', () => {
     let proxy: LlmProxy;
     let connectorId: string;
-    let events: MessageAddEvent[];
 
     before(async () => {
       ({ connectorId, proxy } = await createLLMProxyConnector({ log, supertest }));
 
-      const chatResponse = await observabilityAIAssistantAPIClient
+      await observabilityAIAssistantAPIClient
         .editorUser({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
           params: {
@@ -59,7 +58,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       await proxy.waitForAllInterceptorsSettled();
-      events = getMessageAddedEvents(chatResponse.body);
     });
 
     after(async () => {

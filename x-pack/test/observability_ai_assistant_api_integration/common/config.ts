@@ -23,6 +23,12 @@ export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
 export type CreateTest = ReturnType<typeof createObservabilityAIAssistantAPIConfig>;
 
+export type ObservabilityAIAssistantAPIClient = Awaited<
+  ReturnType<CreateTest['services']['observabilityAIAssistantAPIClient']>
+>;
+
+export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
+
 export function createObservabilityAIAssistantAPIConfig({
   config,
   license,
@@ -76,9 +82,7 @@ export function createObservabilityAIAssistantAPIConfig({
   };
 }
 
-export function createTestConfig(
-  config: ObservabilityAIAssistantFtrConfig
-): ({ readConfigFile }: FtrConfigProviderContext) => Promise<CreateTest> {
+export function createTestConfig(config: ObservabilityAIAssistantFtrConfig) {
   const { license, name, kibanaConfig } = config;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -97,5 +101,3 @@ export function createTestConfig(
     };
   };
 }
-
-export type ObservabilityAIAssistantServices = Awaited<ReturnType<CreateTestConfig>>['services'];
