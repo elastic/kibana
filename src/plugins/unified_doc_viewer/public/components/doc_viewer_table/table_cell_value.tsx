@@ -8,7 +8,7 @@
 
 import { css } from '@emotion/react';
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -154,32 +154,39 @@ export const TableFieldValue = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <div
-        ref={valueRef}
-        className={valueClassName}
-        data-test-subj={`tableDocViewRow-${field}-value`}
-        // Value returned from formatFieldValue is always sanitized
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: formattedValue }}
-      />
-      {isCollapsible && (
-        <div>
-          <EuiButtonEmpty
-            size="xs"
-            flush="both"
-            data-test-subj={`toggleLongFieldValue-${field}`}
-            onClick={onToggleCollapse}
-          >
-            {isCollapsed
-              ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
-                  defaultMessage: 'View more',
-                })
-              : i18n.translate('unifiedDocViewer.docViews.table.viewLessButton', {
-                  defaultMessage: 'View less',
-                })}
-          </EuiButtonEmpty>
-        </div>
-      )}
+      <EuiFlexGroup gutterSize="s" direction="row" alignItems="flexStart">
+        {isCollapsible && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType={isCollapsed ? 'plus' : 'minus'}
+              size="xs"
+              color="primary"
+              data-test-subj={`toggleLongFieldValue-${field}`}
+              title={
+                isCollapsed
+                  ? i18n.translate('unifiedDocViewer.docViews.table.viewMoreButton', {
+                      defaultMessage: 'View more',
+                    })
+                  : i18n.translate('unifiedDocViewer.docViews.table.viewLessButton', {
+                      defaultMessage: 'View less',
+                    })
+              }
+              aria-expanded={!isCollapsed}
+              onClick={onToggleCollapse}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem>
+          <div
+            ref={valueRef}
+            className={valueClassName}
+            data-test-subj={`tableDocViewRow-${field}-value`}
+            // Value returned from formatFieldValue is always sanitized
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: formattedValue }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Fragment>
   );
 };
