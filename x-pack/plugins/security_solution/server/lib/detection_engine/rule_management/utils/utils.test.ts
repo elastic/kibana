@@ -60,7 +60,7 @@ const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchema
 describe('utils', () => {
   const { clients } = requestContextMock.createTools();
   const actionsClient = {
-    isSystemAction: jest.fn((id: string) => id === 'system_action:id'),
+    isSystemAction: jest.fn((id: string) => id === 'system-connector-.cases'),
   } as unknown as jest.Mocked<ActionsClient>;
 
   describe('internalRuleToAPIResponse', () => {
@@ -787,6 +787,25 @@ describe('utils', () => {
           },
         })
       );
+    });
+    test('does not migrate system actions', async () => {
+      const mockSystemAction: RuleAction = {
+        group: 'group string',
+        id: 'system-connector-.cases',
+        action_type_id: '.case',
+        params: {},
+      };
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockSystemAction],
+      };
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        soClient,
+        actionsClient
+      );
+      expect(res).toEqual([{ ...rule, actions: [{ ...mockSystemAction }] }]);
     });
   });
   describe('getInvalidConnectors', () => {

@@ -233,9 +233,9 @@ export const migrateLegacyActionsIds = async (
     rules,
     async (rule) => {
       if (isImportRule(rule) && rule.actions != null && !isEmpty(rule.actions)) {
-        const [systemActions, extActions] = partition<RuleAction>(
-          (action) =>
-            action.action_type_id != null && actionsClient.isSystemAction(action.action_type_id)
+        // filter out system actions, since they were not part of any 7.x releases and do not need to be migrated
+        const [systemActions, extActions] = partition<RuleAction>((action) =>
+          actionsClient.isSystemAction(action.id)
         )(rule.actions);
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
@@ -251,7 +251,7 @@ export const migrateLegacyActionsIds = async (
         )(newActions);
 
         if (actionMigrationErrors == null || actionMigrationErrors.length === 0) {
-          return { ...rule, actions: newlyMigratedActions };
+          return { ...rule, actions: [...newlyMigratedActions, ...systemActions] };
         }
 
         return [

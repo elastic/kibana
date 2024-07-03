@@ -123,11 +123,11 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: coreContext.savedObjects.client,
         });
 
-        return createDetectionRulesClient(
+        return createDetectionRulesClient({
           actionsClient,
-          startPlugins.alerting.getRulesClientWithRequest(request),
-          mlAuthz
-        );
+          rulesClient: startPlugins.alerting.getRulesClientWithRequest(request),
+          mlAuthz,
+        });
       }),
 
       getDetectionEngineHealthClient: memoize(() =>
