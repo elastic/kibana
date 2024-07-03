@@ -45,8 +45,8 @@ import {
   LazyFieldPicker,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 
+import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { ControlGroupApi } from '../control_group/types';
 import { ControlStateManager } from '../types';
 import { DataControlEditorStrings } from './data_control_constants';
