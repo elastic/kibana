@@ -19,6 +19,7 @@
     "@kbn/i18n",
     "@kbn/core-saved-objects-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/logging"
   ]
 }
