@@ -8794,7 +8794,7 @@
           {
             "parentPluginId": "alerting",
             "id": "def-common.Rule.alertDelay",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "alertDelay",
             "description": [],
@@ -8806,7 +8806,7 @@
                 "section": "def-common.AlertDelay",
                 "text": "AlertDelay"
               },
-              " | undefined"
+              " | null | undefined"
             ],
             "path": "packages/kbn-alerting-types/rule_types.ts",
             "deprecated": false,
@@ -10456,6 +10456,18 @@
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.HealthStatus",
+        "type": "Enum",
+        "tags": [],
+        "label": "HealthStatus",
+        "description": [],
+        "path": "packages/kbn-alerting-types/alerting_framework_health_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "alerting",
         "id": "def-common.MaintenanceWindowStatus",
