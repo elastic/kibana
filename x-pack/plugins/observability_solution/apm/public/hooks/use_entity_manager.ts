@@ -6,7 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ApmPluginStartDeps } from '../plugin';
 
 export enum ENTITY_FETCH_STATUS {
@@ -20,7 +20,7 @@ export function useEntityManager() {
   const {
     services: { entityManager },
   } = useKibana<ApmPluginStartDeps>();
-
+  const [counter, setCounter] = useState(0);
   const [result, setResult] = useState({
     isEnabled: false,
     status: ENTITY_FETCH_STATUS.NOT_INITIATED,
@@ -41,7 +41,15 @@ export function useEntityManager() {
     }
 
     isManagedEntityDiscoveryEnabled();
-  }, [entityManager]);
+  }, [entityManager, counter]);
 
-  return { ...result };
+  return useMemo(() => {
+    return {
+      ...result,
+      refetch: () => {
+        // this will invalidate the deps to `useEffect` and will result in a new request
+        setCounter((count) => count + 1);
+      },
+    };
+  }, [result]);
 }

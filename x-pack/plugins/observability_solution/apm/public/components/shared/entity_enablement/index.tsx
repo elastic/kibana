@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useToggle from 'react-use/lib/useToggle';
 import {
@@ -26,11 +26,14 @@ import { useEntityManagerEnablementContext } from '../../../context/entity_manag
 import { FeedbackModal } from './feedback_modal';
 
 export function EntityEnablement() {
+  const [isFeedbackModalVisiable, setsIsFeedbackModalVisiable] = useState(false);
+
   const {
     services: { entityManager },
   } = useKibana<ApmPluginStartDeps>();
 
-  const { isEntityManagerEnabled, isEnablementPending } = useEntityManagerEnablementContext();
+  const { isEntityManagerEnabled, isEnablementPending, refetch } =
+    useEntityManagerEnablementContext();
 
   const [isPopoverOpen, togglePopover] = useToggle(false);
   const [isLoading, setIsLoading] = useToggle(false);
@@ -41,10 +44,11 @@ export function EntityEnablement() {
       const response = await entityManager.entityClient.disableManagedEntityDiscovery();
       if (response.success) {
         setIsLoading(false);
-        window.location.reload();
+        setsIsFeedbackModalVisiable(true);
       }
     } catch (error) {
       setIsLoading(false);
+      setsIsFeedbackModalVisiable(true);
       console.error(error);
     }
   };
@@ -55,7 +59,7 @@ export function EntityEnablement() {
       const response = await entityManager.entityClient.enableManagedEntityDiscovery();
       if (response.success) {
         setIsLoading(false);
-        window.location.reload();
+        refetch();
       }
     } catch (error) {
       setIsLoading(false);
@@ -132,7 +136,11 @@ export function EntityEnablement() {
           </EuiLink>
         </EuiFlexItem>
       )}
-      <FeedbackModal />
+      <FeedbackModal
+        isFeedbackModalVisiable={isFeedbackModalVisiable}
+        setsIsFeedbackModalVisiable={setsIsFeedbackModalVisiable}
+        refetch={refetch}
+      />
     </EuiFlexGroup>
   );
 }

@@ -11,6 +11,7 @@ export interface EntityManagerEnablementContextValue {
   isEntityManagerEnabled: boolean;
   entityManagerEnablementStatus: ENTITY_FETCH_STATUS;
   isEnablementPending: boolean;
+  refetch: () => void;
 }
 
 export const EntityManagerEnablementContext = createContext(
@@ -22,7 +23,7 @@ export function EntityManagerEnablementContextProvider({
 }: {
   children: React.ReactChild;
 }) {
-  const { isEnabled, status } = useEntityManager();
+  const { isEnabled, status, refetch } = useEntityManager();
 
   return (
     <EntityManagerEnablementContext.Provider
@@ -30,6 +31,7 @@ export function EntityManagerEnablementContextProvider({
         isEntityManagerEnabled: isEnabled,
         entityManagerEnablementStatus: status,
         isEnablementPending: status === ENTITY_FETCH_STATUS.LOADING,
+        refetch,
       }}
     >
       {children}
