@@ -51,7 +51,7 @@ steps:
             - exit_status: "1"
               limit: 2
 
-      - label: explore:overview:runner:qa:serverless:release
+      - label: Running explore:overview:runner:qa:serverless:release
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless:release
         key: explore:overview:runner:qa:serverless:release
         agents:
