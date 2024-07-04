@@ -88,8 +88,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.datafeedConfig
           );
           await PageObjects.common.navigateToApp('dashboard');
-          // FIXME
-          await PageObjects.common.sleep(2000);
         });
 
         after(async () => {
@@ -99,6 +97,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('can open job selection flyout', async () => {
           await PageObjects.dashboard.clickCreateDashboardPrompt();
           await ml.dashboardEmbeddables.assertDashboardIsEmpty();
+          // FIXME
+          await PageObjects.common.sleep(3000);
           await ml.dashboardEmbeddables.openAnomalyJobSelectionFlyout('ml_anomaly_charts');
           await a11y.testAppSnapshot();
         });
