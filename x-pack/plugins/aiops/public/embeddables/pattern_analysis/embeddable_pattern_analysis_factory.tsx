@@ -29,7 +29,6 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, distinctUntilChanged, map, skipWhile } from 'rxjs';
 import { getPatternAnalysisComponent } from '../../shared_components';
-// import { getChangePointDetectionComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
 import type {
@@ -144,6 +143,7 @@ export const getPatternAnalysisEmbeddableFactory = (
                 pluginStart,
                 parentApi,
                 uuid,
+                false,
                 serializePatternAnalysisChartState()
               );
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type {
   HasEditCapabilities,
@@ -21,10 +20,8 @@ import type {
   RandomSamplerOption,
   RandomSamplerProbability,
 } from '../../components/log_categorization/sampling_menu/random_sampler';
-// import type { SelectedChangePoint } from '../../components/change_point_detection/change_point_detection_context';
 
 export type ViewComponent = FC<{
-  // changePoints: SelectedChangePoint[];
   interval: string;
   onRenderComplete?: () => void;
 }>;

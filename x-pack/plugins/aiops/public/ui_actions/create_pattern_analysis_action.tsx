@@ -59,7 +59,8 @@ export function createAddPatternAnalysisEmbeddableAction(
           coreStart,
           pluginStart,
           context.embeddable,
-          context.embeddable.uuid
+          context.embeddable.uuid,
+          true
         );
 
         presentationContainerParent.addNewPanel({

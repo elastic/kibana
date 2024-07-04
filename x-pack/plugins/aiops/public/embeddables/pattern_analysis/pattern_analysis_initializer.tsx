@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiFlyoutFooter,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -44,12 +45,14 @@ export interface PatternAnalysisInitializerProps {
   initialInput?: Partial<PatternAnalysisEmbeddableRuntimeState>;
   onCreate: (props: PatternAnalysisEmbeddableRuntimeState) => void;
   onCancel: () => void;
+  isNewPanel: boolean;
 }
 
 export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializerProps> = ({
   initialInput,
   onCreate,
   onCancel,
+  isNewPanel,
 }) => {
   const {
     unifiedSearch: {
@@ -75,7 +78,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
     return {
       ...formInput,
       title: isPopulatedObject(formInput)
-        ? i18n.translate('xpack.aiops.changePointDetection.attachmentTitle', {
+        ? i18n.translate('xpack.aiops.embeddablePatternAnalysis.attachmentTitle', {
             defaultMessage: 'Pattern analysis: {fieldName}',
             values: {
               fieldName: formInput.fieldName,
@@ -88,13 +91,22 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
 
   return (
     <>
-      <EuiFlyoutHeader>
-        <EuiTitle>
-          <h2 id={'changePointConfig'}>
-            <FormattedMessage
-              id="xpack.aiops.embeddableChangePointChart.modalTitle"
-              defaultMessage="Pattern analysis configuration"
-            />
+      <EuiFlyoutHeader
+        hasBorder={true}
+        css={{
+          pointerEvents: 'auto',
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        }}
+      >
+        <EuiTitle size="xs" data-test-subj="inlineEditingFlyoutLabel">
+          <h2>
+            {isNewPanel
+              ? i18n.translate('xpack.aiops.embeddablePatternAnalysis.config.title.new', {
+                  defaultMessage: 'Create pattern analysis',
+                })
+              : i18n.translate('xpack.aiops.embeddablePatternAnalysis.config.title.edit', {
+                  defaultMessage: 'Edit pattern analysis',
+                })}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -103,7 +115,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
         <EuiForm>
           <EuiFormRow
             fullWidth
-            label={i18n.translate('xpack.aiops.embeddableChangePointChart.dataViewLabel', {
+            label={i18n.translate('xpack.aiops.embeddablePatternAnalysis.config.dataViewLabel', {
               defaultMessage: 'Data view',
             })}
           >
@@ -113,7 +125,7 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
               compressed
               indexPatternId={dataViewId}
               placeholder={i18n.translate(
-                'xpack.aiops.embeddableChangePointChart.dataViewSelectorPlaceholder',
+                'xpack.aiops.embeddablePatternAnalysis.config.dataViewSelectorPlaceholder',
                 {
                   defaultMessage: 'Select data view',
                 }
@@ -124,8 +136,6 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
             />
           </EuiFormRow>
           <DataSourceContextProvider dataViewId={dataViewId}>
-            {/* <EuiHorizontalRule margin={'s'} /> */}
-
             <EuiSpacer />
 
             <FormControls
@@ -141,26 +151,30 @@ export const PatternAnalysisEmbeddableInitializer: FC<PatternAnalysisInitializer
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              onClick={onCancel}
-              data-test-subj="aiopsChangePointChartsInitializerCancelButton"
-            >
+            <EuiButtonEmpty onClick={onCancel} data-test-subj="aiopsPatternAnalysisCancelButton">
               <FormattedMessage
-                id="xpack.aiops.embeddableChangePointChart.setupModal.cancelButtonLabel"
+                id="xpack.aiops.embeddablePatternAnalysis.config.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
-              isDisabled={!isFormValid || !dataViewId}
               onClick={onCreate.bind(null, updatedProps)}
               fill
+              aria-label={i18n.translate(
+                'xpack.aiops.embeddablePatternAnalysis.config.applyFlyoutAriaLabel',
+                {
+                  defaultMessage: 'Apply changes',
+                }
+              )}
+              isDisabled={!isFormValid || !dataViewId}
+              iconType="check"
+              data-test-subj="aiopsPatternAnalysisConfirmButton"
             >
               <FormattedMessage
-                id="xpack.aiops.embeddableChangePointChart.setupModal.confirmButtonLabel"
-                defaultMessage="Confirm configurations"
+                id="xpack.aiops.embeddablePatternAnalysis.config.applyAndCloseLabel"
+                defaultMessage="Apply and close"
               />
             </EuiButton>
           </EuiFlexItem>

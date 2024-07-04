@@ -20,6 +20,7 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
   pluginStart: AiopsPluginStartDeps,
   parentApi: unknown,
   focusedPanelId: string,
+  isNewPanel: boolean,
   input?: PatternAnalysisEmbeddableState
 ): Promise<PatternAnalysisEmbeddableState> {
   const { overlays } = coreStart;
@@ -50,6 +51,7 @@ export async function resolveEmbeddablePatternAnalysisUserInput(
                 flyoutSession.close();
                 overlayTracker?.clearOverlays();
               }}
+              isNewPanel={isNewPanel}
             />
           </AiopsAppContext.Provider>,
           coreStart
