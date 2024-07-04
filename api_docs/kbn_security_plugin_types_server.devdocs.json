@@ -3129,20 +3129,20 @@
                 "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
               },
               {
-                "plugin": "files",
-                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
-              },
-              {
-                "plugin": "files",
-                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client_factory.ts"
               },
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/plugins/rule_registry/server/search_strategy/search_strategy.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
+              },
+              {
+                "plugin": "files",
+                "path": "src/plugins/files/server/file_service/file_service_factory.ts"
               },
               {
                 "plugin": "cases",
@@ -3233,28 +3233,8 @@
                 "path": "x-pack/plugins/security/server/plugin.ts"
               },
               {
-                "plugin": "actions",
-                "path": "x-pack/plugins/actions/server/lib/action_executor.ts"
-              },
-              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/rules_settings_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/maintenance_window_client_factory.ts"
               },
               {
                 "plugin": "alerting",
@@ -3267,10 +3247,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/plugin.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/server/client/factory.ts"
               },
               {
                 "plugin": "observabilityAIAssistant",
@@ -3293,10 +3269,6 @@
                 "path": "x-pack/plugins/fleet/server/routes/setup/handlers.ts"
               },
               {
-                "plugin": "cloudDefend",
-                "path": "x-pack/plugins/cloud_defend/server/routes/setup_routes.ts"
-              },
-              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/setup_routes.ts"
               },
@@ -3307,10 +3279,6 @@
               {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/api_keys.ts"
-              },
-              {
-                "plugin": "lists",
-                "path": "x-pack/plugins/lists/server/get_user.ts"
               },
               {
                 "plugin": "securitySolution",
