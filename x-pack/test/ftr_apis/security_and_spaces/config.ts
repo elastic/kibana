@@ -23,7 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     esTestCluster: {
       ...apiIntegrationConfig.get('esTestCluster'),
-      license: 'trial',
+      license: 'basic',
     },
     kbnTestServer: {
       ...apiIntegrationConfig.get('kbnTestServer'),

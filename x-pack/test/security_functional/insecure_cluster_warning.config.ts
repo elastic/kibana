@@ -33,7 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     servers: kibanaFunctionalConfig.get('servers'),
 
     esTestCluster: {
-      license: 'trial',
+      license: 'basic',
       from: 'snapshot',
       serverArgs: ['xpack.security.enabled=false'],
     },

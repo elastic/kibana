@@ -27,7 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     esTestCluster: {
       ...kibanaFunctionalConfig.get('esTestCluster'),
-      license: 'trial',
+      license: 'basic',
       serverArgs: [`xpack.license.self_generated.type='trial'`],
     },
     apps: {

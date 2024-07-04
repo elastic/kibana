@@ -23,7 +23,7 @@ export const observabilityAIAssistantFtrConfigs = {
     },
   },
   enterprise: {
-    license: 'trial' as const,
+    license: 'basic' as const,
     kibanaConfig: {
       'logging.loggers': [observabilityAIAssistantDebugLogger],
       'plugin-path': path.resolve(

@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return configureHTTP2({
     ...functionalConfig.getAll(),
     esTestCluster: {
-      license: 'trial',
+      license: 'basic',
       from: 'snapshot',
       serverArgs: [
         'xpack.security.authc.token.enabled=true',

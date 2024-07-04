@@ -8,6 +8,6 @@
 import { createTestConfig } from './config.base';
 
 export default createTestConfig({
-  license: 'trial',
+  license: 'basic',
   ssl: true,
 });

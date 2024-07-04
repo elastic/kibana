@@ -10,7 +10,7 @@ import { createTestConfig } from '../common/config';
 // eslint-disable-next-line import/no-default-export
 export default createTestConfig('observability', {
   disabledPlugins: [],
-  license: 'trial',
+  license: 'basic',
   ssl: true,
   enableActionsProxy: true,
   publicBaseUrl: true,

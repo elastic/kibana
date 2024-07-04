@@ -12,7 +12,7 @@ export const EmailDomainsAllowed = ['example.org', 'test.com'];
 // eslint-disable-next-line import/no-default-export
 export default createTestConfig('spaces_only', {
   disabledPlugins: ['security'],
-  license: 'trial',
+  license: 'basic',
   enableActionsProxy: false,
   verificationMode: 'none',
   customizeLocalHostSsl: true,
