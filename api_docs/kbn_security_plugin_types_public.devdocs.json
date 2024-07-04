@@ -636,10 +636,6 @@
                 "path": "x-pack/plugins/security_solution/public/management/links.ts"
               },
               {
-                "plugin": "serverlessSearch",
-                "path": "x-pack/plugins/serverless_search/public/plugin.ts"
-              },
-              {
                 "plugin": "cloudLinks",
                 "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
               },
@@ -654,14 +650,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/public/common/lib/kibana/hooks.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/hooks/use_current_user.ts"
-              },
-              {
-                "plugin": "apm",
-                "path": "x-pack/plugins/observability_solution/apm/public/hooks/use_current_user.ts"
               }
             ]
           },
