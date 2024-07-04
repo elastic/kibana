@@ -121,7 +121,7 @@ export const buildBulkBody = (
       ),
       ...additionalAlertFields({
         ...mergedDoc,
-        _source: { ...mergedDoc._source, ...validatedEventFields },
+        _source: { ...validatedSource, ...validatedEventFields },
       }),
     };
   }
