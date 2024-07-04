@@ -56,6 +56,7 @@ export type ServerRoute<
   ? {
       endpoint: TEndpoint;
       params?: TRouteParamsRT;
+      validation?: any;
       handler: ({}: TRouteHandlerResources &
         (TRouteParamsRT extends RouteParamsRT
           ? DecodedRequestParamsOfType<TRouteParamsRT>

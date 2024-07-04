@@ -22,10 +22,13 @@ export interface SloRouteHandlerResources {
   config: SloConfig;
 }
 
+// TODO Extend RouteConfigOptions or VersionedRouteConfig here
 export interface SloRouteCreateOptions {
   options: {
     tags: string[];
     access?: 'public' | 'internal';
+    summary?: string;
+    description?: string;
   };
 }
 

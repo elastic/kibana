@@ -11,6 +11,7 @@ import {
   createSLOParamsSchema,
   deleteSLOInstancesParamsSchema,
   deleteSLOParamsSchema,
+  deleteSLOParamsSchemaZod,
   fetchHistoricalSummaryParamsSchema,
   fetchHistoricalSummaryResponseSchema,
   fetchSLOHealthParamsSchema,
@@ -29,6 +30,7 @@ import {
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
+import { z } from '@kbn/zod';
 import { GetSLOsOverview } from '../../services/get_slos_overview';
 import type { IndicatorTypes } from '../../domain/models';
 import {
@@ -238,8 +240,59 @@ const deleteSLORoute = createSloServerRoute({
   options: {
     tags: ['access:slo_write'],
     access: 'public',
+    summary: 'Delete an SLO',
+    description:
+      'You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n',
   },
   params: deleteSLOParamsSchema,
+  validation: {
+    request: deleteSLOParamsSchemaZod,
+    response: {
+      204: {
+        // description: 'Successful request',
+        body: () => {},
+      },
+      400: {
+        // description: 'Bad request',
+        body: () =>
+          z.object({
+            statusCode: z.number(),
+            error: z.string(),
+            message: z.string(),
+          }),
+      },
+      // 401: {
+      //   description: 'Unauthorized response',
+      //   content: {
+      //     'application/json': {
+      //       schema: {
+      //         $ref: '#/components/schemas/401_response',
+      //       },
+      //     },
+      //   },
+      // },
+      // 403: {
+      //   description: 'Unauthorized response',
+      //   content: {
+      //     'application/json': {
+      //       schema: {
+      //         $ref: '#/components/schemas/403_response',
+      //       },
+      //     },
+      //   },
+      // },
+      // 404: {
+      //   description: 'Not found response',
+      //   content: {
+      //     'application/json': {
+      //       schema: {
+      //         $ref: '#/components/schemas/404_response',
+      //       },
+      //     },
+      //   },
+      // },
+    },
+  },
   handler: async ({ request, context, params, logger, dependencies }) => {
     await assertPlatinumLicense(context);
 

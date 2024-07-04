@@ -53,13 +53,13 @@ export function registerRoutes({ config, repository, core, logger, dependencies 
   const router = core.http.createRouter();
 
   routes.forEach((route) => {
-    const { endpoint, options, handler, params } = route;
+    const { endpoint, options, handler, params, validation } = route;
     const { pathname, method } = parseEndpoint(endpoint);
 
     (router[method] as RouteRegistrar<typeof method, SloRequestHandlerContext>)(
       {
         path: pathname,
-        validate: routeValidationObject,
+        validate: validation ?? routeValidationObject,
         options,
       },
       async (context, request, response) => {
