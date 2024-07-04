@@ -36,7 +36,7 @@ export const REQUIRED = i18n.translate('xpack.cases.templates.required', {
 export const REQUIRED_FIELD = (fieldName: string): string =>
   i18n.translate('xpack.cases.templates.requiredField', {
     values: { fieldName },
-    defaultMessage: 'A {fieldName} is required.',
+    defaultMessage: '{fieldName} is required.',
   });
 
 export const TEMPLATE_NAME = i18n.translate('xpack.cases.templates.templateName', {
