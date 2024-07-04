@@ -6,6 +6,8 @@
  */
 
 import {
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -20,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import type {
   CategorizationRequestBody,
@@ -62,9 +64,11 @@ export const useGeneration = ({
   const { http, notifications } = useKibana().services;
   const [progress, setProgress] = useState<ProgressItem>();
   const [error, setError] = useState<null | string>(null);
+  const [isRequesting, setIsRequesting] = useState<boolean>(true);
 
   useEffect(() => {
     if (
+      !isRequesting ||
       http == null ||
       connector == null ||
       integrationSettings == null ||
@@ -122,7 +126,9 @@ export const useGeneration = ({
         onComplete(relatedGraphResult.results);
       } catch (e) {
         if (abortController.signal.aborted) return;
-        const errorMessage = e.body?.message ?? e.message;
+        const errorMessage = `${e.message}${
+          e.body ? ` (${e.body.statusCode}): ${e.body.message}` : ''
+        }`;
 
         reportGenerationComplete({
           connector,
@@ -131,13 +137,16 @@ export const useGeneration = ({
           error: errorMessage,
         });
 
-        setError(`Error: ${errorMessage}`);
+        setError(errorMessage);
+      } finally {
+        setIsRequesting(false);
       }
     })();
     return () => {
       abortController.abort();
     };
   }, [
+    isRequesting,
     onComplete,
     setProgress,
     connector,
@@ -147,9 +156,15 @@ export const useGeneration = ({
     notifications?.toasts,
   ]);
 
+  const retry = useCallback(() => {
+    setError(null);
+    setIsRequesting(true);
+  }, []);
+
   return {
     progress,
     error,
+    retry,
   };
 };
 
@@ -176,7 +191,7 @@ interface GenerationModalProps {
 export const GenerationModal = React.memo<GenerationModalProps>(
   ({ integrationSettings, connector, onComplete, onClose }) => {
     const { headerCss, bodyCss } = useModalCss();
-    const { progress, error } = useGeneration({
+    const { progress, error, retry } = useGeneration({
       integrationSettings,
       connector,
       onComplete,
@@ -196,41 +211,57 @@ export const GenerationModal = React.memo<GenerationModalProps>(
           <EuiFlexGroup direction="column" gutterSize="l" justifyContent="center">
             {progress && (
               <>
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    direction="row"
-                    gutterSize="s"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    {!error && (
-                      <EuiFlexItem grow={false}>
-                        <EuiLoadingSpinner size="s" />
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {progressText[progress]}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiProgress value={progressValue} max={4} color="primary" size="m" />
-                </EuiFlexItem>
-                {error && (
+                {error ? (
                   <EuiFlexItem>
-                    <EuiText color="danger" size="xs">
+                    <EuiCallOut
+                      title={i18n.GENERATION_ERROR(progressText[progress])}
+                      color="danger"
+                      iconType="alert"
+                    >
                       {error}
-                    </EuiText>
+                    </EuiCallOut>
                   </EuiFlexItem>
+                ) : (
+                  <>
+                    <EuiFlexItem>
+                      <EuiFlexGroup
+                        direction="row"
+                        gutterSize="s"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiLoadingSpinner size="s" />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            {progressText[progress]}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem />
+                    <EuiFlexItem>
+                      <EuiProgress value={progressValue} max={4} color="primary" size="m" />
+                    </EuiFlexItem>
+                  </>
                 )}
               </>
             )}
           </EuiFlexGroup>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiSpacer size="xl" />
+          {error ? (
+            <EuiFlexGroup justifyContent="center">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty iconType="refresh" onClick={retry}>
+                  {i18n.RETRY}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiSpacer size="xl" />
+          )}
         </EuiModalFooter>
       </EuiModal>
     );
