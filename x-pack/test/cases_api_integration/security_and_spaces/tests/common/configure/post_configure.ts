@@ -177,7 +177,91 @@ export default ({ getService }: FtrProviderContext): void => {
       );
 
       const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
-      expect(data).to.eql({ ...getConfigurationOutput(false), customFields, templates });
+      expect(data).to.eql({
+        ...getConfigurationOutput(false),
+        customFields,
+        templates: [
+          {
+            ...templates[0],
+            caseFields: {
+              customFields: [
+                {
+                  key: 'text_field_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+                {
+                  key: 'toggle_field_1',
+                  value: false,
+                  type: CustomFieldTypes.TOGGLE,
+                },
+              ],
+            },
+          },
+          { ...templates[1] },
+          {
+            ...templates[2],
+            caseFields: {
+              ...templates[2].caseFields,
+              customFields: [
+                {
+                  key: 'text_field_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: null,
+                },
+                {
+                  key: 'toggle_field_1',
+                  value: false,
+                  type: CustomFieldTypes.TOGGLE,
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
+
+    it("removes custom field from templates when custom fields don't exist in the configuration", async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: {
+            customFields: [],
+            templates: [
+              {
+                key: 'test_template_1',
+                name: 'First test template',
+                description: 'This is a first test template',
+                caseFields: {
+                  customFields: [
+                    {
+                      key: 'random_key',
+                      type: CustomFieldTypes.TEXT,
+                      value: 'Test',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        })
+      );
+
+      const data = removeServerGeneratedPropertiesFromSavedObject(configuration);
+      expect(data).to.eql({
+        ...getConfigurationOutput(false),
+        customFields: [],
+        templates: [
+          {
+            key: 'test_template_1',
+            name: 'First test template',
+            description: 'This is a first test template',
+            caseFields: {
+              customFields: [],
+            },
+          },
+        ],
+      });
     });
 
     it('should keep only the latest configuration', async () => {
@@ -485,33 +569,6 @@ export default ({ getService }: FtrProviderContext): void => {
                   label: '#2',
                   type: CustomFieldTypes.TEXT,
                   required: false,
-                },
-              ],
-            },
-          }),
-          400
-        );
-      });
-
-      it("should not create a configuration with templates with custom fields that don't exist in the configuration", async () => {
-        await createConfiguration(
-          supertest,
-          getConfigurationRequest({
-            overrides: {
-              templates: [
-                {
-                  key: 'test_template_1',
-                  name: 'First test template',
-                  description: 'This is a first test template',
-                  caseFields: {
-                    customFields: [
-                      {
-                        key: 'random_key',
-                        type: CustomFieldTypes.TEXT,
-                        value: 'Test',
-                      },
-                    ],
-                  },
                 },
               ],
             },

@@ -24,7 +24,11 @@ import {
 
 import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
-import type { CustomFieldConfiguration, TemplateConfiguration } from '../../../common/types/domain';
+import {
+  CustomFieldConfiguration,
+  CustomFieldTypes,
+  TemplateConfiguration,
+} from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
@@ -48,6 +52,7 @@ import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
 import { CustomFieldsForm } from '../custom_fields/form';
 import { TemplateForm } from '../templates/form';
+import type { CaseUI } from '../../containers/types';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -334,10 +339,42 @@ export const ConfigureCases: React.FC = React.memo(() => {
     (data: CustomFieldConfiguration) => {
       const updatedCustomFields = addOrReplaceField(customFields, data);
 
+      // add the new custom field to each template as well
+      const updatedTemplates = updatedCustomFields.length
+        ? templates.map((template) => {
+            const templateCustomFields = template.caseFields?.customFields ?? [];
+
+            updatedCustomFields.forEach((field) => {
+              if (
+                !templateCustomFields.length ||
+                !templateCustomFields.find(
+                  (templateCustomField) => templateCustomField.key === field.key
+                )
+              ) {
+                const value = field.type === CustomFieldTypes.TOGGLE ? false : null;
+
+                templateCustomFields.push({
+                  key: field.key,
+                  type: field.type as CustomFieldTypes,
+                  value: field.defaultValue ?? value,
+                } as CaseUI['customFields'][number]);
+              }
+            });
+
+            return {
+              ...template,
+              caseFields: {
+                ...template.caseFields,
+                customFields: [...templateCustomFields],
+              },
+            };
+          })
+        : templates;
+
       persistCaseConfigure({
         connector,
         customFields: updatedCustomFields,
-        templates,
+        templates: updatedTemplates,
         id: configurationId,
         version: configurationVersion,
         closureType,

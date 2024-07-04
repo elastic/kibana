@@ -19,6 +19,7 @@ import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 
 import type { CasePostRequest } from '../../../common';
 import type { ActionConnector } from '../../../common/types/domain';
+import { CustomFieldTypes } from '../../../common/types/domain';
 import { Connector } from '../case_form_fields/connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from '../case_form_fields/sync_alerts_toggle';
@@ -42,7 +43,22 @@ const transformTemplateCaseFieldsToCaseFormFields = (
   caseTemplateFields: CasesConfigurationUITemplate['caseFields']
 ): CasePostRequest => {
   const caseFields = removeEmptyFields(caseTemplateFields ?? {});
-  return getInitialCaseValue({ owner, ...caseFields });
+  const transFormedCustomFields = caseFields?.customFields?.map((customField) => {
+    if (customField.type === CustomFieldTypes.TEXT && customField.value == null) {
+      return {
+        ...customField,
+        value: '',
+      };
+    }
+
+    return customField;
+  });
+
+  return getInitialCaseValue({
+    owner,
+    ...caseFields,
+    customFields: transFormedCustomFields,
+  });
 };
 
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(

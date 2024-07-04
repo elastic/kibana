@@ -556,51 +556,6 @@ describe('client', () => {
       });
 
       describe('customFields', () => {
-        it('throws when there are no customFields in configure and template has customField in the request', async () => {
-          clientArgs.services.caseConfigureService.get.mockResolvedValue({
-            // @ts-ignore: these are all the attributes needed for the test
-            attributes: {
-              templates: [
-                {
-                  key: 'template_1',
-                  name: 'template 1',
-                  description: 'this is test description',
-                  caseFields: null,
-                },
-              ],
-            },
-          });
-
-          await expect(
-            update(
-              'test-id',
-              {
-                version: 'test-version',
-                templates: [
-                  {
-                    key: 'template_1',
-                    name: 'template 1',
-                    description: 'this is test description',
-                    caseFields: {
-                      customFields: [
-                        {
-                          key: 'custom_field_key_1',
-                          type: CustomFieldTypes.TEXT,
-                          value: 'custom field value 1',
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to get patch configure in route: Error: No custom fields configured.'
-          );
-        });
-
         it('throws when template has duplicated custom field keys in the request', async () => {
           clientArgs.services.caseConfigureService.get.mockResolvedValue({
             // @ts-ignore: these are all the attributes needed for the test
@@ -637,6 +592,14 @@ describe('client', () => {
               'test-id',
               {
                 version: 'test-version',
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
                 templates: [
                   {
                     key: 'template_1',
@@ -664,67 +627,6 @@ describe('client', () => {
             )
           ).rejects.toThrow(
             `Failed to get patch configure in route: Error: Invalid duplicated templates[0]'s customFields keys in request: custom_field_key_1`
-          );
-        });
-
-        it('throws when there are invalid customField keys in the request', async () => {
-          clientArgs.services.caseConfigureService.get.mockResolvedValue({
-            // @ts-ignore: these are all the attributes needed for the test
-            attributes: {
-              customFields: [
-                {
-                  key: 'custom_field_key_1',
-                  label: 'text label',
-                  type: CustomFieldTypes.TEXT,
-                  required: false,
-                },
-              ],
-              templates: [
-                {
-                  key: 'template_1',
-                  name: 'template 1',
-                  description: 'this is test description',
-                  caseFields: {
-                    customFields: [
-                      {
-                        key: 'custom_field_key_1',
-                        type: CustomFieldTypes.TEXT,
-                        value: 'custom field value 1',
-                      },
-                    ],
-                  },
-                },
-              ],
-            },
-          });
-
-          await expect(
-            update(
-              'test-id',
-              {
-                version: 'test-version',
-                templates: [
-                  {
-                    key: 'template_1',
-                    name: 'template 1',
-                    description: 'this is test description',
-                    caseFields: {
-                      customFields: [
-                        {
-                          key: 'custom_field_key_2',
-                          type: CustomFieldTypes.TEXT,
-                          value: 'custom field value 1',
-                        },
-                      ],
-                    },
-                  },
-                ],
-              },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to get patch configure in route: Error: Invalid custom field keys: custom_field_key_2'
           );
         });
 
@@ -764,6 +666,14 @@ describe('client', () => {
               'test-id',
               {
                 version: 'test-version',
+                customFields: [
+                  {
+                    key: 'custom_field_key_1',
+                    label: 'text label',
+                    type: CustomFieldTypes.TEXT,
+                    required: false,
+                  },
+                ],
                 templates: [
                   {
                     key: 'template_1',
@@ -787,6 +697,184 @@ describe('client', () => {
           ).rejects.toThrow(
             'Failed to get patch configure in route: Error: The following custom fields have the wrong type in the request: "text label"'
           );
+        });
+
+        it('adds new custom field to template when configuration custom fields have new custom field', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [],
+              templates: [],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'custom field 1 default value 1',
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: null,
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                customFields: [],
+                owner: 'cases',
+                templates: [],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  label: 'text label',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                  defaultValue: 'custom field 1 default value 1',
+                },
+              ],
+              templates: [
+                {
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field 1 default value 1',
+                      },
+                    ],
+                  },
+                  description: 'this is test description',
+                  key: 'template_1',
+                  name: 'template 1',
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
+        });
+
+        it('removes custom field from template when there are no customFields in the request', async () => {
+          clientArgs.services.caseConfigureService.get.mockResolvedValue({
+            // @ts-ignore: these are all the attributes needed for the test
+            attributes: {
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: ConnectorTypes.none,
+                fields: null,
+              },
+              customFields: [],
+              templates: [],
+              closure_type: 'close-by-user',
+              owner: 'cases',
+            },
+            id: 'test-id',
+            version: 'test-version',
+          });
+
+          await update(
+            'test-id',
+            {
+              version: 'test-version',
+              customFields: [],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          );
+
+          expect(clientArgs.services.caseConfigureService.patch).toHaveBeenCalledWith({
+            configurationId: 'test-id',
+            originalConfiguration: {
+              attributes: {
+                closure_type: 'close-by-user',
+                connector: {
+                  fields: null,
+                  id: 'none',
+                  name: 'none',
+                  type: '.none',
+                },
+                customFields: [],
+                owner: 'cases',
+                templates: [],
+              },
+              id: 'test-id',
+              version: 'test-version',
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            updatedAttributes: {
+              customFields: [],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [],
+                  },
+                },
+              ],
+              updated_at: expect.anything(),
+              updated_by: expect.anything(),
+            },
+          });
         });
 
         it('removes deleted custom field from template correctly', async () => {
@@ -1166,35 +1254,85 @@ describe('client', () => {
           ).resolves.not.toThrow();
         });
 
-        it('throws when there are no customFields in configure and template has customField in the request', async () => {
-          await expect(
-            create(
+        it('removes customFields from template when there are no customFields in the request', async () => {
+          clientArgs.services.caseConfigureService.find.mockResolvedValueOnce({
+            page: 1,
+            per_page: 20,
+            total: 1,
+            saved_objects: [
               {
-                ...baseRequest,
-                templates: [
-                  {
-                    key: 'template_1',
-                    name: 'template 1',
-                    description: 'this is test description',
-                    tags: ['foo', 'bar'],
-                    caseFields: {
-                      customFields: [
-                        {
-                          key: 'custom_field_key_1',
-                          type: CustomFieldTypes.TEXT,
-                          value: 'custom field value 1',
-                        },
-                      ],
-                    },
+                id: 'test-id',
+                type: 'cases-configure',
+                version: 'test-version',
+                namespaces: ['default'],
+                references: [],
+                attributes: {
+                  ...baseRequest,
+                  customFields: [],
+                  templates: [],
+                  created_at: '2019-11-25T21:54:48.952Z',
+                  created_by: {
+                    full_name: 'elastic',
+                    email: 'testemail@elastic.co',
+                    username: 'elastic',
                   },
-                ],
+                  updated_at: null,
+                  updated_by: null,
+                },
+                score: 0,
               },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to create case configuration: Error: No custom fields configured.'
+            ],
+            pit_id: undefined,
+          });
+
+          await create(
+            {
+              ...baseRequest,
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  tags: ['foo', 'bar'],
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: 'custom field value 1',
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
           );
+
+          expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledWith({
+            attributes: {
+              ...baseRequest,
+              customFields: [],
+              created_at: expect.anything(),
+              created_by: expect.anything(),
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  tags: ['foo', 'bar'],
+                  caseFields: {
+                    customFields: [],
+                  },
+                },
+              ],
+              updated_at: null,
+              updated_by: null,
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            id: expect.anything(),
+          });
         });
 
         it('throws when template has duplicated custom field keys in the request', async () => {
@@ -1241,42 +1379,96 @@ describe('client', () => {
           );
         });
 
-        it('throws when there are invalid customField keys in the request', async () => {
-          await expect(
-            create(
+        it('adds new custom field to template when there are new customFields in the request', async () => {
+          clientArgs.services.caseConfigureService.find.mockResolvedValueOnce({
+            page: 1,
+            per_page: 20,
+            total: 1,
+            saved_objects: [
               {
-                ...baseRequest,
-                customFields: [
-                  {
-                    key: 'custom_field_key_1',
-                    type: CustomFieldTypes.TEXT,
-                    label: 'custom field 1',
-                    required: true,
+                id: 'test-id',
+                type: 'cases-configure',
+                version: 'test-version',
+                namespaces: ['default'],
+                references: [],
+                attributes: {
+                  ...baseRequest,
+                  customFields: [],
+                  templates: [],
+                  created_at: '2019-11-25T21:54:48.952Z',
+                  created_by: {
+                    full_name: 'elastic',
+                    email: 'testemail@elastic.co',
+                    username: 'elastic',
                   },
-                ],
-                templates: [
-                  {
-                    key: 'template_1',
-                    name: 'template 1',
-                    description: 'this is test description',
-                    caseFields: {
-                      customFields: [
-                        {
-                          key: 'custom_field_key_2',
-                          type: CustomFieldTypes.TEXT,
-                          value: 'custom field value 1',
-                        },
-                      ],
-                    },
-                  },
-                ],
+                  updated_at: null,
+                  updated_by: null,
+                },
+                score: 0,
               },
-              clientArgs,
-              casesClientInternal
-            )
-          ).rejects.toThrow(
-            'Failed to create case configuration: Error: Invalid custom field keys: custom_field_key_2'
+            ],
+            pit_id: undefined,
+          });
+
+          await create(
+            {
+              ...baseRequest,
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'custom field 1',
+                  required: true,
+                },
+              ],
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: null,
+                },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
           );
+
+          expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalledWith({
+            attributes: {
+              ...baseRequest,
+              customFields: [
+                {
+                  key: 'custom_field_key_1',
+                  type: CustomFieldTypes.TEXT,
+                  label: 'custom field 1',
+                  required: true,
+                },
+              ],
+              created_at: expect.anything(),
+              created_by: expect.anything(),
+              templates: [
+                {
+                  key: 'template_1',
+                  name: 'template 1',
+                  description: 'this is test description',
+                  caseFields: {
+                    customFields: [
+                      {
+                        key: 'custom_field_key_1',
+                        type: CustomFieldTypes.TEXT,
+                        value: null,
+                      },
+                    ],
+                  },
+                },
+              ],
+              updated_at: null,
+              updated_by: null,
+            },
+            unsecuredSavedObjectsClient: expect.anything(),
+            id: expect.anything(),
+          });
         });
 
         it('throws when template has customField with invalid type in the request', async () => {

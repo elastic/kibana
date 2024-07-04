@@ -44,7 +44,7 @@ import type { CasesClientArgs } from '../types';
 import { getMappings } from './get_mappings';
 
 import { Operations } from '../../authorization';
-import { combineAuthorizedAndOwnerFilter, removeCustomFieldFromTemplates } from '../utils';
+import { combineAuthorizedAndOwnerFilter, transformTemplateCustomFields } from '../utils';
 import type { MappingsArgs, CreateMappingsArgs, UpdateMappingsArgs } from './types';
 import { createMappings } from './create_mappings';
 import { updateMappings } from './update_mappings';
@@ -320,14 +320,14 @@ export async function update(
       originalCustomFields: configuration.attributes.customFields,
     });
 
-    await validateTemplates({
+    const updatedTemplates = transformTemplateCustomFields({
       templates,
-      clientArgs,
-      customFields: configuration.attributes.customFields,
+      customFields: request.customFields,
     });
 
-    const updatedTemplates = removeCustomFieldFromTemplates({
-      templates,
+    await validateTemplates({
+      templates: updatedTemplates,
+      clientArgs,
       customFields: request.customFields,
     });
 
@@ -436,8 +436,13 @@ export async function create(
       fieldName: 'customFields',
     });
 
-    await validateTemplates({
+    const updatedTemplates = transformTemplateCustomFields({
       templates: validatedConfigurationRequest.templates,
+      customFields: validatedConfigurationRequest.customFields,
+    });
+
+    await validateTemplates({
+      templates: updatedTemplates,
       clientArgs,
       customFields: validatedConfigurationRequest.customFields,
     });
@@ -515,7 +520,7 @@ export async function create(
       attributes: {
         ...validatedConfigurationRequest,
         customFields: validatedConfigurationRequest.customFields ?? [],
-        templates: validatedConfigurationRequest.templates ?? [],
+        templates: updatedTemplates ?? [],
         connector: validatedConfigurationRequest.connector,
         created_at: creationDate,
         created_by: user,
