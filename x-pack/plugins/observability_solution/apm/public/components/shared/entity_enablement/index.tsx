@@ -6,6 +6,7 @@
  */
 import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ERROR_USER_NOT_AUTHORIZED } from '@kbn/entityManager-plugin/public';
 import useToggle from 'react-use/lib/useToggle';
 import {
   EuiButtonIcon,
@@ -24,9 +25,11 @@ import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
 import { FeedbackModal } from './feedback_modal';
+import { UnauthorisedModal } from './unauthorized_modal';
 
 export function EntityEnablement() {
   const [isFeedbackModalVisiable, setsIsFeedbackModalVisiable] = useState(false);
+  const [isUnauthorizedVisiable, setsIsUnauthorizedModalVisiable] = useState(false);
 
   const {
     services: { entityManager },
@@ -60,6 +63,11 @@ export function EntityEnablement() {
       if (response.success) {
         setIsLoading(false);
         refetch();
+      }
+
+      if (response.reason === ERROR_USER_NOT_AUTHORIZED) {
+        setIsLoading(false);
+        setsIsUnauthorizedModalVisiable(true);
       }
     } catch (error) {
       setIsLoading(false);
@@ -139,6 +147,11 @@ export function EntityEnablement() {
       <FeedbackModal
         isFeedbackModalVisiable={isFeedbackModalVisiable}
         setsIsFeedbackModalVisiable={setsIsFeedbackModalVisiable}
+        refetch={refetch}
+      />
+      <UnauthorisedModal
+        isUnauthorizedVisiable={isUnauthorizedVisiable}
+        setsIsUnauthorizedModalVisiable={setsIsUnauthorizedModalVisiable}
         refetch={refetch}
       />
     </EuiFlexGroup>
