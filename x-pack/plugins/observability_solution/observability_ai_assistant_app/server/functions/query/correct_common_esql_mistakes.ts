@@ -240,7 +240,7 @@ export function correctCommonEsqlMistakes(query: string): {
         // gets the index pattern from the FROM command using AST parsing
         const indexPattern = getIndexPatternFromESQLQuery(formattedCommand);
         const indexPatternWithFixedQuotes = replaceSingleQuotesWithDoubleQuotes(indexPattern);
-        formattedCommand = formattedCommand.replace(indexPattern, indexPatternWithFixedQuotes);
+        formattedCommand = `FROM ${indexPatternWithFixedQuotes}`;
         break;
       }
       case 'WHERE':
