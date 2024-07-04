@@ -44,9 +44,9 @@ export async function rollUsageCountersIndices(
 
     return await Promise.all(
       docsToDelete.map(({ id, type, namespaces }) =>
-        savedObjectsClient.delete(type, id, {
-          ...(namespaces?.[0] && { namespace: namespaces[0] }),
-        })
+        namespaces?.[0]
+          ? savedObjectsClient.delete(type, id, { namespace: namespaces[0] })
+          : savedObjectsClient.delete(type, id)
       )
     );
   } catch (err) {
