@@ -8,6 +8,7 @@
 
 export * from './use_load_rule_types_query';
 export * from './use_load_ui_config';
+export * from './use_health_check';
 export * from './use_load_ui_health';
 export * from './use_load_alerting_framework_health';
 export * from './use_create_rule';

@@ -78,6 +78,13 @@ components:
       required:
         - id
 
+    PromptType:
+      type: string
+      description: Prompt type
+      enum:
+        - system
+        - quick
+
     NormalizedPromptError:
       type: object
       properties:
@@ -111,15 +118,21 @@ components:
         name:
           type: string
         promptType:
-          type: string
+          $ref: '#/components/schemas/PromptType'
         content:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        color:
           type: string
         isNewConversationDefault:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string
         updatedAt:
           type: string
         updatedBy:
@@ -231,15 +244,21 @@ components:
         name:
           type: string
         promptType:
-          type: string
+          $ref: '#/components/schemas/PromptType'
         content:
           type: string
+        color:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
         isNewConversationDefault:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string
 
     PromptUpdateProps:
       type: object
@@ -250,9 +269,15 @@ components:
           type: string
         content:
           type: string
+        color:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
         isNewConversationDefault:
           type: boolean
         isDefault:
           type: boolean
-        isShared:
-          type: boolean
+        consumer:
+          type: string
