@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseQueryFilterToKQL } from './utils';
+import { getPolicyQuery, parseQueryFilterToKQL } from './utils';
 
 describe('utils', () => {
   const searchableFields = [`name`, `description`, `entries.value`, `entries.entries.value`];
@@ -36,6 +36,22 @@ describe('utils', () => {
         )
       ).toBe(
         "(exception-list-agnostic.attributes.name:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.description:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*) OR exception-list-agnostic.attributes.entries.entries.value:(*this'is%&query\\{\\}[]!¿?with.,-+`´special\\<\\>ºª@#|·chars*))"
+      );
+    });
+  });
+
+  describe('getPolicyQuery', () => {
+    it('should translate policy ID to kuery', () => {
+      expect(getPolicyQuery('aaa')).toBe('exception-list-agnostic.attributes.tags:"policy:aaa"');
+    });
+
+    it('should translate global policy ID to kuery using `policy:all`', () => {
+      expect(getPolicyQuery('global')).toBe('exception-list-agnostic.attributes.tags:"policy:all"');
+    });
+
+    it('should translate unassigned policy ID to kuery using `policy:all`', () => {
+      expect(getPolicyQuery('unassigned')).toBe(
+        '(not exception-list-agnostic.attributes.tags:policy\\:*)'
       );
     });
   });

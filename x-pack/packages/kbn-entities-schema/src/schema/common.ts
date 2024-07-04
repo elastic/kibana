@@ -8,16 +8,7 @@
 import { z } from 'zod';
 import moment from 'moment';
 
-export enum EntityType {
-  service = 'service',
-  host = 'host',
-  pod = 'pod',
-  node = 'node',
-}
-
 export const arrayOfStringsSchema = z.array(z.string());
-
-export const entityTypeSchema = z.nativeEnum(EntityType);
 
 export enum BasicAggregations {
   avg = 'avg',
