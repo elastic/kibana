@@ -147,7 +147,7 @@ export function systemRoutes(
       path: `${ML_INTERNAL_BASE_PATH}/ml_node_count`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canGetJobs', 'access:ml:canGetDatafeeds'],
+        tags: ['access:ml:canGetMlInfo'],
       },
     })
     .addVersion(
