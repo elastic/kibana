@@ -10,6 +10,7 @@ export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status` as const;
 export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init` as const;
 export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable` as const;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable` as const;
+export const RISK_ENGINE_SCHEDULE_NOW_URL = `${RISK_ENGINE_URL}/schedule_now` as const;
 export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges` as const;
 export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings` as const;
 

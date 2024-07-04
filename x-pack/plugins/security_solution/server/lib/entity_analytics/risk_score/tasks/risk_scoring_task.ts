@@ -12,6 +12,7 @@ import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskStatus,
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
@@ -132,6 +133,35 @@ export const registerRiskScoringTask = ({
       }),
     },
   });
+};
+
+export interface RiskScoringTaskStatus {
+  status: TaskStatus;
+  interval: string;
+  runAt: Date; // next schedule run
+  startedAt: Date | null; // only available if task is running
+}
+
+export const getRiskScoringTaskStatus = async ({
+  namespace,
+  riskEngineDataClient,
+  taskManager,
+}: {
+  namespace: string;
+  riskEngineDataClient: RiskEngineDataClient;
+  taskManager: TaskManagerStartContract;
+}): Promise<RiskScoringTaskStatus> => {
+  const taskId = getTaskId(namespace);
+  const interval = (await riskEngineDataClient.getConfiguration())?.interval ?? INTERVAL;
+
+  const task = await taskManager.get(taskId);
+
+  return {
+    status: task.status,
+    interval,
+    runAt: task.runAt,
+    startedAt: task.startedAt,
+  };
 };
 
 export const startRiskScoringTask = async ({
@@ -329,6 +359,26 @@ export const runTask = async ({
     };
   } catch (e) {
     telemetry.reportEvent(RISK_SCORE_EXECUTION_ERROR_EVENT.eventType, {});
+    throw e;
+  }
+};
+export const scheduleNow = async ({
+  logger,
+  namespace,
+  taskManager,
+}: {
+  logger: Logger;
+  namespace: string;
+  taskManager: TaskManagerStartContract;
+}) => {
+  const taskId = getTaskId(namespace);
+  const log = logFactory(logger, taskId);
+
+  log('attempting to schedule task to run now');
+  try {
+    await taskManager.runSoon(taskId);
+  } catch (e) {
+    logger.warn(`[task ${taskId}]: error scheduling task now, received ${e.message}`);
     throw e;
   }
 };

@@ -21,6 +21,9 @@ export const RiskEngineStatus = z.enum(['NOT_INSTALLED', 'DISABLED', 'ENABLED'])
 export type RiskEngineStatusEnum = typeof RiskEngineStatus.enum;
 export const RiskEngineStatusEnum = RiskEngineStatus.enum;
 
+export type RiskEngineTaskStatus = z.infer<typeof RiskEngineTaskStatus>;
+export const RiskEngineTaskStatus = z.object({});
+
 export type RiskEngineStatusResponse = z.infer<typeof RiskEngineStatusResponse>;
 export const RiskEngineStatusResponse = z.object({
   legacy_risk_engine_status: RiskEngineStatus,
@@ -29,4 +32,5 @@ export const RiskEngineStatusResponse = z.object({
    * Indicates whether the maximum amount of risk engines has been reached
    */
   is_max_amount_of_risk_engines_reached: z.boolean(),
+  task: RiskEngineTaskStatus.optional(),
 });
