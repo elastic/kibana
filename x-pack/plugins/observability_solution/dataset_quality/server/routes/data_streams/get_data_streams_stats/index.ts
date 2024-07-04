@@ -24,7 +24,7 @@ export async function getDataStreamsStats({
     };
   }
 
-  const matchingDataStreamsStats = await dataStreamService.getStreamsStats(esClient, dataStreams);
+  const matchingDataStreamsStats = dataStreamService.getStreamsStats(esClient, dataStreams);
 
   const indicesDocsCount = sizeStatsAvailable
     ? indexStatsService.getIndicesDocCounts(esClient, dataStreams)
