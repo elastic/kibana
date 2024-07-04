@@ -40,4 +40,6 @@ export const createTelemetryClientMock = (): jest.Mocked<TelemetryClientStart> =
   reportManualRuleRunCancelJob: jest.fn(),
   reportManualRuleRunExecute: jest.fn(),
   reportManualRuleRunOpenModal: jest.fn(),
+  reportOpenNoteInExpandableFlyoutClicked: jest.fn(),
+  reportAddNoteFromExpandableFlyoutClicked: jest.fn(),
 });
