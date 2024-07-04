@@ -32,4 +32,13 @@ describe('validateDefinitionCanCreateValidTransformIds(definition)', () => {
       validateDefinitionCanCreateValidTransformIds(entityDefinitionWithDots);
     }).toThrow(EntityDefinitionIdInvalid);
   });
+
+  it('should throw an error for a definition ID which ends with dash or underscore', () => {
+    const entityDefinitionEndingInUnderscore = entityDefinition;
+    entityDefinitionEndingInUnderscore.id = 'looking-good-but_';
+
+    expect(() => {
+      validateDefinitionCanCreateValidTransformIds(entityDefinitionEndingInUnderscore);
+    }).toThrow(EntityDefinitionIdInvalid);
+  });
 });

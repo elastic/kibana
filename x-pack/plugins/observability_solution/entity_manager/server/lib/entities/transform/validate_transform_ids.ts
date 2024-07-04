@@ -27,10 +27,10 @@ export function validateDefinitionCanCreateValidTransformIds(definition: EntityD
     );
   }
 
-  const transformIdRegex = /^[a-z0-9_-]+$/;
+  const transformIdRegex = /^[a-z0-9][a-z0-9_-]*[a-z0-9]$/;
   if (!transformIdRegex.test(definition.id)) {
     throw new EntityDefinitionIdInvalid(
-      'Entity definition ID must contain only lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores.'
+      'Entity definition ID must contain only lowercase alphanumeric characters (a-z and 0-9), hyphens, and underscores. It must also start and end with alphanumeric characters.'
     );
   }
 }
