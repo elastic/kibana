@@ -24,6 +24,8 @@ export interface DataTableContext {
   valueToStringConverter: ValueToStringConverter;
   componentsTourSteps?: Record<string, string>;
   isPlainRecord?: boolean;
+  pageIndex: number | undefined; // undefined when the pagination is disabled
+  pageSize: number | undefined;
 }
 
 const defaultContext = {} as unknown as DataTableContext;

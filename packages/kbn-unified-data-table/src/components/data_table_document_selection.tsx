@@ -71,8 +71,37 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 };
 
 export const SelectAllButton = () => {
-  const { selectedDocsState } = useContext(UnifiedDataTableContext);
-  const { isIndeterminate, hasSelectedDocs, clearSelectedDocs, selectAllDocs } = selectedDocsState;
+  const { selectedDocsState, pageIndex, pageSize, rows } = useContext(UnifiedDataTableContext);
+  const { getCountOfSelectedDocs, clearSelectedDocs, selectMoreDocs, selectAllDocs } =
+    selectedDocsState;
+
+  const docIdsFromCurrentPage = useMemo(() => {
+    if (typeof pageIndex === 'number' && typeof pageSize === 'number') {
+      const start = pageIndex * pageSize;
+      const end = start + pageSize;
+      return rows.slice(start, end).map((row) => row.id);
+    }
+    return undefined; // pagination is disabled
+  }, [rows, pageIndex, pageSize]);
+
+  const countOfSelectedDocs = useMemo(() => {
+    return docIdsFromCurrentPage?.length ? getCountOfSelectedDocs(docIdsFromCurrentPage) : 0;
+  }, [docIdsFromCurrentPage, getCountOfSelectedDocs]);
+
+  const isIndeterminateForCurrentPage = useMemo(() => {
+    if (docIdsFromCurrentPage?.length) {
+      return countOfSelectedDocs > 0 && countOfSelectedDocs < docIdsFromCurrentPage.length;
+    }
+    return false;
+  }, [docIdsFromCurrentPage, countOfSelectedDocs]);
+
+  const areDocsSelectedForCurrentPage = useMemo(() => {
+    if (docIdsFromCurrentPage?.length) {
+      return countOfSelectedDocs > 0;
+    }
+    return false;
+  }, [docIdsFromCurrentPage, countOfSelectedDocs]);
+
   return (
     <>
       <EuiScreenReaderOnly>
@@ -87,16 +116,20 @@ export const SelectAllButton = () => {
         aria-label={i18n.translate('unifiedDataTable.selectColumnHeader', {
           defaultMessage: 'Select all rows',
         })}
-        indeterminate={isIndeterminate}
-        checked={hasSelectedDocs}
+        indeterminate={isIndeterminateForCurrentPage}
+        checked={areDocsSelectedForCurrentPage}
         onChange={(e) => {
-          if (isIndeterminate) {
+          if (isIndeterminateForCurrentPage) {
             clearSelectedDocs();
             return;
           }
 
           if (e.target.checked) {
-            selectAllDocs();
+            if (docIdsFromCurrentPage) {
+              selectMoreDocs(docIdsFromCurrentPage);
+            } else {
+              selectAllDocs();
+            }
           } else {
             clearSelectedDocs();
           }

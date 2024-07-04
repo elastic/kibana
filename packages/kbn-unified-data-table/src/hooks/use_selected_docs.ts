@@ -11,11 +11,12 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 
 export interface UseSelectedDocsState {
   isDocSelected: (docId: string) => boolean;
-  isIndeterminate: boolean;
+  getCountOfSelectedDocs: (docIds: string[]) => number;
   hasSelectedDocs: boolean;
   usedSelectedDocs: string[];
   toggleDocSelection: (docId: string) => void;
   selectAllDocs: () => void;
+  selectMoreDocs: (docIds: string[]) => void;
   replaceSelectedDocs: (docIds: string[]) => void;
   clearSelectedDocs: () => void;
 }
@@ -43,6 +44,10 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
     setSelectedDocsSet(new Set(docMap.keys()));
   }, [docMap]);
 
+  const selectMoreDocs = useCallback((docIds: string[]) => {
+    setSelectedDocsSet((prevSelectedRowsSet) => new Set([...prevSelectedRowsSet, ...docIds]));
+  }, []);
+
   const clearSelectedDocs = useCallback(() => {
     setSelectedDocsSet(new Set());
   }, []);
@@ -58,28 +63,36 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
   );
 
   const usedSelectedDocsCount = usedSelectedDocs.length;
-  const totalDocsCount = docMap.size;
-  const isIndeterminate = useMemo(
-    () => usedSelectedDocsCount > 0 && usedSelectedDocsCount < totalDocsCount,
-    [usedSelectedDocsCount, totalDocsCount]
+
+  const getCountOfSelectedDocs = useCallback(
+    (docIds) => {
+      if (!usedSelectedDocsCount) {
+        return 0;
+      }
+
+      return docIds.filter(isDocSelected).length;
+    },
+    [usedSelectedDocsCount, isDocSelected]
   );
 
   return useMemo(
     () => ({
       isDocSelected,
-      isIndeterminate,
       hasSelectedDocs: usedSelectedDocsCount > 0,
+      getCountOfSelectedDocs,
       usedSelectedDocs,
       toggleDocSelection,
       selectAllDocs,
+      selectMoreDocs,
       replaceSelectedDocs,
       clearSelectedDocs,
     }),
     [
       isDocSelected,
-      isIndeterminate,
+      getCountOfSelectedDocs,
       toggleDocSelection,
       selectAllDocs,
+      selectMoreDocs,
       replaceSelectedDocs,
       clearSelectedDocs,
       usedSelectedDocsCount,

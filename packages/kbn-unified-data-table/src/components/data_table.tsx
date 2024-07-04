@@ -513,33 +513,6 @@ export const UnifiedDataTable = ({
     [displayedRows, dataView, fieldFormats]
   );
 
-  const unifiedDataTableContextValue = useMemo(
-    () => ({
-      expanded: expandedDoc,
-      setExpanded: setExpandedDoc,
-      rows: displayedRows,
-      onFilter,
-      dataView,
-      isDarkMode: darkMode,
-      selectedDocsState,
-      valueToStringConverter,
-      componentsTourSteps,
-      isPlainRecord,
-    }),
-    [
-      componentsTourSteps,
-      darkMode,
-      dataView,
-      isPlainRecord,
-      displayedRows,
-      expandedDoc,
-      onFilter,
-      setExpandedDoc,
-      selectedDocsState,
-      valueToStringConverter,
-    ]
-  );
-
   /**
    * Pagination
    */
@@ -590,6 +563,36 @@ export const UnifiedDataTable = ({
         : { ...paginationData, pageSize: currentPageSize }
     );
   }, [currentPageSize, setPagination]);
+
+  const unifiedDataTableContextValue = useMemo(
+    () => ({
+      expanded: expandedDoc,
+      setExpanded: setExpandedDoc,
+      rows: displayedRows,
+      onFilter,
+      dataView,
+      isDarkMode: darkMode,
+      selectedDocsState,
+      valueToStringConverter,
+      componentsTourSteps,
+      isPlainRecord,
+      pageIndex: paginationObj?.pageIndex,
+      pageSize: paginationObj?.pageSize,
+    }),
+    [
+      componentsTourSteps,
+      darkMode,
+      dataView,
+      isPlainRecord,
+      displayedRows,
+      expandedDoc,
+      onFilter,
+      setExpandedDoc,
+      selectedDocsState,
+      paginationObj,
+      valueToStringConverter,
+    ]
+  );
 
   const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
