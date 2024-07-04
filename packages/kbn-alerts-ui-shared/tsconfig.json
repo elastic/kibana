@@ -38,5 +38,9 @@
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
     "@kbn/utility-types",
+    "@kbn/core-application-browser",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser",
   ]
 }
