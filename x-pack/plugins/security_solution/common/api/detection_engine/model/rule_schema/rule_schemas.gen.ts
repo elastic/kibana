@@ -570,12 +570,12 @@ export const EsqlRuleRequiredFields = z.object({
    * ESQL query to execute
    */
   query: RuleQuery,
-  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type EsqlRuleOptionalFields = z.infer<typeof EsqlRuleOptionalFields>;
 export const EsqlRuleOptionalFields = z.object({
   alert_suppression: AlertSuppression.optional(),
+  response_actions: z.array(ResponseAction).optional(),
 });
 
 export type EsqlRulePatchFields = z.infer<typeof EsqlRulePatchFields>;
