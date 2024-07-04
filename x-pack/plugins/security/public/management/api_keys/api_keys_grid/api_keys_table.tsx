@@ -19,26 +19,24 @@ import {
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLink,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import type { CustomComponentProps } from '@elastic/eui/src/components/search_bar/filters/custom_component_filter';
-import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '@kbn/security-api-key-management';
+import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from '@kbn/security-api-key-management';
+import type { ApiKeyAggregations, CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { ApiKeysEmptyPrompt, doesErrorIndicateBadQuery } from './api_keys_empty_prompt';
 import type { AuthenticatedUser } from '../../../../common';
-import type { ApiKey, ApiKeyAggregations, BaseApiKey } from '../../../../common/model';
-import type { CreateAPIKeyResult, QueryApiKeySortOptions } from '../api_keys_api_client';
 
 export interface TablePagination {
   pageIndex: number;
@@ -573,129 +571,6 @@ export const UsernameWithIcon: FunctionComponent<UsernameWithIconProps> = ({ use
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-
-export interface TimeToolTipProps {
-  timestamp: number;
-}
-
-export const TimeToolTip: FunctionComponent<TimeToolTipProps> = ({ timestamp, children }) => {
-  return (
-    <EuiToolTip content={moment(timestamp).format('LLL')}>
-      <span>{children ?? moment(timestamp).fromNow()}</span>
-    </EuiToolTip>
-  );
-};
-
-export type ApiKeyStatusProps = Pick<CategorizedApiKey, 'expiration'>;
-
-export const ApiKeyStatus: FunctionComponent<ApiKeyStatusProps> = ({ expiration }) => {
-  if (!expiration) {
-    return (
-      <EuiHealth color="primary" data-test-subj="apiKeyStatus">
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusActive"
-          defaultMessage="Active"
-        />
-      </EuiHealth>
-    );
-  }
-
-  if (Date.now() > expiration) {
-    return (
-      <EuiHealth color="subdued" data-test-subj="apiKeyStatus">
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusExpired"
-          defaultMessage="Expired"
-        />
-      </EuiHealth>
-    );
-  }
-
-  return (
-    <EuiHealth color="warning" data-test-subj="apiKeyStatus">
-      <TimeToolTip timestamp={expiration}>
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusExpires"
-          defaultMessage="Expires {timeFromNow}"
-          values={{
-            timeFromNow: moment(expiration).fromNow(),
-          }}
-        />
-      </TimeToolTip>
-    </EuiHealth>
-  );
-};
-
-export interface ApiKeyBadgeProps {
-  type: 'rest' | 'cross_cluster' | 'managed';
-}
-
-export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
-  return type === 'cross_cluster' ? (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="xpack.security.accountManagement.apiKeyBadge.crossClusterDescription"
-          defaultMessage="Allows remote clusters to connect to your local cluster."
-        />
-      }
-    >
-      <EuiBadge color="hollow" iconType="cluster">
-        <FormattedMessage
-          id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-          defaultMessage="Cross-Cluster"
-        />
-      </EuiBadge>
-    </EuiToolTip>
-  ) : type === 'managed' ? (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="xpack.security.accountManagement.apiKeyBadge.managedDescription"
-          defaultMessage="Created and managed by Kibana to correctly run background tasks."
-        />
-      }
-    >
-      <EuiBadge color="hollow" iconType="gear">
-        <FormattedMessage
-          id="xpack.security.accountManagement.apiKeyBadge.managedTitle"
-          defaultMessage="Managed"
-        />
-      </EuiBadge>
-    </EuiToolTip>
-  ) : (
-    <EuiToolTip
-      content={
-        <FormattedMessage
-          id="xpack.security.accountManagement.apiKeyBadge.restDescription"
-          defaultMessage="Allows external services to access the Elastic Stack on behalf of a user."
-        />
-      }
-    >
-      <EuiBadge color="hollow" iconType="user">
-        <FormattedMessage
-          id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-          defaultMessage="Personal"
-        />
-      </EuiBadge>
-    </EuiToolTip>
-  );
-};
-
-/**
- * Interface representing a REST API key that is managed by Kibana.
- */
-export interface ManagedApiKey extends BaseApiKey {
-  type: 'managed';
-}
-
-/**
- * Interface representing an API key the way it is presented in the Kibana UI  (with Kibana system
- * API keys given its own dedicated `managed` type).
- */
-export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
-  expired: boolean;
-};
 
 export const categorizeAggregations = (aggregationResponse?: ApiKeyAggregations) => {
   const typeFilters: Array<CategorizedApiKey['type']> = [];

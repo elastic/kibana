@@ -1053,6 +1053,136 @@
       "warning": []
     },
     {
+      "query": "row 1 quarter",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row 1                quarter",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 QUARTER",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 Quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() + 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row 1 quarter + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() * 1 quarter",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() / 1 quarter",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() % 1 quarter",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row 1 quarters",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row 1                quarters",
+      "error": [
+        "ROW does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 QUARTERS",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() - 1 Quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = now() + 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row 1 quarters + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() * 1 quarters",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() / 1 quarters",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = now() % 1 quarters",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row 1 month",
       "error": [
         "ROW does not support [date_period] in expression [1 month]"
@@ -6480,6 +6610,146 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval 1 quarter",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                quarter",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarter]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 QUARTER",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 quarter",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 quarter + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 quarter",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 quarter",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 quarter",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarter] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 quarters",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                quarters",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 quarters]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 QUARTERS",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 quarters",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 quarters + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 quarters",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 quarters",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 quarters",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 quarters] type [duration]"
+      ],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval 1 month",
       "error": [
         "EVAL does not support [date_period] in expression [1 month]"
@@ -7456,6 +7726,706 @@
       "error": [
         "Argument of [%] must be [number], found value [now()] type [date]",
         "Argument of [%] must be [number], found value [1 milliseconds] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 ms",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 ms]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                ms",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 ms]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 MS",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 ms",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 ms + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 ms] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 ms",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 ms] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 ms",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 ms] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 ms",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 ms] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 s",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 s]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                s",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 s]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 s",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 s",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 S",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 S",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 s",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 s + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 s] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 s",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 s] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 s",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 s] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 s",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 s] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 m",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 m]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                m",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 m]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 m",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 m",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 M",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 M",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 m",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 m + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 m] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 m",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 m] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 m",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 m] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 m",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 m] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 h",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 h]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                h",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 h]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 h",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 h",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 H",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 H",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 h",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 h + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 h] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 h",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 h] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 h",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 h] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 h",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 h] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 d",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 d]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                d",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 d]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 d",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 d",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 D",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 D",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 d",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 d + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 d] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 d",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 d] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 d",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 d] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 d",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 d] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 w",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 w]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                w",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 w]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 w",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 w",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 W",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 W",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 w",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 w + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 w] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 w",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 w] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 w",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 w] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 w",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 w] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 mo",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 mo]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                mo",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 mo]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 MO",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 mo",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 mo + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 mo] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 mo",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 mo] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 mo",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 mo] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 mo",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 mo] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 q",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 q]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                q",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 q]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 q",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 q",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Q",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Q",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 q",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 q + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 q] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 q",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 q] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 q",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 q] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 q",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 q] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 y",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 y]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                y",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 y]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 y",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 y + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 y",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 y",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 y",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 y] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 yr",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 yr]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1                yr",
+      "error": [
+        "EVAL does not support [date_period] in expression [1 yr]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() - 1 yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 YR",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField - 1 Yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = dateField + 1 yr",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval 1 yr + 1 year",
+      "error": [
+        "Argument of [+] must be [date], found value [1 yr] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() * 1 yr",
+      "error": [
+        "Argument of [*] must be [number], found value [now()] type [date]",
+        "Argument of [*] must be [number], found value [1 yr] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() / 1 yr",
+      "error": [
+        "Argument of [/] must be [number], found value [now()] type [date]",
+        "Argument of [/] must be [number], found value [1 yr] type [duration]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = now() % 1 yr",
+      "error": [
+        "Argument of [%] must be [number], found value [now()] type [date]",
+        "Argument of [%] must be [number], found value [1 yr] type [duration]"
       ],
       "warning": []
     },
@@ -24928,6 +25898,472 @@
     },
     {
       "query": "row nullVar = null | eval repeat(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 3, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, 1, \"desc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 3)",
+      "error": [
+        "Error: [top] function expects exactly 3 arguments, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField)",
+      "error": [
+        "Error: [top] function expects exactly 3 arguments, got 1."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, numberField, \"asc\")",
+      "error": [
+        "Argument of [=] must be a constant, received [top(stringField,numberField,\"asc\")]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 100 + numberField, \"asc\")",
+      "error": [
+        "Argument of [=] must be a constant, received [top(stringField,100+numberField,\"asc\")]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 1, stringField)",
+      "error": [
+        "Argument of [=] must be a constant, received [top(stringField,1,stringField)]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 1, \"asdf\")",
+      "error": [],
+      "warning": [
+        "Invalid option [\"asdf\"] for top. Supported options: [\"asc\", \"desc\"]."
+      ]
+    },
+    {
+      "query": "from a_index | sort top(stringField, numberField, \"asc\")",
+      "error": [
+        "SORT does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, numberField, \"asc\")",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, numberField, \"asc\") > 0",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, numberField, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, numberField, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, numberField, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, numberField, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort top(stringField, 5, \"asc\")",
+      "error": [
+        "SORT does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, 5, \"asc\")",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where top(stringField, 5, \"asc\") > 0",
+      "error": [
+        "WHERE does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, 5, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = top(stringField, 5, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, 5, \"asc\")",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval top(stringField, 5, \"asc\") > 0",
+      "error": [
+        "EVAL does not support function top"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, 5, \"asc\")",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(stringField, numberField, \"asc\")",
+      "error": [
+        "Argument of [top] must be a constant, received [numberField]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats top(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats top(nullVar, nullVar, nullVar)",
+      "error": [
+        "Argument of [top] must be a constant, received [nullVar]",
+        "Argument of [top] must be a constant, received [nullVar]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_distance(to_cartesianpoint(\"POINT (30 10)\"), to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")), to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row st_distance(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(to_geopoint(to_geopoint(\"POINT (30 10)\")), to_geopoint(to_geopoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = st_distance(true, true)",
+      "error": [
+        "Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]",
+        "Argument of [st_distance] must be [cartesian_point], found value [true] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(to_cartesianpoint(cartesianPointField), to_cartesianpoint(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(booleanField, booleanField)",
+      "error": [
+        "Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]",
+        "Argument of [st_distance] must be [cartesian_point], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(geoPointField, geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = st_distance(to_geopoint(geoPointField), to_geopoint(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(cartesianPointField, cartesianPointField, extraArg)",
+      "error": [
+        "Error: [st_distance] function expects exactly 2 arguments, got 3."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort st_distance(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_distance(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_distance(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats round(weighted_avg(numberField, numberField)) + weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField / 2, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(numberField, numberField) by round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), ipField",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), weighted_avg(numberField, numberField) by round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = weighted_avg(numberField, numberField) by var1 = round(numberField / 2), numberField / 2",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats var = weighted_avg(avg(numberField), avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(avg(numberField), avg(numberField))",
+      "error": [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]",
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(booleanField, booleanField)",
+      "error": [
+        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]",
+        "Argument of [weighted_avg] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort weighted_avg(numberField, numberField)",
+      "error": [
+        "SORT does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(numberField, numberField)",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "WHERE does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(numberField, numberField)",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval weighted_avg(numberField, numberField) > 0",
+      "error": [
+        "EVAL does not support function weighted_avg"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats weighted_avg(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats weighted_avg(nullVar, nullVar)",
       "error": [],
       "warning": []
     },

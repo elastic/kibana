@@ -10,18 +10,20 @@ import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_
 import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { Filter } from '@kbn/es-query';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { HasSerializedChildState, PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDataLoading,
   PublishesFilters,
+  PublishesTimeslice,
   PublishesUnifiedSearch,
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { Observable } from 'rxjs';
 import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 
 /** The control display settings published by the control group are the "default" */
@@ -41,6 +43,12 @@ export type ControlGroupUnsavedChanges = Omit<
 
 export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
+export interface DataControlFetchContext {
+  unifiedSearchFilters?: Filter[] | undefined;
+  query?: Query | AggregateQuery | undefined;
+  timeRange?: TimeRange | undefined;
+}
+
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState, ControlGroupRuntimeState> &
   PublishesFilters &
@@ -50,14 +58,19 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataLoading &
   PublishesUnsavedChanges &
   PublishesControlGroupDisplaySettings &
-  Partial<HasParentApi<PublishesUnifiedSearch>>;
+  PublishesTimeslice &
+  Partial<HasParentApi<PublishesUnifiedSearch>> & {
+    autoApplySelections$: PublishingSubject<boolean>;
+    dataControlFetch$: Observable<DataControlFetchContext>;
+    ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>;
+  };
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
   labelPosition: ControlStyle; // TODO: Rename this type to ControlLabelPosition
-  showApplySelections?: boolean;
+  autoApplySelections: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
   initialChildControlState: ControlPanelsState<ControlPanelState>;
@@ -71,7 +84,7 @@ export interface ControlGroupRuntimeState {
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
-  'chainingSystem' | 'labelPosition' | 'showApplySelections' | 'ignoreParentSettings'
+  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
 export type ControlGroupSerializedState = Omit<
@@ -82,10 +95,14 @@ export type ControlGroupSerializedState = Omit<
   | 'defaultControlWidth'
   | 'anyChildHasUnsavedChanges'
   | 'initialChildControlState'
+  | 'autoApplySelections'
 > & {
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
-  // In runtime state, we refer to this property as `labelPosition`; however, to avoid migrations, we will
-  // continue to refer to this property as the legacy `controlStyle` in the serialized state
+  // In runtime state, we refer to this property as `labelPosition`;
+  // to avoid migrations, we will continue to refer to this property as `controlStyle` in the serialized state
   controlStyle: ControlStyle;
+  // In runtime state, we refer to the inverse of this property as `autoApplySelections`
+  // to avoid migrations, we will continue to refer to this property as `showApplySelections` in the serialized state
+  showApplySelections: boolean | undefined;
 };
