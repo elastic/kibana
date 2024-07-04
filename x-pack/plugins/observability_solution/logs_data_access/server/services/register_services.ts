@@ -5,14 +5,27 @@
  * 2.0.
  */
 
-import { createGetLogsRatesService } from './get_logs_rates_service';
+import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import { Logger } from '@kbn/logging';
 import { createGetLogsRateTimeseries } from './get_logs_rate_timeseries/get_logs_rate_timeseries';
 import { createGetLogErrorRateTimeseries } from './get_logs_error_rate_timeseries/get_logs_error_rate_timeseries';
+import { createGetLogsRatesService } from './get_logs_rates_service';
+import { createGetLogSourcesService } from './log_sources_service';
 
-export function registerServices() {
+export interface RegisterServicesParams {
+  logger: Logger;
+  deps: {
+    savedObjects: SavedObjectsServiceStart;
+    uiSettings: UiSettingsServiceStart;
+  };
+}
+
+export function registerServices(params: RegisterServicesParams) {
   return {
     getLogsRatesService: createGetLogsRatesService(),
     getLogsRateTimeseries: createGetLogsRateTimeseries(),
     getLogsErrorRateTimeseries: createGetLogErrorRateTimeseries(),
+    getLogSourcesService: createGetLogSourcesService(params),
   };
 }
