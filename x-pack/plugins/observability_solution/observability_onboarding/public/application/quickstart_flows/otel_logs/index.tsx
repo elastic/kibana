@@ -185,7 +185,7 @@ data:
   otel.yaml: |
     exporters:
       debug:
-        verbosity: normal
+        verbosity: basic
       elasticsearch:
         endpoints: 
         - \${env:ES_ENDPOINT}
