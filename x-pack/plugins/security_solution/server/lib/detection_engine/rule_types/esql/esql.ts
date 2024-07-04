@@ -237,7 +237,7 @@ export const esqlExecutor = async ({
         scheduleNotificationResponseActionsService
       ) {
         scheduleNotificationResponseActionsService({
-          signals: result.createdSignals.map(expandDottedObject),
+          signals: result.createdSignals.map((signal) => expandDottedObject(signal as object)),
           responseActions: completeRule.ruleParams.responseActions,
         });
       }

@@ -11,12 +11,16 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
+import type {
+  CreateRuleOptions,
+  SecurityAlertType,
+  SignalSourceHit,
+  CreateQueryRuleAdditionalOptions,
+} from '../types';
 import { validateIndexPatterns } from '../utils';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
-import type { CreateQueryRuleAdditionalOptions } from '../types';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions & CreateQueryRuleAdditionalOptions

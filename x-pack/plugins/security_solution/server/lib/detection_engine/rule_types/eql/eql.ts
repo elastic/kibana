@@ -27,6 +27,7 @@ import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
   WrapSuppressedHits,
+  CreateQueryRuleAdditionalOptions,
 } from '../types';
 import {
   addToSearchAfterReturn,
@@ -45,7 +46,6 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateSuppressedAlertsInMemory } from '../utils/bulk_create_suppressed_alerts_in_memory';
-import type { CreateQueryRuleAdditionalOptions } from '../types';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -193,7 +193,7 @@ export const eqlExecutor = async ({
         scheduleNotificationResponseActionsService
       ) {
         scheduleNotificationResponseActionsService({
-          signals: result.createdSignals.map(expandDottedObject),
+          signals: result.createdSignals.map((signal) => expandDottedObject(signal as object)),
           responseActions: completeRule.ruleParams.responseActions,
         });
       }
