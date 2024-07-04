@@ -11,6 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import { DocLinksStart } from '@kbn/core/public';
+
+interface RollupDeprecatedWarningProps {
+  docLinksService: DocLinksStart;
+}
 
 const rollupBetaWarningTitle = i18n.translate(
   'indexPatternEditor.rollupIndexPattern.deprecationWarning.title',
@@ -19,7 +24,7 @@ const rollupBetaWarningTitle = i18n.translate(
   }
 );
 
-export const RollupDeprecatedWarning = () => (
+export const RollupDeprecatedWarning = ({ docLinksService }: RollupDeprecatedWarningProps) => (
   <EuiCallOut
     title={rollupBetaWarningTitle}
     color="warning"
@@ -32,7 +37,7 @@ export const RollupDeprecatedWarning = () => (
       values={{
         downsamplingLink: (
           <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/downsampling.html"
+            href={docLinksService.links.elasticsearch.rollupMigratingToDownsampling}
             target="_blank"
             data-test-subj="downsamplingLink"
           >

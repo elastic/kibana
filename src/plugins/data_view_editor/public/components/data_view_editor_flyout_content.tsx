@@ -92,7 +92,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   dataViewEditorService,
 }: Props) => {
   const {
-    services: { application, dataViews, uiSettings, overlays },
+    services: { application, dataViews, uiSettings, overlays, docLinks },
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
@@ -227,7 +227,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       {type === INDEX_PATTERN_TYPE.ROLLUP ? (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <RollupDeprecatedWarning />
+            <RollupDeprecatedWarning docLinksService={docLinks} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
