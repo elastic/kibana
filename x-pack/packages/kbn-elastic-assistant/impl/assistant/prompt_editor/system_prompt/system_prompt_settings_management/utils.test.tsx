@@ -6,8 +6,8 @@
  */
 import { ProviderEnum } from '@kbn/elastic-assistant-common';
 import { mockSystemPrompts } from '../../../../mock/system_prompt';
-import { PromptType } from '../../../types';
 import { getSelectedConversations } from './utils';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 describe('getSelectedConversations', () => {
   const allSystemPrompts = [...mockSystemPrompts];
   const conversationSettings = {
@@ -39,7 +39,7 @@ describe('getSelectedConversations', () => {
         content:
           'You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nProvide the most detailed and relevant answer possible, as if you were relaying this information back to a cyber security expert.\nIf you answer a question related to KQL, EQL, or ES|QL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query. xxx',
         name: 'Enhanced system prompt',
-        promptType: 'system' as PromptType,
+        promptType: PromptTypeEnum.system,
         isDefault: true,
         isNewConversationDefault: true,
       },
