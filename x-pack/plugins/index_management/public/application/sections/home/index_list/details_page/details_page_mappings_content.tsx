@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ILicense } from '@kbn/licensing-plugin/public';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { Index } from '../../../../../../common';
 import { useDetailsPageMappingsModelManagement } from '../../../../../hooks/use_details_page_mappings_model_management';
 import { useAppContext } from '../../../../app_context';
@@ -68,11 +69,14 @@ export const DetailsPageMappingsContent: FunctionComponent<{
     services: { extensionsService },
     core: {
       getUrlForApp,
-      application: { capabilities },
+      application: { capabilities, navigateToUrl },
+      http,
     },
     plugins: { ml, licensing },
     url,
     config,
+    overlays,
+    history,
   } = useAppContext();
 
   const [isPlatinumLicense, setIsPlatinumLicense] = useState<boolean>(false);
@@ -108,6 +112,22 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   });
 
   const [isAddingFields, setAddingFields] = useState<boolean>(false);
+
+  useUnsavedChangesPrompt({
+    titleText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptTitle', {
+      defaultMessage: 'Exit without saving changes?',
+    }),
+    messageText: i18n.translate('xpack.idxMgmt.indexDetails.mappings.unsavedChangesPromptMessage', {
+      defaultMessage:
+        'Your changes will be lost if you leave this page without saving the mapping.',
+    }),
+    hasUnsavedChanges: isAddingFields,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+  });
+
   const newFieldsLength = useMemo(() => {
     return Object.keys(state.fields.byId).length;
   }, [state.fields.byId]);
@@ -227,7 +247,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       if (!error) {
         notificationService.showSuccessToast(
           i18n.translate('xpack.idxMgmt.indexDetails.mappings.successfullyUpdatedIndexMappings', {
-            defaultMessage: 'Index Mapping was successfully updated',
+            defaultMessage: 'Updated index mapping',
           })
         );
         refetchMapping();

@@ -97,6 +97,18 @@ describe('<EntitiesOverview />', () => {
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('should not render link if isPreviewMode is true', () => {
+    const { getByTestId, queryByTestId } = renderEntitiesOverview({
+      ...mockContextValue,
+      isPreviewMode: true,
+    });
+
+    expect(queryByTestId(TOGGLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(TITLE_ICON_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEXT_TEST_ID)).toBeInTheDocument();
+  });
+
   it('should render user and host', () => {
     const { getByTestId, queryByText } = renderEntitiesOverview(mockContextValue);
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();

@@ -14,12 +14,33 @@ import type { SecurityLicense, SecurityLicenseFeatures } from '@kbn/security-plu
 export const licenseMock = {
   create: (
     features: Partial<SecurityLicenseFeatures> | Observable<Partial<SecurityLicenseFeatures>> = {},
-    licenseType: LicenseType = 'basic' // default to basic if this is not specified
+    licenseType: LicenseType = 'basic', // default to basic if this is not specified,
+    isAvailable: Observable<boolean> = of(true)
   ): jest.Mocked<SecurityLicense> => ({
-    isLicenseAvailable: jest.fn().mockReturnValue(true),
+    isLicenseAvailable: jest.fn().mockImplementation(() => {
+      let result = true;
+
+      isAvailable.subscribe((next) => {
+        result = next;
+      });
+
+      return result;
+    }),
+    getLicenseType: jest.fn().mockReturnValue(licenseType),
     getUnavailableReason: jest.fn(),
     isEnabled: jest.fn().mockReturnValue(true),
-    getFeatures: jest.fn().mockReturnValue(features),
+    getFeatures:
+      features instanceof Observable
+        ? jest.fn().mockImplementation(() => {
+            let subbedFeatures: Partial<SecurityLicenseFeatures> = {};
+
+            features.subscribe((next) => {
+              subbedFeatures = next;
+            });
+
+            return subbedFeatures;
+          })
+        : jest.fn().mockReturnValue(features),
     hasAtLeast: jest
       .fn()
       .mockImplementation(

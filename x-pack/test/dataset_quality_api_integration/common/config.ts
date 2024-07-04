@@ -22,6 +22,7 @@ import {
 import { createDatasetQualityApiClient } from './dataset_quality_api_supertest';
 import { RegistryProvider } from './registry';
 import { DatasetQualityFtrConfigName } from '../configs';
+import { PackageService } from './package_service';
 
 export interface DatasetQualityFtrConfig {
   name: DatasetQualityFtrConfigName;
@@ -70,6 +71,7 @@ export interface CreateTest {
       context: InheritedFtrProviderContext
     ) => Promise<LogsSynthtraceEsClient>;
     datasetQualityApiClient: (context: InheritedFtrProviderContext) => DatasetQualityApiClient;
+    packageService: ({ getService }: FtrProviderContext) => ReturnType<typeof PackageService>;
   };
   junit: { reportName: string };
   esTestCluster: any;
@@ -98,6 +100,7 @@ export function createTestConfig(
       servicesRequiredForTestAnalysis: ['datasetQualityFtrConfig', 'registry'],
       services: {
         ...services,
+        packageService: PackageService,
         datasetQualityFtrConfig: () => config,
         registry: RegistryProvider,
         logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
