@@ -7,8 +7,6 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, useEuiPaddingSize } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter } from '@kbn/es-query';
@@ -18,7 +16,6 @@ import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { EmbeddablePatternAnalysisInput } from '@kbn/aiops-log-pattern-analysis/embeddable';
-import { css } from '@emotion/react';
 import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import { useFilterQueryUpdates } from '../../../hooks/use_filters_query';
@@ -55,7 +52,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     uiSettings,
     embeddingOrigin,
   } = useAiopsAppContext();
-  const tablePadding = useEuiPaddingSize('xs');
 
   const {
     dataView,
@@ -403,48 +399,24 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [input.lastReloadRequestTime]
   );
-  const style = css({
-    overflowY: 'auto',
-    '.kbnDocTableWrapper': {
-      overflowX: 'hidden',
-    },
-  });
 
   return (
     <>
-      <EuiFlexItem css={style}>
-        <EuiFlexGroup
-          className="eui-fullHeight"
-          direction="column"
-          gutterSize="none"
-          responsive={false}
-        >
-          <EuiFlexItem css={{ position: 'relative', overflowY: 'auto', marginLeft: tablePadding }}>
-            <>
-              <FieldValidationCallout validationResults={fieldValidationResult} />
-              {(loading ?? true) === true ? (
-                <LoadingCategorization onCancel={cancelRequest} />
-              ) : null}
+      <FieldValidationCallout validationResults={fieldValidationResult} />
+      {(loading ?? true) === true ? <LoadingCategorization onCancel={cancelRequest} /> : null}
 
-              {loading === false &&
-              data !== null &&
-              data.categories.length > 0 &&
-              fieldName !== null ? (
-                <CategoryTable
-                  categories={data.categories}
-                  eventRate={eventRate}
-                  enableRowActions={false}
-                  displayExamples={data.displayExamples}
-                  setSelectedCategories={setSelectedCategories}
-                  openInDiscover={openInDiscover}
-                  tableState={tableState}
-                  selectable={false}
-                />
-              ) : null}
-            </>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+      {loading === false && data !== null && data.categories.length > 0 && fieldName !== null ? (
+        <CategoryTable
+          categories={data.categories}
+          eventRate={eventRate}
+          enableRowActions={false}
+          displayExamples={data.displayExamples}
+          setSelectedCategories={setSelectedCategories}
+          openInDiscover={openInDiscover}
+          tableState={tableState}
+          selectable={false}
+        />
+      ) : null}
     </>
   );
 };

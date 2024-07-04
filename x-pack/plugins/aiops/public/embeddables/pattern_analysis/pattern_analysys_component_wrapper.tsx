@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { css } from '@emotion/react';
 import { useDataSource } from '../../hooks/use_data_source';
 import type { PatternAnalysisProps } from '../../shared_components/pattern_analysis';
 import LogCategorizationEmbeddable from '../../components/log_categorization/log_categorization_for_embeddable/log_categorization_for_embeddable';
@@ -45,10 +44,11 @@ export const PatternAnalysisEmbeddableWrapper: FC<PatternAnalysisProps> = ({
 
   return (
     <div
-      css={css`
-        overflow: auto;
-        width: 100%;
-      `}
+      css={{
+        width: '100%',
+        height: '100%',
+        overflowY: 'auto',
+      }}
     >
       <LogCategorizationEmbeddable
         input={{

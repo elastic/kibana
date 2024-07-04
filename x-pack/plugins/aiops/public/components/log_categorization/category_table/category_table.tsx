@@ -152,6 +152,14 @@ export const CategoryTable: FC<Props> = ({
           'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
           onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
         },
+        {
+          name: openInDiscoverLabels.singleSelect.out + '1',
+          description: openInDiscoverLabels.singleSelect.out,
+          icon: 'minusInCircle',
+          type: 'icon',
+          'data-test-subj': 'aiopsLogPatternsActionFilterOutButton',
+          onClick: (category) => openInDiscoverFunction(QUERY_MODE.EXCLUDE, category),
+        },
       ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;

@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { css } from '@emotion/react';
-// import type { ChangePointDetectionViewType } from '@kbn/aiops-change-point-detection/constants';
 import { EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -136,10 +134,9 @@ const PatternAnalysisWrapper: FC<PatternAnalysisPropsWithDeps> = ({
     <div
       data-shared-item=""
       data-test-subj="aiopsEmbeddablePatternAnalysis"
-      css={css`
-        width: 100%;
-        overflow-y: auto;
-      `}
+      css={{
+        width: '100%',
+      }}
     >
       <KibanaRenderContextProvider {...coreStart}>
         <AiopsAppContext.Provider value={aiopsAppContextValue}>
