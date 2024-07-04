@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { UseSelectedDocsState } from '../hooks/use_selected_docs';
 import { UnifiedDataTableContext } from '../table_context';
 
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
@@ -139,18 +140,18 @@ export function DataTableDocumentToolbarBtn({
   isPlainRecord,
   isFilterActive,
   rows,
-  selectedDocs,
   setIsFilterActive,
-  clearAllSelectedDocs,
+  selectedDocsState,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
   rows: DataTableRecord[];
-  selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
-  clearAllSelectedDocs: () => void;
+  selectedDocsState: UseSelectedDocsState;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
+  const { selectAllDocs, clearAllSelectedDocs, isDocSelected, usedSelectedDocs } =
+    selectedDocsState;
 
   const getMenuItems = useCallback(() => {
     return [
@@ -204,9 +205,7 @@ export function DataTableDocumentToolbarBtn({
         data-test-subj="dscGridCopySelectedDocumentsJSON"
         textToCopy={
           rows
-            ? JSON.stringify(
-                rows.filter((row) => selectedDocs.includes(row.id)).map((row) => row.raw)
-              )
+            ? JSON.stringify(rows.filter((row) => isDocSelected(row.id)).map((row) => row.raw))
             : ''
         }
       >
@@ -226,6 +225,24 @@ export function DataTableDocumentToolbarBtn({
           </EuiContextMenuItem>
         )}
       </EuiCopy>,
+      ...(usedSelectedDocs.length < rows.length
+        ? [
+            <EuiContextMenuItem
+              data-test-subj="dscGridSelectAllDocs"
+              key="selectRowsOnAllPages"
+              icon="check"
+              onClick={() => {
+                setIsSelectionPopoverOpen(false);
+                selectAllDocs();
+              }}
+            >
+              <FormattedMessage
+                id="unifiedDataTable.selectAllDocs"
+                defaultMessage="Select all rows"
+              />
+            </EuiContextMenuItem>,
+          ]
+        : []),
       <EuiContextMenuItem
         data-test-subj="dscGridClearSelectedDocuments"
         key="clearSelection"
@@ -239,7 +256,16 @@ export function DataTableDocumentToolbarBtn({
         <FormattedMessage id="unifiedDataTable.clearSelection" defaultMessage="Clear selection" />
       </EuiContextMenuItem>,
     ];
-  }, [isFilterActive, isPlainRecord, rows, selectedDocs, setIsFilterActive, clearAllSelectedDocs]);
+  }, [
+    isFilterActive,
+    isPlainRecord,
+    rows,
+    setIsFilterActive,
+    isDocSelected,
+    clearAllSelectedDocs,
+    selectAllDocs,
+    usedSelectedDocs,
+  ]);
 
   const toggleSelectionToolbar = useCallback(
     () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),
@@ -255,10 +281,10 @@ export function DataTableDocumentToolbarBtn({
         <EuiDataGridToolbarControl
           iconType="documents"
           onClick={toggleSelectionToolbar}
-          data-selected-documents={selectedDocs.length}
+          data-selected-documents={usedSelectedDocs.length}
           data-test-subj="unifiedDataTableSelectionBtn"
           isSelected={isFilterActive}
-          badgeContent={selectedDocs.length}
+          badgeContent={usedSelectedDocs.length}
         >
           {isPlainRecord ? (
             <FormattedMessage

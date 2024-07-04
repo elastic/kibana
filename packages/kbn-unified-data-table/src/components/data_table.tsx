@@ -470,13 +470,8 @@ export const UnifiedDataTable = ({
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
   const selectedDocsState = useSelectedDocs(docMap);
-  const {
-    isDocSelected,
-    hasSelectedDocs,
-    usedSelectedDocs,
-    clearAllSelectedDocs,
-    replaceSelectedDocs,
-  } = selectedDocsState;
+  const { isDocSelected, hasSelectedDocs, usedSelectedDocs, replaceSelectedDocs } =
+    selectedDocsState;
 
   useEffect(() => {
     if (!hasSelectedDocs && isFilterActive) {
@@ -880,9 +875,8 @@ export const UnifiedDataTable = ({
                 isPlainRecord={isPlainRecord}
                 isFilterActive={isFilterActive}
                 rows={rows!}
-                selectedDocs={usedSelectedDocs}
-                clearAllSelectedDocs={clearAllSelectedDocs}
                 setIsFilterActive={setIsFilterActive}
+                selectedDocsState={selectedDocsState}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -891,9 +885,9 @@ export const UnifiedDataTable = ({
       </>
     );
   }, [
-    externalAdditionalControls,
-    clearAllSelectedDocs,
     usedSelectedDocs,
+    selectedDocsState,
+    externalAdditionalControls,
     isPlainRecord,
     isFilterActive,
     setIsFilterActive,
