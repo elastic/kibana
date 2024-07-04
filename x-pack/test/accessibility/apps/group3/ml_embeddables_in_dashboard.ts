@@ -88,6 +88,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.datafeedConfig
           );
           await PageObjects.common.navigateToApp('dashboard');
+          // FIXME
+          await PageObjects.common.sleep(2000);
         });
 
         after(async () => {
