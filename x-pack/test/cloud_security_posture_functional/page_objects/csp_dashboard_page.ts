@@ -101,6 +101,14 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       return await testSubjects.findAll('dashboard-summary-section-compliance-score');
     },
 
+    getAllComplianceScoresByCisSection: async () => {
+      await dashboard.getCloudDashboard();
+      const getCloudSummarySection = await dashboard.getCloudSummarySection();
+      return await getCloudSummarySection.findAllByTestSubject(
+        'cloudSecurityFindingsComplianceScore'
+      );
+    },
+
     getCloudComplianceScore: async () => {
       await dashboard.getCloudSummarySection();
       return await testSubjects.find('dashboard-summary-section-compliance-score');

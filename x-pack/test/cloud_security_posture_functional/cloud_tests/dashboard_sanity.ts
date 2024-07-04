@@ -52,6 +52,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const resourcesEvaluatedCount = parseInt(visibleText.replace(/,/g, ''), 10);
         expect(resourcesEvaluatedCount).greaterThan(1500);
       });
+
+      it('Compliance By CIS sections have non empty values', async () => {
+        const compliancScoresChartPanel = await dashboard.getAllComplianceScoresByCisSection();
+        expect(compliancScoresChartPanel.length).to.be.greaterThan(0);
+        for (const score of compliancScoresChartPanel) {
+          const scoreValue = await score.getVisibleText();
+          // Check if the score is a percentage
+          expect(scoreValue).to.match(/^\d+%$/);
+        }
+      });
     });
 
     describe('Kubernetes Dashboard', () => {
