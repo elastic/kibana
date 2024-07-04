@@ -13,9 +13,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const { deleteMetadataStream, deleteAllDocsFromMetadataCurrentIndex } = getService(
-    'endpointDataStreamHelpers'
-  );
+  const endpointDataStreamHelpers = getService('endpointDataStreamHelpers');
 
   describe('When in the Fleet application', function () {
     targetTags(this, ['@ess', '@serverless']);
@@ -27,8 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await browser.refresh();
     });
     after(async () => {
-      await deleteMetadataStream(getService);
-      await deleteAllDocsFromMetadataCurrentIndex(getService);
+      await endpointDataStreamHelpers.deleteMetadataStream(getService);
+      await endpointDataStreamHelpers.deleteAllDocsFromMetadataCurrentIndex(getService);
     });
     describe('and on the Endpoint Integration details page', () => {
       beforeEach(async () => {

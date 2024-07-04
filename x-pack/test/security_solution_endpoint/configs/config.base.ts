@@ -7,6 +7,7 @@
 
 import { Config } from '@kbn/test';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution';
 import { pageObjects } from '../page_objects';
 import type { TargetTags } from '../target_tags';
 
@@ -42,7 +43,9 @@ export const generateConfig = async ({
   services: any;
 }): Promise<Config> => {
   const { readConfigFile } = ftrConfigProviderContext;
-  const { createEndpointDockerConfig, getRegistryUrlAsArray } = services.endpointRegistryHelpers();
+  // services are not ready yet, so we need to import them here
+  const { createEndpointDockerConfig, getRegistryUrlAsArray } =
+    SecuritySolutionEndpointRegistryHelpers();
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../../functional/config.base.js')
   );

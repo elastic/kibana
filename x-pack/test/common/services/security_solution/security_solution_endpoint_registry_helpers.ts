@@ -37,30 +37,7 @@ export function SecuritySolutionEndpointRegistryHelpers() {
     './apis/fixtures/package_registry_config.yml'
   );
 
-  function createEndpointDockerConfig(
-    packageRegistryConfig: string = defaultRegistryConfigPath,
-    dockerImage: string = ingestDockerImage,
-    dockerArgs: string[] = []
-  ) {
-    const args: string[] = [
-      '-v',
-      `${packageRegistryConfig}:/package-registry/config.yml`,
-      ...dockerArgs,
-    ];
-    return defineDockerServersConfig({
-      registry: {
-        enabled: !!dockerRegistryPort,
-        image: dockerImage,
-        portInContainer: 8080,
-        port: dockerRegistryPort,
-        args,
-        waitForLogLine: 'package manifests loaded',
-        waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes,
-      },
-    });
-  }
-
-  function getRegistryUrlFromTestEnv(): string | undefined {
+  const getRegistryUrlFromTestEnv = () => {
     let registryUrl: string | undefined;
     if (dockerRegistryPort !== undefined) {
       registryUrl = `--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`;
@@ -68,21 +45,43 @@ export function SecuritySolutionEndpointRegistryHelpers() {
       registryUrl = `--xpack.fleet.registryUrl=${packageRegistryOverride}`;
     }
     return registryUrl;
-  }
+  };
 
-  function getRegistryUrlAsArray(): string[] {
-    const registryUrl: string | undefined = getRegistryUrlFromTestEnv();
-    return registryUrl !== undefined ? [registryUrl] : [];
-  }
-
-  function isRegistryEnabled() {
+  const isRegistryEnabled = () => {
     return getRegistryUrlFromTestEnv() !== undefined;
-  }
+  };
 
   return {
-    createEndpointDockerConfig,
+    createEndpointDockerConfig(
+      packageRegistryConfig: string = defaultRegistryConfigPath,
+      dockerImage: string = ingestDockerImage,
+      dockerArgs: string[] = []
+    ) {
+      const args: string[] = [
+        '-v',
+        `${packageRegistryConfig}:/package-registry/config.yml`,
+        ...dockerArgs,
+      ];
+      return defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: dockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes,
+        },
+      });
+    },
+
     getRegistryUrlFromTestEnv,
-    getRegistryUrlAsArray,
+
+    getRegistryUrlAsArray(): string[] {
+      const registryUrl: string | undefined = getRegistryUrlFromTestEnv();
+      return registryUrl !== undefined ? [registryUrl] : [];
+    },
+
     isRegistryEnabled,
   };
 }

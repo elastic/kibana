@@ -18,13 +18,14 @@ export default function (providerContext: FtrProviderContext) {
     const log = getService('log');
     const endpointTestResources = getService('endpointTestResources');
     const kbnClient = getService('kibanaServer');
-    const { getRegistryUrlFromTestEnv, isRegistryEnabled } = getService('endpointRegistryHelpers');
+    const endpointRegistryHelpers = getService('endpointRegistryHelpers');
 
-    if (!isRegistryEnabled()) {
+    if (!endpointRegistryHelpers.isRegistryEnabled()) {
       log.warning('These tests are being run with an external package registry');
     }
 
-    const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
+    const registryUrl =
+      endpointRegistryHelpers.getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
     before(async () => {
