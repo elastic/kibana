@@ -20,7 +20,11 @@ import {
   EuiSuperDatePicker,
   OnTimeChangeProps,
 } from '@elastic/eui';
-import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import {
+  CONTROL_GROUP_TYPE,
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '@kbn/controls-plugin/common';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -39,6 +43,7 @@ import { ControlGroupApi } from '../react_controls/control_group/types';
 import { RANGE_SLIDER_CONTROL_TYPE } from '../react_controls/data_controls/range_slider/types';
 import { SEARCH_CONTROL_TYPE } from '../react_controls/data_controls/search_control/types';
 import { TIMESLIDER_CONTROL_TYPE } from '../react_controls/timeslider_control/types';
+import { openDataControlEditor } from '../react_controls/data_controls/open_data_control_editor';
 
 const toggleViewButtons = [
   {
@@ -167,6 +172,7 @@ export const ReactControlExample = ({
       addNewPanel: () => {
         return Promise.resolve(undefined);
       },
+      lastUsedDataViewId: new BehaviorSubject<string>(WEB_LOGS_DATA_VIEW_ID),
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -282,6 +288,33 @@ export const ReactControlExample = ({
             Serialize control group
           </EuiButton>
         </EuiFlexItem>
+        {controlGroupApi && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={async () => {
+                const { controlType, initialState } = await openDataControlEditor({
+                  initialState: {
+                    grow: DEFAULT_CONTROL_GROW,
+                    width: DEFAULT_CONTROL_WIDTH,
+                    dataViewId: dashboardApi.lastUsedDataViewId.getValue(),
+                  },
+                  controlGroupApi,
+                  services: {
+                    core,
+                    dataViews: dataViewsService,
+                  },
+                });
+                controlGroupApi.addNewPanel({
+                  panelType: controlType,
+                  initialState,
+                });
+              }}
+              size="s"
+            >
+              Add new data control
+            </EuiButton>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
             legend="Change the view mode"

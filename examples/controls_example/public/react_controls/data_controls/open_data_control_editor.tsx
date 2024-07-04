@@ -8,7 +8,6 @@
 
 import React from 'react';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
 
 import { CoreStart, OverlayRef } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -20,35 +19,28 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditor } from './data_control_editor';
 import { DefaultDataControlState } from './types';
-import { ControlStateManager } from '../types';
+
+export type DataControlEditorState = Omit<DefaultDataControlState, 'fieldName'> & {
+  fieldName?: string;
+};
 
 export const openDataControlEditor = async <
-  State extends DefaultDataControlState = DefaultDataControlState
->(
-  stateManager: ControlStateManager<State>,
-  controlGroupApi: ControlGroupApi,
+  State extends DataControlEditorState = DataControlEditorState
+>({
+  initialState,
+  controlGroupApi,
+  services,
+}: {
+  initialState: State & { controlType?: string; controlId?: string };
+  controlGroupApi: ControlGroupApi;
   services: {
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
-  },
-  controlType?: string,
-  controlId?: string
-): Promise<undefined> => {
-  return new Promise((resolve) => {
-    /**
-     * Duplicate all state into a new manager because we do not want to actually apply the changes
-     * to the control until the user hits save.
-     */
-    const editorStateManager: ControlStateManager<State> = Object.keys(stateManager).reduce(
-      (prev, key) => {
-        return {
-          ...prev,
-          [key as keyof State]: new BehaviorSubject(stateManager[key as keyof State].getValue()),
-        };
-      },
-      {} as ControlStateManager<State>
-    );
+  };
+}): Promise<{ controlType: string; initialState: State }> => {
+  const { controlType, controlId, ...controlState } = initialState;
 
+  return new Promise((resolve) => {
     const closeOverlay = (overlayRef: OverlayRef) => {
       if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
         controlGroupApi.parentApi.clearOverlays();
@@ -56,14 +48,7 @@ export const openDataControlEditor = async <
       overlayRef.close();
     };
 
-    const onCancel = (overlay: OverlayRef) => {
-      const initialState = Object.keys(stateManager).map((key) => {
-        return stateManager[key as keyof State].getValue();
-      });
-      const newState = Object.keys(editorStateManager).map((key) => {
-        return editorStateManager[key as keyof State].getValue();
-      });
-
+    const onCancel = (newState: State, overlay: OverlayRef) => {
       if (deepEqual(initialState, newState)) {
         closeOverlay(overlay);
         return;
@@ -95,23 +80,18 @@ export const openDataControlEditor = async <
 
     const overlay = services.core.overlays.openFlyout(
       toMountPoint(
-        <DataControlEditor
+        <DataControlEditor<State>
           controlId={controlId}
           controlType={controlType}
           parentApi={controlGroupApi}
-          onCancel={() => {
-            onCancel(overlay);
+          onCancel={(state) => {
+            onCancel(state, overlay);
           }}
-          onSave={() => {
-            Object.keys(stateManager).forEach((key) => {
-              stateManager[key as keyof State].next(
-                editorStateManager[key as keyof State].getValue()
-              );
-            });
+          onSave={(state, selectedControlType) => {
             closeOverlay(overlay);
-            resolve(undefined);
+            resolve({ initialState: state, controlType: selectedControlType });
           }}
-          stateManager={editorStateManager}
+          initialState={initialState}
           services={{ dataViews: services.dataViews }}
         />,
         {

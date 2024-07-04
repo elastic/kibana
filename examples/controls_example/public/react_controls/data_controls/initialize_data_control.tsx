@@ -109,14 +109,34 @@ export const initializeDataControl = <EditorState extends object = {}>(
   );
 
   const onEdit = async () => {
-    openDataControlEditor<DefaultDataControlState & EditorState>(
-      { ...stateManager, ...editorStateManager } as ControlStateManager<
-        DefaultDataControlState & EditorState
-      >,
-      controlGroup,
+    // get the initial state from the state manager
+    const mergedStateManager = {
+      ...stateManager,
+      ...editorStateManager,
+    } as ControlStateManager<DefaultDataControlState & EditorState>;
+    const initialState = (
+      Object.keys(mergedStateManager) as Array<keyof DefaultDataControlState & EditorState>
+    ).reduce((prev, key) => {
+      return {
+        ...prev,
+        [key]: mergedStateManager[key]?.getValue(),
+      };
+    }, {} as DefaultDataControlState & EditorState);
+
+    // open the editor to get the new state
+    const { initialState: newState } = await openDataControlEditor<
+      DefaultDataControlState & EditorState
+    >({
       services,
-      controlType,
-      controlId
+      initialState: { controlId, controlType, ...initialState },
+      controlGroupApi: controlGroup,
+    });
+
+    // apply the changes from the new state via the state manager
+    (Object.keys(initialState) as Array<keyof DefaultDataControlState & EditorState>).forEach(
+      (key) => {
+        mergedStateManager[key].next(newState[key]);
+      }
     );
   };
 

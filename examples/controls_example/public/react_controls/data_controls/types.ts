@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { CanClearSelections } from '@kbn/controls-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import {
@@ -14,12 +15,7 @@ import {
   PublishesFilters,
   PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
-import {
-  ControlFactory,
-  ControlStateManager,
-  DefaultControlApi,
-  DefaultControlState,
-} from '../types';
+import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types';
 
 export type DataControlApi = DefaultControlApi &
   Omit<PublishesPanelTitle, 'hidePanelTitle'> & // control titles cannot be hidden
@@ -35,7 +31,8 @@ export interface DataControlFactory<
 > extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{
-    stateManager: ControlStateManager<State>;
+    initialState: Omit<State, keyof DefaultDataControlState>;
+    updateState: (newState: Partial<State>) => void;
     setControlEditorValid: (valid: boolean) => void;
   }>;
 }
