@@ -5,9 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-import { SharePluginStart } from '@kbn/share-plugin/public';
-
 export type { JsonCodeEditorProps } from './components';
 export type { EsDocSearchProps } from './hooks';
 export type { UnifiedDocViewerSetup, UnifiedDocViewerStart } from './plugin';
@@ -19,6 +16,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from './plugin';
 
 export interface UnifiedDocViewerServices {
