@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { kibanaService } from '../../../../../utils/kibana_service';
 import { ClientPluginsStart } from '../../../../../plugin';
 import { store } from '../../../state';
-import { StatusRuleParams } from '../../../../../../common/rules/status_rule';
+import type { StatusRuleParams } from '../../../../../../common/rules/status_rule';
 
 interface Props {
   core: CoreStart;

@@ -10,7 +10,12 @@ import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { httpServerMock, loggingSystemMock, analyticsServiceMock } from '@kbn/core/server/mocks';
+import {
+  httpServerMock,
+  loggingSystemMock,
+  analyticsServiceMock,
+  securityServiceMock,
+} from '@kbn/core/server/mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType as ConnectorType } from '../types';
@@ -20,7 +25,6 @@ import {
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
@@ -58,7 +62,7 @@ const executeParams = {
 const spacesMock = spacesServiceMock.createStartContract();
 const loggerMock: ReturnType<typeof loggingSystemMock.createLogger> =
   loggingSystemMock.createLogger();
-const securityMockStart = securityMock.createStart();
+const securityMockStart = securityServiceMock.createStart();
 
 const authorizationMock = actionsAuthorizationMock.create();
 const getActionsAuthorizationWithRequest = jest.fn();
