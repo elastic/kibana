@@ -45,6 +45,7 @@ import {
   AUTO_UPGRADE_POLICIES_PACKAGES,
   SO_SEARCH_LIMIT,
 } from '../../../../../constants';
+import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
 
@@ -255,7 +256,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, startServices 
   return (
     <>
       <EuiFlexGroup alignItems="flexStart">
-        <EuiFlexItem grow={1} />
+        <SideBarColumn grow={1} />
         <EuiFlexItem grow={7}>
           <EuiText>
             <EuiTitle>

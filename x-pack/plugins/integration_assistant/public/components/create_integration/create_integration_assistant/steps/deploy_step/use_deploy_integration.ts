@@ -10,18 +10,21 @@ import { useKibana } from '../../../../../common/hooks/use_kibana';
 import type { BuildIntegrationRequestBody } from '../../../../../../common';
 import type { State } from '../../state';
 import { runBuildIntegration, runInstallPackage } from '../../../../../common/lib/api';
-import { defaultLogoEncoded } from '../default_logo';
 import { getIntegrationNameFromResponse } from '../../../../../common/lib/api_parsers';
+import { useTelemetry } from '../../../telemetry';
 
 interface PipelineGenerationProps {
   integrationSettings: State['integrationSettings'];
   result: State['result'];
-  connectorId: State['connectorId'];
+  connector: State['connector'];
 }
 
-export type ProgressItem = 'build' | 'install';
-
-export const useDeployIntegration = ({ integrationSettings, result }: PipelineGenerationProps) => {
+export const useDeployIntegration = ({
+  integrationSettings,
+  result,
+  connector,
+}: PipelineGenerationProps) => {
+  const telemetry = useTelemetry();
   const { http, notifications } = useKibana().services;
   const [integrationFile, setIntegrationFile] = useState<Blob | null>(null);
   const [integrationName, setIntegrationName] = useState<string>();
@@ -31,6 +34,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
   useEffect(() => {
     if (
       http == null ||
+      connector == null ||
       integrationSettings == null ||
       notifications?.toasts == null ||
       result?.pipeline == null
@@ -47,7 +51,7 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
             title: integrationSettings.title ?? '',
             description: integrationSettings.description ?? '',
             name: integrationSettings.name ?? '',
-            logo: integrationSettings.logo ?? defaultLogoEncoded,
+            logo: integrationSettings.logo,
             dataStreams: [
               {
                 title: integrationSettings.dataStreamTitle ?? '',
@@ -74,6 +78,11 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
         const integrationNameFromResponse = getIntegrationNameFromResponse(installResult);
         if (integrationNameFromResponse) {
           setIntegrationName(integrationNameFromResponse);
+          telemetry.reportAssistantComplete({
+            integrationName: integrationNameFromResponse,
+            integrationSettings,
+            connector,
+          });
         } else {
           throw new Error('Integration name not found in response');
         }
@@ -92,9 +101,11 @@ export const useDeployIntegration = ({ integrationSettings, result }: PipelineGe
     setIntegrationFile,
     http,
     integrationSettings,
+    connector,
     notifications?.toasts,
     result?.docs,
     result?.pipeline,
+    telemetry,
   ]);
 
   return {

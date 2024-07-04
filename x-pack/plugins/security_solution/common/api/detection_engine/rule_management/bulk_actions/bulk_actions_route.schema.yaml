@@ -29,6 +29,7 @@ paths:
                 - $ref: '#/components/schemas/BulkEnableRules'
                 - $ref: '#/components/schemas/BulkExportRules'
                 - $ref: '#/components/schemas/BulkDuplicateRules'
+                - $ref: '#/components/schemas/BulkManualRuleRun'
                 - $ref: '#/components/schemas/BulkEditRules'
       responses:
         200:
@@ -78,6 +79,8 @@ components:
         - MACHINE_LEARNING_INDEX_PATTERN
         - ESQL_INDEX_PATTERN
         - INVESTIGATION_FIELDS_FEATURE
+        - MANUAL_RULE_RUN_FEATURE
+        - MANUAL_RULE_RUN_DISABLED_RULE
 
     NormalizedRuleError:
       type: object
@@ -251,6 +254,29 @@ components:
           required:
             - action
 
+    BulkManualRuleRun:
+      allOf:
+        - $ref: '#/components/schemas/BulkActionBase'
+        - type: object
+          properties:
+            action:
+              type: string
+              enum: [run]
+            run:
+              type: object
+              properties:
+                start_date:
+                  type: string
+                  description: Start date of the manual rule run
+                end_date:
+                  type: string
+                  description: End date of the manual rule run
+              required:
+                - start_date
+          required:
+            - action
+            - run
+
     ThrottleForBulkActions:
       type: string
       description: "The condition for throttling the notification: 'rule', 'no_actions', or time duration"
@@ -269,6 +295,7 @@ components:
         - delete
         - duplicate
         - edit
+        - run
 
     BulkActionEditType:
       type: string

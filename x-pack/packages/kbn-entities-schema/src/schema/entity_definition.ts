@@ -8,7 +8,6 @@
 import { z } from 'zod';
 import {
   arrayOfStringsSchema,
-  entityTypeSchema,
   keyMetricSchema,
   metadataSchema,
   filterSchema,
@@ -20,7 +19,7 @@ export const entityDefinitionSchema = z.object({
   id: z.string().regex(/^[\w-]+$/),
   name: z.string(),
   description: z.optional(z.string()),
-  type: entityTypeSchema,
+  type: z.string(),
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),

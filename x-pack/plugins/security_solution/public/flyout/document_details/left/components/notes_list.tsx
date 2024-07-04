@@ -30,13 +30,13 @@ import {
 import type { State } from '../../../../common/store';
 import type { Note } from '../../../../../common/api/timeline';
 import {
-  deleteNote,
+  deleteNotes,
   ReqStatus,
   selectCreateNoteStatus,
-  selectDeleteNoteError,
-  selectDeleteNoteStatus,
-  selectFetchNotesByDocumentIdError,
-  selectFetchNotesByDocumentIdStatus,
+  selectDeleteNotesError,
+  selectDeleteNotesStatus,
+  selectFetchNotesByDocumentIdsError,
+  selectFetchNotesByDocumentIdsStatus,
   selectNotesByDocumentId,
 } from '../../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -84,20 +84,21 @@ export const NotesList = memo(({ eventId }: NotesListProps) => {
     'unifiedComponentsInTimelineEnabled'
   );
 
-  const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdStatus(state));
-  const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdError(state));
+  const fetchStatus = useSelector((state: State) => selectFetchNotesByDocumentIdsStatus(state));
+  const fetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
+
   const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
 
   const createStatus = useSelector((state: State) => selectCreateNoteStatus(state));
 
-  const deleteStatus = useSelector((state: State) => selectDeleteNoteStatus(state));
-  const deleteError = useSelector((state: State) => selectDeleteNoteError(state));
+  const deleteStatus = useSelector((state: State) => selectDeleteNotesStatus(state));
+  const deleteError = useSelector((state: State) => selectDeleteNotesError(state));
   const [deletingNoteId, setDeletingNoteId] = useState('');
 
   const deleteNoteFc = useCallback(
     (noteId: string) => {
       setDeletingNoteId(noteId);
-      dispatch(deleteNote({ id: noteId }));
+      dispatch(deleteNotes({ ids: [noteId] }));
     },
     [dispatch]
   );

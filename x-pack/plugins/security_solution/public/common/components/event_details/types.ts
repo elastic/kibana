@@ -20,7 +20,7 @@ export interface FieldsData {
 export interface EnrichedFieldInfo {
   data: FieldsData | EventFieldsData;
   eventId: string;
-  fieldFromBrowserField?: BrowserField;
+  fieldFromBrowserField?: Partial<BrowserField>;
   scopeId: string;
   values: string[] | null | undefined;
   linkValue?: string;
