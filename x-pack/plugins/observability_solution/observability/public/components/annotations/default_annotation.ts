@@ -47,10 +47,12 @@ export function getDefaultAnnotation({
     },
     ...(sloId &&
       sloInstanceId && {
-        slo: {
-          id: sloId,
-          instanceId: sloInstanceId,
-        },
+        slos: [
+          {
+            id: sloId,
+            instanceId: sloInstanceId,
+          },
+        ],
       }),
   };
 }

@@ -51,14 +51,16 @@ export const ANNOTATION_MAPPINGS: Mappings = {
         },
       },
     },
-    host: {
+    hosts: {
+      type: 'nested',
       properties: {
         name: {
           type: 'keyword',
         },
       },
     },
-    slo: {
+    slos: {
+      type: 'nested',
       properties: {
         id: {
           type: 'keyword',
@@ -68,14 +70,16 @@ export const ANNOTATION_MAPPINGS: Mappings = {
         },
       },
     },
-    monitor: {
+    monitors: {
+      type: 'nested',
       properties: {
         id: {
           type: 'keyword',
         },
       },
     },
-    alert: {
+    alerts: {
+      type: 'nested',
       properties: {
         id: {
           type: 'keyword',

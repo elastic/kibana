@@ -174,17 +174,26 @@ export function createAnnotationsClient(params: {
       const { start, end, sloId, sloInstanceId, serviceName } = findParams ?? {};
 
       const shouldClauses: QueryDslQueryContainer[] = [];
-      if (sloId) {
-        shouldClauses.push({
-          term: {
-            'slo.id': sloId,
+      if (sloId || sloInstanceId) {
+        const query: QueryDslQueryContainer = {
+          nested: {
+            path: 'slos',
+            query: {
+              bool: {
+                filter: [
+                  ...(sloId ? [{ term: { 'slos.id': sloId } }] : []),
+                  ...(sloInstanceId ? [{ term: { 'slos.instanceId': sloInstanceId } }] : []),
+                ],
+              },
+            },
           },
-        });
+        };
+        shouldClauses.push(query);
       }
       if (sloInstanceId && sloInstanceId !== '*') {
         shouldClauses.push({
           term: {
-            'slo.instanceId': sloInstanceId,
+            'slos.instanceId': sloInstanceId,
           },
         });
       }
@@ -195,6 +204,34 @@ export function createAnnotationsClient(params: {
           },
         });
       }
+
+      console.log(
+        JSON.stringify({
+          index: readIndex,
+          size: 10000,
+          ignore_unavailable: true,
+          query: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: start,
+                      lte: end,
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    should: shouldClauses,
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
 
       const result = await esClient.search({
         index: readIndex,

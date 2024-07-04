@@ -60,10 +60,7 @@ export const createAnnotationRt = t.intersection([
       environment: t.string,
       version: t.string,
     }),
-    slo: t.partial({
-      id: t.string,
-      instanceId: t.string,
-    }),
+    slos: t.array(t.intersection([t.type({ id: t.string }), t.partial({ instanceId: t.string })])),
   }),
 ]);
 

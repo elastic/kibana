@@ -19,40 +19,30 @@ export function SLOApplyTo({ editAnnotation }: { editAnnotation?: Annotation | n
   return (
     <EuiFormRow
       label={i18n.translate('xpack.observability.annotationMeta.euiFormRow.sloLabel', {
-        defaultMessage: 'SLO',
+        defaultMessage: 'SLOs',
       })}
       display="columnCompressed"
       fullWidth={true}
     >
       <Controller
-        defaultValue={editAnnotation?.slo}
-        name="slo"
+        defaultValue={editAnnotation?.slos}
+        name="slos"
         control={control}
         render={({ field }) => (
           <SloSelector
-            initialSlos={
-              field.value
-                ? [
-                    {
-                      id: field.value.id!,
-                      instanceId: field.value.instanceId!,
-                    },
-                  ]
-                : []
-            }
+            initialSlos={field.value ?? []}
             onSelected={(newValue) => {
               const { slos, all } = newValue;
               if (all) {
-                field.onChange({
-                  id: ALL_VALUE,
-                });
+                field.onChange([
+                  {
+                    id: ALL_VALUE,
+                  },
+                ]);
               } else {
-                if (slos && 'id' in slos) {
-                  field.onChange({ id: slos.id, instanceId: slos.instanceId });
-                }
+                field.onChange(slos);
               }
             }}
-            singleSelection={true}
           />
         )}
       />

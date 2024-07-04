@@ -13,24 +13,20 @@ import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchSloList } from '../hooks/use_fetch_slo_list';
 export interface SloItem {
   id: string;
-  instanceId: string;
+  instanceId?: string;
   name?: string;
   groupBy?: string;
 }
 
 interface Props {
   initialSlos?: SloItem[];
-  onSelected: (vals: {
-    slos?: SLOWithSummaryResponse[] | SLOWithSummaryResponse;
-    all?: boolean;
-  }) => void;
+  onSelected: (vals: { slos?: Array<{ id: string; instanceId?: string }>; all?: boolean }) => void;
   hasError?: boolean;
-  singleSelection?: boolean;
 }
 
 type Option = EuiComboBoxOptionOption<string>;
 
-export function SloSelector({ initialSlos, onSelected, hasError, singleSelection }: Props) {
+export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
   const mapSlosToOptions = (slos: SLOWithSummaryResponse[] | undefined) =>
     slos?.map((slo) => ({
       label:
@@ -77,8 +73,10 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
           ? sloList!.results?.filter((slo) =>
               opts.find((opt) => opt.value === `${slo.id}-${slo.instanceId}`)
             )
-          : undefined;
-      onSelected({ slos: singleSelection ? selectedSlos?.[0] : selectedSlos });
+          : [];
+      onSelected({
+        slos: selectedSlos.map((slo) => ({ id: slo.id, instanceId: slo.instanceId })),
+      });
     }
   };
 
@@ -92,19 +90,18 @@ export function SloSelector({ initialSlos, onSelected, hasError, singleSelection
 
   return (
     <EuiComboBox
+      async
       compressed
       aria-label={SLO_LABEL}
       placeholder={SLO_SELECTOR}
       data-test-subj="sloSelector"
       options={[ALL_OPTION, ...options]}
       selectedOptions={selectedOptions}
-      async
       isLoading={isLoading}
       onChange={onChange}
       fullWidth
       onSearchChange={onSearchChange}
       isInvalid={hasError}
-      singleSelection={singleSelection ? { asPlainText: true } : undefined}
     />
   );
 }

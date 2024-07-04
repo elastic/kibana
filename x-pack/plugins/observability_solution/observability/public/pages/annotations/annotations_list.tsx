@@ -123,12 +123,12 @@ export function AnnotationsList() {
     {
       name: APPLY_TO_LABEL,
       render: (annotation: Annotation) => {
-        const sloID = annotation.slo?.id;
+        const slos = annotation.slos;
         const serviceName = annotation.service?.name;
-        const sloLabel = sloID
+        const sloLabel = slos?.length
           ? i18n.translate('xpack.observability.columns.sloTextLabel', {
-              defaultMessage: 'SLO: {sloID}',
-              values: { sloID },
+              defaultMessage: 'SLOs: {slos}',
+              values: { slos: slos.map((slo) => slo.id).join(', ') },
             })
           : '';
         const serviceLabel = serviceName
@@ -138,7 +138,7 @@ export function AnnotationsList() {
             })
           : '';
 
-        if (!sloID && !serviceName) {
+        if (!slos?.length && !serviceName) {
           return (
             <EuiText size="s">
               {i18n.translate('xpack.observability.columns.TextLabel', { defaultMessage: '--' })}
