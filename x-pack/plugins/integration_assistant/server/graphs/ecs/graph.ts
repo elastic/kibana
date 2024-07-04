@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { StateGraphArgs } from '@langchain/langgraph';
-import { StateGraph, END, START } from '@langchain/langgraph';
 import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
-import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
-import { modifySamples, mergeSamples } from '../../util/samples';
-import { createPipeline } from './pipeline';
-import { handleEcsMapping } from './mapping';
-import { handleDuplicates } from './duplicates';
-import { handleMissingKeys } from './missing';
-import { handleInvalidEcs } from './invalid';
-import { handleValidateMappings } from './validate';
+import type { StateGraphArgs } from '@langchain/langgraph';
+import { END, START, StateGraph } from '@langchain/langgraph';
 import type { EcsMappingState } from '../../types';
+import { mergeSamples, modifySamples } from '../../util/samples';
+import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
+import { handleDuplicates } from './duplicates';
+import { handleInvalidEcs } from './invalid';
+import { handleEcsMapping } from './mapping';
+import { handleMissingKeys } from './missing';
+import { createPipeline } from './pipeline';
+import { handleValidateMappings } from './validate';
 
 const graphState: StateGraphArgs<EcsMappingState>['channels'] = {
   ecs: {

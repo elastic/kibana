@@ -1,0 +1,36 @@
+.controlPanel {
+  width: 100%;
+  max-inline-size: 100% !important;
+  height: calc($euiButtonHeight - 2px);
+  box-shadow: none !important;
+  background-color: $euiFormBackgroundColor !important;
+
+  border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
+  &--roundedBorders {
+    border-radius: $euiBorderRadius !important;
+  }
+
+  &--label {
+    @include euiTextTruncate;
+    max-width: 40%;
+    background-color: transparent;
+    border-radius: $euiBorderRadius;
+
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  &--hideComponent {
+    display: none;
+  }
+
+  .controlErrorButton {
+    width: 100%;
+    border-radius: 0 $euiBorderRadius $euiBorderRadius 0 !important;
+
+    &--content {
+      justify-content: left;
+      padding-left: $euiSizeM;
+    }
+  }
+}

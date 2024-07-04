@@ -346,6 +346,20 @@ export const fleetUsagesSchema: RootSchema<any> = {
           _meta: { description: 'Output types of agent policies' },
         },
       },
+      count_with_global_data_tags: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies using global data tags',
+        },
+      },
+      avg_number_global_data_tags_per_policy: {
+        type: 'long',
+        _meta: {
+          description:
+            'Average number of global data tags defined per agent policy (accross policies using global data tags)',
+          optional: true,
+        },
+      },
     },
   },
   agent_checkin_status: {

@@ -24,7 +24,7 @@ import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { timeUnits, chronoLiterals } from '../definitions/literals';
 import {
   byOption,
   metadataOption,
@@ -127,7 +127,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['from', 'row', 'show'].includes(String(label));
+  return ['FROM', 'ROW', 'SHOW'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -290,12 +290,13 @@ export function areFieldAndVariableTypesCompatible(
   return fieldType === variableType;
 }
 
-export function printFunctionSignature(arg: ESQLFunction): string {
+export function printFunctionSignature(arg: ESQLFunction, useCaps = true): string {
   const fnDef = getFunctionDefinition(arg.name);
   if (fnDef) {
     const signature = getFunctionSignatures(
       {
         ...fnDef,
+        name: useCaps ? fnDef.name.toUpperCase() : fnDef.name,
         signatures: [
           {
             ...fnDef?.signatures[0],
@@ -376,7 +377,7 @@ export function getAllArrayTypes(
 }
 
 export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
-  return timeLiterals.some(({ name }) => name === item.unit.toLowerCase());
+  return timeUnits.some((unit) => unit === item.unit.toLowerCase());
 }
 
 /**
@@ -571,3 +572,6 @@ export function shouldBeQuotedText(
 ) {
   return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }
+
+export const isAggFunction = (arg: ESQLFunction): boolean =>
+  getFunctionDefinition(arg.name)?.type === 'agg';

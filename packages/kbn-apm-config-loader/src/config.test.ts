@@ -146,6 +146,35 @@ describe('ApmConfiguration', () => {
     );
   });
 
+  it('flattens the `globalLabels` object', () => {
+    const kibanaConfig = {
+      elastic: {
+        apm: {
+          globalLabels: {
+            keyOne: 'k1',
+            objectOne: {
+              objectOneKeyOne: 'o1k1',
+              objectOneKeyTwo: {
+                objectOneKeyTwoSubkeyOne: 'o1k2s1',
+              },
+            },
+          },
+        },
+      },
+    };
+    const config = new ApmConfiguration(mockedRootDir, kibanaConfig, true);
+    expect(config.getConfig('serviceName')).toEqual(
+      expect.objectContaining({
+        globalLabels: {
+          git_rev: 'sha',
+          keyOne: 'k1',
+          'objectOne.objectOneKeyOne': 'o1k1',
+          'objectOne.objectOneKeyTwo.objectOneKeyTwoSubkeyOne': 'o1k2s1',
+        },
+      })
+    );
+  });
+
   describe('env vars', () => {
     beforeEach(() => {
       delete process.env.ELASTIC_APM_ENVIRONMENT;

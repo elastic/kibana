@@ -16,6 +16,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
+  Metadata,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -221,12 +222,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Adds LangChain Documents to the knowledge base
    *
-   * @param documents LangChain Documents to add to the knowledge base
+   * @param {Array<Document<Metadata>>} documents - LangChain Documents to add to the knowledge base
    */
   public addKnowledgeBaseDocuments = async ({
     documents,
   }: {
-    documents: Document[];
+    documents: Array<Document<Metadata>>;
   }): Promise<KnowledgeBaseEntryResponse[]> => {
     const writer = await this.getWriter();
     const changedAt = new Date().toISOString();
@@ -240,9 +241,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const { errors, docs_created: docsCreated } = await writer.bulk({
       documentsToCreate: documents.map((doc) =>
         transformToCreateSchema(changedAt, this.spaceId, authenticatedUser, {
-          // TODO: Update the LangChain Document Metadata type extension
           metadata: {
-            kbResource: doc.metadata.kbResourcer ?? 'unknown',
+            kbResource: doc.metadata.kbResource ?? 'unknown',
             required: doc.metadata.required ?? false,
             source: doc.metadata.source ?? 'unknown',
           },

@@ -72,5 +72,6 @@
     "@kbn/ftr-common-functional-ui-services",
     "@kbn/monaco",
     "@kbn/search-types",
+    "@kbn/console-plugin",
   ]
 }
