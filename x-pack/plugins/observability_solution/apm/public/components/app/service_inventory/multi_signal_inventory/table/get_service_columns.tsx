@@ -30,6 +30,7 @@ import { NotAvailableApmMetrics } from '../../../../shared/not_available_apm_met
 import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
+import { isApmSignal } from '../../../../../utils/get_signal_type';
 export function getServiceColumns({
   query,
   breakpoints,
@@ -46,14 +47,19 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { serviceName, agentName }) => (
+      render: (_, { serviceName, agentName, signalTypes }) => (
         <TruncateWithTooltip
           data-test-subj="apmServiceListAppLink"
           text={serviceName}
           content={
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
               <EuiFlexItem grow={false}>
-                <ServiceLink serviceName={serviceName} agentName={agentName} query={query} />
+                <ServiceLink
+                  signalTypes={signalTypes}
+                  serviceName={serviceName}
+                  agentName={agentName}
+                  query={query}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -87,7 +93,7 @@ export function getServiceColumns({
       render: (_, { metrics, signalTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
@@ -110,7 +116,7 @@ export function getServiceColumns({
       render: (_, { metrics, signalTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
@@ -133,7 +139,7 @@ export function getServiceColumns({
       render: (_, { metrics, signalTypes }) => {
         const { currentPeriodColor } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
-        return !signalTypes.includes(SignalTypes.METRICS) ? (
+        return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric

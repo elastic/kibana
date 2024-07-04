@@ -45,6 +45,8 @@ const transformTemplateCaseFieldsToCaseFormFields = (
   return getInitialCaseValue({ owner, ...caseFields });
 };
 
+const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
+
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ configuration, connectors, isLoading, withSteps, draftStorageKey }) => {
     const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
@@ -60,6 +62,18 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     useEffect(() => {
       setFieldValue('connectorId', configuration.connector.id);
     }, [configuration.connector.id, setFieldValue]);
+
+    const defaultTemplate = useMemo(
+      () => ({
+        key: DEFAULT_EMPTY_TEMPLATE_KEY,
+        name: i18n.DEFAULT_EMPTY_TEMPLATE_NAME,
+        caseFields: getInitialCaseValue({
+          owner: configurationOwner,
+          connector: configuration.connector,
+        }),
+      }),
+      [configurationOwner, configuration.connector]
+    );
 
     const onTemplateChange = useCallback(
       (caseFields: CasesConfigurationUITemplate['caseFields']) => {
@@ -83,12 +97,12 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         children: (
           <TemplateSelector
             isLoading={isSubmitting || isLoading}
-            templates={configuration.templates}
+            templates={[defaultTemplate, ...configuration.templates]}
             onTemplateChange={onTemplateChange}
           />
         ),
       }),
-      [configuration.templates, isLoading, isSubmitting, onTemplateChange]
+      [configuration.templates, defaultTemplate, isLoading, isSubmitting, onTemplateChange]
     );
 
     const secondStep = useMemo(
