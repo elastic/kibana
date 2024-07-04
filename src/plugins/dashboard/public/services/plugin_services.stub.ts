@@ -46,6 +46,7 @@ import { serverlessServiceFactory } from './serverless/serverless_service.stub';
 import { userProfileServiceFactory } from './user_profile/user_profile_service.stub';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
 import { uiActionsServiceFactory } from './ui_actions/ui_actions_service.stub';
+import { dashboardRecentlyAccessedServiceFactory } from './dashboard_recently_accessed/dashboard_recently_accessed.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
@@ -80,6 +81,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
   userProfile: new PluginServiceProvider(userProfileServiceFactory),
+  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedServiceFactory)
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

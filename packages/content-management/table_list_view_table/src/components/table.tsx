@@ -59,6 +59,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   tableCaption: string;
   tableColumns: Array<EuiBasicTableColumn<T>>;
   hasUpdatedAtMetadata: boolean;
+  hasRecentlyAccessedMetadata: boolean;
   deleteItems: TableListViewTableProps<T>['deleteItems'];
   tableItemsRowActions: TableItemsRowActions;
   renderCreateButton: () => React.ReactElement | undefined;
@@ -81,6 +82,7 @@ export function Table<T extends UserContentCommonSchema>({
   tableSort,
   tableFilter,
   hasUpdatedAtMetadata,
+  hasRecentlyAccessedMetadata,
   entityName,
   entityNamePlural,
   tagsToTableItemMap,
@@ -174,12 +176,13 @@ export function Table<T extends UserContentCommonSchema>({
           <TableSortSelect
             tableSort={tableSort}
             hasUpdatedAtMetadata={hasUpdatedAtMetadata}
+            hasRecentlyAccessedMetadata={hasRecentlyAccessedMetadata}
             onChange={onSortChange}
           />
         );
       },
     };
-  }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
+  }, [hasUpdatedAtMetadata, onSortChange, tableSort, hasRecentlyAccessedMetadata]);
 
   const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
     if (!isTaggingEnabled()) return null;
@@ -298,7 +301,13 @@ export function Table<T extends UserContentCommonSchema>({
         selection={selection}
         search={search}
         executeQueryOptions={{ enabled: false }}
-        sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
+        sorting={
+          tableSort
+            ? tableSort.field === 'accessedAt'
+              ? true
+              : { sort: tableSort as PropertySort }
+            : undefined
+        }
         onChange={onTableChange}
         data-test-subj="itemsInMemTable"
         rowHeader="attributes.title"

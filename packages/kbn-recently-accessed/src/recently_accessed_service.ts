@@ -6,23 +6,20 @@
  * Side Public License, v 1.
  */
 
-import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
-import type {
-  ChromeRecentlyAccessed,
-  ChromeRecentlyAccessedHistoryItem,
-} from '@kbn/core-chrome-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { RecentlyAccessed, RecentlyAccessedHistoryItem } from './types';
 import { PersistedLog } from './persisted_log';
 import { createLogKey } from './create_log_key';
 
 interface StartDeps {
-  http: InternalHttpStart;
+  key: string;
+  http: Pick<HttpStart, 'basePath'>;
 }
 
-/** @internal */
 export class RecentlyAccessedService {
-  async start({ http }: StartDeps): Promise<ChromeRecentlyAccessed> {
-    const logKey = await createLogKey('recentlyAccessed', http.basePath.get());
-    const history = new PersistedLog<ChromeRecentlyAccessedHistoryItem>(logKey, {
+  start({ http, key }: StartDeps): RecentlyAccessed {
+    const logKey = createLogKey(key, http.basePath.get());
+    const history = new PersistedLog<RecentlyAccessedHistoryItem>(logKey, {
       maxLength: 20,
       isEqual: (oldItem, newItem) => oldItem.id === newItem.id,
     });
