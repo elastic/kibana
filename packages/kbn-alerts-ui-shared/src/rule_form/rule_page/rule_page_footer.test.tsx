@@ -71,6 +71,14 @@ describe('rulePageFooter', () => {
     expect(screen.getByTestId('rulePageConfirmCreateRule')).toBeInTheDocument();
   });
 
+  test('should show call onSave if clicking rule confirmation', () => {
+    render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
+
+    fireEvent.click(screen.getByTestId('rulePageFooterSaveButton'));
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+    expect(onSave).toHaveBeenCalled();
+  });
+
   test('should cancel when the cancel button is clicked', () => {
     render(<RulePageFooter onSave={onSave} onCancel={onCancel} />);
 

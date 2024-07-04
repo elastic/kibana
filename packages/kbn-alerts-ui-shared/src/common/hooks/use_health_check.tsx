@@ -51,7 +51,7 @@ export const useHealthCheck = (props: UseHealthCheckProps) => {
   }, [isInitialLoadingUiHealth, isInitialLoadingAlertingFrameworkHealth]);
 
   const alertingHealth: HealthStatus | null = useMemo(() => {
-    if (isLoading || isInitialLoading || !uiHealth) {
+    if (isLoading || isInitialLoading || !uiHealth || !alertingFrameworkHealth) {
       return null;
     }
     if (!uiHealth.isRulesAvailable) {
@@ -61,17 +61,10 @@ export const useHealthCheck = (props: UseHealthCheckProps) => {
         hasPermanentEncryptionKey: false,
       };
     }
-    if (alertingFrameworkHealth) {
-      return {
-        ...uiHealth,
-        isSufficientlySecure: alertingFrameworkHealth.isSufficientlySecure,
-        hasPermanentEncryptionKey: alertingFrameworkHealth.hasPermanentEncryptionKey,
-      };
-    }
     return {
       ...uiHealth,
-      isSufficientlySecure: true,
-      hasPermanentEncryptionKey: true,
+      isSufficientlySecure: alertingFrameworkHealth.isSufficientlySecure,
+      hasPermanentEncryptionKey: alertingFrameworkHealth.hasPermanentEncryptionKey,
     };
   }, [isLoading, isInitialLoading, uiHealth, alertingFrameworkHealth]);
 
