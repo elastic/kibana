@@ -174,6 +174,10 @@ ENV PROFILER_SIGNAL=SIGUSR1
 RUN sed 's/\(--openssl-legacy-provider\)/#\1/' -i config/node.options
 {{/opensslLegacyProvider}}
 
+{{#fips}}
+RUN /usr/bin/echo -e '\nxpack.security.experimental.fipsMode.enabled: true' >> /usr/share/kibana/config/kibana.yml
+{{/fips}}
+
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
 COPY bin/kibana-docker /usr/local/bin/
