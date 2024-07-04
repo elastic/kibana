@@ -134,6 +134,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         storage,
         dataViewFieldEditor,
         notifications: { toasts: toastsService },
+        telemetry,
         theme,
         data: dataPluginContract,
       },
@@ -187,6 +188,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               },
             },
           });
+          telemetry.reportDetailsFlyoutOpened({
+            location: timelineId,
+            panel: 'right',
+          });
         } else {
           dispatch(
             timelineActions.toggleDetailPanel({
@@ -199,7 +204,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
         activeTimeline.toggleExpandedDetail({ ...updatedExpandedDetail });
       },
-      [activeTab, dispatch, refetch, timelineId, isExpandableFlyoutDisabled, openFlyout]
+      [refetch, isExpandableFlyoutDisabled, openFlyout, timelineId, telemetry, dispatch, activeTab]
     );
 
     const onTimelineLegacyFlyoutClose = useCallback(() => {
