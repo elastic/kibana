@@ -19,7 +19,9 @@ import React, { memo, useEffect } from 'react';
  *
  * */
 export const getCustomCellPopoverRenderer = () => {
-  return memo(function RenderCustomCellPopover(props: EuiDataGridCellPopoverElementProps) {
+  const RenderCustomCellPopoverMemoized = memo(function RenderCustomCellPopoverMemoized(
+    props: EuiDataGridCellPopoverElementProps
+  ) {
     const { setCellPopoverProps, DefaultCellPopover } = props;
 
     useEffect(() => {
@@ -30,4 +32,10 @@ export const getCustomCellPopoverRenderer = () => {
 
     return <DefaultCellPopover {...props} />;
   });
+
+  // Components passed to EUI DataGrid cannot be memoized components
+  // otherwise EUI throws an error `typeof Component !== 'function'`
+  return (props: EuiDataGridCellPopoverElementProps) => (
+    <RenderCustomCellPopoverMemoized {...props} />
+  );
 };

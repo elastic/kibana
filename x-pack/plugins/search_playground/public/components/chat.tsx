@@ -156,6 +156,7 @@ export const Chat = () => {
                     disabled={isToolBarActionsDisabled}
                     onClick={regenerateMessages}
                     size="xs"
+                    data-test-subj="regenerateActionButton"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.regenerateBtn"
@@ -169,6 +170,7 @@ export const Chat = () => {
                     disabled={isToolBarActionsDisabled}
                     onClick={handleClearChat}
                     size="xs"
+                    data-test-subj="clearChatActionButton"
                   >
                     <FormattedMessage
                       id="xpack.searchPlayground.chat.clearChatBtn"

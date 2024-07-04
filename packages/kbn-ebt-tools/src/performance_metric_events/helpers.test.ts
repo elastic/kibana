@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createAnalytics, type AnalyticsClient } from '@kbn/analytics-client';
+import { createAnalytics, type AnalyticsClient } from '@kbn/ebt/client';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerPerformanceMetricEventType, reportPerformanceMetricEvent } from './helpers';
 import { METRIC_EVENT_SCHEMA } from './schema';

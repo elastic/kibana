@@ -2399,8 +2399,8 @@
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "common",
                 "docId": "kibKbnAlertsUiSharedPluginApi",
-                "section": "def-common.RuleFormErrors",
-                "text": "RuleFormErrors"
+                "section": "def-common.RuleFormParamsErrors",
+                "text": "RuleFormParamsErrors"
               }
             ],
             "path": "packages/kbn-alerts-ui-shared/src/common/types/action_types.ts",
@@ -8101,7 +8101,9 @@
             },
             " | undefined; onUpdate?: ((args: ",
             "TableUpdateHandlerArgs",
-            ") => void) | undefined; onLoaded?: (() => void) | undefined; runtimeMappings?: ",
+            ") => void) | undefined; onLoaded?: ((alerts: ",
+            "Alerts",
+            ") => void) | undefined; runtimeMappings?: ",
             "MappingRuntimeFields",
             " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
             "EuiDataGridToolBarVisibilityOptions",
@@ -8159,7 +8161,9 @@
                 },
                 " | undefined; onUpdate?: ((args: ",
                 "TableUpdateHandlerArgs",
-                ") => void) | undefined; onLoaded?: (() => void) | undefined; runtimeMappings?: ",
+                ") => void) | undefined; onLoaded?: ((alerts: ",
+                "Alerts",
+                ") => void) | undefined; runtimeMappings?: ",
                 "MappingRuntimeFields",
                 " | undefined; showAlertStatusWithFlapping?: boolean | undefined; toolbarVisibility?: ",
                 "EuiDataGridToolBarVisibilityOptions",

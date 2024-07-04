@@ -123,6 +123,7 @@ export const QueryMode: React.FC = () => {
                     tableCaption="Query Model table"
                     data-test-subj={`queryFieldsSelectable_${index}`}
                     items={[
+                      ...group.semantic_fields,
                       ...group.elser_query_fields,
                       ...group.dense_vector_query_fields,
                       ...group.bm25_query_fields,

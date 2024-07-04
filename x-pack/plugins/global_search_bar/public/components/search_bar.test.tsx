@@ -177,7 +177,7 @@ describe('SearchBar', () => {
       await focusAndUpdate();
 
       expect(searchService.find).toHaveBeenCalledTimes(1);
-      //
+
       simulateTypeChar('d');
       await assertSearchResults(['Visualize • Kibana', 'Map • Kibana']);
 

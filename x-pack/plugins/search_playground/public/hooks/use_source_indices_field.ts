@@ -70,7 +70,7 @@ export const useSourceIndicesFields = () => {
       const defaultFields = getDefaultQueryFields(fields);
       const defaultSourceFields = getDefaultSourceFields(fields);
 
-      onElasticsearchQueryChange(createQuery(defaultFields, fields));
+      onElasticsearchQueryChange(createQuery(defaultFields, defaultSourceFields, fields));
       onQueryFieldsOnChange(defaultFields);
 
       const mergedSettledAndDefaultFields = Object.entries(defaultSourceFields).reduce(

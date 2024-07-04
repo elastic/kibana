@@ -19,7 +19,7 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, buildDataTableRecordList } from '@kbn/discover-utils';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
@@ -64,19 +64,8 @@ const waitNextUpdate = async (component: ReactWrapper) => {
 };
 
 describe('Discover flyout', function () {
-  const mountComponent = async ({
-    dataView,
-    hits,
-    hitIndex,
-    query,
-  }: {
-    dataView?: DataView;
-    hits?: DataTableRecord[];
-    hitIndex?: number;
-    query?: Query | AggregateQuery;
-  }) => {
-    const onClose = jest.fn();
-    const services = {
+  const getServices = () => {
+    return {
       ...discoverServiceMock,
       filterManager: createFilterManagerMock(),
       addBasePath: (path: string) => `/base${path}`,
@@ -92,22 +81,35 @@ describe('Discover flyout', function () {
         addSuccess: jest.fn(),
       },
     } as unknown as DiscoverServices;
+  };
+
+  const mountComponent = async ({
+    dataView,
+    records,
+    expandedHit,
+    query,
+    services = getServices(),
+  }: {
+    dataView?: DataView;
+    records?: DataTableRecord[];
+    expandedHit?: EsHitRecord;
+    query?: Query | AggregateQuery;
+    services?: DiscoverServices;
+  }) => {
+    const onClose = jest.fn();
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
-    const hit = buildDataTableRecord(
-      hitIndex ? esHitsMock[hitIndex] : (esHitsMock[0] as EsHitRecord),
-      dataViewMock
-    );
+    const currentRecords =
+      records ||
+      esHitsMock.map((entry: EsHitRecord) => buildDataTableRecord(entry, dataView || dataViewMock));
 
     const props = {
       columns: ['date'],
       dataView: dataView || dataViewMock,
-      hit,
-      hits:
-        hits ||
-        esHitsMock.map((entry: EsHitRecord) =>
-          buildDataTableRecord(entry, dataView || dataViewMock)
-        ),
+      hit: expandedHit
+        ? buildDataTableRecord(expandedHit, dataView || dataViewMock)
+        : currentRecords[0],
+      hits: currentRecords,
       query,
       onAddColumn: jest.fn(),
       onClose,
@@ -131,6 +133,7 @@ describe('Discover flyout', function () {
   beforeEach(() => {
     mockFlyoutCustomization.actions.defaultActions = undefined;
     mockFlyoutCustomization.Content = undefined;
+    mockFlyoutCustomization.title = undefined;
     jest.clearAllMocks();
 
     (useDiscoverCustomization as jest.Mock).mockImplementation(() => mockFlyoutCustomization);
@@ -158,19 +161,19 @@ describe('Discover flyout', function () {
 
   it('displays document navigation when there is more than 1 doc available', async () => {
     const { component } = await mountComponent({ dataView: dataViewWithTimefieldMock });
-    const docNav = findTestSubject(component, 'dscDocNavigation');
+    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
     expect(docNav.length).toBeTruthy();
   });
 
   it('displays no document navigation when there are 0 docs available', async () => {
-    const { component } = await mountComponent({ hits: [] });
-    const docNav = findTestSubject(component, 'dscDocNavigation');
+    const { component } = await mountComponent({ records: [], expandedHit: esHitsMock[0] });
+    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
     expect(docNav.length).toBeFalsy();
   });
 
   it('displays no document navigation when the expanded doc is not part of the given docs', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const hits = [
+    const records = [
       {
         _index: 'new',
         _id: '1',
@@ -186,8 +189,8 @@ describe('Discover flyout', function () {
         _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
       },
     ].map((hit) => buildDataTableRecord(hit, dataViewMock));
-    const { component } = await mountComponent({ hits });
-    const docNav = findTestSubject(component, 'dscDocNavigation');
+    const { component } = await mountComponent({ records, expandedHit: esHitsMock[0] });
+    const docNav = findTestSubject(component, 'docViewerFlyoutNavigation');
     expect(docNav.length).toBeFalsy();
   });
 
@@ -208,14 +211,18 @@ describe('Discover flyout', function () {
 
   it('doesnt allow you to navigate to the next doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = await mountComponent({ hitIndex: esHitsMock.length - 1 });
+    const { component, props } = await mountComponent({
+      expandedHit: esHitsMock[esHitsMock.length - 1],
+    });
     findTestSubject(component, 'pagination-button-next').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(0);
   });
 
   it('allows you to navigate to the previous doc, if expanded doc is the last', async () => {
     // scenario: you've expanded a doc, and in the next request differed docs where fetched
-    const { component, props } = await mountComponent({ hitIndex: esHitsMock.length - 1 });
+    const { component, props } = await mountComponent({
+      expandedHit: esHitsMock[esHitsMock.length - 1],
+    });
     findTestSubject(component, 'pagination-button-previous').simulate('click');
     expect(props.setExpandedDoc).toHaveBeenCalledTimes(1);
     expect(props.setExpandedDoc.mock.calls[0][0].raw._id).toBe('4');
@@ -223,19 +230,19 @@ describe('Discover flyout', function () {
 
   it('allows navigating with arrow keys through documents', async () => {
     const { component, props } = await mountComponent({});
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowRight' });
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::2::' }));
     component.setProps({ ...props, hit: props.hits[1] });
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowLeft' });
     expect(props.setExpandedDoc).toHaveBeenCalledWith(expect.objectContaining({ id: 'i::1::' }));
   });
 
   it('should not navigate with keypresses when already at the border of documents', async () => {
     const { component, props } = await mountComponent({});
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowLeft' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowLeft' });
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
     component.setProps({ ...props, hit: props.hits[props.hits.length - 1] });
-    findTestSubject(component, 'docTableDetailsFlyout').simulate('keydown', { key: 'ArrowRight' });
+    findTestSubject(component, 'docViewerFlyout').simulate('keydown', { key: 'ArrowRight' });
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 
@@ -260,7 +267,7 @@ describe('Discover flyout', function () {
     });
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
-    const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
+    const flyoutTitle = findTestSubject(component, 'docViewerRowDetailsTitle');
     expect(flyoutTitle.text()).toBe('Result');
   });
 
@@ -272,7 +279,7 @@ describe('Discover flyout', function () {
 
         const { component } = await mountComponent({});
 
-        const titleNode = findTestSubject(component, 'docTableRowDetailsTitle');
+        const titleNode = findTestSubject(component, 'docViewerRowDetailsTitle');
 
         expect(titleNode.text()).toBe(customTitle);
       });
@@ -468,6 +475,38 @@ describe('Discover flyout', function () {
         expect(props.onRemoveColumn).toHaveBeenCalled();
         expect(services.toastNotifications.addSuccess).toHaveBeenCalledTimes(2);
         expect(props.onFilter).toHaveBeenCalled();
+      });
+    });
+
+    describe('context awareness', () => {
+      it('should render flyout per the defined document profile', async () => {
+        const services = getServices();
+        const hits = [
+          {
+            _index: 'new',
+            _id: '1',
+            _score: 1,
+            _type: '_doc',
+            _source: { date: '2020-20-01T12:12:12.123', message: 'test1', bytes: 20 },
+          },
+          {
+            _index: 'new',
+            _id: '2',
+            _score: 1,
+            _type: '_doc',
+            _source: { date: '2020-20-01T12:12:12.124', name: 'test2', extension: 'jpg' },
+          },
+        ];
+        const records = buildDataTableRecordList({
+          records: hits as EsHitRecord[],
+          dataView: dataViewMock,
+          processRecord: (record) => services.profilesManager.resolveDocumentProfile({ record }),
+        });
+        const { component } = await mountComponent({ records, services });
+        const title = findTestSubject(component, 'docViewerRowDetailsTitle');
+        expect(title.text()).toBe('Document #new::1::');
+        const content = findTestSubject(component, 'kbnDocViewer');
+        expect(content.text()).toBe('Mock tab');
       });
     });
   });
