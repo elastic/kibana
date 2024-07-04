@@ -76,8 +76,7 @@ export const getUsageRecords = async (
             {
               range: {
                 'event.ingested': {
-                  // gt: searchFrom.toISOString(),
-                  gte: `now-30m`,
+                  gt: searchFrom.toISOString(),
                 },
               },
             },
