@@ -261,6 +261,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.agentless.api.url (string)',
+        'xpack.fleet.agentless.api.tls.certificate (string)',
+        'xpack.fleet.agentless.api.tls.key (string)',
         'xpack.fleet.enableExperimental (array)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',

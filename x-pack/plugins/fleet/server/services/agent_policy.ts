@@ -1115,8 +1115,11 @@ class AgentPolicyService {
       const fleetUrl = defaultFleetHost?.host_urls[0];
 
       const agentlessApiUrl = appContextService.getConfig()?.agentless?.api.url;
-      if (!agentlessApiUrl) {
-        throw new FleetError('Error creating agentless agent: missing agentless api url');
+      const agentlessCert = appContextService.getConfig()?.agentless?.api.certificate;
+      const agentlessKey = appContextService.getConfig()?.agentless?.api.key;
+
+      if (!agentlessApiUrl || !agentlessCert || !agentlessKey) {
+        throw new FleetError('Error creating agentless agent: missing agentless permission');
       }
 
       const stackVersion = appContextService.getKibanaVersion();
@@ -1128,41 +1131,66 @@ class AgentPolicyService {
         stack_version: stackVersion,
       };
 
+      // following these examples:
+      // https://github.com/elastic/kibana/blob/main/x-pack/plugins/observability_solution/synthetics/server/synthetics_service/service_api_client.ts#L88
+      // https://github.com/elastic/cloud-assets/pull/947/files
+      // https://github.com/elastic/kibana/pull/172427/files#top
       const tlsConfig = new SslConfig(
         sslSchema.validate({
           enabled: true,
-          // generate locally with https://serverfault.com/a/224127
-          certificate: 'config/certs/node.crt',
-          key: 'config/certs/node.key',
-          clientAuthentication: 'required',
+          certificate: agentlessCert,
+          key: agentlessKey,
         })
       );
 
       try {
-        const res = await axios.post(agentlessApiCreateDeploymentUrl, body, {
-          headers: {
-            'Content-type': 'application/json',
-          },
-          method: 'POST',
-          httpsAgent: new https.Agent({
-            rejectUnauthorized: tlsConfig.rejectUnauthorized,
-            cert: tlsConfig.certificate,
-            key: tlsConfig.key,
-            // ca: tlsConfig.ca,
-          }),
-          // signal: abortController.signal,
-        });
+        const { data, status, statusText } = await axios.post(
+          agentlessApiCreateDeploymentUrl,
+          body,
+          {
+            headers: {
+              'Content-type': 'application/json',
+            },
+            method: 'POST',
+            httpsAgent: new https.Agent({
+              rejectUnauthorized: tlsConfig.rejectUnauthorized,
+              cert: tlsConfig.certificate,
+              key: tlsConfig.key,
+            }),
+          }
+        );
 
-        if (res.status !== 200) {
-          throw new FleetError(`Error creating agentless agent: ${res.statusText}`);
+        if (status !== 200) {
+          throw new FleetError(`Error creating agentless agent: ${statusText}`);
         }
 
-        return res.data;
+        return data;
       } catch (error) {
         throw new FleetError(`Error creating agentless agent: ${error}`);
       }
     }
   }
+
+  // getHttpsAgent(targetUrl: string, tls: ) {
+  //   const parsedTargetUrl = new URL(targetUrl);
+
+  //   const rejectUnauthorized = parsedTargetUrl.hostname !== 'localhost';
+  //   const baseHttpsAgent = new https.Agent({ rejectUnauthorized });
+
+  //   // If using basic-auth, ignore certificate config
+
+  //   if (config.tls && config.tls.certificate && config.tls.key) {
+  //     const tlsConfig = new SslConfig(config.tls);
+
+  //     return new https.Agent({
+  //       rejectUnauthorized,
+  //       cert: tlsConfig.certificate,
+  //       key: tlsConfig.key,
+  //     });
+  //   }
+
+  //   return baseHttpsAgent;
+  // }
 
   public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
     await this.deployPolicies(soClient, [agentPolicyId]);

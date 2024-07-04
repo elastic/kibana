@@ -33,6 +33,10 @@ export interface FleetConfigType {
   agentless?: {
     api: {
       url: string;
+      tls: {
+        certificate: string;
+        key: string;
+      };
     };
   };
   spaceSettings?: Array<{
