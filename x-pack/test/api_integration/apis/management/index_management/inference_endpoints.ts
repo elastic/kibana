@@ -45,8 +45,8 @@ export default function ({ getService }: FtrProviderContext) {
         }
       );
       if (createInferenceEndpointResponse) {
-        const responseBody = createInferenceEndpointResponse.body;
-        const responseStatus = createInferenceEndpointResponse.status;
+        const responseBody = createInferenceEndpointResponse?.body;
+        const responseStatus = createInferenceEndpointResponse?.status;
         if (responseStatus === 408) {
           // handle the case when it takes a while to download and start trained model
           expect(responseBody).to.have.property('error');
