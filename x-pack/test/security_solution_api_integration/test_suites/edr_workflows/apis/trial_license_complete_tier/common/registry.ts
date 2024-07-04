@@ -32,10 +32,7 @@ const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTR
  */
 const packageRegistryOverride: string | undefined = process.env.PACKAGE_REGISTRY_URL_OVERRIDE;
 
-const defaultRegistryConfigPath = path.join(
-  __dirname,
-  './apis/fixtures/package_registry_config.yml'
-);
+const defaultRegistryConfigPath = path.join(__dirname, './fixtures/package_registry_config.yml');
 
 export function createEndpointDockerConfig(
   packageRegistryConfig: string = defaultRegistryConfigPath,
