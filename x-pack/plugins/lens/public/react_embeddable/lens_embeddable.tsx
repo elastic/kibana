@@ -10,11 +10,14 @@ import {
   getUnchangingComparator,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import {
-  ReactEmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
-import { LensApi, LensEmbeddableStartServices, LensRuntimeState, LensSerializedState } from './types';
+import {
+  LensApi,
+  LensEmbeddableStartServices,
+  LensRuntimeState,
+  LensSerializedState,
+} from './types';
 
 import { initializeEditApi } from './initializers/inizialize_edit';
 import { ExpressionWrapper } from './expression_wrapper';
@@ -50,7 +53,6 @@ export const createLensEmbeddableFactory = (
     return ('attributes' in rawState ? rawState : { attributes: rawState }) as LensRuntimeState;
   },
   buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-
     /**
      * Observables declared here are the bridge between the outer world
      * and the embeddable. They are updated within a subscribe callback
@@ -58,9 +60,10 @@ export const createLensEmbeddableFactory = (
      */
     const observables = initializeObservables(parentApi);
     // Build an helper to force a re-render for user messages
-    const updateRenderCount = () => observables.variables.renderCount$.next(observables.variables.renderCount$.getValue() + 1);
+    const updateRenderCount = () =>
+      observables.variables.renderCount$.next(observables.variables.renderCount$.getValue() + 1);
 
-    const visualizationContextHelper = initializeVisualizationContext()
+    const visualizationContextHelper = initializeVisualizationContext();
 
     /**
      * Initialize various configurations required to build all the required
@@ -70,7 +73,7 @@ export const createLensEmbeddableFactory = (
      * - serialize: a serializable subset of the Lens runtime state
      * - comparators: a set of comparators to help Dashboard determine if the state has changed since its saved state
      * - cleanup: a function to clean up any resources when the component is unmounted
-     * 
+     *
      * Mind: the getState argument is ok to pass as long as it is lazy evaluated (i.e. called within a function).
      * If there's something that should be immediately computed use the "state" deserialized variable.
      */
@@ -84,12 +87,12 @@ export const createLensEmbeddableFactory = (
       services,
       inspectorConfig.api,
       parentApi,
-      state.savedObjectId,
+      state.savedObjectId
     );
 
     const libraryConfig = initializeLibraryServices(getState, services);
     const searchContextConfig = initializeSearchContext(state);
-    const dataConfig = initializeData(getState, observables.variables)
+    const dataConfig = initializeData(getState, observables.variables);
     const integrationsConfig = initializeIntegrations(getState);
     const actionsConfig = initializeActionApi(
       uuid,
@@ -100,7 +103,7 @@ export const createLensEmbeddableFactory = (
       services
     );
 
-    /** 
+    /**
      * This is useful to have always the latest version of the state
      * at hand when calling callbacks or performing actions
      */
@@ -114,10 +117,9 @@ export const createLensEmbeddableFactory = (
         ...libraryConfig.serialize(),
         ...searchContextConfig.serialize(),
         ...dataConfig.serialize(),
-        ...integrationsConfig.serialize()
+        ...integrationsConfig.serialize(),
       };
     }
-
 
     /**
      * Lens API is the object that can be passed to the final component/renderer and
@@ -151,19 +153,37 @@ export const createLensEmbeddableFactory = (
     // Compute the expression using the provided parameters
     // Inside a subscription will be updated based on each unifiedSearch change
     // and as side effect update few observables as  expressionParams$, expressionAbortController$ and renderCount% with the new values upon updates
-    const { getUserMessages, ...expression } = loadEmbeddableData(uuid, getState, api, parentApi, observables.variables, services, visualizationContextHelper, updateRenderCount);
+    const { getUserMessages, ...expression } = loadEmbeddableData(
+      uuid,
+      getState,
+      api,
+      parentApi,
+      observables.variables,
+      services,
+      visualizationContextHelper,
+      updateRenderCount
+    );
 
     return {
       api,
       Component: () => {
         // Pick up updated params from the observable
-        const expressionParams = useStateFromPublishingSubject(observables.variables.expressionParams$);
+        const expressionParams = useStateFromPublishingSubject(
+          observables.variables.expressionParams$
+        );
         // used for functional tests
         const renderCount = useStateFromPublishingSubject(observables.variables.renderCount$);
-        const hasRendered = useStateFromPublishingSubject(observables.variables.hasRenderCompleted$);
-        const canEdit = Boolean(api.isEditingEnabled?.() && observables.variables.viewMode$.getValue() === 'edit')
+        const hasRendered = useStateFromPublishingSubject(
+          observables.variables.hasRenderCompleted$
+        );
+        const canEdit = Boolean(
+          api.isEditingEnabled?.() && observables.variables.viewMode$.getValue() === 'edit'
+        );
 
-        const [blockingErrors, warningOrErrors, infoMessages] = useMessages(getUserMessages, hasRendered)
+        const [blockingErrors, warningOrErrors, infoMessages] = useMessages(
+          getUserMessages,
+          hasRendered
+        );
 
         // On unmount call all the cleanups
         useEffect(() => {
@@ -180,31 +200,38 @@ export const createLensEmbeddableFactory = (
         }, []);
 
         // Anything that can go wrong should show the error panel together with all the messages
-        if (!services.spaces || !hasExpressionParamsToRender(expressionParams) || blockingErrors.length) {
-          return (<UserMessages
-            blockingErrors={blockingErrors}
-            warningOrErrors={warningOrErrors}
-            infoMessages={infoMessages}
-            canEdit={canEdit}
-          />);
+        if (
+          !services.spaces ||
+          !hasExpressionParamsToRender(expressionParams) ||
+          blockingErrors.length
+        ) {
+          return (
+            <UserMessages
+              blockingErrors={blockingErrors}
+              warningOrErrors={warningOrErrors}
+              infoMessages={infoMessages}
+              canEdit={canEdit}
+            />
+          );
         }
 
-        return (<div
-          style={{ width: '100%', height: '100%' }}
-          data-rendering-count={renderCount}
-          data-render-complete={hasRendered}
-          data-title={!api.hidePanelTitle?.getValue() ? api.panelTitle?.getValue() ?? '' : ''}
-          data-description={api.panelDescription?.getValue() ?? ''}
-          data-shared-item
-        >
-          <ExpressionWrapper {...expressionParams} />
-          <UserMessages
-            blockingErrors={blockingErrors}
-            warningOrErrors={warningOrErrors}
-            infoMessages={infoMessages}
-            canEdit={canEdit}
-          />
-        </div>
+        return (
+          <div
+            style={{ width: '100%', height: '100%' }}
+            data-rendering-count={renderCount}
+            data-render-complete={hasRendered}
+            data-title={!api.hidePanelTitle?.getValue() ? api.panelTitle?.getValue() ?? '' : ''}
+            data-description={api.panelDescription?.getValue() ?? ''}
+            data-shared-item
+          >
+            <ExpressionWrapper {...expressionParams} />
+            <UserMessages
+              blockingErrors={blockingErrors}
+              warningOrErrors={warningOrErrors}
+              infoMessages={infoMessages}
+              canEdit={canEdit}
+            />
+          </div>
         );
       },
     };
