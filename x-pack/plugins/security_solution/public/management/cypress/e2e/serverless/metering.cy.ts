@@ -32,6 +32,7 @@ describe(
   },
   () => {
     const HEARTBEAT_COUNT = 2001;
+    const UNBILLED_COUNT = 5;
 
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHeartbeats> | undefined;
 
@@ -40,6 +41,7 @@ describe(
       startTransparentApiProxy({ port: 3623 });
       indexEndpointHeartbeats({
         count: HEARTBEAT_COUNT,
+        unbilledCount: UNBILLED_COUNT,
       }).then((indexedHeartbeats) => {
         endpointData = indexedHeartbeats;
       });

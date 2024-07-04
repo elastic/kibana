@@ -1,7 +1,7 @@
 steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations
     key: test_investigations
-    label: 'Serverless MKI QA Investigations - Security Solution Cypress Tests'
+    label: 'Cypress MKI - Investigations'
     env:
       BK_TEST_SUITE_KEY: "serverless-cypress-investigations"
     agents:
@@ -17,3 +17,36 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 1
+
+  - group: "API MKI - Investigations"
+    key: api_test_investigations
+    steps:
+      - label: Running investigations:timeline:runner:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:timeline:runner:qa:serverless
+        key: investigations:timeline:runner:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+
+      - label: Running investigations:saved-objects:runner:qa:serverless
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh investigations:saved-objects:runner:qa:serverless
+        key: investigations:saved-objects:runner:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+          preemptible: true
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2

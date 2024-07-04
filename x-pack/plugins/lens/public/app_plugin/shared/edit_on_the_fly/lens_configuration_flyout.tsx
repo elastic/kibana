@@ -117,8 +117,7 @@ export function LensEditConfigurationFlyout({
         // there are cases where a query can return a big amount of columns
         // at this case we don't suggest all columns in a table but the first
         // MAX_NUM_OF_COLUMNS
-        const columns = Object.keys(table.rows?.[0]) ?? [];
-        setSuggestsLimitedColumns(columns.length >= MAX_NUM_OF_COLUMNS);
+        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
         layers.forEach((layer) => {
           activeData[layer] = table;
         });

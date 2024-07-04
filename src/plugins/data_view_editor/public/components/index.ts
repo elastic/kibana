@@ -17,4 +17,4 @@ export { PreviewPanel } from './preview_panel';
 export { LoadingIndices } from './loading_indices';
 export { Footer, SubmittingType } from './footer';
 export { AdvancedParamsContent } from './advanced_params_content';
-export { RollupBetaWarning } from './rollup_beta_warning';
+export { RollupDeprecatedWarning } from './rollup_deprecated_warning';

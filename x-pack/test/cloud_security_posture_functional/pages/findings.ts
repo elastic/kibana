@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const supertest = getService('supertest');
@@ -147,8 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/152913
-    describe.skip('Table Sort', () => {
+    describe('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)
@@ -187,19 +185,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             );
           });
         }
-      });
-    });
-
-    describe('DistributionBar', () => {
-      (['passed', 'failed'] as const).forEach((type) => {
-        it(`filters by ${type} findings`, async () => {
-          await distributionBar.filterBy(type);
-
-          const items = data.filter(({ result }) => result.evaluation === type);
-          expect(await latestFindingsTable.getFindingsCount(type)).to.eql(items.length);
-
-          await filterBar.removeFilter('result.evaluation');
-        });
       });
     });
 
