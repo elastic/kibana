@@ -44,8 +44,13 @@ describe('correctCommonEsqlMistakes', () => {
   it("replaces ` or ' escaping in FROM statements with double quotes", () => {
     expectQuery({ input: `FROM "logs-*" | LIMIT 10`, expectedOutput: 'FROM "logs-*"\n| LIMIT 10' });
     expectQuery({ input: `FROM 'logs-*' | LIMIT 10`, expectedOutput: 'FROM "logs-*"\n| LIMIT 10' });
+    expectQuery({ input: 'FROM `logs-*` | LIMIT 10', expectedOutput: 'FROM "logs-*"\n| LIMIT 10' });
     expectQuery({
       input: `FROM 'logs-2024-07-01','logs-2024-07-02' | LIMIT 10`,
+      expectedOutput: 'FROM "logs-2024-07-01","logs-2024-07-02"\n| LIMIT 10',
+    });
+    expectQuery({
+      input: 'FROM `logs-2024-07-01`,`logs-2024-07-02` | LIMIT 10',
       expectedOutput: 'FROM "logs-2024-07-01","logs-2024-07-02"\n| LIMIT 10',
     });
     expectQuery({ input: `FROM logs-* | LIMIT 10`, expectedOutput: 'FROM logs-*\n| LIMIT 10' });

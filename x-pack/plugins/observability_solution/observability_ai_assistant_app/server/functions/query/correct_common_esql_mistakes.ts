@@ -239,7 +239,13 @@ export function correctCommonEsqlMistakes(query: string): {
       case 'FROM': {
         // gets the index pattern from the FROM command using AST parsing
         const indexPattern = getIndexPatternFromESQLQuery(formattedCommand);
-        const indexPatternWithFixedQuotes = replaceSingleQuotesWithDoubleQuotes(indexPattern);
+        let indexPatternWithFixedQuotes = replaceSingleQuotesWithDoubleQuotes(indexPattern);
+        // the parser removes the backticks from the indices (but not the double quotes), so we need a different approach if
+        // the indices are wrapped in backticks from the LLM
+        if (formattedCommand.includes('`')) {
+          const indices = indexPattern.split(',');
+          indexPatternWithFixedQuotes = indices?.map((i) => `"${i}"`).join(',');
+        }
         formattedCommand = `FROM ${indexPatternWithFixedQuotes}`;
         break;
       }
