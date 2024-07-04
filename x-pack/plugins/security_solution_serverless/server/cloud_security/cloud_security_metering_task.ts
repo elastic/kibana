@@ -17,13 +17,12 @@ import {
   METERING_CONFIGS,
   BILLABLE_ASSETS_CONFIG,
 } from './constants';
-import type { Tier, UsageRecord } from '../types';
+import type { ResourceSubtypeCounter, Tier, UsageRecord } from '../types';
 import type {
   CloudSecurityMeteringCallbackInput,
   CloudSecuritySolutions,
   AssetCountAggregation,
   ResourceSubtypeAggregationBucket,
-  ResourceSubtypeCounter,
 } from './types';
 
 export const getUsageRecords = (
