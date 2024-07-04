@@ -238,7 +238,10 @@ export function DataTableDocumentToolbarBtn({
             >
               <FormattedMessage
                 id="unifiedDataTable.selectAllDocs"
-                defaultMessage="Select all rows"
+                defaultMessage="Select {rowsCount} {rowsCount, plural, one {row} other {rows}} on all pages"
+                values={{
+                  rowsCount: rows.length,
+                }}
               />
             </EuiContextMenuItem>,
           ]
