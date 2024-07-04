@@ -303,8 +303,9 @@ export function Table<T extends UserContentCommonSchema>({
         executeQueryOptions={{ enabled: false }}
         sorting={
           tableSort
-            ? tableSort.field === 'accessedAt'
-              ? true
+            ? tableSort.field ===
+              'accessedAt' /* "accessedAt" is a special case with a custom sorting */
+              ? true /* by passing "true" we disable the EuiInMemoryTable sorting and handle it ourselves */
               : { sort: tableSort as PropertySort }
             : undefined
         }
