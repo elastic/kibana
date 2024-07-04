@@ -11,9 +11,9 @@ import { EntityDefinition } from '@kbn/entities-schema';
 import { SO_ENTITY_DEFINITION_TYPE } from '../../saved_objects';
 import {
   generateHistoryTransformId,
-  generateHistoryPipelineId,
+  generateHistoryIngestPipelineId,
   generateLatestTransformId,
-  generateLatestPipelineId,
+  generateLatestIngestPipelineId,
 } from './helpers/generate_component_id';
 import { BUILT_IN_ID_PREFIX } from './built_in';
 import { EntityDefinitionWithState } from './types';
@@ -58,8 +58,8 @@ async function getEntityDefinitionState(
   esClient: ElasticsearchClient,
   definition: EntityDefinition
 ) {
-  const historyIngestPipelineId = generateHistoryPipelineId(definition);
-  const latestIngestPipelineId = generateLatestPipelineId(definition);
+  const historyIngestPipelineId = generateHistoryIngestPipelineId(definition);
+  const latestIngestPipelineId = generateLatestIngestPipelineId(definition);
   const [ingestPipelines, transforms] = await Promise.all([
     esClient.ingest.getPipeline({
       id: `${historyIngestPipelineId},${latestIngestPipelineId}`,

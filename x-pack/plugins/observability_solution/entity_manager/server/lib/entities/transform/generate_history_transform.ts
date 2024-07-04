@@ -19,7 +19,7 @@ import {
 import { generateHistoryMetadataAggregations } from './generate_metadata_aggregations';
 import {
   generateHistoryTransformId,
-  generateHistoryPipelineId,
+  generateHistoryIngestPipelineId,
   generateHistoryIndexName,
 } from '../helpers/generate_component_id';
 
@@ -47,7 +47,7 @@ export function generateHistoryTransform(
     },
     dest: {
       index: `${generateHistoryIndexName({ id: 'noop' } as EntityDefinition)}`,
-      pipeline: generateHistoryPipelineId(definition),
+      pipeline: generateHistoryIngestPipelineId(definition),
     },
     frequency: definition.history.settings?.frequency ?? ENTITY_DEFAULT_HISTORY_FREQUENCY,
     sync: {

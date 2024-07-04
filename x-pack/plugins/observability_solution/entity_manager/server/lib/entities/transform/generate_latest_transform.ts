@@ -15,7 +15,7 @@ import { generateLatestMetadataAggregations } from './generate_metadata_aggregat
 import {
   generateHistoryIndexName,
   generateLatestTransformId,
-  generateLatestPipelineId,
+  generateLatestIngestPipelineId,
   generateLatestIndexName,
 } from '../helpers/generate_component_id';
 import { generateLatestMetricAggregations } from './generate_metric_aggregations';
@@ -31,7 +31,7 @@ export function generateLatestTransform(
     },
     dest: {
       index: `${generateLatestIndexName({ id: 'noop' } as EntityDefinition)}`,
-      pipeline: generateLatestPipelineId(definition),
+      pipeline: generateLatestIngestPipelineId(definition),
     },
     frequency: definition.latest?.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
     sync: {

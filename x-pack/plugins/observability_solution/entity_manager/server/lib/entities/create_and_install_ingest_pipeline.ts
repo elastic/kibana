@@ -8,8 +8,8 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
-  generateHistoryPipelineId,
-  generateLatestPipelineId,
+  generateHistoryIngestPipelineId,
+  generateLatestIngestPipelineId,
 } from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 import { generateHistoryProcessors } from './ingest_pipeline/generate_history_processors';
@@ -22,7 +22,7 @@ export async function createAndInstallHistoryIngestPipeline(
 ) {
   try {
     const historyProcessors = generateHistoryProcessors(definition);
-    const historyId = generateHistoryPipelineId(definition);
+    const historyId = generateHistoryIngestPipelineId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline({
@@ -45,7 +45,7 @@ export async function createAndInstallLatestIngestPipeline(
 ) {
   try {
     const latestProcessors = generateLatestProcessors(definition);
-    const latestId = generateLatestPipelineId(definition);
+    const latestId = generateLatestIngestPipelineId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline({
