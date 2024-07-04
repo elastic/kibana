@@ -339,6 +339,7 @@ export class ObservabilityAIAssistantService {
         this.kbService!.queue(
           entries.flatMap((entry) => {
             const entryWithSystemProperties = {
+              type: 'contextual' as const,
               ...entry,
               '@timestamp': new Date().toISOString(),
               doc_id: entry.id,

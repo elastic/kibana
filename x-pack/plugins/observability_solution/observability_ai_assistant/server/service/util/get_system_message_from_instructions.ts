@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { compact, partition } from 'lodash';
+import { compact, partition, uniqBy } from 'lodash';
 import { v4 } from 'uuid';
-import { UserInstruction, UserInstructionOrPlainText } from '../../../common/types';
+import { Instruction, InstructionOrPlainText } from '../../../common/types';
 import { withTokenBudget } from '../../../common/utils/with_token_budget';
 import { RegisteredInstruction } from '../types';
 
@@ -20,13 +20,13 @@ as long as they don't conflict with anything you've been told so far:
 
 export function getSystemMessageFromInstructions({
   registeredInstructions,
-  userInstructions,
+  kbUserInstructions,
   requestInstructions,
   availableFunctionNames,
 }: {
   registeredInstructions: RegisteredInstruction[];
-  userInstructions: UserInstruction[];
-  requestInstructions: UserInstructionOrPlainText[];
+  kbUserInstructions: Instruction[];
+  requestInstructions: InstructionOrPlainText[];
   availableFunctionNames: string[];
 }): string {
   const allRegisteredInstructions = compact(
@@ -40,29 +40,29 @@ export function getSystemMessageFromInstructions({
 
   const requestInstructionsWithId = requestInstructions.map((instruction) =>
     typeof instruction === 'string'
-      ? { doc_id: v4(), text: instruction, system: false }
+      ? { doc_id: v4(), text: instruction, user_instruction: true }
       : instruction
   );
 
-  const [requestSystemInstructions, requestUserInstructionsWithId] = partition(
+  // split request instructions into user instructions and registered instructions
+  const [requestUserInstructions, requestRegisteredInstructions] = partition(
     requestInstructionsWithId,
-    (instruction) => instruction.system === true
+    (instruction) => instruction.user_instruction
   );
 
-  const requestOverrideIds = requestUserInstructionsWithId.map((instruction) => instruction.doc_id);
-
-  // all request instructions, and those from the KB that are not defined as a request instruction
-  const allUserInstructions = requestInstructionsWithId.concat(
-    userInstructions.filter((instruction) => !requestOverrideIds.includes(instruction.doc_id))
+  // all request instructions and KB instructions.
+  // request instructions will be prioritized over KB instructions if the doc_id is the same
+  const allUserInstructions = withTokenBudget(
+    uniqBy([...requestUserInstructions, ...kbUserInstructions], (i) => i.doc_id),
+    1000
   );
-
-  const instructionsWithinBudget = withTokenBudget(allUserInstructions, 1000);
 
   return [
-    ...allRegisteredInstructions.concat(requestSystemInstructions),
-    ...(instructionsWithinBudget.length
-      ? [USER_INSTRUCTIONS_HEADER, ...instructionsWithinBudget]
-      : []),
+    // registered instructions
+    ...allRegisteredInstructions.concat(requestRegisteredInstructions),
+
+    // user instructions
+    ...(allUserInstructions.length ? [USER_INSTRUCTIONS_HEADER, ...allUserInstructions] : []),
   ]
     .map((instruction) => {
       return typeof instruction === 'string' ? instruction : instruction.text;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { KnowledeBaseType } from '../../common/types';
 import type { FunctionRegistrationParameters } from '.';
 import { KnowledgeBaseEntryRole } from '../../common';
 
@@ -41,6 +42,11 @@ export function registerSummarizationFunction({
             type: 'boolean',
             description: 'Whether this is a correction for a previous learning.',
           },
+          type: {
+            type: 'string',
+            description: `The type can be: "user_instruction" or "contextual". "user_instruction": the entry will be included in the system message if it fits within the token budget and it will be marked as a user instruction. "contextual": the entry will be included if it semantically matches the user's prompt. If matching it will be included as part of the context instead of the system prompt`,
+            enum: [KnowledeBaseType.UserInstruction, KnowledeBaseType.Contextual],
+          },
           confidence: {
             type: 'string',
             description: 'How confident you are about this being a correct and useful learning',
@@ -56,13 +62,14 @@ export function registerSummarizationFunction({
           'id' as const,
           'text' as const,
           'is_correction' as const,
+          'type' as const,
           'confidence' as const,
           'public' as const,
         ],
       },
     },
     (
-      { arguments: { id, text, is_correction: isCorrection, confidence, public: isPublic } },
+      { arguments: { id, text, is_correction: isCorrection, type, confidence, public: isPublic } },
       signal
     ) => {
       return client
@@ -73,6 +80,7 @@ export function registerSummarizationFunction({
             id,
             text,
             is_correction: isCorrection,
+            type,
             confidence,
             public: isPublic,
             labels: {},

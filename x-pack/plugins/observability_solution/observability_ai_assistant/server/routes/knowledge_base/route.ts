@@ -100,6 +100,7 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       t.partial({
         confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
         is_correction: toBooleanRt,
+        type: t.union([t.literal('user_instruction'), t.literal('contextual')]),
         public: toBooleanRt,
         labels: t.record(t.string, t.string),
         role: t.union([
@@ -126,6 +127,7 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       public: isPublic,
       confidence,
       is_correction: isCorrection,
+      type,
       labels,
       role,
     } = resources.params.body;
@@ -137,6 +139,7 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
         doc_id: id,
         confidence: confidence ?? 'high',
         is_correction: isCorrection ?? false,
+        type: type ?? 'contextual',
         public: isPublic ?? true,
         labels: labels ?? {},
         role: (role as KnowledgeBaseEntryRole) ?? KnowledgeBaseEntryRole.UserEntry,
@@ -192,6 +195,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
       doc_id: entry.id,
       confidence: 'high' as KnowledgeBaseEntry['confidence'],
       is_correction: false,
+      type: 'contextual' as const,
       public: true,
       labels: {},
       role: KnowledgeBaseEntryRole.UserEntry,

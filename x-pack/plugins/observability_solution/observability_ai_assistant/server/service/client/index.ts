@@ -45,7 +45,7 @@ import {
 } from '../../../common/conversation_complete';
 import { CompatibleJSONSchema } from '../../../common/functions/types';
 import {
-  UserInstructionOrPlainText,
+  InstructionOrPlainText,
   type Conversation,
   type ConversationCreateRequest,
   type ConversationUpdateRequest,
@@ -170,7 +170,7 @@ export class ObservabilityAIAssistantClient {
     title?: string;
     isPublic?: boolean;
     kibanaPublicUrl?: string;
-    instructions?: UserInstructionOrPlainText[];
+    instructions?: InstructionOrPlainText[];
     simulateFunctionCalling?: boolean;
     disableFunctions?:
       | boolean
@@ -215,17 +215,19 @@ export class ObservabilityAIAssistantClient {
           );
         }
 
-        const userInstructions$ = from(this.fetchUserInstructions()).pipe(shareReplay());
+        const kbUserInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(
+          shareReplay()
+        );
 
         // from the initial messages, override any system message with
         // the one that is based on the instructions (registered, request, kb)
-        const messagesWithUpdatedSystemMessage$ = userInstructions$.pipe(
-          map((userInstructions) => {
+        const messagesWithUpdatedSystemMessage$ = kbUserInstructions$.pipe(
+          map((kbUserInstructions) => {
             // this is what we eventually store in the conversation
             const messagesWithUpdatedSystemMessage = replaceSystemMessage(
               getSystemMessageFromInstructions({
                 registeredInstructions: functionClient.getInstructions(),
-                userInstructions,
+                kbUserInstructions,
                 requestInstructions,
                 availableFunctionNames: functionClient
                   .getFunctions()
@@ -272,9 +274,9 @@ export class ObservabilityAIAssistantClient {
         // messages and the knowledge base instructions
         const nextEvents$ = combineLatest([
           messagesWithUpdatedSystemMessage$,
-          userInstructions$,
+          kbUserInstructions$,
         ]).pipe(
-          switchMap(([messagesWithUpdatedSystemMessage, userInstructions]) => {
+          switchMap(([messagesWithUpdatedSystemMessage, kbUserInstructions]) => {
             // if needed, inject a context function request here
             const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
               ? getContextFunctionRequestIfNeeded(messagesWithUpdatedSystemMessage)
@@ -302,7 +304,7 @@ export class ObservabilityAIAssistantClient {
                 // start out with the max number of function calls
                 functionCallsLeft: MAX_FUNCTION_CALLS,
                 functionClient,
-                userInstructions,
+                kbUserInstructions,
                 requestInstructions,
                 signal,
                 logger: this.dependencies.logger,
@@ -760,7 +762,7 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
   };
 
-  fetchUserInstructions = async () => {
+  getKnowledgeBaseUserInstructions = async () => {
     return this.dependencies.knowledgeBaseService.getUserInstructions(
       this.dependencies.namespace,
       this.dependencies.user

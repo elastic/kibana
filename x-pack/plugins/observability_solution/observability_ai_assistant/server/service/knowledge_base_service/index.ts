@@ -15,7 +15,12 @@ import { map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
-import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
+import {
+  KnowledgeBaseEntry,
+  KnowledgeBaseEntryRole,
+  Instruction,
+  KnowledeBaseType,
+} from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
@@ -428,25 +433,20 @@ export class KnowledgeBaseService {
   getUserInstructions = async (
     namespace: string,
     user?: { name: string }
-  ): Promise<UserInstruction[]> => {
+  ): Promise<Instruction[]> => {
     try {
       const response = await this.dependencies.esClient.asInternalUser.search<KnowledgeBaseEntry>({
         index: this.dependencies.resources.aliases.kb,
         query: {
           bool: {
-            must: [
+            filter: [
               {
                 term: {
-                  'labels.category.keyword': {
-                    value: 'instruction',
-                  },
+                  type: KnowledeBaseType.UserInstruction,
                 },
               },
+              ...getAccessQuery({ user, namespace }),
             ],
-            filter: getAccessQuery({
-              user,
-              namespace,
-            }),
           },
         },
         size: 500,

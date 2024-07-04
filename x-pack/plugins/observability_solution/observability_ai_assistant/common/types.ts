@@ -84,6 +84,7 @@ export interface KnowledgeBaseEntry {
   doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
+  type?: 'user_instruction' | 'contextual';
   public: boolean;
   labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
@@ -92,13 +93,18 @@ export interface KnowledgeBaseEntry {
   };
 }
 
-export interface UserInstruction {
+export interface Instruction {
   doc_id: string;
   text: string;
-  system?: boolean;
+  user_instruction?: boolean;
 }
 
-export type UserInstructionOrPlainText = string | UserInstruction;
+export type InstructionOrPlainText = string | Instruction;
+
+export enum KnowledeBaseType {
+  UserInstruction = 'user_instruction',
+  Contextual = 'contextual',
+}
 
 export interface ObservabilityAIAssistantScreenContextRequest {
   screenDescription?: string;

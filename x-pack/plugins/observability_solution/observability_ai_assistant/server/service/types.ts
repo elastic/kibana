@@ -16,7 +16,7 @@ import type {
 import type {
   Message,
   ObservabilityAIAssistantScreenContextRequest,
-  UserInstructionOrPlainText,
+  InstructionOrPlainText,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
 import { ChatFunctionClient } from './chat_function_client';
@@ -63,16 +63,16 @@ export interface FunctionHandler {
   respond: RespondFunction<any, FunctionResponse>;
 }
 
-export type RegisteredInstruction = UserInstructionOrPlainText | RegisterInstructionCallback;
+export type RegisteredInstruction = InstructionOrPlainText | RegisterInstructionCallback;
 
 type RegisterInstructionCallback = ({
   availableFunctionNames,
 }: {
   availableFunctionNames: string[];
-}) => UserInstructionOrPlainText | UserInstructionOrPlainText[] | undefined;
+}) => InstructionOrPlainText | InstructionOrPlainText[] | undefined;
 
 export type RegisterInstruction = (
-  ...instructions: Array<UserInstructionOrPlainText | RegisterInstructionCallback>
+  ...instructions: Array<InstructionOrPlainText | RegisterInstructionCallback>
 ) => void;
 
 export type RegisterFunction = <
