@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext): void => {
       enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
 
-    context('with auditbeat data', () => {
+    context('with auditbeat data', function () {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
         index: 'ecs_compliant',
