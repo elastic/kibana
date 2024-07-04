@@ -17,7 +17,6 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PackageInfo } from '../../../../../types';
@@ -66,10 +65,7 @@ export const Configs: React.FC<ConfigsProps> = ({ packageInfo }) => {
             <p>
               <FormattedMessage
                 id="xpack.fleet.epm.InputTemplates.error"
-                defaultMessage={i18n.translate('xpack.fleet.epm.InputTemplates.error', {
-                  defaultMessage:
-                    "This integration doesn't support automatic generation of sample configurations.",
-                })}
+                defaultMessage="This integration doesn't support automatic generation of sample configurations."
               />
             </p>
           </EuiCallOut>
