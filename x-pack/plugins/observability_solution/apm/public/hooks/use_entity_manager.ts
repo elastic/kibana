@@ -9,19 +9,33 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
 import { ApmPluginStartDeps } from '../plugin';
 
+export enum ENTITY_FETCH_STATUS {
+  LOADING = 'loading',
+  SUCCESS = 'success',
+  FAILURE = 'failure',
+  NOT_INITIATED = 'not_initiated',
+}
+
 export function useEntityManager() {
   const {
     services: { entityManager },
   } = useKibana<ApmPluginStartDeps>();
-  const [isEntityDiscoveryEnabled, setIsEntityDiscoveryEnabled] = useState(false);
+
+  const [result, setResult] = useState({
+    isEnabled: false,
+    status: ENTITY_FETCH_STATUS.NOT_INITIATED,
+  });
 
   useEffect(() => {
     async function isManagedEntityDiscoveryEnabled() {
+      setResult({ isEnabled: false, status: ENTITY_FETCH_STATUS.LOADING });
+
       try {
         const response = await entityManager.entityClient.isManagedEntityDiscoveryEnabled();
-        setIsEntityDiscoveryEnabled(response?.enabled);
+        setResult({ isEnabled: response?.enabled, status: ENTITY_FETCH_STATUS.SUCCESS });
       } catch (err) {
-        setIsEntityDiscoveryEnabled(false);
+        setResult({ isEnabled: false, status: ENTITY_FETCH_STATUS.FAILURE });
+
         console.error(err);
       }
     }
@@ -29,5 +43,5 @@ export function useEntityManager() {
     isManagedEntityDiscoveryEnabled();
   }, [entityManager]);
 
-  return [isEntityDiscoveryEnabled];
+  return { ...result };
 }

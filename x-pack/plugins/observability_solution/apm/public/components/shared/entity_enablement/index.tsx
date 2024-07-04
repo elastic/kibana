@@ -15,20 +15,23 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverFooter,
+  EuiSkeletonText,
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 import { ApmPluginStartDeps } from '../../../plugin';
-import { useEntityManager } from '../../../hooks/use_entity_manager';
+import { useEntityManagerEnablementContext } from '../../../context/entity_manager_context/use_entity_manager_enablement_context';
+import { FeedbackModal } from './feedback_modal';
 
 export function EntityEnablement() {
   const {
     services: { entityManager },
   } = useKibana<ApmPluginStartDeps>();
 
-  const [isEntityDiscoveryEnabled] = useEntityManager();
+  const { isEntityManagerEnabled, isEnablementPending } = useEntityManagerEnablementContext();
+
   const [isPopoverOpen, togglePopover] = useToggle(false);
   const [isLoading, setIsLoading] = useToggle(false);
 
@@ -36,7 +39,6 @@ export function EntityEnablement() {
     setIsLoading(true);
     try {
       const response = await entityManager.entityClient.disableManagedEntityDiscovery();
-      console.log('response---', response);
       if (response.success) {
         setIsLoading(false);
         window.location.reload();
@@ -60,18 +62,23 @@ export function EntityEnablement() {
       console.error(error);
     }
   };
-  return (
+
+  return isEnablementPending ? (
+    <EuiFlexItem grow={false} css={{ maxWidth: '500px' }}>
+      <EuiSkeletonText lines={1} data-test-sub="loading-content" />
+    </EuiFlexItem>
+  ) : (
     <EuiFlexGroup direction="row" alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
         {isLoading ? <EuiLoadingSpinner size="m" /> : <TechnicalPreviewBadge icon="beaker" />}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiLink
-          disabled={isEntityDiscoveryEnabled}
+          disabled={isEntityManagerEnabled}
           data-test-subj="tryOutEEMLink"
           onClick={handleEnableblement}
         >
-          {isEntityDiscoveryEnabled
+          {isEntityManagerEnabled
             ? i18n.translate('xpack.apm.eemEnablement.enabled.', {
                 defaultMessage: 'This is Elastic’s new experience!',
               })
@@ -84,7 +91,7 @@ export function EntityEnablement() {
         <EuiPopover
           button={
             <EuiButtonIcon
-              disabled={isEntityDiscoveryEnabled}
+              disabled={isEntityManagerEnabled}
               onClick={togglePopover}
               data-test-subj="apmEntityEnablementWithFooterButton"
               iconType="iInCircle"
@@ -116,7 +123,7 @@ export function EntityEnablement() {
           </EuiPopoverFooter>
         </EuiPopover>
       </EuiFlexItem>
-      {isEntityDiscoveryEnabled && (
+      {isEntityManagerEnabled && (
         <EuiFlexItem grow={false}>
           <EuiLink data-test-subj="restoreClassiView" onClick={handleRestoreView}>
             {i18n.translate('xpack.apm.eemEnablement.restoveClassicView.', {
@@ -125,6 +132,7 @@ export function EntityEnablement() {
           </EuiLink>
         </EuiFlexItem>
       )}
+      <FeedbackModal />
     </EuiFlexGroup>
   );
 }

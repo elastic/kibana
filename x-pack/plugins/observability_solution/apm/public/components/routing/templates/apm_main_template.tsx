@@ -159,7 +159,7 @@ export function ApmMainTemplate({
         pageTitle: pageHeaderTitle,
         children: (
           <EuiFlexGroup direction="column">
-            {showEnablementCallout && <EntityEnablement />}
+            {showEnablementCallout && selectedNavButton === 'allServices' && <EntityEnablement />}
             {showServiceGroupsNav && selectedNavButton && (
               <ServiceGroupsButtonGroup selectedNavButton={selectedNavButton} />
             )}
