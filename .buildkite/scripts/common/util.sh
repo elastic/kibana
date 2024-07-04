@@ -33,7 +33,7 @@ check_for_changed_files() {
 
   SHOULD_AUTO_COMMIT_CHANGES="${2:-}"
   CUSTOM_FIX_MESSAGE="${3:-}"
-  GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc' ':!:config/node.options')"
+  GIT_CHANGES="$(git status --porcelain -- . ':!:.bazelrc' ':!:config/node.options' ':!config/kibana.yml')"
 
   if [ "$GIT_CHANGES" ]; then
     if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
