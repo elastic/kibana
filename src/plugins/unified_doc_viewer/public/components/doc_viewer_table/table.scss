@@ -62,10 +62,6 @@
   color: $euiColorFullShade;
   vertical-align: top;
 
-  &.dscTruncateByHeight {
-    @include euiOverflowShadow;
-  }
-
   .euiDataGridRowCell__popover & {
     font-size: $euiFontSizeS;
   }

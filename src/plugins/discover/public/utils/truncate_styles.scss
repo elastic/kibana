@@ -1,0 +1,7 @@
+.dscTruncateByHeight {
+  $hideHeight: 28px;
+  $gradientEnd:
+    transparentize($euiColorDanger, 0) calc(100% - #{$hideHeight}),
+    transparentize($euiColorDanger, .9) 100%;
+  mask-image: linear-gradient(to bottom, #{$gradientEnd});
+}

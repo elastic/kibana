@@ -316,9 +316,9 @@ export const getUiSettings: (
   },
   [TRUNCATE_MAX_HEIGHT]: {
     name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum cell height in the classic table',
+      defaultMessage: 'Maximum cell height in the table',
     }),
-    value: 115,
+    value: 110,
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
       defaultMessage:

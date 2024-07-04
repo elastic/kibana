@@ -9,6 +9,7 @@
 import createCache from '@emotion/cache';
 import { cache } from '@emotion/css';
 import { serializeStyles } from '@emotion/serialize';
+import './truncate_styles.scss';
 
 /**
  * The following emotion cache management was introduced here

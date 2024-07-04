@@ -158,7 +158,7 @@ export const TableFieldValue = ({
         {isCollapsible && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
-              iconType={isCollapsed ? 'plus' : 'minus'}
+              iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
               size="xs"
               color="primary"
               data-test-subj={`toggleLongFieldValue-${field}`}
