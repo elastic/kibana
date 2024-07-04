@@ -35,6 +35,8 @@
     "initialize-server:lists:complete": "node ./scripts/index.js server lists_and_exception_lists trial_license_complete_tier",
     "run-tests:lists:complete": "node ./scripts/index.js runner lists_and_exception_lists trial_license_complete_tier",
 
+    "run-tests:edr-workflows": "node ./scripts/index.js runner edr_workflows trial_license_complete_tier",
+
     "initialize-server:investigations": "node scripts/index.js server investigation trial_license_complete_tier",
     "run-tests:investigations": "node scripts/index.js runner investigation trial_license_complete_tier",
 
@@ -71,6 +73,9 @@
     "entity_analytics:essentials:qa:serverless:release": "npm run run-tests:ea:basic_essentials risk_engine serverless qaEnv",
     "entity_analytics:essentials:server:ess": "npm run initialize-server:ea:basic_essentials risk_engine ess",
     "entity_analytics:essentials:runner:ess": "npm run run-tests:ea:basic_essentials risk_engine ess essEnv",
+
+    "edr_workflows:qa:serverless": "npm run run-tests:edr-workflows apis serverless qaPeriodicEnv",
+    "edr_workflows:qa:serverless:release": "npm run run-tests:edr-workflows apis serverless qaEnv",
 
     "exception_lists_items:server:serverless": "npm run initialize-server:lists:complete exception_lists_items serverless",
     "exception_lists_items:runner:serverless": "npm run run-tests:lists:complete exception_lists_items serverless serverlessEnv",

@@ -1,18 +1,41 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
-    label: "Cypress MKI - Defend Workflows "
-    key: test_defend_workflows
-    agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
-      enableNestedVirtualization: true
-      localSsds: 1
-      localSsdInterface: nvme
-      machineType: n2-standard-4
-    timeout_in_minutes: 300
-    parallelism: 6
-    retry:
-      automatic:
-        - exit_status: "*"
-          limit: 1
+  - group: "Cypress MKI - Defend Workflows"
+    key: cypress_test_defend_workflows
+    steps:
+      - label: "Running cypress:dw:qa:serverless:run"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/edr_workflows/mki_security_solution_defend_workflows.sh cypress:dw:qa:serverless:run
+        key: test_defend_workflows
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          localSsds: 1
+          localSsdInterface: nvme
+          machineType: n2-standard-4
+        timeout_in_minutes: 300
+        parallelism: 6
+        retry:
+          automatic:
+            - exit_status: "*"
+              limit: 1
+
+  - group: "API MKI - Defend Workflows"
+    key: api_test_defend_workflows
+    steps:
+      - label: "Running edr_workflows:qa:serverless"
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh edr_workflows:qa:serverless
+        key: edr_workflows:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          enableNestedVirtualization: true
+          localSsds: 1
+          localSsdInterface: nvme
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
