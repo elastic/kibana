@@ -10,6 +10,7 @@
  * Builds an ES|QL query for the provided index or index pattern
  * @param indexOrIndexPattern
  */
-export function getInitialESQLQuery(indexOrIndexPattern: string): string {
-  return `FROM ${indexOrIndexPattern} | LIMIT 10`;
+export function getInitialESQLQuery(indexOrIndexPattern: string, timeFieldName?: string): string {
+  const sortByTimeStamp = timeFieldName ? ` | SORT ${timeFieldName} DESC` : '';
+  return `FROM ${indexOrIndexPattern}${sortByTimeStamp} | LIMIT 10`;
 }

@@ -12,4 +12,10 @@ describe('getInitialESQLQuery', () => {
   it('should work correctly', () => {
     expect(getInitialESQLQuery('logs*')).toBe('FROM logs* | LIMIT 10');
   });
+
+  it('should append a sort by timefield correctly', () => {
+    expect(getInitialESQLQuery('logs*', '@timestamp')).toBe(
+      'FROM logs* | SORT @timestamp DESC | LIMIT 10'
+    );
+  });
 });

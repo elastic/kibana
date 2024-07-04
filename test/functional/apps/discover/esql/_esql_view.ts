@@ -303,7 +303,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const historyItems = await esql.getHistoryItems();
         log.debug(historyItems);
         const queryAdded = historyItems.some((item) => {
-          return item[1] === 'FROM logstash-* | LIMIT 10';
+          return item[1] === 'FROM logstash-* | SORT @timestamp DESC | LIMIT 10';
         });
 
         expect(queryAdded).to.be(true);
