@@ -337,8 +337,9 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       );
     }
 
-    const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const coreContext = await context.core;
+    const user = coreContext.security.authc.getCurrentUser();
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const connectorActions = (await context.actions).getActionsClient();
     const responseActionsClient: ResponseActionsClient = getResponseActionsClient(
