@@ -29,6 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
+    // see details: https://github.com/elastic/kibana/issues/187369
     it.skip('should fetch an index settings', async () => {
       const index = await svlIndicesHelpers.createIndex();
 
@@ -102,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    // see details: https://github.com/elastic/kibana/issues/187369
     it.skip('should update an index settings', async () => {
       const index = await svlIndicesHelpers.createIndex();
 
