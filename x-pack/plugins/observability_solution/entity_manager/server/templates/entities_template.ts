@@ -6,21 +6,27 @@
  */
 
 import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ENTITY_BASE_PREFIX, ENTITY_SCHEMA_VERSION_V1 } from '../../common/constants_entities';
+import {
+  ENTITY_BASE_COMPONENT_TEMPLATE,
+  ENTITY_ENTITY_COMPONENT_TEMPLATE,
+  ENTITY_EVENT_COMPONENT_TEMPLATE,
+  ENTITY_INDEX_TEMPLATE,
+  ENTITY_INDICES_PATTERN,
+} from '../../common/constants_entities';
 
 export const entitiesIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
-  name: `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_index_template`,
+  name: ENTITY_INDEX_TEMPLATE,
   _meta: {
     description:
       "Index template for indices managed by the Elastic Entity Model's entity discovery framework",
     ecs_version: '8.0.0',
   },
   composed_of: [
-    `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_base`,
-    `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_event`,
-    `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_entity`,
+    ENTITY_BASE_COMPONENT_TEMPLATE,
+    ENTITY_ENTITY_COMPONENT_TEMPLATE,
+    ENTITY_EVENT_COMPONENT_TEMPLATE,
   ],
-  index_patterns: [`${ENTITY_BASE_PREFIX}.*`],
+  index_patterns: [ENTITY_INDICES_PATTERN],
   priority: 1,
   template: {
     mappings: {

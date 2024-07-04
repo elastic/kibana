@@ -6,13 +6,10 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  ENTITY_BASE_PREFIX,
-  ENTITY_SCHEMA_VERSION_V1,
-} from '@kbn/entityManager-plugin/common/constants_entities';
+import { ENTITY_ENTITY_COMPONENT_TEMPLATE } from '../../../common/constants_entities';
 
 export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateRequest = {
-  name: `${ENTITY_BASE_PREFIX}_${ENTITY_SCHEMA_VERSION_V1}_entity`,
+  name: ENTITY_ENTITY_COMPONENT_TEMPLATE,
   _meta: {
     description:
       "Component template for the entity fields used in the Elastic Entity Model's entity discovery framework",

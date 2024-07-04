@@ -7,35 +7,32 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import {
-  ENTITY_BASE_PREFIX,
-  ENTITY_HISTORY,
-  ENTITY_INDEX_PREFIX,
-  ENTITY_LATEST,
-  ENTITY_SCHEMA_VERSION_V1,
+  ENTITY_HISTORY_INDEX_PREFIX,
+  ENTITY_HISTORY_PREFIX,
+  ENTITY_LATEST_INDEX_PREFIX,
+  ENTITY_LATEST_PREFIX,
 } from '../../../../common/constants_entities';
 
-// Latest
-export function generateLatestTransformId(definition: EntityDefinition) {
-  return `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_LATEST}-${definition.id}`;
-}
-
-export function generateLatestPipelineId(definition: EntityDefinition) {
-  return `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_LATEST}-${definition.id}`;
-}
-
-export function generateLatestIndexName(definition: EntityDefinition) {
-  return `${ENTITY_INDEX_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_LATEST}-${definition.id}`;
-}
-
 // History
-export function generateHistoryTransformId(definition: EntityDefinition) {
-  return `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_HISTORY}-${definition.id}`;
+function generateHistoryId(definition: EntityDefinition) {
+  return `${ENTITY_HISTORY_PREFIX}-${definition.id}`;
 }
 
-export function generateHistoryPipelineId(definition: EntityDefinition) {
-  return `${ENTITY_BASE_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_HISTORY}-${definition.id}`;
-}
+export const generateHistoryTransformId = generateHistoryId;
+export const generateHistoryPipelineId = generateHistoryId;
 
 export function generateHistoryIndexName(definition: EntityDefinition) {
-  return `${ENTITY_INDEX_PREFIX}-${ENTITY_SCHEMA_VERSION_V1}-${ENTITY_HISTORY}-${definition.id}`;
+  return `${ENTITY_HISTORY_INDEX_PREFIX}-${definition.id}`;
+}
+
+// Latest
+function generateLatestId(definition: EntityDefinition) {
+  return `${ENTITY_LATEST_PREFIX}-${definition.id}`;
+}
+
+export const generateLatestTransformId = generateLatestId;
+export const generateLatestPipelineId = generateLatestId;
+
+export function generateLatestIndexName(definition: EntityDefinition) {
+  return `${ENTITY_LATEST_INDEX_PREFIX}-${definition.id}`;
 }
