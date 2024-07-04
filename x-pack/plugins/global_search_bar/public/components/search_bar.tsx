@@ -47,7 +47,7 @@ const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
   const charLimitMessage = (
     <>
       <EuiText size="m">
-        <p>
+        <p data-test-subj="searchCharLimitExceededMessageHeading">
           <FormattedMessage
             id="xpack.globalSearchBar.searchBar.searchCharLimitExceededHeading"
             defaultMessage="Search character limit exceeded"
@@ -155,17 +155,19 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           searchSubscription.current = null;
         }
 
+        if (searchValue.length > globalSearch.searchCharLimit) {
+          // setting this will display an error message to the user
+          setSearchCharLimitExceeded(true);
+          return;
+        } else {
+          setSearchCharLimitExceeded(false);
+        }
+
         setIsLoading(true);
         const suggestions = loadSuggestions(searchValue.toLowerCase());
         setIsLoading(false);
 
         let aggregatedResults: GlobalSearchResult[] = [];
-
-        if (searchValue.length > 1000) {
-          // setting this will display an error message to the user
-          setSearchCharLimitExceeded(true);
-          return;
-        }
 
         if (searchValue.length !== 0) {
           reportEvent.searchRequest();
