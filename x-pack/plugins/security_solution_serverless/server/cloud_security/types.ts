@@ -39,10 +39,6 @@ export interface MinTimestamp {
   value_as_string: string;
 }
 
-export interface ResourceSubtypeCounter {
-  [key: string]: string;
-}
-
 export type CloudSecuritySolutions = typeof CSPM | typeof KSPM | typeof CNVM | typeof CLOUD_DEFEND;
 
 export interface CloudSecurityMeteringCallbackInput

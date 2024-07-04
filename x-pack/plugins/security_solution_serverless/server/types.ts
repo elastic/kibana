@@ -25,7 +25,6 @@ import type { IntegrationAssistantPluginSetup } from '@kbn/integration-assistant
 import type { ProductTier } from '../common/product';
 
 import type { ServerlessSecurityConfig } from './config';
-import type { ResourceSubtypeCounter } from './cloud_security/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SecuritySolutionServerlessPluginSetup {}
@@ -121,4 +120,7 @@ export interface MetringTaskProperties {
   interval: string;
   periodSeconds: number;
   version: string;
+}
+export interface ResourceSubtypeCounter {
+  [key: string]: string;
 }
