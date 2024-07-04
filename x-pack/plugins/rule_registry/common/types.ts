@@ -380,8 +380,8 @@ type AssertAssignable<T, U extends T> = T;
 
 // Used to check that the validation schema is aligned with the type from ES
 declare type _ = AssertAssignable<
-  typeof allowedFilterKeysSchema.types[number]['value'],
-  keyof Omit<QueryDslQueryContainer, 'script' | 'script_score'>
+  keyof Omit<QueryDslQueryContainer, 'script' | 'script_score'>,
+  t.TypeOf<typeof allowedFilterKeysSchema>
 >;
 
 export const alertsGroupFilterSchema = t.record(allowedFilterKeysSchema, t.any);
