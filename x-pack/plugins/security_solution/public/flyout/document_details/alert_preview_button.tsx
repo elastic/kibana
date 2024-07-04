@@ -9,7 +9,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import React, { useCallback } from 'react';
 import type { FC } from 'react';
-import { ALERT_PREVIEW_BANNER } from './preview';
+import { ALERT_PREVIEW_BANNER } from './preview/constants';
 import { DocumentDetailsPreviewPanelKey } from './shared/constants/panel_keys';
 
 interface AlertPreviewButtonProps {

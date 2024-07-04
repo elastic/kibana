@@ -74,7 +74,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -87,7 +87,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -116,7 +116,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -134,7 +134,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
     const contextsTable = getByTestId('risk-input-contexts-table');
@@ -153,7 +153,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
     const contextsTable = getByTestId('risk-input-contexts-table');
@@ -172,7 +172,7 @@ describe('RiskInputsTab', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
@@ -201,7 +201,7 @@ describe('RiskInputsTab', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" scopeId={'scopeId'} />
       </TestProviders>
     );
 
