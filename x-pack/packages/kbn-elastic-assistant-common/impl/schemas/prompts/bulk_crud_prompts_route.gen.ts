@@ -34,6 +34,14 @@ export const PromptDetailsInError = z.object({
   name: z.string().optional(),
 });
 
+/**
+ * Prompt type
+ */
+export type PromptType = z.infer<typeof PromptType>;
+export const PromptType = z.enum(['system', 'quick']);
+export type PromptTypeEnum = typeof PromptType.enum;
+export const PromptTypeEnum = PromptType.enum;
+
 export type NormalizedPromptError = z.infer<typeof NormalizedPromptError>;
 export const NormalizedPromptError = z.object({
   message: z.string(),
@@ -47,11 +55,13 @@ export const PromptResponse = z.object({
   id: NonEmptyString,
   timestamp: NonEmptyString.optional(),
   name: z.string(),
-  promptType: z.string(),
+  promptType: PromptType,
   content: z.string(),
+  categories: z.array(z.string()).optional(),
+  color: z.string().optional(),
   isNewConversationDefault: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  isShared: z.boolean().optional(),
+  consumer: z.string().optional(),
   updatedAt: z.string().optional(),
   updatedBy: z.string().optional(),
   createdAt: z.string().optional(),
@@ -107,20 +117,24 @@ export const BulkActionBase = z.object({
 export type PromptCreateProps = z.infer<typeof PromptCreateProps>;
 export const PromptCreateProps = z.object({
   name: z.string(),
-  promptType: z.string(),
+  promptType: PromptType,
   content: z.string(),
+  color: z.string().optional(),
+  categories: z.array(z.string()).optional(),
   isNewConversationDefault: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  isShared: z.boolean().optional(),
+  consumer: z.string().optional(),
 });
 
 export type PromptUpdateProps = z.infer<typeof PromptUpdateProps>;
 export const PromptUpdateProps = z.object({
   id: z.string(),
   content: z.string().optional(),
+  color: z.string().optional(),
+  categories: z.array(z.string()).optional(),
   isNewConversationDefault: z.boolean().optional(),
   isDefault: z.boolean().optional(),
-  isShared: z.boolean().optional(),
+  consumer: z.string().optional(),
 });
 
 export type PerformBulkActionRequestBody = z.infer<typeof PerformBulkActionRequestBody>;
