@@ -79,7 +79,7 @@ describe('AddLayerButton', () => {
         return within(
           screen.getByTestId('contextMenuPanelTitleButton').parentElement as HTMLElement
         )
-          .getAllByRole('button')
+          .getAllByTestId('lnsChartSwitch-option-label')
           .map((el) => el.textContent);
       },
     };
@@ -95,9 +95,7 @@ describe('AddLayerButton', () => {
     clickAddLayer();
     clickVisualizationButton();
     await waitForSeriesOptions();
-
     expect(getSeriesTypeOptions()).toEqual([
-      'Select visualization type',
       'Bar vertical',
       'Bar vertical stacked',
       'Bar vertical percentage',

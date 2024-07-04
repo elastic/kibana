@@ -13,10 +13,12 @@ import {
   EuiContextMenu,
   EuiFlexItem,
   EuiFlexGroup,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { css } from '@emotion/react';
 import { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -24,6 +26,7 @@ import { SeriesType, XYState, visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';
 import { ExperimentalBadge } from '../../shared_components';
+import { ChartOption } from '../../editor_frame_service/editor_frame/config_panel/chart_switch/chart_option';
 
 interface AddLayerButtonProps {
   state: XYState;
@@ -36,7 +39,7 @@ interface AddLayerButtonProps {
 export enum AddLayerPanelType {
   main = 'main',
   selectAnnotationMethod = 'selectAnnotationMethod',
-  selectVisualizationType = 'selectVisualizationType',
+  compatibleVisualizationTypes = 'compatibleVisualizationTypes',
 }
 
 export function AddLayerButton({
@@ -63,11 +66,11 @@ export function AddLayerButton({
       disabled,
       name: (
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={true}>
             <span className="lnsLayerAddButton__label">{label}</span>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <ExperimentalBadge color={disabled ? 'subdued' : undefined} />
+            <ExperimentalBadge color={disabled ? 'subdued' : undefined} size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -85,7 +88,7 @@ export function AddLayerButton({
     toolTipContent,
   }: (typeof supportedLayers)[0]) => {
     return {
-      panel: AddLayerPanelType.selectVisualizationType,
+      panel: AddLayerPanelType.compatibleVisualizationTypes,
       toolTipContent,
       disabled,
       name: <span className="lnsLayerAddButtonLabel">{label}</span>,
@@ -193,19 +196,27 @@ export function AddLayerButton({
               ],
             },
             {
-              id: AddLayerPanelType.selectVisualizationType,
+              id: AddLayerPanelType.compatibleVisualizationTypes,
               initialFocusedItemIndex: currentLayerVisType,
-              title: i18n.translate('xpack.lens.layerPanel.selectVisualizationType', {
-                defaultMessage: 'Select visualization type',
+              title: i18n.translate('xpack.lens.layerPanel.compatibleVisualizationTypes', {
+                defaultMessage: 'Compatible visualization types',
               }),
+              width: 300,
               items: availableVisTypes.map((t) => ({
-                name: t.fullLabel || t.label,
-                icon: t.icon && <EuiIcon size="m" type={t.icon} />,
-                onClick: () => {
-                  addLayer(LayerTypes.DATA, undefined, undefined, t.id as SeriesType);
-                  toggleLayersChoice(false);
+                renderItem: () => {
+                  return (
+                    <ChartOptionWrapper
+                      type={t.id}
+                      label={t.fullLabel || t.label}
+                      description={t.description}
+                      icon={t.icon}
+                      onClick={() => {
+                        addLayer(LayerTypes.DATA, undefined, undefined, t.id as SeriesType);
+                        toggleLayersChoice(false);
+                      }}
+                    />
+                  );
                 },
-                'data-test-subj': `lnsXY_seriesType-${t.id}`,
               })),
             },
           ]}
@@ -225,3 +236,40 @@ export function AddLayerButton({
     </>
   );
 }
+
+const ChartOptionWrapper = ({
+  label,
+  description,
+  icon,
+  onClick,
+  type,
+}: {
+  label: string;
+  description: string;
+  icon: IconType;
+  onClick: () => void;
+  type: string;
+}) => {
+  return (
+    <button
+      data-test-subj={`lnsXY_seriesType-${type}`}
+      onClick={onClick}
+      className="euiContextMenuItem lnsLayerAddButton"
+      css={css`
+        padding: 8px 12px;
+        border-bottom: 1px solid #eef2f7;
+        width: 100%;
+        &: hover, &: focus {
+          color: #0071c2;
+          background-color: rgba(0, 119, 204, 0.1);
+          span, .euiText {
+            text-decoration: underline;
+            color: #0071c2;
+          }
+        }
+      `}
+    >
+      <ChartOption option={{ icon, label, description }} />
+    </button>
+  );
+};
