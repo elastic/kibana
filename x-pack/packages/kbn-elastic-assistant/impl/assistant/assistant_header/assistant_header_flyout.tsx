@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -47,6 +48,9 @@ interface OwnProps {
   refetchConversationsState: () => Promise<void>;
   onConversationCreate: () => Promise<void>;
   isAssistantEnabled: boolean;
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 type Props = OwnProps;
@@ -74,6 +78,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
   refetchConversationsState,
   onConversationCreate,
   isAssistantEnabled,
+  refetchPrompts,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -125,6 +130,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
             `,
             onClick: showDestroyModal,
             icon: 'refresh',
+            'data-test-subj': 'clear-chat',
           },
         ],
       },
@@ -163,6 +169,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
               conversationsLoaded={conversationsLoaded}
               refetchConversationsState={refetchConversationsState}
               isFlyoutMode={true}
+              refetchPrompts={refetchPrompts}
             />
           </EuiFlexItem>
 
@@ -243,6 +250,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
                       aria-label="test"
                       iconType="boxesVertical"
                       onClick={onButtonClick}
+                      data-test-subj="chat-context-menu"
                     />
                   }
                   isOpen={isPopoverOpen}
@@ -266,6 +274,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           confirmButtonText={i18n.RESET_BUTTON_TEXT}
           buttonColor="danger"
           defaultFocusedButton="confirm"
+          data-test-subj="reset-conversation-modal"
         >
           <p>{i18n.CLEAR_CHAT_CONFIRMATION}</p>
         </EuiConfirmModal>
