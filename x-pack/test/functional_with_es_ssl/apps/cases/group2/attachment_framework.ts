@@ -235,8 +235,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders solutions selection', async () => {
           await openFlyout();
 
+          await testSubjects.click('caseOwnerSelector');
+
           for (const owner of TOTAL_OWNERS) {
-            await testSubjects.existOrFail(`${owner}RadioButton`);
+            await testSubjects.existOrFail(`${owner}OwnerOption`);
           }
 
           await closeFlyout();

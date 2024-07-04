@@ -35,7 +35,7 @@ export interface ConnectorSetupProps {
   conversation?: Conversation;
   isFlyoutMode?: boolean;
   onSetupComplete?: () => void;
-  onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  onConversationUpdate?: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
   updateConversationsOnSaveConnector?: boolean;
 }
 
@@ -198,7 +198,10 @@ export const useConnectorSetup = ({
         });
 
         if (updatedConversation) {
-          onConversationUpdate({ cId: updatedConversation.id, cTitle: updatedConversation.title });
+          onConversationUpdate?.({
+            cId: updatedConversation.id,
+            cTitle: updatedConversation.title,
+          });
 
           refetchConnectors?.();
           setIsConnectorModalVisible(false);
