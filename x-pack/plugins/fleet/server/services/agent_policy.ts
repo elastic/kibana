@@ -1114,16 +1114,13 @@ class AgentPolicyService {
       const fleetToken = enrollmentApiKeys[0].api_key;
       const fleetUrl = defaultFleetHost?.host_urls[0];
 
-      const agentlessApiUrl = appContextService.getConfig()?.agentless?.api.url;
-      const agentlessCert = appContextService.getConfig()?.agentless?.api.certificate;
-      const agentlessKey = appContextService.getConfig()?.agentless?.api.key;
-
-      if (!agentlessApiUrl || !agentlessCert || !agentlessKey) {
-        throw new FleetError('Error creating agentless agent: missing agentless permission');
+      const agentlessConfig = appContextService.getConfig()?.agentless;
+      if (!agentlessConfig) {
+        throw new FleetError('Error creating agentless agent: missing agentless configuration');
       }
 
       const stackVersion = appContextService.getKibanaVersion();
-      const agentlessApiCreateDeploymentUrl = `${agentlessApiUrl}/deployments`;
+      const agentlessApiCreateDeploymentUrl = `${agentlessConfig.api.url}/deployments`;
       const body = {
         policy_id: policyId,
         fleet_url: fleetUrl,
@@ -1138,8 +1135,8 @@ class AgentPolicyService {
       const tlsConfig = new SslConfig(
         sslSchema.validate({
           enabled: true,
-          certificate: agentlessCert,
-          key: agentlessKey,
+          certificate: agentlessConfig.api.tls.certificate,
+          key: agentlessConfig.api.tls.key,
         })
       );
 
@@ -1160,7 +1157,8 @@ class AgentPolicyService {
           }
         );
 
-        if (status !== 200) {
+        // if status is not CREATED, throw an error
+        if (status !== 201) {
           throw new FleetError(`Error creating agentless agent: ${statusText}`);
         }
 
