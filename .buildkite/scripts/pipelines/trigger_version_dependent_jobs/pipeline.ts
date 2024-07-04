@@ -125,7 +125,7 @@ function getArtifactSnapshotPipelineTriggers() {
 function getArtifactStagingPipelineTriggers() {
   // Trigger for all branches, that are not current minor+major
   const versions = getVersionsFile();
-  const branches = versions.filter((v) => !v.currentMajor && !v.currentMinor).map((v) => v.branch);
+  const branches = versions.filter((v) => v.branch !== 'main').map((v) => v.branch);
 
   return branches.map((branch) => {
     return {
