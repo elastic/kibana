@@ -794,7 +794,7 @@ export const RuleForm = ({
               data-test-subj="intervalFormRow"
               display="rowCompressed"
               helpText={getHelpTextForInterval()}
-              isInvalid={errors['schedule.interval'].length > 0}
+              isInvalid={!!errors['schedule.interval'].length}
               error={errors['schedule.interval']}
             >
               <EuiFlexGroup gutterSize="s">
@@ -803,7 +803,7 @@ export const RuleForm = ({
                     prepend={labelForRuleChecked}
                     fullWidth
                     min={1}
-                    isInvalid={errors['schedule.interval'].length > 0}
+                    isInvalid={!!errors['schedule.interval'].length}
                     value={ruleInterval || ''}
                     name="interval"
                     data-test-subj="intervalInput"

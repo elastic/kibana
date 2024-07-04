@@ -14,6 +14,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useKibana } from '../../../../../common/lib/kibana';
 import type {
   ColumnHeaderOptions,
   CellValueElementProps,
@@ -107,6 +108,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   trailingControlColumns,
   onToggleShowNotes,
 }) => {
+  const { telemetry } = useKibana().services;
   const trGroupRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
 
@@ -224,6 +226,10 @@ const StatefulEventComponent: React.FC<Props> = ({
           },
         },
       });
+      telemetry.reportDetailsFlyoutOpened({
+        location: timelineId,
+        panel: 'right',
+      });
     } else {
       // opens the panel when clicking on the table row action
       dispatch(
@@ -241,6 +247,7 @@ const StatefulEventComponent: React.FC<Props> = ({
     expandableFlyoutDisabled,
     openFlyout,
     timelineId,
+    telemetry,
     dispatch,
     tabType,
   ]);

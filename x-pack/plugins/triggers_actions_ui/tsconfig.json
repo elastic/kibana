@@ -68,7 +68,9 @@
     "@kbn/controls-plugin",
     "@kbn/search-types",
     "@kbn/alerting-comparators",
-    "@kbn/alerting-types"
+    "@kbn/alerting-types",
+    "@kbn/visualization-utils",
+    "@kbn/core-ui-settings-browser"
   ],
   "exclude": ["target/**/*"]
 }
