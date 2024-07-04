@@ -532,8 +532,8 @@ describe('Event filter form', () => {
     });
 
     it('should display a tooltip to the user', async () => {
-      const tooltipIconSelector = `${formPrefix}-filterProcessDescendants-tooltipIcon`;
-      const tooltipTextSelector = `${formPrefix}-filterProcessDescendants-tooltipText`;
+      const tooltipIconSelector = `${formPrefix}-filterProcessDescendantsTooltip-tooltipIcon`;
+      const tooltipTextSelector = `${formPrefix}-filterProcessDescendantsTooltip-tooltipText`;
       render();
 
       expect(renderResult.getByTestId(tooltipIconSelector)).toBeInTheDocument();
