@@ -37,7 +37,7 @@ export function registerPipelinesDeleteRoute(router: LogstashPluginRouter) {
     {
       path: '/api/logstash/pipelines/delete',
       options: {
-        description: `Delete managed Logstash pipelines`,
+        summary: `Delete managed Logstash pipelines`,
       },
       validate: {
         body: schema.object({

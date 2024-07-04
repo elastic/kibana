@@ -15,7 +15,7 @@ export const getCaseConfigureRoute = createCasesRoute({
   path: CASE_CONFIGURE_URL,
   routerOptions: {
     access: 'public',
-    description: `Get case settings`,
+    summary: `Get case settings`,
   },
   handler: async ({ context, request, response }) => {
     try {

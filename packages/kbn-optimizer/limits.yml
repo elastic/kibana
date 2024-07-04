@@ -5,7 +5,6 @@ pageLoadAssetSize:
   aiops: 10000
   alerting: 106936
   apm: 64385
-  assetManager: 25000
   banners: 17946
   bfetch: 22837
   canvas: 29355
@@ -31,7 +30,7 @@ pageLoadAssetSize:
   dataQuality: 19384
   datasetQuality: 50624
   dataViewEditor: 28082
-  dataViewFieldEditor: 27000
+  dataViewFieldEditor: 42021
   dataViewManagement: 5300
   dataViews: 65000
   dataVisualizer: 27530
@@ -41,7 +40,9 @@ pageLoadAssetSize:
   discoverShared: 17111
   embeddable: 87309
   embeddableEnhanced: 22107
-  enterpriseSearch: 50858
+  enterpriseSearch: 66810
+  entityManager: 17175
+  esqlDataGrid: 24582
   esUiShared: 326654
   eventAnnotation: 30000
   eventAnnotationListing: 25841
@@ -81,7 +82,9 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
+  integrationAssistant: 19524
   interactiveSetup: 80000
+  investigate: 17970
   kibanaOverview: 56279
   kibanaReact: 74422
   kibanaUsageCollection: 16463
@@ -92,6 +95,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
+  logsDataAccess: 16759
   logsExplorer: 60000
   logsShared: 281060
   logstash: 53548
@@ -99,13 +103,13 @@ pageLoadAssetSize:
   maps: 90000
   mapsEms: 26072
   metricsDataAccess: 73287
-  ml: 82187
+  ml: 85000
   mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
   noDataPage: 5000
-  observability: 167673
+  observability: 76678
   observabilityAIAssistant: 58230
   observabilityAIAssistantApp: 27680
   observabilityAiAssistantManagement: 19279
@@ -130,6 +134,8 @@ pageLoadAssetSize:
   screenshotMode: 17856
   screenshotting: 22870
   searchConnectors: 30000
+  searchHomepage: 19831
+  searchInferenceEndpoints: 20470
   searchNotebooks: 18942
   searchPlayground: 19325
   searchprofiler: 67080

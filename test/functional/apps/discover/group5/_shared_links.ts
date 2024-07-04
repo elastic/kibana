@@ -61,11 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('permalink', function () {
-        it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/app/r/s/.+$');
+        it('should allow for copying the snapshot URL', async function () {
+          const re = new RegExp(baseUrl + '/app/r.+$');
           await retry.try(async () => {
             const actualUrl = await PageObjects.share.getSharedUrl();
-            expect(actualUrl).to.match(re);
+            expect(actualUrl).match(re);
           });
         });
 
@@ -104,12 +104,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await teardown();
       });
 
-      it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-        const re = new RegExp(baseUrl + '/app/r/s/.+$');
+      it('should allow for copying the snapshot URL and should open it', async function () {
+        const re = new RegExp(baseUrl + '/app/r.*$');
         let actualUrl: string = '';
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.match(re);
+          expect(actualUrl).match(re);
         });
 
         const actualTime = await PageObjects.timePicker.getTimeConfig();

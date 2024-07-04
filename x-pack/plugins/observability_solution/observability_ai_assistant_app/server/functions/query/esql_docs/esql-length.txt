@@ -1,13 +1,29 @@
-LENGTH
+## LENGTH
 
-Syntax
-Parameters
-string
-String expression. If null, the function returns null.
-DescriptionReturns the character length of a string.Supported types
-Example
+The `LENGTH` function in ES|QL is used to return the character length of a string.
+
+### Syntax
+
+`LENGTH(string)`
+
+#### Parameters
+
+- `string`: This is a string expression. If null, the function returns null.
+
+### Examples
+
+Here are a couple of examples of how you can use the `LENGTH` function in ES|QL:
+
 ```esql
 FROM employees
-| KEEP first_name, last_name
-| EVAL fn_length = LENGTH(first_name)
+| EVAL name_length = LENGTH(first_name)
 ```
+
+In this example, the `LENGTH` function is used to calculate the length of the `first_name` field for each record in the `employees` index.
+
+```esql
+FROM logs-*
+| EVAL message_length = LENGTH(message)
+```
+
+In this second example, the `LENGTH` function is used to calculate the length of the `message` field for each record in the `logs-*` index.

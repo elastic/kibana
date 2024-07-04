@@ -124,6 +124,20 @@ describe('ShowShareModal', () => {
       query: { query: 'bye', language: 'kuery' },
     } as unknown as DashboardContainerInput;
     const showModalProps = getPropsAndShare(unsavedDashboardState);
+    showModalProps.getDashboardState = () => {
+      return {
+        panels: {
+          panel_1: {
+            type: 'panel_type',
+            gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+            panelRefName: 'superPanel',
+            explicitInput: {
+              id: 'superPanel',
+            },
+          },
+        },
+      } as unknown as DashboardContainerInput;
+    };
     ShowShareModal(showModalProps);
     expect(toggleShareMenuSpy).toHaveBeenCalledTimes(1);
     const shareLocatorParams = (
@@ -175,6 +189,14 @@ describe('ShowShareModal', () => {
               changedKey2: 'definitely NOT changed',
             },
           },
+          panel_3: {
+            gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
+            type: 'superType',
+            explicitInput: {
+              id: 'whatever2',
+              changedKey3: 'should still exist',
+            },
+          },
         },
       } as unknown as DashboardContainerInput;
     };
@@ -197,5 +219,6 @@ describe('ShowShareModal', () => {
     expect(shareLocatorParams.panels).toBeDefined();
     expect(shareLocatorParams.panels![0].embeddableConfig.changedKey1).toBe('changed');
     expect(shareLocatorParams.panels![1].embeddableConfig.changedKey2).toBe('definitely changed');
+    expect(shareLocatorParams.panels![2].embeddableConfig.changedKey3).toBe('should still exist');
   });
 });

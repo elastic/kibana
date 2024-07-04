@@ -28,8 +28,7 @@ export type {
 export type { MapsSetupApi, MapsStartApi } from './api';
 export type { CreateLayerDescriptorParams } from './classes/sources/es_search_source/create_layer_descriptor';
 
-export type { MapEmbeddable, MapEmbeddableInput, MapEmbeddableOutput } from './embeddable';
-export { type MapApi, isMapApi } from './embeddable/map_api';
+export { type MapApi, type MapSerializedState, isMapApi } from './react_embeddable/types';
 
 export type { EMSTermJoinConfig, SampleValuesConfig } from './ems_autosuggest';
 

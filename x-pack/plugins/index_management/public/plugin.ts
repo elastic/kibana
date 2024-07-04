@@ -41,8 +41,8 @@ export class IndexMgmtUIPlugin
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
     enableIndexStats: boolean;
+    enableDataStreamStats: boolean;
     editableIndexSettings: 'all' | 'limited';
-    enableDataStreamsStorageColumn: boolean;
     isIndexManagementUiEnabled: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
@@ -59,8 +59,8 @@ export class IndexMgmtUIPlugin
       enableIndexActions,
       enableLegacyTemplates,
       enableIndexStats,
+      enableDataStreamStats,
       editableIndexSettings,
-      enableDataStreamsStorageColumn,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
       dev: { enableSemanticText },
@@ -70,8 +70,8 @@ export class IndexMgmtUIPlugin
       enableIndexActions: enableIndexActions ?? true,
       enableLegacyTemplates: enableLegacyTemplates ?? true,
       enableIndexStats: enableIndexStats ?? true,
+      enableDataStreamStats: enableDataStreamStats ?? true,
       editableIndexSettings: editableIndexSettings ?? 'all',
-      enableDataStreamsStorageColumn: enableDataStreamsStorageColumn ?? true,
       enableMappingsSourceFieldSection: enableMappingsSourceFieldSection ?? true,
       enableTogglingDataRetention: enableTogglingDataRetention ?? true,
       enableSemanticText: enableSemanticText ?? false,
@@ -112,7 +112,7 @@ export class IndexMgmtUIPlugin
   }
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
-    const { fleet, usageCollection, cloud, share, console, ml } = plugins;
+    const { fleet, usageCollection, cloud, share, console, ml, licensing } = plugins;
     return {
       extensionsService: this.extensionsService.setup(),
       getIndexMappingComponent: (deps: { history: ScopedHistory<unknown> }) => {
@@ -134,6 +134,7 @@ export class IndexMgmtUIPlugin
             cloud,
             console,
             ml,
+            licensing,
           },
           services: {
             extensionsService: this.extensionsService,

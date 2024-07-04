@@ -19,6 +19,7 @@ import { getConnectorType as getEmailConnectorType } from './email';
 import { getConnectorType as getIndexConnectorType } from './es_index';
 import { getConnectorType as getOpenAIConnectorType } from './openai';
 import { getConnectorType as getBedrockConnectorType } from './bedrock';
+import { getConnectorType as getGeminiConnectorType } from './gemini';
 import { getConnectorType as getPagerDutyConnectorType } from './pagerduty';
 import { getConnectorType as getSwimlaneConnectorType } from './swimlane';
 import { getConnectorType as getServerLogConnectorType } from './server_log';
@@ -57,7 +58,7 @@ export type { SlackApiActionParams as SlackApiActionParams } from '../../common/
 export { ConnectorTypeId as TeamsConnectorTypeId } from './teams';
 export type { ActionParamsType as TeamsActionParams } from './teams';
 export { ConnectorTypeId as WebhookConnectorTypeId } from './webhook';
-export type { ActionParamsType as WebhookActionParams } from './webhook';
+export type { ActionParamsType as WebhookActionParams } from './webhook/types';
 export { ConnectorTypeId as XmattersConnectorTypeId } from './xmatters';
 export type { ActionParamsType as XmattersActionParams } from './xmatters';
 
@@ -105,6 +106,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getTinesConnectorType());
   actions.registerSubActionConnectorType(getOpenAIConnectorType());
   actions.registerSubActionConnectorType(getBedrockConnectorType());
+  actions.registerSubActionConnectorType(getGeminiConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
 

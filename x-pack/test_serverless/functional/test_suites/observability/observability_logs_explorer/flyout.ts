@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         NAMESPACE
       );
       await PageObjects.observabilityLogsExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     beforeEach(async () => {
@@ -61,14 +61,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after('clean up archives', async () => {
-      await PageObjects.svlCommonPage.forceLogout();
       if (cleanupDataStreamSetup) {
         cleanupDataStreamSetup();
       }
     });
 
     it('should display the logs overview tab', async () => {
-      await dataGrid.clickRowToggle({ columnIndex: 4 });
+      await dataGrid.clickRowToggle({ columnIndex: 1 });
       await testSubjects.existOrFail('docViewerTab-doc_view_logs_overview');
     });
   });

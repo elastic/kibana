@@ -426,7 +426,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: false,
                 message:
-                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.otherFields]: types that failed validation:\n - [subActionParams.incident.otherFields.0]: A maximum of 20 otherFields can be defined at a time.\n - [subActionParams.incident.otherFields.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.otherFields]: types that failed validation:\n - [subActionParams.incident.otherFields.0]: A maximum of 20 fields in otherFields can be defined at a time.\n - [subActionParams.incident.otherFields.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
                 errorSource: TaskErrorSource.FRAMEWORK,
               });
             });

@@ -8,11 +8,13 @@
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';
-import { AssistantSettings, CONVERSATIONS_TAB } from './assistant_settings';
+import { AssistantSettings } from './assistant_settings';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
+import { CONVERSATIONS_TAB } from './const';
 
 interface Props {
   defaultConnector?: AIConnector;
@@ -23,7 +25,11 @@ interface Props {
   isDisabled?: boolean;
   isFlyoutMode: boolean;
   conversations: Record<string, Conversation>;
+  conversationsLoaded: boolean;
   refetchConversationsState: () => Promise<void>;
+  refetchPrompts?: (
+    options?: RefetchOptions & RefetchQueryFilters<unknown>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 }
 
 /**
@@ -39,7 +45,9 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     isFlyoutMode,
     onConversationSelected,
     conversations,
+    conversationsLoaded,
     refetchConversationsState,
+    refetchPrompts,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -56,6 +64,9 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       async (success: boolean) => {
         cleanupAndCloseModal();
         await refetchConversationsState();
+        if (refetchPrompts) {
+          await refetchPrompts();
+        }
         if (success) {
           toasts?.addSuccess({
             iconType: 'check',
@@ -63,7 +74,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
           });
         }
       },
-      [cleanupAndCloseModal, refetchConversationsState, toasts]
+      [cleanupAndCloseModal, refetchConversationsState, refetchPrompts, toasts]
     );
 
     const handleShowConversationSettings = useCallback(() => {
@@ -94,6 +105,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             onSave={handleSave}
             isFlyoutMode={isFlyoutMode}
             conversations={conversations}
+            conversationsLoaded={conversationsLoaded}
           />
         )}
       </>

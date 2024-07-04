@@ -7,9 +7,6 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110895
 /* eslint-disable @kbn/eslint/no_export_all */
-
-import { AlertsHealth } from './rule';
-
 export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';
@@ -26,6 +23,7 @@ export type {
   RuleTaskState,
   RuleTaskParams,
 } from '@kbn/alerting-state-types';
+export type { AlertingFrameworkHealth } from '@kbn/alerting-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';
@@ -72,12 +70,6 @@ export {
   contextToSchemaName,
 } from './alert_schema';
 
-export interface AlertingFrameworkHealth {
-  isSufficientlySecure: boolean;
-  hasPermanentEncryptionKey: boolean;
-  alertingFrameworkHealth: AlertsHealth;
-}
-
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
@@ -95,6 +87,8 @@ export const INTERNAL_ALERTING_BACKFILL_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill` as const;
 export const INTERNAL_ALERTING_BACKFILL_FIND_API_PATH =
   `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_find` as const;
+export const INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH =
+  `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule` as const;
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;

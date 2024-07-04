@@ -33,7 +33,7 @@ export const executeActionRoute = (
       path: `${BASE_ACTION_API_PATH}/action/{id}/_execute`,
       options: {
         access: 'public',
-        description: `Run a connector`,
+        summary: `Run a connector`,
       },
       validate: {
         body: bodySchema,

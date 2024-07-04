@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SetAlertTagsRequestBody } from './set_alert_tags_route';
+import type { ManageAlertTagsRequestBody } from './set_alert_tags.gen';
 
 export const getSetAlertTagsRequestMock = (
   tagsToAdd: string[] = [],
   tagsToRemove: string[] = [],
   ids: string[] = []
-): SetAlertTagsRequestBody => ({
+): ManageAlertTagsRequestBody => ({
   tags: { tags_to_add: tagsToAdd, tags_to_remove: tagsToRemove },
   ids,
 });

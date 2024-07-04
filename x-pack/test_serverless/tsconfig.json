@@ -101,6 +101,9 @@
     "@kbn/dataset-quality-plugin",
     "@kbn/alerting-comparators",
     "@kbn/search-types",
-    "@kbn/reporting-server"
+    "@kbn/reporting-server",
+    "@kbn/config-schema",
+    "@kbn/features-plugin",
+    "@kbn/observability-ai-assistant-plugin",
   ]
 }
