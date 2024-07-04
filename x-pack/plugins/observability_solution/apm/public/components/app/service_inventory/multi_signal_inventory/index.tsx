@@ -8,9 +8,10 @@ import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { ApmDocumentType } from '../../../../../common/document_type';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { EmptyMessage } from '../../../shared/empty_message';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
@@ -22,6 +23,10 @@ import {
   MultiSignalServicesTable,
   ServiceInventoryFieldName,
 } from './table/multi_signal_services_table';
+import { ServiceListItem } from '../../../../../common/service_inventory';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
 
@@ -74,9 +79,73 @@ function useServicesEntitiesMainStatisticsFetcher() {
   return { mainStatisticsData: data, mainStatisticsStatus: status };
 }
 
+function useServicesEntitiesDetailedStatisticsFetcher({
+  mainStatisticsFetch,
+  services,
+}: {
+  mainStatisticsFetch: ReturnType<typeof useServicesEntitiesMainStatisticsFetcher>;
+  services: ServiceListItem[];
+}) {
+  const {
+    query: { rangeFrom, rangeTo, environment, kuery, offset, comparisonEnabled },
+  } = useApmParams('/services');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const dataSourceOptions = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.ServiceTransactionMetric,
+    numBuckets: 20,
+  });
+
+  const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
+
+  const comparisonFetch = useProgressiveFetcher(
+    (callApmApi) => {
+      const serviceNames = services.map(({ serviceName }) => serviceName);
+
+      if (
+        start &&
+        end &&
+        serviceNames.length > 0 &&
+        mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
+        dataSourceOptions
+      ) {
+        return callApmApi('POST /internal/apm/services/detailed_statistics', {
+          params: {
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              offset: comparisonEnabled && isTimeComparison(offset) ? offset : undefined,
+              documentType: dataSourceOptions.source.documentType,
+              rollupInterval: dataSourceOptions.source.rollupInterval,
+              bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
+            },
+            body: {
+              // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+              serviceNames: JSON.stringify(serviceNames.sort()),
+            },
+          },
+        });
+      }
+    },
+    // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mainStatisticsData.requestId, services, offset, comparisonEnabled],
+    { preservePreviousData: false }
+  );
+
+  return { comparisonFetch };
+}
+
 export const MultiSignalInventory = () => {
   const [searchQuery, setSearchQuery] = React.useState('');
   const { mainStatisticsData, mainStatisticsStatus } = useServicesEntitiesMainStatisticsFetcher();
+  const mainStatisticsFetch = useServicesEntitiesMainStatisticsFetcher();
 
   const initialSortField = ServiceInventoryFieldName.Throughput;
 
@@ -84,6 +153,11 @@ export const MultiSignalInventory = () => {
     items: mainStatisticsData.services,
     searchQuery,
     fieldsToSearch: [ServiceInventoryFieldName.ServiceName],
+  });
+
+  const { comparisonFetch } = useServicesEntitiesDetailedStatisticsFetcher({
+    mainStatisticsFetch,
+    services: mainStatisticsData.services,
   });
 
   return (
@@ -110,6 +184,8 @@ export const MultiSignalInventory = () => {
             initialSortField={initialSortField}
             initialPageSize={INITIAL_PAGE_SIZE}
             initialSortDirection={INITIAL_SORT_DIRECTION}
+            comparisonData={comparisonFetch?.data}
+            comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
             noItemsMessage={
               <EmptyMessage
                 heading={i18n.translate('xpack.apm.servicesTable.notFoundLabel', {

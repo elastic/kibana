@@ -17,6 +17,8 @@ import { ManagedTable } from '../../../../shared/managed_table';
 import { getServiceColumns } from './get_service_columns';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/entities/services'>;
+type ServicesDetailedStatisticsAPIResponse =
+  APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
 
 export enum ServiceInventoryFieldName {
   ServiceName = 'serviceName',
@@ -35,6 +37,8 @@ interface Props {
   initialSortDirection: 'asc' | 'desc';
   noItemsMessage: React.ReactNode;
   data: MainStatisticsApiResponse['services'];
+  comparisonDataLoading: boolean;
+  comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }
 
 export function MultiSignalServicesTable({
@@ -44,6 +48,8 @@ export function MultiSignalServicesTable({
   initialPageSize,
   initialSortDirection,
   noItemsMessage,
+  comparisonDataLoading,
+  comparisonData,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { query } = useApmParams('/services');
@@ -55,8 +61,10 @@ export function MultiSignalServicesTable({
       query: omit(query, 'page', 'pageSize', 'sortDirection', 'sortField'),
       breakpoints,
       link,
+      comparisonDataLoading,
+      comparisonData,
     });
-  }, [query, link, breakpoints]);
+  }, [query, breakpoints, link, comparisonDataLoading, comparisonData]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>

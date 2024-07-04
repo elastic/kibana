@@ -31,14 +31,23 @@ import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 import { ServiceInventoryFieldName } from './multi_signal_services_table';
 import { EntityServiceListItem, SignalTypes } from '../../../../../../common/entities/types';
 import { isApmSignal } from '../../../../../utils/get_signal_type';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+
+type ServicesDetailedStatisticsAPIResponse =
+  APIReturnType<'POST /internal/apm/services/detailed_statistics'>;
+
 export function getServiceColumns({
   query,
   breakpoints,
   link,
+  comparisonDataLoading,
+  comparisonData,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   breakpoints: Breakpoints;
   link: any;
+  comparisonDataLoading: boolean;
+  comparisonData?: ServicesDetailedStatisticsAPIResponse;
 }): Array<ITableColumn<EntityServiceListItem>> {
   return [
     {
@@ -90,17 +99,22 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
-        const { currentPeriodColor } = getTimeSeriesColor(ChartType.LATENCY_AVG);
+      render: (_, { metrics, serviceName, signalTypes }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.LATENCY_AVG
+        );
 
         return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
+            isLoading={comparisonDataLoading}
+            series={comparisonData?.currentPeriod[serviceName]?.latency}
+            comparisonSeries={comparisonData?.previousPeriod[serviceName]?.latency}
+            // hideSeries={!showWhenSmallOrGreaterThanLarge} - TODO
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asMillisecondDuration(metrics.latency)}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -113,17 +127,22 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
-        const { currentPeriodColor } = getTimeSeriesColor(ChartType.THROUGHPUT);
+      render: (_, { metrics, serviceName, signalTypes }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.THROUGHPUT
+        );
 
         return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asTransactionRate(metrics.throughput)}
+            isLoading={comparisonDataLoading}
+            series={comparisonData?.currentPeriod[serviceName]?.throughput}
+            comparisonSeries={comparisonData?.previousPeriod[serviceName]?.throughput}
+            // hideSeries={!showWhenSmallOrGreaterThanLarge}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
@@ -136,17 +155,22 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics, signalTypes }) => {
-        const { currentPeriodColor } = getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
+      render: (_, { metrics, serviceName, signalTypes }) => {
+        const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+          ChartType.FAILED_TRANSACTION_RATE
+        );
 
         return !isApmSignal(signalTypes) ? (
           <NotAvailableApmMetrics />
         ) : (
           <ListMetric
-            isLoading={false}
             color={currentPeriodColor}
-            hideSeries
             valueLabel={asPercent(metrics.failedTransactionRate, 1)}
+            isLoading={comparisonDataLoading}
+            series={comparisonData?.currentPeriod[serviceName]?.transactionErrorRate}
+            comparisonSeries={comparisonData?.previousPeriod[serviceName]?.transactionErrorRate}
+            // hideSeries={!showWhenSmallOrGreaterThanLarge}
+            comparisonSeriesColor={previousPeriodColor}
           />
         );
       },
