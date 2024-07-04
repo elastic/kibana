@@ -156,7 +156,7 @@ pageLoadAssetSize:
   synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
-  textBasedLanguages: 37000
+  esql: 37000
   threatIntelligence: 44299
   timelines: 327300
   transform: 41007

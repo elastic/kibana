@@ -328,7 +328,7 @@ generating deep links to other apps using locators, and creating short URLs.
 |This plugin adds the Advanced Settings section for the Usage and Security Data collection (aka Telemetry).
 
 
-|{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[textBasedLanguages]
+|{kib-repo}blob/{branch}/src/plugins/text_based_languages/README.md[esql]
 |The editor accepts the following properties:
 
 
