@@ -659,7 +659,10 @@ describe('TableListView', () => {
         TagList: getTagList({ references: [] }),
       }),
       {
-        defaultProps: { ...requiredProps, recentlyAccessed: { get: () => [{ id: '123' }] } },
+        defaultProps: {
+          ...requiredProps,
+          recentlyAccessed: { get: () => [{ id: '123', link: '', label: '' }] },
+        },
         memoryRouter: { wrapComponent: true },
       }
     );

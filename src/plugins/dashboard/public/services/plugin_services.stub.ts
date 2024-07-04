@@ -81,7 +81,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
   uiActions: new PluginServiceProvider(uiActionsServiceFactory),
   userProfile: new PluginServiceProvider(userProfileServiceFactory),
-  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedServiceFactory)
+  dashboardRecentlyAccessed: new PluginServiceProvider(dashboardRecentlyAccessedServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);
