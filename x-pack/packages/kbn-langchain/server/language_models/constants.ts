@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-export const getDefaultArguments = (llmType?: string, temperature?: number, stop?: string[]) =>
+export const getDefaultArguments = (
+  llmType?: string,
+  temperature?: number,
+  stop?: string[],
+  maxTokens?: number
+) =>
   llmType === 'bedrock'
     ? {
         temperature: temperature ?? DEFAULT_BEDROCK_TEMPERATURE,
         stopSequences: stop ?? DEFAULT_BEDROCK_STOP_SEQUENCES,
+        maxTokens,
       }
     : llmType === 'gemini'
     ? {

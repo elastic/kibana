@@ -26,13 +26,15 @@ import { registerRoutes as registerFleetServerHostRoutes } from './fleet_server_
 import { registerRoutes as registerFleetProxiesRoutes } from './fleet_proxies';
 import { registerRoutes as registerMessageSigningServiceRoutes } from './message_signing_service';
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
+import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
+import { registerRoutes as registerDebugRoutes } from './debug';
 
 export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
   // Always register app routes for permissions checking
   registerAppRoutes(fleetAuthzRouter);
 
   // The upload package route is only authorized for the superuser
-  registerEPMRoutes(fleetAuthzRouter);
+  registerEPMRoutes(fleetAuthzRouter, config);
 
   registerSetupRoutes(fleetAuthzRouter, config);
   registerAgentPolicyRoutes(fleetAuthzRouter);
@@ -47,6 +49,8 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerHealthCheckRoutes(fleetAuthzRouter);
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
+  registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
+  registerDebugRoutes(fleetAuthzRouter);
 
   // Conditional config routes
   if (config.agents.enabled) {

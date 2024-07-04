@@ -29,3 +29,4 @@ export const INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID =
   `${INSIGHTS_TAB_TEST_ID}CorrelationsButton` as const;
 export const INVESTIGATION_TAB_CONTENT_TEST_ID = `${PREFIX}InvestigationsTabContent` as const;
 export const RESPONSE_TAB_CONTENT_TEST_ID = `${PREFIX}ResponseTabContent` as const;
+export const NOTES_TAB_CONTENT_TEST_ID = `${PREFIX}NotesTabContent` as const;

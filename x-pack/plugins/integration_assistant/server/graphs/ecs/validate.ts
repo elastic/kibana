@@ -49,7 +49,11 @@ function findMissingFields(formattedSamples: string, ecsMapping: AnyObject): str
   return missingKeys;
 }
 
-function processMapping(path: string[], value: any, output: Record<string, string[][]>): void {
+export function processMapping(
+  path: string[],
+  value: any,
+  output: Record<string, string[][]>
+): void {
   if (typeof value === 'object' && value !== null) {
     if (!Array.isArray(value)) {
       // If the value is a dict with all the keys returned for each source field, this is the full path of the field.
