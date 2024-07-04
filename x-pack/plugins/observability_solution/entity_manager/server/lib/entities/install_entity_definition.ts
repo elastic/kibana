@@ -17,6 +17,7 @@ import {
   createAndInstallHistoryTransform,
   createAndInstallLatestTransform,
 } from './create_and_install_transform';
+import { validateDefinitionCanCreateValidTransformIds } from './transform/validate_transform_ids';
 import { deleteEntityDefinition } from './delete_entity_definition';
 import { deleteHistoryIngestPipeline, deleteLatestIngestPipeline } from './delete_ingest_pipeline';
 import { findEntityDefinitions } from './find_entity_definition';
@@ -57,6 +58,9 @@ export async function installEntityDefinition({
 
   try {
     logger.debug(() => `Installing definition ${JSON.stringify(definition)}`);
+
+    validateDefinitionCanCreateValidTransformIds(definition);
+
     const entityDefinition = await saveEntityDefinition(soClient, definition);
     installState.definition = true;
 
