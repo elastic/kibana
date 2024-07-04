@@ -6,4 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { RollupBetaWarning } from './rollup_beta_warning';
+/**
+ * Checks whether the provided ref is local.
+ * Local references start with `#/`
+ */
+export function isLocalRef(ref: string): boolean {
+  return ref.startsWith('#/');
+}
