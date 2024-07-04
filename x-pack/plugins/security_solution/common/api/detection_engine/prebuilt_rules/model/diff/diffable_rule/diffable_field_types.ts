@@ -43,7 +43,10 @@ export const DataSourceDataView = z.object({
 });
 
 export type RuleDataSource = z.infer<typeof RuleDataSource>;
-export const RuleDataSource = z.union([DataSourceIndexPatterns, DataSourceDataView]);
+export const RuleDataSource = z.discriminatedUnion('type', [
+  DataSourceIndexPatterns,
+  DataSourceDataView,
+]);
 
 // -------------------------------------------------------------------------------------------------
 // Rule data query
@@ -68,7 +71,7 @@ export const SavedKqlQuery = z.object({
 });
 
 export type RuleKqlQuery = z.infer<typeof RuleKqlQuery>;
-export const RuleKqlQuery = z.union([InlineKqlQuery, SavedKqlQuery]);
+export const RuleKqlQuery = z.discriminatedUnion('type', [InlineKqlQuery, SavedKqlQuery]);
 
 export type RuleEqlQuery = z.infer<typeof RuleEqlQuery>;
 export const RuleEqlQuery = z.object({

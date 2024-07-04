@@ -8,26 +8,13 @@
 import { z } from 'zod';
 
 import {
-  BuildingBlockObject,
-  RuleEqlQuery,
-  RuleEsqlQuery,
-  InlineKqlQuery,
-  RuleKqlQuery,
-  RuleDataSource,
-  RuleSchedule,
-  TimelineTemplateReference,
-  TimestampOverrideObject,
-  RuleNameOverrideObject,
-} from './diffable_field_types';
-
-import { buildSchema } from './build_schema';
-import {
   AnomalyThreshold,
   ConcurrentSearches,
   EventCategoryOverride,
   HistoryWindowStart,
   InvestigationGuide,
   ItemsPerSearch,
+  MachineLearningJobId,
   MaxSignals,
   NewTermsFields,
   RelatedIntegrationArray,
@@ -49,153 +36,133 @@ import {
   SeverityMapping,
   ThreatArray,
   ThreatIndex,
-  ThreatMapping,
   ThreatIndicatorPath,
+  ThreatMapping,
   Threshold,
   TiebreakerField,
   TimestampField,
-  MachineLearningJobId,
 } from '../../../../model/rule_schema';
 
+import {
+  BuildingBlockObject,
+  InlineKqlQuery,
+  RuleDataSource,
+  RuleEqlQuery,
+  RuleEsqlQuery,
+  RuleKqlQuery,
+  RuleNameOverrideObject,
+  RuleSchedule,
+  TimelineTemplateReference,
+  TimestampOverrideObject,
+} from './diffable_field_types';
+
 export type DiffableCommonFields = z.infer<typeof DiffableCommonFields>;
-export const DiffableCommonFields = buildSchema({
-  required: {
-    // Technical fields
-    // NOTE: We might consider removing them from the schema and returning from the API
-    // not via the fields diff, but via dedicated properties in the response body.
-    rule_id: RuleSignatureId,
-    version: RuleVersion,
+export const DiffableCommonFields = z.object({
+  // Technical fields
+  // NOTE: We might consider removing them from the schema and returning from the API
+  // not via the fields diff, but via dedicated properties in the response body.
+  rule_id: RuleSignatureId,
+  version: RuleVersion,
 
-    // Main domain fields
-    name: RuleName,
-    tags: RuleTagArray,
-    description: RuleDescription,
-    severity: Severity,
-    severity_mapping: SeverityMapping,
-    risk_score: RiskScore,
-    risk_score_mapping: RiskScoreMapping,
+  // Main domain fields
+  name: RuleName,
+  tags: RuleTagArray,
+  description: RuleDescription,
+  severity: Severity,
+  severity_mapping: SeverityMapping,
+  risk_score: RiskScore,
+  risk_score_mapping: RiskScoreMapping,
 
-    // About -> Advanced settings
-    references: RuleReferenceArray,
-    false_positives: RuleFalsePositiveArray,
-    threat: ThreatArray,
-    note: InvestigationGuide,
-    setup: SetupGuide,
-    related_integrations: RelatedIntegrationArray,
-    required_fields: RequiredFieldArray,
-    author: RuleAuthorArray,
-    license: RuleLicense,
+  // About -> Advanced settings
+  references: RuleReferenceArray,
+  false_positives: RuleFalsePositiveArray,
+  threat: ThreatArray,
+  note: InvestigationGuide,
+  setup: SetupGuide,
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  author: RuleAuthorArray,
+  license: RuleLicense,
 
-    // Other domain fields
-    rule_schedule: RuleSchedule, // NOTE: new field
-    exceptions_list: z.array(RuleExceptionList),
-    max_signals: MaxSignals,
-  },
-  optional: {
-    rule_name_override: RuleNameOverrideObject, // NOTE: new field
-    timestamp_override: TimestampOverrideObject, // NOTE: new field
-    timeline_template: TimelineTemplateReference, // NOTE: new field
-    building_block: BuildingBlockObject, // NOTE: new field
-  },
+  // Other domain fields
+  rule_schedule: RuleSchedule, // NOTE: new field
+  exceptions_list: z.array(RuleExceptionList),
+  max_signals: MaxSignals,
+
+  // Optional fields
+  rule_name_override: RuleNameOverrideObject.optional(), // NOTE: new field
+  timestamp_override: TimestampOverrideObject.optional(), // NOTE: new field
+  timeline_template: TimelineTemplateReference.optional(), // NOTE: new field
+  building_block: BuildingBlockObject.optional(), // NOTE: new field
 });
 
 export type DiffableCustomQueryFields = z.infer<typeof DiffableCustomQueryFields>;
-export const DiffableCustomQueryFields = buildSchema({
-  required: {
-    type: z.literal('query'),
-    kql_query: RuleKqlQuery, // NOTE: new field
-  },
-  optional: {
-    data_source: RuleDataSource, // NOTE: new field
-  },
+export const DiffableCustomQueryFields = z.object({
+  type: z.literal('query'),
+  kql_query: RuleKqlQuery, // NOTE: new field
+  data_source: RuleDataSource.optional(), // NOTE: new field
 });
 
 export type DiffableSavedQueryFields = z.infer<typeof DiffableSavedQueryFields>;
-export const DiffableSavedQueryFields = buildSchema({
-  required: {
-    type: z.literal('saved_query'),
-    kql_query: RuleKqlQuery, // NOTE: new field
-  },
-  optional: {
-    data_source: RuleDataSource, // NOTE: new field
-  },
+export const DiffableSavedQueryFields = z.object({
+  type: z.literal('saved_query'),
+  kql_query: RuleKqlQuery, // NOTE: new field
+  data_source: RuleDataSource.optional(), // NOTE: new field
 });
 
 export type DiffableEqlFields = z.infer<typeof DiffableEqlFields>;
-export const DiffableEqlFields = buildSchema({
-  required: {
-    type: z.literal('eql'),
-    eql_query: RuleEqlQuery, // NOTE: new field
-  },
-  optional: {
-    data_source: RuleDataSource, // NOTE: new field
-    event_category_override: EventCategoryOverride,
-    timestamp_field: TimestampField,
-    tiebreaker_field: TiebreakerField,
-  },
+export const DiffableEqlFields = z.object({
+  type: z.literal('eql'),
+  eql_query: RuleEqlQuery, // NOTE: new field
+  data_source: RuleDataSource.optional(), // NOTE: new field
+  event_category_override: EventCategoryOverride.optional(),
+  timestamp_field: TimestampField.optional(),
+  tiebreaker_field: TiebreakerField.optional(),
 });
 
+// this is a new type of rule, no prebuilt rules created yet.
+// new properties might be added here during further rule type development
 export type DiffableEsqlFields = z.infer<typeof DiffableEsqlFields>;
-export const DiffableEsqlFields = buildSchema({
-  required: {
-    type: z.literal('esql'),
-    esql_query: RuleEsqlQuery, // NOTE: new field
-  },
-  // this is a new type of rule, no prebuilt rules created yet.
-  // new properties might be added here during further rule type development
-  optional: {},
+export const DiffableEsqlFields = z.object({
+  type: z.literal('esql'),
+  esql_query: RuleEsqlQuery, // NOTE: new field
 });
 
 export type DiffableThreatMatchFields = z.infer<typeof DiffableThreatMatchFields>;
-export const DiffableThreatMatchFields = buildSchema({
-  required: {
-    type: z.literal('threat_match'),
-    kql_query: RuleKqlQuery, // NOTE: new field
-    threat_query: InlineKqlQuery, // NOTE: new field
-    threat_index: ThreatIndex,
-    threat_mapping: ThreatMapping,
-  },
-  optional: {
-    data_source: RuleDataSource, // NOTE: new field
-    threat_indicator_path: ThreatIndicatorPath,
-    concurrent_searches: ConcurrentSearches,
-    items_per_search: ItemsPerSearch,
-  },
+export const DiffableThreatMatchFields = z.object({
+  type: z.literal('threat_match'),
+  kql_query: RuleKqlQuery, // NOTE: new field
+  threat_query: InlineKqlQuery, // NOTE: new field
+  threat_index: ThreatIndex,
+  threat_mapping: ThreatMapping,
+  data_source: RuleDataSource.optional(), // NOTE: new field
+  threat_indicator_path: ThreatIndicatorPath.optional(),
+  concurrent_searches: ConcurrentSearches.optional(),
+  items_per_search: ItemsPerSearch.optional(),
 });
 
 export type DiffableThresholdFields = z.infer<typeof DiffableThresholdFields>;
-export const DiffableThresholdFields = buildSchema({
-  required: {
-    type: z.literal('threshold'),
-    kql_query: RuleKqlQuery, // NOTE: new field
-    threshold: Threshold,
-  },
-  optional: {
-    data_source: RuleDataSource, // NOTE: new field
-  },
+export const DiffableThresholdFields = z.object({
+  type: z.literal('threshold'),
+  kql_query: RuleKqlQuery, // NOTE: new field
+  threshold: Threshold,
+  data_source: RuleDataSource.optional(), // NOTE: new field
 });
 
 export type DiffableMachineLearningFields = z.infer<typeof DiffableMachineLearningFields>;
-export const DiffableMachineLearningFields = buildSchema({
-  required: {
-    type: z.literal('machine_learning'),
-    machine_learning_job_id: MachineLearningJobId,
-    anomaly_threshold: AnomalyThreshold,
-  },
-  optional: {},
+export const DiffableMachineLearningFields = z.object({
+  type: z.literal('machine_learning'),
+  machine_learning_job_id: MachineLearningJobId,
+  anomaly_threshold: AnomalyThreshold,
 });
 
 export type DiffableNewTermsFields = z.infer<typeof DiffableNewTermsFields>;
-export const DiffableNewTermsFields = buildSchema({
-  required: {
-    type: z.literal('new_terms'),
-    kql_query: InlineKqlQuery, // NOTE: new field
-    new_terms_fields: NewTermsFields,
-    history_window_start: HistoryWindowStart,
-  },
-  optional: {
-    data_source: RuleDataSource, // NOTE: new field
-  },
+export const DiffableNewTermsFields = z.object({
+  type: z.literal('new_terms'),
+  kql_query: InlineKqlQuery, // NOTE: new field
+  new_terms_fields: NewTermsFields,
+  history_window_start: HistoryWindowStart,
+  data_source: RuleDataSource.optional(), // NOTE: new field
 });
 
 /**
@@ -228,7 +195,7 @@ export const DiffableNewTermsFields = buildSchema({
 export type DiffableRule = z.infer<typeof DiffableRule>;
 const DiffableRule = z.intersection(
   DiffableCommonFields,
-  z.union([
+  z.discriminatedUnion('type', [
     DiffableCustomQueryFields,
     DiffableSavedQueryFields,
     DiffableEqlFields,

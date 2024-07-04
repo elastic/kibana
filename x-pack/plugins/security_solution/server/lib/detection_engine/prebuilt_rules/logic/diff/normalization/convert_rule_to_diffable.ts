@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RequiredOptional } from '@kbn/zod-helpers';
 import { requiredOptional } from '@kbn/zod-helpers';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
@@ -109,7 +110,7 @@ export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): D
 
 const extractDiffableCommonFields = (
   rule: RuleResponse | PrebuiltRuleAsset
-): DiffableCommonFields => {
+): RequiredOptional<DiffableCommonFields> => {
   return {
     // --------------------- REQUIRED FIELDS
     // Technical fields
@@ -151,7 +152,7 @@ const extractDiffableCommonFields = (
 
 const extractDiffableCustomQueryFields = (
   rule: QueryRule | QueryRuleCreateProps
-): DiffableCustomQueryFields => {
+): RequiredOptional<DiffableCustomQueryFields> => {
   return {
     type: rule.type,
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
@@ -161,7 +162,7 @@ const extractDiffableCustomQueryFields = (
 
 const extractDiffableSavedQueryFieldsFromRuleObject = (
   rule: SavedQueryRule | SavedQueryRuleCreateProps
-): DiffableSavedQueryFields => {
+): RequiredOptional<DiffableSavedQueryFields> => {
   return {
     type: rule.type,
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
@@ -171,7 +172,7 @@ const extractDiffableSavedQueryFieldsFromRuleObject = (
 
 const extractDiffableEqlFieldsFromRuleObject = (
   rule: EqlRule | EqlRuleCreateProps
-): DiffableEqlFields => {
+): RequiredOptional<DiffableEqlFields> => {
   return {
     type: rule.type,
     eql_query: extractRuleEqlQuery(rule.query, rule.language, rule.filters),
@@ -184,7 +185,7 @@ const extractDiffableEqlFieldsFromRuleObject = (
 
 const extractDiffableEsqlFieldsFromRuleObject = (
   rule: EsqlRule | EsqlRuleCreateProps
-): DiffableEsqlFields => {
+): RequiredOptional<DiffableEsqlFields> => {
   return {
     type: rule.type,
     esql_query: extractRuleEsqlQuery(rule.query, rule.language),
@@ -193,7 +194,7 @@ const extractDiffableEsqlFieldsFromRuleObject = (
 
 const extractDiffableThreatMatchFieldsFromRuleObject = (
   rule: ThreatMatchRule | ThreatMatchRuleCreateProps
-): DiffableThreatMatchFields => {
+): RequiredOptional<DiffableThreatMatchFields> => {
   return {
     type: rule.type,
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
@@ -213,7 +214,7 @@ const extractDiffableThreatMatchFieldsFromRuleObject = (
 
 const extractDiffableThresholdFieldsFromRuleObject = (
   rule: ThresholdRule | ThresholdRuleCreateProps
-): DiffableThresholdFields => {
+): RequiredOptional<DiffableThresholdFields> => {
   return {
     type: rule.type,
     kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
@@ -224,7 +225,7 @@ const extractDiffableThresholdFieldsFromRuleObject = (
 
 const extractDiffableMachineLearningFieldsFromRuleObject = (
   rule: MachineLearningRule | MachineLearningRuleCreateProps
-): DiffableMachineLearningFields => {
+): RequiredOptional<DiffableMachineLearningFields> => {
   return {
     type: rule.type,
     machine_learning_job_id: rule.machine_learning_job_id,
@@ -234,7 +235,7 @@ const extractDiffableMachineLearningFieldsFromRuleObject = (
 
 const extractDiffableNewTermsFieldsFromRuleObject = (
   rule: NewTermsRule | NewTermsRuleCreateProps
-): DiffableNewTermsFields => {
+): RequiredOptional<DiffableNewTermsFields> => {
   return {
     type: rule.type,
     kql_query: extractInlineKqlQuery(rule.query, rule.language, rule.filters),

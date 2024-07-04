@@ -8,22 +8,22 @@
 import * as t from 'io-ts';
 import { NonEmptyString, UUID } from '@kbn/securitysolution-io-ts-types';
 
-/**
- * IMPORTANT NOTE ON THIS FILE:
- *
- * This file contains the remaining rule schema types created manually via io-ts. They have been
- * migrated to Zod schemas created via code generation out of OpenAPI schemas
- * (found in x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts)
- *
- * The remaining types here couldn't easily be deleted/replaced because they are dependencies in
- * complex derived schemas in two files:
- *
- * - x-pack/plugins/security_solution/common/api/detection_engine/rule_exceptions/find_exception_references/find_exception_references_route.ts
- * - x-pack/plugins/security_solution/common/api/timeline/model/api.ts
- *
- * Once those two files are migrated to Zod, the /common/api/detection_engine/model/rule_schema_legacy
- * folder can be removed.
- */
+/*
+IMPORTANT NOTE ON THIS FILE:
+
+This file contains the remaining rule schema types created manually via io-ts. They have been
+migrated to Zod schemas created via code generation out of OpenAPI schemas
+(found in x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts)
+
+The remaining types here couldn't easily be deleted/replaced because they are dependencies in
+complex derived schemas in two files:
+
+- x-pack/plugins/security_solution/common/api/detection_engine/rule_exceptions/find_exception_references/find_exception_references_route.ts
+- x-pack/plugins/security_solution/common/api/timeline/model/api.ts
+
+Once those two files are migrated to Zod, the /common/api/detection_engine/model/rule_schema_legacy
+folder can be removed.
+*/
 
 export type RuleObjectId = t.TypeOf<typeof RuleObjectId>;
 export const RuleObjectId = UUID;
