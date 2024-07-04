@@ -17,7 +17,7 @@ import type {
   ESQLSource,
   ESQLTimeInterval,
 } from '@kbn/esql-ast';
-import { ESQLInlineCast } from '@kbn/esql-ast/src/types';
+import { ESQLAstMetricsCommand, ESQLInlineCast } from '@kbn/esql-ast/src/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -572,3 +572,9 @@ export function shouldBeQuotedText(
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
   getFunctionDefinition(arg.name)?.type === 'agg';
+
+export const isMetricsCommand = (x: unknown): x is ESQLAstMetricsCommand =>
+  !!x &&
+  typeof x === 'object' &&
+  (x as ESQLAstMetricsCommand).type === 'command' &&
+  (x as ESQLAstMetricsCommand).name === 'metrics';

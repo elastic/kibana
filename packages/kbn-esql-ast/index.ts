@@ -25,6 +25,7 @@ export type {
   AstProviderFn,
   EditorError,
   ESQLAstNode,
+  ESQLAstField,
 } from './src/types';
 
 // Low level functions to parse grammar

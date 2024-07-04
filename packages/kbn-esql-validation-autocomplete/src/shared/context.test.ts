@@ -52,14 +52,81 @@ describe('context', () => {
     });
 
     describe('METRICS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
-      test.only('returns sources position', async () => {
-        const { context } = await getContext('METRICS ');
+      describe('... <sources> ...', () => {
+        test('returns "sources" position on space after command name', async () => {
+          const { context } = await getContext('METRICS ');
 
-        expect(context).toMatchObject({
-          type: 'expression',
-          command: {
-            name: 'metrics',
-          },
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'sources',
+          });
+        });
+
+        test('returns "sources" position on space after comma', async () => {
+          const { context } = await getContext('METRICS index, ');
+
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'sources',
+          });
+        });
+      });
+
+      describe('... <aggregates> ...', () => {
+        test('returns "aggregates" position on space after sources', async () => {
+          const { context } = await getContext('METRICS index ');
+
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'aggregates',
+          });
+        });
+
+        test('returns "aggregates" position on space after comma', async () => {
+          const { context } = await getContext('METRICS index test, ');
+
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'aggregates',
+          });
+        });
+      });
+
+      describe('... BY <grouping> ...', () => {
+        test('returns "grouping" position on space after "BY"', async () => {
+          const { context } = await getContext('METRICS index aggregate BY ');
+
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'grouping',
+          });
+        });
+
+        test('returns "grouping" position on space after comma', async () => {
+          const { context } = await getContext('METRICS index aggregate BY grp1, ');
+
+          expect(context).toMatchObject({
+            type: 'expression',
+            command: {
+              name: 'metrics',
+            },
+            commandPosition: 'grouping',
+          });
         });
       });
     });

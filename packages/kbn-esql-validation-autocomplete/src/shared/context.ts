@@ -14,6 +14,8 @@ import type {
   ESQLCommand,
   ESQLCommandOption,
   ESQLCommandMode,
+  ESQLAstCommand,
+  ESQLAstMetricsCommand,
 } from '@kbn/esql-ast';
 import { ENRICH_MODES } from '../definitions/settings';
 import { EDITOR_MARKER } from './constants';
@@ -24,6 +26,8 @@ import {
   getFunctionDefinition,
   isSourceItem,
   isSettingItem,
+  isMetricsCommand,
+  isSingleItem,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -110,19 +114,104 @@ export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCo
   if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
     return {
       ...node,
-      args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
+      args: removeMarkerFromItemList(node.args),
     };
   }
   return node;
 }
 
+const removeMarkerFromItemList = (list: ESQLAstItem[]): ESQLAstItem[] =>
+  list.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode);
+
+const removeMarkerFromCommand = (command: ESQLAstCommand): ESQLAstCommand => {
+  switch (command.name) {
+    case 'metrics': {
+      const metrics = command as ESQLAstMetricsCommand;
+
+      return {
+        ...metrics,
+        args: removeMarkerFromItemList(metrics.args),
+        sources: removeMarkerFromItemList(metrics.sources),
+        aggregates: metrics.aggregates ? removeMarkerFromItemList(metrics.aggregates) : [],
+        grouping: metrics.grouping ? removeMarkerFromItemList(metrics.grouping) : [],
+      } as ESQLAstMetricsCommand;
+    }
+    default: {
+      return {
+        ...command,
+        args: removeMarkerFromItemList(command.args),
+      };
+    }
+  }
+};
+
+const getFirstItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined => {
+  if (!items.length) {
+    return undefined;
+  }
+  const first = items[0];
+  return isSingleItem(first) ? first : getFirstItem(first.args);
+};
+
+const getLastItem = (items: ESQLAstItem[]): ESQLSingleAstItem | undefined => {
+  if (!items.length) {
+    return undefined;
+  }
+  const last = items[items.length - 1];
+  return isSingleItem(last) ? last : getLastItem(last);
+};
+
+const isInItemRange = (position: number, items: ESQLAstItem[]): boolean => {
+  const first = getFirstItem(items);
+  if (!first || position < first.location.min) {
+    return false;
+  }
+  const last = getLastItem(items);
+  if (!last || position > last.location.max) {
+    return false;
+  }
+  return true;
+};
+
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
+
   if (!command) {
     return { command: undefined, node: undefined, option: undefined, setting: undefined };
   }
+
+  /**
+   * Position in a command. Empty string if not known, otherwise can be:
+   *
+   * - FROM <sources>
+   * - STATS <aggregates> [ BY <grouping> ]
+   * - METRICS <sources> [ <aggregates> [ BY <grouping> ]]
+   */
+  let commandPosition: '' | 'sources' | 'aggregates' | 'grouping' = '';
+
+  if (isMetricsCommand(command)) {
+    if (!commandPosition) {
+      if (command.sources.length && isInItemRange(offset, command.sources)) {
+        commandPosition = 'sources';
+      } else if (
+        command.aggregates &&
+        command.aggregates.length &&
+        isInItemRange(offset, command.aggregates)
+      ) {
+        commandPosition = 'aggregates';
+      } else if (
+        command.grouping &&
+        command.grouping.length &&
+        isInItemRange(offset, command.grouping)
+      ) {
+        commandPosition = 'grouping';
+      }
+    }
+  }
+
   return {
-    command: removeMarkerArgFromArgsList(command)!,
+    command: removeMarkerFromCommand(command),
+    commandPosition,
     option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
     node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))),
     setting: removeMarkerArgFromArgsList(findSetting(command.args, offset)),
@@ -150,7 +239,7 @@ function isBuiltinFunction(node: ESQLFunction) {
  * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
  */
 export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
-  const { command, option, setting, node } = findAstPosition(ast, offset);
+  const { command, commandPosition, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
@@ -187,6 +276,7 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   return {
     type: 'expression' as const,
     command,
+    commandPosition,
     option,
     node,
     setting,
