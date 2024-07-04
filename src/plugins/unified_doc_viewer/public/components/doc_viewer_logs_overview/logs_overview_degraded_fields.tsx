@@ -170,10 +170,19 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBadge color="default">{countOfDegradedFields}</EuiBadge>
+        <EuiBadge
+          color="default"
+          data-test-subj="unifiedDocViewLogsOverviewDegradedFieldTitleCount"
+        >
+          {countOfDegradedFields}
+        </EuiBadge>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBetaBadge label={qualityIssuesAccordionTechPreviewBadge} color="hollow" />
+        <EuiBetaBadge
+          label={qualityIssuesAccordionTechPreviewBadge}
+          color="hollow"
+          data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsTechPreview"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -188,6 +197,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         extraAction={
           <DatasetQualityLink urlService={urlService} paramsForLocator={paramsForLocator} />
         }
+        data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
       >
         <EuiBasicTable
           tableLayout="fixed"
@@ -196,7 +206,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
           sorting={{ sort: tableOptions.sort }}
           onChange={onTableChange}
           pagination={pagination}
-          data-test-subj="LogsFlyoutQualityIssuesTable"
+          data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsQualityIssuesTable"
         />
       </EuiAccordion>
       <EuiHorizontalRule margin="xs" />
@@ -301,7 +311,7 @@ const DatasetQualityLink = React.memo(
       <EuiHeaderLink
         {...datasetQualityLinkProps}
         color="primary"
-        data-test-subj="logsFlyourOverviewDatasetQualityLink"
+        data-test-subj="unifiedDocViewLogsOverviewDegradedFieldDatasetLink"
         iconType="popout"
         target="_blank"
       >
