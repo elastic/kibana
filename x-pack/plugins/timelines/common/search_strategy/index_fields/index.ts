@@ -76,19 +76,21 @@ export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
  */
 export interface BrowserField {
   aggregatable: boolean;
-  category: string;
-  description: string | null;
-  example: string | number | null;
-  fields: Record<string, Partial<BrowserField>>;
   format: string;
-  indexes: string[];
+  indexes: string[]; // FIXME: missing in FieldSpec
   name: string;
   searchable: boolean;
   type: string;
   esTypes?: string[];
-  subType?: IFieldSubType;
+  subType?: IFieldSubType; // not sure
   readFromDocValues: boolean;
   runtimeField?: RuntimeField;
+}
+
+type FieldCategoryName = string;
+
+export interface FieldCategory {
+  fields: Record<string, Partial<BrowserField>>;
 }
 
 /**
@@ -98,7 +100,7 @@ export interface BrowserField {
  * you are working with? Or perhaps you need a description for a
  * particular field? Consider using the EcsFlat module from `@kbn/ecs`
  */
-export type BrowserFields = Record<string, Partial<BrowserField>>;
+export type BrowserFields = Record<FieldCategoryName, FieldCategory>;
 
 export const EMPTY_BROWSER_FIELDS = {};
 export const EMPTY_INDEX_FIELDS: FieldSpec[] = [];

@@ -173,7 +173,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
                 )}
                 isUrl
                 helpText={
-                  inputs.hostUrlsInput.props.disabled && (
+                  cloud?.isServerlessEnabled && (
                     <FormattedMessage
                       id="xpack.fleet.settings.fleetServerHostsFlyout.serverlessHostUrlsHelpText"
                       defaultMessage="Custom host URLs are not allowed in serverless."

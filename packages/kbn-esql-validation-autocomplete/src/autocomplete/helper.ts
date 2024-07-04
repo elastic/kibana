@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLSource } from '@kbn/esql-ast';
 import { FunctionDefinition } from '../definitions/types';
 import { getFunctionDefinition, isAssignment, isFunctionItem } from '../shared/helpers';
 
@@ -62,4 +62,12 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
   return commands.length === 1 && ['from', 'row', 'show'].includes(commands[0].name)
     ? ''
     : queryString;
+}
+
+export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
+  const fromCommand = commands.find(({ name }) => name === 'from');
+  const args = (fromCommand?.args ?? []) as ESQLSource[];
+  const sources = args.filter((arg) => arg.sourceType === sourceType);
+
+  return sources.length === 1 ? sources[0] : undefined;
 }

@@ -7,24 +7,16 @@
 
 import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
-import { get } from 'lodash';
-import memoizeOne from 'memoize-one';
+import { getFieldFromBrowserField } from '../../../../common/components/event_details/columns';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { FieldValueCell } from '../../../../common/components/event_details/table/field_value_cell';
-import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { FieldNameCell } from '../../../../common/components/event_details/table/field_name_cell';
 import { CellActions } from '../components/cell_actions';
 import * as i18n from '../../../../common/components/event_details/translations';
-import { useRightPanelContext } from '../context';
+import { useDocumentDetailsContext } from '../../shared/context';
 import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
 import { EventFieldsBrowser } from '../../../../common/components/event_details/event_fields_browser';
 import { TimelineTabs } from '../../../../../common/types';
-
-export const getFieldFromBrowserField = memoizeOne(
-  (keys: string[], browserFields: BrowserFields): BrowserField | undefined =>
-    get(browserFields, keys),
-  (newArgs, lastArgs) => newArgs[0].join() === lastArgs[0].join()
-);
 
 export const getColumns: ColumnsProvider = ({
   browserFields,
@@ -57,10 +49,7 @@ export const getColumns: ColumnsProvider = ({
     ),
     width: '70%',
     render: (values, data) => {
-      const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category as string, 'fields', data.field],
-        browserFields
-      );
+      const fieldFromBrowserField = getFieldFromBrowserField(data.field, browserFields);
       return (
         <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
           <FieldValueCell
@@ -82,7 +71,8 @@ export const getColumns: ColumnsProvider = ({
  * Table view displayed in the document details expandable flyout right section
  */
 export const TableTab = memo(() => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useRightPanelContext();
+  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } =
+    useDocumentDetailsContext();
 
   return (
     <EventFieldsBrowser

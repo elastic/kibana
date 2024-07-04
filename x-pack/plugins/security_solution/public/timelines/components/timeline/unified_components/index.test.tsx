@@ -75,8 +75,8 @@ const useIsExperimentalFeatureEnabledMock = jest.fn((feature: keyof Experimental
 
 jest.mock('../../../../common/lib/kibana');
 
-// unified-field-list is is reporiting multiple analytics events
-jest.mock(`@kbn/analytics-client`);
+// unified-field-list is reporting multiple analytics events
+jest.mock(`@kbn/ebt/client`);
 
 const columnsToDisplay = [
   ...defaultUdtHeaders,
@@ -118,8 +118,6 @@ const TestComponent = (props: Partial<ComponentProps<typeof UnifiedTimeline>>) =
     dataLoadingState: DataLoadingState.loaded,
     updatedAt: Date.now(),
     isTextBasedQuery: false,
-    eventIdToNoteIds: {} as Record<string, string[]>,
-    pinnedEventIds: {} as Record<string, boolean>,
   };
 
   const dispatch = useDispatch();

@@ -21,10 +21,10 @@ import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
-import { SearchApi, Services, SearchSerializedState } from './types';
+import { SearchApi, Services, SearchSerializedState, SearchRuntimeState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchApi> = {
+  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchRuntimeState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_ID,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {

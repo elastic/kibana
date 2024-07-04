@@ -208,6 +208,57 @@ describe('conversational chain', () => {
     });
   }, 10000);
 
+  it('should be able to create a conversational chain with inner hit field', async () => {
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      docs: [
+        {
+          _index: 'index',
+          _id: '1',
+          inner_hits: {
+            'index.field': {
+              hits: {
+                hits: [
+                  {
+                    _source: {
+                      text: 'value',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      ],
+      expectedDocs: [
+        {
+          documents: [{ metadata: { _id: '1', _index: 'index' }, pageContent: 'value' }],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 7 },
+        { type: 'prompt_token_count', count: 20 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
+        },
+      ],
+      contentField: { index: 'field' },
+    });
+  }, 10000);
+
   it('asking with chat history should re-write the question', async () => {
     await createTestChain({
       responses: ['rewrite the question', 'the final answer'],
