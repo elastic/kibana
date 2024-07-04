@@ -128,19 +128,32 @@ export const findMissingBrackets = (text: string) => {
 export const fixupQuery = (query: string, caretPosition: number, context: EditorContext) => {
   const leftOfCaret = query.substring(0, caretPosition);
   const missingBrackets = findMissingBrackets(leftOfCaret);
+  const { triggerCharacter } = context;
   let fixedQuery = leftOfCaret;
 
-  // Insert a marker, if it is a comma/colon by the user or a forced trigger by
-  // a function argument suggestion to make the expression still valid.
+  // Insert a marker, if:
+  //
+  //   1. it is a comma/colon by the user;
+  //   2. or, a forced trigger by a function argument suggestion to make the
+  //      expression still valid;
+  //   3. or, a space that separates <sources> from <aggregates> in the METRICS
+  //      command. (METRICS <sources> <aggregates>)
   const charThatNeedMarkers = [',', ':'];
-  if (
-    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+  const triggeredByUserChar = triggerCharacter && charThatNeedMarkers.includes(triggerCharacter);
+  const triggeredByFunctionArgSuggestion =
     (context.triggerKind === 0 &&
       missingBrackets.roundCount === 0 &&
       getLastCharFromTrimmed(leftOfCaret) !== '_') ||
-    (context.triggerCharacter === ' ' &&
+    (triggerCharacter === ' ' &&
       (isMathFunction(leftOfCaret, caretPosition) ||
-        isComma(leftOfCaret.trimEnd()[leftOfCaret.trimEnd().length - 1])))
+        isComma(leftOfCaret.trimEnd()[leftOfCaret.trimEnd().length - 1])));
+  const isMetricsCommandTransitionIntoAggregates =
+    triggerCharacter === ' ' && /^metrics\s([^,],?)+ $/i.test(leftOfCaret);
+
+  if (
+    triggeredByUserChar ||
+    triggeredByFunctionArgSuggestion ||
+    isMetricsCommandTransitionIntoAggregates
   ) {
     fixedQuery =
       leftOfCaret.substring(0, caretPosition) +
