@@ -7,7 +7,10 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryId, generateLatestId } from './helpers/generate_component_id';
+import {
+  generateHistoryPipelineId,
+  generateLatestPipelineId,
+} from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 
 export async function deleteHistoryIngestPipeline(
@@ -16,7 +19,7 @@ export async function deleteHistoryIngestPipeline(
   logger: Logger
 ) {
   try {
-    const historyPipelineId = generateHistoryId(definition);
+    const historyPipelineId = generateHistoryPipelineId(definition);
     await retryTransientEsErrors(() =>
       esClient.ingest.deletePipeline({ id: historyPipelineId }, { ignore: [404] })
     );
@@ -32,7 +35,7 @@ export async function deleteLatestIngestPipeline(
   logger: Logger
 ) {
   try {
-    const latestPipelineId = generateLatestId(definition);
+    const latestPipelineId = generateLatestPipelineId(definition);
     await retryTransientEsErrors(() =>
       esClient.ingest.deletePipeline({ id: latestPipelineId }, { ignore: [404] })
     );

@@ -7,7 +7,10 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryId, generateLatestId } from './helpers/generate_component_id';
+import {
+  generateHistoryTransformId,
+  generateLatestTransformId,
+} from './helpers/generate_component_id';
 import { retryTransientEsErrors } from './helpers/retry';
 
 export async function stopAndDeleteHistoryTransform(
@@ -16,7 +19,7 @@ export async function stopAndDeleteHistoryTransform(
   logger: Logger
 ) {
   try {
-    const historyTransformId = generateHistoryId(definition);
+    const historyTransformId = generateHistoryTransformId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.transform.stopTransform(
@@ -45,7 +48,7 @@ export async function stopAndDeleteLatestTransform(
   logger: Logger
 ) {
   try {
-    const latestTransformId = generateLatestId(definition);
+    const latestTransformId = generateLatestTransformId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.transform.stopTransform(

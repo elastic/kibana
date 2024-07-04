@@ -12,22 +12,26 @@ import {
   ENTITY_DEFAULT_LATEST_SYNC_DELAY,
 } from '../../../../common/constants_entities';
 import { generateLatestMetadataAggregations } from './generate_metadata_aggregations';
-import { generateLatestId } from '../helpers/generate_component_id';
-import { generateHistoryIndexName, generateLatestIndexName } from '../helpers/generate_index_name';
+import {
+  generateHistoryIndexName,
+  generateLatestTransformId,
+  generateLatestPipelineId,
+  generateLatestIndexName,
+} from '../helpers/generate_component_id';
 import { generateLatestMetricAggregations } from './generate_metric_aggregations';
 
 export function generateLatestTransform(
   definition: EntityDefinition
 ): TransformPutTransformRequest {
   return {
-    transform_id: generateLatestId(definition),
+    transform_id: generateLatestTransformId(definition),
     defer_validation: true,
     source: {
       index: `${generateHistoryIndexName(definition)}.*`,
     },
     dest: {
       index: generateLatestIndexName(definition),
-      pipeline: generateLatestId(definition),
+      pipeline: generateLatestPipelineId(definition),
     },
     frequency: definition.latest?.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
     sync: {
