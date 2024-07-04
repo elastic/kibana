@@ -36,7 +36,7 @@ describe('correctCommonEsqlMistakes', () => {
     );
   });
 
-  it("replaces ` or ' escaping in FROM statements with backticks", () => {
+  it("replaces ` or ' escaping in FROM statements with double quotes", () => {
     expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM "logs-*"\n| LIMIT 10');
     expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM "logs-*"\n| LIMIT 10');
     expectQuery(`FROM logs-* | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
