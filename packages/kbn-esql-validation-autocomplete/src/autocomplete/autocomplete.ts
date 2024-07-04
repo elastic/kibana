@@ -171,6 +171,27 @@ export async function suggest(
   if (astContext.type === 'expression') {
     // suggest next possible argument, or option
     // otherwise a variable
+
+    if (astContext.command.name === 'metrics') {
+      if (astContext.commandPosition === 'aggregates') {
+        const { nodeArg } = extractArgMeta(astContext.command, astContext.node);
+        const fieldsMap: Map<string, ESQLRealField> = await new Map();
+        const anyVariables = collectVariables([], fieldsMap, innerText);
+
+        return await getFieldsOrFunctionsSuggestions(
+          ['any'],
+          astContext.command.name,
+          '',
+          getFieldsByType,
+          {
+            functions: true,
+            fields: false,
+            variables: nodeArg ? undefined : anyVariables,
+          }
+        );
+      }
+    }
+
     return getExpressionSuggestionsByType(
       innerText,
       ast,

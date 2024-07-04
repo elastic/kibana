@@ -282,3 +282,5 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     setting,
   };
 }
+
+export type AstContext = ReturnType<typeof getAstContext>;
