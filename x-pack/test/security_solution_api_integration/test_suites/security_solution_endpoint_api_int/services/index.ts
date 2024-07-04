@@ -15,8 +15,8 @@ import { RolesUsersProvider } from './roles_users';
 import { EndpointTestResources } from '../../../../security_solution_endpoint/services/endpoint';
 import { EndpointPolicyTestResourcesProvider } from '../../../../security_solution_endpoint/services/endpoint_policy';
 import { EndpointArtifactsTestResources } from '../../../../security_solution_endpoint/services/endpoint_artifacts';
-import { SecuritySolutionEndpointDataStreamHelpers } from '../../../../common/services/security_solution/security_solution_endpoint_data_stream_helpers';
-import { SecuritySolutionEndpointRegistryHelpers } from '../../../../common/services/security_solution/security_solution_endpoint_registry_helpers';
+import { SecuritySolutionEndpointDataStreamHelpers } from '../../../../common/services/security_solution/endpoint_data_stream_helpers';
+import { SecuritySolutionEndpointRegistryHelpers } from '../../../../common/services/security_solution/endpoint_registry_helpers';
 
 export const services = {
   ...xPackAPIServices,

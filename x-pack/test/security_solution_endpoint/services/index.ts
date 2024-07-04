@@ -17,8 +17,8 @@ import {
   KibanaSupertestWithCertProvider,
   KibanaSupertestWithCertWithoutAuthProvider,
 } from './supertest_with_cert';
-import { SecuritySolutionEndpointDataStreamHelpers } from '../../common/services/security_solution/security_solution_endpoint_data_stream_helpers';
-import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution/security_solution_endpoint_registry_helpers';
+import { SecuritySolutionEndpointDataStreamHelpers } from '../../common/services/security_solution/endpoint_data_stream_helpers';
+import { SecuritySolutionEndpointRegistryHelpers } from '../../common/services/security_solution/endpoint_registry_helpers';
 
 export const services = {
   ...xPackFunctionalServices,
