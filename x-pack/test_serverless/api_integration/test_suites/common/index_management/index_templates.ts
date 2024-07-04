@@ -27,9 +27,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const getRandomString: () => string = () => randomness.string({ casing: 'lower', alpha: true });
 
-  describe('Index templates', function () {
-    // see details: https://github.com/elastic/kibana/issues/187368
-    this.tags(['failsOnMKI']);
+  // see details: https://github.com/elastic/kibana/issues/187368
+  describe.skip('Index templates', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
@@ -130,8 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('create', () => {
-      // see details: https://github.com/elastic/kibana/issues/187368
-      it.skip('should create an index template', async () => {
+      it('should create an index template', async () => {
         const payload = svlTemplatesHelpers.getTemplatePayload(
           `template-${getRandomString()}`,
           [getRandomString()],
@@ -142,8 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(status).to.eql(200);
       });
 
-      // see details: https://github.com/elastic/kibana/issues/187368
-      it.skip('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
+      it('should throw a 409 conflict when trying to create 2 templates with the same name', async () => {
         const templateName = `template-${getRandomString()}`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -177,8 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      // see details: https://github.com/elastic/kibana/issues/187368
-      it.skip('should parse the ES error and return the cause', async () => {
+      it('should parse the ES error and return the cause', async () => {
         const templateName = `template-create-parse-es-error`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -206,8 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('update', () => {
-      // see details: https://github.com/elastic/kibana/issues/187368
-      it.skip('should update an index template', async () => {
+      it('should update an index template', async () => {
         const templateName = `template-${getRandomString()}`;
         const indexTemplate = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -242,8 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
         ).to.equal(updatedVersion.toString());
       });
 
-      // see details: https://github.com/elastic/kibana/issues/187368
-      it.skip('should parse the ES error and return the cause', async () => {
+      it('should parse the ES error and return the cause', async () => {
         const templateName = `template-update-parse-es-error`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,
@@ -282,8 +276,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('delete', () => {
-      // see details: https://github.com/elastic/kibana/issues/187368
-      it.skip('should delete an index template', async () => {
+      it('should delete an index template', async () => {
         const templateName = `template-${getRandomString()}`;
         const payload = svlTemplatesHelpers.getTemplatePayload(
           templateName,

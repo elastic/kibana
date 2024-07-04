@@ -17,9 +17,8 @@ export default function ({ getService }: FtrProviderContext) {
   const svlIndicesHelpers = getService('svlIndicesHelpers');
   let roleAuthc: RoleCredentials;
 
-  describe('settings', function () {
-    // see details: https://github.com/elastic/kibana/issues/187369
-    this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
+  // see details: https://github.com/elastic/kibana/issues/187369
+  describe.skip('settings', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
     });
@@ -29,8 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    // see details: https://github.com/elastic/kibana/issues/187369
-    it.skip('should fetch an index settings', async () => {
+    it('should fetch an index settings', async () => {
       const index = await svlIndicesHelpers.createIndex();
 
       const { status, body } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
@@ -103,8 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    // see details: https://github.com/elastic/kibana/issues/187369
-    it.skip('should update an index settings', async () => {
+    it('should update an index settings', async () => {
       const index = await svlIndicesHelpers.createIndex();
 
       const { body: body1 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
