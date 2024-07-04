@@ -97,7 +97,9 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     let reversedCodeowners = [];
     try {
       reversedCodeowners = getPathsWithOwnersReversed();
-    } catch {}
+    } catch {
+      /* no-op */
+    }
 
     const commandLine = prettifyCommandLine(process.argv);
 
