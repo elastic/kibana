@@ -30,7 +30,7 @@ export function generateLatestTransform(
       index: `${generateHistoryIndexName(definition)}.*`,
     },
     dest: {
-      index: generateLatestIndexName(definition),
+      index: `${generateLatestIndexName({ id: 'noop' } as EntityDefinition)}`,
       pipeline: generateLatestPipelineId(definition),
     },
     frequency: definition.latest?.settings?.frequency ?? ENTITY_DEFAULT_LATEST_FREQUENCY,
