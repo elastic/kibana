@@ -16,5 +16,5 @@ export type {
 
 export async function plugin(initializerContext: PluginInitializerContext) {
   const { LogsDataAccessPlugin } = await import('./plugin');
-  return new LogsDataAccessPlugin();
+  return new LogsDataAccessPlugin(initializerContext);
 }

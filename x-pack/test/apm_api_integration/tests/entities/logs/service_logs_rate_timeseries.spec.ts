@@ -6,12 +6,14 @@
  */
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { first, last } from 'lodash';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const logSynthtrace = getService('logSynthtraceEsClient');
 
   const serviceName = 'synth-go';
@@ -19,9 +21,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const end = new Date('2024-01-01T00:15:00.000Z').getTime() - 1;
 
   const hostName = 'synth-host';
-
-  type LogsRateTimeseriesReturnType =
-    APIReturnType<'GET /internal/apm/entities/services/{serviceName}/logs_rate_timeseries'>;
 
   async function getLogsRateTimeseries(
     overrides?: RecursivePartial<
@@ -165,8 +164,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(response.status).to.be(200);
-          expect(first(response.body.currentPeriod['my-service']).y).to.be(0.18181818181818182);
-          expect(last(response.body.currentPeriod['my-service']).y).to.be(0.09090909090909091);
+          expect(first(response.body.currentPeriod?.['my-service'])?.y).to.be(0.18181818181818182);
+          expect(last(response.body.currentPeriod?.['my-service'])?.y).to.be(0.09090909090909091);
         });
       });
     });

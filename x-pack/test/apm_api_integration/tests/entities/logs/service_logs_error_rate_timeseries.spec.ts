@@ -7,11 +7,13 @@
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { first, last } from 'lodash';
+import { RecursivePartial } from '@kbn/apm-plugin/typings/common';
+import { APIClientRequestParamsOf } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
   const logSynthtrace = getService('logSynthtraceEsClient');
 
   const serviceName = 'synth-go';
@@ -163,8 +165,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             expect(response.status).to.be(200);
-            expect(first(response.body.currentPeriod['my-service']).y).to.be(0.5);
-            expect(last(response.body.currentPeriod['my-service']).y).to.be(1);
+            expect(first(response.body.currentPeriod?.['my-service'])?.y).to.be(0.5);
+            expect(last(response.body.currentPeriod?.['my-service'])?.y).to.be(1);
           });
         });
       });
