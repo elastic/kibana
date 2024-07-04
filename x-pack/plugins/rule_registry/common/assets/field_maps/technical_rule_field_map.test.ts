@@ -82,6 +82,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.previous_action_group": Object {
+        "array": false,
+        "required": false,
+        "type": "keyword",
+      },
       "kibana.alert.reason": Object {
         "array": false,
         "multi_fields": Array [
@@ -244,6 +249,11 @@ it('matches snapshot', () => {
         "array": false,
         "required": false,
         "type": "keyword",
+      },
+      "kibana.alert.severity_improving": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
       },
       "kibana.alert.start": Object {
         "array": false,

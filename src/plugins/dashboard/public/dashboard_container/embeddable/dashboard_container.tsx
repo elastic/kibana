@@ -170,6 +170,7 @@ export class DashboardContainer
   public creationEndTime?: number;
   public firstLoad: boolean = true;
   private hadContentfulRender = false;
+  private scrollPosition?: number;
 
   // cleanup
   public stopSyncingWithUnifiedSearch?: () => void;
@@ -585,11 +586,18 @@ export class DashboardContainer
     return panel;
   };
 
-  public expandPanel = (panelId?: string) => {
-    this.setExpandedPanelId(panelId);
+  public expandPanel = (panelId: string) => {
+    const isPanelExpanded = Boolean(this.getExpandedPanelId());
 
-    if (!panelId) {
+    if (isPanelExpanded) {
+      this.setExpandedPanelId(undefined);
       this.setScrollToPanelId(panelId);
+      return;
+    }
+
+    this.setExpandedPanelId(panelId);
+    if (window.scrollY > 0) {
+      this.scrollPosition = window.scrollY;
     }
   };
 
@@ -765,6 +773,17 @@ export class DashboardContainer
 
     this.untilEmbeddableLoaded(id).then(() => {
       this.setScrollToPanelId(undefined);
+      if (this.scrollPosition) {
+        panelRef.ontransitionend = () => {
+          // Scroll to the last scroll position after the transition ends to ensure the panel is back in the right position before scrolling
+          // This is necessary because when an expanded panel collapses, it takes some time for the panel to return to its original position
+          window.scrollTo({ top: this.scrollPosition });
+          this.scrollPosition = undefined;
+          panelRef.ontransitionend = null;
+        };
+        return;
+      }
+
       panelRef.scrollIntoView({ block: 'center' });
     });
   };

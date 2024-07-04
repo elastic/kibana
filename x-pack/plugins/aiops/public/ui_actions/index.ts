@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   categorizeFieldTrigger,
@@ -27,10 +27,13 @@ export function registerAiopsUiActions(
   const openChangePointInMlAppAction = createOpenChangePointInMlAppAction(coreStart, pluginStart);
   const addChangePointChartAction = createAddChangePointChartAction(coreStart, pluginStart);
   const addPatternAnalysisAction = createAddPatternAnalysisEmbeddableAction(coreStart, pluginStart);
-
+  
+  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addPatternAnalysisAction);
   uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addChangePointChartAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openChangePointInMlAppAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addPatternAnalysisAction);
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addChangePointChartAction);
+  
+    
 
   uiActions.registerTrigger(categorizeFieldTrigger);
 

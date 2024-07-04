@@ -22,7 +22,6 @@
     "@kbn/shared-ux-chrome-navigation",
     "@kbn/cloud-plugin",
     "@kbn/config",
-    "@kbn/user-profile-components",
     "@kbn/cloud-experiments-plugin",
     "@kbn/spaces-plugin",
   ],
