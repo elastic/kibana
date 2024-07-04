@@ -55,10 +55,10 @@ export const useSourceIndicesFields = () => {
   } = useController({
     name: ChatFormFields.sourceFields,
   });
-  const { fields, isLoading } = useIndicesFields(selectedIndices);
+  const { fields, isLoading: isFieldsLoading } = useIndicesFields(selectedIndices);
 
   useEffect(() => {
-    if (fields && !isLoading) {
+    if (fields && !isFieldsLoading) {
       resetField(ChatFormFields.queryFields);
 
       const defaultFields = getDefaultQueryFields(fields);
@@ -81,7 +81,7 @@ export const useSourceIndicesFields = () => {
     }
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fields, isLoading]);
+  }, [fields, isFieldsLoading]);
 
   const addIndex = (newIndex: IndexName) => {
     const newIndices = [...selectedIndices, newIndex];
@@ -107,6 +107,7 @@ export const useSourceIndicesFields = () => {
     indices: selectedIndices,
     fields,
     loading,
+    isFieldsLoading,
     addIndex,
     removeIndex,
     setIndices,

@@ -20,21 +20,27 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect } from 'react';
-import { useController, useFormContext } from 'react-hook-form';
+import React, { useEffect, useMemo } from 'react';
+import { useController } from 'react-hook-form';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
-import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { docLinks } from '../../../common/doc_links';
 import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
 
+const isQueryFieldSelected = (
+  queryFields: ChatForm[ChatFormFields.queryFields],
+  index: string,
+  field: string
+) => {
+  return queryFields[index]?.includes(field);
+};
+
 export const QueryMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const usageTracker = useUsageTracker();
-  const { getValues } = useFormContext<ChatForm>();
-  const selectedIndices: string[] = getValues(ChatFormFields.indices);
-  const { fields } = useIndicesFields(selectedIndices);
+  const { fields, isFieldsLoading } = useSourceIndicesFields();
   const defaultFields = getDefaultQueryFields(fields);
 
   const {
@@ -49,10 +55,6 @@ export const QueryMode: React.FC = () => {
   } = useController({
     name: ChatFormFields.elasticsearchQuery,
   });
-
-  const isQueryFieldSelected = (index: string, field: string) => {
-    return queryFields[index].includes(field);
-  };
 
   const updateFields = (index: string, fieldName: string, checked: boolean) => {
     const currentIndexFields = checked
@@ -69,23 +71,35 @@ export const QueryMode: React.FC = () => {
     usageTracker?.load(AnalyticsEvents.queryModeLoaded);
   }, [usageTracker]);
 
+  const query = useMemo(
+    () => !isFieldsLoading && JSON.stringify(createQuery(queryFields, fields), null, 2),
+    [queryFields, fields, isFieldsLoading]
+  );
+
   return (
-    <EuiFlexGroup css={{ padding: euiTheme.size.l }}>
-      <EuiFlexItem grow={6}>
+    <EuiFlexGroup>
+      <EuiFlexItem
+        grow={6}
+        className="eui-yScroll"
+        css={{ padding: euiTheme.size.l, paddingRight: 0 }}
+      >
         <EuiCodeBlock
           language="json"
           fontSize="m"
-          paddingSize="m"
+          paddingSize="none"
           lineNumbers
           transparentBackground
           data-test-subj="ViewElasticsearchQueryResult"
-          className="eui-yScroll"
         >
-          {JSON.stringify(createQuery(queryFields, fields), null, 2)}
+          {query}
         </EuiCodeBlock>
       </EuiFlexItem>
-      <EuiFlexItem grow={3}>
-        <EuiFlexGroup direction="column" className="eui-yScroll" gutterSize="s">
+      <EuiFlexItem
+        grow={3}
+        className="eui-yScroll"
+        css={{ padding: euiTheme.size.l, paddingLeft: 0 }}
+      >
+        <EuiFlexGroup direction="column" gutterSize="s">
           <EuiText>
             <h5>
               <FormattedMessage
@@ -117,6 +131,7 @@ export const QueryMode: React.FC = () => {
                     ].map((field) => ({
                       name: typeof field === 'string' ? field : field.field,
                       checked: isQueryFieldSelected(
+                        queryFields,
                         index,
                         typeof field === 'string' ? field : field.field
                       ),
