@@ -303,7 +303,7 @@ export const validatePackagePolicyConfig = (
         errors.push(
           i18n.translate('xpack.fleet.packagePolicyValidation.quoteStringErrorMessage', {
             defaultMessage:
-              'Strings starting with special YAML characters like * or & need to be enclosed in double quotes.',
+              'Strings starting with special YAML characters like * or & need to be enclosed in double quotes. Example: "*foo"',
           })
         );
       }
@@ -329,7 +329,7 @@ export const validatePackagePolicyConfig = (
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.quoteStringErrorMessage', {
           defaultMessage:
-            'Strings starting with special YAML characters like * or & need to be enclosed in double quotes.',
+            'Strings starting with special YAML characters like * or & need to be enclosed in double quotes. Example: "*foo"',
         })
       );
     }

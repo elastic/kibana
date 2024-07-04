@@ -621,131 +621,101 @@ describe('Fleet - validatePackagePolicy()', () => {
       });
     });
 
-    // TODO enable when https://github.com/elastic/kibana/issues/125655 is fixed
-    it.skip('returns package policy validation error if input var does not exist', () => {
+    it('returns error when var starts with * or &', () => {
       expect(
         validatePackagePolicy(
           {
-            description: 'Linux Metrics',
-            enabled: true,
+            ...validPackagePolicy,
             inputs: [
               {
+                type: 'foo',
+                policy_template: 'pkgPolicy1',
                 enabled: true,
-                streams: [
-                  {
-                    data_stream: {
-                      dataset: 'linux.memory',
-                      type: 'metrics',
-                    },
-                    enabled: true,
-                  },
-                ],
-                type: 'linux/metrics',
                 vars: {
-                  period: {
-                    type: 'string',
-                    value: '1s',
-                  },
+                  'foo-input-var-name': { value: '*', type: 'text' },
                 },
-              },
-            ],
-            name: 'linux-3d13ada6-a9ae-46df-8e57-ff5050f4b671',
-            namespace: 'default',
-            package: {
-              name: 'linux',
-              title: 'Linux Metrics',
-              version: '0.6.2',
-            },
-            policy_id: 'b25cb6e0-8347-11ec-96f9-6590c25bacf9',
-            policy_ids: ['b25cb6e0-8347-11ec-96f9-6590c25bacf9'],
-          },
-          {
-            ...mockPackage,
-            name: 'linux',
-            policy_templates: [
-              {
-                name: 'system',
-                title: 'Linux kernel metrics',
-                description: 'Collect system metrics from Linux operating systems',
-                inputs: [
-                  {
-                    title: 'Collect system metrics from Linux instances',
-                    vars: [
-                      {
-                        name: 'system.hostfs',
-                        type: 'text',
-                        title: 'Proc Filesystem Directory',
-                        multi: false,
-                        required: false,
-                        show_user: true,
-                        description: 'The proc filesystem base directory.',
-                      },
-                    ],
-                    type: 'system/metrics',
-                    description:
-                      'Collecting Linux entropy, Network Summary, RAID, service, socket, and users metrics',
-                  },
-                  {
-                    title: 'Collect low-level system metrics from Linux instances',
-                    vars: [],
-                    type: 'linux/metrics',
-                    description: 'Collecting Linux conntrack, ksm, pageinfo metrics.',
-                  },
-                ],
-                multiple: true,
-              },
-            ],
-            data_streams: [
-              {
-                dataset: 'linux.memory',
-                package: 'linux',
-                path: 'memory',
                 streams: [
                   {
-                    input: 'linux/metrics',
-                    title: 'Linux memory metrics',
-                    vars: [
-                      {
-                        name: 'period',
-                        type: 'text',
-                        title: 'Period',
-                        multi: false,
-                        required: true,
-                        show_user: true,
-                        default: '10s',
-                      },
-                    ],
-                    template_path: 'stream.yml.hbs',
-                    description: 'Linux paging and memory management metrics',
+                    data_stream: { dataset: 'foo', type: 'logs' },
+                    enabled: true,
+                    vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
                   },
                 ],
-                title: 'Linux-only memory metrics',
-                release: 'experimental',
-                type: 'metrics',
               },
             ],
           },
+          mockPackage,
           safeLoad
         )
       ).toEqual({
+        name: null,
         description: null,
+        namespace: null,
         inputs: {
-          'linux/metrics': {
+          foo: {
             streams: {
-              'linux.memory': {
+              foo: {
                 vars: {
-                  period: ['Period is required'],
+                  'var-name': null,
                 },
               },
             },
             vars: {
-              period: ['period var definition does not exist'],
+              'foo-input-var-name': [
+                'Strings starting with special YAML characters like * or & need to be enclosed in double quotes. Example: "*foo"',
+              ],
             },
           },
         },
         vars: {},
+      });
+    });
+
+    it('returns no error when var starts with special character wrapped with double quotes', () => {
+      expect(
+        validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                type: 'foo',
+                policy_template: 'pkgPolicy1',
+                enabled: true,
+                vars: {
+                  'foo-input-var-name': { value: '"*foo"', type: 'text' },
+                },
+                streams: [
+                  {
+                    data_stream: { dataset: 'foo', type: 'logs' },
+                    enabled: true,
+                    vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
+                  },
+                ],
+              },
+            ],
+          },
+          mockPackage,
+          safeLoad
+        )
+      ).toEqual({
         name: null,
+        description: null,
         namespace: null,
+        inputs: {
+          foo: {
+            streams: {
+              foo: {
+                vars: {
+                  'var-name': null,
+                },
+              },
+            },
+            vars: {
+              'foo-input-var-name': null,
+            },
+          },
+        },
+        vars: {},
       });
     });
   });
