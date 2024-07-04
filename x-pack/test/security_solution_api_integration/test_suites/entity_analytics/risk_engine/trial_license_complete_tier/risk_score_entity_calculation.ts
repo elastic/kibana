@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
   };
 
-  describe('@ess @serverless Risk Scoring Entity Calculation API', () => {
+  describe('@ess @serverless @serverlessQA Risk Scoring Entity Calculation API', () => {
     before(async () => {
       enableAssetCriticalityAdvancedSetting(kibanaServer, log);
     });
