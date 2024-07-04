@@ -187,7 +187,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName
           <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{USER_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.user} />
+              <RiskScoreDocTooltip />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
