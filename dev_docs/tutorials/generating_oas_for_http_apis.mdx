@@ -16,25 +16,43 @@ tags: ['kibana', 'onboarding', 'dev', 'architecture', 'http', 'rest', 'api']
 To get OAS generated for HTTP APIs you must use the following components:
 
 1. Core's `router` or `router.versioned` for defining HTTP APIs provided via the `core.http` service to all plugins
-2. `@kbn/config-schema` request and response schemas
+2. `@kbn/config-schema` request and response schemas, skip to <a href="#what-about-runtime-validation-libary-x">this</a> FAQ for more information
 
 <DocCallOut title="Beyond runtime validation">
-  Kibana's core platform supports `@kbn/config-schema` as a first class citizen for various schema purposes: configuration, saved objects, and HTTP API request/response bodies.
+  Kibana's core platform supports `@kbn/config-schema` as a first-class citizen for various schema purposes: configuration, saved objects, and HTTP API request/response bodies.
 
   Developers can leverage `@kbn/config-schema` as a single-source of truth for runtime validation, TypeScript interfaces, and OpenAPI specification.
 </DocCallOut>
 
-### How can I use it?
+### How do I see my HTTP API's OAS?
 
-#### 1. Schema definitions
+In `kibana.dev.yml` add the following configuration:
 
-Defining and organizing schemas is up to each team. In this example we show how you can organize HTTP API schemas
-to prepare them for being versioned and shared both on the server and client side of your plugin:
+```yaml
+server.oas.enabled: true
+```
+
+Launch Kibana and issue the following request:
+
+```bash
+curl -s -uelastic:changeme http://localhost:5601/api/oas\?pathStartsWith\=/api/foo
+```
+
+The value returned should contain the OpenAPI specification for your route.
+
+### Some good practices to consider
+
+#### 1. Runtime schema definitions
 
 ```typescript
 // In server/schemas/v1.ts
 import { schema, TypeOf } from '@kbn/config-schema';
-export const fooResource = schema.object({ name: schema.string() });
+
+export const fooResource = schema.object({
+  name: schema.string()
+  // ...and any other fields you may need
+});
+
 export type FooResource = TypeOf<typeof fooResource>;
 
 // In common/foo/v1.ts
@@ -45,6 +63,11 @@ export type { FooResource } from './latest';
 
 export * as fooResourceV1 from '../foo/v1';
 ```
+
+This example demonstrates how you can organize runtime schemas to prepare for:
+
+1. Being versioned
+2. Have TypeScript references available to client and server code in your plugin
 
 See <DocLink id="kibDevTutorialVersioningInterfaces" text="strategies for versioning your schemas" /> for more information on this organizational pattern.
 
@@ -113,19 +136,7 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
 
 #### 3. Generating OAS
 
-In `kibana.dev.yml` add the following configuration:
-
-```yaml
-server.oas.enabled: true
-```
-
-Launch Kibana and issue the following request:
-
-```bash
-curl -s -uelastic:changeme http://localhost:5601/api/oas\?pathStartsWith\=/api/foo
-```
-
-The value returned should contain the OpenAPI specification for your route.
+See <a href="#how-do-i-see-my-http api-s-oas">this section</a> about viewing your HTTP APIs OAS.
 
 #### 4. Iterating on OAS
 
