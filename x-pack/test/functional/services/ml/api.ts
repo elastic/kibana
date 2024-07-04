@@ -247,21 +247,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         log.debug(`Inference endpoint '${inferenceId}' already exists. Nothing to create.`);
         return;
       }
-      const { body, status } = await esSupertest
+      const response = await esSupertest
         .put(`/_inference/${taskType}/${inferenceId}`)
         .send(requestBody);
-      if (status === 408) {
-        // confirm its request time out error
-        expect(body).to.have.property('error');
-        expect(body.error).to.have.property('reason');
-        expect(body.error.reason).to.eql(
-          'Timed out after [30s] waiting for model deployment to start. Use the trained model stats API to track the state of the deployment.'
-        );
-      } else {
-        this.assertResponseStatusCode(200, status, body);
-      }
-      log.debug('> Inference endpoint created');
-      return body;
+      return response;
     },
 
     async deleteInferenceEndpoint(inferenceId: string, taskType: string) {

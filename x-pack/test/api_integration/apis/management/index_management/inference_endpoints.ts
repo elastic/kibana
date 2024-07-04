@@ -20,25 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const modelId = '.elser_model_2';
 
   describe('Inference endpoints', function () {
-    before(async () => {
-      log.debug(`Creating inference endpoint`);
-      try {
-        await ml.api.createInferenceEndpoint(inferenceId, taskType, {
-          service,
-          service_settings: {
-            num_allocations: 1,
-            num_threads: 1,
-            model_id: modelId,
-          },
-        });
-      } catch (err) {
-        log.debug('[Setup error] Error creating inference endpoint');
-        throw err;
-      }
-    });
-
     after(async () => {
-      // Cleanup inference endpoints created for testing purposes
+      // Cleanup inference endpoints created for testing
       try {
         log.debug(`Deleting inference endpoint`);
         await ml.api.deleteInferenceEndpoint(inferenceId, taskType);
@@ -50,18 +33,37 @@ export default function ({ getService }: FtrProviderContext) {
         throw err;
       }
     });
-
-    describe('get inference endpoints', () => {
-      it('returns the existing inference endpoints', async () => {
-        const { body: inferenceEndpoints } = await supertest
-          .get(`${API_BASE_PATH}/inference/all`)
-          .set('kbn-xsrf', 'xxx')
-          .set('x-elastic-internal-origin', 'xxx')
-          .expect(200);
-
-        expect(inferenceEndpoints).to.be.ok();
-        expect(inferenceEndpoints[0].model_id).to.eql(inferenceId);
+    it('create inference endpoint', async () => {
+      log.debug(`create inference endpoint`);
+      const { body, status } = await ml.api.createInferenceEndpoint(inferenceId, taskType, {
+        service,
+        service_settings: {
+          num_allocations: 1,
+          num_threads: 1,
+          model_id: modelId,
+        },
       });
+      if (status === 408) {
+        // handles the case when it takes a while to download and start trained model
+        expect(body).to.have.property('error');
+        expect(body.error).to.have.property('reason');
+        expect(body.error.reason).to.eql(
+          'Timed out after [30s] waiting for model deployment to start. Use the trained model stats API to track the state of the deployment.'
+        );
+      } else {
+        expect(status).to.eql(200, `${JSON.stringify(body)}`);
+      }
+      log.debug('> Inference endpoint created');
+    });
+    it('get all inference endpoints and confirm inference endpoint exist', async () => {
+      const { body: inferenceEndpoints } = await supertest
+        .get(`${API_BASE_PATH}/inference/all`)
+        .set('kbn-xsrf', 'xxx')
+        .set('x-elastic-internal-origin', 'xxx')
+        .expect(200);
+
+      expect(inferenceEndpoints).to.be.ok();
+      expect(inferenceEndpoints[0].model_id).to.eql(inferenceId);
     });
   });
 }
