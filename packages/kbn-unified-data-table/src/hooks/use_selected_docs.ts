@@ -17,8 +17,9 @@ export interface UseSelectedDocsState {
   toggleDocSelection: (docId: string) => void;
   selectAllDocs: () => void;
   selectMoreDocs: (docIds: string[]) => void;
+  deselectSomeDocs: (docIds: string[]) => void;
   replaceSelectedDocs: (docIds: string[]) => void;
-  clearSelectedDocs: () => void;
+  clearAllSelectedDocs: () => void;
 }
 
 export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelectedDocsState => {
@@ -48,7 +49,14 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
     setSelectedDocsSet((prevSelectedRowsSet) => new Set([...prevSelectedRowsSet, ...docIds]));
   }, []);
 
-  const clearSelectedDocs = useCallback(() => {
+  const deselectSomeDocs = useCallback((docIds: string[]) => {
+    setSelectedDocsSet(
+      (prevSelectedRowsSet) =>
+        new Set([...prevSelectedRowsSet].filter((docId) => !docIds.includes(docId)))
+    );
+  }, []);
+
+  const clearAllSelectedDocs = useCallback(() => {
     setSelectedDocsSet(new Set());
   }, []);
 
@@ -84,8 +92,9 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
       toggleDocSelection,
       selectAllDocs,
       selectMoreDocs,
+      deselectSomeDocs,
       replaceSelectedDocs,
-      clearSelectedDocs,
+      clearAllSelectedDocs,
     }),
     [
       isDocSelected,
@@ -93,8 +102,9 @@ export const useSelectedDocs = (docMap: Map<string, DataTableRecord>): UseSelect
       toggleDocSelection,
       selectAllDocs,
       selectMoreDocs,
+      deselectSomeDocs,
       replaceSelectedDocs,
-      clearSelectedDocs,
+      clearAllSelectedDocs,
       usedSelectedDocsCount,
       usedSelectedDocs,
     ]

@@ -72,8 +72,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 
 export const SelectAllButton = () => {
   const { selectedDocsState, pageIndex, pageSize, rows } = useContext(UnifiedDataTableContext);
-  const { getCountOfSelectedDocs, clearSelectedDocs, selectMoreDocs, selectAllDocs } =
-    selectedDocsState;
+  const { getCountOfSelectedDocs, deselectSomeDocs, selectMoreDocs } = selectedDocsState;
 
   const docIdsFromCurrentPage = useMemo(() => {
     if (typeof pageIndex === 'number' && typeof pageSize === 'number') {
@@ -102,6 +101,10 @@ export const SelectAllButton = () => {
     return false;
   }, [docIdsFromCurrentPage, countOfSelectedDocs]);
 
+  if (!docIdsFromCurrentPage) {
+    return null;
+  }
+
   return (
     <>
       <EuiScreenReaderOnly>
@@ -119,19 +122,12 @@ export const SelectAllButton = () => {
         indeterminate={isIndeterminateForCurrentPage}
         checked={areDocsSelectedForCurrentPage}
         onChange={(e) => {
-          if (isIndeterminateForCurrentPage) {
-            clearSelectedDocs();
-            return;
-          }
+          const shouldClearSelection = isIndeterminateForCurrentPage || !e.target.checked;
 
-          if (e.target.checked) {
-            if (docIdsFromCurrentPage) {
-              selectMoreDocs(docIdsFromCurrentPage);
-            } else {
-              selectAllDocs();
-            }
+          if (shouldClearSelection) {
+            deselectSomeDocs(docIdsFromCurrentPage);
           } else {
-            clearSelectedDocs();
+            selectMoreDocs(docIdsFromCurrentPage);
           }
         }}
       />
@@ -145,14 +141,14 @@ export function DataTableDocumentToolbarBtn({
   rows,
   selectedDocs,
   setIsFilterActive,
-  clearSelectedDocs,
+  clearAllSelectedDocs,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
   rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
-  clearSelectedDocs: () => void;
+  clearAllSelectedDocs: () => void;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
@@ -236,14 +232,14 @@ export function DataTableDocumentToolbarBtn({
         icon="cross"
         onClick={() => {
           setIsSelectionPopoverOpen(false);
-          clearSelectedDocs();
+          clearAllSelectedDocs();
           setIsFilterActive(false);
         }}
       >
         <FormattedMessage id="unifiedDataTable.clearSelection" defaultMessage="Clear selection" />
       </EuiContextMenuItem>,
     ];
-  }, [isFilterActive, isPlainRecord, rows, selectedDocs, setIsFilterActive, clearSelectedDocs]);
+  }, [isFilterActive, isPlainRecord, rows, selectedDocs, setIsFilterActive, clearAllSelectedDocs]);
 
   const toggleSelectionToolbar = useCallback(
     () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),

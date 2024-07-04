@@ -474,7 +474,7 @@ export const UnifiedDataTable = ({
     isDocSelected,
     hasSelectedDocs,
     usedSelectedDocs,
-    clearSelectedDocs,
+    clearAllSelectedDocs,
     replaceSelectedDocs,
   } = selectedDocsState;
 
@@ -881,7 +881,7 @@ export const UnifiedDataTable = ({
                 isFilterActive={isFilterActive}
                 rows={rows!}
                 selectedDocs={usedSelectedDocs}
-                clearSelectedDocs={clearSelectedDocs}
+                clearAllSelectedDocs={clearAllSelectedDocs}
                 setIsFilterActive={setIsFilterActive}
               />
             </EuiFlexItem>
@@ -892,7 +892,7 @@ export const UnifiedDataTable = ({
     );
   }, [
     externalAdditionalControls,
-    clearSelectedDocs,
+    clearAllSelectedDocs,
     usedSelectedDocs,
     isPlainRecord,
     isFilterActive,

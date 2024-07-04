@@ -155,7 +155,7 @@ describe('document selection', () => {
         rows: dataTableContextMock.rows,
         selectedDocs: ['i::1::'],
         setIsFilterActive: jest.fn(),
-        clearSelectedDocs: jest.fn(),
+        clearAllSelectedDocs: jest.fn(),
         setIsCompareActive: jest.fn(),
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);

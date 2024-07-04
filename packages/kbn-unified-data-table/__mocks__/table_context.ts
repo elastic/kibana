@@ -31,7 +31,7 @@ const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableCo
     selectedDocsState: {
       toggleDocSelection: jest.fn(),
       selectAllDocs: jest.fn(),
-      clearSelectedDocs: jest.fn(),
+      clearAllSelectedDocs: jest.fn(),
       replaceSelectedDocs: jest.fn(),
       isDocSelected: jest.fn(),
       isIndeterminate: false,
