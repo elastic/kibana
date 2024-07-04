@@ -18,11 +18,10 @@ import { generateLatestProcessors } from './ingest_pipeline/generate_latest_proc
 export async function createAndInstallHistoryIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
-  logger: Logger,
-  spaceId: string
+  logger: Logger
 ) {
   try {
-    const historyProcessors = generateHistoryProcessors(definition, spaceId);
+    const historyProcessors = generateHistoryProcessors(definition);
     const historyId = generateHistoryPipelineId(definition);
     await retryTransientEsErrors(
       () =>
@@ -42,11 +41,10 @@ export async function createAndInstallHistoryIngestPipeline(
 export async function createAndInstallLatestIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
-  logger: Logger,
-  spaceId: string
+  logger: Logger
 ) {
   try {
-    const latestProcessors = generateLatestProcessors(definition, spaceId);
+    const latestProcessors = generateLatestProcessors(definition);
     const latestId = generateLatestPipelineId(definition);
     await retryTransientEsErrors(
       () =>
