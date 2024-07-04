@@ -43,7 +43,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
-export function generateHistoryProcessors(definition: EntityDefinition, spaceId: string) {
+export function generateHistoryProcessors(definition: EntityDefinition) {
   return [
     {
       set: {
@@ -53,8 +53,8 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
     },
     {
       set: {
-        field: 'entity.spaceId',
-        value: spaceId,
+        field: 'entity.type',
+        value: definition.type,
       },
     },
     {
@@ -135,7 +135,7 @@ export function generateHistoryProcessors(definition: EntityDefinition, spaceId:
     {
       date_index_name: {
         field: '@timestamp',
-        index_name_prefix: `${generateHistoryIndexName(definition)}.${spaceId}.`,
+        index_name_prefix: `${generateHistoryIndexName(definition)}.`,
         date_rounding: 'M',
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },

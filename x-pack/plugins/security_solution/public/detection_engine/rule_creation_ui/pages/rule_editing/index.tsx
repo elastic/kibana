@@ -210,7 +210,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   });
   const actionMessageParams = useMemo(() => getActionMessageParams(rule?.type), [rule?.type]);
 
-  const { indexPattern, isIndexPatternLoading, browserFields } = useRuleIndexPattern({
+  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
@@ -245,7 +245,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   key="defineStep"
                   indexPattern={indexPattern}
                   isIndexPatternLoading={isIndexPatternLoading}
-                  browserFields={browserFields}
                   isQueryBarValid={isQueryBarValid}
                   setIsQueryBarValid={setIsQueryBarValid}
                   setIsThreatQueryBarValid={setIsThreatQueryBarValid}
@@ -371,7 +370,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       setEqlOptionsSelected,
       indexPattern,
       isIndexPatternLoading,
-      browserFields,
       isQueryBarValid,
       defineStepData,
       aboutStepData,

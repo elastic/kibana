@@ -30,6 +30,8 @@ export interface CustomFieldType<T extends CaseUICustomField> {
   Create: React.FC<{
     customFieldConfiguration: CasesConfigurationUICustomField;
     isLoading: boolean;
+    setAsOptional?: boolean;
+    setDefaultValue?: boolean;
   }>;
 }
 
