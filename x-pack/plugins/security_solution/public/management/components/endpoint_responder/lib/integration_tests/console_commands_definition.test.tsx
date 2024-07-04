@@ -77,11 +77,10 @@ describe('When displaying Endpoint Response Actions', () => {
       // add status to the list of expected commands in that order
       expectedCommands.splice(2, 0, 'status');
 
+      const helpCommandsString = commandsInPanel.map((command) => command.split(' ')[0]).join(',');
+
       // verify that the help commands map to the command list in the same order
-      for (let i = 0; i < commandsInPanel.length; i++) {
-        const command = commandsInPanel[i].split(' ')[0];
-        expect(command).toEqual(expectedCommands[i]);
-      }
+      expect(helpCommandsString).toEqual(expectedCommands.join(','));
     });
   });
 
