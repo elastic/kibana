@@ -29,7 +29,7 @@ import { rowToDocument } from './utils';
 import { fetchSourceDocuments } from './fetch_source_documents';
 import { buildReasonMessageForEsqlAlert } from '../utils/reason_formatters';
 
-import type { RunOpts, SignalSource } from '../types';
+import type { RunOpts, SignalSource, CreateQueryRuleAdditionalOptions } from '../types';
 
 import {
   addToSearchAfterReturn,
@@ -43,7 +43,6 @@ import type { EsqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import type { ExperimentalFeatures } from '../../../../../common';
-import type { CreateQueryRuleAdditionalOptions } from '../types';
 
 export const esqlExecutor = async ({
   runOpts: {
