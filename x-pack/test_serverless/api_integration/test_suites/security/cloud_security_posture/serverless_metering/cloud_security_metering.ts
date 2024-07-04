@@ -41,6 +41,7 @@ export default function (providerContext: FtrProviderContext) {
    This test mocks the usage API server and intercepts the usage API request sent by the metering background task manager.
   */
   describe('Intercept the usage API request sent by the metering background task manager', function () {
+    this.tags(['skipMKI']);
     let agentPolicyId: string;
     let roleAuthc: RoleCredentials;
     let internalRequestHeader: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string };
