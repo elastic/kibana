@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 
 const STRING_DELIMITER_TOKENS = ['`', "'", '"'];
 const ESCAPE_TOKEN = '\\\\';
@@ -234,14 +235,14 @@ export function correctCommonEsqlMistakes(query: string): {
 
   const formattedCommands: string[] = commands.map(({ name, command }, index) => {
     let formattedCommand = command;
-
     switch (name) {
-      case 'FROM':
-        formattedCommand = formattedCommand
-          .replaceAll(/FROM '(.*)'/g, 'FROM "$1"')
-          .replaceAll(/FROM `(.*)`/g, 'FROM "$1"');
+      case 'FROM': {
+        // gets the index pattern from the FROM command using AST parsing
+        const indexPattern = getIndexPatternFromESQLQuery(formattedCommand);
+        const indexPatternWithFixedQuotes = replaceSingleQuotesWithDoubleQuotes(indexPattern);
+        formattedCommand = formattedCommand.replace(indexPattern, indexPatternWithFixedQuotes);
         break;
-
+      }
       case 'WHERE':
         formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
         formattedCommand = ensureEqualityOperators(formattedCommand);

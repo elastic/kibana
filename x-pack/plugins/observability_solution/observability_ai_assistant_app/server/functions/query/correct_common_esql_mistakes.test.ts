@@ -35,10 +35,13 @@ describe('correctCommonEsqlMistakes', () => {
       | STATS avg_duration = AVG(transaction.duration.us), total_successes = SUM(success), total_requests = COUNT(*) BY service.name`
     );
   });
-
   it("replaces ` or ' escaping in FROM statements with double quotes", () => {
     expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM "logs-*"\n| LIMIT 10');
     expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM "logs-*"\n| LIMIT 10');
+    expectQuery(
+      `FROM 'logs-2024-07-01','logs-2024-07-02' | LIMIT 10`,
+      'FROM "logs-2024-07-01","logs-2024-07-02"\n| LIMIT 10'
+    );
     expectQuery(`FROM logs-* | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
   });
 
