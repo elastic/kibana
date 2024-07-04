@@ -51,7 +51,7 @@ export const AlertPreviewButton: FC<AlertPreviewButtonProps> = ({
       iconType="expand"
       data-test-subj={dataTestSubj}
       onClick={openAlertPreview}
-      aria-label={i18n.translate('ack.securitySolution.flyout.right.alertPreview.ariaLabel', {
+      aria-label={i18n.translate('xpack.securitySolution.flyout.right.alertPreview.ariaLabel', {
         defaultMessage: 'Preview alert with id {id}',
         values: { id },
       })}
