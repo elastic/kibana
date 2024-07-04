@@ -22,7 +22,7 @@ export const generateHistoryTransformId = generateHistoryId;
 export const generateHistoryIngestPipelineId = generateHistoryId;
 
 export function generateHistoryIndexName(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_INDEX_PREFIX}-${definition.id}`;
+  return `${ENTITY_HISTORY_INDEX_PREFIX}.${definition.id}`;
 }
 
 // Latest
@@ -34,5 +34,5 @@ export const generateLatestTransformId = generateLatestId;
 export const generateLatestIngestPipelineId = generateLatestId;
 
 export function generateLatestIndexName(definition: EntityDefinition) {
-  return `${ENTITY_LATEST_INDEX_PREFIX}-${definition.id}`;
+  return `${ENTITY_LATEST_INDEX_PREFIX}.${definition.id}`;
 }
