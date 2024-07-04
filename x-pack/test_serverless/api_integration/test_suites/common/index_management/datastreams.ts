@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => await svlDatastreamsHelpers.createDataStream(testDataStreamName));
       after(async () => await svlDatastreamsHelpers.deleteDataStream(testDataStreamName));
 
-      xit('returns an array of data streams', async () => {
+      it.skip('returns an array of data streams', async () => {
         const { body: dataStreams, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams`)
           .set(internalReqHeader)
@@ -84,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      xit('returns a single data stream by ID', async () => {
+      it.skip('returns a single data stream by ID', async () => {
         const { body: dataStream, status } = await supertestWithoutAuth
           .get(`${API_BASE_PATH}/data_streams/${testDataStreamName}`)
           .set(internalReqHeader)

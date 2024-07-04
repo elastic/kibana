@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
       await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
-    xit('should fetch an index settings', async () => {
+    it.skip('should fetch an index settings', async () => {
       const index = await svlIndicesHelpers.createIndex();
 
       const { status, body } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    xit('should update an index settings', async () => {
+    it.skip('should update an index settings', async () => {
       const index = await svlIndicesHelpers.createIndex();
 
       const { body: body1 } = await svlSettingsApi.getIndexSettings(index, roleAuthc);
