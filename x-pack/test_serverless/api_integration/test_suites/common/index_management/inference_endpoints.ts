@@ -21,9 +21,6 @@ export default function ({ getService }: FtrProviderContext) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/185216
   describe('Inference endpoints', function () {
-    // test adds new trained model '.elser_model_2_linux-x86_64', but does not clean it. Follow up tests are affected
-    this.tags(['failsOnMKI']);
-
     after(async () => {
       // Cleanup inference endpoints created for testing
       try {
